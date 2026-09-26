@@ -1,0 +1,29 @@
+{
+  "name": "arl-protocol",
+  "private": true,
+  "description": "ARL Protocol monorepo",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "typecheck": "tsc -p packages/tokenomics",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm test --workspaces --if-present",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm test",
+    "check:contracts": "cd contracts && forge fmt --check && forge build --sizes && forge test && cd .. && node scripts/check-token-abi.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/node": "22.20.4",
+    "eslint": "10.11.0",
+    "prettier": "3.9.9",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.70.1"
+  },
+  "license": "Apache-2.0"
+}

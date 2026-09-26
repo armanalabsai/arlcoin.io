@@ -58,3 +58,7 @@ Disclaimer
 ARL Protocol is a technology project under development. Information in this repository may change as the protocol architecture evolves.
 
 Nothing in this repository constitutes financial, investment, or legal advice.
+
+License
+
+Licensed under the Apache License 2.0. See LICENSE and NOTICE. Third-party components keep their own licenses; see THIRD_PARTY_LICENSES.md.
