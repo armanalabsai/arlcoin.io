@@ -1,3 +1,33 @@
+# Dependencies
 node_modules/
+
+# Logs and OS files
 *.log
 .DS_Store
+
+# Build output (Foundry and any other tool, at any depth)
+out/
+cache/
+
+# Deployment artifacts. Deployment configuration in contracts/deploy/config/
+# is public and source-controlled; everything a deployment produces is not.
+broadcast/
+contracts/deploy/plans/
+contracts/deploy/deployments/
+*.deployment.json
+
+# Environment files and secrets. Only the documented template may be committed.
+.env
+.env.*
+!.env.example
+
+# Keys and keystores
+*.key
+*.pem
+*.keystore
+keystore/
+keystores/
+*-keystore.json
+UTC--*--*
+mnemonic*
+*.mnemonic
