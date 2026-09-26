@@ -79,11 +79,11 @@ contract ARLTokenTest is ARLTestBase {
 
     // ---------------------------------------------------------------- no admin surface
 
-    /// @dev The token exposes exactly the ERC-20 interface plus MAX_SUPPLY. Any selector that
+    /// @dev The token exposes exactly ERC-20, EIP-2612 permit and MAX_SUPPLY. Any selector that
     /// could be an admin or mint function must not exist.
     function test_NoAdminOrMintFunctions() public {
         address me = address(this);
-        bytes[] memory calls = new bytes[](12);
+        bytes[] memory calls = new bytes[](11);
         calls[0] = abi.encodeWithSignature("owner()");
         calls[1] = abi.encodeWithSignature("mint(address,uint256)", me, 1e18);
         calls[2] = abi.encodeWithSignature("mint(uint256)", 1e18);
@@ -95,16 +95,6 @@ contract ARLTokenTest is ARLTestBase {
         calls[8] = abi.encodeWithSignature("initialize()");
         calls[9] = abi.encodeWithSignature("upgradeToAndCall(address,bytes)", me, "");
         calls[10] = abi.encodeWithSignature("issue(address,uint256)", me, 1e18);
-        calls[11] = abi.encodeWithSignature(
-            "permit(address,address,uint256,uint256,uint8,bytes32,bytes32)",
-            me,
-            me,
-            1,
-            type(uint256).max,
-            uint8(27),
-            bytes32(0),
-            bytes32(0)
-        );
         for (uint256 i = 0; i < calls.length; i++) {
             (bool ok,) = address(token).call(calls[i]);
             assertFalse(ok);

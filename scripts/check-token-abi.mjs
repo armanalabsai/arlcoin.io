@@ -1,5 +1,5 @@
-// Fails if the compiled ARL token exposes any function beyond the ERC-20 interface and
-// MAX_SUPPLY. Guards against a mint, burn, owner or admin function being added.
+// Fails if the compiled ARL token exposes any function beyond ERC-20, EIP-2612 permit
+// (with its EIP-5267 domain getter) and MAX_SUPPLY. Guards against a mint, burn, owner or admin function being added.
 import { readFileSync } from "node:fs";
 import process from "node:process";
 import { URL } from "node:url";
@@ -9,12 +9,16 @@ const artifact = JSON.parse(
 );
 
 const expected = [
+  "DOMAIN_SEPARATOR()",
   "MAX_SUPPLY()",
   "allowance(address,address)",
   "approve(address,uint256)",
   "balanceOf(address)",
   "decimals()",
+  "eip712Domain()",
   "name()",
+  "nonces(address)",
+  "permit(address,address,uint256,uint256,uint8,bytes32,bytes32)",
   "symbol()",
   "totalSupply()",
   "transfer(address,uint256)",
@@ -31,4 +35,4 @@ if (unexpected.length > 0 || missing.length > 0) {
   );
   process.exit(1);
 }
-process.stdout.write(`ARLToken ABI OK: ${actual.length} functions, all ERC-20.\n`);
+process.stdout.write(`ARLToken ABI OK: ${actual.length} functions, all ERC-20 / EIP-2612.\n`);
