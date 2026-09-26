@@ -19,7 +19,7 @@ can change between releases.
 - **BUSL-1.1**: production use is not permitted without a license from the
   owner until the change date.
 
-## Phase 1 — token foundation (selected)
+## Phase 1 — token foundation (adopted)
 
 | Component              | Repository                          | Version / commit                                     | License           | Security record                                                                                                                                 | Use                                                 |
 | ---------------------- | ----------------------------------- | ---------------------------------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
@@ -32,6 +32,9 @@ can change between releases.
 OpenZeppelin v5.7.0 (released 2026-07-29) is newer, but its `audits/`
 directory has no v5.7 report and npm's `latest` tag still points to 5.6.1.
 Pin v5.6.1 and re-evaluate when a v5.7 audit is published.
+
+OpenZeppelin, forge-std, Foundry and Slither are now in use; the Safe is used
+as a deployed instance only. Exact provenance is in `THIRD_PARTY_LICENSES.md`.
 
 ## Later phases (evaluated, not selected)
 

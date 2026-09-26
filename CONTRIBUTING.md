@@ -4,12 +4,13 @@
 
 - Node.js 22.18 or newer (see `.nvmrc`)
 - `npm ci` to install exact dependency versions
+- Foundry v1.8.3 and `git submodule update --init` for `contracts/`
 
 ## Workflow
 
 1. Branch from `main`. Never push to `main` directly.
 2. Keep each pull request to one change; write tests with the change.
-3. Run `npm run check` (typecheck, lint, format check, tests) before pushing.
+3. Run `npm run check` and `npm run check:contracts` before pushing.
 4. Open a pull request. CI must pass and the code owner must approve.
 
 ## Standards

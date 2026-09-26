@@ -1,101 +1,171 @@
-# ARL Token, Vesting and Treasury Design
+# ARL Token, Vesting and Treasury
 
-Status: **approved design, not implemented.** No contract code exists yet and
-nothing is deployed. Implementation starts only after Phase 1 approval.
+Status: **implemented and tested; not deployed.** No contract address exists on
+any network. Deployment requires a separate approval.
 
-All references are to OpenZeppelin Contracts **v5.6.1**
-(commit `5fd1781b1454fd1ef8e722282f86f9293cacf256`), verified against the
-upstream source. See [`open-source.md`](open-source.md) for why v5.6.1 and not
-v5.7.0.
+Source: [`contracts/src/`](../contracts/src). Upstream: OpenZeppelin Contracts
+v5.6.1 (`5fd1781b1454fd1ef8e722282f86f9293cacf256`). Compiler: solc 0.8.36,
+EVM version `cancun`, optimizer 200 runs, no via-IR.
+
+## Contracts
+
+| Contract           | Upstream base                             | ARL-specific code                                        |
+| ------------------ | ----------------------------------------- | -------------------------------------------------------- |
+| `ARLToken`         | `ERC20` (unmodified)                      | Constructor that mints the ten allocations once          |
+| `ARLAllocation`    | —                                         | Library of allocation constants                          |
+| `ARLVestingWallet` | `VestingWallet` (unmodified vesting math) | Explicit cliff parameters; beneficiary cannot be changed |
+| `ARLTimelock`      | `TimelockController`                      | No external admin; 48-hour floor on the delay            |
 
 ## Token
 
-| Property              | Value                                                               |
-| --------------------- | ------------------------------------------------------------------- |
-| Standard              | ERC-20 (`ERC20.sol`)                                                |
-| Name / symbol         | ARL / ARL                                                           |
-| Decimals              | 18                                                                  |
-| Supply                | 21,000,000 ARL (21,000,000 × 10¹⁸ base units)                       |
-| Issuance              | Minted once, in the constructor, directly to the allocation holders |
-| Mint after deployment | Impossible — no external or public function calls `_mint`           |
-| Owner / admin         | None. The token does not inherit `Ownable` or `AccessControl`       |
-| Pause                 | None. No security analysis has shown a pause to be necessary        |
-| Upgradeability        | None. No proxy                                                      |
+| Property                     | Value                                          |
+| ---------------------------- | ---------------------------------------------- |
+| Name / symbol                | ARL / ARL                                      |
+| Decimals                     | 18                                             |
+| Supply                       | 21,000,000 ARL, minted once in the constructor |
+| Public functions             | ERC-20 only, plus `MAX_SUPPLY`                 |
+| Owner, admin, pause, upgrade | None                                           |
 
-Constructor rules:
+### Supply invariant
 
-- Takes the recipient list produced from `packages/tokenomics` and reverts
-  unless the minted total equals exactly 21,000,000 × 10¹⁸.
-- `_mint` is internal to OpenZeppelin's `ERC20`; the ARL contract calls it only
-  from the constructor. Tests assert that the deployed bytecode exposes no
-  function that can increase `totalSupply`.
+`totalSupply() == MAX_SUPPLY == 21,000,000 × 10¹⁸` from the end of the
+constructor for the life of the contract.
 
-Open token decisions:
+Why no code path can increase supply:
 
-- `ERC20Permit` (EIP-2612 signed approvals) would help AI payment flows. It
-  adds no supply risk. Proposal: include.
-- `ERC20Burnable`: burning reduces supply and cannot breach the cap. Proposal:
-  exclude until a use case exists.
+1. OpenZeppelin's `_mint` is `internal`. `ARLToken` calls it only in its
+   constructor, which runs once.
+2. There is no burn, so supply also cannot decrease.
+3. The contract is not upgradeable and has no `delegatecall`, so the code cannot
+   change after deployment.
+4. The constructor reverts unless the minted total equals `MAX_SUPPLY`.
+
+Enforced by:
+
+- `test_NoAdminOrMintFunctions` — calls mint, burn, owner, pause, role,
+  initializer, upgrade and permit selectors with valid arguments; all fail.
+- `scripts/check-token-abi.mjs` — CI fails if the compiled ABI contains any
+  function beyond the ERC-20 set and `MAX_SUPPLY`.
+- Invariants `invariant_TotalSupplyIsExactlyMax` and
+  `invariant_BalancesSumToSupply` over 262,144 random calls (extended run).
+- `contract-consistency.test.ts` — the Solidity constants must equal
+  `packages/tokenomics`.
 
 ## Vesting
 
-OpenZeppelin `VestingWallet` releases linearly from `start` over `duration`.
-`VestingWalletCliff` returns zero before the cliff, **then releases everything
-vested since `start`** — at the end of a 24-month cliff it would release 24
-months' worth at once. That does not match "cliff, then linear".
+### Why `ARLVestingWallet`
 
-ARL therefore uses a plain `VestingWallet` whose `start` is the end of the
-cliff:
+OpenZeppelin v5.6.1 was checked first:
 
-| Allocation        | Beneficiary     | `start`                | `duration` |
-| ----------------- | --------------- | ---------------------- | ---------- |
-| Founder           | founder address | launch + 24 months     | 36 months  |
-| Team (per member) | member address  | grant date + 12 months | 36 months  |
-| Ecosystem Reserve | ecosystem Safe  | launch                 | 60 months  |
+- `VestingWalletCliff` returns zero before the cliff and then applies the
+  linear formula from `start`. At cliff expiry it releases the whole cliff
+  period's share at once (for the founder, 24/60 of the allocation). Rejected.
+- `VestingWallet` with `start = cliff end` gives exactly "nothing during the
+  cliff, then linear" with unmodified OpenZeppelin math.
+- `VestingWallet` is `Ownable`; the beneficiary can call `transferOwnership`
+  and hand over every unvested token. OpenZeppelin warns about this in the
+  contract itself and ships no non-transferable variant. Composition does not
+  solve it: whatever address owns the wallet can transfer it.
 
-Ecosystem Reserve: linear release of 7,000,000 ARL over 60 months never
-exceeds 1,400,000 ARL in any 12-month window, which satisfies the annual cap
-without custom code. Released tokens go to the ecosystem Safe; release is not
-sale.
+`ARLVestingWallet` therefore adds only:
 
-Unassigned team tokens: held by a Safe-controlled team pool. A member's
-`VestingWallet` is created and funded only when an approved grant exists.
+- explicit `cliffStart`, `cliffEnd`, `vestingEnd` timestamps, validated as
+  `0 < cliffStart <= cliffEnd < vestingEnd`;
+- `transferOwnership` and `renounceOwnership` that always revert.
 
-Required decisions and risks:
+No vesting math is changed. There are no initializers, so double
+initialization is not possible.
 
-- **Month length.** "24 months" must become an exact number of seconds.
-  Proposal: fix absolute `start` timestamps at deployment rather than
-  computing months on-chain.
-- **Transferable vesting wallets.** `VestingWallet` is `Ownable`; a beneficiary
-  can transfer ownership and so sell unvested tokens (documented upstream).
-  Proposal: a thin ARL subclass that disables `transferOwnership` and
-  `renounceOwnership`. This is ARL-specific code and needs its own tests.
+### Schedules
+
+Timestamps are explicit UTC calendar dates supplied at deployment. The
+contracts never convert months to seconds.
+
+| Allocation        | `cliffStart` | `cliffEnd`                  | `vestingEnd`                    |
+| ----------------- | ------------ | --------------------------- | ------------------------------- |
+| Founder           | launch date  | launch + 24 calendar months | `cliffEnd` + 36 calendar months |
+| Team member       | grant date   | grant + 12 calendar months  | `cliffEnd` + 36 calendar months |
+| Ecosystem Reserve | launch date  | launch date (no cliff)      | launch + 1,830 days             |
+
+Vested amount at time `t`:
+
+- `t < cliffEnd`: 0
+- `cliffEnd ≤ t < vestingEnd`: `allocation × (t − cliffEnd) / (vestingEnd − cliffEnd)`, rounded down
+- `t ≥ vestingEnd`: the full allocation
+
+`release` may be called by anyone and always pays the beneficiary.
+
+### Ecosystem Reserve
+
+A standard linear release satisfies the 1,400,000 ARL annual cap; no custom
+logic is needed. The duration must be chosen carefully:
+
+- Five calendar years from 2027-01-01 are 1,826 days and include leap year 2028. Linear over 1,826 days releases 7,000,000 × 366 / 1,826 ≈ 1,403,066 ARL
+  in 2028 — over the cap (`test_PlainFiveCalendarYearsWouldBreachCap`).
+- Linear over 5 × 366 = **1,830 days** releases at most 1,400,000 ARL in any
+  window of up to 366 days, so the cap holds in every calendar year.
+  Verified for each calendar year and by fuzzing arbitrary windows. Release
+  completes about four days after the fifth anniversary.
+
+Released tokens go to the ecosystem Safe. Release is not sale.
+
+### Team pool
+
+The 500,000 ARL team allocation is minted to a multisig-controlled pool. A
+member's `ARLVestingWallet` is created and funded from the pool only when an
+approved grant exists. No individual grants are defined.
+
+### Known limitation
+
+A beneficiary that loses its key loses the tokens in its wallet; there is no
+recovery path by design. Beneficiaries should be multisigs or keys with a
+documented recovery procedure.
 
 ## Treasury
 
-Approved policy: Safe multisig, **3-of-5** approval, **minimum 48-hour** delay.
-
-Safe has no built-in delay. Proposed composition:
+Policy: Safe 3-of-5, minimum 48-hour delay.
 
 ```
-Safe (3-of-5) ──proposes / cancels──▶ TimelockController (minDelay = 172,800 s)
-                                           │ holds treasury ARL
-                                           ▼ executes after the delay
+Safe (3-of-5) ──schedule / cancel / execute──▶ ARLTimelock (≥ 48 h)
+                                                   │ holds 3,000,000 ARL
+                                                   ▼
+                                              token transfers
 ```
 
-- `TimelockController(minDelay, proposers=[Safe], executors=[Safe], admin=address(0))`.
-  With `admin = address(0)`, only the timelock itself holds the admin role, so
-  any role or delay change must itself pass the 48-hour delay.
-- Treasury tokens are held by the timelock, not by the Safe.
-- Signer addresses are configured only when the production Safe is created.
-  No addresses, keys or seed phrases are ever committed to this repository.
+`ARLTimelock` is OpenZeppelin `TimelockController` with:
 
-Alternative considered: the Zodiac Delay modifier for Safe. Rejected for now —
-`TimelockController` is already part of the selected OpenZeppelin release and
-is covered by its audits.
+- admin fixed to `address(0)`: only the timelock holds `DEFAULT_ADMIN_ROLE`,
+  so role changes must themselves wait the delay;
+- a 48-hour floor in the constructor and in `updateDelay`. Upstream
+  `updateDelay` accepts any value, so a scheduled call could otherwise reduce
+  the delay to zero;
+- at least one proposer and one executor required; the executor role is not
+  open to everyone.
 
-## Role separation
+The Safe's 3-of-5 threshold is Safe configuration. It is verified when the
+production Safe is created, not by these contracts. Tests use a labelled test
+account in place of the Safe. No signer addresses exist yet.
 
-Separate Safes for treasury, ecosystem reserve, team pool and reward programs,
-so that one compromised signer set cannot move every allocation. Signer
-overlap between Safes is a decision for the project lead.
+## Other allocations
+
+Community / Staking, Liquidity, Strategic Partnerships, Public Launch, Grants /
+Bug Bounty and Mining / Early User Rewards are minted to their own multisigs.
+Their release programs are later phases.
+
+## ERC20Permit decision
+
+**Recommendation: include `ERC20Permit` before deployment.** It is not in the
+current code; adding it needs approval.
+
+| Aspect                  | Assessment                                                                                                                                                                                                                                                                 |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Benefit for AI payments | The x402 EVM specification (commit `dd927a26`) settles tokens without EIP-3009 through Permit2. Its `eip2612GasSponsoring` extension uses EIP-2612 so the user's one-time Permit2 approval is also gasless. Without permit, every payer first sends an on-chain `approve`. |
+| Irreversibility         | The token is immutable. Permit cannot be added after deployment.                                                                                                                                                                                                           |
+| OpenZeppelin support    | `ERC20Permit` in v5.6.1, covered by its audits. EIP-3009 is not in v5.6.1 and would be custom code — not recommended.                                                                                                                                                      |
+| Replay protection       | EIP-712 domain binds chain ID and contract address; per-owner sequential nonces; deadline; `ECDSA` rejects malleable signatures.                                                                                                                                           |
+| Supply                  | No effect. Permit only sets allowances.                                                                                                                                                                                                                                    |
+| Risks                   | Phishing of off-chain signatures; a front-run permit makes the victim's transaction revert (callers should tolerate an already-used permit); `ERC20Permit` verifies EOA signatures only — smart-contract wallets use Permit2 or `approve`.                                 |
+| Cost                    | Adds `permit`, `nonces`, `DOMAIN_SEPARATOR` and `eip712Domain`; no change to transfer gas.                                                                                                                                                                                 |
+
+If approved: inherit `ERC20Permit("ARL")`, add the four functions to the ABI
+allowlist, and add signature, replay, deadline and nonce tests.

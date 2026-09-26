@@ -1,7 +1,7 @@
 # ARL Protocol — Architecture
 
-Status: Phase 0 (repository foundation). No contract code exists and nothing
-is deployed.
+Status: Phase 1 (token, vesting, treasury contracts) implemented and tested.
+Nothing is deployed.
 
 ## Repository
 
@@ -24,11 +24,10 @@ is deployed.
 ARLCOIN/
 ├── packages/
 │   └── tokenomics/        Allocation table, validation, share math
-├── contracts/             Phase 1 — Foundry project (not created)
+├── contracts/             Foundry project (solc 0.8.36)
 │   ├── src/               ARL-specific contracts only
 │   ├── test/              unit, fuzz and invariant tests
-│   ├── script/            deployment scripts, reading packages/tokenomics
-│   └── lib/               upstream dependencies as pinned git submodules
+│   └── lib/               OpenZeppelin v5.6.1, forge-std v1.16.2 (pinned submodules)
 ├── apps/
 │   └── web/               ARL website (not created)
 └── docs/
