@@ -1,5 +1,4 @@
-# ARLCOIN
-ARL Protocol — Building decentralized AI, compute, privacy, DeFi and blockchain infrastructure around a 21M hard-capped native ARL Protocol
+ARL Protocol
 
 Decentralized AI, compute, privacy, and DeFi infrastructure powered by ARL.
 
