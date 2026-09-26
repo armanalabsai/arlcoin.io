@@ -11,7 +11,7 @@ EVM version `cancun`, optimizer 200 runs, no via-IR.
 
 | Contract           | Upstream base                             | ARL-specific code                                        |
 | ------------------ | ----------------------------------------- | -------------------------------------------------------- |
-| `ARLToken`         | `ERC20` (unmodified)                      | Constructor that mints the ten allocations once          |
+| `ARLToken`         | `ERC20`, `ERC20Permit` (both unmodified)  | Constructor that mints the ten allocations once          |
 | `ARLAllocation`    | —                                         | Library of allocation constants                          |
 | `ARLVestingWallet` | `VestingWallet` (unmodified vesting math) | Explicit cliff parameters; beneficiary cannot be changed |
 | `ARLTimelock`      | `TimelockController`                      | No external admin; 48-hour floor on the delay            |
@@ -23,7 +23,7 @@ EVM version `cancun`, optimizer 200 runs, no via-IR.
 | Name / symbol                | ARL / ARL                                      |
 | Decimals                     | 18                                             |
 | Supply                       | 21,000,000 ARL, minted once in the constructor |
-| Public functions             | ERC-20 only, plus `MAX_SUPPLY`                 |
+| Public functions             | ERC-20, EIP-2612 permit, `MAX_SUPPLY`          |
 | Owner, admin, pause, upgrade | None                                           |
 
 ### Supply invariant
@@ -43,9 +43,10 @@ Why no code path can increase supply:
 Enforced by:
 
 - `test_NoAdminOrMintFunctions` — calls mint, burn, owner, pause, role,
-  initializer, upgrade and permit selectors with valid arguments; all fail.
+  initializer and upgrade selectors with valid arguments; all fail.
 - `scripts/check-token-abi.mjs` — CI fails if the compiled ABI contains any
-  function beyond the ERC-20 set and `MAX_SUPPLY`.
+  function beyond ERC-20, EIP-2612 permit (`permit`, `nonces`,
+  `DOMAIN_SEPARATOR`, `eip712Domain`) and `MAX_SUPPLY`.
 - Invariants `invariant_TotalSupplyIsExactlyMax` and
   `invariant_BalancesSumToSupply` over 262,144 random calls (extended run).
 - `contract-consistency.test.ts` — the Solidity constants must equal
@@ -103,7 +104,8 @@ logic is needed. The duration must be chosen carefully:
 - Five calendar years from 2027-01-01 are 1,826 days and include leap year 2028. Linear over 1,826 days releases 7,000,000 × 366 / 1,826 ≈ 1,403,066 ARL
   in 2028 — over the cap (`test_PlainFiveCalendarYearsWouldBreachCap`).
 - Linear over 5 × 366 = **1,830 days** releases at most 1,400,000 ARL in any
-  window of up to 366 days, so the cap holds in every calendar year.
+  window of up to 366 days, so the cap holds in every calendar year
+  (duration approved 2026-09-26).
   Verified for each calendar year and by fuzzing arbitrary windows. Release
   completes about four days after the fifth anniversary.
 
@@ -152,10 +154,10 @@ Community / Staking, Liquidity, Strategic Partnerships, Public Launch, Grants /
 Bug Bounty and Mining / Early User Rewards are minted to their own multisigs.
 Their release programs are later phases.
 
-## ERC20Permit decision
+## ERC20Permit
 
-**Recommendation: include `ERC20Permit` before deployment.** It is not in the
-current code; adding it needs approval.
+**Included** (approved 2026-09-26). `ARLToken` inherits OpenZeppelin
+`ERC20Permit("ARL")` unmodified; the EIP-712 domain is name `ARL`, version `1`.
 
 | Aspect                  | Assessment                                                                                                                                                                                                                                                                 |
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -167,5 +169,7 @@ current code; adding it needs approval.
 | Risks                   | Phishing of off-chain signatures; a front-run permit makes the victim's transaction revert (callers should tolerate an already-used permit); `ERC20Permit` verifies EOA signatures only — smart-contract wallets use Permit2 or `approve`.                                 |
 | Cost                    | Adds `permit`, `nonces`, `DOMAIN_SEPARATOR` and `eip712Domain`; no change to transfer gas.                                                                                                                                                                                 |
 
-If approved: inherit `ERC20Permit("ARL")`, add the four functions to the ABI
-allowlist, and add signature, replay, deadline and nonce tests.
+Tests (`ARLTokenPermit.t.sol`): valid permit and `transferFrom`, nonce
+increment, supply unchanged, exact-deadline boundary, replay, expiry (fuzzed),
+wrong signer, altered value or spender, other chain ID, high-`s` malleable
+signature, zero signature, and fuzzed keys, values and deadlines.

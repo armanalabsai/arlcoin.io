@@ -62,8 +62,9 @@ Rules:
 | Decision                                                                | Needed before                |
 | ----------------------------------------------------------------------- | ---------------------------- |
 | Production chain                                                        | Deployment scripts           |
-| Exact vesting start timestamps (month → seconds)                        | Vesting contracts            |
-| Non-transferable vesting wallets (subclass of `VestingWallet`)          | Vesting contracts            |
-| `ERC20Permit` in the token                                              | Token contract               |
+| Exact launch and grant dates (contracts take explicit timestamps)       | Deployment                   |
 | Signer sets and overlap across treasury, reserve, team and reward Safes | Production multisig creation |
 | Copyright holder named in `NOTICE`                                      | Public release               |
+
+Resolved on 2026-09-26: `ERC20Permit` included; Ecosystem Reserve released
+linearly over 1,830 days.
