@@ -12,12 +12,12 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Actions are pinned to full commit SHAs; the tag is noted for review.
 jobs:
-  check:
+  typescript:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      # Actions are pinned to full commit SHAs; the tag is noted for review.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
@@ -33,3 +33,53 @@ jobs:
       - run: npm run format:check
       - run: npm test
       - run: npm audit --audit-level=high
+
+  contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+
+      - uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09 # v1.9.1
+        with:
+          version: v1.8.3
+
+      - name: Verify pinned dependencies
+        run: |
+          test "$(git -C contracts/lib/openzeppelin-contracts rev-parse HEAD)" = 5fd1781b1454fd1ef8e722282f86f9293cacf256
+          test "$(git -C contracts/lib/forge-std rev-parse HEAD)" = bf647bd6046f2f7da30d0c2bf435e5c76a780c1b
+          forge --version | grep -q cae51ad458f6abb64852b7709eb784352429825d
+
+      - run: forge fmt --check
+        working-directory: contracts
+      - run: forge build --sizes
+        working-directory: contracts
+      - run: forge test -vv
+        working-directory: contracts
+      - run: node scripts/check-token-abi.mjs
+
+  slither:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+
+      - uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09 # v1.9.1
+        with:
+          version: v1.8.3
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - run: pip install slither-analyzer==0.11.6
+
+      - name: Slither (ARL code; fails on low severity or higher)
+        run: slither . --filter-paths "lib/|test/" --exclude-dependencies --fail-low
+        working-directory: contracts
