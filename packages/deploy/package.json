@@ -1,0 +1,16 @@
+{
+  "name": "@arl/deploy",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Builds and validates ARL deployment plans from public config and tokenomics",
+  "type": "module",
+  "exports": {
+    ".": "./src/plan.ts"
+  },
+  "dependencies": {
+    "@arl/tokenomics": "0.1.0"
+  },
+  "scripts": {
+    "test": "node --test \"test/**/*.test.ts\""
+  }
+}

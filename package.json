@@ -9,13 +9,14 @@
     "packages/*"
   ],
   "scripts": {
-    "typecheck": "tsc -p packages/tokenomics",
+    "typecheck": "tsc -p packages/tokenomics && tsc -p packages/deploy",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "npm test --workspaces --if-present",
     "check": "npm run typecheck && npm run lint && npm run format:check && npm test",
-    "check:contracts": "cd contracts && forge fmt --check && forge build --sizes && forge test && cd .. && node scripts/check-token-abi.mjs"
+    "check:contracts": "cd contracts && forge fmt --check && forge build --sizes --skip test --skip script && forge test && cd .. && node scripts/check-token-abi.mjs",
+    "rehearse:local": "bash scripts/rehearse-local.sh"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

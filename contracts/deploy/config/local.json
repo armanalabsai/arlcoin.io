@@ -1,0 +1,21 @@
+{
+  "network": "local",
+  "chainId": 31337,
+  "launchDate": "2027-01-01T00:00:00Z",
+  "requireRecipientCode": false,
+  "founderBeneficiary": "0x1F67caa874DDec60E290e27cce758f01Bd53c380",
+  "ecosystemReserveBeneficiary": "0x61042dF2f9DfD50AFC0734F5CB4da6E55bE6d09d",
+  "treasury": {
+    "safe": "0xCbA140fcD82caf116be04c2a478A0e10b55202F9",
+    "minDelayHours": 48
+  },
+  "recipients": {
+    "communityStaking": "0x86d861EBe84C3F6D4F374c9640c5b89549C724A8",
+    "liquidity": "0x179DaF8783071e3868Fb00208B3529F48E544AF8",
+    "strategicPartnerships": "0x5F611FC6df7B0e0326A6B10b135A15DdF8667c2a",
+    "publicLaunch": "0x1E0C4aef807F25F0F79146f3A9646e75954E0E0d",
+    "grantsBugBounty": "0x2F050E3aAFBFb59BD438F97c4D280D0d38F411c4",
+    "team": "0xB5C15dcF9624e2137D772f72fCB1020B6Cba1455",
+    "earlyUserRewards": "0x480F68E166456e8a00584F003575d6975a8f2aFB"
+  }
+}
