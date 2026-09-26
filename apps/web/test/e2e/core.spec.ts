@@ -1,5 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
+import { allPaths } from "../../src/content/registry.ts";
+
 // Behaviour of the Interactive Core against the production build.
 
 /** Collects console errors and uncaught exceptions (including hydration errors). */
@@ -44,7 +46,7 @@ test("the Core cycles through the layers in place", async ({ page }) => {
   await mark(page);
   await core(page).click();
   await expect(page).toHaveURL(/\/core\/team$/);
-  await expect(page.getByRole("link", { name: /Alaz Daghan Gokturk/ }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: /Joon-Ho Park/ }).first()).toBeVisible();
   await core(page).click();
   await expect(page).toHaveURL(/\/core\/token$/);
   await expect(page).toHaveTitle("Token · ARL");
@@ -110,7 +112,7 @@ test("detail content is in the server-rendered HTML", async ({ request }) => {
 
 test("sitemap lists every route and robots points to it", async ({ request }) => {
   const sitemap = await (await request.get("/sitemap.xml")).text();
-  expect(sitemap.match(/<loc>/g)).toHaveLength(51);
+  expect(sitemap.match(/<loc>/g)).toHaveLength(allPaths().length);
   const robots = await (await request.get("/robots.txt")).text();
   expect(robots).toContain("Sitemap: https://arlcoin.io/sitemap.xml");
   expect((await request.get("/core/unknown")).status()).toBe(404);
@@ -121,15 +123,15 @@ test("keyboard: Enter on the Core, Space on a card, arrows between cards", async
   await core(page).focus();
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/\/core\/team$/);
-  const first = page.locator('[data-ring-card="founder"]');
+  const first = page.locator('[data-ring-card="foundark"]');
   await first.focus();
   await page.keyboard.press("ArrowRight");
-  await expect(page.locator('[data-ring-card="blockchain-engineer"]')).toBeFocused();
+  await expect(page.locator('[data-ring-card="joon-ho-park"]')).toBeFocused();
   await page.keyboard.press(" ");
-  await expect(page).toHaveURL(/\/core\/team\/blockchain-engineer$/);
+  await expect(page).toHaveURL(/\/core\/team\/joon-ho-park$/);
   await expect(surface(page)).toBeVisible();
   await page.keyboard.press("Escape");
-  await expect(page.locator('[data-ring-card="blockchain-engineer"]')).toBeFocused();
+  await expect(page.locator('[data-ring-card="joon-ho-park"]')).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(page).toHaveURL(/\/$/);
 });
@@ -187,4 +189,26 @@ test("deployment-dependent token values are never given a number", async ({ page
     await page.goto(`/core/token/${id}`);
     await expect(surface(page)).toContainText("Not yet deployed");
   }
+});
+
+test("team layer: 12 profiles around the Core, unverified details withheld", async ({ page }) => {
+  await page.goto("/");
+  await core(page).click();
+  await expect(page).toHaveURL(/\/core\/team$/);
+  await expect(core(page)).toBeVisible();
+  await expect(page.locator("[data-ring-card]")).toHaveCount(12);
+  await expect(page.locator("img")).toHaveCount(0);
+
+  await page.locator('[data-ring-card="joon-ho-park"]').click();
+  await expect(page).toHaveURL(/\/core\/team\/joon-ho-park$/);
+  await expect(surface(page).getByRole("heading", { name: "Joon-Ho Park" })).toBeVisible();
+  await expect(surface(page)).toContainText("CTO / Protocol Architect");
+  await expect(surface(page)).toContainText("Profile not yet verified");
+  await expect(surface(page)).not.toContainText("KAIST");
+  await expect(surface(page)).not.toContainText("Bitcoin Core");
+  await expect(surface(page).getByRole("link")).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Back to Team" }).click();
+  await expect(page).toHaveURL(/\/core\/team$/);
+  await expect(page.locator('[data-ring-card="joon-ho-park"]')).toBeFocused();
 });

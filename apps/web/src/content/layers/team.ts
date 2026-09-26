@@ -1,9 +1,9 @@
 import { ALLOCATIONS } from "../../../../../packages/tokenomics/src/index.ts";
-import { SITE } from "../site.ts";
-import type { Card, Layer } from "../types.ts";
+import { TEAM, type TeamProfile } from "../team/registry.ts";
+import type { Card, Fact, Layer, Section } from "../types.ts";
 
-// Only the founder is a named person. Every other seat is an open role and is
-// labelled as one: no invented names, biographies or photos.
+// Maps the team registry to Core cards. This is where the publishing rule is
+// applied, so no component can show an unverified claim by accident.
 
 const team = ALLOCATIONS.find((a) => a.id === "team");
 if (!team || team.release.kind !== "cliff-linear") {
@@ -11,85 +11,44 @@ if (!team || team.release.kind !== "cliff-linear") {
 }
 const teamVesting = `${team.release.cliffMonths}-month cliff, then ${team.release.vestingMonths}-month linear vesting from each member's grant date`;
 
-interface OpenRole {
-  id: string;
-  role: string;
-  focus: readonly string[];
+export const UNVERIFIED_NOTE =
+  "This profile has not been independently verified. Education and career details are published only after verification.";
+
+function profileCard(p: TeamProfile, index: number): Card {
+  const verified = p.verificationStatus === "verified";
+  const facts: Fact[] = [
+    { label: "Role", value: p.role },
+    { label: "Profile", value: verified ? "Verified" : "Not yet verified" },
+  ];
+  const sections: Section[] = [{ heading: "Expertise", items: p.expertise }];
+  if (verified) {
+    if (p.education.length) sections.push({ heading: "Education", items: p.education });
+    if (p.career.length) sections.push({ heading: "Career", items: p.career });
+  } else {
+    sections.push({ heading: "Verification", body: UNVERIFIED_NOTE });
+  }
+  sections.push({ heading: "Team token vesting", body: teamVesting });
+
+  return {
+    id: p.id,
+    title: p.name,
+    shortDescription: p.role,
+    weight: index === 0 ? "primary" : "secondary",
+    person: {
+      name: p.name,
+      role: p.role,
+      open: false,
+      verificationStatus: p.verificationStatus,
+      initials: p.initials,
+    },
+    detail: { summary: `Focus: ${p.expertise.join(", ").toLowerCase()}.`, facts, sections },
+    ...(verified && p.links?.length ? { links: p.links } : {}),
+  };
 }
-
-const OPEN_ROLES: readonly OpenRole[] = [
-  {
-    id: "blockchain-engineer",
-    role: "Blockchain Engineer",
-    focus: ["Solidity and the EVM", "Token, vesting and treasury contracts", "Deployment tooling"],
-  },
-  {
-    id: "security-engineer",
-    role: "Security Engineer",
-    focus: ["Smart contract review", "Threat modelling", "Incident response"],
-  },
-  {
-    id: "ai-engineer",
-    role: "AI Engineer",
-    focus: ["AI service integration", "Usage metering", "Settlement in ARL"],
-  },
-  {
-    id: "compute-engineer",
-    role: "Compute Engineer",
-    focus: ["GPU and CPU scheduling", "Provider onboarding", "Job metering"],
-  },
-  {
-    id: "zk-engineer",
-    role: "ZK Engineer",
-    focus: ["Zero-knowledge proof systems", "Circuit design", "Verification contracts"],
-  },
-  {
-    id: "defi-engineer",
-    role: "DeFi Engineer",
-    focus: ["Staking design", "Liquidity operations", "Protocol economics"],
-  },
-];
-
-const openRoleCard = (r: OpenRole): Card => ({
-  id: r.id,
-  title: r.role,
-  shortDescription: r.focus.slice(0, 2).join(" · "),
-  weight: "tertiary",
-  person: { name: null, role: r.role, open: true },
-  detail: {
-    summary: "This seat is open. No one has been appointed to it.",
-    facts: [{ label: "Team token vesting", value: teamVesting }],
-    sections: [{ heading: "Focus", items: r.focus }],
-  },
-  links: [{ label: "Repository", href: SITE.repository }],
-});
 
 export const teamLayer: Layer = {
   id: "team",
   title: "Team",
-  description: "The founder and the open core roles.",
-  cards: [
-    {
-      id: "founder",
-      title: "Alaz Daghan Gokturk",
-      shortDescription: "Founder / Project Lead",
-      weight: "primary",
-      person: { name: "Alaz Daghan Gokturk", role: "Founder / Project Lead", open: false },
-      detail: {
-        summary: "Founder and project lead of ARL.",
-        sections: [
-          {
-            heading: "Responsibilities",
-            items: [
-              "Product and protocol direction",
-              "Tokenomics and allocation decisions",
-              "Building the core team",
-            ],
-          },
-        ],
-      },
-      links: [{ label: "Repository", href: SITE.repository }],
-    },
-    ...OPEN_ROLES.map(openRoleCard),
-  ],
+  description: "The people building ARL. Profiles are marked until verified.",
+  cards: TEAM.map(profileCard),
 };

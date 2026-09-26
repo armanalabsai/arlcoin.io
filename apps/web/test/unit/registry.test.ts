@@ -10,6 +10,7 @@ import {
   parsePath,
   pathFor,
 } from "../../src/content/registry.ts";
+import { TEAM } from "../../src/content/team/registry.ts";
 import type { Card, Layer } from "../../src/content/types.ts";
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -53,9 +54,9 @@ describe("registry structure", () => {
     }
   });
 
-  it("keeps every layer between 1 and 11 cards so the orbit layout fits", () => {
+  it("keeps every layer between 1 and 12 cards so the orbit layout fits", () => {
     for (const layer of LAYERS) {
-      assert.ok(layer.cards.length >= 1 && layer.cards.length <= 11, layer.id);
+      assert.ok(layer.cards.length >= 1 && layer.cards.length <= 12, layer.id);
     }
   });
 
@@ -162,12 +163,68 @@ describe("content accuracy", () => {
       for (const text of texts(layer)) assert.doesNotMatch(text, hype, text);
     }
   });
+});
 
-  it("names no invented people: only the founder has a name", () => {
-    const named = LAYERS.flatMap((l) => l.cards).filter((c) => c.person?.name);
+describe("team publishing rule", () => {
+  const teamLayer = LAYERS.find((l) => l.id === "team");
+  const INSTITUTIONS =
+    /Bitcoin Core|MIT\b|Stanford|KAIST|Harvard|Yale|Carnegie|Berkeley|Columbia|Barcelona|Madrid|Valencia|AGI Core|University|School|Laboratory|B\.S\.|M\.S\.|Doctorate/;
+
+  it("builds the team layer from all 12 registry profiles, in order", () => {
+    assert.equal(TEAM.length, 12);
     assert.deepEqual(
-      named.map((c) => c.person?.name),
-      ["Alaz Daghan Gokturk"],
+      teamLayer?.cards.map((c) => c.id),
+      TEAM.map((p) => p.id),
     );
+  });
+
+  it("gives every profile a verification status", () => {
+    for (const p of TEAM) {
+      assert.ok(["verified", "unverified", "placeholder"].includes(p.verificationStatus), p.id);
+    }
+  });
+
+  it("shows no education or career claims for profiles that are not verified", () => {
+    for (const card of teamLayer?.cards ?? []) {
+      if (card.person?.verificationStatus === "verified") continue;
+      for (const text of cardTexts(card))
+        assert.doesNotMatch(text, INSTITUTIONS, `${card.id}: ${text}`);
+      assert.equal(card.links, undefined, `${card.id} must not show links`);
+    }
+  });
+
+  it("marks unverified profiles as such in the detail", () => {
+    for (const card of teamLayer?.cards ?? []) {
+      if (card.person?.verificationStatus !== "unverified") continue;
+      const facts = card.detail.facts ?? [];
+      assert.ok(
+        facts.some((f) => f.label === "Profile" && f.value === "Not yet verified"),
+        card.id,
+      );
+    }
+  });
+
+  it("keeps expertise free of institution names", () => {
+    for (const p of TEAM) {
+      for (const e of p.expertise) assert.doesNotMatch(e, INSTITUTIONS, `${p.id}: ${e}`);
+    }
+  });
+
+  it("records no nationality or ethnicity and no invented portraits or links", () => {
+    for (const p of TEAM) {
+      const keys = Object.keys(p);
+      assert.ok(!keys.some((k) => /national|ethnic|race/i.test(k)), p.id);
+      if (p.verificationStatus !== "verified") {
+        assert.equal(p.portrait, undefined, p.id);
+        assert.equal(p.links, undefined, p.id);
+      }
+    }
+  });
+
+  it("never displays birth years", () => {
+    for (const card of teamLayer?.cards ?? []) {
+      for (const text of cardTexts(card))
+        assert.doesNotMatch(text, /\b(19|20)\d\d\b/, `${card.id}: ${text}`);
+    }
   });
 });

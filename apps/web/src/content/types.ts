@@ -47,11 +47,22 @@ export interface ExternalLink {
   readonly href: `https://${string}`;
 }
 
+/**
+ * Whether a profile's identity and background have been checked.
+ * - verified: identity, education and career confirmed against a source.
+ * - unverified: provided to the project, not yet checked.
+ * - placeholder: an open seat, not a person.
+ */
+export type VerificationStatus = "verified" | "unverified" | "placeholder";
+
 export interface Person {
-  /** Real name, or null for an open seat. Never an invented person. */
+  /** Name as provided, or null for an open seat. */
   readonly name: string | null;
   readonly role: string;
   readonly open: boolean;
+  readonly verificationStatus: VerificationStatus;
+  /** Two letters for the abstract identity mark. No portrait is ever generated. */
+  readonly initials: string;
 }
 
 /** Visual weight. Cards are not all equal; the layer decides what matters. */

@@ -1,6 +1,6 @@
 "use client";
 
-import type { Metric, Status, Weight } from "@/content/types.ts";
+import type { Metric, Status, VerificationStatus, Weight } from "@/content/types.ts";
 
 import { isPlainClick } from "./useCoreRoute.ts";
 
@@ -12,8 +12,8 @@ export interface RingEntry {
   weight: Weight;
   status?: Status;
   metric?: Metric;
-  /** Present for person cards: open seats are marked as such. */
-  open?: boolean;
+  /** Present for person cards. */
+  person?: { initials: string; verificationStatus: VerificationStatus };
 }
 
 interface Props {
@@ -22,13 +22,16 @@ interface Props {
   onActivate: (entry: RingEntry, element: HTMLElement) => void;
 }
 
-const SIZE: Record<Weight, string> = {
-  primary: "min-[1100px]:w-[248px] min-[1100px]:min-h-[132px]",
-  secondary: "min-[1100px]:w-[212px] min-[1100px]:min-h-[116px]",
-  tertiary: "min-[1100px]:w-[188px] min-[1100px]:min-h-[100px]",
-};
-
-export function MetricValue({ metric, size }: { metric: Metric; size: "card" | "surface" }) {
+export function MetricValue({
+  metric,
+  size,
+  emphasis = false,
+}: {
+  metric: Metric;
+  size: "card" | "surface";
+  /** Important metric: the value is set in the ARL accent. */
+  emphasis?: boolean;
+}) {
   const big = size === "surface";
   if (metric.kind === "unavailable") {
     return (
@@ -46,11 +49,11 @@ export function MetricValue({ metric, size }: { metric: Metric; size: "card" | "
   return (
     <span className="flex items-baseline gap-1.5">
       <span
-        className={
+        className={`${
           big
             ? "font-mono text-[40px] leading-none font-medium tracking-[-0.03em] tabular-nums sm:text-[52px]"
             : "font-mono text-[18px] leading-none font-medium tracking-[-0.02em] tabular-nums"
-        }
+        } ${emphasis ? "text-accent" : ""}`}
       >
         {metric.value}
       </span>
@@ -63,6 +66,25 @@ export function MetricValue({ metric, size }: { metric: Metric; size: "card" | "
           {metric.unit}
         </span>
       ) : null}
+    </span>
+  );
+}
+
+/**
+ * Abstract identity mark: initials on graphite with an amber edge. Used
+ * instead of a portrait whenever no verified photo exists.
+ */
+export function IdentityMark({ initials, size }: { initials: string; size: "card" | "surface" }) {
+  const big = size === "surface";
+  return (
+    <span
+      aria-hidden="true"
+      className={`relative grid shrink-0 place-items-center rounded-full border border-line-strong bg-surface-3 font-mono tracking-[0.04em] text-fg-muted shadow-[inset_0_1px_0_rgb(255_255_255/0.06)] ${
+        big ? "size-16 text-[18px]" : "size-10 text-[12px]"
+      }`}
+    >
+      <span className="absolute inset-[-1px] rounded-full border border-transparent border-t-accent-edge" />
+      {initials}
     </span>
   );
 }
@@ -89,28 +111,49 @@ export function RingCard({ entry, selected, onActivate }: Props) {
           onActivate(entry, e.currentTarget);
         }
       }}
-      className={`group flex h-full w-full flex-col justify-between gap-4 rounded-(--radius-card) border p-4 transition-[border-color,background-color,translate] duration-200 ease-(--ease-out-quint) hover:-translate-y-px active:translate-y-0 active:scale-[0.99] ${
-        selected
-          ? "border-accent bg-surface-2"
-          : "border-line bg-surface-1 hover:border-line-strong hover:bg-surface-2"
-      } ${SIZE[entry.weight]}`}
+      data-weight={entry.weight}
+      data-selected={selected ? "true" : undefined}
+      className={`material-card group flex h-full flex-col justify-between gap-4 rounded-(--radius-card) border p-4 transition-[border-color,background-color,box-shadow,translate] duration-200 ease-(--ease-out-quint) hover:-translate-y-px active:translate-y-0 active:scale-[0.99]`}
     >
-      <span className="flex flex-col gap-1.5">
-        <span className="flex items-start justify-between gap-3">
-          <span
-            className={`leading-tight font-medium tracking-[-0.01em] ${primary ? "text-[17px]" : "text-[15px]"}`}
-          >
-            {entry.title}
-          </span>
-          {entry.open ? (
-            <span className="shrink-0 rounded-[5px] border border-line px-1.5 py-0.5 font-mono text-[9px] tracking-[0.1em] text-fg-subtle uppercase">
-              Open
+      {entry.person ? (
+        <>
+          <span className="flex items-start gap-3">
+            <IdentityMark initials={entry.person.initials} size="card" />
+            <span className="flex min-w-0 flex-col gap-1">
+              <span
+                className={`leading-tight font-medium tracking-[-0.01em] ${primary ? "text-[17px]" : "text-[15px]"}`}
+              >
+                {entry.title}
+              </span>
+              <span className="text-[13px] leading-snug text-fg-muted">{entry.description}</span>
             </span>
+          </span>
+          <span className="flex items-center justify-between gap-3">
+            <span className="text-[12px] text-fg-subtle transition-colors group-hover:text-accent">
+              Explore <span aria-hidden="true">→</span>
+            </span>
+            {entry.person.verificationStatus !== "verified" ? (
+              <span className="rounded-[5px] border border-line px-1.5 py-0.5 font-mono text-[9px] tracking-[0.1em] text-fg-subtle uppercase">
+                {entry.person.verificationStatus === "placeholder" ? "Open" : "Unverified"}
+              </span>
+            ) : null}
+          </span>
+        </>
+      ) : (
+        <>
+          <span className="flex flex-col gap-1.5">
+            <span
+              className={`leading-tight font-medium tracking-[-0.01em] ${primary ? "text-[17px]" : "text-[15px]"}`}
+            >
+              {entry.title}
+            </span>
+            <span className="text-[13px] leading-snug text-fg-muted">{entry.description}</span>
+          </span>
+          {entry.metric ? (
+            <MetricValue metric={entry.metric} size="card" emphasis={primary} />
           ) : null}
-        </span>
-        <span className="text-[13px] leading-snug text-fg-muted">{entry.description}</span>
-      </span>
-      {entry.metric ? <MetricValue metric={entry.metric} size="card" /> : null}
+        </>
+      )}
     </a>
   );
 }

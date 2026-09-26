@@ -42,7 +42,14 @@ export function InteractiveCore() {
       weight: c.weight,
       ...(c.status ? { status: c.status } : {}),
       ...(c.metric ? { metric: c.metric } : {}),
-      ...(c.person ? { open: c.person.open } : {}),
+      ...(c.person
+        ? {
+            person: {
+              initials: c.person.initials,
+              verificationStatus: c.person.verificationStatus,
+            },
+          }
+        : {}),
     }));
   }, [layer]);
 
@@ -144,15 +151,15 @@ export function InteractiveCore() {
           onActivate={onActivate}
           core={<CoreCard layer={layer} onActivate={onCore} />}
           caption={
-            <div className="flex max-w-[340px] flex-col items-center gap-5 text-center">
+            <div className="flex max-w-[300px] flex-col items-center gap-5 text-center">
               <p className="text-[15px] leading-[1.55] text-balance text-fg-muted">
-                {layer ? layer.description : SITE.description}
+                {layer ? layer.description : SITE.tagline}
               </p>
               {layer ? (
                 <button
                   type="button"
                   onClick={() => navigate("/")}
-                  className="inline-flex h-8 items-center gap-2 rounded-(--radius-control) px-2 text-[13px] text-fg-subtle transition-colors hover:bg-surface-3 hover:text-fg"
+                  className="orbit-hide inline-flex h-8 items-center gap-2 rounded-(--radius-control) px-2 text-[13px] text-fg-subtle transition-colors hover:bg-surface-3 hover:text-fg"
                 >
                   <span aria-hidden="true">←</span> Overview
                 </button>

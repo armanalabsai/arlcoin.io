@@ -15,7 +15,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { Card, Layer } from "@/content/types.ts";
 
 import { FADE_FAST, SPRING_SHEET, SPRING_SURFACE } from "./motion.ts";
-import { MetricValue } from "./RingCard.tsx";
+import { IdentityMark, MetricValue } from "./RingCard.tsx";
 
 interface Props {
   layer: Layer | null;
@@ -261,13 +261,29 @@ function Surface({ layer, card, originRect, onClose, onStep }: SurfaceProps) {
                     {card.title}
                   </Dialog.Title>
                   {card.person ? (
-                    <p className="text-[15px] text-fg-muted">
-                      {card.person.open ? `${card.person.role} · Open role` : card.person.role}
-                    </p>
+                    <div className="flex items-center gap-4">
+                      <IdentityMark initials={card.person.initials} size="surface" />
+                      <div className="flex flex-col gap-1">
+                        <p className="text-[15px] text-fg">{card.person.role}</p>
+                        <p className="font-mono text-[11px] tracking-[0.1em] text-fg-subtle uppercase">
+                          {card.person.verificationStatus === "verified"
+                            ? "Verified profile"
+                            : card.person.verificationStatus === "placeholder"
+                              ? "Open role"
+                              : "Profile not yet verified"}
+                        </p>
+                      </div>
+                    </div>
                   ) : null}
                 </div>
 
-                {card.metric ? <MetricValue metric={card.metric} size="surface" /> : null}
+                {card.metric ? (
+                  <MetricValue
+                    metric={card.metric}
+                    size="surface"
+                    emphasis={card.weight === "primary"}
+                  />
+                ) : null}
 
                 <Dialog.Description
                   id="detail-summary"
