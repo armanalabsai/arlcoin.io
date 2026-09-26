@@ -15,7 +15,11 @@ remappings = [
   "forge-std/=lib/forge-std/src/",
 ]
 # Never read or write outside the project.
-fs_permissions = []
+# Scripts read deployment plans and write deployed addresses; nothing else.
+fs_permissions = [
+  { access = "read", path = "./deploy" },
+  { access = "read-write", path = "./deploy/deployments" },
+]
 # Upstream OpenZeppelin v5.6.1 ECDSA uses `error` as an identifier; solc 0.8.36 warns it will
 # become a keyword (6335). Upstream code is not edited, so silence warnings from lib/ only.
 ignored_warnings_from = ["lib/"]
