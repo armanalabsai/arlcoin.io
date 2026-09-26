@@ -10,7 +10,7 @@
 
 1. Branch from `main`. Never push to `main` directly.
 2. Keep each pull request to one change; write tests with the change.
-3. Run `npm run check` and `npm run check:contracts` before pushing.
+3. Run `npm run check`, `npm run check:contracts` and `npm run rehearse:local` before pushing.
 4. Open a pull request. CI must pass and the code owner must approve.
 
 ## Standards
@@ -28,6 +28,11 @@
   every adopted component in [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md).
 - **Dependencies** are pinned to exact versions and justified in the pull
   request.
+
+## Deployment
+
+Never commit private keys, `.env` files or deployment output; `.gitignore` excludes them. See
+[`docs/deployment.md`](docs/deployment.md).
 
 ## Commit messages
 
