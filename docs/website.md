@@ -61,7 +61,9 @@ apps/web
 ## Motion
 
 - **Orbit positions are pure CSS.** Each card gets `--cos`/`--sin` from its index and sits on an
-  ellipse sized from the viewport. JavaScript never measures layout for the orbit.
+  ellipse sized from the viewport. JavaScript never measures layout for the orbit. The orbit is
+  used from 1100 × 760 (layers with 11 or more cards: from 1360 × 820); below that, cards flow as
+  a grid. An end-to-end test checks for collisions on every layer at seven common viewports.
 - **Layer switching** collapses the current cards into the Core and expands the next set out of
   it. Motion animates a single CSS variable (`--t`) per card with a critically damped spring.
   Every layer uses the same engine.
@@ -83,16 +85,54 @@ apps/web
 - Escape on a layer returns to the overview. A skip link, a polite live region for layer
   changes, and visible focus rings are included.
 
-## Visual system
+## Visual system: ARL CORE color language
 
-- Near-black graphite surfaces stepping up in lightness, white and grey type, and one accent
-  (`#e0a94e`) used only for the active layer, the Core ring and selected state.
-- Translucent material is used only where content overlaps content: the top bar and the detail
+```
+BLACK / GRAPHITE  →  LIQUID GLASS  →  WHITE / SOFT GREY  →  AMBER  →  ACTIVE / IMPORTANT
+```
+
+The tokens live in `app/globals.css` (`@theme`).
+
+| Token                                                         | Value                             | Use                                                       |
+| ------------------------------------------------------------- | --------------------------------- | --------------------------------------------------------- |
+| `page`                                                        | `#08090b`                         | Near-black background                                     |
+| `surface-1` / `surface-2` / `surface-3`                       | `#0f1113` / `#15171a` / `#1c1f23` | Graphite and charcoal surfaces, lightest = most important |
+| `fg` / `fg-muted` / `fg-subtle`                               | `#f2f2f0` / `#a3a6ab` / `#6c7076` | Type                                                      |
+| `accent`                                                      | `#eea53f`                         | ARL amber: warm, between yellow and orange                |
+| `accent-strong`, `accent-edge`, `accent-soft`, `accent-faint` | derived                           | Hover, edges, active backgrounds                          |
+
+Rules:
+
+- Amber marks only the Core (ring, label, hairline, a micro glow kept inside the Core's own
+  footprint), the active layer, hovered and selected card edges, important metrics (primary cards
+  only), focus rings and key interaction points.
+- No card is filled with amber. No glow spreads across the screen. No neon or fluorescent yellow,
+  and nothing pushed toward orange.
+- Cards stay graphite with light translucency and a top hairline. Brightness follows weight
+  (primary > secondary > tertiary), so cards are never all equal.
+- Translucent blur is reserved for surfaces over other content: the top bar and the detail
   surface.
 - Radii: 8px controls, 14px cards, 22px surfaces, a circle for the Core. Spacing uses the 4px
-  scale.
-- Geist Sans and Geist Mono (numbers, identifiers), self-hosted from the `geist` package. No
-  external font or image requests.
+  scale. Type: Geist Sans, with Geist Mono for numbers and identifiers, self-hosted.
+
+## Team registry and publishing rule
+
+Team profiles live in `src/content/team/registry.ts`. Each profile has a `verificationStatus`
+(`verified`, `unverified` or `placeholder`). The mapping in `src/content/layers/team.ts` applies
+the publishing rule, so no component can bypass it:
+
+- Every profile shows its name, role, neutral expertise and verification state.
+- Education and career entries (universities, employers, projects) are shown **only for
+  verified profiles**. Unverified profiles state that these details are published after
+  verification.
+- Portraits and links are shown only for verified profiles and only from a real source. Without
+  a verified photo, cards use an abstract identity mark (initials), never a generated face.
+- Nationality and ethnicity are not recorded. Birth years are recorded as provided and are never
+  displayed.
+
+All 12 current profiles are `unverified`. Unit and end-to-end tests fail if an unverified
+profile shows an institution, a degree, a link or a portrait. To publish a profile's background,
+verify it, set `verificationStatus: "verified"`, and add real links if they exist.
 
 ## Source component review
 
@@ -136,6 +176,6 @@ Vercel preparation, for when deployment is approved:
 
 - No approved ARL brand asset exists yet. `app/icon.svg` is a placeholder derived from the Core
   ring, and the wordmark is set in type.
-- The team has one named member; the other seats are shown as open roles.
+- All 12 team profiles are unverified, so their education and career details are withheld.
 - No live data provider exists yet. The `Metric` model and `DataSourceId` are the extension
   point.
