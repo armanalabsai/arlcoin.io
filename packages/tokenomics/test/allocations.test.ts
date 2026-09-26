@@ -46,10 +46,7 @@ describe("supply", () => {
   });
 
   it("matches the approved allocation table exactly", () => {
-    assert.deepEqual(
-      Object.fromEntries(ALLOCATIONS.map((a) => [a.id, a.amount])),
-      APPROVED,
-    );
+    assert.deepEqual(Object.fromEntries(ALLOCATIONS.map((a) => [a.id, a.amount])), APPROVED);
   });
 
   it("every amount is a positive safe integer", () => {
@@ -99,26 +96,37 @@ describe("release rules", () => {
   it("ecosystem reserve: at most 1,400,000 per year for 5 years", () => {
     const r = byId("ecosystem-reserve").release;
     assert.equal(r.kind, "annual-cap");
-    if (r.kind !== "annual-cap") return;
     assert.equal(r.maxPerYear, 1_400_000);
     assert.equal(r.years, 5);
     assert.equal(r.maxPerYear * r.years, 7_000_000);
   });
 
-  it("team is separate from founder and its vesting is only a proposal", () => {
+  it("team: separate from founder, 12-month cliff then 36-month linear (approved)", () => {
     const team = byId("team");
     assert.notEqual(team.id, byId("founder").id);
     assert.equal(team.amount, 500_000);
-    assert.equal(team.release.kind, "cliff-linear");
-    assert.equal(team.release.status, "proposal");
+    assert.deepEqual(team.release, {
+      kind: "cliff-linear",
+      cliffMonths: 12,
+      vestingMonths: 36,
+      status: "approved",
+    });
+  });
+
+  it("treasury: Safe 3-of-5 with at least a 48-hour delay, no signer addresses", () => {
+    const r = byId("treasury").release;
+    assert.equal(r.kind, "custody");
+    assert.deepEqual(r.controls, { wallet: "Safe", threshold: 3, signers: 5, minDelayHours: 48 });
+    assert.doesNotMatch(JSON.stringify(ALLOCATIONS), /0x[0-9a-fA-F]{40}/);
   });
 
   it("early user rewards: initial program up to 100,000 over 6 months", () => {
     const r = byId("early-user-rewards").release;
     assert.equal(r.kind, "program");
-    if (r.kind !== "program") return;
-    assert.equal(r.initialProgram?.maxAmount, 100_000);
-    assert.equal(r.initialProgram?.durationMonths, 6);
+    const initial = r.initialProgram;
+    assert.ok(initial);
+    assert.equal(initial.maxAmount, 100_000);
+    assert.equal(initial.durationMonths, 6);
   });
 });
 
@@ -171,6 +179,27 @@ describe("validator rejects invalid tables", () => {
         : a,
     );
     assert.match(validateAllocations(table, MAX_SUPPLY).join("\n"), /expected 7000000/);
+  });
+
+  it("rejects a weak treasury multisig or a short timelock", () => {
+    const weaken = (controls: object) =>
+      clone().map((a) =>
+        a.release.kind === "custody" && a.release.controls
+          ? { ...a, release: { ...a.release, controls: { ...a.release.controls, ...controls } } }
+          : a,
+      );
+    assert.match(
+      validateAllocations(weaken({ threshold: 1 }), MAX_SUPPLY).join("\n"),
+      /not a valid/,
+    );
+    assert.match(
+      validateAllocations(weaken({ threshold: 6 }), MAX_SUPPLY).join("\n"),
+      /not a valid/,
+    );
+    assert.match(
+      validateAllocations(weaken({ minDelayHours: 24 }), MAX_SUPPLY).join("\n"),
+      /below/,
+    );
   });
 
   it("rejects an initial program larger than its allocation", () => {

@@ -1,4 +1,4 @@
-import type { Allocation } from "./allocations.ts";
+import { MIN_TIMELOCK_HOURS, type Allocation } from "./allocations.ts";
 
 /**
  * Checks an allocation table against the protocol rules and returns every
@@ -63,6 +63,21 @@ export function validateAllocations(
         }
         break;
       case "custody":
+        if (r.controls) {
+          const c = r.controls;
+          if (!Number.isInteger(c.signers) || !Number.isInteger(c.threshold)) {
+            errors.push(`${a.id}: multisig threshold and signers must be integers`);
+          } else if (c.threshold < 2 || c.threshold > c.signers) {
+            errors.push(
+              `${a.id}: threshold ${c.threshold} of ${c.signers} is not a valid multisig`,
+            );
+          }
+          if (!(c.minDelayHours >= MIN_TIMELOCK_HOURS)) {
+            errors.push(
+              `${a.id}: timelock ${c.minDelayHours}h is below the ${MIN_TIMELOCK_HOURS}h minimum`,
+            );
+          }
+        }
         break;
     }
   }

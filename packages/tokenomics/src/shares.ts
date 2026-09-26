@@ -11,10 +11,7 @@ export interface Share {
  * method, so displayed percentages always add up to exactly 100.00%.
  * Deterministic: ties are broken by table order.
  */
-export function shareOfSupply(
-  allocations: readonly Allocation[],
-  maxSupply: number,
-): Share[] {
+export function shareOfSupply(allocations: readonly Allocation[], maxSupply: number): Share[] {
   const TOTAL_BP = 10_000;
   const exact = allocations.map((a, index) => {
     const scaled = a.amount * TOTAL_BP;
@@ -27,9 +24,7 @@ export function shareOfSupply(
   });
 
   let left = TOTAL_BP - exact.reduce((sum, e) => sum + e.floor, 0);
-  const byRemainder = [...exact].sort(
-    (x, y) => y.remainder - x.remainder || x.index - y.index,
-  );
+  const byRemainder = [...exact].sort((x, y) => y.remainder - x.remainder || x.index - y.index);
   const bonus = new Set<number>();
   for (const e of byRemainder) {
     if (left <= 0) break;

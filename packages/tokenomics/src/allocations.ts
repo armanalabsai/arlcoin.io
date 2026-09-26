@@ -34,6 +34,7 @@ export type Release =
       readonly kind: "custody";
       readonly description: string;
       readonly status: DecisionStatus;
+      readonly controls?: MultisigControls;
     }
   | {
       readonly kind: "program";
@@ -46,6 +47,22 @@ export type Release =
         readonly status: DecisionStatus;
       };
     };
+
+/**
+ * Approval policy for a multisig-held allocation. Signer addresses are
+ * deliberately absent: they are configured only when the production Safe is
+ * created, never committed here.
+ */
+export interface MultisigControls {
+  readonly wallet: "Safe";
+  readonly threshold: number;
+  readonly signers: number;
+  /** Minimum delay between approval and execution, in hours. */
+  readonly minDelayHours: number;
+}
+
+/** Protocol floor for any multisig timelock delay. */
+export const MIN_TIMELOCK_HOURS = 48;
 
 export interface Allocation {
   readonly id: string;
@@ -96,8 +113,9 @@ export const ALLOCATIONS: readonly Allocation[] = deepFreeze([
     release: {
       kind: "custody",
       description:
-        "Multisig custody with a timelock and separated roles. Signer set, threshold and delay are not yet decided.",
+        "Safe multisig with a timelock and separated roles. Signer addresses are configured only when the production Safe is created.",
       status: "approved",
+      controls: { wallet: "Safe", threshold: 3, signers: 5, minDelayHours: 48 },
     },
   },
   {
@@ -129,7 +147,11 @@ export const ALLOCATIONS: readonly Allocation[] = deepFreeze([
     name: "Strategic Partnerships",
     amount: 1_500_000,
     purpose: "Reserved for future partners. No partnership has been announced.",
-    release: { kind: "program", description: "Released per signed agreement.", status: "undecided" },
+    release: {
+      kind: "program",
+      description: "Released per signed agreement.",
+      status: "undecided",
+    },
   },
   {
     id: "public-launch",
@@ -143,22 +165,26 @@ export const ALLOCATIONS: readonly Allocation[] = deepFreeze([
     name: "Grants / Bug Bounty",
     amount: 400_000,
     purpose: "Builder grants and security bug bounties.",
-    release: { kind: "program", description: "Paid per grant or bounty award.", status: "undecided" },
+    release: {
+      kind: "program",
+      description: "Paid per grant or bounty award.",
+      status: "undecided",
+    },
   },
   {
     id: "team",
     name: "Team",
     amount: 500_000,
-    purpose: "Core team members. Separate from the founder allocation.",
-    // Long-term vesting is required; the schedule below is a proposal only.
-    release: { kind: "cliff-linear", cliffMonths: 12, vestingMonths: 36, status: "proposal" },
+    purpose:
+      "Core team members. Separate from the founder allocation. Individual grants are not assigned yet; unassigned tokens stay locked in a multisig-controlled pool.",
+    // Applies per member from their grant date, each with a separate schedule.
+    release: { kind: "cliff-linear", cliffMonths: 12, vestingMonths: 36, status: "approved" },
   },
   {
     id: "early-user-rewards",
     name: "Mining / Early User Rewards",
     amount: 500_000,
-    purpose:
-      "Rewards for verified early protocol usage. Not proof-of-work mining.",
+    purpose: "Rewards for verified early protocol usage. Not proof-of-work mining.",
     release: {
       kind: "program",
       description:

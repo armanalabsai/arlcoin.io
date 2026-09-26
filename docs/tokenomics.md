@@ -14,19 +14,19 @@ this page is out of date.
 
 ## Allocation
 
-| Allocation | ARL | Share |
-| --- | ---: | ---: |
-| Founder | 2,100,000 | 10.00% |
-| Ecosystem Reserve | 7,000,000 | 33.33% |
-| Treasury | 3,000,000 | 14.29% |
-| Community / Staking | 3,000,000 | 14.29% |
-| Liquidity | 2,000,000 | 9.52% |
-| Strategic Partnerships | 1,500,000 | 7.14% |
-| Public Launch | 1,000,000 | 4.76% |
-| Grants / Bug Bounty | 400,000 | 1.91% |
-| Team | 500,000 | 2.38% |
-| Mining / Early User Rewards | 500,000 | 2.38% |
-| **Total** | **21,000,000** | **100.00%** |
+| Allocation                  |            ARL |       Share |
+| --------------------------- | -------------: | ----------: |
+| Founder                     |      2,100,000 |      10.00% |
+| Ecosystem Reserve           |      7,000,000 |      33.33% |
+| Treasury                    |      3,000,000 |      14.29% |
+| Community / Staking         |      3,000,000 |      14.29% |
+| Liquidity                   |      2,000,000 |       9.52% |
+| Strategic Partnerships      |      1,500,000 |       7.14% |
+| Public Launch               |      1,000,000 |       4.76% |
+| Grants / Bug Bounty         |        400,000 |       1.91% |
+| Team                        |        500,000 |       2.38% |
+| Mining / Early User Rewards |        500,000 |       2.38% |
+| **Total**                   | **21,000,000** | **100.00%** |
 
 Shares are rounded to basis points with the largest-remainder method so they
 always add up to 100.00%. Grants / Bug Bounty is exactly 1.9048%.
@@ -36,29 +36,35 @@ not sum to exactly 21,000,000 ARL.
 
 ## Release rules
 
-| Allocation | Rule | Status |
-| --- | --- | --- |
-| Founder | 24-month cliff, then 36-month linear vesting | approved |
-| Ecosystem Reserve | At most 1,400,000 ARL unlocked per year for 5 years. Unlocked tokens stay in the reserve until spent; an unlock is not a sale. Uses: protocol development, strategic partnerships, ecosystem development, staking incentives, infrastructure, grants | approved |
-| Treasury | Multisig with timelock and separated roles; parameters undecided | approved in principle |
-| Community / Staking | Paid from this allocation or protocol revenue; never new issuance | approved in principle |
-| Liquidity | Held as a reserve; first DEX amount decided separately | approved in principle |
-| Strategic Partnerships | Per signed agreement | undecided |
-| Public Launch | Terms set before any launch | undecided |
-| Grants / Bug Bounty | Per award | undecided |
-| Team | Long-term vesting required — see proposal below | **proposal** |
-| Mining / Early User Rewards | See below | approved |
+| Allocation                  | Rule                                                                                                                                                                                                                                                 | Status    |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| Founder                     | 24-month cliff, then 36-month linear vesting                                                                                                                                                                                                         | approved  |
+| Ecosystem Reserve           | At most 1,400,000 ARL unlocked per year for 5 years. Unlocked tokens stay in the reserve until spent; an unlock is not a sale. Uses: protocol development, strategic partnerships, ecosystem development, staking incentives, infrastructure, grants | approved  |
+| Treasury                    | Safe multisig, 3-of-5 approval, minimum 48-hour timelock, separated roles                                                                                                                                                                            | approved  |
+| Community / Staking         | Paid from this allocation or protocol revenue; never new issuance                                                                                                                                                                                    | approved  |
+| Liquidity                   | Held as a reserve; first DEX amount decided separately                                                                                                                                                                                               | approved  |
+| Strategic Partnerships      | Per signed agreement                                                                                                                                                                                                                                 | undecided |
+| Public Launch               | Terms set before any launch                                                                                                                                                                                                                          | undecided |
+| Grants / Bug Bounty         | Per award                                                                                                                                                                                                                                            | undecided |
+| Team                        | 12-month cliff, then 36-month linear vesting, per member                                                                                                                                                                                             | approved  |
+| Mining / Early User Rewards | See below                                                                                                                                                                                                                                            | approved  |
 
-### Team vesting — proposal
+How these rules map to contracts is described in
+[`token-design.md`](token-design.md).
 
-The team allocation is separate from the founder allocation. Proposed
-schedule, **not approved**:
+### Team
 
-- 12-month cliff, then 36-month linear vesting (48 months total), per member.
-- Each grant gets its own vesting contract when the member joins; the vesting
-  clock starts at the grant date.
-- Unassigned team tokens stay locked in a team pool controlled by a multisig
-  and cannot be spent for any other purpose.
+- 500,000 ARL in total, separate from the founder allocation.
+- Individual grants are not assigned yet.
+- Each member gets a separate vesting schedule and contract when an approved
+  grant exists: 12-month cliff from the grant date, then 36 months linear.
+- Unassigned team tokens stay locked in a multisig-controlled pool.
+
+### Treasury
+
+- Safe multisig, 3-of-5 approval threshold.
+- Every transaction passes a timelock of at least 48 hours.
+- Signer addresses are configured only when the production Safe is created.
 
 ### Mining / Early User Rewards
 
