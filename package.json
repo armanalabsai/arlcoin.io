@@ -14,7 +14,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "npm test --workspaces --if-present",
-    "check": "npm run typecheck && npm run lint && npm run format:check && npm test"
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm test",
+    "check:contracts": "cd contracts && forge fmt --check && forge build --sizes && forge test && cd .. && node scripts/check-token-abi.mjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
