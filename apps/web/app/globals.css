@@ -1,25 +1,34 @@
 @import "tailwindcss";
 
 /*
- * ARL design tokens.
+ * ARL CORE COLOR LANGUAGE
  *
- * Surfaces step up in lightness from the page to the active detail surface;
- * translucency is used only where content sits over other content (the top
- * bar and the detail surface). One accent, reserved for the active layer,
- * the Core ring and selected state.
+ *   black / graphite  →  liquid glass  →  white / soft grey  →  amber  →  active / important
+ *
+ * Background and cards stay near-black and graphite. Amber, the warm tone
+ * between yellow and orange, is the ARL signature. It marks the Core, the
+ * active layer, selected and hovered cards, important metrics and focus, and
+ * nothing else: no card is filled with it and no glow spreads across the
+ * screen. Translucent material is reserved for surfaces that sit over other
+ * content (top bar, detail surface); cards get a restrained version of it.
  */
 @theme {
-  --color-page: #0a0b0d;
-  --color-surface-1: #111316;
-  --color-surface-2: #171a1e;
-  --color-surface-3: #1e2227;
-  --color-line: rgb(255 255 255 / 0.08);
-  --color-line-strong: rgb(255 255 255 / 0.16);
-  --color-fg: #f2f3f5;
-  --color-fg-muted: #a1a7b0;
-  --color-fg-subtle: #6f757e;
-  --color-accent: #e0a94e;
-  --color-accent-soft: rgb(224 169 78 / 0.14);
+  --color-page: #08090b;
+  --color-surface-1: #0f1113;
+  --color-surface-2: #15171a;
+  --color-surface-3: #1c1f23;
+  --color-line: rgb(255 255 255 / 0.07);
+  --color-line-strong: rgb(255 255 255 / 0.14);
+  --color-fg: #f2f2f0;
+  --color-fg-muted: #a3a6ab;
+  --color-fg-subtle: #6c7076;
+
+  /* Amber: warm, between yellow and orange. Never neon, never a fill. */
+  --color-accent: #eea53f;
+  --color-accent-strong: #f4b556;
+  --color-accent-edge: rgb(238 165 63 / 0.5);
+  --color-accent-soft: rgb(238 165 63 / 0.12);
+  --color-accent-faint: rgb(238 165 63 / 0.06);
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", monospace;
@@ -77,6 +86,54 @@
       0 24px 64px rgb(0 0 0 / 0.5);
   }
 
+  /*
+   * Cards: graphite with light translucency and a top hairline highlight. No
+   * blur (a dozen blurred, animated cards would cost more than they add).
+   * Weight sets brightness so cards are not all equal; amber appears only as
+   * an edge on hover and as edge plus micro glow when selected.
+   */
+  .material-card {
+    border-color: var(--color-line);
+    background: rgb(15 17 19 / 0.78);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04);
+  }
+
+  .material-card[data-weight="primary"] {
+    background: rgb(21 23 26 / 0.84);
+    border-color: var(--color-line-strong);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+  }
+
+  .material-card[data-weight="tertiary"] {
+    background: rgb(12 13 15 / 0.72);
+  }
+
+  .material-card:hover {
+    border-color: rgb(238 165 63 / 0.32);
+    background: rgb(21 23 26 / 0.88);
+  }
+
+  .material-card[data-selected="true"] {
+    border-color: var(--color-accent-edge);
+    background: rgb(21 23 26 / 0.92);
+    box-shadow:
+      inset 0 1px 0 rgb(238 165 63 / 0.18),
+      0 0 0 1px rgb(238 165 63 / 0.1),
+      0 8px 28px rgb(238 165 63 / 0.08);
+  }
+
+  /* The Core carries the strongest hierarchy: an amber hairline and a micro
+     glow kept inside its own footprint. */
+  .core-surface {
+    background: radial-gradient(120% 120% at 50% 0%, #1b1d21 0%, #121417 62%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.07),
+      inset 0 0 0 1px rgb(238 165 63 / 0.14),
+      0 0 0 1px rgb(0 0 0 / 0.6),
+      0 18px 48px rgb(0 0 0 / 0.55),
+      0 0 64px rgb(238 165 63 / 0.07);
+  }
+
   @supports not (backdrop-filter: blur(1px)) {
     .material-bar {
       background: rgb(17 19 22 / 0.96);
@@ -130,8 +187,17 @@
     display: none;
   }
 
-  @media (min-width: 1100px) and (min-height: 700px) {
-    .orbit-stage {
+  /* Screens under 900px tall: tighter caption gap (the Core also shrinks). */
+  @media (max-height: 899px) {
+    .orbit-stage .orbit-caption {
+      top: calc(100% + 18px) !important;
+    }
+  }
+
+  /* Orbit on wide screens. Layers with 11 or more cards need more room and
+     switch to the orbit only from 1360 × 820. */
+  @media (min-width: 1100px) and (min-height: 760px) {
+    .orbit-stage:not([data-dense]) {
       /* Header is 56px tall; the stage fills the rest of the first screen. */
       --stage-h: max(700px, calc(100dvh - 57px));
       --rx: min(calc(50vw - 150px), 620px);
@@ -140,25 +206,21 @@
       height: var(--stage-h);
       padding: 0;
     }
-
-    .orbit-layer {
+    .orbit-stage:not([data-dense]) .orbit-layer {
       position: absolute;
       inset: 0;
       max-width: none;
       pointer-events: none;
     }
-
-    .orbit-list {
+    .orbit-stage:not([data-dense]) .orbit-list {
       position: absolute;
       inset: 0;
       display: block;
     }
-
-    .orbit-item {
+    .orbit-stage:not([data-dense]) .orbit-item {
       pointer-events: auto;
     }
-
-    .orbit-ring {
+    .orbit-stage:not([data-dense]) .orbit-ring {
       display: block;
       position: absolute;
       left: 50%;
@@ -170,8 +232,7 @@
       border-radius: 50%;
       pointer-events: none;
     }
-
-    .orbit-item {
+    .orbit-stage:not([data-dense]) .orbit-item {
       position: absolute;
       left: 50%;
       top: 50%;
@@ -181,20 +242,107 @@
         )
         scale(calc(0.72 + 0.28 * var(--t)));
     }
-
-    .orbit-core {
+    .orbit-stage:not([data-dense]) .orbit-core {
       position: absolute;
       left: 50%;
       top: 50%;
       translate: -50% -50%;
     }
-
-    .orbit-caption {
+    .orbit-stage:not([data-dense]) .orbit-caption {
       position: absolute;
       top: calc(100% + 28px);
       left: 50%;
-      width: 340px;
+      width: 300px;
       translate: -50% 0;
+    }
+    .orbit-stage:not([data-dense]) .material-card[data-weight="primary"] {
+      width: 248px;
+      min-height: 132px;
+    }
+
+    .orbit-stage:not([data-dense]) .material-card[data-weight="secondary"] {
+      width: 212px;
+      min-height: 116px;
+    }
+
+    .orbit-stage:not([data-dense]) .material-card[data-weight="tertiary"] {
+      width: 188px;
+      min-height: 100px;
+    }
+  }
+
+  @media (min-width: 1360px) and (min-height: 820px) {
+    .orbit-stage[data-dense] {
+      /* Header is 56px tall; the stage fills the rest of the first screen. */
+      --stage-h: max(700px, calc(100dvh - 57px));
+      --rx: min(calc(50vw - 150px), 620px);
+      --ry: calc(var(--stage-h) / 2 - 84px);
+      flex: none;
+      height: var(--stage-h);
+      padding: 0;
+    }
+    .orbit-stage[data-dense] .orbit-layer {
+      position: absolute;
+      inset: 0;
+      max-width: none;
+      pointer-events: none;
+    }
+    .orbit-stage[data-dense] .orbit-list {
+      position: absolute;
+      inset: 0;
+      display: block;
+    }
+    .orbit-stage[data-dense] .orbit-item {
+      pointer-events: auto;
+    }
+    .orbit-stage[data-dense] .orbit-ring {
+      display: block;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: calc(var(--rx) * 2);
+      height: calc(var(--ry) * 2);
+      translate: -50% -50%;
+      border: 1px solid var(--color-line);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .orbit-stage[data-dense] .orbit-item {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(
+          calc(-50% + var(--cos) * var(--rx) * var(--t)),
+          calc(-50% + var(--sin) * var(--ry) * var(--t))
+        )
+        scale(calc(0.72 + 0.28 * var(--t)));
+    }
+    .orbit-stage[data-dense] .orbit-core {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      translate: -50% -50%;
+    }
+    .orbit-stage[data-dense] .orbit-caption {
+      position: absolute;
+      top: calc(100% + 28px);
+      left: 50%;
+      width: 300px;
+      translate: -50% 0;
+    }
+    .orbit-stage[data-dense] .material-card[data-weight="primary"] {
+      width: 248px;
+      min-height: 132px;
+    }
+
+    .orbit-stage[data-dense] .material-card[data-weight="secondary"] {
+      width: 212px;
+      min-height: 116px;
+    }
+
+    .orbit-stage[data-dense] .material-card[data-weight="tertiary"] {
+      width: 188px;
+      min-height: 100px;
     }
   }
 
@@ -214,5 +362,19 @@
   *::after {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* Unlayered so it overrides utility classes: in orbit mode the Overview
+   button is redundant with the wordmark, the Core cycle and Escape. */
+@media (min-width: 1100px) and (min-height: 760px) {
+  .orbit-stage:not([data-dense]) .orbit-hide {
+    display: none;
+  }
+}
+
+@media (min-width: 1360px) and (min-height: 820px) {
+  .orbit-stage[data-dense] .orbit-hide {
+    display: none;
   }
 }

@@ -17,7 +17,10 @@ interface Props {
   onActivate: (entry: RingEntry, element: HTMLElement) => void;
 }
 
-const ORBIT_QUERY = "(min-width: 1100px) and (min-height: 700px) and (pointer: fine)";
+/** Matches the CSS breakpoints in globals.css. */
+export const DENSE_FROM = 11;
+const ORBIT_QUERY = "(min-width: 1100px) and (min-height: 760px) and (pointer: fine)";
+const DENSE_ORBIT_QUERY = "(min-width: 1360px) and (min-height: 820px) and (pointer: fine)";
 const PARALLAX_PX = 6;
 
 /**
@@ -28,6 +31,7 @@ const PARALLAX_PX = 6;
  */
 export function Orbit({ ringKey, label, entries, selectedKey, core, caption, onActivate }: Props) {
   const reduce = useReducedMotion() ?? false;
+  const dense = entries.length >= DENSE_FROM;
   const stageRef = useRef<HTMLDivElement>(null);
 
   // Pointer parallax: motion values only, no React state per frame.
@@ -39,7 +43,7 @@ export function Orbit({ ringKey, label, entries, selectedKey, core, caption, onA
   useEffect(() => {
     const stage = stageRef.current;
     if (!stage || reduce) return;
-    const query = window.matchMedia(ORBIT_QUERY);
+    const query = window.matchMedia(dense ? DENSE_ORBIT_QUERY : ORBIT_QUERY);
     let rect: DOMRect | null = null;
 
     const onMove = (e: PointerEvent) => {
@@ -66,7 +70,7 @@ export function Orbit({ ringKey, label, entries, selectedKey, core, caption, onA
       stage.removeEventListener("pointerleave", onLeave);
       window.removeEventListener("scroll", invalidate);
     };
-  }, [px, py, reduce]);
+  }, [px, py, reduce, dense]);
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLUListElement>) => {
     const keys = ["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp", "Home", "End"];
@@ -90,7 +94,7 @@ export function Orbit({ ringKey, label, entries, selectedKey, core, caption, onA
   const count = entries.length;
 
   return (
-    <div ref={stageRef} className="orbit-stage">
+    <div ref={stageRef} className="orbit-stage" data-dense={dense ? "" : undefined}>
       <div aria-hidden="true" className="orbit-ring" />
       <div className="orbit-core z-10 flex flex-col items-center gap-10">
         {core}

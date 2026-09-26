@@ -5,6 +5,8 @@ export const SITE = {
   url: "https://arlcoin.io",
   description:
     "ARL is the native utility token planned for decentralized AI and compute services. 21,000,000 ARL maximum supply. Not yet deployed.",
+  /** Short line under the Core on the overview. */
+  tagline: "The native utility token planned for AI and compute services. Not yet deployed.",
   repository: "https://github.com/gokturkalazdaghan-dot/ARLCOIN",
 } as const;
 

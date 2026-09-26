@@ -40,7 +40,7 @@ export function CoreCard({ layer, onActivate }: Props) {
       onClick={onActivate}
       aria-label={label}
       data-testid="arl-core"
-      className="group relative grid size-[184px] shrink-0 place-items-center rounded-full border border-line-strong bg-surface-2 shadow-[inset_0_1px_0_rgb(255_255_255/0.07),0_18px_48px_rgb(0_0_0/0.45)] transition-[transform,border-color] duration-200 ease-(--ease-out-quint) hover:border-[rgb(255_255_255/0.24)] active:scale-[0.97] min-[1100px]:size-[216px]"
+      className="core-surface group relative grid size-[184px] shrink-0 place-items-center rounded-full border border-line-strong transition-[transform,border-color] duration-200 ease-(--ease-out-quint) hover:border-accent-edge active:scale-[0.97] min-[1100px]:size-[216px] min-[1100px]:[@media(max-height:899px)]:size-[184px]"
     >
       <svg
         viewBox="0 0 240 240"
@@ -63,10 +63,10 @@ export function CoreCard({ layer, onActivate }: Props) {
         ))}
       </svg>
       <span className="flex flex-col items-center gap-2">
-        <span className="text-[44px] leading-none font-semibold tracking-[-0.04em] min-[1100px]:text-[52px]">
+        <span className="text-[44px] leading-none font-semibold tracking-[-0.04em] min-[1100px]:text-[52px] min-[1100px]:[@media(max-height:899px)]:text-[44px]">
           ARL
         </span>
-        <span className="font-mono text-[11px] tracking-[0.14em] text-fg-muted uppercase">
+        <span className="font-mono text-[11px] tracking-[0.14em] text-accent uppercase">
           {layer ? layer.title : "Core"}
         </span>
       </span>
