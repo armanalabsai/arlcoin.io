@@ -56,7 +56,7 @@ Rules:
 | Token           | ERC-20, 18 decimals, 21,000,000 ARL minted once, no mint function, no owner, no pause | [`token-design.md`](token-design.md)         |
 | Founder vesting | 24-month cliff, 36 months linear                                                      | [`tokenomics.md`](tokenomics.md)             |
 | Team vesting    | 12-month cliff, 36 months linear, per member; unassigned tokens in a multisig pool    | [`tokenomics.md`](tokenomics.md)             |
-| Treasury        | Safe 3-of-5, minimum 48-hour timelock                                                 | [`token-design.md`](token-design.md)         |
+| Treasury        | Safe 3-of-5, minimum 48-hour timelock, guardian Safe that can only cancel (no sunset) | [`token-design.md`](token-design.md)         |
 | Dependencies    | Open source first, provenance recorded                                                | [`open-source.md`](open-source.md)           |
 | Content         | English only; no unverified claims; no implied partnerships                           | [`content-standard.md`](content-standard.md) |
 
@@ -71,3 +71,14 @@ Rules:
 
 Resolved on 2026-09-26: `ERC20Permit` included; Ecosystem Reserve released
 linearly over 1,830 days.
+
+Resolved on 2026-09-27 (Phase 2 Remediation Pack 2):
+
+- M-1: a separate guardian Safe holds only `CANCELLER_ROLE` on the treasury
+  timelock. It must differ from the proposer and executor. No sunset; the
+  risk that a compromised guardian freezes Treasury operations is accepted.
+- L-3: the timelock constructor rejects `address(0)` in the proposer and
+  executor lists and as the guardian.
+
+M-2 (custody of unlocked allocations) and M-3 (vesting beneficiary type) are
+still open.

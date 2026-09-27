@@ -125,12 +125,13 @@ documented recovery procedure.
 
 ## Treasury
 
-Policy: Safe 3-of-5, minimum 48-hour delay.
+Policy: Safe 3-of-5, minimum 48-hour delay, independent guardian that can
+only cancel.
 
 ```
 Safe (3-of-5) ──schedule / cancel / execute──▶ ARLTimelock (≥ 48 h)
-                                                   │ holds 3,000,000 ARL
-                                                   ▼
+                                                   ▲  │ holds 3,000,000 ARL
+Guardian Safe ─────────── cancel only ─────────────┘  ▼
                                               token transfers
 ```
 
@@ -141,12 +142,26 @@ Safe (3-of-5) ──schedule / cancel / execute──▶ ARLTimelock (≥ 48 h)
 - a 48-hour floor in the constructor and in `updateDelay`. Upstream
   `updateDelay` accepts any value, so a scheduled call could otherwise reduce
   the delay to zero;
-- at least one proposer and one executor required; the executor role is not
-  open to everyone.
+- at least one proposer and one executor required;
+- no zero address in the proposer or executor list. Upstream accepts
+  `address(0)`, and an `address(0)` executor opens execution to everyone;
+- a guardian passed to the constructor that receives only `CANCELLER_ROLE`. It
+  must be non-zero and must not appear in the proposer or executor list. It can
+  cancel a pending operation during the delay, and cannot schedule, execute,
+  move funds or change roles. There is no sunset.
 
-The Safe's 3-of-5 threshold is Safe configuration. It is verified when the
-production Safe is created, not by these contracts. Tests use a labelled test
-account in place of the Safe. No signer addresses exist yet.
+A compromised guardian can cancel every Treasury operation, including an
+operation that replaces the guardian. Funds cannot be moved or stolen that way,
+but Treasury operations can be frozen until the guardian is replaced by social
+or legal means. This trade-off was accepted on 2026-09-27. If the guardian's
+keys are lost, the Treasury replaces it through a scheduled `revokeRole` and
+`grantRole`, which a guardian without keys cannot cancel.
+
+The Safe's 3-of-5 threshold and the guardian Safe's threshold are Safe
+configuration. They are verified when the production Safes are created, not by
+these contracts. The guardian's signers are to be disjoint from the Treasury
+Safe's. Tests use labelled test accounts in place of the Safes. No signer
+addresses exist yet.
 
 ## Other allocations
 

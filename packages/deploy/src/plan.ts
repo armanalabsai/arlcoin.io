@@ -53,7 +53,8 @@ export interface DeployConfig {
   requireRecipientCode: boolean;
   founderBeneficiary: string;
   ecosystemReserveBeneficiary: string;
-  treasury: { safe: string; minDelayHours: number };
+  /** `guardian` holds only the canceller role and must differ from `safe`. */
+  treasury: { safe: string; guardian: string; minDelayHours: number };
   recipients: Record<RecipientKey, string>;
 }
 
@@ -66,7 +67,7 @@ export interface DeployPlan {
   allocations: Record<string, string>;
   founder: { beneficiary: string; cliffStart: number; cliffEnd: number; vestingEnd: number };
   ecosystemReserve: { beneficiary: string; start: number };
-  treasury: { safe: string; minDelay: number };
+  treasury: { safe: string; guardian: string; minDelay: number };
   recipients: Record<RecipientKey, string>;
   source: { launchDate: string; founderCliff: string; founderVestingEnd: string };
 }
@@ -167,6 +168,10 @@ export function buildPlan(config: DeployConfig): DeployPlan {
     "ecosystemReserveBeneficiary",
   );
   const treasurySafe = requireAddress(config.treasury.safe, "treasury.safe");
+  const treasuryGuardian = requireAddress(config.treasury.guardian, "treasury.guardian");
+  if (treasuryGuardian.toLowerCase() === treasurySafe.toLowerCase()) {
+    fail("treasury.guardian: must differ from treasury.safe");
+  }
 
   const delayHours = config.treasury.minDelayHours;
   if (!Number.isSafeInteger(delayHours) || delayHours < MIN_TIMELOCK_HOURS) {
@@ -213,7 +218,7 @@ export function buildPlan(config: DeployConfig): DeployPlan {
       beneficiary: reserveBeneficiary,
       start: requireTimestamp(toUnix(launch), "ecosystemReserve.start"),
     },
-    treasury: { safe: treasurySafe, minDelay: delayHours * 3600 },
+    treasury: { safe: treasurySafe, guardian: treasuryGuardian, minDelay: delayHours * 3600 },
     recipients,
     source: {
       launchDate: toIso(launch),

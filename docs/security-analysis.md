@@ -13,6 +13,8 @@ audited.** No contract is deployed.
 - OpenZeppelin v5.6.1 `ERC20`, `VestingWallet`, `TimelockController` and their
   dependencies are correct (audited upstream; see `open-source.md`).
 - The Safe contract used for the treasury is a correctly configured 3-of-5 Safe.
+- The treasury guardian is a separate, correctly configured Safe whose signers
+  are disjoint from the treasury Safe's.
 - Deployment passes correct, explicit timestamps and the intended holder
   addresses. The contracts validate ordering but cannot validate intent.
 - Block timestamps are accurate to within seconds; vesting boundaries are
@@ -20,22 +22,26 @@ audited.** No contract is deployed.
 
 ## Threats and controls
 
-| Threat                                  | Control                                                                                                                                       | Evidence                                                                                              |
-| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| Supply above 21M                        | Mint only in constructor; no mint function; constructor total check                                                                           | Unit test, ABI allowlist, invariants                                                                  |
-| Hidden admin                            | No `Ownable`/`AccessControl` on the token                                                                                                     | `test_NoAdminOrMintFunctions`                                                                         |
-| Early vesting release                   | Linear period starts at `cliffEnd`                                                                                                            | Boundary tests at `cliffEnd − 1`, `cliffEnd`, `cliffEnd + 1`; invariant `NoFounderReleaseBeforeCliff` |
-| Over-release                            | Unmodified OpenZeppelin release accounting                                                                                                    | Fuzzed repeated releases; invariant `VestingNeverOverReleases`                                        |
-| Beneficiary transfer of unvested tokens | `transferOwnership`/`renounceOwnership` revert                                                                                                | Unit, fuzz and invariant tests                                                                        |
-| Reserve over the annual cap             | 1,830-day linear duration                                                                                                                     | Calendar-year test; fuzzed 366-day windows                                                            |
-| Treasury bypass                         | Timelock holds funds; Safe-only roles; 48-hour delay                                                                                          | Unit and fuzz tests; invariant `TreasuryOnlyPaysThroughTimelock`                                      |
-| Delay lowered via timelock              | 48-hour floor in `updateDelay`                                                                                                                | `test_RevertWhen_DelayLoweredBelowFloorThroughTheTimelock`                                            |
-| Role takeover                           | No external admin; role changes pass the delay                                                                                                | `test_RevertWhen_RoleGrantedOutsideTheTimelock`                                                       |
-| Overflow                                | Solidity 0.8 checked arithmetic; max product 7×10²⁴ × 1.6×10⁸ ≪ 2²⁵⁶                                                                          | Fuzzing over the full `uint64` time range                                                             |
-| Reentrancy                              | ARL is a plain ERC-20 with no hooks; `VestingWallet` updates state before transfer                                                            | Slither `reentrancy-*` clean on ARL code                                                              |
-| Permit replay or forgery                | OpenZeppelin `ERC20Permit`: EIP-712 domain with chain ID and contract address, sequential nonces, deadline, low-`s` check                     | `ARLTokenPermit.t.sol` (replay, expiry, wrong signer, other chain, high-`s`, fuzz)                    |
-| Permit front-running                    | A consumed permit makes a later identical `permit` call revert; the allowance is unaffected. Integrators must tolerate an already-used permit | Documented                                                                                            |
-| Double initialization                   | No initializers; constructors only                                                                                                            | Design                                                                                                |
+| Threat                                  | Control                                                                                                                                       | Evidence                                                                                                    |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Supply above 21M                        | Mint only in constructor; no mint function; constructor total check                                                                           | Unit test, ABI allowlist, invariants                                                                        |
+| Hidden admin                            | No `Ownable`/`AccessControl` on the token                                                                                                     | `test_NoAdminOrMintFunctions`                                                                               |
+| Early vesting release                   | Linear period starts at `cliffEnd`                                                                                                            | Boundary tests at `cliffEnd − 1`, `cliffEnd`, `cliffEnd + 1`; invariant `NoFounderReleaseBeforeCliff`       |
+| Over-release                            | Unmodified OpenZeppelin release accounting                                                                                                    | Fuzzed repeated releases; invariant `VestingNeverOverReleases`                                              |
+| Beneficiary transfer of unvested tokens | `transferOwnership`/`renounceOwnership` revert                                                                                                | Unit, fuzz and invariant tests                                                                              |
+| Reserve over the annual cap             | 1,830-day linear duration                                                                                                                     | Calendar-year test; fuzzed 366-day windows                                                                  |
+| Treasury bypass                         | Timelock holds funds; Safe-only roles; 48-hour delay                                                                                          | Unit and fuzz tests; invariant `TreasuryOnlyPaysThroughTimelock`                                            |
+| Delay lowered via timelock              | 48-hour floor in `updateDelay`                                                                                                                | `test_RevertWhen_DelayLoweredBelowFloorThroughTheTimelock`                                                  |
+| Role takeover                           | No external admin; role changes pass the delay                                                                                                | `test_RevertWhen_RoleGrantedOutsideTheTimelock`                                                             |
+| Open execution (L-3)                    | Constructor rejects `address(0)` as proposer, executor or guardian; verifier re-checks the zero address holds no role                         | `test_RevertWhen_ZeroExecutor`, `testFuzz_RevertWhen_ZeroInAnyRoleList`; rehearsal                          |
+| Treasury Safe compromise (M-1)          | Independent guardian Safe can cancel any pending operation within the 48-hour delay                                                           | `test_GuardianCanCancelPendingOperation`; invariant `GuardianIsCancellerOnly`                               |
+| Guardian overreach                      | Guardian holds only `CANCELLER_ROLE`; must not be a proposer or executor; verifier asserts its exact roles                                    | `test_RevertWhen_GuardianSchedules`, `test_RevertWhen_GuardianExecutes`, `test_RevertWhen_Verify*Guardian*` |
+| Guardian compromise (griefing)          | **Accepted.** A hostile guardian can cancel every operation, including its own replacement; it cannot move funds. Recovery is social or legal | Documented in `token-design.md`                                                                             |
+| Overflow                                | Solidity 0.8 checked arithmetic; max product 7×10²⁴ × 1.6×10⁸ ≪ 2²⁵⁶                                                                          | Fuzzing over the full `uint64` time range                                                                   |
+| Reentrancy                              | ARL is a plain ERC-20 with no hooks; `VestingWallet` updates state before transfer                                                            | Slither `reentrancy-*` clean on ARL code                                                                    |
+| Permit replay or forgery                | OpenZeppelin `ERC20Permit`: EIP-712 domain with chain ID and contract address, sequential nonces, deadline, low-`s` check                     | `ARLTokenPermit.t.sol` (replay, expiry, wrong signer, other chain, high-`s`, fuzz)                          |
+| Permit front-running                    | A consumed permit makes a later identical `permit` call revert; the allowance is unaffected. Integrators must tolerate an already-used permit | Documented                                                                                                  |
+| Double initialization                   | No initializers; constructors only                                                                                                            | Design                                                                                                      |
 
 ## Mutation checks
 
@@ -46,6 +52,12 @@ Each deliberate defect was introduced, the suite run, and the defect reverted:
 | Vesting beneficiary can be transferred          | 2 unit/fuzz tests and 6 invariants                         |
 | Public `mint` added to the token                | `test_NoAdminOrMintFunctions`, ABI allowlist               |
 | Timelock delay floor removed from `updateDelay` | `test_RevertWhen_DelayLoweredBelowFloorThroughTheTimelock` |
+| Zero-address check on role lists removed        | 4 tests (zero proposer, zero executor, fuzz, deploy)       |
+| Zero guardian allowed                           | `test_RevertWhen_ZeroGuardian`                             |
+| Guardian may also be proposer or executor       | `test_RevertWhen_GuardianIsProposerOrExecutor`             |
+| Executor list not checked                       | 3 tests                                                    |
+| Guardian not granted the canceller role         | 3 tests, invariant `GuardianIsCancellerOnly`               |
+| Guardian also granted proposer or executor      | 3-4 tests each, invariant `GuardianIsCancellerOnly`        |
 
 ## Slither 0.11.6
 

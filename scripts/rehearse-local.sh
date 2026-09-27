@@ -98,6 +98,14 @@ expect "timelock delay (s)" "172800" "$(num "$TIMELOCK" 'getMinDelay()(uint256)'
 expect "founder cliff end" "1861920000" "$(num "$FOUNDER_VESTING" 'cliffEnd()(uint256)')"
 expect "founder vesting end" "1956528000" "$(num "$FOUNDER_VESTING" 'vestingEnd()(uint256)')"
 expect "reserve duration (s)" "158112000" "$(num "$RESERVE_VESTING" 'duration()(uint256)')"
+GUARDIAN="$(node -e "console.log(require('./$PLAN').treasury.guardian)")"
+role() { cast call "$TIMELOCK" "$1()(bytes32)" --rpc-url "$RPC"; }
+has_role() { cast call "$TIMELOCK" 'hasRole(bytes32,address)(bool)' "$(role "$1")" "$2" --rpc-url "$RPC"; }
+expect "guardian is canceller" "true" "$(has_role CANCELLER_ROLE "$GUARDIAN")"
+expect "guardian is not proposer" "false" "$(has_role PROPOSER_ROLE "$GUARDIAN")"
+expect "guardian is not executor" "false" "$(has_role EXECUTOR_ROLE "$GUARDIAN")"
+expect "zero address is not executor" "false" \
+  "$(has_role EXECUTOR_ROLE 0x0000000000000000000000000000000000000000)"
 
 # Writes a copy of the plan with one field changed: mutate <out> <js expression on p>.
 mutate() {
@@ -129,6 +137,8 @@ must_fail "wrong founder beneficiary" "VerifyAddressMismatch\\(\"founder benefic
   forge_verify "$REHEARSAL/wrong-beneficiary.json" "$DEPLOYMENT"
 mutate "$REHEARSAL/wrong-safe.json" "p.treasury.safe='0x000000000000000000000000000000000000dEaD'"
 must_fail "wrong treasury safe" "VerifyFailed\\(\"treasury safe is proposer\"" forge_verify "$REHEARSAL/wrong-safe.json" "$DEPLOYMENT"
+mutate "$REHEARSAL/wrong-guardian.json" "p.treasury.guardian='0x000000000000000000000000000000000000dEaD'"
+must_fail "wrong treasury guardian" "VerifyFailed\\(\"guardian is canceller\"" forge_verify "$REHEARSAL/wrong-guardian.json" "$DEPLOYMENT"
 
 log "Negative rehearsals: DeployARL must refuse invalid plans before broadcasting"
 BEFORE="$(nonce)"
@@ -138,6 +148,10 @@ mutate "$REHEARSAL/bad-cliff.json" "p.founder.cliffEnd = p.founder.cliffStart + 
 must_fail "cliff of 24 x 30 days" "PlanInvalidSchedule\\(\"founder cliff is not 24 calendar months\"" forge_deploy "$REHEARSAL/bad-cliff.json" "$REHEARSAL/x.json"
 mutate "$REHEARSAL/zero-executor.json" "p.treasury.safe='0x0000000000000000000000000000000000000000'"
 must_fail "zero executor" "PlanZeroAddress\\(\"treasury.safe\"" forge_deploy "$REHEARSAL/zero-executor.json" "$REHEARSAL/x.json"
+mutate "$REHEARSAL/zero-guardian.json" "p.treasury.guardian='0x0000000000000000000000000000000000000000'"
+must_fail "zero guardian" "PlanZeroAddress\\(\"treasury.guardian\"" forge_deploy "$REHEARSAL/zero-guardian.json" "$REHEARSAL/x.json"
+mutate "$REHEARSAL/guardian-is-safe.json" "p.treasury.guardian=p.treasury.safe"
+must_fail "guardian is the treasury safe" "PlanGuardianNotIndependent" forge_deploy "$REHEARSAL/guardian-is-safe.json" "$REHEARSAL/x.json"
 mutate "$REHEARSAL/short-delay.json" "p.treasury.minDelay = 172799"
 must_fail "timelock delay below 48 hours" "PlanDelayBelowFloor\\(172799 " \
   forge_deploy "$REHEARSAL/short-delay.json" "$REHEARSAL/x.json"
@@ -164,6 +178,9 @@ must_fail "planner: delay below 48 hours" "below the 48-hour minimum" \
 bad_config "$REHEARSAL/cfg-zero.json" "c.treasury.safe='0x0000000000000000000000000000000000000000'"
 must_fail "planner: zero executor" "treasury.safe: zero address" \
   node "$ROOT/packages/deploy/src/cli.ts" "$REHEARSAL/cfg-zero.json" "$REHEARSAL/p.json"
+bad_config "$REHEARSAL/cfg-guardian.json" "c.treasury.guardian=c.treasury.safe"
+must_fail "planner: guardian is the treasury safe" "treasury.guardian: must differ from treasury.safe" \
+  node "$ROOT/packages/deploy/src/cli.ts" "$REHEARSAL/cfg-guardian.json" "$REHEARSAL/p.json"
 bad_config "$REHEARSAL/cfg-date.json" "c.launchDate='2027-01-31T00:00:00Z'"
 must_fail "planner: ambiguous month arithmetic" "day of month must be 1-28" \
   node "$ROOT/packages/deploy/src/cli.ts" "$REHEARSAL/cfg-date.json" "$REHEARSAL/p.json"

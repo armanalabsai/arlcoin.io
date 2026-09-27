@@ -64,6 +64,7 @@ contract ARLDeployTest is Test {
         p.reserveBeneficiary = makeAddr("ecosystemSafe");
         p.reserveStart = LAUNCH;
         p.treasurySafe = makeAddr("treasurySafe");
+        p.treasuryGuardian = makeAddr("guardianSafe");
         p.minDelay = 48 hours;
         p.recipients = Recipients({
             communityStaking: makeAddr("communitySafe"),
@@ -119,7 +120,7 @@ contract ARLDeployTest is Test {
             '"cliffStart":1798761600,"cliffEnd":1861920000,"vestingEnd":1956528000},',
             '"ecosystemReserve":{"beneficiary":"0x61042dF2f9DfD50AFC0734F5CB4da6E55bE6d09d",',
             '"start":1798761600},"treasury":{"safe":"0xCbA140fcD82caf116be04c2a478A0e10b55202F9",',
-            '"minDelay":172800},"recipients":{"communityStaking":"0x86d861EBe84C3F6D4F374c9640c5b89549C724A8",'
+            '"guardian":"0x0c0bA8A2630B2108D5aF98B64fA89eF1BDb7C9d4","minDelay":172800},"recipients":{"communityStaking":"0x86d861EBe84C3F6D4F374c9640c5b89549C724A8",'
         );
         string memory tail = string.concat(
             '"liquidity":"0x179DaF8783071e3868Fb00208B3529F48E544AF8",',
@@ -136,6 +137,7 @@ contract ARLDeployTest is Test {
         assertEq(p.allocations.earlyUserRewards, ARLAllocation.EARLY_USER_REWARDS);
         assertEq(p.founderCliffEnd, CLIFF_END);
         assertEq(p.minDelay, 48 hours);
+        assertEq(p.treasuryGuardian, 0x0c0bA8A2630B2108D5aF98B64fA89eF1BDb7C9d4);
         assertEq(p.recipients.team, 0xB5C15dcF9624e2137D772f72fCB1020B6Cba1455);
         h.validate(p);
     }
@@ -150,7 +152,7 @@ contract ARLDeployTest is Test {
     function test_DelayFloorMatchesTimelock() public {
         address[] memory safe = new address[](1);
         safe[0] = makeAddr("safe");
-        ARLTimelock tl = new ARLTimelock(48 hours, safe, safe);
+        ARLTimelock tl = new ARLTimelock(48 hours, safe, safe, makeAddr("guardian"));
         assertEq(ARLDeployPlan.TIMELOCK_DELAY_FLOOR, tl.MIN_DELAY_FLOOR());
     }
 
@@ -206,6 +208,11 @@ contract ARLDeployTest is Test {
         h.validate(p);
 
         p = _plan();
+        p.treasuryGuardian = address(0);
+        _expectZero("treasury.guardian");
+        h.validate(p);
+
+        p = _plan();
         p.founderBeneficiary = address(0);
         _expectZero("founderBeneficiary");
         h.validate(p);
@@ -213,6 +220,32 @@ contract ARLDeployTest is Test {
         p = _plan();
         p.recipients.earlyUserRewards = address(0);
         _expectZero("recipients.earlyUserRewards");
+        h.validate(p);
+    }
+
+    function test_RevertWhen_GuardianIsTheTreasurySafe() public {
+        Plan memory p = _plan();
+        p.treasuryGuardian = p.treasurySafe;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ARLDeployPlan.PlanGuardianNotIndependent.selector, p.treasurySafe
+            )
+        );
+        h.validate(p);
+    }
+
+    function test_RevertWhen_GuardianHasNoCodeWhenRequired() public {
+        Plan memory p = _plan();
+        p.requireRecipientCode = true;
+        _giveCode(p);
+        vm.etch(p.treasuryGuardian, "");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ARLDeployPlan.PlanRecipientHasNoCode.selector,
+                "treasury.guardian",
+                p.treasuryGuardian
+            )
+        );
         h.validate(p);
     }
 
@@ -354,22 +387,60 @@ contract ARLDeployTest is Test {
         h.verify(p, d);
     }
 
-    /// @dev A timelock deployed with address(0) as executor makes execution open to anyone.
-    /// ARLDeployer never does this, so the system is assembled by hand here.
+    /// @dev An address(0) executor makes execution open to anyone. The constructor refuses it
+    /// (L-3); the verifier still checks it in case a role is granted later through the delay.
+    function test_RevertWhen_TimelockBuiltWithOpenExecutorRole() public {
+        address[] memory proposers = new address[](1);
+        proposers[0] = makeAddr("treasurySafe");
+        address[] memory executors = new address[](2);
+        executors[0] = proposers[0];
+        executors[1] = address(0);
+        vm.expectRevert(ARLTimelock.ARLTimelockZeroAddress.selector);
+        new ARLTimelock(48 hours, proposers, executors, makeAddr("guardianSafe"));
+    }
+
     function test_RevertWhen_VerifyOpenExecutorRole() public {
         Plan memory p = _plan();
         Deployment memory d = h.deploy(p);
-
-        address[] memory proposers = new address[](1);
-        proposers[0] = p.treasurySafe;
-        address[] memory executors = new address[](2);
-        executors[0] = p.treasurySafe;
-        executors[1] = address(0);
-        d.timelock = new ARLTimelock(48 hours, proposers, executors);
-        d.token = _tokenFor(p, d);
-
+        bytes32 executor = d.timelock.EXECUTOR_ROLE();
+        vm.prank(address(d.timelock));
+        d.timelock.grantRole(executor, address(0));
         vm.expectRevert(
             abi.encodeWithSelector(ARLVerify.VerifyFailed.selector, "zero address is not executor")
+        );
+        h.verify(p, d);
+    }
+
+    function test_RevertWhen_VerifyWrongGuardian() public {
+        Plan memory p = _plan();
+        Deployment memory d = h.deploy(p);
+        p.treasuryGuardian = makeAddr("otherGuardian");
+        vm.expectRevert(
+            abi.encodeWithSelector(ARLVerify.VerifyFailed.selector, "guardian is canceller")
+        );
+        h.verify(p, d);
+    }
+
+    function test_RevertWhen_VerifyGuardianIsTheSafe() public {
+        Plan memory p = _plan();
+        Deployment memory d = h.deploy(p);
+        p.treasuryGuardian = p.treasurySafe;
+        vm.expectRevert(
+            abi.encodeWithSelector(ARLVerify.VerifyFailed.selector, "guardian is independent")
+        );
+        h.verify(p, d);
+    }
+
+    /// @dev A guardian granted more than CANCELLER_ROLE (possible only through a scheduled role
+    /// change) must fail verification.
+    function test_RevertWhen_VerifyGuardianHasExtraRole() public {
+        Plan memory p = _plan();
+        Deployment memory d = h.deploy(p);
+        bytes32 proposer = d.timelock.PROPOSER_ROLE();
+        vm.prank(address(d.timelock));
+        d.timelock.grantRole(proposer, p.treasuryGuardian);
+        vm.expectRevert(
+            abi.encodeWithSelector(ARLVerify.VerifyFailed.selector, "guardian is not proposer")
         );
         h.verify(p, d);
     }
@@ -397,26 +468,10 @@ contract ARLDeployTest is Test {
 
     // ------------------------------------------------------------------ helpers
 
-    function _tokenFor(Plan memory p, Deployment memory d) internal returns (ARLToken) {
-        return new ARLToken(
-            ARLToken.Recipients({
-                founder: address(d.founderVesting),
-                ecosystemReserve: address(d.reserveVesting),
-                treasury: address(d.timelock),
-                communityStaking: p.recipients.communityStaking,
-                liquidity: p.recipients.liquidity,
-                strategicPartnerships: p.recipients.strategicPartnerships,
-                publicLaunch: p.recipients.publicLaunch,
-                grantsBugBounty: p.recipients.grantsBugBounty,
-                team: p.recipients.team,
-                earlyUserRewards: p.recipients.earlyUserRewards
-            })
-        );
-    }
-
     function _giveCode(Plan memory p) internal {
-        address[9] memory safes = [
+        address[10] memory safes = [
             p.treasurySafe,
+            p.treasuryGuardian,
             p.reserveBeneficiary,
             p.recipients.communityStaking,
             p.recipients.liquidity,
