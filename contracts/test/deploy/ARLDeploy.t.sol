@@ -191,6 +191,7 @@ contract ARLDeployTest is Test {
     function test_RevertWhen_RecipientHasNoCode() public {
         Plan memory p = _plan();
         p.requireRecipientCode = true;
+        vm.etch(p.founderBeneficiary, hex"00");
         vm.expectRevert(
             abi.encodeWithSelector(
                 ARLDeployPlan.PlanRecipientHasNoCode.selector,
@@ -199,6 +200,48 @@ contract ARLDeployTest is Test {
             )
         );
         h.validate(p);
+    }
+
+    /// @dev M-3: off local Anvil the founder beneficiary must be a contract (a Safe), not a
+    /// single-key account whose loss would strand the founder allocation.
+    function test_RevertWhen_FounderBeneficiaryHasNoCodeWhenRequired() public {
+        Plan memory p = _plan();
+        p.requireRecipientCode = true;
+        _giveCode(p);
+        vm.etch(p.founderBeneficiary, "");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ARLDeployPlan.PlanRecipientHasNoCode.selector,
+                "founderBeneficiary",
+                p.founderBeneficiary
+            )
+        );
+        h.validate(p);
+    }
+
+    /// @dev Local Anvil plans may keep placeholder accounts without code.
+    function test_FounderBeneficiaryWithoutCodeAllowedLocally() public {
+        Plan memory p = _plan();
+        assertFalse(p.requireRecipientCode);
+        assertEq(p.founderBeneficiary.code.length, 0);
+        h.validate(p);
+    }
+
+    function test_RevertWhen_VerifyFounderBeneficiaryHasNoCode() public {
+        Plan memory p = _plan();
+        Deployment memory d = h.deploy(p);
+        p.requireRecipientCode = true;
+        _giveCode(p);
+        vm.etch(p.founderBeneficiary, "");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ARLVerify.VerifyAddressMismatch.selector,
+                "founder beneficiary safe",
+                p.founderBeneficiary,
+                address(0)
+            )
+        );
+        h.verify(p, d);
     }
 
     function test_RevertWhen_ZeroAddresses() public {
@@ -469,7 +512,8 @@ contract ARLDeployTest is Test {
     // ------------------------------------------------------------------ helpers
 
     function _giveCode(Plan memory p) internal {
-        address[10] memory safes = [
+        address[11] memory safes = [
+            p.founderBeneficiary,
             p.treasurySafe,
             p.treasuryGuardian,
             p.reserveBeneficiary,

@@ -8,6 +8,8 @@
 #   5. cross-check key values independently with `cast`
 #   6. run negative rehearsals: each must be rejected, and rejected deployments must not
 #      broadcast anything
+#   7. deploy real Safe contracts, redeploy with every Safe role held by a Safe and code checks
+#      enforced, and reject a founder beneficiary without code (M-3)
 #
 # Exits 0 only if every step and every negative case behaves as expected.
 
@@ -188,5 +190,63 @@ bad_config "$REHEARSAL/cfg-chain.json" "c.chainId = 11155111"
 must_fail "planner: non-local chain without code checks" "requireRecipientCode: may be false only" \
   node "$ROOT/packages/deploy/src/cli.ts" "$REHEARSAL/cfg-chain.json" "$REHEARSAL/p.json"
 [[ ! -f "$REHEARSAL/p.json" ]] || die "a rejected config produced a plan"
+
+log "Founder Safe (M-3): real Safe v1.5.0 contracts on Anvil, code checks enforced"
+# Safe v1.5.0 (LGPL-3.0) is deployed here from its published npm build artifacts; no Safe source
+# is copied into ARL. Owners are Anvil development accounts; nobody's real keys are involved.
+ACCOUNTS="$(cast rpc eth_accounts --rpc-url "$RPC" | tr -d '[]" ')"
+account() { cut -d, -f"$(($1 + 1))" <<<"$ACCOUNTS"; }
+SAFE_DEPLOYER="$(account 1)"
+ZERO=0x0000000000000000000000000000000000000000
+artifact() { node -e "console.log(require('@safe-global/safe-smart-account/build/artifacts/contracts/$1').bytecode)"; }
+create() {
+  cast send --unlocked --from "$SAFE_DEPLOYER" --rpc-url "$RPC" --json --create "$1" |
+    node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>console.log(JSON.parse(s).contractAddress))"
+}
+SAFE_SINGLETON="$(create "$(artifact Safe.sol/Safe.json)")"
+SAFE_FACTORY="$(create "$(artifact proxies/SafeProxyFactory.sol/SafeProxyFactory.json)")"
+SAFE_SETUP="$(cast calldata 'setup(address[],uint256,address,bytes,address,address,uint256,address)' \
+  "[$(account 2),$(account 3),$(account 4)]" 2 "$ZERO" 0x "$ZERO" "$ZERO" 0 "$ZERO")"
+# new_safe <salt>: deploys a 2-of-3 Safe proxy and prints its address.
+new_safe() {
+  local addr
+  addr="$(cast call "$SAFE_FACTORY" 'createProxyWithNonce(address,bytes,uint256)(address)' \
+    "$SAFE_SINGLETON" "$SAFE_SETUP" "$1" --from "$SAFE_DEPLOYER" --rpc-url "$RPC")"
+  cast send "$SAFE_FACTORY" 'createProxyWithNonce(address,bytes,uint256)' "$SAFE_SINGLETON" \
+    "$SAFE_SETUP" "$1" --unlocked --from "$SAFE_DEPLOYER" --rpc-url "$RPC" >/dev/null
+  printf '%s' "$addr"
+}
+FOUNDER_SAFE="$(new_safe 1)"
+expect "founder safe threshold" "2" "$(num "$FOUNDER_SAFE" 'getThreshold()(uint256)')"
+expect "founder safe owners" "3" \
+  "$(cast call "$FOUNDER_SAFE" 'getOwners()(address[])' --rpc-url "$RPC" | tr ',' '\n' | grep -c 0x)"
+
+# Every Safe role gets its own Safe proxy so the plan can require code everywhere.
+SAFE_PLAN="$REHEARSAL/safes.json"
+node -e "
+const p = require('./$PLAN');
+const s = process.argv.slice(1);
+p.requireRecipientCode = true;
+p.founder.beneficiary = s[0];
+p.ecosystemReserve.beneficiary = s[1];
+p.treasury.safe = s[2];
+p.treasury.guardian = s[3];
+Object.keys(p.recipients).forEach((k, i) => (p.recipients[k] = s[4 + i]));
+require('fs').writeFileSync('$SAFE_PLAN', JSON.stringify(p));
+" "$FOUNDER_SAFE" $(for i in $(seq 2 11); do new_safe "$i"; printf ' '; done)
+SAFE_DEPLOYMENT="deploy/deployments/31337-safes.json"
+forge_deploy "$SAFE_PLAN" "$SAFE_DEPLOYMENT" >/dev/null || die "deployment with Safe recipients failed"
+forge_verify "$SAFE_PLAN" "$SAFE_DEPLOYMENT" || die "verifier rejected the deployment with Safe recipients"
+SAFE_FOUNDER_VESTING="$(node -e "console.log(require('./$SAFE_DEPLOYMENT').founderVesting)")"
+expect "founder vesting beneficiary is Safe" "$FOUNDER_SAFE" \
+  "$(cast call "$SAFE_FOUNDER_VESTING" 'owner()(address)' --rpc-url "$RPC")"
+
+BEFORE="$(nonce)"
+node -e "const p=require('./$SAFE_PLAN'); p.founder.beneficiary='$(account 5)'; require('fs').writeFileSync('$REHEARSAL/founder-eoa.json', JSON.stringify(p));"
+must_fail "founder beneficiary without code" "PlanRecipientHasNoCode\\(\"founderBeneficiary\"" \
+  forge_deploy "$REHEARSAL/founder-eoa.json" "$REHEARSAL/x.json"
+[[ "$(nonce)" == "$BEFORE" ]] || die "a rejected deployment broadcast a transaction"
+must_fail "verify: founder beneficiary without code" "VerifyAddressMismatch\\(\"founder beneficiary safe\"" \
+  forge_verify "$REHEARSAL/founder-eoa.json" "$SAFE_DEPLOYMENT"
 
 log "REHEARSAL PASSED: deployed, verified, and $NEGATIVE negative cases rejected"

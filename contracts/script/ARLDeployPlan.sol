@@ -169,7 +169,8 @@ library ARLDeployPlan {
     }
 
     function _validateAddresses(Plan memory p) private view {
-        _nonZero("founderBeneficiary", p.founderBeneficiary);
+        // M-3: the founder beneficiary is a dedicated Safe, so a lost key can be rotated out.
+        _safe(p, "founderBeneficiary", p.founderBeneficiary);
         _safe(p, "ecosystemReserveBeneficiary", p.reserveBeneficiary);
         _safe(p, "treasury.safe", p.treasurySafe);
         _safe(p, "treasury.guardian", p.treasuryGuardian);

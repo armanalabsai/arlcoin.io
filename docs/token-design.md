@@ -115,13 +115,24 @@ Released tokens go to the ecosystem Safe. Release is not sale.
 
 The 500,000 ARL team allocation is minted to a multisig-controlled pool. A
 member's `ARLVestingWallet` is created and funded from the pool only when an
-approved grant exists. No individual grants are defined.
+approved grant exists. No individual grants are defined. Grants are
+irrevocable and made in tranches; each member's beneficiary is the member's own
+Safe or smart account. `ARLVestingWallet` has no revocation and none is added.
 
 ### Known limitation
 
 A beneficiary that loses its key loses the tokens in its wallet; there is no
-recovery path by design. Beneficiaries should be multisigs or keys with a
-documented recovery procedure.
+recovery path in the vesting wallet by design. Recovery therefore lives in the
+beneficiary itself:
+
+- The founder beneficiary must be a dedicated Safe (for example 2-of-3). Off
+  local Anvil, the deployment plan and the verifier reject a founder
+  beneficiary without contract code. A lost key is replaced by rotating the
+  Safe's owners; the beneficiary address never changes.
+- Team members' beneficiaries are their own Safes or smart accounts.
+
+Signer addresses and thresholds are Safe configuration and are never stored in
+this repository.
 
 ## Treasury
 

@@ -38,7 +38,7 @@ not sum to exactly 21,000,000 ARL.
 
 | Allocation                  | Rule                                                                                                                                                                                                                                                                          | Status    |
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| Founder                     | 24-month cliff, then 36-month linear vesting                                                                                                                                                                                                                                  | approved  |
+| Founder                     | 24-month cliff, then 36-month linear vesting to a dedicated founder Safe                                                                                                                                                                                                      | approved  |
 | Ecosystem Reserve           | At most 1,400,000 ARL unlocked per year for 5 years (linear over 1,830 days). Unlocked tokens stay in the reserve until spent; an unlock is not a sale. Uses: protocol development, strategic partnerships, ecosystem development, staking incentives, infrastructure, grants | approved  |
 | Treasury                    | Safe multisig, 3-of-5 approval, minimum 48-hour timelock, separated roles                                                                                                                                                                                                     | approved  |
 | Community / Staking         | Paid from this allocation or protocol revenue; never new issuance                                                                                                                                                                                                             | approved  |
@@ -58,6 +58,11 @@ How these rules map to contracts is described in
 - Individual grants are not assigned yet.
 - Each member gets a separate vesting schedule and contract when an approved
   grant exists: 12-month cliff from the grant date, then 36 months linear.
+- Grants are irrevocable and made in tranches: each tranche is a new
+  `ARLVestingWallet` funded from the pool, so a member who leaves early
+  forfeits only tranches not yet granted (decided 2026-09-27).
+- Each member's beneficiary is the member's own Safe or smart account, so a
+  lost key can be recovered by rotating signers.
 - Unassigned team tokens stay locked in a multisig-controlled pool.
 
 ### Treasury

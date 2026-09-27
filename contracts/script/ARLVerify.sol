@@ -38,6 +38,7 @@ library ARLVerify {
         _hasCode("ecosystem reserve vesting wallet", address(d.reserveVesting));
         _hasCode("treasury timelock", address(d.timelock));
         if (p.requireRecipientCode) {
+            _hasCode("founder beneficiary safe", p.founderBeneficiary);
             _hasCode("treasury safe", p.treasurySafe);
             _hasCode("treasury guardian", p.treasuryGuardian);
             _hasCode("ecosystem reserve beneficiary", p.reserveBeneficiary);
