@@ -57,6 +57,11 @@ describe("buildPlan: valid local config", () => {
     assert.equal(plan.treasury.minDelay, 172_800);
   });
 
+  it("treasury guardian is carried into the plan and differs from the Safe", () => {
+    assert.equal(plan.treasury.guardian, LOCAL.treasury.guardian);
+    assert.notEqual(plan.treasury.guardian.toLowerCase(), plan.treasury.safe.toLowerCase());
+  });
+
   it("is deterministic", () => {
     assert.deepEqual(buildPlan(config()), plan);
   });
@@ -94,6 +99,23 @@ describe("buildPlan: fails closed", () => {
     rejects(
       config((c) => (c.treasury.safe = zero)),
       /treasury\.safe: zero/,
+    );
+  });
+
+  it("rejects a zero, missing or non-independent treasury guardian", () => {
+    rejects(
+      config((c) => (c.treasury.guardian = "0x0000000000000000000000000000000000000000")),
+      /treasury\.guardian: zero address/,
+    );
+    rejects(
+      config((c) => {
+        delete (c.treasury as Partial<DeployConfig["treasury"]>).guardian;
+      }),
+      /treasury\.guardian: not an address/,
+    );
+    rejects(
+      config((c) => (c.treasury.guardian = c.treasury.safe.toLowerCase())),
+      /treasury\.guardian: must differ from treasury\.safe/,
     );
   });
 

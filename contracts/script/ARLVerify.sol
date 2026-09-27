@@ -39,6 +39,7 @@ library ARLVerify {
         _hasCode("treasury timelock", address(d.timelock));
         if (p.requireRecipientCode) {
             _hasCode("treasury safe", p.treasurySafe);
+            _hasCode("treasury guardian", p.treasuryGuardian);
             _hasCode("ecosystem reserve beneficiary", p.reserveBeneficiary);
             _hasCode("community staking recipient", p.recipients.communityStaking);
             _hasCode("liquidity recipient", p.recipients.liquidity);
@@ -155,6 +156,13 @@ library ARLVerify {
         _role(tl, "treasury safe is executor", executor, p.treasurySafe, true);
         _role(tl, "timelock administers itself", admin, address(tl), true);
         _role(tl, "treasury safe is not admin", admin, p.treasurySafe, false);
+
+        // The guardian can only cancel pending operations.
+        if (p.treasuryGuardian == p.treasurySafe) revert VerifyFailed("guardian is independent");
+        _role(tl, "guardian is canceller", canceller, p.treasuryGuardian, true);
+        _role(tl, "guardian is not proposer", proposer, p.treasuryGuardian, false);
+        _role(tl, "guardian is not executor", executor, p.treasuryGuardian, false);
+        _role(tl, "guardian is not admin", admin, p.treasuryGuardian, false);
 
         // A role granted to address(0) is open to everyone in TimelockController.
         _role(tl, "zero address is not proposer", proposer, address(0), false);

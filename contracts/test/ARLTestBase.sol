@@ -28,6 +28,7 @@ abstract contract ARLTestBase is Test {
     address internal founder = makeAddr("founder");
     address internal ecosystemSafe = makeAddr("ecosystemSafe");
     address internal treasurySafe = makeAddr("treasurySafe");
+    address internal guardianSafe = makeAddr("guardianSafe");
     address internal communitySafe = makeAddr("communitySafe");
     address internal liquiditySafe = makeAddr("liquiditySafe");
     address internal partnershipsSafe = makeAddr("partnershipsSafe");
@@ -50,7 +51,7 @@ abstract contract ARLTestBase is Test {
 
         address[] memory safe = new address[](1);
         safe[0] = treasurySafe;
-        treasury = new ARLTimelock(48 hours, safe, safe);
+        treasury = new ARLTimelock(48 hours, safe, safe, guardianSafe);
 
         token = new ARLToken(
             ARLToken.Recipients({

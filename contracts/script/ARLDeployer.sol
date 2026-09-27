@@ -39,7 +39,7 @@ library ARLDeployer {
 
         address[] memory safe = new address[](1);
         safe[0] = p.treasurySafe;
-        d.timelock = new ARLTimelock(p.minDelay, safe, safe);
+        d.timelock = new ARLTimelock(p.minDelay, safe, safe, p.treasuryGuardian);
 
         d.token = new ARLToken(
             ARLToken.Recipients({

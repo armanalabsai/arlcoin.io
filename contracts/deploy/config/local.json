@@ -7,6 +7,7 @@
   "ecosystemReserveBeneficiary": "0x61042dF2f9DfD50AFC0734F5CB4da6E55bE6d09d",
   "treasury": {
     "safe": "0xCbA140fcD82caf116be04c2a478A0e10b55202F9",
+    "guardian": "0x0c0bA8A2630B2108D5aF98B64fA89eF1BDb7C9d4",
     "minDelayHours": 48
   },
   "recipients": {

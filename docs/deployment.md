@@ -40,7 +40,8 @@ a local Anvil chain.
 | `launchDate`                                        | `YYYY-MM-DDTHH:MM:SSZ`, UTC, day of month 1-28 (so month arithmetic is exact)                                       |
 | `requireRecipientCode`                              | Must be `true` on every chain except local Anvil (31337); then every multisig recipient must be a deployed contract |
 | `founderBeneficiary`, `ecosystemReserveBeneficiary` | Non-zero                                                                                                            |
-| `treasury.safe`                                     | Non-zero; becomes the timelock's only proposer, canceller and executor                                              |
+| `treasury.safe`                                     | Non-zero; becomes the timelock's only proposer and executor, and a canceller                                        |
+| `treasury.guardian`                                 | Non-zero and different from `treasury.safe`; a separate Safe that receives only the canceller role                  |
 | `treasury.minDelayHours`                            | Integer, at least 48                                                                                                |
 | `recipients.*`                                      | Seven non-zero addresses; the team pool is the multisig-controlled `team` recipient                                 |
 
@@ -51,6 +52,7 @@ broadcast) each reject:
 
 - allocations that differ from the approved table or do not total exactly 21,000,000 ARL;
 - a zero address anywhere;
+- a treasury guardian equal to the treasury Safe;
 - a founder cliff that is not 24 calendar months, or linear vesting that is not 36 calendar months
   (730-731 and 1,095-1,096 days; 24 × 30 days is rejected);
 - invalid timestamp ordering or a zero start;
@@ -63,8 +65,9 @@ broadcast) each reject:
 total supply and `MAX_SUPPLY` equal 21,000,000 ARL; every holder's balance, aggregated per
 address, and that planned holders account for the whole supply; zero deployer balance; founder
 and reserve beneficiaries, cliff start, cliff end, vesting end and durations; reserve duration
-exactly 1,830 days; timelock delay; the Safe holds proposer, canceller and executor; the timelock
-is its own admin; neither the zero address nor the deployer holds any role.
+exactly 1,830 days; timelock delay; the Safe holds proposer, canceller and executor; the guardian
+differs from the Safe and holds the canceller role and no other; the timelock is its own admin;
+neither the zero address nor the deployer holds any role.
 
 The verifier asserts the genesis distribution, so it must run before any token moves.
 
@@ -76,13 +79,13 @@ npm run rehearse:local
 ```
 
 Starts a fresh Anvil chain, builds the plan, deploys, verifies, cross-checks key values with
-`cast`, and runs 17 negative cases. Each must fail with its specific error, and rejected
+`cast` (including the guardian's roles), and runs 21 negative cases. Each must fail with its specific error, and rejected
 deployments must leave the deployer nonce unchanged. CI runs the rehearsal on every pull request.
 
 ## Before any public network
 
 See the pre-testnet requirements in the Phase 2 security scope report. In particular: a
 testnet-only config with `requireRecipientCode: true` and real test Safes, a free public RPC, and
-the decisions still open (M-1 canceller model, M-2 custody of unlocked allocations, M-3 beneficiary
-type). Private keys are never placed in config files; use a hardware wallet or Foundry keystore
+a second test Safe for the treasury guardian, and the decisions still open (M-2 custody of
+unlocked allocations, M-3 beneficiary type). Private keys are never placed in config files; use a hardware wallet or Foundry keystore
 outside the repository.

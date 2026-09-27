@@ -44,6 +44,7 @@ struct Plan {
     address reserveBeneficiary;
     uint64 reserveStart;
     address treasurySafe;
+    address treasuryGuardian;
     uint256 minDelay;
     Recipients recipients;
 }
@@ -78,6 +79,7 @@ library ARLDeployPlan {
     error PlanSupplyMismatch(uint256 planned, uint256 approved);
     error PlanInvalidSchedule(string reason);
     error PlanDelayBelowFloor(uint256 delay, uint256 floor);
+    error PlanGuardianNotIndependent(address guardian);
 
     /// @notice Parses a plan JSON document. Reverts if any field is missing or malformed.
     function load(string memory json) internal pure returns (Plan memory p) {
@@ -107,6 +109,7 @@ library ARLDeployPlan {
         p.reserveStart = _u64(VM.parseJsonUint(json, ".ecosystemReserve.start"));
 
         p.treasurySafe = VM.parseJsonAddress(json, ".treasury.safe");
+        p.treasuryGuardian = VM.parseJsonAddress(json, ".treasury.guardian");
         p.minDelay = VM.parseJsonUint(json, ".treasury.minDelay");
 
         p.recipients = Recipients({
@@ -169,6 +172,11 @@ library ARLDeployPlan {
         _nonZero("founderBeneficiary", p.founderBeneficiary);
         _safe(p, "ecosystemReserveBeneficiary", p.reserveBeneficiary);
         _safe(p, "treasury.safe", p.treasurySafe);
+        _safe(p, "treasury.guardian", p.treasuryGuardian);
+        // The guardian is an independent brake: it must not be the Safe it can cancel.
+        if (p.treasuryGuardian == p.treasurySafe) {
+            revert PlanGuardianNotIndependent(p.treasuryGuardian);
+        }
         Recipients memory r = p.recipients;
         _safe(p, "recipients.communityStaking", r.communityStaking);
         _safe(p, "recipients.liquidity", r.liquidity);

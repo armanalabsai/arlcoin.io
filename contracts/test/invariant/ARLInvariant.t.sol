@@ -196,4 +196,13 @@ contract ARLInvariantTest is ARLTestBase {
         );
         assertGe(treasury.getMinDelay(), 48 hours);
     }
+
+    /// The guardian can only ever cancel; the handler never changes roles.
+    function invariant_GuardianIsCancellerOnly() public view {
+        assertTrue(treasury.hasRole(treasury.CANCELLER_ROLE(), guardianSafe));
+        assertFalse(treasury.hasRole(treasury.PROPOSER_ROLE(), guardianSafe));
+        assertFalse(treasury.hasRole(treasury.EXECUTOR_ROLE(), guardianSafe));
+        assertFalse(treasury.hasRole(treasury.DEFAULT_ADMIN_ROLE(), guardianSafe));
+        assertFalse(treasury.hasRole(treasury.EXECUTOR_ROLE(), address(0)));
+    }
 }
