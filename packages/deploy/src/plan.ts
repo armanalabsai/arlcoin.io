@@ -51,6 +51,7 @@ export interface DeployConfig {
   launchDate: string;
   /** Must be true on every chain except local Anvil. */
   requireRecipientCode: boolean;
+  /** A dedicated Safe; must be a deployed contract wherever `requireRecipientCode` is true. */
   founderBeneficiary: string;
   ecosystemReserveBeneficiary: string;
   /** `guardian` holds only the canceller role and must differ from `safe`. */

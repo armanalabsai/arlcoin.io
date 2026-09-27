@@ -30,14 +30,15 @@ Compiled ARL contracts include OpenZeppelin code under the MIT license
 
 Exact versions and integrity hashes are recorded in `package-lock.json`.
 
-| Package           | Version | License    | Purpose                  |
-| ----------------- | ------- | ---------- | ------------------------ |
-| typescript        | 5.9.3   | Apache-2.0 | Type checking            |
-| @types/node       | 22.20.4 | MIT        | Node.js type definitions |
-| eslint            | 10.11.0 | MIT        | Linting                  |
-| @eslint/js        | 10.0.1  | MIT        | ESLint recommended rules |
-| typescript-eslint | 8.70.1  | MIT        | TypeScript lint rules    |
-| prettier          | 3.9.9   | MIT        | Formatting               |
+| Package                         | Version | License    | Purpose                                                                                                                                                            |
+| ------------------------------- | ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| typescript                      | 5.9.3   | Apache-2.0 | Type checking                                                                                                                                                      |
+| @types/node                     | 22.20.4 | MIT        | Node.js type definitions                                                                                                                                           |
+| eslint                          | 10.11.0 | MIT        | Linting                                                                                                                                                            |
+| @eslint/js                      | 10.0.1  | MIT        | ESLint recommended rules                                                                                                                                           |
+| typescript-eslint               | 8.70.1  | MIT        | TypeScript lint rules                                                                                                                                              |
+| prettier                        | 3.9.9   | MIT        | Formatting                                                                                                                                                         |
+| @safe-global/safe-smart-account | 1.5.0   | LGPL-3.0   | Safe build artifacts deployed on local Anvil by the rehearsal only; no Safe source is copied into ARL (upstream commit `dc437e8fba8b4805d76bcbd1c668c9fd3d1e83be`) |
 
 ## Website (`apps/web`)
 
@@ -88,4 +89,5 @@ license could not be verified. See [`docs/website.md`](docs/website.md).
 ## Evaluated, not added
 
 See [`docs/open-source.md`](docs/open-source.md). The Safe smart account
-(v1.5.0, LGPL-3.0) is used as a deployed instance and is not vendored.
+(v1.5.0, LGPL-3.0) is used as a deployed instance and is not vendored. The
+local rehearsal deploys it from the npm package listed above.

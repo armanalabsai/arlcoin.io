@@ -80,5 +80,12 @@ Resolved on 2026-09-27 (Phase 2 Remediation Pack 2):
 - L-3: the timelock constructor rejects `address(0)` in the proposer and
   executor lists and as the guardian.
 
-M-2 (custody of unlocked allocations) and M-3 (vesting beneficiary type) are
-still open.
+Resolved on 2026-09-27 (Phase 2 M-3):
+
+- The founder beneficiary is a dedicated Safe. Off local Anvil, the deployment
+  plan and the verifier require contract code at that address. Signers and
+  thresholds are not stored in the repository.
+- Team grants are irrevocable and made in tranches; each member's beneficiary
+  is the member's own Safe or smart account. `ARLVestingWallet` is unchanged.
+
+M-2 (custody of unlocked allocations) is still open.
