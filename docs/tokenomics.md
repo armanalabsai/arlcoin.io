@@ -55,7 +55,7 @@ in `packages/tokenomics`. Every Safe is dedicated to one allocation.
 | Ecosystem & Growth            | Dedicated Safe                                                                |
 | Strategic Partnerships        | Vesting wallet → dedicated Safe                                               |
 | Liquidity                     | Dedicated Safe                                                                |
-| Founder                       | Vesting wallet → dedicated founder Safe                                       |
+| Founder                       | Two tranches: Unrestricted → dedicated founder Safe; Reserved → custody TBD   |
 | Investors / Strategic Capital | Vesting wallet → dedicated Safe                                               |
 | Treasury                      | Treasury timelock, controlled by the Treasury Safe, cancel-only guardian      |
 | Team                          | Dedicated team pool Safe; each grant → its own vesting wallet → member's Safe |
@@ -69,19 +69,34 @@ in `packages/tokenomics`. Every Safe is dedicated to one allocation.
 
 ## Release rules
 
-| Allocation                    | Rule                                                                                                    | Status    |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------- | --------- |
-| Public Launch                 | Terms set before any launch                                                                             | undecided |
-| Community & Staking           | Paid from this allocation or protocol revenue; never new issuance. Rates and schedule not defined       | undecided |
-| Ecosystem & Growth            | Programs tied to genuine, verifiable activity. Rules, rates and schedule not defined                    | undecided |
-| Strategic Partnerships        | Vesting wallet; schedule TBD. Not an unconditional pool: partnership → milestone → vesting → release    | undecided |
-| Liquidity                     | Held as a reserve; the amount used for any pool or listing is decided separately                        | approved  |
-| Founder                       | Vesting wallet; schedule TBD                                                                            | undecided |
-| Investors / Strategic Capital | Vesting wallet; schedule TBD. Not unlocked at launch by default                                         | undecided |
-| Treasury                      | Safe 3-of-5, minimum 48-hour timelock, cancel-only guardian                                             | approved  |
-| Team                          | Irrevocable per-member grants in tranches from the pool, each to the member's own Safe; schedule TBD    | undecided |
-| Early Users                   | Rewards only for genuine, verifiable usage; connecting a wallet earns nothing. Amounts and schedule TBD | undecided |
-| Grants / Bug Bounty           | Paid per grant or bounty award                                                                          | undecided |
+| Allocation                    | Rule                                                                                                    | Status                         |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| Public Launch                 | Terms set before any launch                                                                             | undecided                      |
+| Community & Staking           | Paid from this allocation or protocol revenue; never new issuance. Rates and schedule not defined       | undecided                      |
+| Ecosystem & Growth            | Programs tied to genuine, verifiable activity. Rules, rates and schedule not defined                    | undecided                      |
+| Strategic Partnerships        | Vesting wallet; schedule TBD. Not an unconditional pool: partnership → milestone → vesting → release    | undecided                      |
+| Liquidity                     | Held as a reserve; the amount used for any pool or listing is decided separately                        | approved                       |
+| Founder                       | 2,000,000 ARL unrestricted at TGE (no vesting); 100,000 ARL reserved, not vested, treatment TBD         | approved (reserved: undecided) |
+| Investors / Strategic Capital | Vesting wallet; schedule TBD. Not unlocked at launch by default                                         | undecided                      |
+| Treasury                      | Safe 3-of-5, minimum 48-hour timelock, cancel-only guardian                                             | approved                       |
+| Team                          | Irrevocable per-member grants in tranches from the pool, each to the member's own Safe; schedule TBD    | undecided                      |
+| Early Users                   | Rewards only for genuine, verifiable usage; connecting a wallet earns nothing. Amounts and schedule TBD | undecided                      |
+| Grants / Bug Bounty           | Paid per grant or bounty award                                                                          | undecided                      |
+
+The Founder allocation is one allocation of 2,100,000 ARL minted to two
+genesis holders, so the token mints to twelve holders for eleven allocations:
+
+| Founder tranche      |       ARL | Allocated | Unlocked at TGE | Custody                   |
+| -------------------- | --------: | --------- | --------------- | ------------------------- |
+| Founder Unrestricted | 2,000,000 | yes       | yes             | Dedicated founder Safe    |
+| Founder Reserved     |   100,000 | yes       | not decided     | TBD (placeholder locally) |
+| **Founder total**    | 2,100,000 |           |                 |                           |
+
+Neither tranche vests. The unrestricted tranche is an ordinary ERC-20 holder
+with no protocol-level transfer or sale restriction; tokens the Founder has not
+sold are still unlocked, not locked. The reserved tranche has no schedule; its
+treatment and custody are TBD, and the tooling refuses every public network
+until its custody is approved (`FOUNDER_RESERVE_CUSTODY_APPROVED = false`).
 
 A vesting schedule that is TBD cannot reach a public network: the planner
 (`packages/deploy`) and `ARLDeployPlan` both refuse any chain other than local

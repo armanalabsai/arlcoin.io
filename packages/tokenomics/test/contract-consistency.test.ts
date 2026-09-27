@@ -12,14 +12,22 @@ const read = (path: string) =>
 const allocationSource = read("ARLAllocation.sol");
 const tokenSource = read("ARLToken.sol");
 
-/** Package id → Solidity constant → `Recipients` field. */
+/**
+ * Genesis holders in canonical order: every allocation, except that an
+ * allocation held in tranches is replaced by its tranches. The Founder
+ * allocation is one economic allocation with two genesis holders.
+ */
+const GENESIS = ALLOCATIONS.flatMap((a) => a.tranches ?? [a]);
+
+/** Genesis holder id → Solidity constant → `Recipients` field. */
 const CONTRACT_NAMES: Record<string, readonly [constant: string, field: string]> = {
   "public-launch": ["PUBLIC_LAUNCH", "publicLaunch"],
   "community-staking": ["COMMUNITY_STAKING", "communityStaking"],
   "ecosystem-growth": ["ECOSYSTEM_GROWTH", "ecosystemGrowth"],
   "strategic-partnerships": ["STRATEGIC_PARTNERSHIPS", "strategicPartnerships"],
   liquidity: ["LIQUIDITY", "liquidity"],
-  founder: ["FOUNDER", "founder"],
+  "founder-unrestricted": ["FOUNDER_UNRESTRICTED", "founderUnrestricted"],
+  "founder-reserved": ["FOUNDER_RESERVED", "founderReserved"],
   investors: ["INVESTORS", "investors"],
   treasury: ["TREASURY", "treasury"],
   team: ["TEAM", "team"],
@@ -50,20 +58,30 @@ describe("ARLAllocation.sol", () => {
     assert.equal(wholeTokens("MAX_SUPPLY"), MAX_SUPPLY);
   });
 
-  it("every allocation matches in amount and order, and there are no extra constants", () => {
+  it("every genesis holder matches in amount and order, and there are no extra constants", () => {
     assert.deepEqual(
       Object.keys(CONTRACT_NAMES),
-      ALLOCATIONS.map((a) => a.id),
+      GENESIS.map((a) => a.id),
     );
     assert.deepEqual(
       allocationConstants,
-      ALLOCATIONS.map((a) => CONTRACT_NAMES[a.id]?.[0]),
+      GENESIS.map((a) => CONTRACT_NAMES[a.id]?.[0]),
     );
-    for (const a of ALLOCATIONS) {
+    for (const a of GENESIS) {
       const names = CONTRACT_NAMES[a.id];
       assert.ok(names);
       assert.equal(wholeTokens(names[0]), a.amount, a.id);
     }
+  });
+
+  it("FOUNDER is exactly the sum of its two tranches (2,100,000 ARL)", () => {
+    assert.match(
+      allocationSource,
+      /uint256 internal constant FOUNDER = FOUNDER_UNRESTRICTED \+ FOUNDER_RESERVED;/,
+    );
+    const founder = ALLOCATIONS.find((a) => a.id === "founder");
+    assert.equal(founder?.amount, 2_100_000);
+    assert.equal(wholeTokens("FOUNDER_UNRESTRICTED") + wholeTokens("FOUNDER_RESERVED"), 2_100_000);
   });
 
   it("the constants sum to MAX_SUPPLY", () => {
@@ -84,17 +102,18 @@ describe("ARLToken.sol", () => {
     m[2],
   ]);
 
-  it("has exactly one recipient per allocation, in canonical order", () => {
+  it("has exactly one recipient per genesis holder (12), in canonical order", () => {
+    assert.equal(fields.length, 12);
     assert.deepEqual(
       fields,
-      ALLOCATIONS.map((a) => CONTRACT_NAMES[a.id]?.[1]),
+      GENESIS.map((a) => CONTRACT_NAMES[a.id]?.[1]),
     );
   });
 
-  it("mints each allocation exactly once, to its own recipient", () => {
+  it("mints each genesis holder exactly once, to its own recipient", () => {
     assert.deepEqual(
       mints,
-      ALLOCATIONS.map((a) => {
+      GENESIS.map((a) => {
         const names = CONTRACT_NAMES[a.id];
         return [names?.[1], names?.[0]];
       }),
@@ -102,10 +121,11 @@ describe("ARLToken.sol", () => {
   });
 
   it("calls _mint only in the constructor (no mint path after deployment)", () => {
-    assert.equal((tokenSource.match(/_mint\(/g) ?? []).length, ALLOCATIONS.length);
+    assert.equal(GENESIS.length, 12);
+    assert.equal((tokenSource.match(/_mint\(/g) ?? []).length, GENESIS.length);
     const constructorBody = /constructor\([^)]*\)[^{]*\{([\s\S]*?)\n {4}\}/.exec(tokenSource)?.[1];
     assert.ok(constructorBody);
-    assert.equal((constructorBody.match(/_mint\(/g) ?? []).length, ALLOCATIONS.length);
+    assert.equal((constructorBody.match(/_mint\(/g) ?? []).length, GENESIS.length);
     assert.doesNotMatch(tokenSource, /function\s+\w*mint/i);
   });
 });

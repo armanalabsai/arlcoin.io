@@ -5,6 +5,7 @@ export type {
   DecisionStatus,
   MultisigControls,
   Release,
+  Tranche,
 } from "./allocations.ts";
 export { validateAllocations } from "./validate.ts";
 export { formatBasisPoints, shareOfSupply } from "./shares.ts";

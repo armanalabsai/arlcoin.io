@@ -5,7 +5,7 @@ import {ARLAllocation} from "../src/ARLAllocation.sol";
 import {ARLTimelock} from "../src/ARLTimelock.sol";
 import {ARLToken} from "../src/ARLToken.sol";
 import {ARLVestingWallet} from "../src/ARLVestingWallet.sol";
-import {ARLDeployPlan, Allocations, Plan, VestingPlan} from "./ARLDeployPlan.sol";
+import {ARLDeployPlan, Allocations, FounderTranches, Plan, VestingPlan} from "./ARLDeployPlan.sol";
 import {Deployment} from "./ARLDeployer.sol";
 
 /// @title Post-deployment verification
@@ -21,7 +21,6 @@ library ARLVerify {
         _chainAndCode(p, d);
         _token(p, d);
         _distribution(p, d);
-        _vesting("founder", p.founder, d.founderVesting, d);
         _vesting("investors", p.investors, d.investorsVesting, d);
         _vesting("strategic partnerships", p.strategicPartnerships, d.partnershipsVesting, d);
         _timelock(p, d);
@@ -32,7 +31,6 @@ library ARLVerify {
     function _chainAndCode(Plan memory p, Deployment memory d) private view {
         _eq("chain id", p.chainId, block.chainid);
         _hasCode("token", address(d.token));
-        _hasCode("founder vesting wallet", address(d.founderVesting));
         _hasCode("investors vesting wallet", address(d.investorsVesting));
         _hasCode("strategic partnerships vesting wallet", address(d.partnershipsVesting));
         _hasCode("treasury timelock", address(d.timelock));
@@ -58,31 +56,39 @@ library ARLVerify {
 
     // ------------------------------------------------------------------ distribution
 
-    /// @dev Every allocation has its own holder. Checks that the eleven holders are distinct,
+    /// @dev Every allocation has its own holder, and the Founder allocation has two (its
+    /// unrestricted and reserved tranches). Checks that the twelve genesis holders are distinct,
     /// that each holds exactly its planned amount, and that together they hold the whole supply,
-    /// so no allocation can sit at an unexpected address.
+    /// so no allocation can sit at an unexpected address. The Founder holders are plan
+    /// recipients, never a vesting wallet deployed here, and no founder schedule exists.
     function _distribution(Plan memory p, Deployment memory d) private view {
         Allocations memory a = p.allocations;
-        address[11] memory holder = [
+        FounderTranches memory f = p.founderTranches;
+        if (f.unrestricted + f.reserved != a.founder) {
+            revert VerifyUintMismatch("founder tranches", a.founder, f.unrestricted + f.reserved);
+        }
+        address[12] memory holder = [
             p.recipients.publicLaunch,
             p.recipients.communityStaking,
             p.recipients.ecosystemGrowth,
             address(d.partnershipsVesting),
             p.recipients.liquidity,
-            address(d.founderVesting),
+            p.recipients.founderUnrestricted,
+            p.recipients.founderReserved,
             address(d.investorsVesting),
             address(d.timelock),
             p.recipients.team,
             p.recipients.earlyUsers,
             p.recipients.grantsBugBounty
         ];
-        uint256[11] memory amount = [
+        uint256[12] memory amount = [
             a.publicLaunch,
             a.communityStaking,
             a.ecosystemGrowth,
             a.strategicPartnerships,
             a.liquidity,
-            a.founder,
+            f.unrestricted,
+            f.reserved,
             a.investors,
             a.treasury,
             a.team,
@@ -91,8 +97,8 @@ library ARLVerify {
         ];
 
         uint256 accounted = 0;
-        for (uint256 i = 0; i < 11; i++) {
-            for (uint256 j = i + 1; j < 11; j++) {
+        for (uint256 i = 0; i < 12; i++) {
+            for (uint256 j = i + 1; j < 12; j++) {
                 // forge-lint: disable-next-line(require-revert-in-loop)
                 if (holder[i] == holder[j]) revert VerifyFailed("allocation holders are distinct");
             }
@@ -104,14 +110,21 @@ library ARLVerify {
 
         // Stated against the contract constants as well, so a plan that agreed with a changed
         // allocation table could not pass.
-        _eq("founder vesting balance", ARLAllocation.FOUNDER, d.token.balanceOf(holder[5]));
-        _eq("investors vesting balance", ARLAllocation.INVESTORS, d.token.balanceOf(holder[6]));
+        _eq(
+            "founder unrestricted balance",
+            ARLAllocation.FOUNDER_UNRESTRICTED,
+            d.token.balanceOf(holder[5])
+        );
+        _eq(
+            "founder reserved balance", ARLAllocation.FOUNDER_RESERVED, d.token.balanceOf(holder[6])
+        );
+        _eq("investors vesting balance", ARLAllocation.INVESTORS, d.token.balanceOf(holder[7]));
         _eq(
             "strategic partnerships vesting balance",
             ARLAllocation.STRATEGIC_PARTNERSHIPS,
             d.token.balanceOf(holder[3])
         );
-        _eq("treasury balance", ARLAllocation.TREASURY, d.token.balanceOf(holder[7]));
+        _eq("treasury balance", ARLAllocation.TREASURY, d.token.balanceOf(holder[8]));
     }
 
     // ------------------------------------------------------------------ vesting

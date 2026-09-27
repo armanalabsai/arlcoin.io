@@ -5,7 +5,9 @@ pragma solidity 0.8.36;
 /// @notice On-chain copy of `packages/tokenomics/src/allocations.ts` (the 11-allocation model
 /// approved on 2026-09-27). A test in that package parses this file and fails if the two ever
 /// differ.
-/// @dev Amounts are in base units (18 decimals). Listed in canonical order.
+/// @dev Amounts are in base units (18 decimals). Listed in canonical order. The Founder
+/// allocation is one economic allocation minted to two genesis holders (tranches): the
+/// unrestricted tranche and the reserved tranche, whose custody is not decided yet.
 library ARLAllocation {
     uint256 internal constant UNIT = 1e18;
 
@@ -16,7 +18,10 @@ library ARLAllocation {
     uint256 internal constant ECOSYSTEM_GROWTH = 2_000_000 * UNIT;
     uint256 internal constant STRATEGIC_PARTNERSHIPS = 2_000_000 * UNIT;
     uint256 internal constant LIQUIDITY = 2_000_000 * UNIT;
-    uint256 internal constant FOUNDER = 2_100_000 * UNIT;
+    /// @notice The Founder allocation, exactly the sum of its two tranches (2,100,000 ARL).
+    uint256 internal constant FOUNDER = FOUNDER_UNRESTRICTED + FOUNDER_RESERVED;
+    uint256 internal constant FOUNDER_UNRESTRICTED = 2_000_000 * UNIT;
+    uint256 internal constant FOUNDER_RESERVED = 100_000 * UNIT;
     uint256 internal constant INVESTORS = 1_500_000 * UNIT;
     uint256 internal constant TREASURY = 1_000_000 * UNIT;
     uint256 internal constant TEAM = 900_000 * UNIT;

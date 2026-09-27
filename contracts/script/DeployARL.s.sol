@@ -37,8 +37,6 @@ contract DeployARL is Script {
             vm.toString(d.deployer),
             '","token":"',
             vm.toString(address(d.token)),
-            '","founderVesting":"',
-            vm.toString(address(d.founderVesting)),
             '","investorsVesting":"',
             vm.toString(address(d.investorsVesting)),
             '","partnershipsVesting":"',

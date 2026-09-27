@@ -138,8 +138,8 @@ describe("supply concepts", () => {
 describe("custody and vesting readiness", () => {
   const vestingWallet = { holder: "vesting-wallet", beneficiary: "dedicated-safe" };
 
-  it("founder, investors and strategic partnerships vest to dedicated Safes; schedule TBD", () => {
-    for (const id of ["founder", "investors", "strategic-partnerships"]) {
+  it("investors and strategic partnerships vest to dedicated Safes; schedule TBD", () => {
+    for (const id of ["investors", "strategic-partnerships"]) {
       const a = byId(id);
       assert.deepEqual(a.custody, vestingWallet, id);
       assert.ok(a.release.kind === "vesting", id);
@@ -147,6 +147,49 @@ describe("custody and vesting readiness", () => {
       assert.equal(a.release.status, "undecided", id);
     }
     assert.match(JSON.stringify(byId("strategic-partnerships")), /milestone/);
+  });
+
+  it("only investors and strategic partnerships vest; no Founder tranche vests", () => {
+    const vesting = ALLOCATIONS.flatMap((a) => a.tranches ?? [a])
+      .filter((a) => a.release.kind === "vesting" || a.custody.holder === "vesting-wallet")
+      .map((a) => a.id);
+    assert.deepEqual(vesting, ["strategic-partnerships", "investors"]);
+  });
+
+  it("the founder allocation is 2,000,000 unrestricted plus 100,000 reserved", () => {
+    const founder = byId("founder");
+    assert.equal(founder.amount, 2_100_000);
+    assert.deepEqual(founder.custody, { holder: "tranches" });
+    assert.equal(founder.release.kind, "tranches");
+    const tranches = founder.tranches ?? [];
+    assert.deepEqual(
+      tranches.map((t) => [t.id, t.amount]),
+      [
+        ["founder-unrestricted", 2_000_000],
+        ["founder-reserved", 100_000],
+      ],
+    );
+    assert.equal(
+      tranches.reduce((s, t) => s + t.amount, 0),
+      founder.amount,
+    );
+  });
+
+  it("founder unrestricted is unlocked at TGE in a dedicated Safe (approved)", () => {
+    const t = byId("founder").tranches?.[0];
+    assert.ok(t);
+    assert.equal(t.release.kind, "unrestricted");
+    assert.equal(t.release.status, "approved");
+    assert.deepEqual(t.custody, { holder: "safe" });
+  });
+
+  it("founder reserved is not vested, not scheduled, and its custody is TBD", () => {
+    const t = byId("founder").tranches?.[1];
+    assert.ok(t);
+    assert.equal(t.release.kind, "reserved");
+    assert.equal(t.release.status, "undecided");
+    assert.deepEqual(t.custody, { holder: "tbd" });
+    assert.doesNotMatch(JSON.stringify(t), /month|cliff (end|of)|linear|schedule:/i);
   });
 
   it("team is a dedicated pool Safe funding per-member grants", () => {
@@ -189,6 +232,9 @@ describe("immutability", () => {
     }, TypeError);
     assert.throws(() => {
       (byId("founder") as { amount: number }).amount = 21_000_000;
+    }, TypeError);
+    assert.throws(() => {
+      (byId("founder").tranches?.[1] as { amount: number }).amount = 0;
     }, TypeError);
   });
 });
@@ -254,7 +300,7 @@ describe("validator rejects invalid tables", () => {
 
   it("rejects custody that contradicts the release rule", () => {
     const inSafe = clone().map((a) =>
-      a.id === "founder" ? { ...a, custody: { holder: "safe" as const } } : a,
+      a.id === "investors" ? { ...a, custody: { holder: "safe" as const } } : a,
     );
     assert.match(errorsOf(inSafe), /needs a vesting wallet/);
     const noVesting = clone().map((a) =>
@@ -266,5 +312,65 @@ describe("validator rejects invalid tables", () => {
         : a,
     );
     assert.match(errorsOf(noVesting), /needs a vesting release/);
+  });
+
+  describe("founder tranches", () => {
+    const withTranches = (change: (tranches: Allocation["tranches"] & object) => unknown[]) =>
+      clone().map((a) =>
+        a.id === "founder" ? ({ ...a, tranches: change(a.tranches ?? []) } as Allocation) : a,
+      );
+
+    it("rejects tranches that do not add up to 2,100,000", () => {
+      const table = withTranches(([u, r]) => [u, { ...r, amount: 100_001 }]);
+      assert.match(errorsOf(table), /founder: tranches total 2100001, expected exactly 2100000/);
+    });
+
+    it("rejects a founder allocation without tranches", () => {
+      const table = clone().map((a) => {
+        if (a.id !== "founder") return a;
+        const rest: Allocation = { ...a };
+        delete (rest as { tranches?: unknown }).tranches;
+        return rest;
+      });
+      assert.match(errorsOf(table), /needs at least two tranches/);
+    });
+
+    it("rejects vesting for the reserved tranche", () => {
+      const table = withTranches(([u, r]) => [
+        u,
+        {
+          ...r,
+          release: { kind: "vesting", schedule: "tbd", status: "undecided" },
+          custody: { holder: "vesting-wallet", beneficiary: "dedicated-safe" },
+        },
+      ]);
+      assert.match(errorsOf(table), /founder-reserved: the Founder allocation does not vest/);
+    });
+
+    it("rejects a custody choice for the reserved tranche while its release is reserved", () => {
+      const table = withTranches(([u, r]) => [u, { ...r, custody: { holder: "safe" } }]);
+      assert.match(errorsOf(table), /founder-reserved: a reserved release needs custody TBD/);
+    });
+
+    it("rejects an approved status for undecided custody", () => {
+      const table = withTranches(([u, r]) => [
+        u,
+        { ...r, release: { kind: "reserved", description: "x", status: "approved" } },
+      ]);
+      assert.match(errorsOf(table), /custody TBD cannot be approved/);
+    });
+
+    it("rejects an unrestricted tranche that is not in a dedicated Safe", () => {
+      const table = withTranches(([u, r]) => [{ ...u, custody: { holder: "tbd" } }, r]);
+      assert.match(
+        errorsOf(table),
+        /founder-unrestricted: an unrestricted release needs a dedicated Safe/,
+      );
+    });
+
+    it("rejects a tranche id that collides with an allocation id", () => {
+      const table = withTranches(([u, r]) => [{ ...u, id: "treasury" }, r]);
+      assert.match(errorsOf(table), /duplicate allocation (or tranche )?id "treasury"/);
+    });
   });
 });

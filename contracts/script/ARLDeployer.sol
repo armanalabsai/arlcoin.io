@@ -10,22 +10,22 @@ import {Plan, VestingPlan} from "./ARLDeployPlan.sol";
 struct Deployment {
     address deployer;
     ARLToken token;
-    ARLVestingWallet founderVesting;
     ARLVestingWallet investorsVesting;
     ARLVestingWallet partnershipsVesting;
     ARLTimelock timelock;
 }
 
 /// @title ARL system deployment
-/// @notice Deploys the complete system from a validated plan, in this order: founder,
-/// investors and strategic partnership vesting wallets, treasury timelock, token. The token
-/// mints every allocation in its constructor, so no transfer happens after deployment.
+/// @notice Deploys the complete system from a validated plan, in this order: investors and
+/// strategic partnership vesting wallets, treasury timelock, token. The token mints every
+/// allocation in its constructor, so no transfer happens after deployment. The Founder
+/// allocation has no vesting wallet: its two tranches are minted directly to the planned
+/// Founder Unrestricted and Founder Reserved addresses.
 /// @dev Callers must run `ARLDeployPlan.validate` first and `ARLVerify.verify` afterwards.
 library ARLDeployer {
     function deploy(Plan memory p, address deployer) internal returns (Deployment memory d) {
         d.deployer = deployer;
 
-        d.founderVesting = _vesting(p.founder);
         d.investorsVesting = _vesting(p.investors);
         d.partnershipsVesting = _vesting(p.strategicPartnerships);
 
@@ -40,7 +40,8 @@ library ARLDeployer {
                 ecosystemGrowth: p.recipients.ecosystemGrowth,
                 strategicPartnerships: address(d.partnershipsVesting),
                 liquidity: p.recipients.liquidity,
-                founder: address(d.founderVesting),
+                founderUnrestricted: p.recipients.founderUnrestricted,
+                founderReserved: p.recipients.founderReserved,
                 investors: address(d.investorsVesting),
                 treasury: address(d.timelock),
                 team: p.recipients.team,

@@ -7,9 +7,17 @@
 
 import { ALLOCATIONS, MAX_SUPPLY, MIN_TIMELOCK_HOURS, validateAllocations } from "@arl/tokenomics";
 
-export const PLAN_SCHEMA = "arl-deploy-plan/2";
+/**
+ * Plan schema. Version 3 removes the founder vesting wallet: the Founder allocation is minted
+ * to two recipients (unrestricted and reserved) and never vests. Plans and configs that still
+ * carry `vesting.founder` are rejected, not reinterpreted.
+ */
+export const PLAN_SCHEMA = "arl-deploy-plan/3";
 
-/** Anvil's default chain ID. Only here may recipients lack code or schedules be unapproved. */
+/**
+ * Anvil's default chain ID. Only here may recipients lack code, schedules be unapproved, or the
+ * Founder Reserved custody be undecided.
+ */
 export const LOCAL_CHAIN_ID = 31337;
 
 const DECIMALS = 18n;
@@ -19,21 +27,25 @@ const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
 const ZERO_ADDRESS = /^0x0{40}$/;
 const UTC_DATE = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})Z$/;
 
-/** Allocations minted directly to a dedicated Safe, in the order of the Solidity struct. */
+/**
+ * Holders minted to directly, in the order of the Solidity struct: seven dedicated Safes, the
+ * Founder Unrestricted Safe, and the Founder Reserved holder (custody TBD).
+ */
 export const RECIPIENT_KEYS = [
   "publicLaunch",
   "communityStaking",
   "ecosystemGrowth",
   "liquidity",
+  "founderUnrestricted",
+  "founderReserved",
   "team",
   "earlyUsers",
   "grantsBugBounty",
 ] as const;
 type RecipientKey = (typeof RECIPIENT_KEYS)[number];
 
-/** Allocations held by a vesting wallet, with their tokenomics id. */
+/** Allocations held by a vesting wallet, with their tokenomics id. The Founder never vests. */
 export const VESTING_KEYS = {
-  founder: "founder",
   investors: "investors",
   strategicPartnerships: "strategic-partnerships",
 } as const;
@@ -53,6 +65,12 @@ const ALLOCATION_KEY: Record<string, string> = {
   "early-users": "earlyUsers",
   "grants-bug-bounty": "grantsBugBounty",
 };
+
+/** Founder tranche id → plan key (under `founderTranches`) and recipient key. */
+const FOUNDER_TRANCHES = {
+  "founder-unrestricted": { key: "unrestricted", recipient: "founderUnrestricted" },
+  "founder-reserved": { key: "reserved", recipient: "founderReserved" },
+} as const;
 
 const CONFIG_KEYS = [
   "network",
@@ -80,7 +98,10 @@ export interface DeployConfig {
   requireRecipientCode: boolean;
   /** Free text; ignored. */
   note?: string;
-  /** Beneficiaries are dedicated Safes and must be deployed contracts off local Anvil. */
+  /**
+   * Beneficiaries are dedicated Safes and must be deployed contracts off local Anvil. There is
+   * no `founder` entry: the Founder allocation does not vest.
+   */
   vesting: Record<VestingKey, VestingConfig>;
   /** `guardian` holds only the canceller role and must differ from `safe`. */
   treasury: { safe: string; guardian: string; minDelayHours: number };
@@ -101,6 +122,8 @@ export interface DeployPlan {
   requireRecipientCode: boolean;
   maxSupply: string;
   allocations: Record<string, string>;
+  /** The Founder allocation's two tranches, in base units; together `allocations.founder`. */
+  founderTranches: { unrestricted: string; reserved: string };
   vesting: Record<VestingKey, VestingPlan>;
   treasury: { safe: string; guardian: string; minDelay: number };
   recipients: Record<RecipientKey, string>;
@@ -233,6 +256,18 @@ function buildVesting(
   };
 }
 
+/**
+ * The Founder Reserved custody is TBD. Off local Anvil the plan is refused until it is
+ * approved; locally a placeholder address may rehearse it.
+ */
+export function founderReserveGate(local: boolean, custodyApproved: boolean): void {
+  if (!local && !custodyApproved) {
+    fail(
+      "recipients.founderReserved: custody is not approved (TBD); only local Anvil may rehearse it with a placeholder",
+    );
+  }
+}
+
 export function buildPlan(config: DeployConfig): DeployPlan {
   const tokenomicsErrors = validateAllocations(ALLOCATIONS, MAX_SUPPLY);
   if (tokenomicsErrors.length > 0) fail(`tokenomics invalid: ${tokenomicsErrors.join("; ")}`);
@@ -252,6 +287,17 @@ export function buildPlan(config: DeployConfig): DeployPlan {
     fail(`requireRecipientCode: may be false only on local chain ${LOCAL_CHAIN_ID}`);
   }
 
+  // Configs are parsed from untyped JSON, so the section may be missing or malformed here.
+  const vestingSection: unknown = config.vesting;
+  if (
+    typeof vestingSection === "object" &&
+    vestingSection !== null &&
+    "founder" in vestingSection
+  ) {
+    fail(
+      `vesting.founder: the Founder allocation does not vest; ${PLAN_SCHEMA} has no founder vesting`,
+    );
+  }
   requireKeys(config.vesting, "vesting", Object.keys(VESTING_KEYS));
   const vesting = {} as Record<VestingKey, VestingPlan>;
   const source = {} as DeployPlan["source"];
@@ -278,7 +324,17 @@ export function buildPlan(config: DeployConfig): DeployPlan {
     recipients[key] = requireAddress(config.recipients[key], `recipients.${key}`);
   }
 
-  // Every Safe is dedicated to one role.
+  const founder = ALLOCATIONS.find((a) => a.id === "founder");
+  const reserved = founder?.tranches?.find((t) => t.id === "founder-reserved");
+  if (!founder || !reserved || founder.tranches?.length !== 2) {
+    fail("tokenomics: the founder allocation must have exactly two tranches");
+  }
+  founderReserveGate(
+    local,
+    reserved.custody.holder !== "tbd" && reserved.release.status === "approved",
+  );
+
+  // Every address is dedicated to one role.
   const roles: [string, string][] = [
     ...(Object.keys(VESTING_KEYS) as VestingKey[]).map((k): [string, string] => [
       `vesting.${k}.beneficiary`,
@@ -291,7 +347,7 @@ export function buildPlan(config: DeployConfig): DeployPlan {
   const seen = new Map<string, string>();
   for (const [field, address] of roles) {
     const other = seen.get(address.toLowerCase());
-    if (other) fail(`${field}: same address as ${other}; every Safe must be dedicated`);
+    if (other) fail(`${field}: same address as ${other}; every address must be dedicated`);
     seen.set(address.toLowerCase(), field);
   }
 
@@ -307,6 +363,20 @@ export function buildPlan(config: DeployConfig): DeployPlan {
   const maxSupply = BigInt(MAX_SUPPLY) * UNIT;
   if (total !== maxSupply) fail(`allocations total ${total}, expected ${maxSupply}`);
 
+  const founderTranches = { unrestricted: "", reserved: "" };
+  let founderTotal = 0n;
+  for (const t of founder.tranches) {
+    const target = FOUNDER_TRANCHES[t.id as keyof typeof FOUNDER_TRANCHES] as
+      (typeof FOUNDER_TRANCHES)[keyof typeof FOUNDER_TRANCHES] | undefined;
+    if (!target) fail(`tokenomics: founder tranche "${t.id}" has no deployment recipient`);
+    const amount = BigInt(t.amount) * UNIT;
+    founderTranches[target.key] = amount.toString();
+    founderTotal += amount;
+  }
+  if (founderTotal !== BigInt(founder.amount) * UNIT) {
+    fail(`founder tranches total ${founderTotal}, expected ${BigInt(founder.amount) * UNIT}`);
+  }
+
   return {
     schema: PLAN_SCHEMA,
     network: config.network,
@@ -314,6 +384,7 @@ export function buildPlan(config: DeployConfig): DeployPlan {
     requireRecipientCode: config.requireRecipientCode,
     maxSupply: maxSupply.toString(),
     allocations,
+    founderTranches,
     vesting,
     treasury: { safe: treasurySafe, guardian: treasuryGuardian, minDelay: delayHours * 3600 },
     recipients,

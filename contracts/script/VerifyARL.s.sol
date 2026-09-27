@@ -24,10 +24,14 @@ contract VerifyARL is Script {
             );
         }
 
+        // A deployment record from the superseded founder-vesting architecture is not accepted.
+        if (vm.keyExistsJson(json, ".founderVesting")) {
+            revert ARLVerify.VerifyFailed("no founder vesting wallet");
+        }
+
         Deployment memory d = Deployment({
             deployer: vm.parseJsonAddress(json, ".deployer"),
             token: ARLToken(vm.parseJsonAddress(json, ".token")),
-            founderVesting: ARLVestingWallet(payable(vm.parseJsonAddress(json, ".founderVesting"))),
             investorsVesting: ARLVestingWallet(
                 payable(vm.parseJsonAddress(json, ".investorsVesting"))
             ),

@@ -2,14 +2,8 @@
   "network": "local",
   "chainId": 31337,
   "requireRecipientCode": false,
-  "note": "Local Anvil rehearsal only. Addresses are keccak256(\"arl.local.<name>\") placeholders nobody holds keys for. The vesting schedules below are rehearsal placeholders, not approved schedules; the planner and ARLDeployPlan refuse any other chain until schedules are approved.",
+  "note": "Local Anvil rehearsal only. Addresses are keccak256(\"arl.local.<name>\") placeholders nobody holds keys for. The vesting schedules below are rehearsal placeholders, not approved schedules, and the founderReserved address is a placeholder, not a custody decision; the planner and ARLDeployPlan refuse any other chain until the schedules and the Founder Reserved custody are approved.",
   "vesting": {
-    "founder": {
-      "beneficiary": "0x1F67caa874DDec60E290e27cce758f01Bd53c380",
-      "start": "2027-01-01T00:00:00Z",
-      "cliffMonths": 12,
-      "vestingMonths": 24
-    },
     "investors": {
       "beneficiary": "0x4bCb1679EEfBA34C88F55c0D07efe4EA9bfF4721",
       "start": "2027-01-01T00:00:00Z",
@@ -33,6 +27,8 @@
     "communityStaking": "0x86d861EBe84C3F6D4F374c9640c5b89549C724A8",
     "ecosystemGrowth": "0x8F188E2C17b8CC001AeBA6e4A46D916f0A260Be3",
     "liquidity": "0x179DaF8783071e3868Fb00208B3529F48E544AF8",
+    "founderUnrestricted": "0xF600D8BD9AFeCE824Dd0Fb55E995B1728f651068",
+    "founderReserved": "0x48310346982561f9c00359Cb1851594eE8C58FF8",
     "team": "0xB5C15dcF9624e2137D772f72fCB1020B6Cba1455",
     "earlyUsers": "0x259238550bE2D033DdCBD0dDA00c427738C27991",
     "grantsBugBounty": "0x2F050E3aAFBFb59BD438F97c4D280D0d38F411c4"

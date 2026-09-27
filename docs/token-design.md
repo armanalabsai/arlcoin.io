@@ -81,9 +81,10 @@ initialization is not possible.
 
 ### Schedules
 
-Three allocations are held by `ARLVestingWallet`s, each releasing to a
-dedicated Safe: Founder, Investors / Strategic Capital and Strategic
-Partnerships. Their schedules (start, cliff, duration) are **TBD**. The
+Two allocations are held by `ARLVestingWallet`s, each releasing to a
+dedicated Safe: Investors / Strategic Capital and Strategic Partnerships. Their
+schedules (start, cliff, duration) are not yet implemented and are treated as
+**TBD** by the tooling. The Founder allocation does not vest (see below). The
 deployment configuration supplies explicit UTC timestamps, and the planner and
 `ARLDeployPlan` refuse every chain except local Anvil until the schedules are
 approved (`VESTING_SCHEDULES_APPROVED = false`). The verifier asserts that each
@@ -101,6 +102,19 @@ Strategic Partnerships is not an unconditional transfer pool: tokens reach the
 partnerships Safe only as they vest, and the intended flow is partnership →
 milestone → vesting → release. Milestones are not defined.
 
+### Founder allocation
+
+The 2,100,000 ARL Founder allocation is minted at genesis to two holders:
+`FOUNDER_UNRESTRICTED` (2,000,000 ARL) to a dedicated founder Safe and
+`FOUNDER_RESERVED` (100,000 ARL) to a separate address whose custody is TBD
+(`FOUNDER = FOUNDER_UNRESTRICTED + FOUNDER_RESERVED`). Neither goes through a
+vesting wallet, and the token gives neither any privilege: both use the same
+ERC-20 transfer mechanics as every holder. The planner and `ARLDeployPlan`
+refuse every chain except local Anvil until the reserved custody is approved
+(`FOUNDER_RESERVE_CUSTODY_APPROVED = false`), and every plan address must be
+distinct, so the reserved tranche cannot share the unrestricted Safe or any
+other holder.
+
 ### Team pool
 
 The 900,000 ARL team allocation is minted to a dedicated team pool Safe. A
@@ -116,10 +130,10 @@ A beneficiary that loses its key loses the tokens in its wallet; there is no
 recovery path in the vesting wallet by design. Recovery therefore lives in the
 beneficiary itself:
 
-- The founder beneficiary must be a dedicated Safe (for example 2-of-3). Off
-  local Anvil, the deployment plan and the verifier reject a founder
-  beneficiary without contract code. A lost key is replaced by rotating the
-  Safe's owners; the beneficiary address never changes.
+- The Founder Unrestricted recipient must be a dedicated Safe (for example
+  2-of-3). Off local Anvil, the deployment plan and the verifier reject it
+  without contract code (M-3). A lost key is replaced by rotating the Safe's
+  owners.
 - Team members' beneficiaries are their own Safes or smart accounts.
 
 Signer addresses and thresholds are Safe configuration and are never stored in

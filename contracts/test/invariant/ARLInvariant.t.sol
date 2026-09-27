@@ -14,7 +14,6 @@ import {ARLTestBase} from "../ARLTestBase.sol";
 /// logic.
 contract ARLHandler is Test {
     ARLToken internal immutable token;
-    ARLVestingWallet internal immutable founderVesting;
     ARLVestingWallet internal immutable investorsVesting;
     ARLVestingWallet internal immutable partnershipsVesting;
     ARLTimelock internal immutable treasury;
@@ -28,7 +27,6 @@ contract ARLHandler is Test {
 
     constructor(
         ARLToken token_,
-        ARLVestingWallet founderVesting_,
         ARLVestingWallet investorsVesting_,
         ARLVestingWallet partnershipsVesting_,
         ARLTimelock treasury_,
@@ -36,7 +34,6 @@ contract ARLHandler is Test {
         address[] memory actors_
     ) {
         token = token_;
-        founderVesting = founderVesting_;
         investorsVesting = investorsVesting_;
         partnershipsVesting = partnershipsVesting_;
         treasury = treasury_;
@@ -64,10 +61,6 @@ contract ARLHandler is Test {
         token.transferFrom(owner, spender, amount);
     }
 
-    function releaseFounder() external {
-        founderVesting.release(address(token));
-    }
-
     function releaseInvestors() external {
         investorsVesting.release(address(token));
     }
@@ -82,7 +75,7 @@ contract ARLHandler is Test {
 
     function tryTakeOverVesting(uint256 callerSeed, address newOwner) external {
         vm.prank(_actor(callerSeed));
-        try founderVesting.transferOwnership(newOwner) {
+        try investorsVesting.transferOwnership(newOwner) {
             ghostOwnershipChanges++;
         } catch {}
         vm.prank(_actor(callerSeed));
@@ -128,8 +121,8 @@ contract ARLInvariantTest is ARLTestBase {
     function setUp() public override {
         super.setUp();
 
-        address[] memory actors = new address[](14);
-        actors[0] = founder;
+        address[] memory actors = new address[](15);
+        actors[0] = founderUnrestrictedSafe;
         actors[1] = investorsSafe;
         actors[2] = partnershipsSafe;
         actors[3] = launchSafe;
@@ -143,21 +136,15 @@ contract ARLInvariantTest is ARLTestBase {
         actors[11] = guardianSafe;
         actors[12] = makeAddr("userA");
         actors[13] = makeAddr("userB");
+        actors[14] = founderReservedHolder;
 
         handler = new ARLHandler(
-            token,
-            founderVesting,
-            investorsVesting,
-            partnershipsVesting,
-            treasury,
-            treasurySafe,
-            actors
+            token, investorsVesting, partnershipsVesting, treasury, treasurySafe, actors
         );
 
         for (uint256 i = 0; i < actors.length; i++) {
             holders.push(actors[i]);
         }
-        holders.push(address(founderVesting));
         holders.push(address(investorsVesting));
         holders.push(address(partnershipsVesting));
         holders.push(address(treasury));
@@ -183,25 +170,53 @@ contract ARLInvariantTest is ARLTestBase {
     /// Vesting wallets never release more than has vested, nor more than their allocation.
     function invariant_VestingNeverOverReleases() public view {
         uint64 now_ = uint64(block.timestamp);
-        uint256 founderReleased = founderVesting.released(address(token));
-        assertLe(founderReleased, founderVesting.vestedAmount(address(token), now_));
-        assertLe(founderReleased, ARLAllocation.FOUNDER);
-        assertEq(founderReleased + token.balanceOf(address(founderVesting)), ARLAllocation.FOUNDER);
-
         _assertVesting(investorsVesting, ARLAllocation.INVESTORS, now_);
         _assertVesting(partnershipsVesting, ARLAllocation.STRATEGIC_PARTNERSHIPS, now_);
     }
 
-    /// Nothing vests for the founder before the cliff ends.
-    function invariant_NoFounderReleaseBeforeCliff() public view {
-        if (block.timestamp < FOUNDER_CLIFF_END) {
-            assertEq(founderVesting.released(address(token)), 0);
+    /// Nothing vests for investors before the cliff ends.
+    function invariant_NoInvestorsReleaseBeforeCliff() public view {
+        if (block.timestamp < INVESTORS_CLIFF_END) {
+            assertEq(investorsVesting.released(address(token)), 0);
         }
+    }
+
+    /// The only vesting wallets hold exactly the investor and strategic partnership allocations
+    /// (less what they released). No vesting wallet holds any Founder tranche, and the Founder
+    /// holders are plain accounts, not contracts.
+    function invariant_NoFounderVesting() public view {
+        assertEq(
+            investorsVesting.released(address(token)) + token.balanceOf(address(investorsVesting)),
+            ARLAllocation.INVESTORS
+        );
+        assertEq(
+            partnershipsVesting.released(address(token))
+                + token.balanceOf(address(partnershipsVesting)),
+            ARLAllocation.STRATEGIC_PARTNERSHIPS
+        );
+        assertEq(founderUnrestrictedSafe.code.length, 0);
+        assertEq(founderReservedHolder.code.length, 0);
+    }
+
+    /// Genesis reconciles exactly: the eleven allocation constants, with the Founder allocation
+    /// as the sum of its two tranches, add up to the maximum supply.
+    function invariant_AllocationsReconcile() public pure {
+        assertEq(
+            ARLAllocation.FOUNDER_UNRESTRICTED + ARLAllocation.FOUNDER_RESERVED,
+            ARLAllocation.FOUNDER
+        );
+        assertEq(
+            ARLAllocation.PUBLIC_LAUNCH + ARLAllocation.COMMUNITY_STAKING
+                + ARLAllocation.ECOSYSTEM_GROWTH + ARLAllocation.STRATEGIC_PARTNERSHIPS
+                + ARLAllocation.LIQUIDITY + ARLAllocation.FOUNDER + ARLAllocation.INVESTORS
+                + ARLAllocation.TREASURY + ARLAllocation.TEAM + ARLAllocation.EARLY_USERS
+                + ARLAllocation.GRANTS_BUG_BOUNTY,
+            ARLAllocation.MAX_SUPPLY
+        );
     }
 
     /// Beneficiaries cannot be changed.
     function invariant_BeneficiariesFixed() public view {
-        assertEq(founderVesting.owner(), founder);
         assertEq(investorsVesting.owner(), investorsSafe);
         assertEq(partnershipsVesting.owner(), partnershipsSafe);
         assertEq(handler.ghostOwnershipChanges(), 0);

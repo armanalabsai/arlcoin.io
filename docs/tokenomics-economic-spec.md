@@ -402,13 +402,17 @@ operations.
 13. ARL Core: the unresolved items listed in section 17.10.
 
 Implementation gap (not a decision): the repository still records the
-investor, strategic partnership and team schedules as TBD and models the whole
-Founder allocation as a vesting wallet (`packages/tokenomics`,
-`docs/tokenomics.md`, the contracts and the deployment tooling), and the
-tooling still refuses every public network (`VESTING_SCHEDULES_APPROVED =
-false`). Those earlier Founder descriptions are not the current economic
-decision; section 4.4 is. Aligning the implementation with sections 4 and 4.4
-is a separate task that needs its own approval.
+investor, strategic partnership and team schedules as TBD, and the tooling
+still refuses every public network (`VESTING_SCHEDULES_APPROVED = false`).
+Aligning the implementation with section 4 is a separate task that needs its
+own approval.
+
+Founder implementation status (not a decision): the Founder allocation
+(2,100,000 ARL) is implemented as two genesis tranches, with no vesting wallet.
+Founder Unrestricted (2,000,000 ARL) is minted to a dedicated Safe and released
+at TGE. Founder Reserved (100,000 ARL) is minted to a separate address; its
+custody and treatment remain TBD, and the tooling refuses every public network
+until its custody is approved (`FOUNDER_RESERVE_CUSTODY_APPROVED = false`).
 
 ## 16. Mainnet Preconditions
 
