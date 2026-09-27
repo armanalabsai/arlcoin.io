@@ -39,6 +39,43 @@ Exact versions and integrity hashes are recorded in `package-lock.json`.
 | typescript-eslint | 8.70.1  | MIT        | TypeScript lint rules    |
 | prettier          | 3.9.9   | MIT        | Formatting               |
 
+## Website (`apps/web`)
+
+Exact versions and integrity hashes are recorded in `apps/web/package-lock.json`. None of the
+website's source is copied from third parties; these packages are used as published.
+
+Runtime (included in the built site):
+
+| Package                | Version | License | Purpose                                      |
+| ---------------------- | ------- | ------- | -------------------------------------------- |
+| next                   | 16.3.6  | MIT     | Framework, routing, static generation        |
+| react / react-dom      | 19.3.0  | MIT     | UI runtime                                   |
+| motion                 | 13.4.4  | MIT     | Springs, presence and drag animations        |
+| @radix-ui/react-dialog | 1.1.23  | MIT     | Accessible dialog (focus trap, Escape, ARIA) |
+| geist                  | 1.7.2   | OFL-1.1 | Geist Sans and Geist Mono fonts, self-hosted |
+
+Transitive runtime packages are MIT, ISC, Apache-2.0, BSD-3-Clause or 0BSD, with three
+exceptions:
+
+- `caniuse-lite` (CC-BY-4.0): browser-support data used at build time.
+- `@img/sharp-libvips-*` and `@img/sharp-wasm32` (LGPL-3.0-or-later components): optional
+  native libraries loaded by Next.js's image optimiser. The site does not use `next/image`, and
+  they are never shipped to browsers.
+
+Development only (not distributed):
+
+| Package                                     | Version | License    | Purpose                                               |
+| ------------------------------------------- | ------- | ---------- | ----------------------------------------------------- |
+| typescript                                  | 5.9.3   | Apache-2.0 | Type checking                                         |
+| tailwindcss / @tailwindcss/postcss          | 4.3.3   | MIT        | CSS utilities and build                               |
+| eslint                                      | 9.39.5  | MIT        | Linting (ESLint 9 is required by the Next.js plugins) |
+| eslint-config-next                          | 16.3.6  | MIT        | Next.js, React and a11y lint rules                    |
+| @playwright/test                            | 1.63.0  | Apache-2.0 | End-to-end tests                                      |
+| @types/node, @types/react, @types/react-dom | —       | MIT        | Type definitions                                      |
+
+The `scroll-morph-hero.tsx` component supplied during design was not used: its source and
+license could not be verified. See [`docs/website.md`](docs/website.md).
+
 ## CI actions
 
 | Action                       | Version | Commit                                     | License           |

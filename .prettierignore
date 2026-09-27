@@ -5,3 +5,7 @@ README.md
 contracts/lib/
 contracts/out/
 contracts/cache/
+apps/web/.next/
+apps/web/playwright-report/
+apps/web/test-results/
+apps/web/next-env.d.ts
