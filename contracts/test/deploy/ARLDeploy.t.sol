@@ -6,19 +6,32 @@ import {Test} from "forge-std/Test.sol";
 import {ARLAllocation} from "../../src/ARLAllocation.sol";
 import {ARLTimelock} from "../../src/ARLTimelock.sol";
 import {ARLToken} from "../../src/ARLToken.sol";
-import {ARLVestingWallet} from "../../src/ARLVestingWallet.sol";
-import {ARLDeployPlan, Allocations, Plan, Recipients} from "../../script/ARLDeployPlan.sol";
+import {
+    ARLDeployPlan,
+    Allocations,
+    FounderTranches,
+    Plan,
+    Recipients,
+    VestingPlan
+} from "../../script/ARLDeployPlan.sol";
 import {ARLDeployer, Deployment} from "../../script/ARLDeployer.sol";
 import {ARLVerify} from "../../script/ARLVerify.sol";
 
 /// @dev External wrappers so `vm.expectRevert` can observe reverts from internal library code.
 contract ARLDeployHarness {
-    function load(string memory json) external pure returns (Plan memory) {
+    function load(string memory json) external view returns (Plan memory) {
         return ARLDeployPlan.load(json);
     }
 
     function validate(Plan memory p) external view {
         ARLDeployPlan.validate(p);
+    }
+
+    function approvalGate(uint256 chainId, bool vestingApproved, bool reserveApproved)
+        external
+        pure
+    {
+        ARLDeployPlan.approvalGate(chainId, vestingApproved, reserveApproved);
     }
 
     function deploy(Plan memory p) external returns (Deployment memory) {
@@ -30,10 +43,11 @@ contract ARLDeployHarness {
     }
 }
 
+/// @dev Vesting schedules here are test fixtures; the approved schedules are TBD.
 contract ARLDeployTest is Test {
-    uint64 internal constant LAUNCH = 1_798_761_600; // 2027-01-01T00:00:00Z
-    uint64 internal constant CLIFF_END = 1_861_920_000; // 2029-01-01T00:00:00Z
-    uint64 internal constant VESTING_END = 1_956_528_000; // 2032-01-01T00:00:00Z
+    uint64 internal constant START = 1_798_761_600; // 2027-01-01T00:00:00Z
+    uint64 internal constant CLIFF_END = 1_830_297_600; // 2028-01-01T00:00:00Z
+    uint64 internal constant VESTING_END = 1_893_456_000; // 2030-01-01T00:00:00Z
 
     ARLDeployHarness internal h;
 
@@ -46,34 +60,36 @@ contract ARLDeployTest is Test {
         p.requireRecipientCode = false;
         p.maxSupply = ARLAllocation.MAX_SUPPLY;
         p.allocations = Allocations({
-            founder: ARLAllocation.FOUNDER,
-            ecosystemReserve: ARLAllocation.ECOSYSTEM_RESERVE,
-            treasury: ARLAllocation.TREASURY,
-            communityStaking: ARLAllocation.COMMUNITY_STAKING,
-            liquidity: ARLAllocation.LIQUIDITY,
-            strategicPartnerships: ARLAllocation.STRATEGIC_PARTNERSHIPS,
             publicLaunch: ARLAllocation.PUBLIC_LAUNCH,
-            grantsBugBounty: ARLAllocation.GRANTS_BUG_BOUNTY,
+            communityStaking: ARLAllocation.COMMUNITY_STAKING,
+            ecosystemGrowth: ARLAllocation.ECOSYSTEM_GROWTH,
+            strategicPartnerships: ARLAllocation.STRATEGIC_PARTNERSHIPS,
+            liquidity: ARLAllocation.LIQUIDITY,
+            founder: ARLAllocation.FOUNDER,
+            investors: ARLAllocation.INVESTORS,
+            treasury: ARLAllocation.TREASURY,
             team: ARLAllocation.TEAM,
-            earlyUserRewards: ARLAllocation.EARLY_USER_REWARDS
+            earlyUsers: ARLAllocation.EARLY_USERS,
+            grantsBugBounty: ARLAllocation.GRANTS_BUG_BOUNTY
         });
-        p.founderBeneficiary = makeAddr("founder");
-        p.founderCliffStart = LAUNCH;
-        p.founderCliffEnd = CLIFF_END;
-        p.founderVestingEnd = VESTING_END;
-        p.reserveBeneficiary = makeAddr("ecosystemSafe");
-        p.reserveStart = LAUNCH;
+        p.founderTranches =
+            FounderTranches(ARLAllocation.FOUNDER_UNRESTRICTED, ARLAllocation.FOUNDER_RESERVED);
+        p.investors = VestingPlan(makeAddr("investorsSafe"), START, CLIFF_END, VESTING_END);
+        p.strategicPartnerships =
+            VestingPlan(makeAddr("partnershipsSafe"), START, START, VESTING_END);
         p.treasurySafe = makeAddr("treasurySafe");
         p.treasuryGuardian = makeAddr("guardianSafe");
         p.minDelay = 48 hours;
         p.recipients = Recipients({
-            communityStaking: makeAddr("communitySafe"),
-            liquidity: makeAddr("liquiditySafe"),
-            strategicPartnerships: makeAddr("partnershipsSafe"),
             publicLaunch: makeAddr("launchSafe"),
-            grantsBugBounty: makeAddr("grantsSafe"),
+            communityStaking: makeAddr("communitySafe"),
+            ecosystemGrowth: makeAddr("growthSafe"),
+            liquidity: makeAddr("liquiditySafe"),
+            founderUnrestricted: makeAddr("founderUnrestrictedSafe"),
+            founderReserved: makeAddr("founderReservedHolder"),
             team: makeAddr("teamPoolSafe"),
-            earlyUserRewards: makeAddr("rewardsSafe")
+            earlyUsers: makeAddr("earlyUsersSafe"),
+            grantsBugBounty: makeAddr("grantsSafe")
         });
     }
 
@@ -85,15 +101,39 @@ contract ARLDeployTest is Test {
         Deployment memory d = h.deploy(p);
         h.verify(p, d);
         assertEq(d.token.totalSupply(), 21_000_000e18);
-        assertEq(d.token.balanceOf(address(d.timelock)), 3_000_000e18);
-        assertEq(d.reserveVesting.duration(), 1830 days);
-        assertEq(d.founderVesting.cliffEnd(), CLIFF_END);
+        assertEq(d.token.balanceOf(address(d.timelock)), 1_000_000e18);
+        assertEq(d.token.balanceOf(p.recipients.founderUnrestricted), 2_000_000e18);
+        assertEq(d.token.balanceOf(p.recipients.founderReserved), 100_000e18);
+        assertEq(d.token.balanceOf(address(d.investorsVesting)), 1_500_000e18);
+        assertEq(d.token.balanceOf(address(d.partnershipsVesting)), 2_000_000e18);
+        assertEq(d.token.balanceOf(p.recipients.publicLaunch), 5_000_000e18);
+        assertEq(d.investorsVesting.cliffEnd(), CLIFF_END);
+        assertEq(d.partnershipsVesting.owner(), p.strategicPartnerships.beneficiary);
     }
 
-    function test_SharedRecipientVerifies() public {
+    /// @dev The Founder allocation is minted straight to the two planned addresses. Neither is
+    /// a contract the deployer created, so neither can be a vesting wallet, and the Founder
+    /// Unrestricted holder can move its whole tranche immediately.
+    function test_NoFounderVestingWalletIsDeployed() public {
         Plan memory p = _plan();
-        p.recipients.liquidity = p.recipients.communityStaking;
-        h.verify(p, h.deploy(p));
+        Deployment memory d = h.deploy(p);
+        h.verify(p, d);
+        address[4] memory deployed = [
+            address(d.token),
+            address(d.investorsVesting),
+            address(d.partnershipsVesting),
+            address(d.timelock)
+        ];
+        for (uint256 i = 0; i < deployed.length; i++) {
+            assertTrue(deployed[i] != p.recipients.founderUnrestricted);
+            assertTrue(deployed[i] != p.recipients.founderReserved);
+        }
+        assertEq(p.recipients.founderUnrestricted.code.length, 0);
+        assertEq(p.recipients.founderReserved.code.length, 0);
+
+        vm.prank(p.recipients.founderUnrestricted);
+        assertTrue(d.token.transfer(makeAddr("buyer"), ARLAllocation.FOUNDER_UNRESTRICTED));
+        assertEq(d.token.balanceOf(p.recipients.founderUnrestricted), 0);
     }
 
     function test_SafesWithCodeVerifyWhenRequired() public {
@@ -105,46 +145,107 @@ contract ARLDeployTest is Test {
     }
 
     function test_LoadParsesPlannerOutput() public view {
-        // Shape and values produced by `packages/deploy` for the local config (trimmed).
-        string memory head = string.concat(
-            '{"schema":"arl-deploy-plan/1","chainId":31337,"requireRecipientCode":false,',
-            '"maxSupply":"21000000000000000000000000","allocations":{',
-            '"founder":"2100000000000000000000000","ecosystemReserve":"7000000000000000000000000",',
-            '"treasury":"3000000000000000000000000","communityStaking":"3000000000000000000000000",',
-            '"liquidity":"2000000000000000000000000","strategicPartnerships":"1500000000000000000000000",',
-            '"publicLaunch":"1000000000000000000000000","grantsBugBounty":"400000000000000000000000",'
-        );
-        string memory mid = string.concat(
-            '"team":"500000000000000000000000","earlyUserRewards":"500000000000000000000000"},',
-            '"founder":{"beneficiary":"0x1F67caa874DDec60E290e27cce758f01Bd53c380",',
-            '"cliffStart":1798761600,"cliffEnd":1861920000,"vestingEnd":1956528000},',
-            '"ecosystemReserve":{"beneficiary":"0x61042dF2f9DfD50AFC0734F5CB4da6E55bE6d09d",',
-            '"start":1798761600},"treasury":{"safe":"0xCbA140fcD82caf116be04c2a478A0e10b55202F9",',
-            '"guardian":"0x0c0bA8A2630B2108D5aF98B64fA89eF1BDb7C9d4","minDelay":172800},"recipients":{"communityStaking":"0x86d861EBe84C3F6D4F374c9640c5b89549C724A8",'
-        );
-        string memory tail = string.concat(
-            '"liquidity":"0x179DaF8783071e3868Fb00208B3529F48E544AF8",',
-            '"strategicPartnerships":"0x5F611FC6df7B0e0326A6B10b135A15DdF8667c2a",',
-            '"publicLaunch":"0x1E0C4aef807F25F0F79146f3A9646e75954E0E0d",',
-            '"grantsBugBounty":"0x2F050E3aAFBFb59BD438F97c4D280D0d38F411c4",',
-            '"team":"0xB5C15dcF9624e2137D772f72fCB1020B6Cba1455",',
-            '"earlyUserRewards":"0x480F68E166456e8a00584F003575d6975a8f2aFB"}}'
-        );
-        string memory json = string.concat(head, mid, tail);
-        Plan memory p = h.load(json);
+        Plan memory p = h.load(_json("", "", ""));
         assertEq(p.chainId, 31337);
+        assertEq(p.allocations.publicLaunch, ARLAllocation.PUBLIC_LAUNCH);
+        assertEq(p.allocations.investors, ARLAllocation.INVESTORS);
+        assertEq(p.allocations.grantsBugBounty, ARLAllocation.GRANTS_BUG_BOUNTY);
         assertEq(p.allocations.founder, ARLAllocation.FOUNDER);
-        assertEq(p.allocations.earlyUserRewards, ARLAllocation.EARLY_USER_REWARDS);
-        assertEq(p.founderCliffEnd, CLIFF_END);
+        assertEq(p.founderTranches.unrestricted, ARLAllocation.FOUNDER_UNRESTRICTED);
+        assertEq(p.founderTranches.reserved, ARLAllocation.FOUNDER_RESERVED);
+        assertEq(p.recipients.founderUnrestricted, 0xF600D8BD9AFeCE824Dd0Fb55E995B1728f651068);
+        assertEq(p.recipients.founderReserved, 0x48310346982561f9c00359Cb1851594eE8C58FF8);
+        assertEq(p.investors.cliffEnd, CLIFF_END);
+        assertEq(p.strategicPartnerships.vestingEnd, VESTING_END);
         assertEq(p.minDelay, 48 hours);
         assertEq(p.treasuryGuardian, 0x0c0bA8A2630B2108D5aF98B64fA89eF1BDb7C9d4);
-        assertEq(p.recipients.team, 0xB5C15dcF9624e2137D772f72fCB1020B6Cba1455);
+        assertEq(p.recipients.earlyUsers, 0x259238550bE2D033DdCBD0dDA00c427738C27991);
         h.validate(p);
+    }
+
+    // ------------------------------------------------------------------ loading (fail closed)
+
+    /// @dev An `arl-deploy-plan/2` plan (with its founder vesting wallet) is rejected, never
+    /// reinterpreted.
+    function test_RevertWhen_PlanHasOldSchema() public {
+        string memory json =
+            vm.replace(_json("", "", ""), '"arl-deploy-plan/3"', '"arl-deploy-plan/2"');
+        vm.expectRevert(
+            abi.encodeWithSelector(ARLDeployPlan.PlanSchemaMismatch.selector, "arl-deploy-plan/2")
+        );
+        h.load(json);
+    }
+
+    function test_RevertWhen_PlanHasFounderVesting() public {
+        string memory json = vm.replace(
+            _json("", "", ""),
+            '"vesting":{',
+            string.concat(
+                '"vesting":{"founder":{"beneficiary":"0x1F67caa874DDec60E290e27cce758f01Bd53c380",',
+                '"cliffStart":1798761600,"cliffEnd":1830297600,"vestingEnd":1893456000},'
+            )
+        );
+        vm.expectRevert(ARLDeployPlan.PlanFounderVestingNotAllowed.selector);
+        h.load(json);
+    }
+
+    function test_RevertWhen_PlanMissesFounderTranches() public {
+        string memory json = vm.replace(
+            _json("", "", ""),
+            '"founderTranches":{"unrestricted":"2000000000000000000000000","reserved":"100000000000000000000000"},',
+            ""
+        );
+        vm.expectRevert();
+        h.load(json);
     }
 
     function test_RevertWhen_PlanFieldMissing() public {
         vm.expectRevert();
         h.load('{"chainId":31337}');
+    }
+
+    function test_RevertWhen_PlanHasLegacyEcosystemReserve() public {
+        vm.expectRevert(
+            abi.encodeWithSelector(ARLDeployPlan.PlanLegacyAllocation.selector, "ecosystemReserve")
+        );
+        h.load(
+            _json(
+                "",
+                "",
+                '"ecosystemReserve":{"beneficiary":"0x61042dF2f9DfD50AFC0734F5CB4da6E55bE6d09d","start":1798761600},'
+            )
+        );
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ARLDeployPlan.PlanLegacyAllocation.selector, "allocations.ecosystemReserve"
+            )
+        );
+        h.load(_json('"ecosystemReserve":"7000000000000000000000000",', "", ""));
+    }
+
+    function test_RevertWhen_PlanHasExtraAllocation() public {
+        vm.expectRevert(
+            abi.encodeWithSelector(ARLDeployPlan.PlanUnexpectedKeys.selector, "allocations", 12, 11)
+        );
+        h.load(_json('"bonus":"1",', "", ""));
+    }
+
+    function test_RevertWhen_PlanMissesAnAllocation() public {
+        string memory json = _json("", "", "");
+        // Drop the investors entry.
+        json = vm.replace(json, '"investors":"1500000000000000000000000",', "");
+        vm.expectRevert(
+            abi.encodeWithSelector(ARLDeployPlan.PlanUnexpectedKeys.selector, "allocations", 10, 11)
+        );
+        h.load(json);
+    }
+
+    function test_RevertWhen_PlanHasExtraRecipient() public {
+        vm.expectRevert(
+            abi.encodeWithSelector(ARLDeployPlan.PlanUnexpectedKeys.selector, "recipients", 10, 9)
+        );
+        h.load(_json("", '"earlyUserRewards":"0x480F68E166456e8a00584F003575d6975a8f2aFB",', ""));
     }
 
     // ------------------------------------------------------------------ constant guards
@@ -156,9 +257,16 @@ contract ARLDeployTest is Test {
         assertEq(ARLDeployPlan.TIMELOCK_DELAY_FLOOR, tl.MIN_DELAY_FLOOR());
     }
 
-    function test_ReserveDurationMatchesApproval() public pure {
-        assertEq(ARLAllocation.ECOSYSTEM_RESERVE_DURATION, ARLVerify.APPROVED_RESERVE_DURATION);
-        assertEq(ARLVerify.APPROVED_RESERVE_DURATION, 1830 days);
+    /// @dev Flipping this requires the approved investor and strategic partnership schedules to
+    /// be implemented.
+    function test_VestingSchedulesAreNotApprovedYet() public pure {
+        assertFalse(ARLDeployPlan.VESTING_SCHEDULES_APPROVED);
+    }
+
+    /// @dev Flipping this requires an approved custody decision for the Founder Reserved
+    /// tranche.
+    function test_FounderReserveCustodyIsNotApprovedYet() public pure {
+        assertFalse(ARLDeployPlan.FOUNDER_RESERVE_CUSTODY_APPROVED);
     }
 
     // ------------------------------------------------------------------ validation (fail closed)
@@ -188,60 +296,91 @@ contract ARLDeployTest is Test {
         h.validate(p);
     }
 
+    function test_RevertWhen_VestingSchedulesNotApprovedOffLocal() public {
+        vm.chainId(11155111);
+        Plan memory p = _plan();
+        p.requireRecipientCode = true;
+        _giveCode(p);
+        vm.expectRevert(
+            abi.encodeWithSelector(ARLDeployPlan.PlanVestingScheduleNotApproved.selector, 11155111)
+        );
+        h.validate(p);
+    }
+
+    /// @dev Even with every vesting schedule approved, a non-local plan fails closed while the
+    /// Founder Reserved custody is not approved.
+    function test_RevertWhen_FounderReserveCustodyNotApprovedOffLocal() public {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ARLDeployPlan.PlanFounderReserveCustodyNotApproved.selector, 11155111
+            )
+        );
+        h.approvalGate(11155111, true, false);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(ARLDeployPlan.PlanVestingScheduleNotApproved.selector, 1)
+        );
+        h.approvalGate(1, false, true);
+
+        // Only when both decisions are approved does the gate open off local Anvil.
+        h.approvalGate(11155111, true, true);
+    }
+
+    /// @dev Local Anvil may rehearse with the Founder Reserved custody still TBD.
+    function test_LocalRehearsalAllowedWhileReserveCustodyTbd() public {
+        h.approvalGate(31337, false, false);
+        Plan memory p = _plan();
+        assertEq(p.chainId, 31337);
+        h.validate(p);
+    }
+
     function test_RevertWhen_RecipientHasNoCode() public {
         Plan memory p = _plan();
         p.requireRecipientCode = true;
-        vm.etch(p.founderBeneficiary, hex"00");
+        _giveCode(p);
+        vm.etch(p.recipients.ecosystemGrowth, "");
         vm.expectRevert(
             abi.encodeWithSelector(
                 ARLDeployPlan.PlanRecipientHasNoCode.selector,
-                "ecosystemReserveBeneficiary",
-                p.reserveBeneficiary
+                "recipients.ecosystemGrowth",
+                p.recipients.ecosystemGrowth
             )
         );
         h.validate(p);
     }
 
-    /// @dev M-3: off local Anvil the founder beneficiary must be a contract (a Safe), not a
-    /// single-key account whose loss would strand the founder allocation.
-    function test_RevertWhen_FounderBeneficiaryHasNoCodeWhenRequired() public {
+    /// @dev Off local Anvil the Founder Unrestricted holder must be a contract (a Safe), not a
+    /// single-key account whose loss would strand 2,000,000 ARL (M-3).
+    function test_RevertWhen_FounderUnrestrictedHasNoCodeWhenRequired() public {
         Plan memory p = _plan();
         p.requireRecipientCode = true;
         _giveCode(p);
-        vm.etch(p.founderBeneficiary, "");
+        vm.etch(p.recipients.founderUnrestricted, "");
         vm.expectRevert(
             abi.encodeWithSelector(
                 ARLDeployPlan.PlanRecipientHasNoCode.selector,
-                "founderBeneficiary",
-                p.founderBeneficiary
+                "recipients.founderUnrestricted",
+                p.recipients.founderUnrestricted
             )
         );
         h.validate(p);
     }
 
-    /// @dev Local Anvil plans may keep placeholder accounts without code.
-    function test_FounderBeneficiaryWithoutCodeAllowedLocally() public {
+    /// @dev The Founder Reserved custody is TBD, so the plan does not presume a Safe for it; the
+    /// approval gate is what blocks non-local deployment.
+    function test_FounderReservedCustodyIsNotPresumed() public {
+        Plan memory p = _plan();
+        p.requireRecipientCode = true;
+        _giveCode(p);
+        assertEq(p.recipients.founderReserved.code.length, 0);
+        h.validate(p);
+    }
+
+    function test_BeneficiariesWithoutCodeAllowedLocally() public {
         Plan memory p = _plan();
         assertFalse(p.requireRecipientCode);
-        assertEq(p.founderBeneficiary.code.length, 0);
+        assertEq(p.recipients.founderUnrestricted.code.length, 0);
         h.validate(p);
-    }
-
-    function test_RevertWhen_VerifyFounderBeneficiaryHasNoCode() public {
-        Plan memory p = _plan();
-        Deployment memory d = h.deploy(p);
-        p.requireRecipientCode = true;
-        _giveCode(p);
-        vm.etch(p.founderBeneficiary, "");
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ARLVerify.VerifyAddressMismatch.selector,
-                "founder beneficiary safe",
-                p.founderBeneficiary,
-                address(0)
-            )
-        );
-        h.verify(p, d);
     }
 
     function test_RevertWhen_ZeroAddresses() public {
@@ -256,13 +395,23 @@ contract ARLDeployTest is Test {
         h.validate(p);
 
         p = _plan();
-        p.founderBeneficiary = address(0);
-        _expectZero("founderBeneficiary");
+        p.investors.beneficiary = address(0);
+        _expectZero("vesting.investors.beneficiary");
         h.validate(p);
 
         p = _plan();
-        p.recipients.earlyUserRewards = address(0);
-        _expectZero("recipients.earlyUserRewards");
+        p.recipients.grantsBugBounty = address(0);
+        _expectZero("recipients.grantsBugBounty");
+        h.validate(p);
+
+        p = _plan();
+        p.recipients.founderUnrestricted = address(0);
+        _expectZero("recipients.founderUnrestricted");
+        h.validate(p);
+
+        p = _plan();
+        p.recipients.founderReserved = address(0);
+        _expectZero("recipients.founderReserved");
         h.validate(p);
     }
 
@@ -277,16 +426,91 @@ contract ARLDeployTest is Test {
         h.validate(p);
     }
 
-    function test_RevertWhen_GuardianHasNoCodeWhenRequired() public {
+    /// @dev Every allocation has its own dedicated holder; reusing one is a duplicate allocation.
+    function test_RevertWhen_AddressReused() public {
         Plan memory p = _plan();
-        p.requireRecipientCode = true;
-        _giveCode(p);
-        vm.etch(p.treasuryGuardian, "");
+        p.recipients.liquidity = p.recipients.communityStaking;
         vm.expectRevert(
             abi.encodeWithSelector(
-                ARLDeployPlan.PlanRecipientHasNoCode.selector,
-                "treasury.guardian",
-                p.treasuryGuardian
+                ARLDeployPlan.PlanAddressReused.selector,
+                "recipients.liquidity",
+                "recipients.communityStaking"
+            )
+        );
+        h.validate(p);
+
+        p = _plan();
+        p.recipients.team = p.recipients.founderUnrestricted;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ARLDeployPlan.PlanAddressReused.selector,
+                "recipients.team",
+                "recipients.founderUnrestricted"
+            )
+        );
+        h.validate(p);
+    }
+
+    /// @dev The reserved tranche must never share an address with the unrestricted tranche or
+    /// any other holder, so it cannot silently become unrestricted or join another allocation.
+    function test_RevertWhen_FounderReservedAddressReused() public {
+        Plan memory p = _plan();
+        p.recipients.founderReserved = p.recipients.founderUnrestricted;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ARLDeployPlan.PlanAddressReused.selector,
+                "recipients.founderReserved",
+                "recipients.founderUnrestricted"
+            )
+        );
+        h.validate(p);
+
+        p = _plan();
+        p.recipients.founderReserved = p.treasurySafe;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ARLDeployPlan.PlanAddressReused.selector,
+                "recipients.founderReserved",
+                "treasury.safe"
+            )
+        );
+        h.validate(p);
+
+        p = _plan();
+        p.recipients.founderReserved = p.investors.beneficiary;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ARLDeployPlan.PlanAddressReused.selector,
+                "recipients.founderReserved",
+                "vesting.investors.beneficiary"
+            )
+        );
+        h.validate(p);
+    }
+
+    function test_RevertWhen_FounderTrancheMismatch() public {
+        Plan memory p = _plan();
+        p.founderTranches.unrestricted += 1;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ARLDeployPlan.PlanAllocationMismatch.selector,
+                "founderTranches.unrestricted",
+                ARLAllocation.FOUNDER_UNRESTRICTED + 1,
+                ARLAllocation.FOUNDER_UNRESTRICTED
+            )
+        );
+        h.validate(p);
+
+        // Swapping the tranches keeps the Founder total but is still rejected.
+        p = _plan();
+        (p.founderTranches.unrestricted, p.founderTranches.reserved) =
+        (p.founderTranches.reserved, p.founderTranches.unrestricted);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ARLDeployPlan.PlanAllocationMismatch.selector,
+                "founderTranches.unrestricted",
+                ARLAllocation.FOUNDER_RESERVED,
+                ARLAllocation.FOUNDER_UNRESTRICTED
             )
         );
         h.validate(p);
@@ -301,6 +525,23 @@ contract ARLDeployTest is Test {
                 "team",
                 ARLAllocation.TEAM + 1,
                 ARLAllocation.TEAM
+            )
+        );
+        h.validate(p);
+    }
+
+    /// @dev Amounts are keyed by allocation, so swapping two amounts is caught even though the
+    /// total is unchanged.
+    function test_RevertWhen_AllocationsSwapped() public {
+        Plan memory p = _plan();
+        (p.allocations.founder, p.allocations.investors) =
+        (p.allocations.investors, p.allocations.founder);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ARLDeployPlan.PlanAllocationMismatch.selector,
+                "founder",
+                ARLAllocation.INVESTORS,
+                ARLAllocation.FOUNDER
             )
         );
         h.validate(p);
@@ -330,46 +571,18 @@ contract ARLDeployTest is Test {
 
     function test_RevertWhen_ScheduleOrderingInvalid() public {
         Plan memory p = _plan();
-        p.founderCliffStart = 0;
-        _expectSchedule("founder cliff start is zero");
+        p.investors.cliffStart = 0;
+        _expectSchedule("investors start is zero");
         h.validate(p);
 
         p = _plan();
-        p.founderCliffEnd = p.founderCliffStart;
-        _expectSchedule("founder cliff end is not after cliff start");
+        p.investors.cliffEnd = p.investors.cliffStart - 1;
+        _expectSchedule("investors cliff end is before its start");
         h.validate(p);
 
         p = _plan();
-        p.founderVestingEnd = p.founderCliffEnd;
-        _expectSchedule("founder vesting end is not after cliff end");
-        h.validate(p);
-
-        p = _plan();
-        p.reserveStart = 0;
-        _expectSchedule("ecosystem reserve start is zero");
-        h.validate(p);
-    }
-
-    function test_RevertWhen_MonthsApproximatedAsThirtyDays() public {
-        Plan memory p = _plan();
-        p.founderCliffEnd = p.founderCliffStart + 24 * 30 days;
-        _expectSchedule("founder cliff is not 24 calendar months");
-        h.validate(p);
-
-        p = _plan();
-        p.founderVestingEnd = p.founderCliffEnd + 36 * 30 days;
-        _expectSchedule("founder linear vesting is not 36 calendar months");
-        h.validate(p);
-    }
-
-    function testFuzz_CliffLengthMustBe24CalendarMonths(uint64 cliff) public {
-        cliff = uint64(bound(cliff, 1, 2000 days));
-        Plan memory p = _plan();
-        p.founderCliffEnd = p.founderCliffStart + cliff;
-        p.founderVestingEnd = p.founderCliffEnd + 1095 days;
-        if (cliff < 730 days || cliff > 731 days) {
-            _expectSchedule("founder cliff is not 24 calendar months");
-        }
+        p.strategicPartnerships.vestingEnd = p.strategicPartnerships.cliffEnd;
+        _expectSchedule("strategicPartnerships vesting end is not after cliff end");
         h.validate(p);
     }
 
@@ -378,6 +591,16 @@ contract ARLDeployTest is Test {
         Plan memory p = _plan();
         p.minDelay = delay;
         if (delay < 48 hours) vm.expectRevert();
+        h.validate(p);
+    }
+
+    function testFuzz_ScheduleOrdering(uint64 cliffStart, uint64 cliffEnd, uint64 vestingEnd)
+        public
+    {
+        Plan memory p = _plan();
+        p.investors = VestingPlan(p.investors.beneficiary, cliffStart, cliffEnd, vestingEnd);
+        bool valid = cliffStart != 0 && cliffEnd >= cliffStart && vestingEnd > cliffEnd;
+        if (!valid) vm.expectRevert();
         h.validate(p);
     }
 
@@ -394,11 +617,11 @@ contract ARLDeployTest is Test {
     function test_RevertWhen_VerifyWrongTimestamp() public {
         Plan memory p = _plan();
         Deployment memory d = h.deploy(p);
-        p.founderVestingEnd += 1;
+        p.investors.vestingEnd += 1;
         vm.expectRevert(
             abi.encodeWithSelector(
                 ARLVerify.VerifyUintMismatch.selector,
-                "founder vesting end",
+                "investors vesting end",
                 uint256(VESTING_END) + 1,
                 uint256(VESTING_END)
             )
@@ -409,14 +632,89 @@ contract ARLDeployTest is Test {
     function test_RevertWhen_VerifyWrongBeneficiary() public {
         Plan memory p = _plan();
         Deployment memory d = h.deploy(p);
-        address planned = p.reserveBeneficiary;
-        p.reserveBeneficiary = makeAddr("other");
+        address planned = p.investors.beneficiary;
+        p.investors.beneficiary = makeAddr("other");
         vm.expectRevert(
             abi.encodeWithSelector(
                 ARLVerify.VerifyAddressMismatch.selector,
-                "reserve beneficiary",
-                p.reserveBeneficiary,
+                "investors beneficiary",
+                p.investors.beneficiary,
                 planned
+            )
+        );
+        h.verify(p, d);
+    }
+
+    function test_RevertWhen_VerifyWrongAmount() public {
+        Plan memory p = _plan();
+        Deployment memory d = h.deploy(p);
+        p.allocations.earlyUsers -= 1;
+        p.allocations.grantsBugBounty += 1;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ARLVerify.VerifyUintMismatch.selector,
+                "allocation balance",
+                ARLAllocation.EARLY_USERS - 1,
+                ARLAllocation.EARLY_USERS
+            )
+        );
+        h.verify(p, d);
+    }
+
+    function test_RevertWhen_VerifyFounderReservedAtWrongAddress() public {
+        Plan memory p = _plan();
+        Deployment memory d = h.deploy(p);
+        p.recipients.founderReserved = makeAddr("elsewhere");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ARLVerify.VerifyUintMismatch.selector,
+                "allocation balance",
+                ARLAllocation.FOUNDER_RESERVED,
+                0
+            )
+        );
+        h.verify(p, d);
+    }
+
+    function test_RevertWhen_VerifyFounderTranchesDoNotReconcile() public {
+        Plan memory p = _plan();
+        Deployment memory d = h.deploy(p);
+        p.founderTranches.reserved += 1;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ARLVerify.VerifyUintMismatch.selector,
+                "founder tranches",
+                ARLAllocation.FOUNDER,
+                ARLAllocation.FOUNDER + 1
+            )
+        );
+        h.verify(p, d);
+    }
+
+    /// @dev The token itself accepts a shared holder; the verifier refuses it.
+    function test_RevertWhen_VerifySharedHolder() public {
+        Plan memory p = _plan();
+        Deployment memory d = h.deploy(p);
+        p.recipients.liquidity = p.recipients.communityStaking;
+        d.token = new ARLToken(
+            ARLToken.Recipients({
+                publicLaunch: p.recipients.publicLaunch,
+                communityStaking: p.recipients.communityStaking,
+                ecosystemGrowth: p.recipients.ecosystemGrowth,
+                strategicPartnerships: address(d.partnershipsVesting),
+                liquidity: p.recipients.liquidity,
+                founderUnrestricted: p.recipients.founderUnrestricted,
+                founderReserved: p.recipients.founderReserved,
+                investors: address(d.investorsVesting),
+                treasury: address(d.timelock),
+                team: p.recipients.team,
+                earlyUsers: p.recipients.earlyUsers,
+                grantsBugBounty: p.recipients.grantsBugBounty
+            })
+        );
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ARLVerify.VerifyFailed.selector, "allocation holders are distinct"
             )
         );
         h.verify(p, d);
@@ -488,6 +786,23 @@ contract ARLDeployTest is Test {
         h.verify(p, d);
     }
 
+    function test_RevertWhen_VerifyFounderUnrestrictedHasNoCode() public {
+        Plan memory p = _plan();
+        Deployment memory d = h.deploy(p);
+        p.requireRecipientCode = true;
+        _giveCode(p);
+        vm.etch(p.recipients.founderUnrestricted, "");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ARLVerify.VerifyAddressMismatch.selector,
+                "recipients.founderUnrestricted",
+                p.recipients.founderUnrestricted,
+                address(0)
+            )
+        );
+        h.verify(p, d);
+    }
+
     function test_RevertWhen_VerifyTokenMissing() public {
         Plan memory p = _plan();
         Deployment memory d = h.deploy(p);
@@ -512,21 +827,9 @@ contract ARLDeployTest is Test {
     // ------------------------------------------------------------------ helpers
 
     function _giveCode(Plan memory p) internal {
-        address[11] memory safes = [
-            p.founderBeneficiary,
-            p.treasurySafe,
-            p.treasuryGuardian,
-            p.reserveBeneficiary,
-            p.recipients.communityStaking,
-            p.recipients.liquidity,
-            p.recipients.strategicPartnerships,
-            p.recipients.publicLaunch,
-            p.recipients.grantsBugBounty,
-            p.recipients.team,
-            p.recipients.earlyUserRewards
-        ];
-        for (uint256 i = 0; i < safes.length; i++) {
-            vm.etch(safes[i], hex"00");
+        (, address[12] memory account) = ARLDeployPlan.safeRoles(p);
+        for (uint256 i = 0; i < account.length; i++) {
+            vm.etch(account[i], hex"00");
         }
     }
 
@@ -536,5 +839,58 @@ contract ARLDeployTest is Test {
 
     function _expectSchedule(string memory reason) internal {
         vm.expectRevert(abi.encodeWithSelector(ARLDeployPlan.PlanInvalidSchedule.selector, reason));
+    }
+
+    /// @dev The shape and values `packages/deploy` produces for `local.json` (the `source`
+    /// section is omitted). Extra entries are inserted at the start of each section.
+    function _json(
+        string memory extraAllocation,
+        string memory extraRecipient,
+        string memory extraTop
+    ) internal pure returns (string memory) {
+        string memory allocations = string.concat(
+            '"allocations":{',
+            extraAllocation,
+            '"publicLaunch":"5000000000000000000000000","communityStaking":"3000000000000000000000000",',
+            '"ecosystemGrowth":"2000000000000000000000000","strategicPartnerships":"2000000000000000000000000",',
+            '"liquidity":"2000000000000000000000000","founder":"2100000000000000000000000",',
+            '"investors":"1500000000000000000000000","treasury":"1000000000000000000000000",',
+            '"team":"900000000000000000000000","earlyUsers":"1100000000000000000000000",',
+            '"grantsBugBounty":"400000000000000000000000"},',
+            '"founderTranches":{"unrestricted":"2000000000000000000000000","reserved":"100000000000000000000000"},'
+        );
+        string memory vesting = string.concat(
+            '"vesting":{"investors":{"beneficiary":"0x4bCb1679EEfBA34C88F55c0D07efe4EA9bfF4721",',
+            '"cliffStart":1798761600,"cliffEnd":1830297600,"vestingEnd":1893456000},',
+            '"strategicPartnerships":{"beneficiary":"0x5F611FC6df7B0e0326A6B10b135A15DdF8667c2a",',
+            '"cliffStart":1798761600,"cliffEnd":1830297600,"vestingEnd":1893456000}},'
+        );
+        string memory treasury = string.concat(
+            '"treasury":{"safe":"0xCbA140fcD82caf116be04c2a478A0e10b55202F9",',
+            '"guardian":"0x0c0bA8A2630B2108D5aF98B64fA89eF1BDb7C9d4","minDelay":172800},'
+        );
+        string memory recipients = string.concat(
+            '"recipients":{',
+            extraRecipient,
+            '"publicLaunch":"0x1E0C4aef807F25F0F79146f3A9646e75954E0E0d",',
+            '"communityStaking":"0x86d861EBe84C3F6D4F374c9640c5b89549C724A8",',
+            '"ecosystemGrowth":"0x8F188E2C17b8CC001AeBA6e4A46D916f0A260Be3",',
+            '"liquidity":"0x179DaF8783071e3868Fb00208B3529F48E544AF8",',
+            '"founderUnrestricted":"0xF600D8BD9AFeCE824Dd0Fb55E995B1728f651068",',
+            '"founderReserved":"0x48310346982561f9c00359Cb1851594eE8C58FF8",',
+            '"team":"0xB5C15dcF9624e2137D772f72fCB1020B6Cba1455",',
+            '"earlyUsers":"0x259238550bE2D033DdCBD0dDA00c427738C27991",',
+            '"grantsBugBounty":"0x2F050E3aAFBFb59BD438F97c4D280D0d38F411c4"}'
+        );
+        return string.concat(
+            '{"schema":"arl-deploy-plan/3","network":"local","chainId":31337,',
+            extraTop,
+            '"requireRecipientCode":false,"maxSupply":"21000000000000000000000000",',
+            allocations,
+            vesting,
+            treasury,
+            recipients,
+            "}"
+        );
     }
 }

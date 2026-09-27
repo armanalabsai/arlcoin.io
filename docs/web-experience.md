@@ -146,18 +146,18 @@ SOURCE        the repository file and commit (or, after deployment, the contract
               the test, CI run, verifier check, or explorer page that proves it
 ```
 
-| Question                              | Answer today (source)                                                                                                                                                           | After deployment                                       |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| Who holds the tokens?                 | Planned holders per allocation (`packages/tokenomics`, `ARLAllocation.sol`); the deployment plan assigns every allocation to a named contract or Safe                           | `balanceOf` for every planned holder                   |
-| When do tokens unlock?                | Founder: 24-month cliff, then 36 months linear. Ecosystem Reserve: linear over 1,830 days. Team: 12-month cliff, then 36 months linear, per member (`docs/tokenomics.md`)       | `ARLVestingWallet` start, cliff, end, released, vested |
-| How is the team allocation protected? | Unassigned tokens sit in a multisig pool. Grants are irrevocable, made in tranches, each an `ARLVestingWallet` whose beneficiary is the member's own Safe or smart account      | Each grant's wallet and schedule                       |
-| Can more tokens be minted?            | No. The full supply is minted once in the constructor; no mint function exists; a CI check fails if the token interface changes (`ARLToken.sol`, `scripts/check-token-abi.mjs`) | `totalSupply` = 21,000,000; verified source            |
-| Who controls the treasury?            | Treasury Safe (3-of-5) is the only proposer and executor on `ARLTimelock`; the timelock is its own admin                                                                        | Role checks on the deployed timelock                   |
-| How does the timelock work?           | Every operation waits at least 48 hours; the delay cannot be lowered below 48 hours (`ARLTimelock.sol`)                                                                         | `getMinDelay`; the operation queue                     |
-| What can the guardian do?             | Only cancel pending operations. It cannot propose, execute, move funds or change roles (`ARLTimelock.sol`, `ARLVerify.sol`)                                                     | Guardian role check; cancelled operations              |
-| What is the Safe structure?           | Treasury Safe 3-of-5; separate guardian Safe; dedicated founder Safe. Signers and thresholds are Safe configuration, not stored in the repository                               | Safe addresses; code present at each                   |
-| How is circulating supply calculated? | **Not defined yet.** The methodology depends on the custody decision M-2                                                                                                        | Published methodology + on-chain reads                 |
-| Is the contract really verified?      | No contract is deployed. Pre-deployment evidence: unit, fuzz and invariant tests, Slither, and a deployment rehearsal in CI. **No external audit has been performed**           | Explorer source verification + `VerifyARL` result      |
+| Question                              | Answer today (source)                                                                                                                                                                                                    | After deployment                                       |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------ |
+| Who holds the tokens?                 | Planned holders per allocation (`packages/tokenomics`, `ARLAllocation.sol`); the deployment plan assigns every allocation to a named contract or Safe                                                                    | `balanceOf` for every planned holder                   |
+| When do tokens unlock?                | Founder, Investors and Strategic Partnerships vest through `ARLVestingWallet`s; the schedules are **TBD** and no public deployment is possible until they are approved. Team grants: schedule TBD (`docs/tokenomics.md`) | `ARLVestingWallet` start, cliff, end, released, vested |
+| How is the team allocation protected? | Unassigned tokens sit in a dedicated team pool Safe. Grants are irrevocable, made in tranches, each an `ARLVestingWallet` whose beneficiary is the member's own Safe or smart account                                    | Each grant's wallet and schedule                       |
+| Can more tokens be minted?            | No. The full supply is minted once in the constructor; no mint function exists; a CI check fails if the token interface changes (`ARLToken.sol`, `scripts/check-token-abi.mjs`)                                          | `totalSupply` = 21,000,000; verified source            |
+| Who controls the treasury?            | Treasury Safe (3-of-5) is the only proposer and executor on `ARLTimelock`; the timelock is its own admin                                                                                                                 | Role checks on the deployed timelock                   |
+| How does the timelock work?           | Every operation waits at least 48 hours; the delay cannot be lowered below 48 hours (`ARLTimelock.sol`)                                                                                                                  | `getMinDelay`; the operation queue                     |
+| What can the guardian do?             | Only cancel pending operations. It cannot propose, execute, move funds or change roles (`ARLTimelock.sol`, `ARLVerify.sol`)                                                                                              | Guardian role check; cancelled operations              |
+| What is the Safe structure?           | Treasury Safe 3-of-5; separate guardian Safe; dedicated founder Safe. Signers and thresholds are Safe configuration, not stored in the repository                                                                        | Safe addresses; code present at each                   |
+| How is circulating supply calculated? | **Not defined yet.** The methodology depends on the custody decision M-2                                                                                                                                                 | Published methodology + on-chain reads                 |
+| Is the contract really verified?      | No contract is deployed. Pre-deployment evidence: unit, fuzz and invariant tests, Slither, and a deployment rehearsal in CI. **No external audit has been performed**                                                    | Explorer source verification + `VerifyARL` result      |
 
 ## 6. Technology Room
 
@@ -166,17 +166,18 @@ actually built, not through decorative animation. It shows only relationships th
 contracts and deployment scripts:
 
 ```
-ARLToken ──one-time initial mint (constructor, 21,000,000 ARL)──▶ 10 allocation holders
+ARLToken ──one-time initial mint (constructor, 21,000,000 ARL)──▶ 11 allocation holders
                                                                    no mint afterwards
 
-Founder allocation ───▶ ARLVestingWallet (24-month cliff + 36 months linear) ───▶ Founder Safe
-Ecosystem Reserve  ───▶ ARLVestingWallet (1,830 days linear)                 ───▶ Ecosystem Safe
-Treasury allocation ──▶ ARLTimelock (≥ 48 h, admin = itself)
+Founder                ───▶ ARLVestingWallet (schedule TBD) ───▶ dedicated Founder Safe
+Investors              ───▶ ARLVestingWallet (schedule TBD) ───▶ dedicated Safe
+Strategic Partnerships ───▶ ARLVestingWallet (schedule TBD) ───▶ dedicated Safe
+Treasury allocation    ───▶ ARLTimelock (≥ 48 h, admin = itself)
 
 Treasury Safe (3-of-5) ──schedule / execute──▶ ARLTimelock ──after the delay──▶ execution
 Guardian Safe          ──cancel only─────────▶ ARLTimelock
 
-Seven other allocations ──minted directly──▶ their Safes   (custody model open: M-2)
+Six other allocations ──minted directly──▶ their own dedicated Safes
 Team pool Safe ──funds per-member tranches──▶ ARLVestingWallet ──▶ member's Safe or smart account
 ```
 
@@ -187,8 +188,7 @@ Rules:
 - Before deployment, every node carries `Not deployed`. Nothing is shown as live.
 - Planned components (AI and compute services, staking) appear only in Network → Technology and
   are labelled `PLANNED`. They are not drawn as part of the deployed system.
-- The seven directly minted allocations are drawn as they are today, with a note that the custody
-  model (M-2) is not decided.
+- Vesting schedules are drawn as `TBD` until they are approved.
 - Motion is limited to highlighting a path on hover or focus. No particles, no pulsing and no
   moving "data flow" effects.
 
@@ -214,14 +214,14 @@ Rules for every Console screen:
 
 First version, in this order:
 
-| Screen                    | Purpose                                                                                       | Data source                                                                                         |
-| ------------------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Contracts                 | Official addresses, ABI, source links                                                         | Deployment manifest (section 15) + explorer                                                         |
-| Verification              | Is each contract's source verified; did the post-deployment verifier pass                     | Explorer verification API + recorded `VerifyARL` result                                             |
-| Vesting                   | Founder, Ecosystem Reserve and team wallets: start, cliff, end, vested, released, next unlock | `ARLVestingWallet` view functions                                                                   |
-| Treasury / Timelock Queue | Pending, ready, executed and cancelled operations; earliest execution time                    | `ARLTimelock` events (`CallScheduled`, `CallExecuted`, `Cancelled`) + `getMinDelay`, `getTimestamp` |
-| Roles                     | Proposer, executor, canceller and admin holders                                               | `hasRole` for the known addresses from the manifest                                                 |
-| Supply & Distribution     | Total supply and the balance of every planned holder                                          | `totalSupply`, `balanceOf`; circulating supply only once the M-2 methodology exists                 |
+| Screen                    | Purpose                                                                                                            | Data source                                                                                         |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| Contracts                 | Official addresses, ABI, source links                                                                              | Deployment manifest (section 15) + explorer                                                         |
+| Verification              | Is each contract's source verified; did the post-deployment verifier pass                                          | Explorer verification API + recorded `VerifyARL` result                                             |
+| Vesting                   | Founder, investors, strategic partnership and team grant wallets: start, cliff, end, vested, released, next unlock | `ARLVestingWallet` view functions                                                                   |
+| Treasury / Timelock Queue | Pending, ready, executed and cancelled operations; earliest execution time                                         | `ARLTimelock` events (`CallScheduled`, `CallExecuted`, `Cancelled`) + `getMinDelay`, `getTimestamp` |
+| Roles                     | Proposer, executor, canceller and admin holders                                                                    | `hasRole` for the known addresses from the manifest                                                 |
+| Supply & Distribution     | Total supply and the balance of every planned holder                                                               | `totalSupply`, `balanceOf`; circulating supply only once the M-2 methodology exists                 |
 
 `AccessControl` has no role enumeration, so the Roles screen checks the known addresses from the
 manifest. It must say that it checks known addresses; it cannot prove that no other holder exists.

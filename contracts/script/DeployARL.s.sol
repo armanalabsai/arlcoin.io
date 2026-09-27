@@ -8,7 +8,7 @@ import {ARLDeployPlan, Plan} from "./ARLDeployPlan.sol";
 import {ARLDeployer, Deployment} from "./ARLDeployer.sol";
 import {ARLVerify} from "./ARLVerify.sol";
 
-/// @title Deploy the ARL Phase 1 system
+/// @title Deploy the ARL system
 /// @notice Inputs (environment):
 /// - `ARL_PLAN`: plan produced by `packages/deploy` (under `contracts/deploy/`).
 /// - `ARL_DEPLOYMENT`: where to write the deployed addresses (under
@@ -37,10 +37,10 @@ contract DeployARL is Script {
             vm.toString(d.deployer),
             '","token":"',
             vm.toString(address(d.token)),
-            '","founderVesting":"',
-            vm.toString(address(d.founderVesting)),
-            '","reserveVesting":"',
-            vm.toString(address(d.reserveVesting)),
+            '","investorsVesting":"',
+            vm.toString(address(d.investorsVesting)),
+            '","partnershipsVesting":"',
+            vm.toString(address(d.partnershipsVesting)),
             '","timelock":"',
             vm.toString(address(d.timelock)),
             '"}'

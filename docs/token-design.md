@@ -11,7 +11,7 @@ EVM version `cancun`, optimizer 200 runs, no via-IR.
 
 | Contract           | Upstream base                             | ARL-specific code                                        |
 | ------------------ | ----------------------------------------- | -------------------------------------------------------- |
-| `ARLToken`         | `ERC20`, `ERC20Permit` (both unmodified)  | Constructor that mints the ten allocations once          |
+| `ARLToken`         | `ERC20`, `ERC20Permit` (both unmodified)  | Constructor that mints the eleven allocations once       |
 | `ARLAllocation`    | —                                         | Library of allocation constants                          |
 | `ARLVestingWallet` | `VestingWallet` (unmodified vesting math) | Explicit cliff parameters; beneficiary cannot be changed |
 | `ARLTimelock`      | `TimelockController`                      | No external admin; 48-hour floor on the delay            |
@@ -50,7 +50,9 @@ Enforced by:
 - Invariants `invariant_TotalSupplyIsExactlyMax` and
   `invariant_BalancesSumToSupply` over 262,144 random calls (extended run).
 - `contract-consistency.test.ts` — the Solidity constants must equal
-  `packages/tokenomics`.
+  `packages/tokenomics` in amount and order, `ARLToken.Recipients` must have
+  exactly one field per allocation, and `_mint` must appear exactly eleven
+  times, all inside the constructor.
 
 ## Vesting
 
@@ -60,7 +62,7 @@ OpenZeppelin v5.6.1 was checked first:
 
 - `VestingWalletCliff` returns zero before the cliff and then applies the
   linear formula from `start`. At cliff expiry it releases the whole cliff
-  period's share at once (for the founder, 24/60 of the allocation). Rejected.
+  period's share at once. Rejected.
 - `VestingWallet` with `start = cliff end` gives exactly "nothing during the
   cliff, then linear" with unmodified OpenZeppelin math.
 - `VestingWallet` is `Ownable`; the beneficiary can call `transferOwnership`
@@ -79,16 +81,16 @@ initialization is not possible.
 
 ### Schedules
 
-Timestamps are explicit UTC calendar dates supplied at deployment. The
-contracts never convert months to seconds.
+Two allocations are held by `ARLVestingWallet`s, each releasing to a
+dedicated Safe: Investors / Strategic Capital and Strategic Partnerships. Their
+schedules (start, cliff, duration) are not yet implemented and are treated as
+**TBD** by the tooling. The Founder allocation does not vest (see below). The
+deployment configuration supplies explicit UTC timestamps, and the planner and
+`ARLDeployPlan` refuse every chain except local Anvil until the schedules are
+approved (`VESTING_SCHEDULES_APPROVED = false`). The verifier asserts that each
+deployed wallet matches its planned beneficiary and timestamps.
 
-| Allocation        | `cliffStart` | `cliffEnd`                  | `vestingEnd`                    |
-| ----------------- | ------------ | --------------------------- | ------------------------------- |
-| Founder           | launch date  | launch + 24 calendar months | `cliffEnd` + 36 calendar months |
-| Team member       | grant date   | grant + 12 calendar months  | `cliffEnd` + 36 calendar months |
-| Ecosystem Reserve | launch date  | launch date (no cliff)      | launch + 1,830 days             |
-
-Vested amount at time `t`:
+The contracts never convert months to seconds. Vested amount at time `t`:
 
 - `t < cliffEnd`: 0
 - `cliffEnd ≤ t < vestingEnd`: `allocation × (t − cliffEnd) / (vestingEnd − cliffEnd)`, rounded down
@@ -96,28 +98,31 @@ Vested amount at time `t`:
 
 `release` may be called by anyone and always pays the beneficiary.
 
-### Ecosystem Reserve
+Strategic Partnerships is not an unconditional transfer pool: tokens reach the
+partnerships Safe only as they vest, and the intended flow is partnership →
+milestone → vesting → release. Milestones are not defined.
 
-A standard linear release satisfies the 1,400,000 ARL annual cap; no custom
-logic is needed. The duration must be chosen carefully:
+### Founder allocation
 
-- Five calendar years from 2027-01-01 are 1,826 days and include leap year 2028. Linear over 1,826 days releases 7,000,000 × 366 / 1,826 ≈ 1,403,066 ARL
-  in 2028 — over the cap (`test_PlainFiveCalendarYearsWouldBreachCap`).
-- Linear over 5 × 366 = **1,830 days** releases at most 1,400,000 ARL in any
-  window of up to 366 days, so the cap holds in every calendar year
-  (duration approved 2026-09-26).
-  Verified for each calendar year and by fuzzing arbitrary windows. Release
-  completes about four days after the fifth anniversary.
-
-Released tokens go to the ecosystem Safe. Release is not sale.
+The 2,100,000 ARL Founder allocation is minted at genesis to two holders:
+`FOUNDER_UNRESTRICTED` (2,000,000 ARL) to a dedicated founder Safe and
+`FOUNDER_RESERVED` (100,000 ARL) to a separate address whose custody is TBD
+(`FOUNDER = FOUNDER_UNRESTRICTED + FOUNDER_RESERVED`). Neither goes through a
+vesting wallet, and the token gives neither any privilege: both use the same
+ERC-20 transfer mechanics as every holder. The planner and `ARLDeployPlan`
+refuse every chain except local Anvil until the reserved custody is approved
+(`FOUNDER_RESERVE_CUSTODY_APPROVED = false`), and every plan address must be
+distinct, so the reserved tranche cannot share the unrestricted Safe or any
+other holder.
 
 ### Team pool
 
-The 500,000 ARL team allocation is minted to a multisig-controlled pool. A
+The 900,000 ARL team allocation is minted to a dedicated team pool Safe. A
 member's `ARLVestingWallet` is created and funded from the pool only when an
-approved grant exists. No individual grants are defined. Grants are
-irrevocable and made in tranches; each member's beneficiary is the member's own
-Safe or smart account. `ARLVestingWallet` has no revocation and none is added.
+approved grant exists. No individual grants are defined, and the grant
+schedule is TBD. Grants are irrevocable and made in tranches; each member's
+beneficiary is the member's own Safe or smart account. `ARLVestingWallet` has
+no revocation and none is added.
 
 ### Known limitation
 
@@ -125,10 +130,10 @@ A beneficiary that loses its key loses the tokens in its wallet; there is no
 recovery path in the vesting wallet by design. Recovery therefore lives in the
 beneficiary itself:
 
-- The founder beneficiary must be a dedicated Safe (for example 2-of-3). Off
-  local Anvil, the deployment plan and the verifier reject a founder
-  beneficiary without contract code. A lost key is replaced by rotating the
-  Safe's owners; the beneficiary address never changes.
+- The Founder Unrestricted recipient must be a dedicated Safe (for example
+  2-of-3). Off local Anvil, the deployment plan and the verifier reject it
+  without contract code (M-3). A lost key is replaced by rotating the Safe's
+  owners.
 - Team members' beneficiaries are their own Safes or smart accounts.
 
 Signer addresses and thresholds are Safe configuration and are never stored in
@@ -141,7 +146,7 @@ only cancel.
 
 ```
 Safe (3-of-5) ──schedule / cancel / execute──▶ ARLTimelock (≥ 48 h)
-                                                   ▲  │ holds 3,000,000 ARL
+                                                   ▲  │ holds 1,000,000 ARL
 Guardian Safe ─────────── cancel only ─────────────┘  ▼
                                               token transfers
 ```
@@ -176,9 +181,10 @@ addresses exist yet.
 
 ## Other allocations
 
-Community / Staking, Liquidity, Strategic Partnerships, Public Launch, Grants /
-Bug Bounty and Mining / Early User Rewards are minted to their own multisigs.
-Their release programs are later phases.
+Public Launch, Community & Staking, Ecosystem & Growth, Liquidity, Early Users
+and Grants / Bug Bounty are minted directly to their own dedicated Safes; the
+Team allocation is minted to the team pool Safe. Their release programs are not
+defined. See [`tokenomics.md`](tokenomics.md#custody).
 
 ## ERC20Permit
 

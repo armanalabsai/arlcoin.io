@@ -49,28 +49,30 @@ Rules:
 
 ## Approved decisions
 
-| Area            | Decision                                                                              | Detail                                       |
-| --------------- | ------------------------------------------------------------------------------------- | -------------------------------------------- |
-| Chain           | EVM-compatible; production chain chosen before deployment                             | [`chain-evaluation.md`](chain-evaluation.md) |
-| License         | Apache-2.0                                                                            | `LICENSE`, `NOTICE`                          |
-| Token           | ERC-20, 18 decimals, 21,000,000 ARL minted once, no mint function, no owner, no pause | [`token-design.md`](token-design.md)         |
-| Founder vesting | 24-month cliff, 36 months linear                                                      | [`tokenomics.md`](tokenomics.md)             |
-| Team vesting    | 12-month cliff, 36 months linear, per member; unassigned tokens in a multisig pool    | [`tokenomics.md`](tokenomics.md)             |
-| Treasury        | Safe 3-of-5, minimum 48-hour timelock, guardian Safe that can only cancel (no sunset) | [`token-design.md`](token-design.md)         |
-| Dependencies    | Open source first, provenance recorded                                                | [`open-source.md`](open-source.md)           |
-| Content         | English only; no unverified claims; no implied partnerships                           | [`content-standard.md`](content-standard.md) |
+| Area         | Decision                                                                              | Detail                                       |
+| ------------ | ------------------------------------------------------------------------------------- | -------------------------------------------- |
+| Chain        | EVM-compatible; production chain chosen before deployment                             | [`chain-evaluation.md`](chain-evaluation.md) |
+| License      | Apache-2.0                                                                            | `LICENSE`, `NOTICE`                          |
+| Token        | ERC-20, 18 decimals, 21,000,000 ARL minted once, no mint function, no owner, no pause | [`token-design.md`](token-design.md)         |
+| Allocation   | 11 allocations totalling 21,000,000 ARL (approved 2026-09-27)                         | [`tokenomics.md`](tokenomics.md)             |
+| Custody      | Vesting wallets, timelock or a dedicated Safe per allocation (approved 2026-09-27)    | [`tokenomics.md`](tokenomics.md#custody)     |
+| Treasury     | Safe 3-of-5, minimum 48-hour timelock, guardian Safe that can only cancel (no sunset) | [`token-design.md`](token-design.md)         |
+| Dependencies | Open source first, provenance recorded                                                | [`open-source.md`](open-source.md)           |
+| Content      | English only; no unverified claims; no implied partnerships                           | [`content-standard.md`](content-standard.md) |
 
 ## Decisions still open
 
-| Decision                                                                | Needed before                |
-| ----------------------------------------------------------------------- | ---------------------------- |
-| Production chain                                                        | Deployment scripts           |
-| Exact launch and grant dates (contracts take explicit timestamps)       | Deployment                   |
-| Signer sets and overlap across treasury, reserve, team and reward Safes | Production multisig creation |
-| Copyright holder named in `NOTICE`                                      | Public release               |
+| Decision                                                               | Needed before                |
+| ---------------------------------------------------------------------- | ---------------------------- |
+| Production chain                                                       | Deployment scripts           |
+| Founder, investor and strategic partnership vesting schedules (TBD)    | Any public network           |
+| Team grant schedule; program rules for staking, growth and early users | The programs                 |
+| Exact launch and grant dates (contracts take explicit timestamps)      | Deployment                   |
+| Signer sets and thresholds of the dedicated Safes                      | Production multisig creation |
+| Copyright holder named in `NOTICE`                                     | Public release               |
 
 Resolved on 2026-09-26: `ERC20Permit` included; Ecosystem Reserve released
-linearly over 1,830 days.
+linearly over 1,830 days (the Ecosystem Reserve was superseded on 2026-09-27).
 
 Resolved on 2026-09-27 (Phase 2 Remediation Pack 2):
 
@@ -88,4 +90,15 @@ Resolved on 2026-09-27 (Phase 2 M-3):
 - Team grants are irrevocable and made in tranches; each member's beneficiary
   is the member's own Safe or smart account. `ARLVestingWallet` is unchanged.
 
-M-2 (custody of unlocked allocations) is still open.
+Superseded on 2026-09-27 (M-2 model replacement):
+
+- The 10-allocation Phase 1 table, including the 7,000,000 ARL Ecosystem
+  Reserve and its 1,830-day schedule, and the founder (24 + 36 months) and team
+  (12 + 36 months) durations, are replaced by the 11-allocation model in
+  [`tokenomics.md`](tokenomics.md). Vesting durations for the new model are TBD.
+- The M-2 custody and vesting decision recorded earlier the same day (commit
+  `91eaf10`) is superseded and kept in history only.
+- Still in force: the Founder Unrestricted recipient (formerly the founder
+  vesting beneficiary) is a dedicated Safe (M-3); team
+  grants are irrevocable, in tranches, to each member's own Safe (M-3); the
+  treasury guardian (M-1) and zero-address checks (L-3).

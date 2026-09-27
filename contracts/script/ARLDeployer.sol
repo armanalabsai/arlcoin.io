@@ -1,41 +1,33 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity 0.8.36;
 
-import {ARLAllocation} from "../src/ARLAllocation.sol";
 import {ARLTimelock} from "../src/ARLTimelock.sol";
 import {ARLToken} from "../src/ARLToken.sol";
 import {ARLVestingWallet} from "../src/ARLVestingWallet.sol";
-import {Plan} from "./ARLDeployPlan.sol";
+import {Plan, VestingPlan} from "./ARLDeployPlan.sol";
 
 /// @notice Addresses produced by one deployment.
 struct Deployment {
     address deployer;
     ARLToken token;
-    ARLVestingWallet founderVesting;
-    ARLVestingWallet reserveVesting;
+    ARLVestingWallet investorsVesting;
+    ARLVestingWallet partnershipsVesting;
     ARLTimelock timelock;
 }
 
 /// @title ARL system deployment
-/// @notice Deploys the complete Phase 1 system from a validated plan, in this order:
-/// founder vesting wallet, Ecosystem Reserve vesting wallet, treasury timelock, token. The token
-/// mints every allocation in its constructor, so no transfer happens after deployment.
+/// @notice Deploys the complete system from a validated plan, in this order: investors and
+/// strategic partnership vesting wallets, treasury timelock, token. The token mints every
+/// allocation in its constructor, so no transfer happens after deployment. The Founder
+/// allocation has no vesting wallet: its two tranches are minted directly to the planned
+/// Founder Unrestricted and Founder Reserved addresses.
 /// @dev Callers must run `ARLDeployPlan.validate` first and `ARLVerify.verify` afterwards.
 library ARLDeployer {
     function deploy(Plan memory p, address deployer) internal returns (Deployment memory d) {
         d.deployer = deployer;
 
-        d.founderVesting = new ARLVestingWallet(
-            p.founderBeneficiary, p.founderCliffStart, p.founderCliffEnd, p.founderVestingEnd
-        );
-
-        // No cliff: the linear release starts at launch and lasts exactly the approved duration.
-        d.reserveVesting = new ARLVestingWallet(
-            p.reserveBeneficiary,
-            p.reserveStart,
-            p.reserveStart,
-            p.reserveStart + ARLAllocation.ECOSYSTEM_RESERVE_DURATION
-        );
+        d.investorsVesting = _vesting(p.investors);
+        d.partnershipsVesting = _vesting(p.strategicPartnerships);
 
         address[] memory safe = new address[](1);
         safe[0] = p.treasurySafe;
@@ -43,17 +35,23 @@ library ARLDeployer {
 
         d.token = new ARLToken(
             ARLToken.Recipients({
-                founder: address(d.founderVesting),
-                ecosystemReserve: address(d.reserveVesting),
-                treasury: address(d.timelock),
-                communityStaking: p.recipients.communityStaking,
-                liquidity: p.recipients.liquidity,
-                strategicPartnerships: p.recipients.strategicPartnerships,
                 publicLaunch: p.recipients.publicLaunch,
-                grantsBugBounty: p.recipients.grantsBugBounty,
+                communityStaking: p.recipients.communityStaking,
+                ecosystemGrowth: p.recipients.ecosystemGrowth,
+                strategicPartnerships: address(d.partnershipsVesting),
+                liquidity: p.recipients.liquidity,
+                founderUnrestricted: p.recipients.founderUnrestricted,
+                founderReserved: p.recipients.founderReserved,
+                investors: address(d.investorsVesting),
+                treasury: address(d.timelock),
                 team: p.recipients.team,
-                earlyUserRewards: p.recipients.earlyUserRewards
+                earlyUsers: p.recipients.earlyUsers,
+                grantsBugBounty: p.recipients.grantsBugBounty
             })
         );
+    }
+
+    function _vesting(VestingPlan memory v) private returns (ARLVestingWallet) {
+        return new ARLVestingWallet(v.beneficiary, v.cliffStart, v.cliffEnd, v.vestingEnd);
     }
 }

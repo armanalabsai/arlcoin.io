@@ -7,35 +7,19 @@ export interface Share {
 }
 
 /**
- * Splits 10,000 basis points across allocations with the largest-remainder
- * method, so displayed percentages always add up to exactly 100.00%.
- * Deterministic: ties are broken by table order.
+ * Share of max supply per allocation in basis points, rounded half up from
+ * the exact integer amounts. Rounded shares may not add up to exactly
+ * 100.00%; the underlying amounts always add up to the max supply.
+ * Deterministic and integer-only.
  */
 export function shareOfSupply(allocations: readonly Allocation[], maxSupply: number): Share[] {
   const TOTAL_BP = 10_000;
-  const exact = allocations.map((a, index) => {
+  return allocations.map((a) => {
     const scaled = a.amount * TOTAL_BP;
-    return {
-      id: a.id,
-      index,
-      floor: Math.floor(scaled / maxSupply),
-      remainder: scaled % maxSupply,
-    };
+    const floor = Math.floor(scaled / maxSupply);
+    const remainder = scaled % maxSupply;
+    return { id: a.id, basisPoints: floor + (remainder * 2 >= maxSupply ? 1 : 0) };
   });
-
-  let left = TOTAL_BP - exact.reduce((sum, e) => sum + e.floor, 0);
-  const byRemainder = [...exact].sort((x, y) => y.remainder - x.remainder || x.index - y.index);
-  const bonus = new Set<number>();
-  for (const e of byRemainder) {
-    if (left <= 0) break;
-    bonus.add(e.index);
-    left -= 1;
-  }
-
-  return exact.map((e) => ({
-    id: e.id,
-    basisPoints: e.floor + (bonus.has(e.index) ? 1 : 0),
-  }));
 }
 
 /** 1000 → "10.00%". */

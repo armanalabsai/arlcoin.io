@@ -3,6 +3,12 @@
 Status: internal review and automated testing only. **ARL has not been
 audited.** No contract is deployed.
 
+The allocation model changed on 2026-09-27 (11 allocations; the Ecosystem
+Reserve was removed). `ARLAllocation`, `ARLToken`, the deployment planner,
+deployer, verifier and rehearsal were changed with it. This is a new
+security-sensitive revision: evidence gathered for the previous model does not
+carry over and must be re-reviewed for this one.
+
 ## Scope
 
 `contracts/src/ARLToken.sol` (including `ERC20Permit`), `ARLAllocation.sol`, `ARLVestingWallet.sol`,
@@ -22,27 +28,28 @@ audited.** No contract is deployed.
 
 ## Threats and controls
 
-| Threat                                  | Control                                                                                                                                       | Evidence                                                                                                                                            |
-| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Supply above 21M                        | Mint only in constructor; no mint function; constructor total check                                                                           | Unit test, ABI allowlist, invariants                                                                                                                |
-| Hidden admin                            | No `Ownable`/`AccessControl` on the token                                                                                                     | `test_NoAdminOrMintFunctions`                                                                                                                       |
-| Early vesting release                   | Linear period starts at `cliffEnd`                                                                                                            | Boundary tests at `cliffEnd − 1`, `cliffEnd`, `cliffEnd + 1`; invariant `NoFounderReleaseBeforeCliff`                                               |
-| Over-release                            | Unmodified OpenZeppelin release accounting                                                                                                    | Fuzzed repeated releases; invariant `VestingNeverOverReleases`                                                                                      |
-| Beneficiary transfer of unvested tokens | `transferOwnership`/`renounceOwnership` revert                                                                                                | Unit, fuzz and invariant tests                                                                                                                      |
-| Founder key loss or theft (M-3)         | Founder beneficiary must be a contract (a dedicated Safe) off local Anvil; checked by the plan and by the verifier                            | `test_RevertWhen_FounderBeneficiaryHasNoCodeWhenRequired`, `test_RevertWhen_VerifyFounderBeneficiaryHasNoCode`; rehearsal with Safe v1.5.0 on Anvil |
-| Reserve over the annual cap             | 1,830-day linear duration                                                                                                                     | Calendar-year test; fuzzed 366-day windows                                                                                                          |
-| Treasury bypass                         | Timelock holds funds; Safe-only roles; 48-hour delay                                                                                          | Unit and fuzz tests; invariant `TreasuryOnlyPaysThroughTimelock`                                                                                    |
-| Delay lowered via timelock              | 48-hour floor in `updateDelay`                                                                                                                | `test_RevertWhen_DelayLoweredBelowFloorThroughTheTimelock`                                                                                          |
-| Role takeover                           | No external admin; role changes pass the delay                                                                                                | `test_RevertWhen_RoleGrantedOutsideTheTimelock`                                                                                                     |
-| Open execution (L-3)                    | Constructor rejects `address(0)` as proposer, executor or guardian; verifier re-checks the zero address holds no role                         | `test_RevertWhen_ZeroExecutor`, `testFuzz_RevertWhen_ZeroInAnyRoleList`; rehearsal                                                                  |
-| Treasury Safe compromise (M-1)          | Independent guardian Safe can cancel any pending operation within the 48-hour delay                                                           | `test_GuardianCanCancelPendingOperation`; invariant `GuardianIsCancellerOnly`                                                                       |
-| Guardian overreach                      | Guardian holds only `CANCELLER_ROLE`; must not be a proposer or executor; verifier asserts its exact roles                                    | `test_RevertWhen_GuardianSchedules`, `test_RevertWhen_GuardianExecutes`, `test_RevertWhen_Verify*Guardian*`                                         |
-| Guardian compromise (griefing)          | **Accepted.** A hostile guardian can cancel every operation, including its own replacement; it cannot move funds. Recovery is social or legal | Documented in `token-design.md`                                                                                                                     |
-| Overflow                                | Solidity 0.8 checked arithmetic; max product 7×10²⁴ × 1.6×10⁸ ≪ 2²⁵⁶                                                                          | Fuzzing over the full `uint64` time range                                                                                                           |
-| Reentrancy                              | ARL is a plain ERC-20 with no hooks; `VestingWallet` updates state before transfer                                                            | Slither `reentrancy-*` clean on ARL code                                                                                                            |
-| Permit replay or forgery                | OpenZeppelin `ERC20Permit`: EIP-712 domain with chain ID and contract address, sequential nonces, deadline, low-`s` check                     | `ARLTokenPermit.t.sol` (replay, expiry, wrong signer, other chain, high-`s`, fuzz)                                                                  |
-| Permit front-running                    | A consumed permit makes a later identical `permit` call revert; the allowance is unaffected. Integrators must tolerate an already-used permit | Documented                                                                                                                                          |
-| Double initialization                   | No initializers; constructors only                                                                                                            | Design                                                                                                                                              |
+| Threat                                  | Control                                                                                                                                       | Evidence                                                                                                                                              |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Supply above 21M                        | Mint only in constructor; no mint function; constructor total check                                                                           | Unit test, ABI allowlist, invariants                                                                                                                  |
+| Hidden admin                            | No `Ownable`/`AccessControl` on the token                                                                                                     | `test_NoAdminOrMintFunctions`                                                                                                                         |
+| Early vesting release                   | Linear period starts at `cliffEnd`                                                                                                            | Boundary tests at `cliffEnd − 1`, `cliffEnd`, `cliffEnd + 1`; invariant `NoInvestorsReleaseBeforeCliff`                                               |
+| Over-release                            | Unmodified OpenZeppelin release accounting                                                                                                    | Fuzzed repeated releases; invariant `VestingNeverOverReleases`                                                                                        |
+| Beneficiary transfer of unvested tokens | `transferOwnership`/`renounceOwnership` revert                                                                                                | Unit, fuzz and invariant tests                                                                                                                        |
+| Founder key loss or theft (M-3)         | Founder Unrestricted recipient must be a contract (a dedicated Safe) off local Anvil; checked by the plan and by the verifier                 | `test_RevertWhen_FounderUnrestrictedHasNoCodeWhenRequired`, `test_RevertWhen_VerifyFounderUnrestrictedHasNoCode`; rehearsal with Safe v1.5.0 on Anvil |
+| Allocation drift (M-2 model)            | 11 constants, one recipient and one `_mint` each; plan and verifier keyed per allocation; every holder distinct                               | `contract-consistency.test.ts`; `test_RevertWhen_AllocationsSwapped`, `test_RevertWhen_VerifySharedHolder`; rehearsal negatives                       |
+| Unapproved vesting schedule deployed    | Planner and `ARLDeployPlan` refuse every chain but local Anvil while schedules are TBD                                                        | `test_RevertWhen_VestingSchedulesNotApprovedOffLocal`; planner test; rehearsal                                                                        |
+| Treasury bypass                         | Timelock holds funds; Safe-only roles; 48-hour delay                                                                                          | Unit and fuzz tests; invariant `TreasuryOnlyPaysThroughTimelock`                                                                                      |
+| Delay lowered via timelock              | 48-hour floor in `updateDelay`                                                                                                                | `test_RevertWhen_DelayLoweredBelowFloorThroughTheTimelock`                                                                                            |
+| Role takeover                           | No external admin; role changes pass the delay                                                                                                | `test_RevertWhen_RoleGrantedOutsideTheTimelock`                                                                                                       |
+| Open execution (L-3)                    | Constructor rejects `address(0)` as proposer, executor or guardian; verifier re-checks the zero address holds no role                         | `test_RevertWhen_ZeroExecutor`, `testFuzz_RevertWhen_ZeroInAnyRoleList`; rehearsal                                                                    |
+| Treasury Safe compromise (M-1)          | Independent guardian Safe can cancel any pending operation within the 48-hour delay                                                           | `test_GuardianCanCancelPendingOperation`; invariant `GuardianIsCancellerOnly`                                                                         |
+| Guardian overreach                      | Guardian holds only `CANCELLER_ROLE`; must not be a proposer or executor; verifier asserts its exact roles                                    | `test_RevertWhen_GuardianSchedules`, `test_RevertWhen_GuardianExecutes`, `test_RevertWhen_Verify*Guardian*`                                           |
+| Guardian compromise (griefing)          | **Accepted.** A hostile guardian can cancel every operation, including its own replacement; it cannot move funds. Recovery is social or legal | Documented in `token-design.md`                                                                                                                       |
+| Overflow                                | Solidity 0.8 checked arithmetic; max product 7×10²⁴ × 1.6×10⁸ ≪ 2²⁵⁶                                                                          | Fuzzing over the full `uint64` time range                                                                                                             |
+| Reentrancy                              | ARL is a plain ERC-20 with no hooks; `VestingWallet` updates state before transfer                                                            | Slither `reentrancy-*` clean on ARL code                                                                                                              |
+| Permit replay or forgery                | OpenZeppelin `ERC20Permit`: EIP-712 domain with chain ID and contract address, sequential nonces, deadline, low-`s` check                     | `ARLTokenPermit.t.sol` (replay, expiry, wrong signer, other chain, high-`s`, fuzz)                                                                    |
+| Permit front-running                    | A consumed permit makes a later identical `permit` call revert; the allowance is unaffected. Integrators must tolerate an already-used permit | Documented                                                                                                                                            |
+| Double initialization                   | No initializers; constructors only                                                                                                            | Design                                                                                                                                                |
 
 ## Mutation checks
 
@@ -59,8 +66,10 @@ Each deliberate defect was introduced, the suite run, and the defect reverted:
 | Executor list not checked                       | 3 tests                                                    |
 | Guardian not granted the canceller role         | 3 tests, invariant `GuardianIsCancellerOnly`               |
 | Guardian also granted proposer or executor      | 3-4 tests each, invariant `GuardianIsCancellerOnly`        |
-| Founder code check removed from the plan        | `test_RevertWhen_FounderBeneficiaryHasNoCodeWhenRequired`  |
-| Founder code check removed from the verifier    | `test_RevertWhen_VerifyFounderBeneficiaryHasNoCode`        |
+| Founder code check removed from the plan        | `test_RevertWhen_FounderUnrestrictedHasNoCodeWhenRequired` |
+| Founder code check removed from the verifier    | `test_RevertWhen_VerifyFounderUnrestrictedHasNoCode`       |
+| Founder reserve custody gate removed            | `test_RevertWhen_FounderReserveCustodyNotApprovedOffLocal` |
+| Founder reserve shares another holder's address | `test_RevertWhen_FounderReservedAddressReused`             |
 
 ## Slither 0.11.6
 
@@ -88,8 +97,7 @@ because it is too new to have a track record.
 ## Known limitations
 
 - Lost beneficiary keys cannot be recovered by the vesting wallet. Recovery
-  depends on the beneficiary being a Safe (required for the founder off local
-  Anvil) and on its owners keeping a signing quorum.
+  depends on the beneficiary being a Safe and on its owners keeping a signing quorum.
 - The Safe's threshold is not enforced by ARL contracts.
 - Deployment parameters (timestamps, holder addresses) are not yet reviewed —
   no deployment script exists.

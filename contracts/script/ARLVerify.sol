@@ -5,7 +5,7 @@ import {ARLAllocation} from "../src/ARLAllocation.sol";
 import {ARLTimelock} from "../src/ARLTimelock.sol";
 import {ARLToken} from "../src/ARLToken.sol";
 import {ARLVestingWallet} from "../src/ARLVestingWallet.sol";
-import {Allocations, Plan} from "./ARLDeployPlan.sol";
+import {ARLDeployPlan, Allocations, FounderTranches, Plan, VestingPlan} from "./ARLDeployPlan.sol";
 import {Deployment} from "./ARLDeployer.sol";
 
 /// @title Post-deployment verification
@@ -13,10 +13,6 @@ import {Deployment} from "./ARLDeployer.sol";
 /// first check that fails. Must run immediately after deployment, before any token moves:
 /// it asserts the exact genesis distribution.
 library ARLVerify {
-    /// @dev The approved Ecosystem Reserve duration, stated independently of ARLAllocation so a
-    /// change to the constant cannot pass verification.
-    uint64 internal constant APPROVED_RESERVE_DURATION = 1830 days;
-
     error VerifyFailed(string check);
     error VerifyUintMismatch(string check, uint256 expected, uint256 actual);
     error VerifyAddressMismatch(string check, address expected, address actual);
@@ -25,7 +21,8 @@ library ARLVerify {
         _chainAndCode(p, d);
         _token(p, d);
         _distribution(p, d);
-        _vesting(p, d);
+        _vesting("investors", p.investors, d.investorsVesting, d);
+        _vesting("strategic partnerships", p.strategicPartnerships, d.partnershipsVesting, d);
         _timelock(p, d);
     }
 
@@ -34,21 +31,14 @@ library ARLVerify {
     function _chainAndCode(Plan memory p, Deployment memory d) private view {
         _eq("chain id", p.chainId, block.chainid);
         _hasCode("token", address(d.token));
-        _hasCode("founder vesting wallet", address(d.founderVesting));
-        _hasCode("ecosystem reserve vesting wallet", address(d.reserveVesting));
+        _hasCode("investors vesting wallet", address(d.investorsVesting));
+        _hasCode("strategic partnerships vesting wallet", address(d.partnershipsVesting));
         _hasCode("treasury timelock", address(d.timelock));
         if (p.requireRecipientCode) {
-            _hasCode("founder beneficiary safe", p.founderBeneficiary);
-            _hasCode("treasury safe", p.treasurySafe);
-            _hasCode("treasury guardian", p.treasuryGuardian);
-            _hasCode("ecosystem reserve beneficiary", p.reserveBeneficiary);
-            _hasCode("community staking recipient", p.recipients.communityStaking);
-            _hasCode("liquidity recipient", p.recipients.liquidity);
-            _hasCode("strategic partnerships recipient", p.recipients.strategicPartnerships);
-            _hasCode("public launch recipient", p.recipients.publicLaunch);
-            _hasCode("grants recipient", p.recipients.grantsBugBounty);
-            _hasCode("team pool recipient", p.recipients.team);
-            _hasCode("early user rewards recipient", p.recipients.earlyUserRewards);
+            (string[12] memory field, address[12] memory account) = ARLDeployPlan.safeRoles(p);
+            for (uint256 i = 0; i < 12; i++) {
+                _hasCode(field[i], account[i]);
+            }
         }
     }
 
@@ -66,78 +56,91 @@ library ARLVerify {
 
     // ------------------------------------------------------------------ distribution
 
-    /// @dev Aggregates planned amounts per holder (one address may hold several allocations),
-    /// checks every holder's balance, and checks the holders account for the whole supply, so
-    /// no allocation can sit at an unexpected address.
+    /// @dev Every allocation has its own holder, and the Founder allocation has two (its
+    /// unrestricted and reserved tranches). Checks that the twelve genesis holders are distinct,
+    /// that each holds exactly its planned amount, and that together they hold the whole supply,
+    /// so no allocation can sit at an unexpected address. The Founder holders are plan
+    /// recipients, never a vesting wallet deployed here, and no founder schedule exists.
     function _distribution(Plan memory p, Deployment memory d) private view {
         Allocations memory a = p.allocations;
-        address[10] memory holder = [
-            address(d.founderVesting),
-            address(d.reserveVesting),
-            address(d.timelock),
-            p.recipients.communityStaking,
-            p.recipients.liquidity,
-            p.recipients.strategicPartnerships,
+        FounderTranches memory f = p.founderTranches;
+        if (f.unrestricted + f.reserved != a.founder) {
+            revert VerifyUintMismatch("founder tranches", a.founder, f.unrestricted + f.reserved);
+        }
+        address[12] memory holder = [
             p.recipients.publicLaunch,
-            p.recipients.grantsBugBounty,
+            p.recipients.communityStaking,
+            p.recipients.ecosystemGrowth,
+            address(d.partnershipsVesting),
+            p.recipients.liquidity,
+            p.recipients.founderUnrestricted,
+            p.recipients.founderReserved,
+            address(d.investorsVesting),
+            address(d.timelock),
             p.recipients.team,
-            p.recipients.earlyUserRewards
+            p.recipients.earlyUsers,
+            p.recipients.grantsBugBounty
         ];
-        uint256[10] memory amount = [
-            a.founder,
-            a.ecosystemReserve,
-            a.treasury,
-            a.communityStaking,
-            a.liquidity,
-            a.strategicPartnerships,
+        uint256[12] memory amount = [
             a.publicLaunch,
-            a.grantsBugBounty,
+            a.communityStaking,
+            a.ecosystemGrowth,
+            a.strategicPartnerships,
+            a.liquidity,
+            f.unrestricted,
+            f.reserved,
+            a.investors,
+            a.treasury,
             a.team,
-            a.earlyUserRewards
+            a.earlyUsers,
+            a.grantsBugBounty
         ];
 
         uint256 accounted = 0;
-        for (uint256 i = 0; i < 10; i++) {
-            bool seen = false;
-            for (uint256 j = 0; j < i; j++) {
-                if (holder[j] == holder[i]) seen = true;
+        for (uint256 i = 0; i < 12; i++) {
+            for (uint256 j = i + 1; j < 12; j++) {
+                // forge-lint: disable-next-line(require-revert-in-loop)
+                if (holder[i] == holder[j]) revert VerifyFailed("allocation holders are distinct");
             }
-            if (seen) continue;
-            uint256 expected = 0;
-            for (uint256 j = i; j < 10; j++) {
-                if (holder[j] == holder[i]) expected += amount[j];
-            }
-            _eq("allocation balance", expected, d.token.balanceOf(holder[i]));
-            accounted += expected;
+            _eq("allocation balance", amount[i], d.token.balanceOf(holder[i]));
+            accounted += amount[i];
         }
         _eq("supply held by planned recipients", d.token.totalSupply(), accounted);
-
         _eq("deployer balance", 0, d.token.balanceOf(d.deployer));
-        _eq("founder vesting balance", ARLAllocation.FOUNDER, d.token.balanceOf(holder[0]));
+
+        // Stated against the contract constants as well, so a plan that agreed with a changed
+        // allocation table could not pass.
         _eq(
-            "reserve vesting balance", ARLAllocation.ECOSYSTEM_RESERVE, d.token.balanceOf(holder[1])
+            "founder unrestricted balance",
+            ARLAllocation.FOUNDER_UNRESTRICTED,
+            d.token.balanceOf(holder[5])
         );
-        _eq("treasury balance", ARLAllocation.TREASURY, d.token.balanceOf(holder[2]));
+        _eq(
+            "founder reserved balance", ARLAllocation.FOUNDER_RESERVED, d.token.balanceOf(holder[6])
+        );
+        _eq("investors vesting balance", ARLAllocation.INVESTORS, d.token.balanceOf(holder[7]));
+        _eq(
+            "strategic partnerships vesting balance",
+            ARLAllocation.STRATEGIC_PARTNERSHIPS,
+            d.token.balanceOf(holder[3])
+        );
+        _eq("treasury balance", ARLAllocation.TREASURY, d.token.balanceOf(holder[8]));
     }
 
     // ------------------------------------------------------------------ vesting
 
-    function _vesting(Plan memory p, Deployment memory d) private view {
-        ARLVestingWallet f = d.founderVesting;
-        _addr("founder beneficiary", p.founderBeneficiary, f.owner());
-        _eq("founder cliff start", p.founderCliffStart, f.cliffStart());
-        _eq("founder cliff end", p.founderCliffEnd, f.cliffEnd());
-        _eq("founder vesting end", p.founderVestingEnd, f.vestingEnd());
-        _eq("founder linear duration", p.founderVestingEnd - p.founderCliffEnd, f.duration());
-        _eq("founder released", 0, f.released(address(d.token)));
-
-        ARLVestingWallet r = d.reserveVesting;
-        _addr("reserve beneficiary", p.reserveBeneficiary, r.owner());
-        _eq("reserve start", p.reserveStart, r.start());
-        _eq("reserve has no cliff", r.cliffStart(), r.start());
-        _eq("reserve duration", APPROVED_RESERVE_DURATION, r.duration());
-        _eq("reserve end", uint256(p.reserveStart) + APPROVED_RESERVE_DURATION, r.end());
-        _eq("reserve released", 0, r.released(address(d.token)));
+    function _vesting(
+        string memory name,
+        VestingPlan memory v,
+        ARLVestingWallet w,
+        Deployment memory d
+    ) private view {
+        _addr(string.concat(name, " beneficiary"), v.beneficiary, w.owner());
+        _eq(string.concat(name, " cliff start"), v.cliffStart, w.cliffStart());
+        _eq(string.concat(name, " cliff end"), v.cliffEnd, w.cliffEnd());
+        _eq(string.concat(name, " vesting end"), v.vestingEnd, w.vestingEnd());
+        _eq(string.concat(name, " linear duration"), v.vestingEnd - v.cliffEnd, w.duration());
+        _eq(string.concat(name, " released"), 0, w.released(address(d.token)));
     }
 
     // ------------------------------------------------------------------ timelock
