@@ -37,6 +37,14 @@ export type Release =
       readonly controls?: MultisigControls;
     }
   | {
+      /** Linear vesting with no cliff, from `start`, in calendar months. */
+      readonly kind: "linear";
+      readonly vestingMonths: number;
+      readonly start: VestingStart;
+      readonly status: DecisionStatus;
+      readonly note?: string;
+    }
+  | {
       readonly kind: "program";
       readonly description: string;
       readonly status: DecisionStatus;
@@ -47,6 +55,61 @@ export type Release =
         readonly status: DecisionStatus;
       };
     };
+
+/**
+ * When a `linear` schedule starts.
+ * - deployment: the timestamp at which the vesting wallet is deployed.
+ * - initial-program-end: the end of the allocation's initial program period
+ *   (`initialProgram.durationMonths` after deployment).
+ */
+export type VestingStart = "deployment" | "initial-program-end";
+
+/**
+ * Where an allocation's tokens are held at genesis (M-2, decided 2026-09-27).
+ *
+ * Safe signer lists and thresholds are operational configuration. They are
+ * never recorded here, apart from the treasury's approved policy.
+ */
+export type Custody =
+  | {
+      /**
+       * A vesting wallet holds the tokens and releases them to a dedicated
+       * Safe that holds no other allocation.
+       */
+      readonly holder: "vesting-wallet";
+      readonly beneficiary: "dedicated-safe";
+    }
+  | {
+      /**
+       * A Safe holds the tokens directly, with no vesting. `dedicated` is set
+       * only where a dedicated Safe has been decided.
+       */
+      readonly holder: "safe";
+      readonly dedicated?: true;
+    }
+  | {
+      /** The treasury timelock holds the tokens; see the release controls. */
+      readonly holder: "timelock";
+    }
+  | {
+      /**
+       * A dedicated pool Safe holds the tokens, with no pool-level vesting.
+       * Each approved grant is funded from the pool into its own vesting
+       * wallet whose beneficiary is the recipient's own Safe; the release
+       * rule then applies per grant, from its grant date.
+       */
+      readonly holder: "grant-pool";
+      readonly grantBeneficiary: "recipient-safe";
+    };
+
+/** A separately held portion of an allocation. */
+export interface AllocationPart {
+  readonly id: string;
+  /** Whole ARL. */
+  readonly amount: number;
+  readonly custody: Custody;
+  readonly release: Release;
+}
 
 /**
  * Approval policy for a multisig-held allocation. Signer addresses are
@@ -71,6 +134,10 @@ export interface Allocation {
   readonly amount: number;
   readonly purpose: string;
   readonly release: Release;
+  /** Genesis custody. Absent only when `parts` defines custody per portion. */
+  readonly custody?: Custody;
+  /** Separately held portions; their amounts add up to `amount`. */
+  readonly parts?: readonly AllocationPart[];
 }
 
 function deepFreeze<T>(value: T): T {
@@ -90,6 +157,7 @@ export const ALLOCATIONS: readonly Allocation[] = deepFreeze([
     amount: 2_100_000,
     purpose: "Founder allocation, held in a dedicated vesting contract.",
     release: { kind: "cliff-linear", cliffMonths: 24, vestingMonths: 36, status: "approved" },
+    custody: { holder: "vesting-wallet", beneficiary: "dedicated-safe" },
   },
   {
     id: "ecosystem-reserve",
@@ -104,6 +172,7 @@ export const ALLOCATIONS: readonly Allocation[] = deepFreeze([
       status: "approved",
       note: "Unlocked tokens remain in the reserve until spent; an unlock is not a sale.",
     },
+    custody: { holder: "vesting-wallet", beneficiary: "dedicated-safe" },
   },
   {
     id: "treasury",
@@ -117,6 +186,7 @@ export const ALLOCATIONS: readonly Allocation[] = deepFreeze([
       status: "approved",
       controls: { wallet: "Safe", threshold: 3, signers: 5, minDelayHours: 48 },
     },
+    custody: { holder: "timelock" },
   },
   {
     id: "community-staking",
@@ -124,11 +194,13 @@ export const ALLOCATIONS: readonly Allocation[] = deepFreeze([
     amount: 3_000_000,
     purpose: "Staking rewards and community programs.",
     release: {
-      kind: "program",
-      description:
-        "Rewards are paid from this allocation or from protocol revenue. Staking never issues new ARL.",
+      kind: "linear",
+      vestingMonths: 60,
+      start: "deployment",
       status: "approved",
+      note: "Rewards are paid from this allocation or from protocol revenue. Staking never issues new ARL.",
     },
+    custody: { holder: "vesting-wallet", beneficiary: "dedicated-safe" },
   },
   {
     id: "liquidity",
@@ -141,6 +213,7 @@ export const ALLOCATIONS: readonly Allocation[] = deepFreeze([
         "Held as a reserve. The amount used for the first DEX pool is decided separately; control of LP positions is documented before any pool is created.",
       status: "approved",
     },
+    custody: { holder: "safe" },
   },
   {
     id: "strategic-partnerships",
@@ -148,17 +221,22 @@ export const ALLOCATIONS: readonly Allocation[] = deepFreeze([
     amount: 1_500_000,
     purpose: "Reserved for future partners. No partnership has been announced.",
     release: {
-      kind: "program",
-      description: "Released per signed agreement.",
-      status: "undecided",
+      kind: "linear",
+      vestingMonths: 36,
+      start: "deployment",
+      status: "approved",
+      note: "Released per signed agreement, limited to the amount that has vested and is available in the vesting wallet.",
     },
+    custody: { holder: "vesting-wallet", beneficiary: "dedicated-safe" },
   },
   {
     id: "public-launch",
     name: "Public Launch",
     amount: 1_000_000,
     purpose: "Reserved for a future public launch. No sale is scheduled.",
+    // Custody is decided; the launch terms are not.
     release: { kind: "program", description: "Terms set before any launch.", status: "undecided" },
+    custody: { holder: "safe" },
   },
   {
     id: "grants-bug-bounty",
@@ -167,18 +245,20 @@ export const ALLOCATIONS: readonly Allocation[] = deepFreeze([
     purpose: "Builder grants and security bug bounties.",
     release: {
       kind: "program",
-      description: "Paid per grant or bounty award.",
-      status: "undecided",
+      description: "Paid per grant or bounty award. No release schedule.",
+      status: "approved",
     },
+    custody: { holder: "safe" },
   },
   {
     id: "team",
     name: "Team",
     amount: 500_000,
     purpose:
-      "Core team members. Separate from the founder allocation. Individual grants are not assigned yet; unassigned tokens stay locked in a multisig-controlled pool.",
+      "Core team members. Separate from the founder allocation. Individual grants are not assigned yet; unassigned tokens are held in a dedicated team pool Safe, from which approved grants are funded.",
     // Applies per member from their grant date, each with a separate schedule.
     release: { kind: "cliff-linear", cliffMonths: 12, vestingMonths: 36, status: "approved" },
+    custody: { holder: "grant-pool", grantBeneficiary: "recipient-safe" },
   },
   {
     id: "early-user-rewards",
@@ -188,7 +268,7 @@ export const ALLOCATIONS: readonly Allocation[] = deepFreeze([
     release: {
       kind: "program",
       description:
-        "Distributed through reward programs. Amounts beyond the initial program are governed by future programs.",
+        "Distributed through reward programs. Amounts beyond the initial program vest to a dedicated Safe and are distributed by future programs.",
       status: "approved",
       initialProgram: {
         maxAmount: 100_000,
@@ -203,5 +283,28 @@ export const ALLOCATIONS: readonly Allocation[] = deepFreeze([
         status: "approved",
       },
     },
+    parts: [
+      {
+        id: "initial-program",
+        amount: 100_000,
+        custody: { holder: "safe" },
+        release: {
+          kind: "program",
+          description: "The initial program: at most 100,000 ARL during the first 6 months.",
+          status: "approved",
+        },
+      },
+      {
+        id: "vesting",
+        amount: 400_000,
+        custody: { holder: "vesting-wallet", beneficiary: "dedicated-safe" },
+        release: {
+          kind: "linear",
+          vestingMonths: 36,
+          start: "initial-program-end",
+          status: "approved",
+        },
+      },
+    ],
   },
 ]);

@@ -130,6 +130,89 @@ describe("release rules", () => {
   });
 });
 
+describe("custody (M-2, decided 2026-09-27)", () => {
+  const vestingWallet = { holder: "vesting-wallet", beneficiary: "dedicated-safe" };
+
+  it("every allocation or part has a defined custody", () => {
+    for (const a of ALLOCATIONS) {
+      assert.ok(a.custody || a.parts, `${a.id} has no custody`);
+      for (const part of a.parts ?? []) assert.ok(part.custody, `${a.id}/${part.id}`);
+    }
+  });
+
+  it("community / staking: 60 months linear from deployment, no cliff, dedicated Safe", () => {
+    const a = byId("community-staking");
+    assert.equal(a.amount, 3_000_000);
+    assert.deepEqual(a.custody, vestingWallet);
+    const r = a.release;
+    assert.equal(r.kind, "linear");
+    assert.equal(r.vestingMonths, 60);
+    assert.equal(r.start, "deployment");
+    assert.equal(r.status, "approved");
+  });
+
+  it("strategic partnerships: 36 months linear from deployment, no cliff, dedicated Safe", () => {
+    const a = byId("strategic-partnerships");
+    assert.equal(a.amount, 1_500_000);
+    assert.deepEqual(a.custody, vestingWallet);
+    const r = a.release;
+    assert.equal(r.kind, "linear");
+    assert.equal(r.vestingMonths, 36);
+    assert.equal(r.start, "deployment");
+    assert.equal(r.status, "approved");
+    assert.match(r.note ?? "", /limited to the amount that has vested/);
+  });
+
+  it("liquidity, public launch and grants: held in a Safe with no vesting", () => {
+    for (const id of ["liquidity", "public-launch", "grants-bug-bounty"]) {
+      const a = byId(id);
+      assert.deepEqual(a.custody, { holder: "safe" }, id);
+      assert.ok(a.release.kind === "custody" || a.release.kind === "program", id);
+    }
+    // Launch terms remain a separate, open decision.
+    assert.equal(byId("public-launch").release.status, "undecided");
+  });
+
+  it("team: a dedicated pool Safe funds per-member grants; no pool-level schedule", () => {
+    const a = byId("team");
+    assert.deepEqual(a.custody, { holder: "grant-pool", grantBeneficiary: "recipient-safe" });
+    assert.equal(a.release.kind, "cliff-linear");
+    assert.doesNotMatch(a.purpose, /locked/);
+  });
+
+  it("early user rewards: 100,000 in a Safe, 400,000 vesting 36 months after the program", () => {
+    const a = byId("early-user-rewards");
+    assert.equal(a.custody, undefined);
+    const parts = a.parts ?? [];
+    assert.deepEqual(
+      parts.map((p) => [p.id, p.amount]),
+      [
+        ["initial-program", 100_000],
+        ["vesting", 400_000],
+      ],
+    );
+    const [initial, vesting] = parts;
+    assert.ok(initial && vesting);
+    assert.deepEqual(initial.custody, { holder: "safe" });
+    assert.deepEqual(vesting.custody, vestingWallet);
+    assert.deepEqual(vesting.release, {
+      kind: "linear",
+      vestingMonths: 36,
+      start: "initial-program-end",
+      status: "approved",
+    });
+    const r = a.release;
+    assert.ok(r.kind === "program" && r.initialProgram);
+    assert.equal(r.initialProgram.maxAmount, initial.amount);
+  });
+
+  it("founder and ecosystem reserve vest to dedicated Safes; treasury sits in the timelock", () => {
+    assert.deepEqual(byId("founder").custody, vestingWallet);
+    assert.deepEqual(byId("ecosystem-reserve").custody, vestingWallet);
+    assert.deepEqual(byId("treasury").custody, { holder: "timelock" });
+  });
+});
+
 describe("immutability", () => {
   it("the table cannot be modified at runtime", () => {
     assert.throws(() => {
@@ -199,6 +282,44 @@ describe("validator rejects invalid tables", () => {
     assert.match(
       validateAllocations(weaken({ minDelayHours: 24 }), MAX_SUPPLY).join("\n"),
       /below/,
+    );
+  });
+
+  it("rejects parts that do not add up to the allocation", () => {
+    const table = clone().map((a) =>
+      a.parts
+        ? { ...a, parts: a.parts.map((p) => (p.id === "vesting" ? { ...p, amount: 399_999 } : p)) }
+        : a,
+    );
+    assert.match(validateAllocations(table, MAX_SUPPLY).join("\n"), /parts total 499999/);
+  });
+
+  it("rejects an allocation without custody", () => {
+    const table = clone().map((a) => {
+      if (a.id !== "liquidity") return a;
+      const rest: Allocation = { ...a };
+      delete (rest as { custody?: unknown }).custody;
+      return rest;
+    });
+    assert.match(validateAllocations(table, MAX_SUPPLY).join("\n"), /liquidity: custody/);
+  });
+
+  it("rejects custody that contradicts the release rule", () => {
+    const inSafe = clone().map((a) =>
+      a.id === "community-staking" ? { ...a, custody: { holder: "safe" as const } } : a,
+    );
+    assert.match(validateAllocations(inSafe, MAX_SUPPLY).join("\n"), /needs a vesting wallet/);
+    const noSchedule = clone().map((a) =>
+      a.id === "liquidity"
+        ? {
+            ...a,
+            custody: { holder: "vesting-wallet" as const, beneficiary: "dedicated-safe" as const },
+          }
+        : a,
+    );
+    assert.match(
+      validateAllocations(noSchedule, MAX_SUPPLY).join("\n"),
+      /needs a vesting schedule/,
     );
   });
 

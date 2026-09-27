@@ -88,4 +88,22 @@ Resolved on 2026-09-27 (Phase 2 M-3):
 - Team grants are irrevocable and made in tranches; each member's beneficiary
   is the member's own Safe or smart account. `ARLVestingWallet` is unchanged.
 
-M-2 (custody of unlocked allocations) is still open.
+Resolved on 2026-09-27 (Phase 2 M-2, decision recorded; deployment not yet
+implemented):
+
+- Community / Staking: 60-month linear vesting from deployment, no cliff, to a
+  dedicated Safe.
+- Strategic Partnerships: 36-month linear vesting from deployment, no cliff, to
+  a dedicated Safe; releases per signed agreement are limited to the vested
+  amount.
+- Mining / Early User Rewards: 100,000 ARL in a Safe for the initial 6-month
+  program; the remaining 400,000 ARL vests linearly over 36 months, no cliff,
+  from the end of that program, to a dedicated Safe.
+- Liquidity, Public Launch and Grants / Bug Bounty: Safe, no vesting. Public
+  Launch terms remain undecided.
+- Team: a dedicated pool Safe funds the approved per-member grants; there is no
+  pool-level schedule.
+- Every vesting allocation has its own dedicated Safe beneficiary. Signer lists
+  and thresholds are not stored in the repository.
+- Circulating supply methodology: see
+  [`tokenomics.md`](tokenomics.md#circulating-supply-methodology).

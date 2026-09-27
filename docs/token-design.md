@@ -176,9 +176,17 @@ addresses exist yet.
 
 ## Other allocations
 
-Community / Staking, Liquidity, Strategic Partnerships, Public Launch, Grants /
-Bug Bounty and Mining / Early User Rewards are minted to their own multisigs.
-Their release programs are later phases.
+Custody was decided on 2026-09-27 (M-2); see
+[`tokenomics.md`](tokenomics.md#custody).
+
+- Community / Staking (60 months), Strategic Partnerships (36 months) and the
+  400,000 ARL remainder of Mining / Early User Rewards (36 months, starting when
+  the initial 6-month program ends) are held in `ARLVestingWallet`s: linear, no
+  cliff, each releasing to its own dedicated Safe.
+- Liquidity, Public Launch, Grants / Bug Bounty and the initial 100,000 ARL of
+  Mining / Early User Rewards are held in Safes with no vesting.
+
+The deployment scripts do not implement this model yet.
 
 ## ERC20Permit
 
