@@ -3,6 +3,12 @@
 Status: internal review and automated testing only. **ARL has not been
 audited.** No contract is deployed.
 
+The allocation model changed on 2026-09-27 (11 allocations; the Ecosystem
+Reserve was removed). `ARLAllocation`, `ARLToken`, the deployment planner,
+deployer, verifier and rehearsal were changed with it. This is a new
+security-sensitive revision: evidence gathered for the previous model does not
+carry over and must be re-reviewed for this one.
+
 ## Scope
 
 `contracts/src/ARLToken.sol` (including `ERC20Permit`), `ARLAllocation.sol`, `ARLVestingWallet.sol`,
@@ -30,7 +36,8 @@ audited.** No contract is deployed.
 | Over-release                            | Unmodified OpenZeppelin release accounting                                                                                                    | Fuzzed repeated releases; invariant `VestingNeverOverReleases`                                                                                      |
 | Beneficiary transfer of unvested tokens | `transferOwnership`/`renounceOwnership` revert                                                                                                | Unit, fuzz and invariant tests                                                                                                                      |
 | Founder key loss or theft (M-3)         | Founder beneficiary must be a contract (a dedicated Safe) off local Anvil; checked by the plan and by the verifier                            | `test_RevertWhen_FounderBeneficiaryHasNoCodeWhenRequired`, `test_RevertWhen_VerifyFounderBeneficiaryHasNoCode`; rehearsal with Safe v1.5.0 on Anvil |
-| Reserve over the annual cap             | 1,830-day linear duration                                                                                                                     | Calendar-year test; fuzzed 366-day windows                                                                                                          |
+| Allocation drift (M-2 model)            | 11 constants, one recipient and one `_mint` each; plan and verifier keyed per allocation; every holder distinct                               | `contract-consistency.test.ts`; `test_RevertWhen_AllocationsSwapped`, `test_RevertWhen_VerifySharedHolder`; rehearsal negatives                     |
+| Unapproved vesting schedule deployed    | Planner and `ARLDeployPlan` refuse every chain but local Anvil while schedules are TBD                                                        | `test_RevertWhen_VestingSchedulesNotApprovedOffLocal`; planner test; rehearsal                                                                      |
 | Treasury bypass                         | Timelock holds funds; Safe-only roles; 48-hour delay                                                                                          | Unit and fuzz tests; invariant `TreasuryOnlyPaysThroughTimelock`                                                                                    |
 | Delay lowered via timelock              | 48-hour floor in `updateDelay`                                                                                                                | `test_RevertWhen_DelayLoweredBelowFloorThroughTheTimelock`                                                                                          |
 | Role takeover                           | No external admin; role changes pass the delay                                                                                                | `test_RevertWhen_RoleGrantedOutsideTheTimelock`                                                                                                     |

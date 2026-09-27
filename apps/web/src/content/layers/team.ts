@@ -6,10 +6,10 @@ import type { Card, Fact, Layer, Section } from "../types.ts";
 // applied, so no component can show an unverified claim by accident.
 
 const team = ALLOCATIONS.find((a) => a.id === "team");
-if (!team || team.release.kind !== "cliff-linear") {
+if (!team || team.release.kind !== "program") {
   throw new Error("Team allocation is missing from packages/tokenomics");
 }
-const teamVesting = `${team.release.cliffMonths}-month cliff, then ${team.release.vestingMonths}-month linear vesting from each member's grant date`;
+const teamVesting = team.release.description;
 
 export const UNVERIFIED_NOTE =
   "This profile has not been independently verified. Education and career details are published only after verification.";

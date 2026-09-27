@@ -21,7 +21,7 @@ try {
   mkdirSync(dirname(planPath), { recursive: true });
   writeFileSync(planPath, `${JSON.stringify(plan, null, 2)}\n`);
   process.stdout.write(
-    `plan written: ${planPath} (network ${plan.network}, chain ${plan.chainId}, launch ${plan.source.launchDate})\n`,
+    `plan written: ${planPath} (network ${plan.network}, chain ${plan.chainId})\n`,
   );
 } catch (error) {
   const message = error instanceof PlanError ? error.message : String(error);

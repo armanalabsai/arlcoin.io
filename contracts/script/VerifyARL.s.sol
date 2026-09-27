@@ -28,7 +28,12 @@ contract VerifyARL is Script {
             deployer: vm.parseJsonAddress(json, ".deployer"),
             token: ARLToken(vm.parseJsonAddress(json, ".token")),
             founderVesting: ARLVestingWallet(payable(vm.parseJsonAddress(json, ".founderVesting"))),
-            reserveVesting: ARLVestingWallet(payable(vm.parseJsonAddress(json, ".reserveVesting"))),
+            investorsVesting: ARLVestingWallet(
+                payable(vm.parseJsonAddress(json, ".investorsVesting"))
+            ),
+            partnershipsVesting: ARLVestingWallet(
+                payable(vm.parseJsonAddress(json, ".partnershipsVesting"))
+            ),
             timelock: ARLTimelock(payable(vm.parseJsonAddress(json, ".timelock")))
         });
 

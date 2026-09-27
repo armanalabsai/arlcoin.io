@@ -52,7 +52,7 @@ export const technology: Layer = {
       weight: "primary",
       detail: {
         summary:
-          "Providers will offer GPU and CPU capacity; consumers will run jobs and pay in ARL. Early provider participation is eligible for the Mining / Early User Rewards program.",
+          "Providers will offer GPU and CPU capacity; consumers will run jobs and pay in ARL. Early provider participation is eligible for the Early Users program.",
         sections: [
           {
             heading: "Planned scope",
@@ -91,9 +91,9 @@ export const technology: Layer = {
       weight: "secondary",
       detail: {
         summary:
-          "Staking rewards will come from the Community / Staking allocation or protocol revenue, never from new issuance. DEX liquidity will come from the Liquidity allocation and be deployed in stages.",
+          "Staking rewards will come from the Community & Staking allocation or protocol revenue, never from new issuance. DEX and CEX liquidity will come from the Liquidity allocation.",
         facts: [
-          { label: "Community / Staking", value: arlAmount("community-staking"), mono: true },
+          { label: "Community & Staking", value: arlAmount("community-staking"), mono: true },
           { label: "Liquidity", value: arlAmount("liquidity"), mono: true },
           { label: "New issuance for rewards", value: "None" },
         ],

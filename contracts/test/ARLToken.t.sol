@@ -22,38 +22,43 @@ contract ARLTokenTest is ARLTestBase {
     }
 
     function test_AllocationConstantsSumToMaxSupply() public pure {
-        uint256 sum = ARLAllocation.FOUNDER + ARLAllocation.ECOSYSTEM_RESERVE
-            + ARLAllocation.TREASURY + ARLAllocation.COMMUNITY_STAKING + ARLAllocation.LIQUIDITY
-            + ARLAllocation.STRATEGIC_PARTNERSHIPS + ARLAllocation.PUBLIC_LAUNCH
-            + ARLAllocation.GRANTS_BUG_BOUNTY + ARLAllocation.TEAM
-            + ARLAllocation.EARLY_USER_REWARDS;
+        uint256 sum = ARLAllocation.PUBLIC_LAUNCH + ARLAllocation.COMMUNITY_STAKING
+            + ARLAllocation.ECOSYSTEM_GROWTH + ARLAllocation.STRATEGIC_PARTNERSHIPS
+            + ARLAllocation.LIQUIDITY + ARLAllocation.FOUNDER + ARLAllocation.INVESTORS
+            + ARLAllocation.TREASURY + ARLAllocation.TEAM + ARLAllocation.EARLY_USERS
+            + ARLAllocation.GRANTS_BUG_BOUNTY;
         assertEq(sum, ARLAllocation.MAX_SUPPLY);
+        assertEq(sum, 21_000_000e18);
     }
 
     function test_AllocationAmounts() public pure {
-        assertEq(ARLAllocation.FOUNDER, 2_100_000e18);
-        assertEq(ARLAllocation.ECOSYSTEM_RESERVE, 7_000_000e18);
-        assertEq(ARLAllocation.TREASURY, 3_000_000e18);
+        assertEq(ARLAllocation.PUBLIC_LAUNCH, 5_000_000e18);
         assertEq(ARLAllocation.COMMUNITY_STAKING, 3_000_000e18);
+        assertEq(ARLAllocation.ECOSYSTEM_GROWTH, 2_000_000e18);
+        assertEq(ARLAllocation.STRATEGIC_PARTNERSHIPS, 2_000_000e18);
         assertEq(ARLAllocation.LIQUIDITY, 2_000_000e18);
-        assertEq(ARLAllocation.STRATEGIC_PARTNERSHIPS, 1_500_000e18);
-        assertEq(ARLAllocation.PUBLIC_LAUNCH, 1_000_000e18);
+        assertEq(ARLAllocation.FOUNDER, 2_100_000e18);
+        assertEq(ARLAllocation.INVESTORS, 1_500_000e18);
+        assertEq(ARLAllocation.TREASURY, 1_000_000e18);
+        assertEq(ARLAllocation.TEAM, 900_000e18);
+        assertEq(ARLAllocation.EARLY_USERS, 1_100_000e18);
         assertEq(ARLAllocation.GRANTS_BUG_BOUNTY, 400_000e18);
-        assertEq(ARLAllocation.TEAM, 500_000e18);
-        assertEq(ARLAllocation.EARLY_USER_REWARDS, 500_000e18);
     }
 
     function test_EachHolderReceivesItsAllocation() public view {
-        assertEq(token.balanceOf(address(founderVesting)), ARLAllocation.FOUNDER);
-        assertEq(token.balanceOf(address(reserveVesting)), ARLAllocation.ECOSYSTEM_RESERVE);
-        assertEq(token.balanceOf(address(treasury)), ARLAllocation.TREASURY);
-        assertEq(token.balanceOf(communitySafe), ARLAllocation.COMMUNITY_STAKING);
-        assertEq(token.balanceOf(liquiditySafe), ARLAllocation.LIQUIDITY);
-        assertEq(token.balanceOf(partnershipsSafe), ARLAllocation.STRATEGIC_PARTNERSHIPS);
         assertEq(token.balanceOf(launchSafe), ARLAllocation.PUBLIC_LAUNCH);
-        assertEq(token.balanceOf(grantsSafe), ARLAllocation.GRANTS_BUG_BOUNTY);
+        assertEq(token.balanceOf(communitySafe), ARLAllocation.COMMUNITY_STAKING);
+        assertEq(token.balanceOf(growthSafe), ARLAllocation.ECOSYSTEM_GROWTH);
+        assertEq(
+            token.balanceOf(address(partnershipsVesting)), ARLAllocation.STRATEGIC_PARTNERSHIPS
+        );
+        assertEq(token.balanceOf(liquiditySafe), ARLAllocation.LIQUIDITY);
+        assertEq(token.balanceOf(address(founderVesting)), ARLAllocation.FOUNDER);
+        assertEq(token.balanceOf(address(investorsVesting)), ARLAllocation.INVESTORS);
+        assertEq(token.balanceOf(address(treasury)), ARLAllocation.TREASURY);
         assertEq(token.balanceOf(teamPoolSafe), ARLAllocation.TEAM);
-        assertEq(token.balanceOf(rewardsSafe), ARLAllocation.EARLY_USER_REWARDS);
+        assertEq(token.balanceOf(earlyUsersSafe), ARLAllocation.EARLY_USERS);
+        assertEq(token.balanceOf(grantsSafe), ARLAllocation.GRANTS_BUG_BOUNTY);
     }
 
     function test_OneAddressMayHoldSeveralAllocations() public {
@@ -67,7 +72,7 @@ contract ARLTokenTest is ARLTestBase {
     }
 
     function test_RevertWhen_AnyRecipientIsZero() public {
-        for (uint256 i = 0; i < 10; i++) {
+        for (uint256 i = 0; i < 11; i++) {
             ARLToken.Recipients memory r = _recipients();
             _zeroField(r, i);
             vm.expectRevert(
@@ -196,15 +201,16 @@ contract ARLTokenTest is ARLTestBase {
     // ---------------------------------------------------------------- helpers
 
     function _zeroField(ARLToken.Recipients memory r, uint256 i) private pure {
-        if (i == 0) r.founder = address(0);
-        else if (i == 1) r.ecosystemReserve = address(0);
-        else if (i == 2) r.treasury = address(0);
-        else if (i == 3) r.communityStaking = address(0);
+        if (i == 0) r.publicLaunch = address(0);
+        else if (i == 1) r.communityStaking = address(0);
+        else if (i == 2) r.ecosystemGrowth = address(0);
+        else if (i == 3) r.strategicPartnerships = address(0);
         else if (i == 4) r.liquidity = address(0);
-        else if (i == 5) r.strategicPartnerships = address(0);
-        else if (i == 6) r.publicLaunch = address(0);
-        else if (i == 7) r.grantsBugBounty = address(0);
+        else if (i == 5) r.founder = address(0);
+        else if (i == 6) r.investors = address(0);
+        else if (i == 7) r.treasury = address(0);
         else if (i == 8) r.team = address(0);
-        else r.earlyUserRewards = address(0);
+        else if (i == 9) r.earlyUsers = address(0);
+        else r.grantsBugBounty = address(0);
     }
 }

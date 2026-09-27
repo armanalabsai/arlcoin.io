@@ -15,7 +15,8 @@ import {ARLTestBase} from "../ARLTestBase.sol";
 contract ARLHandler is Test {
     ARLToken internal immutable token;
     ARLVestingWallet internal immutable founderVesting;
-    ARLVestingWallet internal immutable reserveVesting;
+    ARLVestingWallet internal immutable investorsVesting;
+    ARLVestingWallet internal immutable partnershipsVesting;
     ARLTimelock internal immutable treasury;
     address internal immutable treasurySafe;
 
@@ -28,14 +29,16 @@ contract ARLHandler is Test {
     constructor(
         ARLToken token_,
         ARLVestingWallet founderVesting_,
-        ARLVestingWallet reserveVesting_,
+        ARLVestingWallet investorsVesting_,
+        ARLVestingWallet partnershipsVesting_,
         ARLTimelock treasury_,
         address treasurySafe_,
         address[] memory actors_
     ) {
         token = token_;
         founderVesting = founderVesting_;
-        reserveVesting = reserveVesting_;
+        investorsVesting = investorsVesting_;
+        partnershipsVesting = partnershipsVesting_;
         treasury = treasury_;
         treasurySafe = treasurySafe_;
         actors = actors_;
@@ -65,8 +68,12 @@ contract ARLHandler is Test {
         founderVesting.release(address(token));
     }
 
-    function releaseReserve() external {
-        reserveVesting.release(address(token));
+    function releaseInvestors() external {
+        investorsVesting.release(address(token));
+    }
+
+    function releasePartnerships() external {
+        partnershipsVesting.release(address(token));
     }
 
     function warp(uint256 seconds_) external {
@@ -79,7 +86,11 @@ contract ARLHandler is Test {
             ghostOwnershipChanges++;
         } catch {}
         vm.prank(_actor(callerSeed));
-        try reserveVesting.renounceOwnership() {
+        try investorsVesting.renounceOwnership() {
+            ghostOwnershipChanges++;
+        } catch {}
+        vm.prank(_actor(callerSeed));
+        try partnershipsVesting.transferOwnership(newOwner) {
             ghostOwnershipChanges++;
         } catch {}
     }
@@ -117,28 +128,38 @@ contract ARLInvariantTest is ARLTestBase {
     function setUp() public override {
         super.setUp();
 
-        address[] memory actors = new address[](12);
+        address[] memory actors = new address[](14);
         actors[0] = founder;
-        actors[1] = ecosystemSafe;
-        actors[2] = communitySafe;
-        actors[3] = liquiditySafe;
-        actors[4] = partnershipsSafe;
-        actors[5] = launchSafe;
-        actors[6] = grantsSafe;
+        actors[1] = investorsSafe;
+        actors[2] = partnershipsSafe;
+        actors[3] = launchSafe;
+        actors[4] = communitySafe;
+        actors[5] = growthSafe;
+        actors[6] = liquiditySafe;
         actors[7] = teamPoolSafe;
-        actors[8] = rewardsSafe;
-        actors[9] = treasurySafe;
-        actors[10] = makeAddr("userA");
-        actors[11] = makeAddr("userB");
+        actors[8] = earlyUsersSafe;
+        actors[9] = grantsSafe;
+        actors[10] = treasurySafe;
+        actors[11] = guardianSafe;
+        actors[12] = makeAddr("userA");
+        actors[13] = makeAddr("userB");
 
-        handler =
-            new ARLHandler(token, founderVesting, reserveVesting, treasury, treasurySafe, actors);
+        handler = new ARLHandler(
+            token,
+            founderVesting,
+            investorsVesting,
+            partnershipsVesting,
+            treasury,
+            treasurySafe,
+            actors
+        );
 
         for (uint256 i = 0; i < actors.length; i++) {
             holders.push(actors[i]);
         }
         holders.push(address(founderVesting));
-        holders.push(address(reserveVesting));
+        holders.push(address(investorsVesting));
+        holders.push(address(partnershipsVesting));
         holders.push(address(treasury));
 
         targetContract(address(handler));
@@ -167,12 +188,8 @@ contract ARLInvariantTest is ARLTestBase {
         assertLe(founderReleased, ARLAllocation.FOUNDER);
         assertEq(founderReleased + token.balanceOf(address(founderVesting)), ARLAllocation.FOUNDER);
 
-        uint256 reserveReleased = reserveVesting.released(address(token));
-        assertLe(reserveReleased, reserveVesting.vestedAmount(address(token), now_));
-        assertEq(
-            reserveReleased + token.balanceOf(address(reserveVesting)),
-            ARLAllocation.ECOSYSTEM_RESERVE
-        );
+        _assertVesting(investorsVesting, ARLAllocation.INVESTORS, now_);
+        _assertVesting(partnershipsVesting, ARLAllocation.STRATEGIC_PARTNERSHIPS, now_);
     }
 
     /// Nothing vests for the founder before the cliff ends.
@@ -185,7 +202,8 @@ contract ARLInvariantTest is ARLTestBase {
     /// Beneficiaries cannot be changed.
     function invariant_BeneficiariesFixed() public view {
         assertEq(founderVesting.owner(), founder);
-        assertEq(reserveVesting.owner(), ecosystemSafe);
+        assertEq(investorsVesting.owner(), investorsSafe);
+        assertEq(partnershipsVesting.owner(), partnershipsSafe);
         assertEq(handler.ghostOwnershipChanges(), 0);
     }
 
@@ -204,5 +222,11 @@ contract ARLInvariantTest is ARLTestBase {
         assertFalse(treasury.hasRole(treasury.EXECUTOR_ROLE(), guardianSafe));
         assertFalse(treasury.hasRole(treasury.DEFAULT_ADMIN_ROLE(), guardianSafe));
         assertFalse(treasury.hasRole(treasury.EXECUTOR_ROLE(), address(0)));
+    }
+
+    function _assertVesting(ARLVestingWallet w, uint256 allocation, uint64 now_) private view {
+        uint256 released = w.released(address(token));
+        assertLe(released, w.vestedAmount(address(token), now_));
+        assertEq(released + token.balanceOf(address(w)), allocation);
     }
 }

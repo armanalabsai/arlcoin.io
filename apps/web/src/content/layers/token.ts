@@ -5,7 +5,7 @@ import {
   formatBasisPoints,
   shareOfSupply,
 } from "../../../../../packages/tokenomics/src/index.ts";
-import type { Allocation, Release } from "../../../../../packages/tokenomics/src/index.ts";
+import type { Allocation } from "../../../../../packages/tokenomics/src/index.ts";
 import { NOT_DEPLOYED, TOKEN_DISCLAIMER, repoDoc } from "../site.ts";
 import type { Fact, Layer } from "../types.ts";
 
@@ -29,19 +29,12 @@ function share(id: string): string {
   return formatBasisPoints(bp);
 }
 
-function cliffLinear(release: Release): string {
-  if (release.kind !== "cliff-linear") throw new Error("Expected a cliff-linear release");
-  return `${release.cliffMonths}-month cliff, then ${release.vestingMonths}-month linear vesting`;
-}
-
 const treasury = allocation("treasury");
 const treasuryControls =
   treasury.release.kind === "custody" ? treasury.release.controls : undefined;
 if (!treasuryControls) throw new Error("Treasury controls are missing from packages/tokenomics");
 
-const reserve = allocation("ecosystem-reserve");
-if (reserve.release.kind !== "annual-cap")
-  throw new Error("Expected an annual cap for the reserve");
+const vesting = ALLOCATIONS.filter((a) => a.release.kind === "vesting");
 
 const allocationFacts: Fact[] = ALLOCATIONS.map((a) => ({
   label: a.name,
@@ -77,13 +70,13 @@ export const token: Layer = {
     {
       id: "allocation",
       title: "Allocation",
-      shortDescription: `${ALLOCATIONS.length} allocations, 100% of supply`,
+      shortDescription: `${ALLOCATIONS.length} allocations, the whole supply`,
       status: "IN DEVELOPMENT",
       weight: "primary",
       metric: { kind: "static", value: String(ALLOCATIONS.length), unit: "allocations" },
       detail: {
         summary:
-          "The entire supply is assigned at deployment to ten allocations. Shares are of the maximum supply and add up to exactly 100%.",
+          "The entire supply is assigned at deployment to eleven allocations, each held by its own vesting wallet, timelock or dedicated Safe. Amounts are exact and add up to 21,000,000 ARL; shares are rounded to two decimals.",
         facts: allocationFacts,
       },
       links: [{ label: "Tokenomics", href: repoDoc("docs/tokenomics.md") }],
@@ -97,7 +90,7 @@ export const token: Layer = {
       metric: { kind: "unavailable", label: NOT_DEPLOYED, source: "chain.circulatingSupply" },
       detail: {
         summary:
-          "No ARL exists yet, so nothing circulates. After deployment, circulating supply will be published together with its methodology: what counts as locked, vested, treasury and reserve.",
+          "No ARL exists yet, so nothing circulates. Allocated supply is not circulating supply. After deployment, circulating supply will be computed from on-chain state and published together with its methodology: what counts as locked, vested, released and held in custody.",
       },
     },
     {
@@ -108,7 +101,7 @@ export const token: Layer = {
       weight: "secondary",
       metric: { kind: "static", value: treasury.amount.toLocaleString("en-US"), unit: "ARL" },
       detail: {
-        summary: `The treasury is held by a timelock contract controlled by a Safe multisig. Every treasury transaction waits at least ${MIN_TIMELOCK_HOURS} hours between approval and execution.`,
+        summary: `The treasury is held by a timelock contract controlled by a Safe multisig. Every treasury transaction waits at least ${MIN_TIMELOCK_HOURS} hours between approval and execution, and a separate guardian Safe can cancel a pending one.`,
         facts: [
           { label: "Amount", value: formatArl(treasury.amount), mono: true },
           { label: "Share of supply", value: share("treasury"), mono: true },
@@ -124,28 +117,23 @@ export const token: Layer = {
     {
       id: "vesting",
       title: "Vesting",
-      shortDescription: "Founder, team and reserve schedules",
+      shortDescription: "Founder, investors and strategic partnerships",
       status: "IN DEVELOPMENT",
       weight: "secondary",
-      metric: { kind: "static", value: "3", unit: "schedules" },
+      metric: { kind: "static", value: String(vesting.length), unit: "vesting wallets" },
       detail: {
         summary:
-          "Locked allocations release on fixed schedules enforced by contracts. Nothing is released before its cliff, and no schedule can be shortened.",
+          "These allocations are held by vesting wallets that release only to a dedicated Safe, only on their schedule. The schedules (start, cliff and duration) are not decided yet; no vesting wallet can be deployed to a public network until they are.",
         facts: [
-          {
-            label: `Founder · ${formatArl(allocation("founder").amount)}`,
-            value: cliffLinear(allocation("founder").release),
-          },
+          ...vesting.map((a) => ({
+            label: `${a.name} · ${formatArl(a.amount)}`,
+            value: "Schedule TBD",
+          })),
           {
             label: `Team · ${formatArl(allocation("team").amount)}`,
-            value: `${cliffLinear(allocation("team").release)}, per member`,
-          },
-          {
-            label: `Ecosystem Reserve · ${formatArl(reserve.amount)}`,
-            value: `At most ${formatArl(reserve.release.maxPerYear)} per year for ${reserve.release.years} years`,
+            value: "Per-member grants from a team pool Safe; schedule TBD",
           },
         ],
-        sections: [{ heading: "Note", body: reserve.release.note }],
       },
     },
     {
@@ -168,7 +156,7 @@ export const token: Layer = {
       weight: "tertiary",
       metric: { kind: "unavailable", label: NOT_DEPLOYED, source: "chain.stakedSupply" },
       detail: {
-        summary: `No staking contract exists. Rewards are planned to come from the Community / Staking allocation (${formatArl(allocation("community-staking").amount)}) or from protocol revenue. Staking never creates new ARL.`,
+        summary: `No staking contract exists. Rewards are planned to come from the Community & Staking allocation (${formatArl(allocation("community-staking").amount)}) or from protocol revenue. Staking never creates new ARL.`,
       },
     },
     {
@@ -179,7 +167,7 @@ export const token: Layer = {
       weight: "tertiary",
       metric: { kind: "unavailable", label: "Not listed", source: "market.listings" },
       detail: {
-        summary: `ARL is not listed on any exchange. ${formatArl(allocation("liquidity").amount)} is allocated to liquidity and will be deployed in stages. A listing is never guaranteed.`,
+        summary: `ARL is not listed on any exchange. ${formatArl(allocation("liquidity").amount)} is allocated to liquidity and held in a dedicated Safe. A listing is never guaranteed.`,
       },
     },
     {

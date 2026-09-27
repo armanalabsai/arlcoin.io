@@ -1,22 +1,40 @@
 {
   "network": "local",
   "chainId": 31337,
-  "launchDate": "2027-01-01T00:00:00Z",
   "requireRecipientCode": false,
-  "founderBeneficiary": "0x1F67caa874DDec60E290e27cce758f01Bd53c380",
-  "ecosystemReserveBeneficiary": "0x61042dF2f9DfD50AFC0734F5CB4da6E55bE6d09d",
+  "note": "Local Anvil rehearsal only. Addresses are keccak256(\"arl.local.<name>\") placeholders nobody holds keys for. The vesting schedules below are rehearsal placeholders, not approved schedules; the planner and ARLDeployPlan refuse any other chain until schedules are approved.",
+  "vesting": {
+    "founder": {
+      "beneficiary": "0x1F67caa874DDec60E290e27cce758f01Bd53c380",
+      "start": "2027-01-01T00:00:00Z",
+      "cliffMonths": 12,
+      "vestingMonths": 24
+    },
+    "investors": {
+      "beneficiary": "0x4bCb1679EEfBA34C88F55c0D07efe4EA9bfF4721",
+      "start": "2027-01-01T00:00:00Z",
+      "cliffMonths": 12,
+      "vestingMonths": 24
+    },
+    "strategicPartnerships": {
+      "beneficiary": "0x5F611FC6df7B0e0326A6B10b135A15DdF8667c2a",
+      "start": "2027-01-01T00:00:00Z",
+      "cliffMonths": 12,
+      "vestingMonths": 24
+    }
+  },
   "treasury": {
     "safe": "0xCbA140fcD82caf116be04c2a478A0e10b55202F9",
     "guardian": "0x0c0bA8A2630B2108D5aF98B64fA89eF1BDb7C9d4",
     "minDelayHours": 48
   },
   "recipients": {
-    "communityStaking": "0x86d861EBe84C3F6D4F374c9640c5b89549C724A8",
-    "liquidity": "0x179DaF8783071e3868Fb00208B3529F48E544AF8",
-    "strategicPartnerships": "0x5F611FC6df7B0e0326A6B10b135A15DdF8667c2a",
     "publicLaunch": "0x1E0C4aef807F25F0F79146f3A9646e75954E0E0d",
-    "grantsBugBounty": "0x2F050E3aAFBFb59BD438F97c4D280D0d38F411c4",
+    "communityStaking": "0x86d861EBe84C3F6D4F374c9640c5b89549C724A8",
+    "ecosystemGrowth": "0x8F188E2C17b8CC001AeBA6e4A46D916f0A260Be3",
+    "liquidity": "0x179DaF8783071e3868Fb00208B3529F48E544AF8",
     "team": "0xB5C15dcF9624e2137D772f72fCB1020B6Cba1455",
-    "earlyUserRewards": "0x480F68E166456e8a00584F003575d6975a8f2aFB"
+    "earlyUsers": "0x259238550bE2D033DdCBD0dDA00c427738C27991",
+    "grantsBugBounty": "0x2F050E3aAFBFb59BD438F97c4D280D0d38F411c4"
   }
 }

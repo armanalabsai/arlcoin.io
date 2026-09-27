@@ -7,9 +7,9 @@
 
 import { ALLOCATIONS, MAX_SUPPLY, MIN_TIMELOCK_HOURS, validateAllocations } from "@arl/tokenomics";
 
-export const PLAN_SCHEMA = "arl-deploy-plan/1";
+export const PLAN_SCHEMA = "arl-deploy-plan/2";
 
-/** Anvil's default chain ID. Only here may recipients be accounts without code. */
+/** Anvil's default chain ID. Only here may recipients lack code or schedules be unapproved. */
 export const LOCAL_CHAIN_ID = 31337;
 
 const DECIMALS = 18n;
@@ -19,44 +19,79 @@ const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
 const ZERO_ADDRESS = /^0x0{40}$/;
 const UTC_DATE = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})Z$/;
 
-/** Allocation ids in the order of the plan and the Solidity `Recipients` struct. */
+/** Allocations minted directly to a dedicated Safe, in the order of the Solidity struct. */
 export const RECIPIENT_KEYS = [
-  "communityStaking",
-  "liquidity",
-  "strategicPartnerships",
   "publicLaunch",
-  "grantsBugBounty",
+  "communityStaking",
+  "ecosystemGrowth",
+  "liquidity",
   "team",
-  "earlyUserRewards",
+  "earlyUsers",
+  "grantsBugBounty",
 ] as const;
 type RecipientKey = (typeof RECIPIENT_KEYS)[number];
 
-const ALLOCATION_KEY: Record<string, string> = {
+/** Allocations held by a vesting wallet, with their tokenomics id. */
+export const VESTING_KEYS = {
   founder: "founder",
-  "ecosystem-reserve": "ecosystemReserve",
-  treasury: "treasury",
-  "community-staking": "communityStaking",
-  liquidity: "liquidity",
-  "strategic-partnerships": "strategicPartnerships",
+  investors: "investors",
+  strategicPartnerships: "strategic-partnerships",
+} as const;
+type VestingKey = keyof typeof VESTING_KEYS;
+
+/** Tokenomics id → plan key. Covers every allocation exactly once. */
+const ALLOCATION_KEY: Record<string, string> = {
   "public-launch": "publicLaunch",
-  "grants-bug-bounty": "grantsBugBounty",
+  "community-staking": "communityStaking",
+  "ecosystem-growth": "ecosystemGrowth",
+  "strategic-partnerships": "strategicPartnerships",
+  liquidity: "liquidity",
+  founder: "founder",
+  investors: "investors",
+  treasury: "treasury",
   team: "team",
-  "early-user-rewards": "earlyUserRewards",
+  "early-users": "earlyUsers",
+  "grants-bug-bounty": "grantsBugBounty",
 };
+
+const CONFIG_KEYS = [
+  "network",
+  "chainId",
+  "requireRecipientCode",
+  "note",
+  "vesting",
+  "treasury",
+  "recipients",
+];
+
+/** A vesting schedule supplied by configuration. The durations are policy-controlled (TBD). */
+export interface VestingConfig {
+  beneficiary: string;
+  /** UTC start, `YYYY-MM-DDTHH:MM:SSZ`, day of month at most 28. */
+  start: string;
+  cliffMonths: number;
+  vestingMonths: number;
+}
 
 export interface DeployConfig {
   network: string;
   chainId: number;
-  /** UTC launch date, `YYYY-MM-DDTHH:MM:SSZ`, day of month at most 28. */
-  launchDate: string;
   /** Must be true on every chain except local Anvil. */
   requireRecipientCode: boolean;
-  /** A dedicated Safe; must be a deployed contract wherever `requireRecipientCode` is true. */
-  founderBeneficiary: string;
-  ecosystemReserveBeneficiary: string;
+  /** Free text; ignored. */
+  note?: string;
+  /** Beneficiaries are dedicated Safes and must be deployed contracts off local Anvil. */
+  vesting: Record<VestingKey, VestingConfig>;
   /** `guardian` holds only the canceller role and must differ from `safe`. */
   treasury: { safe: string; guardian: string; minDelayHours: number };
   recipients: Record<RecipientKey, string>;
+}
+
+export interface VestingPlan {
+  beneficiary: string;
+  cliffStart: number;
+  cliffEnd: number;
+  vestingEnd: number;
 }
 
 export interface DeployPlan {
@@ -66,11 +101,10 @@ export interface DeployPlan {
   requireRecipientCode: boolean;
   maxSupply: string;
   allocations: Record<string, string>;
-  founder: { beneficiary: string; cliffStart: number; cliffEnd: number; vestingEnd: number };
-  ecosystemReserve: { beneficiary: string; start: number };
+  vesting: Record<VestingKey, VestingPlan>;
   treasury: { safe: string; guardian: string; minDelay: number };
   recipients: Record<RecipientKey, string>;
-  source: { launchDate: string; founderCliff: string; founderVestingEnd: string };
+  source: Record<VestingKey, { start: string; cliffEnd: string; vestingEnd: string }>;
 }
 
 export class PlanError extends Error {
@@ -85,6 +119,21 @@ function requireAddress(value: unknown, field: string): string {
   if (typeof value !== "string" || !ADDRESS.test(value)) fail(`${field}: not an address`);
   if (ZERO_ADDRESS.test(value)) fail(`${field}: zero address`);
   return value;
+}
+
+function requireKeys(
+  value: unknown,
+  field: string,
+  keys: readonly string[],
+  optional: string[] = [],
+) {
+  if (typeof value !== "object" || value === null) fail(`${field}: missing`);
+  for (const key of Object.keys(value)) {
+    if (!keys.includes(key)) fail(`${field}.${key}: unexpected key (legacy or unknown field)`);
+  }
+  for (const key of keys) {
+    if (!optional.includes(key) && !(key in value)) fail(`${field}.${key}: missing`);
+  }
 }
 
 interface UtcDate {
@@ -146,10 +195,49 @@ function requireTimestamp(value: number, field: string): number {
   return value;
 }
 
+function buildVesting(
+  key: VestingKey,
+  value: unknown,
+  local: boolean,
+): { plan: VestingPlan; source: { start: string; cliffEnd: string; vestingEnd: string } } {
+  const field = `vesting.${key}`;
+  requireKeys(value, field, ["beneficiary", "start", "cliffMonths", "vestingMonths"]);
+  const v = value as VestingConfig;
+
+  const allocation = ALLOCATIONS.find((a) => a.id === VESTING_KEYS[key]);
+  if (allocation?.release.kind !== "vesting")
+    fail(`tokenomics: ${VESTING_KEYS[key]} does not vest`);
+  // The schedules are TBD. Only a local rehearsal may supply one before it is approved.
+  if (allocation.release.status !== "approved" && !local) {
+    fail(`${field}: the schedule is not approved (TBD); only local Anvil may rehearse one`);
+  }
+
+  const beneficiary = requireAddress(v.beneficiary, `${field}.beneficiary`);
+  if (!Number.isInteger(v.cliffMonths) || v.cliffMonths < 0) {
+    fail(`${field}.cliffMonths: must be a non-negative integer`);
+  }
+  if (!Number.isInteger(v.vestingMonths) || v.vestingMonths <= 0) {
+    fail(`${field}.vestingMonths: must be a positive integer`);
+  }
+  const start = parseUtc(v.start, `${field}.start`);
+  const cliffEnd = addCalendarMonths(start, v.cliffMonths);
+  const vestingEnd = addCalendarMonths(cliffEnd, v.vestingMonths);
+  return {
+    plan: {
+      beneficiary,
+      cliffStart: requireTimestamp(toUnix(start), `${field}.start`),
+      cliffEnd: requireTimestamp(toUnix(cliffEnd), `${field}.cliffEnd`),
+      vestingEnd: requireTimestamp(toUnix(vestingEnd), `${field}.vestingEnd`),
+    },
+    source: { start: toIso(start), cliffEnd: toIso(cliffEnd), vestingEnd: toIso(vestingEnd) },
+  };
+}
+
 export function buildPlan(config: DeployConfig): DeployPlan {
   const tokenomicsErrors = validateAllocations(ALLOCATIONS, MAX_SUPPLY);
   if (tokenomicsErrors.length > 0) fail(`tokenomics invalid: ${tokenomicsErrors.join("; ")}`);
 
+  requireKeys(config, "config", CONFIG_KEYS, ["note"]);
   if (typeof config.network !== "string" || config.network.length === 0) {
     fail("network: missing");
   }
@@ -159,36 +247,53 @@ export function buildPlan(config: DeployConfig): DeployPlan {
   if (typeof config.requireRecipientCode !== "boolean") {
     fail("requireRecipientCode: must be true or false");
   }
-  if (!config.requireRecipientCode && config.chainId !== LOCAL_CHAIN_ID) {
+  const local = config.chainId === LOCAL_CHAIN_ID;
+  if (!config.requireRecipientCode && !local) {
     fail(`requireRecipientCode: may be false only on local chain ${LOCAL_CHAIN_ID}`);
   }
 
-  const founderBeneficiary = requireAddress(config.founderBeneficiary, "founderBeneficiary");
-  const reserveBeneficiary = requireAddress(
-    config.ecosystemReserveBeneficiary,
-    "ecosystemReserveBeneficiary",
-  );
+  requireKeys(config.vesting, "vesting", Object.keys(VESTING_KEYS));
+  const vesting = {} as Record<VestingKey, VestingPlan>;
+  const source = {} as DeployPlan["source"];
+  for (const key of Object.keys(VESTING_KEYS) as VestingKey[]) {
+    const built = buildVesting(key, config.vesting[key], local);
+    vesting[key] = built.plan;
+    source[key] = built.source;
+  }
+
+  requireKeys(config.treasury, "treasury", ["safe", "guardian", "minDelayHours"]);
   const treasurySafe = requireAddress(config.treasury.safe, "treasury.safe");
   const treasuryGuardian = requireAddress(config.treasury.guardian, "treasury.guardian");
   if (treasuryGuardian.toLowerCase() === treasurySafe.toLowerCase()) {
     fail("treasury.guardian: must differ from treasury.safe");
   }
-
   const delayHours = config.treasury.minDelayHours;
   if (!Number.isSafeInteger(delayHours) || delayHours < MIN_TIMELOCK_HOURS) {
     fail(`treasury.minDelayHours: ${delayHours} is below the ${MIN_TIMELOCK_HOURS}-hour minimum`);
   }
 
+  requireKeys(config.recipients, "recipients", RECIPIENT_KEYS);
   const recipients = {} as Record<RecipientKey, string>;
   for (const key of RECIPIENT_KEYS) {
     recipients[key] = requireAddress(config.recipients[key], `recipients.${key}`);
   }
 
-  const founder = ALLOCATIONS.find((a) => a.id === "founder");
-  if (founder?.release.kind !== "cliff-linear") fail("tokenomics: founder schedule not found");
-  const launch = parseUtc(config.launchDate, "launchDate");
-  const cliffEnd = addCalendarMonths(launch, founder.release.cliffMonths);
-  const vestingEnd = addCalendarMonths(cliffEnd, founder.release.vestingMonths);
+  // Every Safe is dedicated to one role.
+  const roles: [string, string][] = [
+    ...(Object.keys(VESTING_KEYS) as VestingKey[]).map((k): [string, string] => [
+      `vesting.${k}.beneficiary`,
+      vesting[k].beneficiary,
+    ]),
+    ["treasury.safe", treasurySafe],
+    ["treasury.guardian", treasuryGuardian],
+    ...RECIPIENT_KEYS.map((k): [string, string] => [`recipients.${k}`, recipients[k]]),
+  ];
+  const seen = new Map<string, string>();
+  for (const [field, address] of roles) {
+    const other = seen.get(address.toLowerCase());
+    if (other) fail(`${field}: same address as ${other}; every Safe must be dedicated`);
+    seen.set(address.toLowerCase(), field);
+  }
 
   const allocations: Record<string, string> = {};
   let total = 0n;
@@ -209,22 +314,9 @@ export function buildPlan(config: DeployConfig): DeployPlan {
     requireRecipientCode: config.requireRecipientCode,
     maxSupply: maxSupply.toString(),
     allocations,
-    founder: {
-      beneficiary: founderBeneficiary,
-      cliffStart: requireTimestamp(toUnix(launch), "founder.cliffStart"),
-      cliffEnd: requireTimestamp(toUnix(cliffEnd), "founder.cliffEnd"),
-      vestingEnd: requireTimestamp(toUnix(vestingEnd), "founder.vestingEnd"),
-    },
-    ecosystemReserve: {
-      beneficiary: reserveBeneficiary,
-      start: requireTimestamp(toUnix(launch), "ecosystemReserve.start"),
-    },
+    vesting,
     treasury: { safe: treasurySafe, guardian: treasuryGuardian, minDelay: delayHours * 3600 },
     recipients,
-    source: {
-      launchDate: toIso(launch),
-      founderCliff: toIso(cliffEnd),
-      founderVestingEnd: toIso(vestingEnd),
-    },
+    source,
   };
 }

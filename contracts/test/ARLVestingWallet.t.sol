@@ -205,57 +205,41 @@ contract ARLVestingWalletTest is ARLTestBase {
         assertEq(founderVesting.owner(), founder);
     }
 
-    // ---------------------------------------------------------------- ecosystem reserve
+    // ---------------------------------------------------------------- investors and partnerships
 
-    function test_ReserveFullyReleasedAfterDuration() public view {
-        uint64 end = LAUNCH + ARLAllocation.ECOSYSTEM_RESERVE_DURATION;
-        assertEq(reserveVesting.vestedAmount(address(token), end), ARLAllocation.ECOSYSTEM_RESERVE);
+    /// @dev Investor tokens are not unlocked at launch: nothing is releasable before the cliff.
+    function test_InvestorsNotUnlockedAtLaunch() public {
+        assertEq(investorsVesting.owner(), investorsSafe);
+        assertEq(token.balanceOf(address(investorsVesting)), ARLAllocation.INVESTORS);
+        assertEq(investorsVesting.releasable(address(token)), 0);
+        investorsVesting.release(address(token));
+        assertEq(token.balanceOf(investorsSafe), 0);
+        assertEq(investorsVesting.vestedAmount(address(token), LAUNCH_PLUS_1Y), 0);
+    }
+
+    function test_InvestorsFullyVestedAtEnd() public view {
+        assertEq(
+            investorsVesting.vestedAmount(address(token), LAUNCH_PLUS_2Y), ARLAllocation.INVESTORS
+        );
         assertLt(
-            reserveVesting.vestedAmount(address(token), end - 1), ARLAllocation.ECOSYSTEM_RESERVE
+            investorsVesting.vestedAmount(address(token), LAUNCH_PLUS_2Y - 1),
+            ARLAllocation.INVESTORS
         );
     }
 
-    /// @dev Five calendar years from 2027-01-01 contain a leap year (2028). A plain five-year
-    /// linear schedule would release more than 1,400,000 ARL in 2028; 5 x 366 days does not.
-    function test_ReserveCapHoldsInEveryCalendarYear() public view {
-        // 2027-01-01 .. 2033-01-01; 2028 and 2032 are leap years.
-        uint64[7] memory yearStarts = [
-            LAUNCH,
-            LAUNCH_PLUS_1Y,
-            LAUNCH_PLUS_2Y,
-            uint64(1_893_456_000),
-            uint64(1_924_992_000),
-            LAUNCH_PLUS_5Y,
-            uint64(1_988_150_400)
-        ];
-        uint256 total;
-        for (uint256 i = 0; i + 1 < yearStarts.length; i++) {
-            uint256 released = reserveVesting.vestedAmount(address(token), yearStarts[i + 1])
-                - reserveVesting.vestedAmount(address(token), yearStarts[i]);
-            assertLe(released, ARLAllocation.ECOSYSTEM_RESERVE_ANNUAL_CAP);
-            total += released;
-        }
-        assertEq(total, ARLAllocation.ECOSYSTEM_RESERVE);
-    }
-
-    /// @dev Stronger than calendar years: no window of up to 366 days releases more than the cap.
-    function testFuzz_ReserveCapHoldsInAnyWindow(uint64 from, uint64 length) public view {
-        from = uint64(bound(from, LAUNCH - 30 days, LAUNCH + 6 * 366 days));
-        length = uint64(bound(length, 0, 366 days));
-        uint256 released = reserveVesting.vestedAmount(address(token), from + length)
-            - reserveVesting.vestedAmount(address(token), from);
-        assertLe(released, ARLAllocation.ECOSYSTEM_RESERVE_ANNUAL_CAP);
-    }
-
-    /// @dev Documents why the duration is 5 x 366 days rather than the five calendar years.
-    function test_PlainFiveCalendarYearsWouldBreachCap() public {
-        ARLVestingWallet naive = new ARLVestingWallet(ecosystemSafe, LAUNCH, LAUNCH, LAUNCH_PLUS_5Y);
-        vm.prank(communitySafe);
-        token.transfer(address(naive), ARLAllocation.ECOSYSTEM_RESERVE / 7 * 3); // 3M sample
-        uint256 in2028 = naive.vestedAmount(address(token), LAUNCH_PLUS_2Y)
-            - naive.vestedAmount(address(token), LAUNCH_PLUS_1Y);
-        // Scale the 3M sample to 7M: the 2028 share exceeds 1.4M.
-        assertGt(in2028 * 7 / 3, ARLAllocation.ECOSYSTEM_RESERVE_ANNUAL_CAP);
+    /// @dev Strategic partnership tokens are released only through the vesting wallet, only to
+    /// its beneficiary Safe, and never faster than the schedule.
+    function test_PartnershipsReleaseOnlyVestedAmountToBeneficiary() public {
+        vm.warp(LAUNCH + (LAUNCH_PLUS_2Y - LAUNCH) / 4);
+        uint256 vested = partnershipsVesting.vestedAmount(address(token), uint64(block.timestamp));
+        assertEq(vested, ARLAllocation.STRATEGIC_PARTNERSHIPS / 4);
+        vm.prank(makeAddr("anyone"));
+        partnershipsVesting.release(address(token));
+        assertEq(token.balanceOf(partnershipsSafe), vested);
+        assertEq(
+            token.balanceOf(address(partnershipsVesting)),
+            ARLAllocation.STRATEGIC_PARTNERSHIPS - vested
+        );
     }
 
     // ---------------------------------------------------------------- helpers

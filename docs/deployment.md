@@ -20,13 +20,12 @@ contracts/deploy/deployments/<chain>.json   deployed addresses (git-ignored)
 
 Values come from their single sources:
 
-| Value                            | Source                                                                                                            |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Allocation amounts, max supply   | `packages/tokenomics` (planner) and `ARLAllocation.sol` (cross-checked)                                           |
-| Founder 24 + 36 months           | `packages/tokenomics` founder release                                                                             |
-| Ecosystem Reserve 1,830 days     | `ARLAllocation.ECOSYSTEM_RESERVE_DURATION`; the verifier also checks the approved value                           |
-| 48-hour timelock floor           | `packages/tokenomics` (planner); `ARLTimelock.MIN_DELAY_FLOOR` (constructor; a test pins the script's copy to it) |
-| Addresses, launch date, chain ID | The deployment config                                                                                             |
+| Value                          | Source                                                                                                            |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| Allocation amounts, max supply | `packages/tokenomics` (planner) and `ARLAllocation.sol` (cross-checked)                                           |
+| Vesting schedules (TBD)        | The deployment config; refused off local Anvil until approved (`VESTING_SCHEDULES_APPROVED`)                      |
+| 48-hour timelock floor         | `packages/tokenomics` (planner); `ARLTimelock.MIN_DELAY_FLOOR` (constructor; a test pins the script's copy to it) |
+| Addresses, chain ID            | The deployment config                                                                                             |
 
 ## Configuration
 
@@ -34,39 +33,38 @@ Values come from their single sources:
 `keccak256("arl.local.<name>")` placeholders: nobody holds their keys and they are valid only on
 a local Anvil chain.
 
-| Field                         | Rule                                                                                                                |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `chainId`                     | Required; must equal the chain the script runs on                                                                   |
-| `launchDate`                  | `YYYY-MM-DDTHH:MM:SSZ`, UTC, day of month 1-28 (so month arithmetic is exact)                                       |
-| `requireRecipientCode`        | Must be `true` on every chain except local Anvil (31337); then every multisig recipient must be a deployed contract |
-| `founderBeneficiary`          | Non-zero; a dedicated founder Safe, so it must have contract code wherever `requireRecipientCode` is true           |
-| `ecosystemReserveBeneficiary` | Non-zero                                                                                                            |
-| `treasury.safe`               | Non-zero; becomes the timelock's only proposer and executor, and a canceller                                        |
-| `treasury.guardian`           | Non-zero and different from `treasury.safe`; a separate Safe that receives only the canceller role                  |
-| `treasury.minDelayHours`      | Integer, at least 48                                                                                                |
-| `recipients.*`                | Seven non-zero addresses; the team pool is the multisig-controlled `team` recipient                                 |
+| Field                                                 | Rule                                                                                                                                                             |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `chainId`                                             | Required; must equal the chain the script runs on                                                                                                                |
+| `requireRecipientCode`                                | Must be `true` on every chain except local Anvil (31337); then every Safe must be a deployed contract                                                            |
+| `vesting.<founder, investors, strategicPartnerships>` | `beneficiary` (dedicated Safe), `start` (`YYYY-MM-DDTHH:MM:SSZ`, UTC, day 1-28), `cliffMonths`, `vestingMonths`. Schedules are TBD: accepted only on local Anvil |
+| `treasury.safe`                                       | Non-zero; becomes the timelock's only proposer and executor, and a canceller                                                                                     |
+| `treasury.guardian`                                   | Non-zero and different from `treasury.safe`; a separate Safe that receives only the canceller role                                                               |
+| `treasury.minDelayHours`                              | Integer, at least 48                                                                                                                                             |
+| `recipients.*`                                        | Exactly seven dedicated Safes: publicLaunch, communityStaking, ecosystemGrowth, liquidity, team (pool), earlyUsers, grantsBugBounty                              |
 
 ## Fail-closed checks
 
 The planner (`packages/deploy`) and `ARLDeployPlan.validate` (run by `DeployARL` before any
 broadcast) each reject:
 
-- allocations that differ from the approved table or do not total exactly 21,000,000 ARL;
-- a zero address anywhere;
+- allocations that differ from the approved 11-allocation table, are missing or extra, or do not
+  total exactly 21,000,000 ARL;
+- the legacy Ecosystem Reserve in any form, and unknown config keys;
+- a zero address anywhere, and any address used for two roles (every Safe is dedicated);
 - a treasury guardian equal to the treasury Safe;
-- a founder cliff that is not 24 calendar months, or linear vesting that is not 36 calendar months
-  (730-731 and 1,095-1,096 days; 24 × 30 days is rejected);
-- invalid timestamp ordering or a zero start;
+- invalid schedule ordering or a zero start;
+- any chain other than local Anvil while the vesting schedules are TBD;
 - a timelock delay below 48 hours;
 - a missing chain ID, a chain ID that differs from the connected chain, or disabled code checks
   off local Anvil;
 - recipients without code where code is required.
 
 `ARLVerify` (run inside `DeployARL` and by `VerifyARL`) checks: code at every deployed contract;
-total supply and `MAX_SUPPLY` equal 21,000,000 ARL; every holder's balance, aggregated per
-address, and that planned holders account for the whole supply; zero deployer balance; code at
-the founder beneficiary where code is required; founder and reserve beneficiaries, cliff start, cliff end, vesting end and durations; reserve duration
-exactly 1,830 days; timelock delay; the Safe holds proposer, canceller and executor; the guardian
+total supply and `MAX_SUPPLY` equal 21,000,000 ARL; the eleven holders are distinct, each holds
+exactly its allocation, and together they hold the whole supply; zero deployer balance; code at
+every Safe where code is required; each vesting wallet's beneficiary, cliff start, cliff end,
+vesting end and duration; timelock delay; the Safe holds proposer, canceller and executor; the guardian
 differs from the Safe and holds the canceller role and no other; the timelock is its own admin;
 neither the zero address nor the deployer holds any role.
 
@@ -84,13 +82,13 @@ Starts a fresh Anvil chain, builds the plan, deploys, verifies, cross-checks key
 v1.5.0 (singleton, proxy factory and one 2-of-3 Safe per Safe role, owned by Anvil development
 accounts) from the published `@safe-global/safe-smart-account` build, redeploys the system with
 code checks enforced, and confirms that a founder beneficiary without code is rejected by both
-the plan and the verifier. 23 negative cases in total. Each must fail with its specific error, and rejected
+the plan and the verifier. 34 negative cases in total. Each must fail with its specific error, and rejected
 deployments must leave the deployer nonce unchanged. CI runs the rehearsal on every pull request.
 
 ## Before any public network
 
 See the pre-testnet requirements in the Phase 2 security scope report. In particular: a
 testnet-only config with `requireRecipientCode: true` and real test Safes, a free public RPC, and
-a second test Safe for the treasury guardian, a dedicated test Safe for the founder
-beneficiary, and the decision still open (M-2 custody of unlocked allocations). Private keys are never placed in config files; use a hardware wallet or Foundry keystore
+a dedicated test Safe for every role, and approved vesting schedules for the founder, investor
+and strategic partnership wallets (until then the tooling refuses every public network). Private keys are never placed in config files; use a hardware wallet or Foundry keystore
 outside the repository.

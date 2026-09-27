@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
+import * as tokenomics from "../src/index.ts";
 import {
   ALLOCATIONS,
   MAX_SUPPLY,
@@ -10,20 +11,21 @@ import {
   type Allocation,
 } from "../src/index.ts";
 
-// The approved table, restated independently so a silent edit to the source
-// data fails this test.
-const APPROVED: Record<string, number> = {
-  founder: 2_100_000,
-  "ecosystem-reserve": 7_000_000,
-  treasury: 3_000_000,
-  "community-staking": 3_000_000,
-  liquidity: 2_000_000,
-  "strategic-partnerships": 1_500_000,
-  "public-launch": 1_000_000,
-  "grants-bug-bounty": 400_000,
-  team: 500_000,
-  "early-user-rewards": 500_000,
-};
+// The approved 11-allocation table (2026-09-27), restated independently so a
+// silent edit to the source data fails this test.
+const APPROVED: readonly (readonly [id: string, name: string, amount: number, share: string])[] = [
+  ["public-launch", "Public Launch", 5_000_000, "23.81%"],
+  ["community-staking", "Community & Staking", 3_000_000, "14.29%"],
+  ["ecosystem-growth", "Ecosystem & Growth", 2_000_000, "9.52%"],
+  ["strategic-partnerships", "Strategic Partnerships", 2_000_000, "9.52%"],
+  ["liquidity", "Liquidity", 2_000_000, "9.52%"],
+  ["founder", "Founder", 2_100_000, "10.00%"],
+  ["investors", "Investors / Strategic Capital", 1_500_000, "7.14%"],
+  ["treasury", "Treasury", 1_000_000, "4.76%"],
+  ["team", "Team", 900_000, "4.29%"],
+  ["early-users", "Early Users", 1_100_000, "5.24%"],
+  ["grants-bug-bounty", "Grants / Bug Bounty", 400_000, "1.90%"],
+];
 
 const byId = (id: string): Allocation => {
   const a = ALLOCATIONS.find((x) => x.id === id);
@@ -31,185 +33,152 @@ const byId = (id: string): Allocation => {
   return a;
 };
 
-describe("supply", () => {
-  it("max supply is 21,000,000 ARL", () => {
+const amountOf = (id: string) => byId(id).amount;
+
+describe("supply and allocation invariants", () => {
+  it("TEST-01 allocations sum to exactly 21,000,000 ARL", () => {
+    assert.equal(
+      ALLOCATIONS.reduce((sum, a) => sum + a.amount, 0),
+      21_000_000,
+    );
+  });
+
+  it("TEST-02 the canonical total supply is 21,000,000 ARL", () => {
     assert.equal(MAX_SUPPLY, 21_000_000);
   });
 
-  it("allocations sum to exactly the max supply", () => {
-    const total = ALLOCATIONS.reduce((sum, a) => sum + a.amount, 0);
-    assert.equal(total, 21_000_000);
+  it("TEST-03 exactly 11 canonical allocations exist", () => {
+    assert.equal(ALLOCATIONS.length, 11);
+  });
+
+  it("TEST-04 allocation ids and names are unique", () => {
+    assert.equal(new Set(ALLOCATIONS.map((a) => a.id)).size, ALLOCATIONS.length);
+    assert.equal(new Set(ALLOCATIONS.map((a) => a.name)).size, ALLOCATIONS.length);
+  });
+
+  it("TEST-05 no allocation has a negative or zero amount", () => {
+    for (const a of ALLOCATIONS) assert.ok(a.amount > 0, a.id);
+  });
+
+  it("TEST-06 every amount is an integer-safe whole number of ARL", () => {
+    for (const a of ALLOCATIONS) assert.ok(Number.isSafeInteger(a.amount), a.id);
+  });
+
+  it("TEST-07 percentages are derived from the amounts", () => {
+    const shares = shareOfSupply(ALLOCATIONS, MAX_SUPPLY);
+    for (const [id, , , share] of APPROVED) {
+      const s = shares.find((x) => x.id === id);
+      assert.ok(s, id);
+      assert.equal(formatBasisPoints(s.basisPoints), share, id);
+      const exact = (amountOf(id) * 10_000) / MAX_SUPPLY;
+      assert.ok(Math.abs(s.basisPoints - exact) <= 0.5, `${id}: ${s.basisPoints} vs ${exact}`);
+    }
+    assert.deepEqual(shareOfSupply(ALLOCATIONS, MAX_SUPPLY), shares, "deterministic");
+  });
+
+  it("TEST-08 the model has no hidden or unlisted allocation", () => {
+    assert.deepEqual(
+      ALLOCATIONS.map((a) => [a.id, a.name, a.amount]),
+      APPROVED.map(([id, name, amount]) => [id, name, amount]),
+    );
+    assert.equal(
+      ALLOCATIONS.find((a) => /reserve/i.test(a.id) || /ecosystem reserve/i.test(a.name)),
+      undefined,
+      "the legacy Ecosystem Reserve must not exist",
+    );
   });
 
   it("the table passes validation", () => {
     assert.deepEqual(validateAllocations(ALLOCATIONS, MAX_SUPPLY), []);
   });
+});
 
-  it("matches the approved allocation table exactly", () => {
-    assert.deepEqual(Object.fromEntries(ALLOCATIONS.map((a) => [a.id, a.amount])), APPROVED);
+describe("canonical amounts", () => {
+  const cases: [string, string, number][] = [
+    ["TEST-09", "public-launch", 5_000_000],
+    ["TEST-10", "community-staking", 3_000_000],
+    ["TEST-11", "ecosystem-growth", 2_000_000],
+    ["TEST-12", "strategic-partnerships", 2_000_000],
+    ["TEST-13", "liquidity", 2_000_000],
+    ["TEST-14", "founder", 2_100_000],
+    ["TEST-15", "investors", 1_500_000],
+    ["TEST-16", "treasury", 1_000_000],
+    ["TEST-17", "team", 900_000],
+    ["TEST-18", "early-users", 1_100_000],
+    ["TEST-19", "grants-bug-bounty", 400_000],
+  ];
+  for (const [label, id, amount] of cases) {
+    it(`${label} ${id} = ${amount.toLocaleString("en-US")} ARL`, () => {
+      assert.equal(amountOf(id), amount);
+    });
+  }
+});
+
+describe("supply concepts", () => {
+  it("TEST-20 and TEST-21: no circulating supply is defined or hard-coded", () => {
+    // Circulating supply is computed from on-chain state after deployment. The
+    // model must not carry a value: not the total supply, not 7,000,000
+    // (Public Launch + Liquidity), not anything.
+    assert.equal("CIRCULATING_SUPPLY" in tokenomics, false);
+    assert.equal("circulatingSupply" in tokenomics, false);
+    assert.doesNotMatch(JSON.stringify(ALLOCATIONS), /circulat/i);
+    assert.equal(amountOf("public-launch") + amountOf("liquidity"), 7_000_000);
   });
 
-  it("every amount is a positive safe integer", () => {
+  it("TEST-22 no allocation describes new issuance", () => {
     for (const a of ALLOCATIONS) {
-      assert.ok(Number.isSafeInteger(a.amount) && a.amount > 0, a.id);
+      const text = JSON.stringify(a);
+      assert.doesNotMatch(text, /\bmint(ed|ing)? new\b|inflation|emission schedule is/i, a.id);
     }
+    assert.match(byId("community-staking").release.kind, /program/);
+    assert.match(JSON.stringify(byId("community-staking")), /never issues new ARL/);
   });
 });
 
-describe("shares", () => {
-  const shares = shareOfSupply(ALLOCATIONS, MAX_SUPPLY);
-
-  it("basis points add up to exactly 100.00%", () => {
-    assert.equal(
-      shares.reduce((sum, s) => sum + s.basisPoints, 0),
-      10_000,
-    );
-  });
-
-  it("each share is within one basis point of the exact value", () => {
-    for (const s of shares) {
-      const exact = (byId(s.id).amount / MAX_SUPPLY) * 10_000;
-      assert.ok(Math.abs(s.basisPoints - exact) < 1, `${s.id}: ${s.basisPoints} vs ${exact}`);
-    }
-  });
-
-  it("founder is exactly 10.00%", () => {
-    const founder = shares.find((s) => s.id === "founder");
-    assert.equal(founder && formatBasisPoints(founder.basisPoints), "10.00%");
-  });
-
-  it("is deterministic", () => {
-    assert.deepEqual(shareOfSupply(ALLOCATIONS, MAX_SUPPLY), shares);
-  });
-});
-
-describe("release rules", () => {
-  it("founder: 24-month cliff, then 36-month linear vesting (approved)", () => {
-    assert.deepEqual(byId("founder").release, {
-      kind: "cliff-linear",
-      cliffMonths: 24,
-      vestingMonths: 36,
-      status: "approved",
-    });
-  });
-
-  it("ecosystem reserve: at most 1,400,000 per year for 5 years", () => {
-    const r = byId("ecosystem-reserve").release;
-    assert.equal(r.kind, "annual-cap");
-    assert.equal(r.maxPerYear, 1_400_000);
-    assert.equal(r.years, 5);
-    assert.equal(r.maxPerYear * r.years, 7_000_000);
-  });
-
-  it("team: separate from founder, 12-month cliff then 36-month linear (approved)", () => {
-    const team = byId("team");
-    assert.notEqual(team.id, byId("founder").id);
-    assert.equal(team.amount, 500_000);
-    assert.deepEqual(team.release, {
-      kind: "cliff-linear",
-      cliffMonths: 12,
-      vestingMonths: 36,
-      status: "approved",
-    });
-  });
-
-  it("treasury: Safe 3-of-5 with at least a 48-hour delay, no signer addresses", () => {
-    const r = byId("treasury").release;
-    assert.equal(r.kind, "custody");
-    assert.deepEqual(r.controls, { wallet: "Safe", threshold: 3, signers: 5, minDelayHours: 48 });
-    assert.doesNotMatch(JSON.stringify(ALLOCATIONS), /0x[0-9a-fA-F]{40}/);
-  });
-
-  it("early user rewards: initial program up to 100,000 over 6 months", () => {
-    const r = byId("early-user-rewards").release;
-    assert.equal(r.kind, "program");
-    const initial = r.initialProgram;
-    assert.ok(initial);
-    assert.equal(initial.maxAmount, 100_000);
-    assert.equal(initial.durationMonths, 6);
-  });
-});
-
-describe("custody (M-2, decided 2026-09-27)", () => {
+describe("custody and vesting readiness", () => {
   const vestingWallet = { holder: "vesting-wallet", beneficiary: "dedicated-safe" };
 
-  it("every allocation or part has a defined custody", () => {
-    for (const a of ALLOCATIONS) {
-      assert.ok(a.custody || a.parts, `${a.id} has no custody`);
-      for (const part of a.parts ?? []) assert.ok(part.custody, `${a.id}/${part.id}`);
-    }
-  });
-
-  it("community / staking: 60 months linear from deployment, no cliff, dedicated Safe", () => {
-    const a = byId("community-staking");
-    assert.equal(a.amount, 3_000_000);
-    assert.deepEqual(a.custody, vestingWallet);
-    const r = a.release;
-    assert.equal(r.kind, "linear");
-    assert.equal(r.vestingMonths, 60);
-    assert.equal(r.start, "deployment");
-    assert.equal(r.status, "approved");
-  });
-
-  it("strategic partnerships: 36 months linear from deployment, no cliff, dedicated Safe", () => {
-    const a = byId("strategic-partnerships");
-    assert.equal(a.amount, 1_500_000);
-    assert.deepEqual(a.custody, vestingWallet);
-    const r = a.release;
-    assert.equal(r.kind, "linear");
-    assert.equal(r.vestingMonths, 36);
-    assert.equal(r.start, "deployment");
-    assert.equal(r.status, "approved");
-    assert.match(r.note ?? "", /limited to the amount that has vested/);
-  });
-
-  it("liquidity, public launch and grants: held in a Safe with no vesting", () => {
-    for (const id of ["liquidity", "public-launch", "grants-bug-bounty"]) {
+  it("founder, investors and strategic partnerships vest to dedicated Safes; schedule TBD", () => {
+    for (const id of ["founder", "investors", "strategic-partnerships"]) {
       const a = byId(id);
-      assert.deepEqual(a.custody, { holder: "safe" }, id);
-      assert.ok(a.release.kind === "custody" || a.release.kind === "program", id);
+      assert.deepEqual(a.custody, vestingWallet, id);
+      assert.ok(a.release.kind === "vesting", id);
+      assert.equal(a.release.schedule, "tbd", id);
+      assert.equal(a.release.status, "undecided", id);
     }
-    // Launch terms remain a separate, open decision.
-    assert.equal(byId("public-launch").release.status, "undecided");
+    assert.match(JSON.stringify(byId("strategic-partnerships")), /milestone/);
   });
 
-  it("team: a dedicated pool Safe funds per-member grants; no pool-level schedule", () => {
-    const a = byId("team");
-    assert.deepEqual(a.custody, { holder: "grant-pool", grantBeneficiary: "recipient-safe" });
-    assert.equal(a.release.kind, "cliff-linear");
-    assert.doesNotMatch(a.purpose, /locked/);
-  });
-
-  it("early user rewards: 100,000 in a Safe, 400,000 vesting 36 months after the program", () => {
-    const a = byId("early-user-rewards");
-    assert.equal(a.custody, undefined);
-    const parts = a.parts ?? [];
-    assert.deepEqual(
-      parts.map((p) => [p.id, p.amount]),
-      [
-        ["initial-program", 100_000],
-        ["vesting", 400_000],
-      ],
-    );
-    const [initial, vesting] = parts;
-    assert.ok(initial && vesting);
-    assert.deepEqual(initial.custody, { holder: "safe" });
-    assert.deepEqual(vesting.custody, vestingWallet);
-    assert.deepEqual(vesting.release, {
-      kind: "linear",
-      vestingMonths: 36,
-      start: "initial-program-end",
-      status: "approved",
+  it("team is a dedicated pool Safe funding per-member grants", () => {
+    assert.deepEqual(byId("team").custody, {
+      holder: "grant-pool",
+      grantBeneficiary: "recipient-safe",
     });
-    const r = a.release;
-    assert.ok(r.kind === "program" && r.initialProgram);
-    assert.equal(r.initialProgram.maxAmount, initial.amount);
+    assert.equal(byId("team").release.status, "undecided");
   });
 
-  it("founder and ecosystem reserve vest to dedicated Safes; treasury sits in the timelock", () => {
-    assert.deepEqual(byId("founder").custody, vestingWallet);
-    assert.deepEqual(byId("ecosystem-reserve").custody, vestingWallet);
+  it("treasury is a timelock under a Safe 3-of-5 with at least 48 hours", () => {
+    const r = byId("treasury").release;
     assert.deepEqual(byId("treasury").custody, { holder: "timelock" });
+    assert.ok(r.kind === "custody");
+    assert.deepEqual(r.controls, { wallet: "Safe", threshold: 3, signers: 5, minDelayHours: 48 });
+  });
+
+  it("the other allocations sit in dedicated Safes", () => {
+    for (const id of [
+      "public-launch",
+      "community-staking",
+      "ecosystem-growth",
+      "liquidity",
+      "early-users",
+      "grants-bug-bounty",
+    ]) {
+      assert.deepEqual(byId(id).custody, { holder: "safe" }, id);
+    }
+  });
+
+  it("no signer or Safe address is stored", () => {
+    assert.doesNotMatch(JSON.stringify(ALLOCATIONS), /0x[0-9a-fA-F]{40}/);
   });
 });
 
@@ -232,36 +201,36 @@ describe("validator rejects invalid tables", () => {
     table[index] = { ...current, ...change };
     return table;
   };
+  const errorsOf = (table: Allocation[]) => validateAllocations(table, MAX_SUPPLY).join("\n");
 
-  it("rejects a total below the cap (the former 20M table)", () => {
-    const table = clone().filter((a) => a.id !== "team" && a.id !== "early-user-rewards");
-    assert.match(validateAllocations(table, MAX_SUPPLY).join("\n"), /total 20000000/);
+  it("rejects a missing allocation", () => {
+    assert.match(errorsOf(clone().filter((a) => a.id !== "grants-bug-bounty")), /total 20600000/);
   });
 
   it("rejects a total above the cap", () => {
-    const table = patch(clone(), 0, { amount: 2_100_001 });
-    assert.match(validateAllocations(table, MAX_SUPPLY).join("\n"), /total 21000001/);
+    assert.match(errorsOf(patch(clone(), 0, { amount: 5_000_001 })), /total 21000001/);
   });
 
-  it("rejects duplicate ids", () => {
-    const table = patch(clone(), 1, { id: "founder" });
-    assert.match(validateAllocations(table, MAX_SUPPLY).join("\n"), /duplicate/);
+  it("rejects duplicate ids and names", () => {
+    assert.match(errorsOf(patch(clone(), 1, { id: "public-launch" })), /duplicate allocation id/);
+    assert.match(
+      errorsOf(patch(clone(), 1, { name: "Public Launch" })),
+      /duplicate allocation name/,
+    );
   });
 
   it("rejects non-integer and non-positive amounts", () => {
     for (const amount of [0, -1, 1.5, Number.NaN]) {
-      const table = patch(clone(), 0, { amount });
-      assert.ok(validateAllocations(table, MAX_SUPPLY).length > 0, String(amount));
+      assert.ok(errorsOf(patch(clone(), 0, { amount })).length > 0, String(amount));
     }
   });
 
-  it("rejects an annual cap that does not cover the allocation", () => {
-    const table = clone().map((a) =>
-      a.release.kind === "annual-cap"
-        ? { ...a, release: { ...a.release, maxPerYear: 1_500_000 } }
-        : a,
+  it("rejects the legacy 7,000,000 Ecosystem Reserve as an extra allocation", () => {
+    const legacy = { ...structuredClone(byId("liquidity")), id: "ecosystem-reserve" };
+    assert.match(
+      errorsOf([...clone(), { ...legacy, name: "Ecosystem Reserve", amount: 7_000_000 }]),
+      /total 28000000/,
     );
-    assert.match(validateAllocations(table, MAX_SUPPLY).join("\n"), /expected 7000000/);
   });
 
   it("rejects a weak treasury multisig or a short timelock", () => {
@@ -271,45 +240,24 @@ describe("validator rejects invalid tables", () => {
           ? { ...a, release: { ...a.release, controls: { ...a.release.controls, ...controls } } }
           : a,
       );
-    assert.match(
-      validateAllocations(weaken({ threshold: 1 }), MAX_SUPPLY).join("\n"),
-      /not a valid/,
-    );
-    assert.match(
-      validateAllocations(weaken({ threshold: 6 }), MAX_SUPPLY).join("\n"),
-      /not a valid/,
-    );
-    assert.match(
-      validateAllocations(weaken({ minDelayHours: 24 }), MAX_SUPPLY).join("\n"),
-      /below/,
-    );
-  });
-
-  it("rejects parts that do not add up to the allocation", () => {
-    const table = clone().map((a) =>
-      a.parts
-        ? { ...a, parts: a.parts.map((p) => (p.id === "vesting" ? { ...p, amount: 399_999 } : p)) }
-        : a,
-    );
-    assert.match(validateAllocations(table, MAX_SUPPLY).join("\n"), /parts total 499999/);
+    assert.match(errorsOf(weaken({ threshold: 1 })), /not a valid/);
+    assert.match(errorsOf(weaken({ threshold: 6 })), /not a valid/);
+    assert.match(errorsOf(weaken({ minDelayHours: 24 })), /below/);
   });
 
   it("rejects an allocation without custody", () => {
-    const table = clone().map((a) => {
-      if (a.id !== "liquidity") return a;
-      const rest: Allocation = { ...a };
-      delete (rest as { custody?: unknown }).custody;
-      return rest;
-    });
-    assert.match(validateAllocations(table, MAX_SUPPLY).join("\n"), /liquidity: custody/);
+    const table = clone().map((a) =>
+      a.id === "liquidity" ? ({ ...a, custody: undefined } as unknown as Allocation) : a,
+    );
+    assert.match(errorsOf(table), /liquidity: custody is not defined/);
   });
 
   it("rejects custody that contradicts the release rule", () => {
     const inSafe = clone().map((a) =>
-      a.id === "community-staking" ? { ...a, custody: { holder: "safe" as const } } : a,
+      a.id === "founder" ? { ...a, custody: { holder: "safe" as const } } : a,
     );
-    assert.match(validateAllocations(inSafe, MAX_SUPPLY).join("\n"), /needs a vesting wallet/);
-    const noSchedule = clone().map((a) =>
+    assert.match(errorsOf(inSafe), /needs a vesting wallet/);
+    const noVesting = clone().map((a) =>
       a.id === "liquidity"
         ? {
             ...a,
@@ -317,24 +265,6 @@ describe("validator rejects invalid tables", () => {
           }
         : a,
     );
-    assert.match(
-      validateAllocations(noSchedule, MAX_SUPPLY).join("\n"),
-      /needs a vesting schedule/,
-    );
-  });
-
-  it("rejects an initial program larger than its allocation", () => {
-    const table = clone().map((a) =>
-      a.release.kind === "program" && a.release.initialProgram
-        ? {
-            ...a,
-            release: {
-              ...a.release,
-              initialProgram: { ...a.release.initialProgram, maxAmount: 600_000 },
-            },
-          }
-        : a,
-    );
-    assert.match(validateAllocations(table, MAX_SUPPLY).join("\n"), /exceeds allocation/);
+    assert.match(errorsOf(noVesting), /needs a vesting release/);
   });
 });
