@@ -8,7 +8,8 @@
     ".": "./src/plan.ts"
   },
   "dependencies": {
-    "@arl/tokenomics": "0.1.0"
+    "@arl/tokenomics": "0.1.0",
+    "@safe-global/safe-deployments": "1.37.63"
   },
   "scripts": {
     "test": "node --test \"test/**/*.test.ts\""

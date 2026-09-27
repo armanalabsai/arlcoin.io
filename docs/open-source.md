@@ -33,6 +33,10 @@ OpenZeppelin v5.7.0 (released 2026-07-29) is newer, but its `audits/`
 directory has no v5.7 report and npm's `latest` tag still points to 5.6.1.
 Pin v5.6.1 and re-evaluate when a v5.7 audit is published.
 
+`safe-global/safe-deployments` (MIT, npm 1.37.63) is adopted for the canonical Safe v1.5.0
+singleton addresses and code hashes: off local Anvil, every Safe role must be a genuine Safe
+v1.5.0 proxy of a canonical singleton.
+
 OpenZeppelin, forge-std, Foundry and Slither are now in use; the Safe is used
 as a deployed instance only. Exact provenance is in `THIRD_PARTY_LICENSES.md`.
 

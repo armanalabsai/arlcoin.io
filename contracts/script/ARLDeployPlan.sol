@@ -51,7 +51,7 @@ struct VestingPlan {
     uint64 vestingEnd;
 }
 
-/// @notice A deployment plan, as produced by `packages/deploy` (schema `arl-deploy-plan/3`).
+/// @notice A deployment plan, as produced by `packages/deploy` (schema `arl-deploy-plan/4`).
 /// The Founder allocation does not vest: it has no vesting plan.
 struct Plan {
     uint256 chainId;
@@ -65,6 +65,9 @@ struct Plan {
     address treasuryGuardian;
     uint256 minDelay;
     Recipients recipients;
+    /// @dev Safe v1.5.0 singletons the plan's Safes may point to. Off local Anvil these must be
+    /// the canonical singletons (`safe-global/safe-deployments`).
+    address[] safeSingletons;
 }
 
 /// @title Deployment plan loading and validation
@@ -88,8 +91,23 @@ library ARLDeployPlan {
     bool internal constant FOUNDER_RESERVE_CUSTODY_APPROVED = false;
 
     /// @dev Plans of any other schema, including `arl-deploy-plan/2` with its founder vesting
-    /// wallet, are rejected rather than reinterpreted.
-    string internal constant PLAN_SCHEMA = "arl-deploy-plan/3";
+    /// wallet and `arl-deploy-plan/3` without Safe singletons, are rejected rather than
+    /// reinterpreted.
+    string internal constant PLAN_SCHEMA = "arl-deploy-plan/4";
+
+    /// @dev Canonical Safe v1.5.0 deployments, from the npm package safe-deployments 1.37.63
+    /// (MIT, safe-global). A test in `packages/deploy` fails if these differ from that package
+    /// or from the official safe-smart-account 1.5.0 build.
+    address internal constant SAFE_SINGLETON_V150 = 0xFf51A5898e281Db6DfC7855790607438dF2ca44b;
+    address internal constant SAFE_L2_SINGLETON_V150 = 0xEdd160fEBBD92E350D4D398fb636302fccd67C7e;
+    bytes32 internal constant SAFE_SINGLETON_V150_CODEHASH =
+        0xdda019cbd7c867a533a2a86e5c53434fdc50b13122b5a5ddb4a8df61b31c20f2;
+    bytes32 internal constant SAFE_L2_SINGLETON_V150_CODEHASH =
+        0x180193227186ccb85316c94db1f0d156ed932b14712cfaac78901899178572dc;
+    /// @dev Runtime code hash of `SafeProxy` v1.5.0. The proxy has no immutables; its singleton
+    /// is stored in slot 0, so every genuine proxy has this exact code.
+    bytes32 internal constant SAFE_PROXY_V150_CODEHASH =
+        0x4e381985ca68b3e5d27b4425fa581c19cf33146d3f887a3cfca96f55528ea46f;
 
     /// @dev Mirrors `ARLTimelock.MIN_DELAY_FLOOR` (Solidity cannot read another contract's
     /// constant by type). `ARLDeployPlanTest` asserts they are equal, and the timelock
@@ -120,6 +138,9 @@ library ARLDeployPlan {
     error PlanInvalidSchedule(string reason);
     error PlanDelayBelowFloor(uint256 delay, uint256 floor);
     error PlanGuardianNotIndependent(address guardian);
+    error PlanSafeSingletonsMissing();
+    error PlanSafeSingletonNotCanonical(address singleton);
+    error PlanNotASafe(string field, address account);
 
     /// @notice Parses a plan JSON document. Reverts if the schema is not `PLAN_SCHEMA`, if any
     /// field is missing or malformed, if a legacy allocation or a founder vesting plan is present,
@@ -140,6 +161,7 @@ library ARLDeployPlan {
         _keyCount(json, ".recipients", "recipients", RECIPIENT_COUNT);
         _keyCount(json, ".vesting", "vesting", VESTING_COUNT);
         _keyCount(json, ".founderTranches", "founderTranches", FOUNDER_TRANCHE_COUNT);
+        _keyCount(json, ".safe", "safe", 1);
 
         p.chainId = VM.parseJsonUint(json, ".chainId");
         p.requireRecipientCode = VM.parseJsonBool(json, ".requireRecipientCode");
@@ -167,6 +189,8 @@ library ARLDeployPlan {
         p.investors = _vesting(json, ".vesting.investors");
         p.strategicPartnerships = _vesting(json, ".vesting.strategicPartnerships");
 
+        p.safeSingletons = VM.parseJsonAddressArray(json, ".safe.singletons");
+
         p.treasurySafe = VM.parseJsonAddress(json, ".treasury.safe");
         p.treasuryGuardian = VM.parseJsonAddress(json, ".treasury.guardian");
         p.minDelay = VM.parseJsonUint(json, ".treasury.minDelay");
@@ -190,6 +214,7 @@ library ARLDeployPlan {
         _validateAllocations(p);
         _validateFounderTranches(p);
         _validateAddresses(p);
+        _validateSafes(p);
         _validateSchedule("investors", p.investors);
         _validateSchedule("strategicPartnerships", p.strategicPartnerships);
         if (p.minDelay < TIMELOCK_DELAY_FLOOR) {
@@ -317,6 +342,63 @@ library ARLDeployPlan {
             r.earlyUsers,
             r.grantsBugBounty
         ];
+    }
+
+    /// @dev Where code is required (every chain except local Anvil), every Safe role must be a
+    /// genuine Safe v1.5.0 proxy of an allowed singleton, so a contract that merely has code
+    /// cannot stand in for a Safe. The Founder Reserved holder is not a Safe role: its custody is
+    /// TBD.
+    function _validateSafes(Plan memory p) private view {
+        if (!p.requireRecipientCode) return;
+        if (p.safeSingletons.length == 0) revert PlanSafeSingletonsMissing();
+        for (uint256 i = 0; i < p.safeSingletons.length; i++) {
+            if (!singletonAllowed(
+                    p.chainId,
+                    p.safeSingletons[i],
+                    SAFE_SINGLETON_V150_CODEHASH,
+                    SAFE_L2_SINGLETON_V150_CODEHASH
+                )) {
+                // forge-lint: disable-next-line(require-revert-in-loop)
+                revert PlanSafeSingletonNotCanonical(p.safeSingletons[i]);
+            }
+        }
+        (string[12] memory field, address[12] memory account) = safeRoles(p);
+        for (uint256 i = 0; i < 12; i++) {
+            if (!isSafeProxy(account[i], p.safeSingletons, SAFE_PROXY_V150_CODEHASH)) {
+                // forge-lint: disable-next-line(require-revert-in-loop)
+                revert PlanNotASafe(field[i], account[i]);
+            }
+        }
+    }
+
+    /// @notice True if `singleton` may back the plan's Safes. Off local Anvil it must be one of
+    /// the two canonical Safe v1.5.0 singletons, with the expected code. On local Anvil a
+    /// rehearsal deploys its own singleton, so any address is accepted there. The code hashes are
+    /// parameters only so tests can exercise each branch; `validate` passes the constants above.
+    function singletonAllowed(
+        uint256 chainId,
+        address singleton,
+        bytes32 safeCodeHash,
+        bytes32 safeL2CodeHash
+    ) internal view returns (bool) {
+        if (chainId == LOCAL_CHAIN_ID) return true;
+        return (singleton == SAFE_SINGLETON_V150 && singleton.codehash == safeCodeHash)
+            || (singleton == SAFE_L2_SINGLETON_V150 && singleton.codehash == safeL2CodeHash);
+    }
+
+    /// @notice True if `account` runs the Safe v1.5.0 proxy code and points (slot 0) to one of
+    /// `singletons`. The proxy code hash is a parameter only so tests can exercise each branch.
+    function isSafeProxy(address account, address[] memory singletons, bytes32 proxyCodeHash)
+        internal
+        view
+        returns (bool)
+    {
+        if (account.codehash != proxyCodeHash) return false;
+        address singleton = address(uint160(uint256(VM.load(account, bytes32(0)))));
+        for (uint256 i = 0; i < singletons.length; i++) {
+            if (singleton == singletons[i]) return true;
+        }
+        return false;
     }
 
     /// @notice Every address the plan names: the Safe roles, then the Founder Reserved holder.
