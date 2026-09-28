@@ -121,6 +121,14 @@ expect "guardian is not executor" "false" "$(has_role EXECUTOR_ROLE "$GUARDIAN")
 expect "zero address is not executor" "false" \
   "$(has_role EXECUTOR_ROLE 0x0000000000000000000000000000000000000000)"
 
+log "Deployment manifest and circulating supply (economic specification sections 5 and 6)"
+MANIFEST="deploy/deployments/31337-manifest.json"
+node "$ROOT/packages/deploy/src/manifest-cli.ts" "$PLAN" "$DEPLOYMENT" "$MANIFEST" || die "manifest failed"
+supply() { node "$ROOT/packages/deploy/src/supply-cli.ts" "$MANIFEST" "$RPC" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>console.log(JSON.parse(s).$1))"; }
+expect "total supply (manifest read)" "21000000000000000000000000" "$(supply totalSupply)"
+expect "circulating supply at TGE" "2000000000000000000000000" "$(supply circulatingSupply)"
+expect "locked supply at TGE" "19000000000000000000000000" "$(supply lockedSupply)"
+
 # Writes a copy of the plan with one field changed: mutate <out> <js expression on p>.
 mutate() {
   node -e "const p=require('./$PLAN'); $2; require('fs').writeFileSync('$1', JSON.stringify(p));"
@@ -323,5 +331,24 @@ must_fail "verify: Safes point to an unlisted singleton" "VerifyFailed\\(\"recip
   forge_verify "$REHEARSAL/wrong-singleton.json" "$SAFE_DEPLOYMENT"
 must_fail "verify: founder unrestricted without code" "VerifyAddressMismatch\\(\"recipients.founderUnrestricted\"" \
   forge_verify "$REHEARSAL/founder-eoa.json" "$SAFE_DEPLOYMENT"
+
+log "Circulating supply moves only when tokens leave a locked address"
+# Runs last: it moves genesis tokens, after which the verifier's genesis checks no longer apply.
+BEEF=0x000000000000000000000000000000000000bEEF
+impersonate() {
+  cast rpc anvil_impersonateAccount "$1" --rpc-url "$RPC" >/dev/null
+  cast rpc anvil_setBalance "$1" 0xDE0B6B3A7640000 --rpc-url "$RPC" >/dev/null
+}
+send_from() {
+  cast send "$TOKEN" 'transfer(address,uint256)' "$2" "$3" --unlocked --from "$1" --rpc-url "$RPC" >/dev/null
+}
+FOUNDER_U="$(planval recipients.founderUnrestricted)"
+LIQUIDITY="$(planval recipients.liquidity)"
+impersonate "$FOUNDER_U"
+send_from "$FOUNDER_U" "$BEEF" 500000000000000000000000
+expect "circulating after a founder sale" "2000000000000000000000000" "$(supply circulatingSupply)"
+impersonate "$LIQUIDITY"
+send_from "$LIQUIDITY" "$BEEF" 1
+expect "circulating after 1 unit leaves liquidity" "2000000000000000000000001" "$(supply circulatingSupply)"
 
 log "REHEARSAL PASSED: deployed, verified, and $NEGATIVE negative cases rejected"

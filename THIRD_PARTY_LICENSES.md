@@ -41,6 +41,7 @@ Exact versions and integrity hashes are recorded in `package-lock.json`.
 | prettier                        | 3.9.9   | MIT        | Formatting                                                                                                                                                                                                                                                                                                   |
 | @safe-global/safe-smart-account | 1.5.0   | LGPL-3.0   | Safe build artifacts deployed on local Anvil by the rehearsal only; no Safe source is copied into ARL (upstream commit `dc437e8fba8b4805d76bcbd1c668c9fd3d1e83be`)                                                                                                                                           |
 | @safe-global/safe-deployments   | 1.37.63 | MIT        | Canonical Safe v1.5.0 singleton addresses and code hashes, used by the deployment planner and pinned in `ARLDeployPlan.sol` (a test checks they match); used as published, no source copied. npm integrity `sha512-dH4V3iHH5tZdxx3DBvvBzmnlOZpKMXUx6CBFGUwlARnUa9MEVVyg8Sbpc3DplsaPB5fLh0J97+WB5ylxhLWCRA==` |
+| viem                            | 2.56.9  | MIT        | Reads `totalSupply` and manifest balances from the chain for the circulating-supply report (`packages/deploy`); used as published, no source copied                                                                                                                                                          |
 
 ## Website (`apps/web`)
 
