@@ -34,7 +34,7 @@ export function Stat({
   testId?: string;
 }) {
   return (
-    <div className="card-arl p-4">
+    <div className="glass-chip p-4">
       <div className="text-xs tracking-wide text-subtle uppercase">{label}</div>
       <div className="stat-value-arl mt-1 text-xl font-semibold" data-testid={testId}>
         {value}
@@ -59,7 +59,7 @@ export function RequireWallet({ children }: { children: ReactNode }) {
   const { isConnected } = useAccount();
   if (isConnected) return <>{children}</>;
   return (
-    <div className="card-arl flex flex-col items-center gap-3 p-8 text-center">
+    <div className="glass-strong flex flex-col items-center gap-3 p-8 text-center">
       <p className="text-muted">Connect a wallet to continue.</p>
       <RainbowKitCustomConnectButton />
     </div>
@@ -104,7 +104,7 @@ export function AmountForm({
         <input
           id={`${testId}-input`}
           data-testid={`${testId}-input`}
-          className="input join-item w-full"
+          className="input glass-field join-item w-full"
           inputMode="decimal"
           placeholder="0.0"
           value={text}
@@ -113,7 +113,7 @@ export function AmountForm({
         />
         <button
           type="button"
-          className="btn join-item"
+          className="btn btn-glass join-item"
           disabled={available === undefined || available === 0n}
           onClick={() =>
             available !== undefined && setText(formatArl(available, 18).replace(/,/g, ""))

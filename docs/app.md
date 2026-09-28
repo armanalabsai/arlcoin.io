@@ -16,6 +16,12 @@ changed is listed in [`THIRD_PARTY_LICENSES`](../THIRD_PARTY_LICENSES).
 | Vesting | `ARLVestingWallet`                 | See beneficiary, cliff and end dates, released and releasable amounts; release to the beneficiary |
 | Staking | `ARLStakingRewards` and `ARLToken` | Stake (approving exactly the amount), withdraw, claim rewards, or withdraw everything and claim   |
 
+Design: Apple-style "liquid glass" in the website's night blue and amber. A fixed layer of soft
+light sits behind the content; panels, tiles, the top bar and menus are translucent glass over it
+(blur and saturation, a lit top edge, soft shadow), heavier for larger surfaces. Fields are recessed,
+buttons respond on press. With "reduce transparency" or "increase contrast" turned on, surfaces
+become solid; with "reduce motion", the press animation is off.
+
 Rules the app follows:
 
 - **Network gate** (`lib/network.ts`): the local chain (31337), and Base Sepolia (84532) once

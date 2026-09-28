@@ -72,7 +72,7 @@ function Wallet() {
         />
       </div>
       {isBeneficiary ? (
-        <div className="alert border-primary/40 bg-primary/10 text-sm">
+        <div className="glass-chip border-primary/40! px-4 py-3 text-sm">
           You are the beneficiary of a vesting wallet.{" "}
           <Link className="link" href="/vesting">
             View vesting
@@ -80,7 +80,7 @@ function Wallet() {
         </div>
       ) : null}
 
-      <section className="card-arl flex flex-col gap-3 p-5">
+      <section className="glass-strong flex flex-col gap-3 p-5">
         <h2 className="font-semibold">Send ARL</h2>
         <label className="text-sm text-muted" htmlFor="send-to">
           Recipient address
@@ -88,7 +88,7 @@ function Wallet() {
         <input
           id="send-to"
           data-testid="send-to"
-          className="input w-full font-mono text-sm"
+          className="input glass-field w-full font-mono text-sm"
           placeholder="0x…"
           value={to}
           onChange={(e) => setTo(e.target.value.trim())}

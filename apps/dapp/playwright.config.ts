@@ -15,6 +15,9 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: 0,
   timeout: 90_000,
+  // Transactions wait for their receipt on a chain that mines one block per second; approve and
+  // stake are two of them.
+  expect: { timeout: 15_000 },
   reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : "list",
   use: {
     baseURL: `http://127.0.0.1:${String(PORT)}`,

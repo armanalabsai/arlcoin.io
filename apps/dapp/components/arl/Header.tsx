@@ -14,7 +14,7 @@ const NAV = [
 export function Header() {
   const pathname = usePathname();
   return (
-    <header className="sticky top-0 z-20 border-b border-line bg-base-100/85 backdrop-blur">
+    <header className="glass-bar sticky top-0 z-20">
       <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
         <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -27,7 +27,7 @@ export function Header() {
               key={item.href}
               href={item.href}
               aria-current={pathname === item.href ? "page" : undefined}
-              className={`btn btn-ghost btn-sm ${pathname === item.href ? "text-primary" : "text-muted"}`}
+              className={`btn btn-sm ${pathname === item.href ? "btn-glass text-primary" : "btn-ghost text-muted"}`}
             >
               {item.label}
             </Link>

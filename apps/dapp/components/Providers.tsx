@@ -13,6 +13,21 @@ import { Header } from "~~/components/arl/Header";
 import { BlockieAvatar } from "~~/components/scaffold-eth";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 
+const base = darkTheme({
+  accentColor: "#eea53f",
+  accentColorForeground: "#1a1204",
+  overlayBlur: "small",
+});
+// The wallet sheet is glass too: translucent over a blurred, dimmed page.
+const theme = {
+  ...base,
+  colors: {
+    ...base.colors,
+    modalBackground: "rgba(10, 20, 48, 0.82)",
+    modalBorder: "rgba(255, 255, 255, 0.14)",
+  },
+};
+
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false } },
 });
@@ -21,10 +36,8 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider
-          avatar={BlockieAvatar}
-          theme={darkTheme({ accentColor: "#eea53f", accentColorForeground: "#1a1204" })}
-        >
+        <RainbowKitProvider avatar={BlockieAvatar} theme={theme}>
+          <div className="ambient" aria-hidden="true" />
           <div className="flex min-h-screen flex-col">
             <Header />
             <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">{children}</main>
@@ -32,7 +45,14 @@ export function Providers({ children }: { children: ReactNode }) {
           </div>
           <Toaster
             position="bottom-right"
-            toastOptions={{ style: { background: "#0f1a3b", color: "#f2f2f0" } }}
+            toastOptions={{
+              style: {
+                background: "rgba(10, 20, 48, 0.85)",
+                backdropFilter: "blur(20px)",
+                border: "1px solid rgba(255,255,255,0.14)",
+                color: "#f2f2f0",
+              },
+            }}
           />
         </RainbowKitProvider>
       </QueryClientProvider>

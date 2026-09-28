@@ -97,7 +97,7 @@ function Vesting() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="card-arl p-5">
+      <div className="glass-strong p-5">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <div className="text-xs tracking-wide text-subtle uppercase">Beneficiary</div>

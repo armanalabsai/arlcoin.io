@@ -120,7 +120,7 @@ function Staking() {
         />
       </div>
 
-      <section className="card-arl flex flex-col gap-5 p-5">
+      <section className="glass-strong flex flex-col gap-5 p-5">
         <AmountForm
           label="Stake"
           action="Stake"
@@ -162,7 +162,7 @@ function Staking() {
           </button>
           <button
             type="button"
-            className="btn"
+            className="btn btn-glass"
             data-testid="staking-exit"
             disabled={(!staked && !earned) || busy}
             onClick={() => void pool.writeContractAsync({ functionName: "exit" })}

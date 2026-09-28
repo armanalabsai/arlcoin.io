@@ -75,12 +75,15 @@ test("staking: stake, earn, claim, withdraw, exit", async ({ page }) => {
   await page.getByTestId("stake-submit").click();
   await expect(page.getByTestId("staking-staked")).toContainText("1,000");
 
-  // One block per second: rewards accrue on screen.
-  await expect.poll(() => amount(page, "staking-earned"), { timeout: 20_000 }).toBeGreaterThan(0);
+  // One block per second: rewards accrue on screen (about 0.0116 ARL per second here).
+  await expect
+    .poll(() => amount(page, "staking-earned"), { timeout: 20_000 })
+    .toBeGreaterThan(0.05);
   await page.screenshot({ path: "test-results/staking.png", fullPage: true });
 
+  // Claiming pays out and resets the counter, which then grows again from zero.
   await page.getByTestId("staking-claim").click();
-  await expect(page.getByText(/Transaction completed/).first()).toBeVisible();
+  await expect.poll(() => amount(page, "staking-earned")).toBeLessThan(0.04);
 
   await page.getByTestId("withdraw-input").fill("400");
   await page.getByTestId("withdraw-submit").click();

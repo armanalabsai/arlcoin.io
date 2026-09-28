@@ -42,8 +42,14 @@
   --color-line: rgb(255 255 255 / 0.08);
 }
 
+/* The base colour lives on <html>; <body> stays transparent so the ambient light layer, which
+   sits behind the content, is not painted over. */
+html {
+  background: #030817;
+}
+
 body {
-  background: #050b1e;
+  background: transparent;
   font-family:
     ui-sans-serif,
     system-ui,
@@ -52,12 +58,200 @@ body {
     sans-serif;
 }
 
-.card-arl {
-  border: 1px solid var(--color-line);
-  background: linear-gradient(180deg, #0a1430, #081127);
-  border-radius: 14px;
+/*
+ * LIQUID GLASS
+ *
+ * Glass needs something behind it to bend. A fixed ambient layer (soft amber and blue light, a
+ * faint star field) sits behind all content and never moves. Surfaces over it are translucent:
+ * they blur and saturate what is behind, catch light on their top edge, and cast a soft shadow.
+ * Weight encodes hierarchy: the header and large panels are heavier (more blur, deeper shadow)
+ * than stat tiles; interactive controls are the lightest. Glass is never stacked on glass of the
+ * same weight.
+ */
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(40rem 30rem at 85% -5%, rgb(238 165 63 / 0.3), transparent 70%),
+    radial-gradient(45rem 35rem at -10% 30%, rgb(56 104 255 / 0.28), transparent 70%),
+    radial-gradient(40rem 30rem at 60% 110%, rgb(120 80 255 / 0.2), transparent 70%),
+    radial-gradient(1px 1px at 20% 30%, rgb(255 255 255 / 0.5), transparent),
+    radial-gradient(1px 1px at 70% 20%, rgb(255 255 255 / 0.35), transparent),
+    radial-gradient(1px 1px at 40% 80%, rgb(255 255 255 / 0.3), transparent),
+    radial-gradient(1.5px 1.5px at 85% 65%, rgb(255 255 255 / 0.4), transparent),
+    radial-gradient(1px 1px at 10% 90%, rgb(255 255 255 / 0.3), transparent),
+    linear-gradient(180deg, #050b1e 0%, #030817 100%);
+}
+
+.glass,
+.glass-strong,
+.glass-chip {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid rgb(255 255 255 / 0.13);
+  background: linear-gradient(
+    160deg,
+    rgb(255 255 255 / 0.1),
+    rgb(255 255 255 / 0.03) 55%,
+    rgb(255 255 255 / 0.05)
+  );
+  -webkit-backdrop-filter: blur(22px) saturate(170%);
+  backdrop-filter: blur(22px) saturate(170%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.22),
+    inset 0 -1px 0 rgb(255 255 255 / 0.04),
+    0 18px 40px -22px rgb(0 0 0 / 0.7);
+}
+
+/* Specular sheen: light entering from the top-left edge. */
+.glass::before,
+.glass-strong::before,
+.glass-chip::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(120% 60% at 0% 0%, rgb(255 255 255 / 0.12), transparent 55%);
+  pointer-events: none;
+}
+
+.glass {
+  border-radius: 22px;
+}
+
+/* Larger surfaces read thicker: more blur, deeper shadow. */
+.glass-strong {
+  border-radius: 26px;
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  backdrop-filter: blur(32px) saturate(180%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.25),
+    inset 0 -1px 0 rgb(255 255 255 / 0.05),
+    0 30px 60px -28px rgb(0 0 0 / 0.8);
+}
+
+.glass-chip {
+  border-radius: 18px;
+  transition:
+    border-color 200ms ease,
+    background 200ms ease;
+}
+
+.glass-chip:hover {
+  border-color: rgb(255 255 255 / 0.22);
+}
+
+/* Floating chrome: content scrolls under it. */
+.glass-bar {
+  border-bottom: 1px solid rgb(255 255 255 / 0.08);
+  background: rgb(5 11 30 / 0.45);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  backdrop-filter: blur(28px) saturate(180%);
+  box-shadow: inset 0 -1px 0 rgb(255 255 255 / 0.04);
+}
+
+/* Fields are recessed into the glass rather than raised from it. */
+.glass-field {
+  border: 1px solid rgb(255 255 255 / 0.1);
+  background: rgb(3 8 23 / 0.35);
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.35);
+}
+
+.glass-field:focus,
+.glass-field:focus-within {
+  border-color: rgb(238 165 63 / 0.6);
+  outline: none;
+}
+
+/* Menus float over content; positioned by the dropdown itself. */
+.glass-menu {
+  border: 1px solid rgb(255 255 255 / 0.14);
+  background: rgb(10 20 48 / 0.7);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  backdrop-filter: blur(28px) saturate(180%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.2),
+    0 24px 50px -20px rgb(0 0 0 / 0.8);
+  border-radius: 16px;
+}
+
+/* Controls are the lightest glass. */
+.btn-glass {
+  border: 1px solid rgb(255 255 255 / 0.14);
+  background: rgb(255 255 255 / 0.08);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18);
+  color: var(--color-base-content);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.btn-glass:hover {
+  background: rgb(255 255 255 / 0.13);
+}
+
+.btn.btn-primary {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.45),
+    0 8px 22px -10px rgb(238 165 63 / 0.7);
+}
+
+.btn.btn-primary:disabled {
+  box-shadow: none;
+}
+
+/* Feedback on press, not on release. */
+.btn:active:not(:disabled) {
+  transform: scale(0.97);
+  transition: transform 100ms ease-out;
 }
 
 .stat-value-arl {
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass,
+  .glass-strong,
+  .glass-chip {
+    background: #0c1634;
+  }
+  .glass-bar {
+    background: #050b1e;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass,
+  .glass-strong,
+  .glass-chip,
+  .btn-glass {
+    background: #0c1634;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .glass-bar {
+    background: #050b1e;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .glass,
+  .glass-strong,
+  .glass-chip,
+  .glass-field {
+    border-color: rgb(255 255 255 / 0.5);
+    background: #081028;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn:active:not(:disabled) {
+    transform: none;
+  }
 }

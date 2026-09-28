@@ -35,14 +35,14 @@ export const AddressInfoDropdown = ({ address }: { address: Address }) => {
 
   return (
     <details ref={dropdownRef} className="dropdown dropdown-end leading-3">
-      <summary className="btn btn-secondary btn-sm h-auto! gap-0 pl-0 pr-2" data-testid="account">
+      <summary className="btn btn-glass btn-sm h-auto! gap-0 pl-0 pr-2" data-testid="account">
         <BlockieAvatar address={checkSumAddress} size={30} />
         <span className="mr-1 ml-2">
           {checkSumAddress.slice(0, 6)}…{checkSumAddress.slice(-4)}
         </span>
         <ChevronDownIcon className="ml-2 h-6 w-4 sm:ml-0" />
       </summary>
-      <ul className="dropdown-content menu z-2 mt-2 gap-1 bg-base-200 p-2 shadow-lg">
+      <ul className="dropdown-content menu z-2 mt-2 gap-1 glass-menu p-2">
         <NetworkOptions hidden={!selectingNetwork} />
         <li className={selectingNetwork ? "hidden" : ""}>
           <button
