@@ -3,13 +3,14 @@ import { expect, test } from "@playwright/test";
 import { FORMS, formsOpen } from "../../src/content/forms.ts";
 import { SITE } from "../../src/content/site.ts";
 
-// The whitelist, contact and privacy pages. With no form access key the forms show a closed
+// The whitelist, contact, privacy and terms pages. With no form access key the forms show a closed
 // notice; with one, submissions are intercepted here so nothing leaves the test.
 
 const PAGES = [
   ["/whitelist", "Whitelist"],
   ["/contact", "Contact the team"],
   ["/privacy", "Privacy"],
+  ["/terms", "Terms of use"],
 ] as const;
 
 for (const [path, heading] of PAGES) {

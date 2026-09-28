@@ -47,7 +47,7 @@ test("the Core cycles through the layers in place", async ({ page }) => {
   await mark(page);
   await core(page).click();
   await expect(page).toHaveURL(/\/core\/team$/);
-  await expect(page.getByRole("link", { name: /FoundArk/ }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: /Alaz Daghan Gokturk/ }).first()).toBeVisible();
   await core(page).click();
   await expect(page).toHaveURL(/\/core\/token$/);
   await expect(page).toHaveTitle("Token · ARL");
@@ -125,7 +125,7 @@ test("keyboard: Enter on the Core, Space on a card, arrows between cards", async
   await core(page).focus();
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/\/core\/team$/);
-  const first = page.locator('[data-ring-card="foundark"]');
+  const first = page.locator('[data-ring-card="alaz-daghan-gokturk"]');
   await first.focus();
   await page.keyboard.press("ArrowRight");
   await expect(page.locator('[data-ring-card="team-growing"]')).toBeFocused();
@@ -203,14 +203,13 @@ test("team layer: the founder and the team-growing note, unverified details with
   await expect(page.locator("[data-ring-card]")).toHaveCount(2);
   await expect(page.locator("img")).toHaveCount(0);
 
-  await page.locator('[data-ring-card="foundark"]').click();
-  await expect(page).toHaveURL(/\/core\/team\/foundark$/);
-  await expect(surface(page).getByRole("heading", { name: "FoundArk" })).toBeVisible();
-  await expect(surface(page)).toContainText("Profile not yet verified");
-  await expect(surface(page)).not.toContainText("AGI Core");
+  await page.locator('[data-ring-card="alaz-daghan-gokturk"]').click();
+  await expect(page).toHaveURL(/\/core\/team\/alaz-daghan-gokturk$/);
+  await expect(surface(page).getByRole("heading", { name: "Alaz Daghan Gokturk" })).toBeVisible();
+  await expect(surface(page)).toContainText("Founder and CEO");
   await expect(surface(page).getByRole("link")).toHaveCount(0);
 
   await page.getByRole("button", { name: "Back to Team" }).click();
   await expect(page).toHaveURL(/\/core\/team$/);
-  await expect(page.locator('[data-ring-card="foundark"]')).toBeFocused();
+  await expect(page.locator('[data-ring-card="alaz-daghan-gokturk"]')).toBeFocused();
 });

@@ -19,7 +19,7 @@ export function ProtocolIndex({ onOpen }: Props) {
   return (
     <footer className="border-t border-line px-4 pt-16 pb-12 sm:px-8">
       <div className="mx-auto flex max-w-[1200px] flex-col gap-12">
-        <h2 className="font-mono text-[11px] tracking-[0.14em] text-fg-subtle uppercase">Index</h2>
+        <h2 className="text-[12px] text-fg-subtle">Index</h2>
         <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:grid-cols-6">
           {LAYERS.map((layer) => (
             <section key={layer.id} className="flex flex-col gap-3">

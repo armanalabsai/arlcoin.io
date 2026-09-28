@@ -80,11 +80,10 @@ export function IdentityMark({ initials, size }: { initials: string; size: "card
   return (
     <span
       aria-hidden="true"
-      className={`relative grid shrink-0 place-items-center rounded-full border border-line-strong bg-surface-3 font-mono tracking-[0.04em] text-fg-muted shadow-[inset_0_1px_0_rgb(255_255_255/0.06)] ${
+      className={`relative grid shrink-0 place-items-center rounded-full border border-line-strong bg-surface-3 font-mono tracking-[0.04em] text-fg-muted ${
         big ? "size-16 text-[18px]" : "size-10 text-[12px]"
       }`}
     >
-      <span className="absolute inset-[-1px] rounded-full border border-transparent border-t-accent-edge" />
       {initials}
     </span>
   );
@@ -114,7 +113,7 @@ export function RingCard({ entry, selected, onActivate }: Props) {
       }}
       data-weight={entry.weight}
       data-selected={selected ? "true" : undefined}
-      className={`material-card group flex h-full flex-col justify-between gap-4 rounded-(--radius-card) border p-4 transition-[border-color,background-color,box-shadow,translate] duration-200 ease-(--ease-out-quint) hover:-translate-y-px active:translate-y-0 active:scale-[0.99]`}
+      className={`material-card group flex h-full flex-col justify-between gap-4 rounded-(--radius-card) border p-4 transition-colors duration-150`}
     >
       {entry.person ? (
         <>
@@ -130,11 +129,11 @@ export function RingCard({ entry, selected, onActivate }: Props) {
             </span>
           </span>
           <span className="flex items-center justify-between gap-3">
-            <span className="text-[12px] text-fg-subtle transition-colors group-hover:text-accent">
+            <span className="text-[13px] text-fg-muted">
               Explore <span aria-hidden="true">→</span>
             </span>
             {entry.person.verificationStatus !== "verified" ? (
-              <span className="rounded-[5px] border border-line px-1.5 py-0.5 font-mono text-[9px] tracking-[0.1em] text-fg-subtle uppercase">
+              <span className="rounded-[5px] border border-line px-1.5 py-0.5 text-[12px] text-fg-subtle">
                 {entry.person.verificationStatus === "placeholder" ? "Open" : "Unverified"}
               </span>
             ) : null}
