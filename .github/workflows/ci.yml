@@ -87,6 +87,33 @@ jobs:
         run: slither . --foundry-compile-all --filter-paths "lib/|test/" --exclude-dependencies --fail-low
         working-directory: contracts
 
+  symbolic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+
+      - uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09 # v1.9.1
+        with:
+          version: v1.8.3
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - run: pip install halmos==0.3.3
+
+      # check_VestedIsMonotonic is nonlinear and times out in the solver; the property is covered
+      # by fuzzing and the VestingNeverOverReleases invariant (docs/audit-scope.md).
+      - name: Halmos symbolic checks
+        run: halmos --match-contract ARLSymbolic --function 'check_(?!VestedIsMonotonic)' --solver-timeout-assertion 120000
+        working-directory: contracts
+        env:
+          FOUNDRY_DYNAMIC_TEST_LINKING: "false"
+
   rehearsal:
     runs-on: ubuntu-latest
     timeout-minutes: 20
