@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { descriptionFor, titleFor } from "@/content/meta.ts";
 import { LAYERS, getCard, getLayer, pathFor } from "@/content/registry.ts";
+import { OG_IMAGE } from "@/content/site.ts";
 
 export const dynamicParams = false;
 
@@ -27,7 +28,12 @@ export async function generateMetadata({
     title: titleFor(route),
     description: descriptionFor(route),
     alternates: { canonical: path },
-    openGraph: { title: titleFor(route), description: descriptionFor(route), url: path },
+    openGraph: {
+      title: titleFor(route),
+      description: descriptionFor(route),
+      url: path,
+      images: [OG_IMAGE],
+    },
   };
 }
 

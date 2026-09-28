@@ -15,5 +15,14 @@ export const repoDoc = (path: string): `https://${string}` =>
 
 export const NOT_DEPLOYED = "Not yet deployed";
 
+/** Social preview image (app/opengraph-image.png). Pages that set `openGraph` repeat it,
+ * because a page-level `openGraph` object replaces the inherited one. */
+export const OG_IMAGE = {
+  url: "/opengraph-image.png",
+  width: 1200,
+  height: 630,
+  alt: "ARL · 21,000,000 ARL maximum supply",
+} as const;
+
 export const TOKEN_DISCLAIMER =
   "ARL is not deployed. No contract exists on any network, nothing is for sale, and nothing here is an offer, investment advice or a promise of listing.";
