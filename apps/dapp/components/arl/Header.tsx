@@ -11,6 +11,7 @@ const NAV = [
   { href: "/staking", label: "Staking" },
   { href: "/payments", label: "Payments" },
   { href: "/network", label: "Network" },
+  { href: "/private", label: "Private" },
 ];
 
 export function Header() {

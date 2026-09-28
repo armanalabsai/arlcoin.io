@@ -47,7 +47,12 @@ const abi = (name: string): unknown =>
     }
   ).abi;
 
+const zk = JSON.parse(readFileSync(join(dirname(deploymentPath), "31337-zk.json"), "utf8")) as {
+  signal: string;
+};
+
 const contracts = {
+  ARLAnonymousSignal: { address: zk.signal, abi: abi("ARLAnonymousSignal") },
   ARLToken: { address: deployment.token, abi: abi("ARLToken") },
   ARLVestingWallet: { address: deployment.vesting, abi: abi("ARLVestingWallet") },
   ARLStakingRewards: { address: deployment.staking, abi: abi("ARLStakingRewards") },

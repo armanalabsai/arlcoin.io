@@ -32,6 +32,7 @@ ignored_warnings_from = ["lib/"]
 [profile.zk]
 src = "zk"
 test = "test-zk"
+script = "zk-script"
 
 [fuzz]
 runs = 10000

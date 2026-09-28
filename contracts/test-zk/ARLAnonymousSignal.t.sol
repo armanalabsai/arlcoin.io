@@ -170,4 +170,46 @@ contract ARLAnonymousSignalTest is Test {
         vm.expectRevert(ARLAnonymousSignal.SignalZeroAddress.selector);
         new ARLAnonymousSignal(IARLSignalVerifier(address(0)));
     }
+
+    function test_addMembersPublishesCommitmentsAndRoot() public {
+        uint256[] memory added = new uint256[](2);
+        added[0] = 111;
+        added[1] = 222;
+        vm.expectEmit(address(signals));
+        emit ARLAnonymousSignal.MembersAdded(0, added);
+        vm.expectEmit(address(signals));
+        emit ARLAnonymousSignal.RootUpdated(0, root, 999);
+        vm.prank(admin);
+        signals.addMembers(0, added, 999);
+        assertEq(signals.groupRoot(0), 999);
+        // Proofs against the previous root still work during the grace period.
+        _signal(p[0]);
+    }
+
+    function test_addMembersChecksCommitmentsAndAdmin() public {
+        uint256[] memory bad = new uint256[](1);
+        vm.prank(admin);
+        vm.expectRevert(
+            abi.encodeWithSelector(ARLAnonymousSignal.SignalInvalidCommitment.selector, 0)
+        );
+        signals.addMembers(0, bad, 999);
+        bad[0] = 5;
+        vm.expectRevert(abi.encodeWithSelector(ARLAnonymousSignal.SignalNotAdmin.selector, 0));
+        signals.addMembers(0, bad, 999);
+    }
+
+    function test_createGroupWithMembersPublishesThem() public {
+        uint256[] memory members = new uint256[](1);
+        members[0] = 7;
+        vm.expectEmit(address(signals));
+        emit ARLAnonymousSignal.GroupCreated(1, address(this), 7);
+        vm.expectEmit(address(signals));
+        emit ARLAnonymousSignal.MembersAdded(1, members);
+        assertEq(signals.createGroupWithMembers(members, 7), 1);
+        members[0] = 0;
+        vm.expectRevert(
+            abi.encodeWithSelector(ARLAnonymousSignal.SignalInvalidCommitment.selector, 0)
+        );
+        signals.createGroupWithMembers(members, 7);
+    }
 }

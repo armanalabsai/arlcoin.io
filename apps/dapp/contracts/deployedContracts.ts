@@ -6,6 +6,507 @@ import type { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract
 
 const deployedContracts = {
   31337: {
+    ARLAnonymousSignal: {
+      address: "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+      abi: [
+        {
+          type: "constructor",
+          inputs: [
+            {
+              name: "verifier_",
+              type: "address",
+              internalType: "contract IARLSignalVerifier",
+            },
+          ],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "ROOT_GRACE_PERIOD",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "SNARK_FIELD",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "addMembers",
+          inputs: [
+            {
+              name: "groupId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "commitments",
+              type: "uint256[]",
+              internalType: "uint256[]",
+            },
+            {
+              name: "root",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "changeAdmin",
+          inputs: [
+            {
+              name: "groupId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "admin",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "createGroup",
+          inputs: [
+            {
+              name: "root",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "groupId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "createGroupWithMembers",
+          inputs: [
+            {
+              name: "commitments",
+              type: "uint256[]",
+              internalType: "uint256[]",
+            },
+            {
+              name: "root",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "groupId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "groupAdmin",
+          inputs: [
+            {
+              name: "groupId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "groupCount",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "groupRoot",
+          inputs: [
+            {
+              name: "groupId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "hashToField",
+          inputs: [
+            {
+              name: "value",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "pure",
+        },
+        {
+          type: "function",
+          name: "isNullifierUsed",
+          inputs: [
+            {
+              name: "groupId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "nullifier",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "bool",
+              internalType: "bool",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "signal",
+          inputs: [
+            {
+              name: "groupId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "scope",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "message",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "root",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "nullifier",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "proof",
+              type: "bytes",
+              internalType: "bytes",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "updateRoot",
+          inputs: [
+            {
+              name: "groupId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "root",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "verifier",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "contract IARLSignalVerifier",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "event",
+          name: "AdminChanged",
+          inputs: [
+            {
+              name: "groupId",
+              type: "uint256",
+              indexed: true,
+              internalType: "uint256",
+            },
+            {
+              name: "previousAdmin",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "admin",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "GroupCreated",
+          inputs: [
+            {
+              name: "groupId",
+              type: "uint256",
+              indexed: true,
+              internalType: "uint256",
+            },
+            {
+              name: "admin",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "root",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "MembersAdded",
+          inputs: [
+            {
+              name: "groupId",
+              type: "uint256",
+              indexed: true,
+              internalType: "uint256",
+            },
+            {
+              name: "commitments",
+              type: "uint256[]",
+              indexed: false,
+              internalType: "uint256[]",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "RootUpdated",
+          inputs: [
+            {
+              name: "groupId",
+              type: "uint256",
+              indexed: true,
+              internalType: "uint256",
+            },
+            {
+              name: "previousRoot",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+            {
+              name: "root",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "Signal",
+          inputs: [
+            {
+              name: "groupId",
+              type: "uint256",
+              indexed: true,
+              internalType: "uint256",
+            },
+            {
+              name: "scope",
+              type: "uint256",
+              indexed: true,
+              internalType: "uint256",
+            },
+            {
+              name: "message",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+            {
+              name: "nullifier",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+            {
+              name: "root",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "error",
+          name: "SignalInvalidCommitment",
+          inputs: [
+            {
+              name: "commitment",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "SignalInvalidProof",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "SignalInvalidRoot",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "SignalNoGroup",
+          inputs: [
+            {
+              name: "groupId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "SignalNotAdmin",
+          inputs: [
+            {
+              name: "groupId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "SignalNullifierUsed",
+          inputs: [
+            {
+              name: "nullifier",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "SignalRootExpired",
+          inputs: [
+            {
+              name: "root",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "SignalUnknownRoot",
+          inputs: [
+            {
+              name: "root",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "SignalZeroAddress",
+          inputs: [],
+        },
+      ],
+    },
     ARLToken: {
       address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
       abi: [

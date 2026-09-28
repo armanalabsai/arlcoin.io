@@ -14,7 +14,7 @@ import { Noir } from "@noir-lang/noir_js";
 import type { CompiledCircuit } from "@noir-lang/noir_js";
 import { LeanIMT } from "@zk-kit/lean-imt";
 import { poseidon1, poseidon2 } from "poseidon-lite";
-import { encodePacked, keccak256, toHex } from "viem";
+import { encodePacked, hexToBytes, keccak256, toHex } from "viem";
 import type { Hex } from "viem";
 
 /** Maximum group depth supported by the circuit (65,536 members). */
@@ -143,9 +143,8 @@ export async function verifySignal(
   const api = await Barretenberg.new({ threads: 1 });
   try {
     const backend = new UltraHonkBackend(circuit.bytecode, api);
-    const bytes = Uint8Array.from(Buffer.from(signal.proof.slice(2), "hex"));
     return await backend.verifyProof(
-      { proof: bytes, publicInputs: signal.publicInputs },
+      { proof: hexToBytes(signal.proof), publicInputs: signal.publicInputs },
       { verifierTarget: "evm" },
     );
   } finally {

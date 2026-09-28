@@ -17,6 +17,7 @@ changed is listed in [`THIRD_PARTY_LICENSES`](../THIRD_PARTY_LICENSES).
 | Staking  | `ARLStakingRewards` and `ARLToken`          | Stake (approving exactly the amount), withdraw, claim rewards, or withdraw everything and claim                                                                  |
 | Network  | ERC-8004 IdentityRegistry                   | List ARL services; register a service with its price, payee and facilitator; take it offline; pay it                                                             |
 | Payments | `ARLToken`, Permit2, `x402UptoPermit2Proxy` | Set or remove the Permit2 payment limit; sign a ceiling (x402 `upto`); a demo service charges the metered amount, capped at the ceiling; cancel an authorization |
+| Private  | `ARLAnonymousSignal`                        | Create a private identity from a signature; join the demo group; vote in a poll with a zero-knowledge proof made in the browser                                  |
 
 Design: Apple-style "liquid glass" in the website's night blue and amber. A fixed layer of soft
 light sits behind the content; panels, tiles, the top bar and menus are translucent glass over it
@@ -55,6 +56,24 @@ On a public network the facilitator is the service's server with its own key and
 demo it runs in the browser as Anvil development account 4, which the local node unlocks; the
 service is account 3. Neither has a key in the app.
 
+## Private (anonymous polls)
+
+The Private screen uses [`ARLAnonymousSignal`](zk-privacy.md). The wallet signs a fixed message;
+the identity secret is derived from that signature in the page, kept only in memory, and never
+sent. Joining publishes the identity's commitment (`MembersAdded`) and the new group root. The
+screen rebuilds the member tree from those events and refuses to vote unless it matches the root
+the contract holds.
+
+A vote is a proof, made in the browser (noir_js and bb.js, a few seconds), that the voter is one
+of the members, bound to the poll (scope) and the chosen option (message). The contract accepts
+one proof per member per poll. On the local chain the group admin is account 0 and votes are sent
+by a relayer (account 6), so the sending address is not the voter's wallet either.
+
+Privacy notes: bb.js downloads its public proving parameters (CRS) from Aztec's CDN
+(`crs.aztec-cdn.foundation`); the request carries nothing about the voter. Anyone who can see
+both who joined and when a vote arrives in a very small group can guess more; the demo group is
+small on purpose and is not a privacy guarantee.
+
 ## Network (ERC-8004)
 
 ARL Network does not add a registry contract of its own. Providers register their services on
@@ -88,13 +107,14 @@ implementation code, and the storage its initializer set, exactly as read from B
 `contracts/script/DevDapp.s.sol` deploys ARL, one vesting wallet and the staking contract on local
 Anvil and refuses every other chain. Its values are development placeholders, not ARL economics:
 
-| Item                  | Value                                                                                     |
-| --------------------- | ----------------------------------------------------------------------------------------- |
-| Demo user (account 1) | Holds the Public Launch allocation; beneficiary of the vesting wallet                     |
-| Operator (account 0)  | Deployer, every other allocation, staking reward distributor                              |
-| Vesting wallet        | Holds the Investors allocation; 5 minute cliff, linear over 30 days                       |
-| Staking               | 30,000 ARL reward period over 30 days, funded at deployment                               |
-| Payments              | Canonical Permit2 and x402 upto proxy code; demo service account 3, facilitator account 4 |
+| Item                  | Value                                                                                                                              |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Demo user (account 1) | Holds the Public Launch allocation; beneficiary of the vesting wallet                                                              |
+| Operator (account 0)  | Deployer, every other allocation, staking reward distributor                                                                       |
+| Vesting wallet        | Holds the Investors allocation; 5 minute cliff, linear over 30 days                                                                |
+| Staking               | 30,000 ARL reward period over 30 days, funded at deployment                                                                        |
+| Payments              | Canonical Permit2 and x402 upto proxy code; demo service account 3, facilitator account 4                                          |
+| Private               | `contracts/zk-script/DevZk.s.sol`: verifier and `ARLAnonymousSignal`; demo group 0 (3 members), admin account 0, relayer account 6 |
 
 The fixture is deployed by account 0 on a fresh chain, so contract addresses never change.
 `contracts/deployedContracts.ts` is generated from it and checked on every end-to-end run.
@@ -114,11 +134,11 @@ To use MetaMask instead, add the network `http://127.0.0.1:8545`, chain id 31337
 
 ## Tests
 
-| Suite      | Command            | Covers                                                                                                                                                                                                                                        |
-| ---------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unit       | `npm test`         | Amount parsing and formatting, vesting phase, reward share, network gate (Base Mainnet refused)                                                                                                                                               |
-| End to end | `npm run test:e2e` | Production build in Chromium against a fresh Anvil chain: connect, send, stake / earn / claim / withdraw / exit, payment limit / signed ceiling / metered charge / cap / zero usage / cancel, vesting before and after the cliff, phone width |
-| Contracts  | `forge test`       | `DevDappTest`: the fixture refuses non-local chains and deploys the expected state                                                                                                                                                            |
+| Suite      | Command            | Covers                                                                                                                                                                                                                                                                                                        |
+| ---------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit       | `npm test`         | Amount parsing and formatting, vesting phase, reward share, network gate (Base Mainnet refused), poll options                                                                                                                                                                                                 |
+| End to end | `npm run test:e2e` | Production build in Chromium against a fresh Anvil chain: connect, send, stake / earn / claim / withdraw / exit, payment limit / signed ceiling / metered charge / cap / zero usage / cancel, anonymous vote proven in the browser and a second vote refused, vesting before and after the cliff, phone width |
+| Contracts  | `forge test`       | `DevDappTest`: the fixture refuses non-local chains and deploys the expected state                                                                                                                                                                                                                            |
 
 ## Not yet
 

@@ -47,6 +47,7 @@ contract ARLAnonymousSignal {
     mapping(uint256 groupId => Group) private _groups;
 
     event GroupCreated(uint256 indexed groupId, address indexed admin, uint256 root);
+    event MembersAdded(uint256 indexed groupId, uint256[] commitments);
     event RootUpdated(uint256 indexed groupId, uint256 previousRoot, uint256 root);
     event AdminChanged(
         uint256 indexed groupId, address indexed previousAdmin, address indexed admin
@@ -61,6 +62,7 @@ contract ARLAnonymousSignal {
 
     error SignalZeroAddress();
     error SignalInvalidRoot();
+    error SignalInvalidCommitment(uint256 commitment);
     error SignalNoGroup(uint256 groupId);
     error SignalNotAdmin(uint256 groupId);
     error SignalUnknownRoot(uint256 root);
@@ -80,8 +82,23 @@ contract ARLAnonymousSignal {
 
     // ---------------------------------------------------------------- groups
 
+    /// @notice Creates a group whose members are published: `commitments` are emitted (see
+    /// addMembers) and `root` is the root of the tree built from them, in order.
+    function createGroupWithMembers(uint256[] calldata commitments, uint256 root)
+        external
+        returns (uint256 groupId)
+    {
+        _checkCommitments(commitments);
+        groupId = _createGroup(root);
+        emit MembersAdded(groupId, commitments);
+    }
+
     /// @notice Creates a group with the caller as admin and `root` as its membership root.
     function createGroup(uint256 root) external returns (uint256 groupId) {
+        groupId = _createGroup(root);
+    }
+
+    function _createGroup(uint256 root) private returns (uint256 groupId) {
         _checkRoot(root);
         groupId = groupCount++;
         Group storage g = _groups[groupId];
@@ -93,6 +110,22 @@ contract ARLAnonymousSignal {
     /// @notice Publishes a new membership root. The previous root keeps working for
     /// ROOT_GRACE_PERIOD.
     function updateRoot(uint256 groupId, uint256 root) external onlyAdmin(groupId) {
+        _updateRoot(groupId, root);
+    }
+
+    /// @notice Adds members and publishes the resulting root. The commitments are emitted so
+    /// that anyone can rebuild the tree (members need it to prove) and check it against the
+    /// root; the contract does not hash the tree itself.
+    function addMembers(uint256 groupId, uint256[] calldata commitments, uint256 root)
+        external
+        onlyAdmin(groupId)
+    {
+        _checkCommitments(commitments);
+        emit MembersAdded(groupId, commitments);
+        _updateRoot(groupId, root);
+    }
+
+    function _updateRoot(uint256 groupId, uint256 root) private {
         _checkRoot(root);
         Group storage g = _groups[groupId];
         uint256 previous = g.root;
@@ -162,6 +195,14 @@ contract ARLAnonymousSignal {
     /// @notice Maps a uint256 into the field, as the prover does (Semaphore convention).
     function hashToField(uint256 value) public pure returns (uint256) {
         return uint256(keccak256(abi.encodePacked(value))) >> 8;
+    }
+
+    function _checkCommitments(uint256[] calldata commitments) private pure {
+        for (uint256 i; i < commitments.length; ++i) {
+            if (commitments[i] == 0 || commitments[i] >= SNARK_FIELD) {
+                revert SignalInvalidCommitment(commitments[i]);
+            }
+        }
     }
 
     function _checkRoot(uint256 root) private pure {

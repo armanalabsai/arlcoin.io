@@ -19,6 +19,11 @@ cd "$CONTRACTS"
 if ! out="$(forge build --skip test 2>&1)"; then echo "$out" >&2; exit 1; fi
 forge script script/DevDapp.s.sol:DevDapp --rpc-url "$RPC" --broadcast --unlocked \
   --sender "$OPERATOR" --slow -q
+# The anonymous-signal verifier and contract, and the demo poll group (Private screen).
+FOUNDRY_PROFILE=zk forge script zk-script/DevZk.s.sol:DevZk --rpc-url "$RPC" --broadcast \
+  --unlocked --sender "$OPERATOR" --slow -q
+node "$APP/scripts/deploy-zk.ts" "$RPC"
+
 # The demo service on the ERC-8004 registry (Network and Payments screens).
 node "$APP/scripts/seed-network.ts" "$RPC"
 

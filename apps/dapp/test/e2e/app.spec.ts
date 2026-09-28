@@ -4,7 +4,10 @@
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 
-import { E2E_RPC } from "./chain";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
+import { CRS_DIR, E2E_RPC } from "./chain";
 
 const OTHER = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC";
 // Anvil development accounts 5 and 4: a second provider's payee, and the facilitator.
@@ -43,7 +46,7 @@ test("asks for a wallet before showing anything", async ({ page }) => {
 
 test("phone width: no sideways scroll, bottom navigation", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  for (const path of ["/", "/staking", "/vesting", "/payments", "/network"]) {
+  for (const path of ["/", "/staking", "/vesting", "/payments", "/network", "/private"]) {
     await connect(page, path);
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - window.innerWidth,
@@ -188,6 +191,46 @@ test("network: register a service, pay it through its own terms, take it offline
   await page.getByTestId("deactivate-1").click();
   await expect(page.getByTestId("service-1")).toHaveCount(0);
   await expect(page.getByTestId("service-list")).toContainText("Demo AI service");
+});
+
+test("private: identity, join, anonymous vote proven in the browser, one vote per member", async ({
+  page,
+}) => {
+  test.setTimeout(180_000);
+  // Serve bb.js's proving parameters from the local cache (see chain.ts).
+  await page.route(
+    /crs\.aztec-(cdn\.foundation|labs\.com)\/(g1_compressed|g2|grumpkin_g1_v2)\.dat$/,
+    async (route) => {
+      const file = /[a-z0-9_]+\.dat$/.exec(route.request().url())![0];
+      const body = readFileSync(join(CRS_DIR, file));
+      const range = /bytes=0-(\d+)/.exec(route.request().headers().range ?? "");
+      const end = range ? Math.min(Number(range[1]) + 1, body.length) : body.length;
+      await route.fulfill({ status: range ? 206 : 200, body: body.subarray(0, end) });
+    },
+  );
+  await connect(page, "/private");
+  await expect(page.getByTestId("zk-members")).toHaveText("3");
+
+  await page.getByTestId("zk-identity").click();
+  await expect(page.getByTestId("zk-member")).toHaveText("Not a member yet");
+  await page.getByTestId("zk-join").click();
+  await expect(page.getByTestId("zk-member")).toHaveText("Member");
+  await expect(page.getByTestId("zk-members")).toHaveText("4");
+
+  await page.getByTestId("zk-vote-0").click();
+  await expect(page.getByTestId("zk-status")).toContainText(
+    "Nothing on-chain links it to your wallet",
+    {
+      timeout: 120_000,
+    },
+  );
+  await expect(page.getByTestId("zk-count-0")).toHaveText("1");
+  await page.screenshot({ path: "test-results/private.png", fullPage: true });
+
+  // A second vote from the same identity, even for another option, is refused.
+  await page.getByTestId("zk-vote-1").click();
+  await expect(page.getByTestId("zk-status")).toContainText("already voted", { timeout: 60_000 });
+  await expect(page.getByTestId("zk-count-1")).toHaveText("0");
 });
 
 test("vesting: nothing before the cliff, then a release to the beneficiary", async ({ page }) => {

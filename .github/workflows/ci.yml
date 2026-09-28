@@ -200,13 +200,18 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-          cache-dependency-path: apps/dapp/package-lock.json
+          cache-dependency-path: |
+            package-lock.json
+            apps/dapp/package-lock.json
 
       # Anvil and forge: the end-to-end tests deploy the local fixture on a fresh Anvil chain.
       - uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09 # v1.9.1
         with:
           version: v1.8.3
 
+      # @arl/zk (packages/zk) is linked into the app; its dependencies install at the root.
+      - run: npm ci
+        working-directory: .
       - run: npm ci
       - run: npm run typecheck
       - run: npm run lint
