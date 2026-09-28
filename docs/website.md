@@ -1,8 +1,8 @@
 # Website: the Interactive Core
 
-Source: [`apps/web`](../apps/web). Status: **built and tested locally; not deployed.** The domain
-`arlcoin.io` is configured as the canonical URL in the build only. No DNS, hosting or Vercel
-setting has been changed.
+Source: [`apps/web`](../apps/web). Hosting: GitHub Pages (static export) at `arlcoin.io`, published
+by `.github/workflows/pages.yml` from `main`. The earlier Vercel deployment was disabled on
+2026-09-28 when the shared Vercel team hit its usage limit.
 
 ## Concept
 
@@ -29,7 +29,7 @@ apps/web
 │   ├── (core)/layout.tsx        mounts <InteractiveCore/> once for every route below
 │   ├── (core)/page.tsx          /                      metadata + JSON-LD
 │   ├── (core)/core/[layer]/…    /core/<layer>[/<card>] metadata, static params, 404 otherwise
-│   ├── sitemap.ts, robots.ts, opengraph-image.tsx, icon.svg, not-found.tsx
+│   ├── sitemap.ts, robots.ts, opengraph-image.png, icon.svg, not-found.tsx
 │   └── globals.css              design tokens, materials, orbit layout
 └── src/
     ├── content/                 data only; no components
@@ -159,18 +159,19 @@ npm run test:e2e      # Playwright, desktop and mobile, against the production b
 
 CI runs all of these in the `web` job, plus `npm audit --audit-level=high`.
 
-## Deployment (not performed)
+## Deployment: GitHub Pages
 
-Vercel preparation, for when deployment is approved:
-
-- Project root directory: `apps/web`; framework preset: Next.js; install command: `npm ci`.
-- "Include files outside the root directory" must stay enabled, because the site imports
-  `packages/tokenomics`.
-- No environment variables, secrets or API keys are required.
-- The domain `arlcoin.io` is attached in Vercel and at the registrar by the owner. Nothing in
-  this repository changes DNS.
-- The free Hobby plan is sufficient for a static site. If a paid plan is ever required, stop and
-  report it.
+- `ARL_STATIC_EXPORT=1 npm run build` writes a static site to `apps/web/out` (`output: "export"`,
+  trailing slashes, unoptimized images). Every route is prerendered; nothing runs on a server.
+- `.github/workflows/pages.yml` builds it on every push to `main` that touches the site, adds
+  `CNAME` (`arlcoin.io`) and `.nojekyll`, and deploys with `actions/deploy-pages`. Free for a
+  public repository; no secrets.
+- Static hosting cannot send response headers, so the security headers in `next.config.ts` apply
+  only to server hosting; the referrer policy is also set as a meta tag.
+- One-time owner settings: repository Settings → Pages → Source "GitHub Actions", custom domain
+  `arlcoin.io`, "Enforce HTTPS"; and DNS for `arlcoin.io` pointed at GitHub Pages (apex A records
+  185.199.108.153, 185.199.109.153, 185.199.110.153, 185.199.111.153; `www` CNAME
+  `gokturkalazdaghan-dot.github.io`).
 
 ## Known gaps
 

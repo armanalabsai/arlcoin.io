@@ -189,7 +189,7 @@ function Surface({ layer, card, originRect, onClose, onStep }: SurfaceProps) {
       <Dialog.Overlay forceMount asChild>
         <motion.div
           style={{ opacity: overlay }}
-          className="fixed inset-0 z-40 bg-[rgb(5_6_8/0.62)]"
+          className="fixed inset-0 z-40 bg-[rgb(3_7_20/0.62)]"
         />
       </Dialog.Overlay>
       <Dialog.Content

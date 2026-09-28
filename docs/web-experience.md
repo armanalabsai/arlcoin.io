@@ -25,7 +25,7 @@ documentation.
 
 | Deployment           | Status           | Evidence                                                                                                                                                                                                          |
 | -------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Website              | `LIVE`           | `arlcoin.io` is served by Vercel. Production deploys come from `main` through the Vercel GitHub integration                                                                                                       |
+| Website              | `IN DEVELOPMENT` | Moving to GitHub Pages (`.github/workflows/pages.yml`); the Vercel deployment was disabled on 2026-09-28. `LIVE` again once `arlcoin.io` serves the Pages build                                                   |
 | Blockchain contracts | **Not deployed** | No ARL contract exists on any network, test or production. Approved networks: Base Sepolia (testnet, not yet deployed) and Base Mainnet (locked). Only local Anvil rehearsals exist (`scripts/rehearse-local.sh`) |
 
 A live website is not a live token. Every on-chain value on the site stays `UNAVAILABLE` until a

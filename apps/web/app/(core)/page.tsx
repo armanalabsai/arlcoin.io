@@ -2,13 +2,18 @@ import type { Metadata } from "next";
 
 import { descriptionFor, titleFor } from "@/content/meta.ts";
 import { HOME } from "@/content/registry.ts";
-import { SITE } from "@/content/site.ts";
+import { SITE, OG_IMAGE } from "@/content/site.ts";
 
 export const metadata: Metadata = {
   title: titleFor(HOME),
   description: descriptionFor(HOME),
   alternates: { canonical: "/" },
-  openGraph: { title: titleFor(HOME), description: descriptionFor(HOME), url: "/" },
+  openGraph: {
+    title: titleFor(HOME),
+    description: descriptionFor(HOME),
+    url: "/",
+    images: [OG_IMAGE],
+  },
 };
 
 const jsonLd = {
