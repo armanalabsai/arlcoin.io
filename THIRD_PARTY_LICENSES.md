@@ -28,6 +28,7 @@ Compiled ARL contracts include OpenZeppelin code under the MIT license
 | Slither         | 0.11.6  | `050cc0a094e77bfd58e8228ae3bb6aa15c65edb4` | AGPL-3.0          | Static analysis in CI only                                         |
 | Halmos          | 0.3.3   | —                                          | AGPL-3.0          | Symbolic checks in CI only                                         |
 | Aderyn          | 0.6.8   | —                                          | MIT               | Static analysis for the audit scope (not in CI)                    |
+| Mythril         | 0.24.8  | —                                          | MIT               | Symbolic analysis for the audit scope (not in CI)                  |
 
 ## npm development dependencies (not distributed)
 

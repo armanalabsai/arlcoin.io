@@ -58,14 +58,15 @@ tooling only).
 
 ## Existing verification
 
-| Method               | Scope                                                                                             | Result                            |
-| -------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------- |
-| Unit and fuzz tests  | Foundry, 10,000 fuzz runs per test                                                                | 183 tests pass                    |
-| Invariant tests      | Supply, allocations, vesting, timelock roles, distributor funds (256 runs × depth 128)            | pass                              |
-| Deployment rehearsal | Real Safe v1.5.0 on Anvil; 55 negative cases; Base Sepolia fork with the canonical Safe contracts | pass                              |
-| Slither 0.11.6       | `src/` and `script/`, 102 detectors, CI fails on Low or higher                                    | 0 findings                        |
-| Aderyn 0.6.8         | `src/`                                                                                            | 3 reported; triage below          |
-| Halmos 0.3.3         | Symbolic checks in `contracts/test/symbolic/ARLSymbolic.t.sol`, run in CI                         | 10 of 11 proven; 1 solver timeout |
+| Method               | Scope                                                                                             | Result                                          |
+| -------------------- | ------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| Unit and fuzz tests  | Foundry, 10,000 fuzz runs per test                                                                | 185 tests pass                                  |
+| Invariant tests      | Supply, allocations, vesting, timelock roles, distributor funds (256 runs × depth 128)            | pass                                            |
+| Deployment rehearsal | Real Safe v1.5.0 on Anvil; 55 negative cases; Base Sepolia fork with the canonical Safe contracts | pass                                            |
+| Slither 0.11.6       | `src/` and `script/`, 102 detectors, CI fails on Low or higher                                    | 0 findings                                      |
+| Aderyn 0.6.8         | `src/`                                                                                            | 3 reported; triage below                        |
+| Halmos 0.3.3         | Symbolic checks in `contracts/test/symbolic/ARLSymbolic.t.sol`, run in CI                         | 10 of 11 proven; 1 solver timeout               |
+| Mythril 0.24.8       | Runtime bytecode of the four deployed contracts, 900 s each                                       | 9 reported, all triaged below; none exploitable |
 
 ### Aderyn triage
 
@@ -74,6 +75,19 @@ tooling only).
 | H-1 Contract locks Ether without a withdraw function | `ARLVestingWallet`    | False positive. The inherited OpenZeppelin `VestingWallet.release()` releases ETH to the beneficiary on the same schedule; nothing is locked.                                           |
 | L-1 Large numeric literal                            | `ARLAllocation` (12×) | Style. Underscore-grouped whole-token amounts are intentional and are parsed by a consistency test against `packages/tokenomics`. No change.                                            |
 | L-2 Unchecked return                                 | `ARLTimelock` line 43 | Informational. `_grantRole(CANCELLER_ROLE, guardian)` always returns true there: the constructor rejects a guardian that is a proposer or executor, so the role cannot already be held. |
+
+### Mythril triage
+
+Mythril analysed runtime bytecode only, so immutables (token, claim end, beneficiary) are zero
+in its model. Findings:
+
+| Finding                                         | Contract, function                                                                  | Triage                                                                                                                                                                                                                                                                                                                             |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SWC-101 integer underflow (High)                | `ARLTimelock.onERC1155BatchReceived`                                                | False positive. Raised in the ABI decoder of OpenZeppelin's `ERC1155Holder` on malformed calldata; the function only returns its selector. The exact reported transaction and a 10,000-run fuzz of arbitrary calldata change no state (`test_MythrilSwc101CalldataChangesNothing`, `testFuzz_ERC1155BatchReceivedChangesNothing`). |
+| SWC-123 requirement violation (Medium)          | `ARLMerkleDistributor.sweep`                                                        | Artefact of the runtime-only model: the token immutable is zero, so the nested call reverts. On chain `sweep` is callable only after the claim window and sends only to `returnTo` (tests and Halmos `check_SweepOnlyToReturnAddressAfterEnd`).                                                                                    |
+| SWC-116 block timestamp (Low) ×5                | `ARLToken.permit`, `ARLMerkleDistributor.claim`/`sweep`, `ARLVestingWallet.release` | By design: permit deadline, claim window and vesting schedule are time-based; validator timestamp drift of seconds does not change an outcome that matters.                                                                                                                                                                        |
+| SWC-107 call to user-supplied address (Low)     | `ARLVestingWallet.release(address)`                                                 | Upstream OpenZeppelin `VestingWallet`: releases any ERC-20 to the fixed beneficiary; accounting is updated before the transfer.                                                                                                                                                                                                    |
+| SWC-113 multiple calls in one transaction (Low) | `ARLVestingWallet.release`                                                          | Same upstream function; expected.                                                                                                                                                                                                                                                                                                  |
 
 ### Halmos (symbolic)
 

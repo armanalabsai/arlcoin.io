@@ -346,4 +346,32 @@ contract ARLTimelockTest is ARLTestBase {
         list[0] = a;
         list[1] = b;
     }
+
+    // ------------------------------------------------------------------ Mythril SWC-101 triage
+
+    /// @dev Mythril flags an arithmetic underflow in `onERC1155BatchReceived` (inherited from
+    /// OpenZeppelin's ERC1155Holder) when it is called with malformed ABI data. The function only
+    /// returns its selector; this is the exact transaction Mythril reported, and it must leave the
+    /// timelock unchanged whether it reverts or returns.
+    function test_MythrilSwc101CalldataChangesNothing() public {
+        bytes memory data =
+            hex"bc197c810000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000001100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004d";
+        _assertCallChangesNothing(data);
+    }
+
+    function testFuzz_ERC1155BatchReceivedChangesNothing(bytes calldata tail) public {
+        _assertCallChangesNothing(abi.encodePacked(bytes4(0xbc197c81), tail));
+    }
+
+    function _assertCallChangesNothing(bytes memory data) internal {
+        uint256 delay = treasury.getMinDelay();
+        uint256 balance = token.balanceOf(address(treasury));
+        (bool ok, bytes memory ret) = address(treasury).call(data);
+        if (ok) assertEq(bytes4(ret), bytes4(0xbc197c81));
+        assertEq(treasury.getMinDelay(), delay);
+        assertEq(token.balanceOf(address(treasury)), balance);
+        assertTrue(treasury.hasRole(treasury.DEFAULT_ADMIN_ROLE(), address(treasury)));
+        assertFalse(treasury.hasRole(treasury.PROPOSER_ROLE(), address(this)));
+        assertFalse(treasury.hasRole(treasury.EXECUTOR_ROLE(), address(this)));
+    }
 }
