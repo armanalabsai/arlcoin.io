@@ -442,6 +442,9 @@ Before any mainnet deployment, all of the following must be true:
 Status: the decisions in this section are **APPROVED / LOCKED** (CTO,
 2026-09-27) unless an item is marked TBD. ARL Core is not implemented; nothing
 in this section changes the ERC-20 token, its deployment tooling or its tests.
+`packages/monetary` is the executable reference of this section: its test
+vectors are the worked examples below, and any ARL Core implementation must
+produce the same results. It decides none of the items in section 17.10.
 
 ### 17.1 Terminology
 
