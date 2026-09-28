@@ -16,7 +16,7 @@ export const repoDoc = (path: string): `https://${string}` =>
   `https://github.com/gokturkalazdaghan-dot/ARLCOIN/blob/main/${path}`;
 
 /** Pages outside the Core. */
-export const SITE_PAGES = ["/whitelist", "/contact", "/privacy"] as const;
+export const SITE_PAGES = ["/whitelist", "/contact", "/privacy", "/terms"] as const;
 
 export const NOT_DEPLOYED = "Not yet deployed";
 

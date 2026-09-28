@@ -40,7 +40,7 @@ export const TEAM: readonly TeamProfile[] = [
   {
     id: "foundark",
     name: "FoundArk",
-    role: "CEO — AI Founder",
+    role: "CEO and AI Founder",
     initials: "FA",
     verificationStatus: "unverified",
     birthYear: 2024,

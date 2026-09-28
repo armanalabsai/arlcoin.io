@@ -40,7 +40,7 @@ export function CoreCard({ layer, onActivate }: Props) {
       onClick={onActivate}
       aria-label={label}
       data-testid="arl-core"
-      className="core-surface group relative grid size-[184px] shrink-0 place-items-center rounded-full border border-line-strong transition-[transform,border-color] duration-200 ease-(--ease-out-quint) hover:border-accent-edge active:scale-[0.97] min-[1100px]:size-[216px] min-[1100px]:[@media(max-height:899px)]:size-[184px]"
+      className="core-surface group relative grid size-[184px] shrink-0 place-items-center rounded-full border border-line-strong min-[1100px]:size-[216px] min-[1100px]:[@media(max-height:899px)]:size-[184px]"
     >
       <svg
         viewBox="0 0 240 240"
@@ -66,13 +66,11 @@ export function CoreCard({ layer, onActivate }: Props) {
         <span className="text-[44px] leading-none font-semibold tracking-[-0.04em] min-[1100px]:text-[52px] min-[1100px]:[@media(max-height:899px)]:text-[44px]">
           ARL
         </span>
-        <span className="font-mono text-[11px] tracking-[0.14em] text-accent uppercase">
-          {layer ? layer.title : "Core"}
-        </span>
+        <span className="text-[12px] text-accent">{layer ? layer.title : "Core"}</span>
       </span>
       <span
         aria-hidden="true"
-        className="absolute -bottom-7 font-mono text-[10px] tracking-[0.14em] whitespace-nowrap text-fg-subtle uppercase opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100"
+        className="absolute -bottom-7 text-[12px] whitespace-nowrap text-fg-subtle opacity-0 group-focus-visible:opacity-100"
       >
         {next ? `Next · ${next.title}` : "Overview"}
       </span>

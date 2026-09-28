@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   openGraph: { title, description, url: "/contact", images: [OG_IMAGE] },
 };
 
-const link = "text-accent underline-offset-4 hover:underline";
+const link = "text-accent underline underline-offset-4";
 
 export default function ContactPage() {
   return (
@@ -37,7 +37,7 @@ export default function ContactPage() {
             >
               GitHub private vulnerability reporting
             </a>
-            , not this form. See the{" "}
+            . See the{" "}
             <a href={repoDoc("SECURITY.md")} rel="noopener noreferrer" className={link}>
               security policy
             </a>

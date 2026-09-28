@@ -54,14 +54,17 @@ website's source is copied from third parties; these packages are used as publis
 
 Runtime (included in the built site):
 
-| Package                | Version | License | Purpose                                                                                                                           |
-| ---------------------- | ------- | ------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| next                   | 16.3.6  | MIT     | Framework, routing, static generation                                                                                             |
-| react / react-dom      | 19.3.0  | MIT     | UI runtime                                                                                                                        |
-| motion                 | 13.4.4  | MIT     | Springs, presence and drag animations                                                                                             |
-| @radix-ui/react-dialog | 1.1.23  | MIT     | Accessible dialog (focus trap, Escape, ARIA)                                                                                      |
-| geist                  | 1.7.2   | OFL-1.1 | Geist Sans and Geist Mono fonts, self-hosted; Geist SemiBold and Medium glyphs are outlined in the ARL wordmark (`assets/brand/`) |
-| @noble/hashes          | 2.4.0   | MIT     | Keccak-256 for the EIP-55 address checksum in the whitelist form                                                                  |
+| Package                                                                                              | Version | License | Purpose                                                                                                         |
+| ---------------------------------------------------------------------------------------------------- | ------- | ------- | --------------------------------------------------------------------------------------------------------------- |
+| next                                                                                                 | 16.3.6  | MIT     | Framework, routing, static generation                                                                           |
+| react / react-dom                                                                                    | 19.3.0  | MIT     | UI runtime                                                                                                      |
+| motion                                                                                               | 13.4.4  | MIT     | Springs, presence and drag animations                                                                           |
+| @radix-ui/react-dialog                                                                               | 1.1.23  | MIT     | Accessible dialog (focus trap, Escape, ARIA)                                                                    |
+| @fontsource-variable/source-sans-3, @fontsource-variable/source-serif-4, @fontsource/source-code-pro | 5.3.0   | OFL-1.1 | Source Sans 3 (text), Source Serif 4 (headings), Source Code Pro (figures, addresses); Adobe fonts, self-hosted |
+| @noble/hashes                                                                                        | 2.4.0   | MIT     | Keccak-256 for the EIP-55 address checksum in the whitelist form                                                |
+
+The ARL wordmark (`assets/brand/`) contains Geist SemiBold and Medium glyphs outlined to vector
+(Geist, OFL-1.1); the site no longer loads the Geist fonts.
 
 Transitive runtime packages are MIT, ISC, Apache-2.0, BSD-3-Clause or 0BSD, with three
 exceptions:

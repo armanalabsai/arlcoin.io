@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   openGraph: { title, description, url: "/privacy", images: [OG_IMAGE] },
 };
 
-const link = "text-accent underline-offset-4 hover:underline";
+const link = "text-accent underline underline-offset-4";
 
 function Section({ heading, children }: { heading: string; children: React.ReactNode }) {
   return (
