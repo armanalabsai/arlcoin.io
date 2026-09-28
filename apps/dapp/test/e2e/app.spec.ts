@@ -40,7 +40,7 @@ test("asks for a wallet before showing anything", async ({ page }) => {
 
 test("phone width: no sideways scroll, bottom navigation", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  for (const path of ["/", "/staking", "/vesting"]) {
+  for (const path of ["/", "/staking", "/vesting", "/payments"]) {
     await connect(page, path);
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - window.innerWidth,
@@ -91,6 +91,53 @@ test("staking: stake, earn, claim, withdraw, exit", async ({ page }) => {
 
   await page.getByTestId("staking-exit").click();
   await expect(page.getByTestId("staking-staked")).toHaveText(/^0\s*ARL$/);
+});
+
+test("payments: limit, signed ceiling, metered charge, cap, cancel", async ({ page }) => {
+  await connect(page, "/payments");
+
+  await page.getByTestId("limit-input").fill("100");
+  await page.getByTestId("limit-submit").click();
+  await expect(page.getByTestId("permit2-allowance")).toContainText("100");
+
+  // 3,700 units at 0.001 ARL: 3.7 ARL of a 5 ARL ceiling.
+  await page.getByTestId("ceiling-input").fill("5");
+  await page.getByTestId("ceiling-submit").click();
+  await expect(page.getByTestId("authorization")).toBeVisible();
+  await page.getByTestId("units-input").fill("3700");
+  await expect(page.getByTestId("metered")).toHaveText("Charge: 3.7 ARL");
+  await page.getByTestId("settle").click();
+  await expect(page.getByTestId("outcome")).toContainText("Paid 3.7 ARL of the 5 ARL ceiling");
+  await expect(page.getByTestId("service-balance")).toContainText("3.7");
+  // Permit2 moved exactly the charge: the limit went down by 3.7.
+  await expect(page.getByTestId("permit2-allowance")).toContainText("96.3");
+  await page.screenshot({ path: "test-results/payments.png", fullPage: true });
+
+  // Usage above the ceiling is charged at the ceiling, never more.
+  await page.getByTestId("ceiling-input").fill("2");
+  await page.getByTestId("ceiling-submit").click();
+  await page.getByTestId("units-input").fill("10000");
+  await expect(page.getByTestId("metered")).toHaveText("Charge: 2 ARL (capped at the ceiling)");
+  await page.getByTestId("settle").click();
+  await expect(page.getByTestId("outcome")).toContainText("Paid 2 ARL of the 2 ARL ceiling");
+  await expect(page.getByTestId("service-balance")).toContainText("5.7");
+
+  // No usage: nothing is sent.
+  await page.getByTestId("ceiling-input").fill("1");
+  await page.getByTestId("ceiling-submit").click();
+  await page.getByTestId("units-input").fill("0");
+  await page.getByTestId("settle").click();
+  await expect(page.getByTestId("outcome")).toContainText("Nothing to pay");
+  await expect(page.getByTestId("service-balance")).toContainText("5.7");
+
+  // The payer cancels before the service charges.
+  await page.getByTestId("ceiling-input").fill("1");
+  await page.getByTestId("ceiling-submit").click();
+  await page.getByTestId("cancel").click();
+  await expect(page.getByTestId("outcome")).toContainText("Cancelled");
+
+  await page.getByTestId("limit-revoke").click();
+  await expect(page.getByTestId("permit2-allowance")).toHaveText(/^0\s*ARL$/);
 });
 
 test("vesting: nothing before the cliff, then a release to the beneficiary", async ({ page }) => {

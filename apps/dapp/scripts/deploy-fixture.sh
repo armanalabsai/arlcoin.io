@@ -12,6 +12,9 @@ OPERATOR=0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
 
 [[ "$(cast chain-id --rpc-url "$RPC")" == "31337" ]] || { echo "not a local Anvil chain: $RPC" >&2; exit 1; }
 
+# Canonical Permit2 and x402 upto proxy code, for the Payments screen.
+node "$APP/scripts/install-x402.ts" "$RPC"
+
 cd "$CONTRACTS"
 if ! out="$(forge build --skip test 2>&1)"; then echo "$out" >&2; exit 1; fi
 forge script script/DevDapp.s.sol:DevDapp --rpc-url "$RPC" --broadcast --unlocked \

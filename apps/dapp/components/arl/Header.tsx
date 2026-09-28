@@ -9,6 +9,7 @@ const NAV = [
   { href: "/", label: "Wallet" },
   { href: "/vesting", label: "Vesting" },
   { href: "/staking", label: "Staking" },
+  { href: "/payments", label: "Payments" },
 ];
 
 export function Header() {
@@ -16,9 +17,9 @@ export function Header() {
   return (
     <header className="glass-bar sticky top-0 z-20">
       <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
-        <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
+        <Link href="/" className="flex items-center gap-2 text-sm font-semibold tracking-tight">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/icon.svg" alt="" width={28} height={28} />
+          <img src="/icon.svg" alt="" width={24} height={24} />
           <span>ARL App</span>
         </Link>
         <nav className="ml-2 hidden gap-1 sm:flex" aria-label="Main">

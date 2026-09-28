@@ -46,6 +46,8 @@
    sits behind the content, is not painted over. */
 html {
   background: #030817;
+  /* A compact scale: every rem-based size (text, spacing, controls) follows it. */
+  font-size: 93.75%; /* 15px at the default 16px, and it still follows the reader's text size */
 }
 
 body {

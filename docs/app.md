@@ -10,11 +10,12 @@ changed is listed in [`THIRD_PARTY_LICENSES`](../THIRD_PARTY_LICENSES).
 
 ## Screens
 
-| Screen  | Contract                           | What the user can do                                                                              |
-| ------- | ---------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Wallet  | `ARLToken`                         | See the ARL balance, stake and unclaimed rewards; send ARL                                        |
-| Vesting | `ARLVestingWallet`                 | See beneficiary, cliff and end dates, released and releasable amounts; release to the beneficiary |
-| Staking | `ARLStakingRewards` and `ARLToken` | Stake (approving exactly the amount), withdraw, claim rewards, or withdraw everything and claim   |
+| Screen   | Contract                                    | What the user can do                                                                                                                                             |
+| -------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Wallet   | `ARLToken`                                  | See the ARL balance, stake and unclaimed rewards; send ARL                                                                                                       |
+| Vesting  | `ARLVestingWallet`                          | See beneficiary, cliff and end dates, released and releasable amounts; release to the beneficiary                                                                |
+| Staking  | `ARLStakingRewards` and `ARLToken`          | Stake (approving exactly the amount), withdraw, claim rewards, or withdraw everything and claim                                                                  |
+| Payments | `ARLToken`, Permit2, `x402UptoPermit2Proxy` | Set or remove the Permit2 payment limit; sign a ceiling (x402 `upto`); a demo service charges the metered amount, capped at the ceiling; cancel an authorization |
 
 Design: Apple-style "liquid glass" in the website's night blue and amber. A fixed layer of soft
 light sits behind the content; panels, tiles, the top bar and menus are translucent glass over it
@@ -33,17 +34,38 @@ Rules the app follows:
 - **Approvals**: staking approves exactly the amount being staked, never an unlimited allowance.
 - **Consistent numbers**: vesting amounts that are added together are read at the same block.
 
+## Payments (x402 `upto`)
+
+The Payments screen uses the x402 SDK (`@x402/evm` 2.27.0) as published, against the canonical
+Permit2 and `x402UptoPermit2Proxy` code, which the local chain setup installs at their canonical
+addresses (`scripts/install-x402.ts`, code hashes checked). The flow:
+
+1. **Payment limit.** The payer approves Permit2 for an amount they choose (never unlimited by
+   default) and can remove it.
+2. **Ceiling.** The payer signs a Permit2 witness for a ceiling, bound to the service (payee), the
+   facilitator, ARL, a nonce and a 5 minute deadline.
+3. **Charge.** The service measures usage (the demo prices it at 0.001 ARL per unit), and its
+   facilitator verifies and settles the metered amount. More usage than the ceiling is charged at
+   the ceiling. No usage sends nothing.
+4. **Cancel.** Before a charge, the payer can cancel the authorization by invalidating its
+   Permit2 nonce.
+
+On a public network the facilitator is the service's server with its own key and gas. In the local
+demo it runs in the browser as Anvil development account 4, which the local node unlocks; the
+service is account 3. Neither has a key in the app.
+
 ## Local fixture
 
 `contracts/script/DevDapp.s.sol` deploys ARL, one vesting wallet and the staking contract on local
 Anvil and refuses every other chain. Its values are development placeholders, not ARL economics:
 
-| Item                  | Value                                                                 |
-| --------------------- | --------------------------------------------------------------------- |
-| Demo user (account 1) | Holds the Public Launch allocation; beneficiary of the vesting wallet |
-| Operator (account 0)  | Deployer, every other allocation, staking reward distributor          |
-| Vesting wallet        | Holds the Investors allocation; 5 minute cliff, linear over 30 days   |
-| Staking               | 30,000 ARL reward period over 30 days, funded at deployment           |
+| Item                  | Value                                                                                     |
+| --------------------- | ----------------------------------------------------------------------------------------- |
+| Demo user (account 1) | Holds the Public Launch allocation; beneficiary of the vesting wallet                     |
+| Operator (account 0)  | Deployer, every other allocation, staking reward distributor                              |
+| Vesting wallet        | Holds the Investors allocation; 5 minute cliff, linear over 30 days                       |
+| Staking               | 30,000 ARL reward period over 30 days, funded at deployment                               |
+| Payments              | Canonical Permit2 and x402 upto proxy code; demo service account 3, facilitator account 4 |
 
 The fixture is deployed by account 0 on a fresh chain, so contract addresses never change.
 `contracts/deployedContracts.ts` is generated from it and checked on every end-to-end run.
@@ -63,15 +85,15 @@ To use MetaMask instead, add the network `http://127.0.0.1:8545`, chain id 31337
 
 ## Tests
 
-| Suite      | Command            | Covers                                                                                                                                                           |
-| ---------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unit       | `npm test`         | Amount parsing and formatting, vesting phase, reward share, network gate (Base Mainnet refused)                                                                  |
-| End to end | `npm run test:e2e` | Production build in Chromium against a fresh Anvil chain: connect, send, stake / earn / claim / withdraw / exit, vesting before and after the cliff, phone width |
-| Contracts  | `forge test`       | `DevDappTest`: the fixture refuses non-local chains and deploys the expected state                                                                               |
+| Suite      | Command            | Covers                                                                                                                                                                                                                                        |
+| ---------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit       | `npm test`         | Amount parsing and formatting, vesting phase, reward share, network gate (Base Mainnet refused)                                                                                                                                               |
+| End to end | `npm run test:e2e` | Production build in Chromium against a fresh Anvil chain: connect, send, stake / earn / claim / withdraw / exit, payment limit / signed ceiling / metered charge / cap / zero usage / cancel, vesting before and after the cliff, phone width |
+| Contracts  | `forge test`       | `DevDappTest`: the fixture refuses non-local chains and deploys the expected state                                                                                                                                                            |
 
 ## Not yet
 
 - Base Sepolia: needs the contracts deployed there (owner approval) and their addresses.
 - Mobile wallets over WalletConnect: needs a WalletConnect project id (a free account; owner
   decision).
-- AI Payments (x402) and Compute screens.
+- A real (server-side) facilitator for services, and the Compute screen.

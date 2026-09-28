@@ -16,7 +16,7 @@ export function useChainTime(): bigint | undefined {
 export function PageTitle({ title, children }: { title: string; children?: ReactNode }) {
   return (
     <div className="mb-6">
-      <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+      <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
       {children ? <p className="mt-1 text-sm text-muted">{children}</p> : null}
     </div>
   );
@@ -36,7 +36,7 @@ export function Stat({
   return (
     <div className="glass-chip p-4">
       <div className="text-xs tracking-wide text-subtle uppercase">{label}</div>
-      <div className="stat-value-arl mt-1 text-xl font-semibold" data-testid={testId}>
+      <div className="stat-value-arl mt-1 text-base font-semibold" data-testid={testId}>
         {value}
       </div>
       {hint ? <div className="mt-1 text-xs text-muted">{hint}</div> : null}
@@ -49,7 +49,7 @@ export function Arl({ value, decimals }: { value: bigint | undefined; decimals?:
     return <span className="loading loading-dots loading-sm" aria-label="Loading" />;
   return (
     <span>
-      {formatArl(value, decimals)} <span className="text-sm text-muted">ARL</span>
+      {formatArl(value, decimals)} <span className="text-xs font-medium text-muted">ARL</span>
     </span>
   );
 }
