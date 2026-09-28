@@ -23,10 +23,10 @@ project.
 Two different things are called "deployment". They must never be confused on the site or in
 documentation.
 
-| Deployment           | Status           | Evidence                                                                                                                                               |
-| -------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Website              | `LIVE`           | `arlcoin.io` is served by Vercel. Production deploys come from `main` through the Vercel GitHub integration                                            |
-| Blockchain contracts | **Not deployed** | No ARL contract exists on any network, test or production. No chain has been selected. Only local Anvil rehearsals exist (`scripts/rehearse-local.sh`) |
+| Deployment           | Status           | Evidence                                                                                                                                                                                                          |
+| -------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Website              | `LIVE`           | `arlcoin.io` is served by Vercel. Production deploys come from `main` through the Vercel GitHub integration                                                                                                       |
+| Blockchain contracts | **Not deployed** | No ARL contract exists on any network, test or production. Approved networks: Base Sepolia (testnet, not yet deployed) and Base Mainnet (locked). Only local Anvil rehearsals exist (`scripts/rehearse-local.sh`) |
 
 A live website is not a live token. Every on-chain value on the site stays `UNAVAILABLE` until a
 contract deployment exists and its addresses are published through the deployment manifest

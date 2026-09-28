@@ -65,8 +65,8 @@ Rules:
 
 | Decision                                                               | Needed before                |
 | ---------------------------------------------------------------------- | ---------------------------- |
-| Production chain                                                       | Deployment scripts           |
-| Vesting start (TGE) for investors and strategic partnerships (TBD)     | Any public network           |
+| Unlocking Base Mainnet (a reviewed change to `networkGate`)            | Production deployment        |
+| Vesting start (TGE) for investors and strategic partnerships (TBD)     | Base Mainnet                 |
 | Team grant schedule; program rules for staking, growth and early users | The programs                 |
 | Exact launch and grant dates (contracts take explicit timestamps)      | Deployment                   |
 | Signer sets and thresholds of the dedicated Safes                      | Production multisig creation |

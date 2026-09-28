@@ -20,12 +20,12 @@ contracts/deploy/deployments/<chain>.json   deployed addresses (git-ignored)
 
 Values come from their single sources:
 
-| Value                          | Source                                                                                                                                       |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Allocation amounts, max supply | `packages/tokenomics` (planner) and `ARLAllocation.sol` (cross-checked)                                                                      |
-| Vesting start (TBD)            | The deployment config; durations must be 12 + 36 months; refused off local Anvil until the start is confirmed (`VESTING_SCHEDULES_APPROVED`) |
-| 48-hour timelock floor         | `packages/tokenomics` (planner); `ARLTimelock.MIN_DELAY_FLOOR` (constructor; a test pins the script's copy to it)                            |
-| Addresses, chain ID            | The deployment config                                                                                                                        |
+| Value                          | Source                                                                                                                        |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| Allocation amounts, max supply | `packages/tokenomics` (planner) and `ARLAllocation.sol` (cross-checked)                                                       |
+| Vesting start (TBD)            | The deployment config; durations must be 12 + 36 months; a placeholder start is accepted on local Anvil and Base Sepolia only |
+| 48-hour timelock floor         | `packages/tokenomics` (planner); `ARLTimelock.MIN_DELAY_FLOOR` (constructor; a test pins the script's copy to it)             |
+| Addresses, chain ID            | The deployment config                                                                                                         |
 
 ## Configuration
 
@@ -98,7 +98,7 @@ The approved Public Launch mechanism is a Merkle claim (economic specification s
 2. Deploy: `DeployDistributor` (`ARL_PLAN`, `ARL_DEPLOYMENT`, `ARL_DISTRIBUTION`, `ARL_CLAIM_END`,
    `ARL_DISTRIBUTOR`). It checks the list's schema, allocation and total, and fixes `returnTo` to
    the plan's Public Launch Safe. Off local Anvil it refuses to run until the launch parameters
-   are approved (`LAUNCH_PARAMETERS_APPROVED = false`).
+   are approved (`LAUNCH_PARAMETERS_APPROVED = false`); it runs only where the network gate allows.
 3. Fund: the Public Launch Safe transfers the list total to the distributor.
 4. Publish the list and add the distributor record to the manifest
    (`manifest-cli.ts <plan> <deployment> <manifest> <distributor.json>`); its unclaimed balance
@@ -129,10 +129,52 @@ total, including a plan that still splits the Founder allocation, plans of the o
 founder vesting wallet. Each must fail with its specific error, and rejected
 deployments must leave the deployer nonce unchanged. CI runs the rehearsal on every pull request.
 
-## Before any public network
+## Network gate
 
-Required before any testnet: a
-testnet-only config with `requireRecipientCode: true` and real test Safes, a free public RPC, and
-a dedicated test Safe for every role, a confirmed vesting start for the investor and strategic
-partnership wallets (until then the tooling refuses every public network). Private keys are never placed in config files; use a hardware wallet or Foundry keystore
-outside the repository.
+Approved network decision: **Base Sepolia (84532) is the only deployable public network. Base
+Mainnet (8453) is hard-locked.**
+
+| Chain                | Gate       | Notes                                                                                                                   |
+| -------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Local Anvil (31337)  | open       | Rehearsals; recipients may lack code                                                                                    |
+| Base Sepolia (84532) | open       | `requireRecipientCode: true`; every Safe role must be a canonical Safe v1.5.0 proxy; placeholder vesting start accepted |
+| Base Mainnet (8453)  | **locked** | Always refused (`PlanProductionLocked`)                                                                                 |
+| Any other chain      | refused    | `PlanChainNotSupported`                                                                                                 |
+
+One gate, `ARLDeployPlan.networkGate`, is checked by `DeployARL` and `DeployDistributor` before they
+read any input, by `ARLDeployPlan.validate`, and by `ARLDeployer.deploy` itself, so a script that
+skips validation is refused too. The planner applies the same rule (`networkGate` in
+`packages/deploy/src/plan.ts`). The gate takes no flag, reads no environment variable and no
+config field, and has no override: `block.chainid` alone decides. Opening Base Mainnet requires
+changing `networkGate` in both places in a reviewed change. No CI workflow deploys or holds a
+deployment key.
+
+Before a Base Sepolia deployment: a config with `requireRecipientCode: true` and a dedicated test
+Safe for every role, and a funded deployer key. Private keys are never placed in config files; use
+a hardware wallet or Foundry keystore outside the repository.
+
+## Base Sepolia runbook
+
+Status: **not deployed.** Dry run: `npm run rehearse:base-sepolia-fork` runs every step below on a
+local Anvil fork of Base Sepolia (real canonical Safe contracts, Anvil development accounts, no
+key); nothing is sent to Base Sepolia.
+
+1. **Safes.** `CreateSafes` creates the 12 role Safes with the canonical Safe v1.5.0
+   `SafeProxyFactory`, `SafeL2` singleton and `CompatibilityFallbackHandler`, after checking their
+   code hashes. Environment overrides of those contracts are refused off local Anvil; Base Mainnet
+   is refused by the network gate. Give the guardian its own signers (`ARL_GUARDIAN_OWNERS`,
+   disjoint from `ARL_SAFE_OWNERS`, M-1).
+
+   ```
+   cd contracts
+   ARL_SAFE_OWNERS=<a>,<b>,<c> ARL_SAFE_THRESHOLD=2 \
+   ARL_GUARDIAN_OWNERS=<d>,<e> ARL_GUARDIAN_THRESHOLD=2 \
+   ARL_SAFES_OUT=deploy/deployments/84532-safes.json \
+   forge script script/CreateSafes.s.sol:CreateSafes --rpc-url https://sepolia.base.org \
+     --broadcast --account <keystore-name> --slow
+   ```
+
+2. **Config and plan.** `safes-config-cli.ts <safes.json> <placeholder-vesting-start> <config.json>`
+   writes the config (code checks on, 12 + 36 months, 48-hour delay); `cli.ts` builds the plan.
+3. **Deploy and verify.** `DeployARL` with `ARL_PLAN` and `ARL_DEPLOYMENT`, then `VerifyARL`.
+4. **Manifest.** `manifest-cli.ts`, then `supply-cli.ts` (circulating supply at TGE is 2,100,000 ARL).

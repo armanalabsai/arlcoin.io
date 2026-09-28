@@ -49,8 +49,8 @@ contract ARLDeployHarness {
         ARLDeployPlan.validateSchedule(name, v);
     }
 
-    function approvalGate(uint256 chainId, bool vestingApproved) external pure {
-        ARLDeployPlan.approvalGate(chainId, vestingApproved);
+    function networkGate(uint256 chainId) external pure {
+        ARLDeployPlan.networkGate(chainId);
     }
 
     function deploy(Plan memory p) external returns (Deployment memory) {
@@ -440,40 +440,112 @@ contract ARLDeployTest is Test {
     }
 
     function test_RevertWhen_CodeChecksDisabledOffLocal() public {
-        vm.chainId(11155111);
+        vm.chainId(84532);
         Plan memory p = _plan();
         vm.expectRevert(
-            abi.encodeWithSelector(ARLDeployPlan.PlanRecipientCodeRequired.selector, 11155111)
+            abi.encodeWithSelector(ARLDeployPlan.PlanRecipientCodeRequired.selector, 84532)
         );
         h.validate(p);
     }
 
-    function test_RevertWhen_VestingSchedulesNotApprovedOffLocal() public {
+    // ------------------------------------------------------------------ network gate
+
+    /// @dev Local Anvil and Base Sepolia pass; Base Mainnet and every other chain revert. The
+    /// gate takes no flag, so no caller can pass it an approval.
+    function test_NetworkGate() public {
+        h.networkGate(31337);
+        h.networkGate(84532);
+        vm.expectRevert(abi.encodeWithSelector(ARLDeployPlan.PlanProductionLocked.selector, 8453));
+        h.networkGate(8453);
+        uint256[5] memory unsupported = [uint256(1), 10, 42161, 11155111, 0];
+        for (uint256 i = 0; i < unsupported.length; i++) {
+            vm.expectRevert(
+                abi.encodeWithSelector(ARLDeployPlan.PlanChainNotSupported.selector, unsupported[i])
+            );
+            h.networkGate(unsupported[i]);
+        }
+    }
+
+    function testFuzz_NetworkGateOpensOnlyLocalAndBaseSepolia(uint256 chainId) public {
+        if (chainId == 31337 || chainId == 84532) {
+            h.networkGate(chainId);
+            return;
+        }
+        vm.expectRevert();
+        h.networkGate(chainId);
+    }
+
+    /// @dev Local Anvil may rehearse while the vesting start is still TBD.
+    function test_LocalRehearsalAllowed() public {
+        Plan memory p = _plan();
+        assertEq(p.chainId, 31337);
+        h.validate(p);
+        h.verify(p, h.deploy(p));
+    }
+
+    /// @dev Base Sepolia passes the network gate with the vesting start still TBD, and is then
+    /// held to every Safe v1.5.0 rule: Safes that do not point to a canonical singleton with the
+    /// canonical code are refused.
+    function test_BaseSepoliaAllowedByGateButNeedsCanonicalSafes() public {
+        vm.chainId(84532);
+        Plan memory p = _plan();
+        p.requireRecipientCode = true;
+        _giveCode(p);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ARLDeployPlan.PlanSafeSingletonNotCanonical.selector, p.safeSingletons[0]
+            )
+        );
+        h.validate(p);
+    }
+
+    /// @dev A Base Mainnet plan that satisfies every other rule (code checks, Safe proxies) is
+    /// still refused, first by validation and then by the deployer itself.
+    function test_RevertWhen_BaseMainnetFullyConfigured() public {
+        vm.chainId(8453);
+        Plan memory p = _plan();
+        p.requireRecipientCode = true;
+        _giveCode(p);
+        vm.expectRevert(abi.encodeWithSelector(ARLDeployPlan.PlanProductionLocked.selector, 8453));
+        h.validate(p);
+        vm.expectRevert(abi.encodeWithSelector(ARLDeployPlan.PlanProductionLocked.selector, 8453));
+        h.deploy(p);
+    }
+
+    /// @dev Configuration alone cannot open Base Mainnet: a loaded plan file for chain 8453 is
+    /// refused whatever its code-check setting.
+    function test_RevertWhen_BaseMainnetPlanFile() public {
+        vm.chainId(8453);
+        string memory json = vm.replace(_json("", "", ""), '"chainId":31337', '"chainId":8453');
+        Plan memory p =
+            h.load(vm.replace(json, '"requireRecipientCode":false', '"requireRecipientCode":true'));
+        vm.expectRevert(abi.encodeWithSelector(ARLDeployPlan.PlanProductionLocked.selector, 8453));
+        h.validate(p);
+        p.requireRecipientCode = false;
+        vm.expectRevert(abi.encodeWithSelector(ARLDeployPlan.PlanProductionLocked.selector, 8453));
+        h.validate(p);
+    }
+
+    /// @dev The deployer refuses Base Mainnet and unsupported chains even when a script skips
+    /// validation.
+    function test_RevertWhen_DeployerCalledWithoutValidation() public {
+        Plan memory p = _plan();
+        vm.chainId(8453);
+        vm.expectRevert(abi.encodeWithSelector(ARLDeployPlan.PlanProductionLocked.selector, 8453));
+        h.deploy(p);
+        vm.chainId(1);
+        vm.expectRevert(abi.encodeWithSelector(ARLDeployPlan.PlanChainNotSupported.selector, 1));
+        h.deploy(p);
+    }
+
+    function test_RevertWhen_ChainNotSupported() public {
         vm.chainId(11155111);
         Plan memory p = _plan();
         p.requireRecipientCode = true;
         _giveCode(p);
         vm.expectRevert(
-            abi.encodeWithSelector(ARLDeployPlan.PlanVestingScheduleNotApproved.selector, 11155111)
+            abi.encodeWithSelector(ARLDeployPlan.PlanChainNotSupported.selector, 11155111)
         );
-        h.validate(p);
-    }
-
-    /// @dev Off local Anvil the gate opens only once the vesting schedules are approved.
-    function test_ApprovalGateOffLocal() public {
-        vm.expectRevert(
-            abi.encodeWithSelector(ARLDeployPlan.PlanVestingScheduleNotApproved.selector, 1)
-        );
-        h.approvalGate(1, false);
-
-        h.approvalGate(11155111, true);
-    }
-
-    /// @dev Local Anvil may rehearse while the vesting start is still TBD.
-    function test_LocalRehearsalAllowedWhileVestingStartTbd() public {
-        h.approvalGate(31337, false);
-        Plan memory p = _plan();
-        assertEq(p.chainId, 31337);
         h.validate(p);
     }
 
