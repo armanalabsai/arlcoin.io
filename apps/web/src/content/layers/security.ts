@@ -26,12 +26,12 @@ export const security: Layer = {
     {
       id: "review-status",
       title: "Security Review",
-      shortDescription: "Phase 2 in progress",
+      shortDescription: "Internal review complete",
       status: "IN DEVELOPMENT",
       weight: "primary",
       detail: {
         summary:
-          "An internal security review of the contracts and deployment process is in progress. Findings, their severity and their status are tracked publicly in the repository.",
+          "The internal review of the contracts and deployment process is complete: unit, fuzz and invariant tests, Slither, Aderyn, Mythril and Halmos symbolic checks, and a deployment rehearsal on a Base Sepolia fork. Every finding and its triage is public in the repository. An independent external audit has not been performed.",
       },
       links: [{ label: "Security analysis", href: repoDoc("docs/security-analysis.md") }],
     },
