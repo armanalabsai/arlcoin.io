@@ -18,6 +18,7 @@
     "check": "npm run typecheck && npm run lint && npm test && npm run build && npm run test:e2e"
   },
   "dependencies": {
+    "@noble/hashes": "2.4.0",
     "@radix-ui/react-dialog": "1.1.23",
     "geist": "1.7.2",
     "motion": "13.4.4",

@@ -161,6 +161,24 @@ npm run test:e2e      # Playwright, desktop and mobile, against the production b
 
 CI runs all of these in the `web` job, plus `npm audit --audit-level=high`.
 
+## Whitelist, contact and privacy pages
+
+- `/whitelist`, `/contact` and `/privacy` sit outside the Core, linked from the header and the
+  footer of every page.
+- Both forms post from the browser to [Web3Forms](https://web3forms.com) (free plan: 250
+  submissions a month), which emails each submission to the team. No server or database is
+  involved, so the forms work on Vercel and on the static GitHub Pages build alike.
+- The access key lives in `src/content/forms.ts` (overridable with `NEXT_PUBLIC_WEB3FORMS_KEY`).
+  It is public by design: it can only send to the inbox it was created for. With no key the
+  forms show a "not open yet" notice and send nothing.
+- The whitelist form accepts an EVM address (EIP-55 checksum enforced for mixed case, using
+  `@noble/hashes`), an email and two confirmations. It says plainly that registering does not
+  guarantee an allocation and that no payment, key or seed phrase is ever requested.
+- Spam: a hidden `botcheck` field; submissions that fill it are dropped in the browser and by
+  Web3Forms.
+- `test/e2e/forms.spec.ts` covers both states; with a key it intercepts the Web3Forms request,
+  so tests never send email.
+
 ## Deployment: GitHub Pages
 
 - `ARL_STATIC_EXPORT=1 npm run build` writes a static site to `apps/web/out` (`output: "export"`,

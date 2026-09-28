@@ -13,6 +13,9 @@ export const SITE = {
 export const repoDoc = (path: string): `https://${string}` =>
   `https://github.com/gokturkalazdaghan-dot/ARLCOIN/blob/main/${path}`;
 
+/** Pages outside the Core. */
+export const SITE_PAGES = ["/whitelist", "/contact", "/privacy"] as const;
+
 export const NOT_DEPLOYED = "Not yet deployed";
 
 /** Social preview image (app/opengraph-image.png). Pages that set `openGraph` repeat it,
