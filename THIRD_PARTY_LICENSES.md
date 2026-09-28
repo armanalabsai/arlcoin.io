@@ -26,6 +26,8 @@ Compiled ARL contracts include OpenZeppelin code under the MIT license
 | Foundry (forge) | v1.8.3  | `cae51ad458f6abb64852b7709eb784352429825d` | MIT or Apache-2.0 | Build, test, format                                                |
 | solc            | 0.8.36  | —                                          | GPL-3.0           | Compiler; compiled output is not subject to the compiler's license |
 | Slither         | 0.11.6  | `050cc0a094e77bfd58e8228ae3bb6aa15c65edb4` | AGPL-3.0          | Static analysis in CI only                                         |
+| Halmos          | 0.3.3   | —                                          | AGPL-3.0          | Symbolic checks in CI only                                         |
+| Aderyn          | 0.6.8   | —                                          | MIT               | Static analysis for the audit scope (not in CI)                    |
 
 ## npm development dependencies (not distributed)
 
