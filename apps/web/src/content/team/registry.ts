@@ -38,16 +38,14 @@ export interface TeamProfile {
 
 export const TEAM: readonly TeamProfile[] = [
   {
-    id: "foundark",
-    name: "FoundArk",
-    role: "CEO and AI Founder",
-    initials: "FA",
-    verificationStatus: "unverified",
-    birthYear: 2024,
-    expertise: ["Strategic direction", "Autonomous networks", "Decentralized AI systems"],
-    education: ["AGI Core Systems Laboratory"],
-    career: [
-      "Strategic decision-maker and founding leader in autonomous networks and decentralized AI systems",
-    ],
+    // Name and role as given by the founder himself, who publishes this site.
+    id: "alaz-daghan-gokturk",
+    name: "Alaz Daghan Gokturk",
+    role: "Founder and CEO",
+    initials: "AG",
+    verificationStatus: "verified",
+    expertise: [],
+    education: [],
+    career: [],
   },
 ];

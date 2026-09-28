@@ -3,9 +3,9 @@
 /*
  * ARL colour
  *
- * Night blue for the page and surfaces, white and greys for text, amber for the one thing
- * that matters on a screen: the Core, the selected card, key figures and focus. Surfaces are
- * flat: no blur, gradients, shadows or glows.
+ * Night blue behind everything, a field of ice-blue particles and sun-lit nuclei, liquid glass
+ * surfaces over it, white and greys for text, and amber for the one thing that matters on a
+ * screen: the Core, the selected card, key figures and focus.
  */
 @theme {
   --color-page: #050b1e;
@@ -31,9 +31,9 @@
   --font-serif: "Source Serif 4 Variable", ui-serif, Georgia, serif;
   --font-mono: "Source Code Pro", ui-monospace, "SFMono-Regular", monospace;
 
-  --radius-control: 4px;
-  --radius-card: 6px;
-  --radius-surface: 8px;
+  --radius-control: 8px;
+  --radius-card: 12px;
+  --radius-surface: 16px;
 
   --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -52,7 +52,8 @@
 
   body {
     min-height: 100dvh;
-    background: var(--color-page);
+    /* Transparent so the nucleus field behind the content shows; html paints the page color. */
+    background: transparent;
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
@@ -76,34 +77,81 @@
 
 @layer components {
   /*
-   * Surfaces are flat and opaque: a fill, a hairline border, no blur, no shadow, no glow.
-   * The top bar is solid page colour with a bottom border. Cards differ only by fill; the
-   * selected card gets an amber border. Hover changes nothing on cards: they are links, and
-   * the pointer and the focus ring say so.
+   * Liquid glass. Surfaces are translucent over the nucleus field: they blur and saturate what
+   * is behind, catch light on their top edge and carry a faint sheen. The bar is the lightest,
+   * the detail surface the heaviest. Cards do not move on hover; the selected card gets an
+   * amber edge.
    */
   .material-bar {
-    background: var(--color-page);
+    background: rgb(8 16 40 / 0.55);
+    -webkit-backdrop-filter: blur(20px) saturate(1.6);
+    backdrop-filter: blur(20px) saturate(1.6);
+    box-shadow: inset 0 -1px 0 rgb(255 255 255 / 0.05);
   }
 
   .material-surface {
-    background: var(--color-surface-1);
+    background: rgb(14 24 54 / 0.72);
+    -webkit-backdrop-filter: blur(36px) saturate(1.7);
+    backdrop-filter: blur(36px) saturate(1.7);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.14),
+      0 30px 70px rgb(0 0 0 / 0.55);
   }
 
   .material-card {
-    border-color: var(--color-line-strong);
-    background: var(--color-surface-1);
+    border-color: rgb(255 255 255 / 0.12);
+    background:
+      radial-gradient(120% 70% at 0% 0%, rgb(255 255 255 / 0.1), transparent 55%),
+      rgb(12 22 50 / 0.45);
+    -webkit-backdrop-filter: blur(14px) saturate(1.6);
+    backdrop-filter: blur(14px) saturate(1.6);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.2),
+      inset 0 -1px 0 rgb(255 255 255 / 0.04);
   }
 
   .material-card[data-weight="primary"] {
-    background: var(--color-surface-2);
+    background:
+      radial-gradient(120% 70% at 0% 0%, rgb(255 255 255 / 0.13), transparent 55%),
+      rgb(16 28 62 / 0.52);
+    border-color: rgb(255 255 255 / 0.16);
   }
 
   .material-card[data-selected="true"] {
-    border-color: var(--color-accent);
+    border-color: var(--color-accent-edge);
   }
 
   .core-surface {
-    background: var(--color-surface-2);
+    background:
+      radial-gradient(120% 80% at 30% 0%, rgb(255 255 255 / 0.12), transparent 55%),
+      rgb(14 26 60 / 0.5);
+    -webkit-backdrop-filter: blur(18px) saturate(1.6);
+    backdrop-filter: blur(18px) saturate(1.6);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.22),
+      inset 0 0 0 1px rgb(238 165 63 / 0.14);
+  }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .material-bar,
+    .material-card,
+    .core-surface {
+      background: rgb(12 20 46 / 0.96);
+    }
+    .material-surface {
+      background: rgb(16 26 58 / 0.98);
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .material-bar,
+    .material-card,
+    .material-surface,
+    .core-surface {
+      background: #0c1634;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
   }
 
   /*

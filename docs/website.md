@@ -90,7 +90,7 @@ apps/web
 ## Visual system: ARL CORE color language
 
 ```
-NIGHT BLUE  →  WHITE / SOFT GREY  →  AMBER  →  ACTIVE / IMPORTANT
+NIGHT BLUE + NUCLEUS FIELD  →  LIQUID GLASS  →  WHITE / SOFT GREY  →  AMBER  →  ACTIVE / IMPORTANT
 ```
 
 The tokens live in `app/globals.css` (`@theme`).
@@ -109,11 +109,14 @@ Rules:
   metrics (primary cards only), focus rings and key interaction points.
 - No card is filled with amber. No glow spreads across the screen. No neon or fluorescent yellow,
   and nothing pushed toward orange.
-- Surfaces are flat and opaque: a fill and a hairline border. No blur or glass, no gradients, no
-  shadows, no glows, no decorative background (the animated particle field was removed).
+- Background: the nucleus field (`src/core/NucleusField.tsx`), thousands of ice-blue subatomic
+  particles at three depths and sun-lit nuclei with ice-blue electrons; it swirls around the
+  pointer, a press sends a shock wave, and it is a still frame under reduced motion.
+- Surfaces are liquid glass: translucent, blurred and saturated, with a lit top edge. Solid
+  fallbacks for reduced transparency and browsers without `backdrop-filter`.
 - Cards do not react to hover; they are links, and the pointer and focus ring show it. Only text
   links and buttons change on hover.
-- Radii: 4px controls, 6px cards, 8px surfaces, a circle for the Core. Spacing uses the 4px
+- Radii: 8px controls, 12px cards, 16px surfaces, a circle for the Core. Spacing uses the 4px
   scale. Type: Source Sans 3 for text, Source Serif 4 for headings, Source Code Pro for numbers and
   identifiers, self-hosted.
 - Copy: no em dashes, no "not X but Y" constructions, no emoji, no check-mark lists.

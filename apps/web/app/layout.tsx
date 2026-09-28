@@ -5,6 +5,7 @@ import "@fontsource/source-code-pro/500.css";
 import type { Metadata, Viewport } from "next";
 
 import { SITE } from "@/content/site.ts";
+import { NucleusField } from "@/core/NucleusField.tsx";
 
 import "./globals.css";
 
@@ -29,7 +30,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <NucleusField />
+        {children}
+      </body>
     </html>
   );
 }
