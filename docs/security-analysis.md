@@ -95,6 +95,19 @@ Each deliberate defect was introduced, the suite run, and the defect reverted:
 | assembly, low-level-calls, solc-version (Info) | OpenZeppelin utilities                | Upstream implementation detail                               |
 | pragma (Info)                                  | ARL files                             | ARL pins `0.8.36`; OpenZeppelin uses `^0.8.20`               |
 
+## Semgrep (evaluated, not adopted)
+
+The Decurity `semgrep-smart-contracts` rules report no findings on `contracts/src`, but they are
+licensed CC BY-NC-SA 4.0 (non-commercial), so they are not used in CI or relied on as evidence.
+
+## Mythril 0.24.8
+
+Symbolic execution of the runtime bytecode of `ARLToken`, `ARLTimelock`,
+`ARLMerkleDistributor` and `ARLVestingWallet`: 9 findings, none exploitable. The one rated High
+(SWC-101 in the inherited `onERC1155BatchReceived`) is a decoder false positive, now covered by a
+test replaying Mythril's transaction and a fuzz test over arbitrary calldata. Full triage:
+`docs/audit-scope.md`.
+
 ## Staking rewards (`ARLStakingRewards`)
 
 Ported from Synthetix `StakingRewards` via curvefi/unipool-fork (MIT). Reward-per-token math is

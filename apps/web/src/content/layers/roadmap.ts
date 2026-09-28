@@ -38,7 +38,7 @@ export const roadmap: Layer = {
       metric: { kind: "static", value: "In progress" },
       detail: {
         summary:
-          "Security review of the contracts and the deployment process. Deployment tooling with pre-broadcast validation and post-deployment verification is complete; the remaining findings are being decided.",
+          "Security review of the contracts and the deployment process. The internal review and the deployment tooling are complete; an independent external audit is still to be done before mainnet.",
       },
     },
     {
