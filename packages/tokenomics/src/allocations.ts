@@ -28,12 +28,13 @@ export type DecisionStatus = "approved" | "proposal" | "undecided";
 export type Release =
   | {
       /**
-       * Released by a vesting wallet. The schedule (start, cliff, duration)
-       * is not decided: deployment configuration supplies it, and deployment
-       * off local Anvil is refused until it is approved.
+       * Released by a vesting wallet: nothing before the cliff ends, then
+       * linear. The durations are in calendar months. The start date is
+       * supplied by deployment configuration; while it is not confirmed,
+       * deployment off local Anvil is refused.
        */
       readonly kind: "vesting";
-      readonly schedule: "tbd";
+      readonly schedule: VestingSchedule;
       readonly status: DecisionStatus;
       readonly note?: string;
     }
@@ -72,6 +73,16 @@ export type Release =
       readonly description: string;
       readonly status: DecisionStatus;
     };
+
+/** An approved vesting schedule: 0% at the start, a cliff, then linear vesting. */
+export interface VestingSchedule {
+  /** Calendar months before anything vests. */
+  readonly cliffMonths: number;
+  /** Calendar months of linear vesting after the cliff. */
+  readonly linearMonths: number;
+  /** Whether the start date (TGE for investors and partnerships) is confirmed. */
+  readonly start: "tbd" | "approved";
+}
 
 /**
  * Where an allocation's tokens are held at genesis (custody architecture
@@ -167,7 +178,15 @@ function deepFreeze<T>(value: T): T {
   return value;
 }
 
-const VESTING_TBD: Release = { kind: "vesting", schedule: "tbd", status: "undecided" };
+/**
+ * Approved schedule (economic specification section 4.1): 0% at TGE, a
+ * 12-month cliff, then 36 months linear. The start (TGE) is not confirmed.
+ */
+const VESTING_12_36: Release = {
+  kind: "vesting",
+  schedule: { cliffMonths: 12, linearMonths: 36, start: "tbd" },
+  status: "approved",
+};
 
 /** In canonical order. */
 export const ALLOCATIONS: readonly Allocation[] = deepFreeze([
@@ -211,7 +230,7 @@ export const ALLOCATIONS: readonly Allocation[] = deepFreeze([
     amount: 2_000_000,
     purpose: "Strategic partners. No partnership has been announced.",
     release: {
-      ...VESTING_TBD,
+      ...VESTING_12_36,
       note: "Not an unconditional pool. Intended flow: partnership, milestone, vesting, release. Milestones are not defined.",
     },
     custody: { holder: "vesting-wallet", beneficiary: "dedicated-safe" },
@@ -276,7 +295,7 @@ export const ALLOCATIONS: readonly Allocation[] = deepFreeze([
     name: "Investors / Strategic Capital",
     amount: 1_500_000,
     purpose: "Investors and strategic capital. Not unlocked at launch by default.",
-    release: VESTING_TBD,
+    release: VESTING_12_36,
     custody: { holder: "vesting-wallet", beneficiary: "dedicated-safe" },
   },
   {
@@ -302,7 +321,7 @@ export const ALLOCATIONS: readonly Allocation[] = deepFreeze([
     release: {
       kind: "program",
       description:
-        "Grants are irrevocable and made in tranches, each funded from the pool into its own vesting wallet whose beneficiary is the member's own Safe. The grant vesting schedule is not defined.",
+        "Grants are irrevocable and made in tranches, each funded from the pool into its own vesting wallet whose beneficiary is the member's own Safe. Each grant vests with 0% at the grant date, a 12-month cliff, then 36 months linear. Tranche sizes and the use of unassigned pool tokens are not defined.",
       status: "undecided",
     },
     custody: { holder: "grant-pool", grantBeneficiary: "recipient-safe" },

@@ -123,15 +123,19 @@ export const token: Layer = {
       metric: { kind: "static", value: String(vesting.length), unit: "vesting wallets" },
       detail: {
         summary:
-          "These allocations are held by vesting wallets that release only to a dedicated Safe, only on their schedule. The schedules (start, cliff and duration) are not decided yet; no vesting wallet can be deployed to a public network until they are.",
+          "These allocations are held by vesting wallets that release only to a dedicated Safe, only on their schedule: nothing at the start, a 12-month cliff, then 36 months of linear vesting. The start date is not confirmed yet; no vesting wallet can be deployed to a public network until it is.",
         facts: [
           ...vesting.map((a) => ({
             label: `${a.name} · ${formatArl(a.amount)}`,
-            value: "Schedule TBD",
+            value:
+              a.release.kind === "vesting"
+                ? `${String(a.release.schedule.cliffMonths)}-month cliff, then ${String(a.release.schedule.linearMonths)} months linear; start date TBD`
+                : "Schedule TBD",
           })),
           {
             label: `Team · ${formatArl(allocation("team").amount)}`,
-            value: "Per-member grants from a team pool Safe; schedule TBD",
+            value:
+              "Per-member grants from a team pool Safe; each grant: 12-month cliff, then 36 months linear",
           },
         ],
       },

@@ -20,12 +20,12 @@ contracts/deploy/deployments/<chain>.json   deployed addresses (git-ignored)
 
 Values come from their single sources:
 
-| Value                          | Source                                                                                                            |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| Allocation amounts, max supply | `packages/tokenomics` (planner) and `ARLAllocation.sol` (cross-checked)                                           |
-| Vesting schedules (TBD)        | The deployment config; refused off local Anvil until approved (`VESTING_SCHEDULES_APPROVED`)                      |
-| 48-hour timelock floor         | `packages/tokenomics` (planner); `ARLTimelock.MIN_DELAY_FLOOR` (constructor; a test pins the script's copy to it) |
-| Addresses, chain ID            | The deployment config                                                                                             |
+| Value                          | Source                                                                                                                                       |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Allocation amounts, max supply | `packages/tokenomics` (planner) and `ARLAllocation.sol` (cross-checked)                                                                      |
+| Vesting start (TBD)            | The deployment config; durations must be 12 + 36 months; refused off local Anvil until the start is confirmed (`VESTING_SCHEDULES_APPROVED`) |
+| 48-hour timelock floor         | `packages/tokenomics` (planner); `ARLTimelock.MIN_DELAY_FLOOR` (constructor; a test pins the script's copy to it)                            |
+| Addresses, chain ID            | The deployment config                                                                                                                        |
 
 ## Configuration
 
@@ -38,7 +38,7 @@ a local Anvil chain.
 | `chainId`                                    | Required; must equal the chain the script runs on                                                                                                                                                                                                    |
 | `requireRecipientCode`                       | Must be `true` on every chain except local Anvil (31337); then every Safe must be a genuine Safe v1.5.0 proxy (see below)                                                                                                                            |
 | `safe.singletons`                            | Local Anvil only: the Safe singletons a rehearsal deployed. Every other chain uses the canonical Safe v1.5.0 singletons from `@safe-global/safe-deployments` and cannot override them                                                                |
-| `vesting.<investors, strategicPartnerships>` | `beneficiary` (dedicated Safe), `start` (`YYYY-MM-DDTHH:MM:SSZ`, UTC, day 1-28), `cliffMonths`, `vestingMonths`. Schedules are TBD: accepted only on local Anvil. `vesting.founder` is rejected                                                      |
+| `vesting.<investors, strategicPartnerships>` | `beneficiary` (dedicated Safe), `start` (`YYYY-MM-DDTHH:MM:SSZ`, UTC, day 1-28), `cliffMonths` (must be 12), `vestingMonths` (must be 36). The start is TBD: accepted only on local Anvil. `vesting.founder` is rejected                             |
 | `treasury.safe`                              | Non-zero; becomes the timelock's only proposer and executor, and a canceller                                                                                                                                                                         |
 | `treasury.guardian`                          | Non-zero and different from `treasury.safe`; a separate Safe that receives only the canceller role                                                                                                                                                   |
 | `treasury.minDelayHours`                     | Integer, at least 48                                                                                                                                                                                                                                 |
@@ -55,7 +55,9 @@ broadcast) each reject:
 - a zero address anywhere, and any address used for two roles (every Safe is dedicated);
 - a treasury guardian equal to the treasury Safe;
 - invalid schedule ordering or a zero start;
-- any chain other than local Anvil while the vesting schedules are TBD;
+- any chain other than local Anvil while the vesting start is TBD;
+- a vesting schedule whose cliff is not 12 calendar months or whose linear period is not 36
+  calendar months;
 - a timelock delay below 48 hours;
 - a missing chain ID, a chain ID that differs from the connected chain, or disabled code checks
   off local Anvil;
@@ -98,7 +100,7 @@ deployments must leave the deployer nonce unchanged. CI runs the rehearsal on ev
 
 See the pre-testnet requirements in the Phase 2 security scope report. In particular: a
 testnet-only config with `requireRecipientCode: true` and real test Safes, a free public RPC, and
-a dedicated test Safe for every role, approved vesting schedules for the investor and strategic
+a dedicated test Safe for every role, a confirmed vesting start for the investor and strategic
 partnership wallets, and an approved custody for the Founder Reserved tranche (until then the
 tooling refuses every public network). Private keys are never placed in config files; use a hardware wallet or Foundry keystore
 outside the repository.
