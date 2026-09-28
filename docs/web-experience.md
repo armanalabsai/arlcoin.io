@@ -347,9 +347,9 @@ how technical content is presented.
 | Typography         | Source Sans 3 for text, Source Serif 4 for headings, Source Code Pro for numbers, addresses, hashes and identifiers. Numbers use tabular figures          |
 | Spacing            | 4px scale                                                                                                                                                 |
 | Grid               | 12-column grid on wide screens; single column on phones; long-form pages capped at a readable measure                                                     |
-| Radius             | 4px controls, 6px cards, 8px surfaces, circle for the Core                                                                                                |
-| Elevation          | Fill brightness by importance; hairline borders; no shadows                                                                                               |
-| Glass              | None. All surfaces are opaque                                                                                                                             |
+| Radius             | 8px controls, 12px cards, 16px surfaces, circle for the Core                                                                                              |
+| Elevation          | Glass weight by importance; lit top edge                                                                                                                  |
+| Glass              | Liquid glass for the top bar, cards, the Core and the detail surface, over the nucleus field; solid under reduced transparency                            |
 | Iconography        | Minimal line icons for status and link type only; no illustrative or 3D icons                                                                             |
 | Motion             | Short, purposeful, spring-based where it explains a transition; `prefers-reduced-motion` turns it into fades                                              |
 | Status indicators  | Text labels `PLANNED`, `IN DEVELOPMENT`, `LIVE`, `BLOCKED`, `UNAVAILABLE`, `Not deployed`; never colour alone                                             |
