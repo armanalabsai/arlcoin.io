@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { FORMS } from "@/content/forms.ts";
-import { OG_IMAGE } from "@/content/site.ts";
+import { OG_IMAGE, SITE } from "@/content/site.ts";
 import { PageShell } from "@/site/PageShell.tsx";
 
 const title = "Privacy · ARL";
@@ -59,8 +59,8 @@ export default function PrivacyPage() {
 
       <Section heading="How it is processed">
         <p>
-          Form submissions are delivered by email to the team through Web3Forms, a form delivery
-          service. Its handling of the data is described in the{" "}
+          Form submissions are delivered by email to the team&rsquo;s inbox, {SITE.email}, through
+          Web3Forms, a form delivery service. Its handling of the data is described in the{" "}
           <a href={FORMS.privacyPolicy} rel="noopener noreferrer" className={link}>
             Web3Forms privacy policy
           </a>
@@ -85,7 +85,11 @@ export default function PrivacyPage() {
           You can ask to see, correct or delete your data at any time through the{" "}
           <Link href="/contact" prefetch={false} className={link}>
             contact form
-          </Link>
+          </Link>{" "}
+          or by email to{" "}
+          <a href={`mailto:${SITE.email}`} className={link}>
+            {SITE.email}
+          </a>
           , using the email address you registered with. Deleting whitelist data removes the address
           from consideration for the launch list.
         </p>

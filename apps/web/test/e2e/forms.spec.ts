@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 import { FORMS, formsOpen } from "../../src/content/forms.ts";
+import { SITE } from "../../src/content/site.ts";
 
 // The whitelist, contact and privacy pages. With no form access key the forms show a closed
 // notice; with one, submissions are intercepted here so nothing leaves the test.
@@ -34,6 +35,13 @@ test("the Core header and footer link to the whitelist and contact pages", async
   const footer = page.getByRole("navigation", { name: "Site" });
   await expect(footer.getByRole("link", { name: "Contact" })).toBeVisible();
   await expect(footer.getByRole("link", { name: "Privacy" })).toBeVisible();
+});
+
+test("the contact page shows the team email address", async ({ page }) => {
+  await page.goto("/contact");
+  await expect(
+    page.getByRole("main").getByRole("link", { name: SITE.email }).first(),
+  ).toHaveAttribute("href", `mailto:${SITE.email}`);
 });
 
 test.describe("forms closed", () => {

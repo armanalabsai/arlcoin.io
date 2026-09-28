@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { OG_IMAGE, repoDoc } from "@/content/site.ts";
+import { OG_IMAGE, repoDoc, SITE } from "@/content/site.ts";
 import { FactList, PageShell } from "@/site/PageShell.tsx";
 import { ContactForm } from "@/site/forms.tsx";
 
@@ -42,6 +42,12 @@ export default function ContactPage() {
               security policy
             </a>
             .
+          </>,
+          <>
+            Email:{" "}
+            <a href={`mailto:${SITE.email}`} className={link}>
+              {SITE.email}
+            </a>
           </>,
           "The team will never ask for your private key, seed phrase or a payment, and does not offer token sales or presales.",
           "ARL has no exchange listing and no partnership announced. Anyone claiming otherwise does not speak for ARL.",

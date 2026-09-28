@@ -290,18 +290,16 @@ export function ContactForm() {
   if (!formsOpen()) {
     return (
       <Closed>
-        <p className="font-medium text-fg">The contact form is not open yet.</p>
+        <p className="font-medium text-fg">Write to the team by email.</p>
         <p>
-          Until it opens, reach the team through the{" "}
           <a
-            href={`${SITE.repository}/issues`}
-            rel="noopener noreferrer"
+            href={`mailto:${SITE.email}`}
             className="text-accent underline-offset-4 hover:underline"
           >
-            repository&rsquo;s issue tracker
+            {SITE.email}
           </a>
-          . Issues are public: do not post personal information there.
         </p>
+        <p>The contact form will open here soon.</p>
       </Closed>
     );
   }
