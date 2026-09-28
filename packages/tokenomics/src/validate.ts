@@ -53,6 +53,15 @@ export function validateAllocations(
 
 function validateRelease(id: string, r: Release): string[] {
   const errors: string[] = [];
+  if (r.kind === "vesting") {
+    const s = r.schedule;
+    if (!Number.isInteger(s.cliffMonths) || s.cliffMonths < 0) {
+      errors.push(`${id}: vesting cliff must be a whole number of months`);
+    }
+    if (!Number.isInteger(s.linearMonths) || s.linearMonths <= 0) {
+      errors.push(`${id}: linear vesting must be a positive whole number of months`);
+    }
+  }
   if (r.kind === "custody" && r.controls) {
     const c = r.controls;
     if (!Number.isInteger(c.signers) || !Number.isInteger(c.threshold)) {

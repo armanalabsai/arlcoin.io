@@ -166,6 +166,8 @@ library ARLVerify {
         _eq(string.concat(name, " vesting end"), v.vestingEnd, w.vestingEnd());
         _eq(string.concat(name, " linear duration"), v.vestingEnd - v.cliffEnd, w.duration());
         _eq(string.concat(name, " released"), 0, w.released(address(d.token)));
+        // The planned schedule itself must have the approved 12 + 36 calendar-month durations.
+        ARLDeployPlan.validateSchedule(name, v);
     }
 
     // ------------------------------------------------------------------ timelock

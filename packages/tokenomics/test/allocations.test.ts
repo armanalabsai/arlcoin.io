@@ -138,13 +138,13 @@ describe("supply concepts", () => {
 describe("custody and vesting readiness", () => {
   const vestingWallet = { holder: "vesting-wallet", beneficiary: "dedicated-safe" };
 
-  it("investors and strategic partnerships vest to dedicated Safes; schedule TBD", () => {
+  it("investors and strategic partnerships vest 12 + 36 months to dedicated Safes; start TBD", () => {
     for (const id of ["investors", "strategic-partnerships"]) {
       const a = byId(id);
       assert.deepEqual(a.custody, vestingWallet, id);
       assert.ok(a.release.kind === "vesting", id);
-      assert.equal(a.release.schedule, "tbd", id);
-      assert.equal(a.release.status, "undecided", id);
+      assert.deepEqual(a.release.schedule, { cliffMonths: 12, linearMonths: 36, start: "tbd" }, id);
+      assert.equal(a.release.status, "approved", id);
     }
     assert.match(JSON.stringify(byId("strategic-partnerships")), /milestone/);
   });
@@ -190,6 +190,26 @@ describe("custody and vesting readiness", () => {
     assert.equal(t.release.status, "undecided");
     assert.deepEqual(t.custody, { holder: "tbd" });
     assert.doesNotMatch(JSON.stringify(t), /month|cliff (end|of)|linear|schedule:/i);
+  });
+
+  it("team grants follow the approved 12 + 36 month schedule per grant", () => {
+    const r = byId("team").release;
+    assert.ok(r.kind === "program");
+    assert.match(r.description, /12-month cliff, then 36 months linear/);
+  });
+
+  it("rejects a vesting schedule that is not a whole number of months", () => {
+    const release: Allocation["release"] = {
+      kind: "vesting",
+      schedule: { cliffMonths: 1.5, linearMonths: 0, start: "tbd" },
+      status: "approved",
+    };
+    const table = (structuredClone(ALLOCATIONS) as Allocation[]).map((a) =>
+      a.id === "investors" ? { ...a, release } : a,
+    );
+    const errors = validateAllocations(table, MAX_SUPPLY).join("\n");
+    assert.match(errors, /investors: vesting cliff must be a whole number of months/);
+    assert.match(errors, /investors: linear vesting must be a positive whole number of months/);
   });
 
   it("team is a dedicated pool Safe funding per-member grants", () => {
@@ -340,7 +360,11 @@ describe("validator rejects invalid tables", () => {
         u,
         {
           ...r,
-          release: { kind: "vesting", schedule: "tbd", status: "undecided" },
+          release: {
+            kind: "vesting",
+            schedule: { cliffMonths: 12, linearMonths: 36, start: "tbd" },
+            status: "undecided",
+          },
           custody: { holder: "vesting-wallet", beneficiary: "dedicated-safe" },
         },
       ]);

@@ -69,19 +69,19 @@ in `packages/tokenomics`. Every Safe is dedicated to one allocation.
 
 ## Release rules
 
-| Allocation                    | Rule                                                                                                    | Status                         |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------ |
-| Public Launch                 | Terms set before any launch                                                                             | undecided                      |
-| Community & Staking           | Paid from this allocation or protocol revenue; never new issuance. Rates and schedule not defined       | undecided                      |
-| Ecosystem & Growth            | Programs tied to genuine, verifiable activity. Rules, rates and schedule not defined                    | undecided                      |
-| Strategic Partnerships        | Vesting wallet; schedule TBD. Not an unconditional pool: partnership → milestone → vesting → release    | undecided                      |
-| Liquidity                     | Held as a reserve; the amount used for any pool or listing is decided separately                        | approved                       |
-| Founder                       | 2,000,000 ARL unrestricted at TGE (no vesting); 100,000 ARL reserved, not vested, treatment TBD         | approved (reserved: undecided) |
-| Investors / Strategic Capital | Vesting wallet; schedule TBD. Not unlocked at launch by default                                         | undecided                      |
-| Treasury                      | Safe 3-of-5, minimum 48-hour timelock, cancel-only guardian                                             | approved                       |
-| Team                          | Irrevocable per-member grants in tranches from the pool, each to the member's own Safe; schedule TBD    | undecided                      |
-| Early Users                   | Rewards only for genuine, verifiable usage; connecting a wallet earns nothing. Amounts and schedule TBD | undecided                      |
-| Grants / Bug Bounty           | Paid per grant or bounty award                                                                          | undecided                      |
+| Allocation                    | Rule                                                                                                                                                | Status                              |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| Public Launch                 | Terms set before any launch                                                                                                                         | undecided                           |
+| Community & Staking           | Paid from this allocation or protocol revenue; never new issuance. Rates and schedule not defined                                                   | undecided                           |
+| Ecosystem & Growth            | Programs tied to genuine, verifiable activity. Rules, rates and schedule not defined                                                                | undecided                           |
+| Strategic Partnerships        | Vesting wallet: 0% at TGE, 12-month cliff, 36 months linear; start date TBD. Not an unconditional pool: partnership → milestone → vesting → release | approved (start: undecided)         |
+| Liquidity                     | Held as a reserve; the amount used for any pool or listing is decided separately                                                                    | approved                            |
+| Founder                       | 2,000,000 ARL unrestricted at TGE (no vesting); 100,000 ARL reserved, not vested, treatment TBD                                                     | approved (reserved: undecided)      |
+| Investors / Strategic Capital | Vesting wallet: 0% at TGE, 12-month cliff, 36 months linear; start date TBD                                                                         | approved (start: undecided)         |
+| Treasury                      | Safe 3-of-5, minimum 48-hour timelock, cancel-only guardian                                                                                         | approved                            |
+| Team                          | Irrevocable per-member grants in tranches from the pool, each to the member's own Safe; each grant: 12-month cliff, 36 months linear                | approved (tranche sizes: undecided) |
+| Early Users                   | Rewards only for genuine, verifiable usage; connecting a wallet earns nothing. Amounts and schedule TBD                                             | undecided                           |
+| Grants / Bug Bounty           | Paid per grant or bounty award                                                                                                                      | undecided                           |
 
 The Founder allocation is one allocation of 2,100,000 ARL minted to two
 genesis holders, so the token mints to twelve holders for eleven allocations:
@@ -98,10 +98,11 @@ sold are still unlocked, not locked. The reserved tranche has no schedule; its
 treatment and custody are TBD, and the tooling refuses every public network
 until its custody is approved (`FOUNDER_RESERVE_CUSTODY_APPROVED = false`).
 
-A vesting schedule that is TBD cannot reach a public network: the planner
-(`packages/deploy`) and `ARLDeployPlan` both refuse any chain other than local
-Anvil until the schedules are approved. Local rehearsals use placeholder
-schedules that are not decisions.
+The approved vesting durations are enforced: the planner (`packages/deploy`)
+and `ARLDeployPlan` reject any schedule whose cliff is not 12 calendar months or
+whose linear period is not 36 calendar months. The vesting start (TGE) is not
+confirmed, so both refuse any chain other than local Anvil until it is. Local
+rehearsals use a placeholder start date that is not a decision.
 
 Future reward programs (staking, referral, onboarding, early users) must be
 compatible with eligibility rules, Sybil resistance, abuse prevention, rate

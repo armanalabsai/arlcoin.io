@@ -7,10 +7,11 @@ notices and attribution requirements.
 
 ## Vendored source (git submodules, unmodified)
 
-| Component              | Path                                   | Tag     | Commit                                     | License           | Use                                                                   | ARL modifications                                                     |
-| ---------------------- | -------------------------------------- | ------- | ------------------------------------------ | ----------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| OpenZeppelin Contracts | `contracts/lib/openzeppelin-contracts` | v5.6.1  | `5fd1781b1454fd1ef8e722282f86f9293cacf256` | MIT               | `ERC20`, `VestingWallet`, `TimelockController` and their dependencies | None. ARL contracts inherit from these; upstream files are not edited |
-| forge-std              | `contracts/lib/forge-std`              | v1.16.2 | `bf647bd6046f2f7da30d0c2bf435e5c76a780c1b` | MIT or Apache-2.0 | Test helpers (tests only)                                             | None                                                                  |
+| Component              | Path                                   | Tag     | Commit                                     | License           | Use                                                                                                                               | ARL modifications                                                     |
+| ---------------------- | -------------------------------------- | ------- | ------------------------------------------ | ----------------- | --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| OpenZeppelin Contracts | `contracts/lib/openzeppelin-contracts` | v5.6.1  | `5fd1781b1454fd1ef8e722282f86f9293cacf256` | MIT               | `ERC20`, `VestingWallet`, `TimelockController` and their dependencies                                                             | None. ARL contracts inherit from these; upstream files are not edited |
+| forge-std              | `contracts/lib/forge-std`              | v1.16.2 | `bf647bd6046f2f7da30d0c2bf435e5c76a780c1b` | MIT or Apache-2.0 | Test helpers (tests only)                                                                                                         | None                                                                  |
+| solidity-datetime      | `contracts/lib/solidity-datetime`      | v2.2.0  | `294fc244973cc5f9ec374713affde12c1403927c` | MIT               | Calendar-month arithmetic (`DateTime.addMonths`) in the deployment plan validator and verifier; not part of any deployed contract | None                                                                  |
 
 Upstream `LICENSE` files and copyright headers are preserved inside each
 submodule. CI verifies both commits on every run.

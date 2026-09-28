@@ -2,19 +2,19 @@
   "network": "local",
   "chainId": 31337,
   "requireRecipientCode": false,
-  "note": "Local Anvil rehearsal only. Addresses are keccak256(\"arl.local.<name>\") placeholders nobody holds keys for. The vesting schedules below are rehearsal placeholders, not approved schedules, and the founderReserved address is a placeholder, not a custody decision; the planner and ARLDeployPlan refuse any other chain until the schedules and the Founder Reserved custody are approved.",
+  "note": "Local Anvil rehearsal only. Addresses are keccak256(\"arl.local.<name>\") placeholders nobody holds keys for. The vesting schedules below use the approved 12 + 36 month durations with a placeholder start date (the vesting start is not confirmed), and the founderReserved address is a placeholder, not a custody decision; the planner and ARLDeployPlan refuse any other chain until the vesting start and the Founder Reserved custody are confirmed.",
   "vesting": {
     "investors": {
       "beneficiary": "0x4bCb1679EEfBA34C88F55c0D07efe4EA9bfF4721",
       "start": "2027-01-01T00:00:00Z",
       "cliffMonths": 12,
-      "vestingMonths": 24
+      "vestingMonths": 36
     },
     "strategicPartnerships": {
       "beneficiary": "0x5F611FC6df7B0e0326A6B10b135A15DdF8667c2a",
       "start": "2027-01-01T00:00:00Z",
       "cliffMonths": 12,
-      "vestingMonths": 24
+      "vestingMonths": 36
     }
   },
   "treasury": {

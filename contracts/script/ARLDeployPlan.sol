@@ -3,6 +3,8 @@ pragma solidity 0.8.36;
 
 import {Vm} from "forge-std/Vm.sol";
 
+import {DateTime} from "solidity-datetime/DateTime.sol";
+
 import {ARLAllocation} from "../src/ARLAllocation.sol";
 
 /// @notice One allocation amount per recipient, in base units, in canonical order. Field order
@@ -81,8 +83,14 @@ library ARLDeployPlan {
     /// vesting schedules that are not yet approved may be rehearsed.
     uint256 internal constant LOCAL_CHAIN_ID = 31337;
 
-    /// @dev The investor and strategic partnership vesting schedules are not recorded as
-    /// approved. Until they are, no plan may target a chain other than local Anvil.
+    /// @dev Approved schedule (economic specification section 4.1): 0% at TGE, a 12-month
+    /// cliff, then 36 months linear, in calendar months. Every plan must match it exactly.
+    uint256 internal constant VESTING_CLIFF_MONTHS = 12;
+    uint256 internal constant VESTING_LINEAR_MONTHS = 36;
+
+    /// @dev The durations are approved and enforced, but the vesting start (TGE) of the
+    /// investor and strategic partnership wallets is not confirmed (TBD). Until it is, no plan
+    /// may target a chain other than local Anvil.
     bool internal constant VESTING_SCHEDULES_APPROVED = false;
 
     /// @dev The custody of the Founder Reserved tranche (100,000 ARL) is not decided (TBD).
@@ -215,8 +223,8 @@ library ARLDeployPlan {
         _validateFounderTranches(p);
         _validateAddresses(p);
         _validateSafes(p);
-        _validateSchedule("investors", p.investors);
-        _validateSchedule("strategicPartnerships", p.strategicPartnerships);
+        validateSchedule("investors", p.investors);
+        validateSchedule("strategicPartnerships", p.strategicPartnerships);
         if (p.minDelay < TIMELOCK_DELAY_FLOOR) {
             revert PlanDelayBelowFloor(p.minDelay, TIMELOCK_DELAY_FLOOR);
         }
@@ -417,15 +425,25 @@ library ARLDeployPlan {
         account[12] = p.recipients.founderReserved;
     }
 
-    /// @dev Structural checks only: the durations themselves are not decided and are not
-    /// asserted here. `ARLVestingWallet` enforces the same ordering on deployment.
-    function _validateSchedule(string memory name, VestingPlan memory v) private pure {
+    /// @notice Reverts unless the schedule is ordered (as `ARLVestingWallet` also enforces) and
+    /// has exactly the approved durations: the cliff ends 12 calendar months after the start,
+    /// and linear vesting ends 36 calendar months after the cliff. Calendar-month arithmetic is
+    /// `DateTime.addMonths` from solidity-datetime (MIT), which keeps the time of day.
+    function validateSchedule(string memory name, VestingPlan memory v) internal pure {
         if (v.cliffStart == 0) revert PlanInvalidSchedule(string.concat(name, " start is zero"));
         if (v.cliffEnd < v.cliffStart) {
             revert PlanInvalidSchedule(string.concat(name, " cliff end is before its start"));
         }
         if (v.vestingEnd <= v.cliffEnd) {
             revert PlanInvalidSchedule(string.concat(name, " vesting end is not after cliff end"));
+        }
+        if (v.cliffEnd != DateTime.addMonths(v.cliffStart, VESTING_CLIFF_MONTHS)) {
+            revert PlanInvalidSchedule(string.concat(name, " cliff is not 12 calendar months"));
+        }
+        if (v.vestingEnd != DateTime.addMonths(v.cliffEnd, VESTING_LINEAR_MONTHS)) {
+            revert PlanInvalidSchedule(string.concat(
+                    name, " linear vesting is not 36 calendar months"
+                ));
         }
     }
 
