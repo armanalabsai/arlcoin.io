@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "@arl/tokenomics": "0.1.0",
-    "@safe-global/safe-deployments": "1.37.63"
+    "@safe-global/safe-deployments": "1.37.63",
+    "viem": "2.56.9"
   },
   "scripts": {
     "test": "node --test \"test/**/*.test.ts\""

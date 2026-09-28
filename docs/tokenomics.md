@@ -124,7 +124,12 @@ These are kept separate everywhere, including the website:
   never hard-coded, and in particular it is not assumed to be 21,000,000 ARL or
   7,000,000 ARL (Public Launch plus Liquidity).
 
-The circulating supply methodology recorded on 2026-09-27 under the superseded
-M-2 decision (Safe-held and unvested tokens are not circulating; vested and
-releasable tokens and tokens released from custody are) must be re-confirmed
-for this model before it is published.
+Circulating supply follows the approved definition in the economic
+specification (section 5): total supply minus the balances of protocol-controlled
+or locked addresses. Vested but unreleased tokens are not circulating; the
+Founder's unlocked 2,000,000 ARL is circulating from TGE; the Founder Reserved
+100,000 ARL is not counted until its treatment is decided. The protocol-controlled
+and locked addresses are published in the deployment manifest
+(`packages/deploy/src/manifest.ts`), and `supply-cli.ts` reads the figure from the
+chain at a single block. At TGE it is exactly 2,000,000 ARL; the local rehearsal
+checks this on a real deployment.
