@@ -76,6 +76,18 @@ neither the zero address nor the deployer holds any role.
 
 The verifier asserts the genesis distribution, so it must run before any token moves.
 
+## Deployment manifest and circulating supply
+
+After a deployment, `packages/deploy/src/manifest-cli.ts <plan.json> <deployment.json>
+<manifest.json>` writes the official deployment manifest: every genesis and protocol-controlled
+address, and whether its balance counts as circulating (economic specification section 5). Only
+the Founder Unrestricted address is circulating; the Founder Reserved holder is not counted until
+its treatment is decided.
+
+`packages/deploy/src/supply-cli.ts <manifest.json> <rpc-url>` reads `totalSupply` and every
+manifest balance at one block (viem, MIT) and prints total, locked and circulating supply as exact
+base-unit and ARL strings. Circulating supply is never estimated or hard-coded.
+
 ## Local rehearsal
 
 ```
@@ -90,7 +102,9 @@ accounts) from the published `@safe-global/safe-smart-account` build, redeploys 
 code checks enforced, and confirms that a Founder Unrestricted recipient without code is rejected
 by both the plan and the verifier, as are a contract that is not a Safe proxy, a missing singleton
 list and Safes that point to an unlisted singleton. The rehearsal also checks that the singleton
-built from the official Safe artifact has the canonical v1.5.0 code hash. 45 negative cases in
+built from the official Safe artifact has the canonical v1.5.0 code hash. It builds the deployment
+manifest, checks that circulating supply is exactly 2,000,000 ARL at TGE, and that it changes
+only when tokens leave a locked address (not when the Founder sells). 45 negative cases in
 total, including plans of the old `arl-deploy-plan/3` schema and of the old
 `arl-deploy-plan/2` schema, a plan or config with `vesting.founder`, and a deployment record with a
 founder vesting wallet. Each must fail with its specific error, and rejected

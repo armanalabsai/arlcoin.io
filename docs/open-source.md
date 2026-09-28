@@ -34,6 +34,9 @@ OpenZeppelin v5.7.0 (released 2026-07-29) is newer, but its `audits/`
 directory has no v5.7 report and npm's `latest` tag still points to 5.6.1.
 Pin v5.6.1 and re-evaluate when a v5.7 audit is published.
 
+`wevm/viem` (MIT, npm 2.56.9) is adopted to read on-chain balances for the circulating-supply
+report.
+
 `safe-global/safe-deployments` (MIT, npm 1.37.63) is adopted for the canonical Safe v1.5.0
 singleton addresses and code hashes: off local Anvil, every Safe role must be a genuine Safe
 v1.5.0 proxy of a canonical singleton.
