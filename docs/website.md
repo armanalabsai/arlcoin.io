@@ -1,8 +1,10 @@
 # Website: the Interactive Core
 
-Source: [`apps/web`](../apps/web). Hosting: GitHub Pages (static export) at `arlcoin.io`, published
-by `.github/workflows/pages.yml` from `main`. The earlier Vercel deployment was disabled on
-2026-09-28 when the shared Vercel team hit its usage limit.
+Source: [`apps/web`](../apps/web). Hosting: Vercel serves `arlcoin.io` from `main` (the shared
+Vercel team was paused on 2026-09-28 for exceeding Hobby fair-use limits and received its one-time
+courtesy unblock the same day, valid 30 days). A static mirror is published to GitHub Pages at
+`https://gokturkalazdaghan-dot.github.io/ARLCOIN/` by `.github/workflows/pages.yml`, as a fallback
+that does not depend on Vercel.
 
 ## Concept
 
@@ -171,10 +173,10 @@ CI runs all of these in the `web` job, plus `npm audit --audit-level=high`.
   public repository; no secrets.
 - Static hosting cannot send response headers, so the security headers in `next.config.ts` apply
   only to server hosting; the referrer policy is also set as a meta tag.
-- One-time owner settings: repository Settings → Pages → Source "GitHub Actions", custom domain
-  `arlcoin.io`, "Enforce HTTPS"; and DNS for `arlcoin.io` pointed at GitHub Pages (apex A records
-  185.199.108.153, 185.199.109.153, 185.199.110.153, 185.199.111.153; `www` CNAME
-  `gokturkalazdaghan-dot.github.io`).
+- One-time owner setting: repository Settings → Pages → Source "GitHub Actions". No custom domain
+  is set there while `arlcoin.io` is served by Vercel; setting one (and pointing DNS at GitHub:
+  apex A 185.199.108.153–185.199.111.153, `www` CNAME `gokturkalazdaghan-dot.github.io`) moves
+  the domain to Pages with no code change.
 
 ## Known gaps
 
