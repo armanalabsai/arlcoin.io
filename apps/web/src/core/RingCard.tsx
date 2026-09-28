@@ -2,6 +2,7 @@
 
 import type { Metric, Status, VerificationStatus, Weight } from "@/content/types.ts";
 
+import { withBase } from "./basePath.ts";
 import { isPlainClick } from "./useCoreRoute.ts";
 
 export interface RingEntry {
@@ -97,7 +98,7 @@ export function RingCard({ entry, selected, onActivate }: Props) {
   const primary = entry.weight === "primary";
   return (
     <a
-      href={entry.href}
+      href={withBase(entry.href)}
       data-ring-card={entry.key}
       aria-current={selected ? "true" : undefined}
       onClick={(e) => {

@@ -3,6 +3,7 @@
 import { LAYERS, pathFor } from "@/content/registry.ts";
 import type { Layer } from "@/content/types.ts";
 
+import { withBase } from "./basePath.ts";
 import { isPlainClick } from "./useCoreRoute.ts";
 
 interface Props {
@@ -21,7 +22,7 @@ export function CoreNavigation({ current, onSelect, className = "" }: Props) {
           return (
             <li key={l.id}>
               <a
-                href={pathFor(l.id)}
+                href={withBase(pathFor(l.id))}
                 aria-current={active ? "page" : undefined}
                 onClick={(e) => {
                   if (!isPlainClick(e)) return;

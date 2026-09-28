@@ -6,6 +6,8 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { titleFor } from "@/content/meta.ts";
 import { HOME, parsePath, pathFor, type CoreRoute } from "@/content/registry.ts";
 
+import { stripBase, withBase } from "./basePath.ts";
+
 /**
  * The URL is the only source of truth for what the Core shows. Navigation uses
  * the native History API, which Next.js integrates with `usePathname`: the
@@ -33,15 +35,15 @@ export function useCoreRoute() {
   }, []);
 
   const navigate = useCallback((path: string, options?: { replace?: boolean }) => {
-    if (path === window.location.pathname) return;
-    if (options?.replace) window.history.replaceState(null, "", path);
-    else window.history.pushState(null, "", path);
+    if (path === stripBase(window.location.pathname)) return;
+    if (options?.replace) window.history.replaceState(null, "", withBase(path));
+    else window.history.pushState(null, "", withBase(path));
   }, []);
 
   const openCard = useCallback(
     (layerId: string, cardId: string) => {
       const target = pathFor(layerId, cardId);
-      const current = window.location.pathname;
+      const current = stripBase(window.location.pathname);
       openedFrom.current = current === pathFor(layerId) ? target : null;
       navigate(target);
     },
@@ -50,7 +52,7 @@ export function useCoreRoute() {
 
   const closeCard = useCallback(() => {
     if (!route.layer) return;
-    const here = window.location.pathname;
+    const here = stripBase(window.location.pathname);
     if (openedFrom.current === here) {
       openedFrom.current = null;
       window.history.back();
