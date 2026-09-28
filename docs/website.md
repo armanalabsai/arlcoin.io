@@ -164,7 +164,10 @@ CI runs all of these in the `web` job, plus `npm audit --audit-level=high`.
 - `ARL_STATIC_EXPORT=1 npm run build` writes a static site to `apps/web/out` (`output: "export"`,
   trailing slashes, unoptimized images). Every route is prerendered; nothing runs on a server.
 - `.github/workflows/pages.yml` builds it on every push to `main` that touches the site, adds
-  `CNAME` (`arlcoin.io`) and `.nojekyll`, and deploys with `actions/deploy-pages`. Free for a
+  `.nojekyll`, and deploys with `actions/deploy-pages`. `actions/configure-pages` reports the
+  sub-path the site is served under, passed to the build as `ARL_BASE_PATH` (Next.js `basePath`):
+  empty with the custom domain set, `/ARLCOIN` without it, so the site also works at
+  `https://gokturkalazdaghan-dot.github.io/ARLCOIN/` while DNS is not pointed at GitHub. Free for a
   public repository; no secrets.
 - Static hosting cannot send response headers, so the security headers in `next.config.ts` apply
   only to server hosting; the referrer policy is also set as a meta tag.

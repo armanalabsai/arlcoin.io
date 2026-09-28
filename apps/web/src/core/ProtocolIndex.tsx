@@ -3,6 +3,7 @@
 import { LAYERS, pathFor } from "@/content/registry.ts";
 import { SITE, TOKEN_DISCLAIMER } from "@/content/site.ts";
 
+import { withBase } from "./basePath.ts";
 import { isPlainClick } from "./useCoreRoute.ts";
 
 interface Props {
@@ -23,7 +24,7 @@ export function ProtocolIndex({ onOpen }: Props) {
             <section key={layer.id} className="flex flex-col gap-3">
               <h3 className="text-[14px] font-medium">
                 <a
-                  href={pathFor(layer.id)}
+                  href={withBase(pathFor(layer.id))}
                   onClick={(e) => {
                     if (!isPlainClick(e)) return;
                     e.preventDefault();
@@ -38,7 +39,7 @@ export function ProtocolIndex({ onOpen }: Props) {
                 {layer.cards.map((card) => (
                   <li key={card.id}>
                     <a
-                      href={pathFor(layer.id, card.id)}
+                      href={withBase(pathFor(layer.id, card.id))}
                       onClick={(e) => {
                         if (!isPlainClick(e)) return;
                         e.preventDefault();
