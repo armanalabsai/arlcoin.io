@@ -11,6 +11,7 @@ const NAV = [
   { href: "/staking", label: "Staking" },
   { href: "/payments", label: "Payments" },
   { href: "/network", label: "Network" },
+  { href: "/jobs", label: "Jobs" },
   { href: "/private", label: "Private" },
 ];
 
@@ -41,7 +42,7 @@ export function Header() {
         </div>
       </div>
       <nav
-        className="flex justify-around border-t border-line sm:hidden"
+        className="flex overflow-x-auto border-t border-line sm:hidden"
         aria-label="Main (mobile)"
       >
         {NAV.map((item) => (
@@ -49,7 +50,7 @@ export function Header() {
             key={item.href}
             href={item.href}
             aria-current={pathname === item.href ? "page" : undefined}
-            className={`flex-1 py-2 text-center text-sm ${pathname === item.href ? "text-primary" : "text-muted"}`}
+            className={`shrink-0 grow px-3 py-2 text-center text-sm ${pathname === item.href ? "text-primary" : "text-muted"}`}
           >
             {item.label}
           </Link>

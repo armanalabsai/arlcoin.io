@@ -7,10 +7,11 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ARLToken} from "../src/ARLToken.sol";
 import {ARLVestingWallet} from "../src/ARLVestingWallet.sol";
 import {ARLStakingRewards} from "../src/ARLStakingRewards.sol";
+import {ARLJobs} from "../src/ARLJobs.sol";
 
 /// @title Local development fixture for the ARL web app (apps/dapp)
-/// @notice Deploys ARL, one vesting wallet and the staking contract on a local Anvil chain so the
-/// app can be run and tested end to end. It is NOT the deployment path: the real deployment is
+/// @notice Deploys ARL, one vesting wallet, the staking contract and the jobs escrow on a local
+/// Anvil chain so the app can be run and tested end to end. It is NOT the deployment path: the real deployment is
 /// `DeployARL` with a reviewed plan. This script refuses every chain except local Anvil (31337).
 ///
 /// Every value here is a development placeholder, not an economic parameter: holders are Anvil's
@@ -42,7 +43,7 @@ contract DevDapp is Script {
 
     function run()
         external
-        returns (ARLToken token, ARLVestingWallet vesting, ARLStakingRewards staking)
+        returns (ARLToken token, ARLVestingWallet vesting, ARLStakingRewards staking, ARLJobs jobs)
     {
         if (block.chainid != LOCAL_CHAIN_ID) revert DevDappLocalOnly(block.chainid);
 
@@ -71,6 +72,7 @@ contract DevDapp is Script {
         );
         if (!token.approve(address(staking), REWARD_AMOUNT)) revert DevDappApproveFailed();
         staking.notifyRewardAmount(REWARD_AMOUNT);
+        jobs = new ARLJobs(IERC20(address(token)));
         vm.stopBroadcast();
 
         vm.writeJson(
@@ -83,6 +85,8 @@ contract DevDapp is Script {
                 vm.toString(address(vesting)),
                 '","staking":"',
                 vm.toString(address(staking)),
+                '","jobs":"',
+                vm.toString(address(jobs)),
                 '","user":"',
                 vm.toString(DEV_USER),
                 '"}'

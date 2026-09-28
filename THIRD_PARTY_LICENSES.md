@@ -25,6 +25,13 @@ Compiled ARL contracts include OpenZeppelin code under the MIT license
 | ---------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------ | ----------------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Synthetix `StakingRewards` (as modified in curvefi/unipool-fork) | `curvefi/unipool-fork`, `contracts/StakingRewards.sol` | `262a5747a32acd3bf7124bc21058d6905f86e22a` | MIT (Copyright (c) 2020 Synthetix; Copyright (c) 2020 Ben Hauser) | `contracts/src/ARLStakingRewards.sol` (MIT) | Solidity 0.8.36 and OpenZeppelin v5; owner, pause and token recovery removed; immutable rewards distributor; separate accounting of funded, accrued, paid and returned rewards so staking and reward token can both be ARL; return of unallocated rewards between periods; `stakeWithPermit` tolerant of front-run permits; reserve-aware `unallocatedRewards`; custom errors |
 
+ERC-8183 (Agentic Commerce) is implemented in `contracts/src/ARLJobs.sol` (Apache-2.0) from the
+specification and its reference `AgenticCommerce` contract in `ethereum/ERCs`,
+`ERCS/erc-8183.md`, commit `ddcc49ddd0b9d5774e8f73fe8a990ea2a35b0f99` (Draft; CC0-1.0, no notice
+required). ARL changes: fixed payment token, no owner, upgrade, fees or hooks, and the
+specification's `fund(jobId, expectedBudget)` and client-or-provider `setBudget`, which the
+reference contract does not follow.
+
 `ARLStakingRewards.sol` is MIT and reproduces, in its header, the copyright notices of both
 sources and the full MIT permission notice. The upstream file's own copy of that notice is cut off
 at its last line; the standard MIT text is used. The rest of the repository is Apache-2.0.

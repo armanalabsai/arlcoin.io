@@ -7,6 +7,7 @@ import type { Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
+import deployedContracts from "../../contracts/deployedContracts";
 import { CRS_DIR, E2E_RPC } from "./chain";
 
 const OTHER = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC";
@@ -21,6 +22,13 @@ async function rpc(method: string, params: unknown[] = []): Promise<unknown> {
     body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
   });
   return ((await res.json()) as { result?: unknown }).result;
+}
+
+/** ARL balance of `account`, read from the chain. */
+async function arlBalance(account: string): Promise<bigint> {
+  const data = `0x70a08231${account.slice(2).toLowerCase().padStart(64, "0")}`;
+  const to = deployedContracts[31337].ARLToken.address;
+  return BigInt((await rpc("eth_call", [{ to, data }, "latest"])) as string);
 }
 
 /** Reads a displayed ARL amount ("1,234.5 ARL") as a number. */
@@ -46,7 +54,7 @@ test("asks for a wallet before showing anything", async ({ page }) => {
 
 test("phone width: no sideways scroll, bottom navigation", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  for (const path of ["/", "/staking", "/vesting", "/payments", "/network", "/private"]) {
+  for (const path of ["/", "/staking", "/vesting", "/payments", "/network", "/jobs", "/private"]) {
     await connect(page, path);
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - window.innerWidth,
@@ -257,4 +265,84 @@ test("vesting: nothing before the cliff, then a release to the beneficiary", asy
   // Held plus released is read at one block: the total never double-counts a release.
   await expect(page.getByTestId("vesting-total")).toContainText("1,500,000");
   await page.screenshot({ path: "test-results/vesting.png", fullPage: true });
+});
+
+test("jobs: post, fund, deliver, accept and pay; reject and refund; refund after the deadline", async ({
+  page,
+}) => {
+  // The demo service registered on the Network screen is Anvil account 3; the screen can play it
+  // as the provider because the local node unlocks it. The client (account 1) is the evaluator.
+  const SERVICE = "0x90F79bf6EB2c4f870365E785982E1f101E93b906";
+  const CLIENT = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
+  const ESCROW = deployedContracts[31337].ARLJobs.address;
+  await connect(page, "/jobs");
+  await expect(page.getByTestId("jobs-empty")).toBeVisible();
+
+  const post = async (description: string, budget: string) => {
+    await page.getByTestId("job-provider").selectOption(SERVICE);
+    await page.getByTestId("job-description").fill(description);
+    await page.getByTestId("job-budget").fill(budget);
+    await page.getByTestId("job-hours").fill("24");
+    await page.getByTestId("job-post").click();
+  };
+
+  // Invalid input is refused before any transaction.
+  await page.getByTestId("job-description").fill("Summarise ten reports");
+  await page.getByTestId("job-budget").fill("0");
+  await page.getByTestId("job-post").click();
+  await expect(page.getByTestId("job-error")).toHaveText("Amount must be above zero");
+  await page.getByTestId("job-budget").fill("1");
+  await page.getByTestId("job-post").click();
+  await expect(page.getByTestId("job-error")).toHaveText(
+    "Choose a service or enter a provider address",
+  );
+  await expect(page.getByTestId("jobs-empty")).toBeVisible();
+
+  // Job 1: accepted, the provider is paid the budget.
+  await post("Summarise ten reports", "250");
+  await expect(page.getByTestId("jobs-status")).toHaveText(
+    "Job 1 posted. Fund it to start the work.",
+  );
+  await expect(page.getByTestId("job-1-status")).toHaveText("Open");
+  const clientBefore = await arlBalance(CLIENT);
+  const serviceBefore = await arlBalance(SERVICE);
+  await page.getByTestId("job-1-fund").click();
+  await expect(page.getByTestId("job-1-status")).toHaveText("Funded");
+  expect(await arlBalance(ESCROW)).toBe(250n * 10n ** 18n);
+  expect(await arlBalance(CLIENT)).toBe(clientBefore - 250n * 10n ** 18n);
+
+  await page.getByTestId("job-1-result").fill("https://example.com/summary.pdf");
+  await page.getByTestId("job-1-submit").click();
+  await expect(page.getByTestId("job-1-status")).toHaveText("Submitted");
+  await expect(page.getByText("Result reference")).toBeVisible();
+
+  await page.getByTestId("job-1-complete").click();
+  await expect(page.getByTestId("job-1-status")).toHaveText("Completed");
+  expect(await arlBalance(SERVICE)).toBe(serviceBefore + 250n * 10n ** 18n);
+  expect(await arlBalance(ESCROW)).toBe(0n);
+
+  // Job 2: the evaluator rejects the funded job, the client gets the budget back.
+  await post("Translate a contract", "40");
+  await expect(page.getByTestId("job-2-status")).toHaveText("Open");
+  await page.getByTestId("job-2-fund").click();
+  await expect(page.getByTestId("job-2-status")).toHaveText("Funded");
+  const beforeReject = await arlBalance(CLIENT);
+  await page.getByTestId("job-2-reject-evaluator").click();
+  await expect(page.getByTestId("job-2-status")).toHaveText("Rejected");
+  expect(await arlBalance(CLIENT)).toBe(beforeReject + 40n * 10n ** 18n);
+
+  // Job 3: nobody delivers before the deadline; anyone can return the budget to the client.
+  await post("Label 500 images", "15");
+  await expect(page.getByTestId("job-3-status")).toHaveText("Open");
+  await page.getByTestId("job-3-fund").click();
+  await expect(page.getByTestId("job-3-status")).toHaveText("Funded");
+  await expect(page.getByTestId("job-3-refund")).toHaveCount(0);
+  await rpc("evm_increaseTime", [25 * 3600]);
+  await rpc("evm_mine");
+  const beforeRefund = await arlBalance(CLIENT);
+  await page.getByTestId("job-3-refund").click();
+  await expect(page.getByTestId("job-3-status")).toHaveText("Expired");
+  expect(await arlBalance(CLIENT)).toBe(beforeRefund + 15n * 10n ** 18n);
+  expect(await arlBalance(ESCROW)).toBe(0n);
+  await page.screenshot({ path: "test-results/jobs.png", fullPage: true });
 });

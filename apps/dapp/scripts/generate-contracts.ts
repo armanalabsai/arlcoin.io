@@ -26,6 +26,7 @@ interface Deployment {
   token: string;
   vesting: string;
   staking: string;
+  jobs: string;
 }
 
 /** Compares content, not layout (the committed file is formatted by prettier). */
@@ -56,6 +57,7 @@ const contracts = {
   ARLToken: { address: deployment.token, abi: abi("ARLToken") },
   ARLVestingWallet: { address: deployment.vesting, abi: abi("ARLVestingWallet") },
   ARLStakingRewards: { address: deployment.staking, abi: abi("ARLStakingRewards") },
+  ARLJobs: { address: deployment.jobs, abi: abi("ARLJobs") },
 };
 
 const source = `/**

@@ -6,6 +6,7 @@ import {Test} from "forge-std/Test.sol";
 import {ARLToken} from "../../src/ARLToken.sol";
 import {ARLVestingWallet} from "../../src/ARLVestingWallet.sol";
 import {ARLStakingRewards} from "../../src/ARLStakingRewards.sol";
+import {ARLJobs} from "../../src/ARLJobs.sol";
 import {DevDapp} from "../../script/DevDapp.s.sol";
 
 /// @dev The web app's local fixture: local Anvil only, and the state the app expects.
@@ -26,7 +27,8 @@ contract DevDappTest is Test {
     function test_deploysTheAppFixture() public {
         vm.chainId(31_337);
         vm.warp(1_800_000_000);
-        (ARLToken token, ARLVestingWallet vesting, ARLStakingRewards staking) = new DevDapp().run();
+        (ARLToken token, ARLVestingWallet vesting, ARLStakingRewards staking, ARLJobs jobs) =
+            new DevDapp().run();
 
         assertEq(token.totalSupply(), 21_000_000 ether);
         assertEq(token.balanceOf(USER), 5_000_000 ether, "public launch to the demo user");
@@ -43,5 +45,8 @@ contract DevDappTest is Test {
         assertEq(token.balanceOf(address(staking)), 30_000 ether);
         assertEq(staking.periodFinish(), 1_800_000_000 + 30 days);
         assertGt(staking.rewardRate(), 0);
+
+        assertEq(address(jobs.paymentToken()), address(token));
+        assertEq(jobs.jobCounter(), 0);
     }
 }

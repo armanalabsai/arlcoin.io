@@ -18,6 +18,7 @@ changed is listed in [`THIRD_PARTY_LICENSES`](../THIRD_PARTY_LICENSES).
 | Network  | ERC-8004 IdentityRegistry                   | List ARL services; register a service with its price, payee and facilitator; take it offline; pay it                                                             |
 | Payments | `ARLToken`, Permit2, `x402UptoPermit2Proxy` | Set or remove the Permit2 payment limit; sign a ceiling (x402 `upto`); a demo service charges the metered amount, capped at the ceiling; cancel an authorization |
 | Private  | `ARLAnonymousSignal`                        | Create a private identity from a signature; join the demo group; vote in a poll with a zero-knowledge proof made in the browser                                  |
+| Jobs     | `ARLJobs`, `ARLToken`                       | Post a job for a service, fund it into escrow, deliver, accept and pay, reject and refund, refund after the deadline                                             |
 
 Design: Apple-style "liquid glass" in the website's night blue and amber. A fixed layer of soft
 light sits behind the content; panels, tiles, the top bar and menus are translucent glass over it
@@ -74,6 +75,10 @@ Privacy notes: bb.js downloads its public proving parameters (CRS) from Aztec's 
 both who joined and when a vote arrives in a very small group can guess more; the demo group is
 small on purpose and is not a privacy guarantee.
 
+## Jobs (ERC-8183)
+
+Escrowed work paid in ARL; see [jobs.md](jobs.md).
+
 ## Network (ERC-8004)
 
 ARL Network does not add a registry contract of its own. Providers register their services on
@@ -112,6 +117,7 @@ Anvil and refuses every other chain. Its values are development placeholders, no
 | Demo user (account 1) | Holds the Public Launch allocation; beneficiary of the vesting wallet                                                              |
 | Operator (account 0)  | Deployer, every other allocation, staking reward distributor                                                                       |
 | Vesting wallet        | Holds the Investors allocation; 5 minute cliff, linear over 30 days                                                                |
+| Jobs                  | `ARLJobs` with ARL as payment token, deployed by `DevDapp`; no jobs at start                                                       |
 | Staking               | 30,000 ARL reward period over 30 days, funded at deployment                                                                        |
 | Payments              | Canonical Permit2 and x402 upto proxy code; demo service account 3, facilitator account 4                                          |
 | Private               | `contracts/zk-script/DevZk.s.sol`: verifier and `ARLAnonymousSignal`; demo group 0 (3 members), admin account 0, relayer account 6 |
@@ -134,15 +140,15 @@ To use MetaMask instead, add the network `http://127.0.0.1:8545`, chain id 31337
 
 ## Tests
 
-| Suite      | Command            | Covers                                                                                                                                                                                                                                                                                                        |
-| ---------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unit       | `npm test`         | Amount parsing and formatting, vesting phase, reward share, network gate (Base Mainnet refused), poll options                                                                                                                                                                                                 |
-| End to end | `npm run test:e2e` | Production build in Chromium against a fresh Anvil chain: connect, send, stake / earn / claim / withdraw / exit, payment limit / signed ceiling / metered charge / cap / zero usage / cancel, anonymous vote proven in the browser and a second vote refused, vesting before and after the cliff, phone width |
-| Contracts  | `forge test`       | `DevDappTest`: the fixture refuses non-local chains and deploys the expected state                                                                                                                                                                                                                            |
+| Suite      | Command            | Covers                                                                                                                                                                                                                                                                                                                                    |
+| ---------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit       | `npm test`         | Amount parsing and formatting, vesting phase, reward share, network gate (Base Mainnet refused), poll options                                                                                                                                                                                                                             |
+| End to end | `npm run test:e2e` | Production build in Chromium against a fresh Anvil chain: connect, send, stake / earn / claim / withdraw / exit, payment limit / signed ceiling / metered charge / cap / zero usage / cancel, anonymous vote proven in the browser and a second vote refused, jobs (pay, refund, expiry), vesting before and after the cliff, phone width |
+| Contracts  | `forge test`       | `DevDappTest`: the fixture refuses non-local chains and deploys the expected state                                                                                                                                                                                                                                                        |
 
 ## Not yet
 
 - Base Sepolia: needs the contracts deployed there (owner approval) and their addresses.
 - Mobile wallets over WalletConnect: needs a WalletConnect project id (a free account; owner
   decision).
-- A real (server-side) facilitator for services, and the Compute screen.
+- A real (server-side) facilitator for services.

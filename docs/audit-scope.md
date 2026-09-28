@@ -124,6 +124,8 @@ finish within 120 s. The same property is covered by fuzz tests and the
 
 - OpenZeppelin Contracts v5.6.1 and Safe v1.5.0 themselves (audited upstream; used unmodified).
 - The website (`apps/web`) and documentation.
+- Contracts not planned for the first deployment, reviewed separately later: `ARLJobs`
+  (ERC-8183 job escrow, [jobs.md](jobs.md)) and `ARLAnonymousSignal` ([zk-privacy.md](zk-privacy.md)).
 - Economic parameters that are not yet decided: vesting start, launch amount, claim window,
   per-address limits, liquidity parameters.
 
