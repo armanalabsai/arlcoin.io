@@ -6,7 +6,7 @@ import { bytesToHex, utf8ToBytes } from "@noble/hashes/utils.js";
 // to the inbox it was created for. An empty key keeps the forms closed.
 export const FORMS = {
   endpoint: "https://api.web3forms.com/submit",
-  accessKey: process.env.NEXT_PUBLIC_WEB3FORMS_KEY ?? "",
+  accessKey: process.env.NEXT_PUBLIC_WEB3FORMS_KEY ?? "8efbfeeb-804a-489a-aca7-da9efd73c823",
   privacyPolicy: "https://web3forms.com/privacy",
 } as const;
 
