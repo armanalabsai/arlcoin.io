@@ -12,6 +12,7 @@ import { CoreNavigation } from "./CoreNavigation.tsx";
 import { DetailSurface } from "./DetailSurface.tsx";
 import { Orbit } from "./Orbit.tsx";
 import { ProtocolIndex } from "./ProtocolIndex.tsx";
+import { SiteLinks } from "@/site/SiteLinks.tsx";
 import type { RingEntry } from "./RingCard.tsx";
 import { isPlainClick, useCoreRoute } from "./useCoreRoute.ts";
 
@@ -130,13 +131,7 @@ export function InteractiveCore() {
             onSelect={(id) => navigate(pathFor(id))}
             className="hidden md:block"
           />
-          <a
-            href={SITE.repository}
-            rel="noopener noreferrer"
-            className="inline-flex h-8 items-center rounded-(--radius-control) border border-line-strong px-3 text-[13px] text-fg-muted transition-colors hover:border-[rgb(255_255_255/0.28)] hover:text-fg"
-          >
-            GitHub
-          </a>
+          <SiteLinks />
         </div>
       </header>
 

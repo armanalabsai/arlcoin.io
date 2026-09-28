@@ -8,10 +8,15 @@ export const SITE = {
   /** Short line under the Core on the overview. */
   tagline: "The native utility token planned for AI and compute services. Not yet deployed.",
   repository: "https://github.com/gokturkalazdaghan-dot/ARLCOIN",
+  /** Public contact address of the team. */
+  email: "armanalabsai@gmail.com",
 } as const;
 
 export const repoDoc = (path: string): `https://${string}` =>
   `https://github.com/gokturkalazdaghan-dot/ARLCOIN/blob/main/${path}`;
+
+/** Pages outside the Core. */
+export const SITE_PAGES = ["/whitelist", "/contact", "/privacy"] as const;
 
 export const NOT_DEPLOYED = "Not yet deployed";
 
