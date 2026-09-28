@@ -24,15 +24,16 @@ Nothing is deployed.
 ARLCOIN/
 ├── packages/
 │   ├── tokenomics/        Allocation table, validation, share math
-│   └── deploy/            Deployment plan builder (UTC calendar arithmetic, validation)
+│   ├── deploy/            Deployment plan builder, deployment manifest, circulating supply
+│   └── monetary/          ARL Core monetary standard: reference implementation and test vectors
 ├── contracts/             Foundry project (solc 0.8.36)
 │   ├── src/               ARL-specific contracts only
 │   ├── test/              unit, fuzz, invariant and deployment tests
 │   ├── script/            deployment, plan validation and post-deployment verification
 │   ├── deploy/config/     public deployment configs (local only so far)
-│   └── lib/               OpenZeppelin v5.6.1, forge-std v1.16.2 (pinned submodules)
+│   └── lib/               OpenZeppelin v5.6.1, forge-std v1.16.2, solidity-datetime v2.2.0 (pinned submodules)
 ├── apps/
-│   └── web/               ARL website (not created)
+│   └── web/               ARL website
 └── docs/
 ```
 
