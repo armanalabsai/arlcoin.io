@@ -345,4 +345,62 @@ impersonate "$LIQUIDITY"
 send_from "$LIQUIDITY" "$BEEF" 1
 expect "circulating after 1 unit leaves liquidity" "2100000000000000000000001" "$(supply circulatingSupply)"
 
+log "Public Launch Merkle claim distributor (economic specification section 7)"
+# The claim list is the placeholder fixture the contract tests use; nobody holds its keys.
+LIST="$REHEARSAL/distribution.json"
+node "$ROOT/packages/deploy/src/distribution-cli.ts" test/fixtures/distribution-input.json "$LIST" \
+  || die "claim list rejected"
+DISTRIBUTOR_RECORD="deploy/deployments/31337-distributor.json"
+NOW="$(cast block latest --field timestamp --rpc-url "$RPC")"
+CLAIM_END=$((NOW + 30 * 86400))
+forge_distributor() {
+  ARL_PLAN="$PLAN" ARL_DEPLOYMENT="$DEPLOYMENT" ARL_DISTRIBUTION="$1" ARL_CLAIM_END="$CLAIM_END" \
+    ARL_DISTRIBUTOR="$2" forge script script/DeployDistributor.s.sol:DeployDistributor \
+    --rpc-url "$RPC" --broadcast --unlocked --sender "$DEPLOYER" --slow
+}
+listval() { node -e "console.log(require('./$LIST').$1)"; }
+node -e "const l=require('./$LIST'); l.allocation='liquidity'; require('fs').writeFileSync('$REHEARSAL/list-liquidity.json', JSON.stringify(l));"
+BEFORE="$(nonce)"
+must_fail "distributor funded by another allocation" "DistributorWrongAllocation\\(\"liquidity\"" \
+  forge_distributor "$REHEARSAL/list-liquidity.json" "$REHEARSAL/x.json"
+[[ "$(nonce)" == "$BEFORE" ]] || die "a rejected distributor deployment broadcast a transaction"
+forge_distributor "$LIST" "$DISTRIBUTOR_RECORD" >/dev/null || die "distributor deployment failed"
+DISTRIBUTOR="$(node -e "console.log(require('./$DISTRIBUTOR_RECORD').distributor)")"
+LAUNCH="$(planval recipients.publicLaunch)"
+TOTAL="$(listval total)"
+expect "distributor merkle root" "$(listval merkleRoot)" "$(cast call "$DISTRIBUTOR" 'merkleRoot()(bytes32)' --rpc-url "$RPC")"
+expect "distributor returns remainder to" "$(cast to-check-sum-address "$LAUNCH")" \
+  "$(cast call "$DISTRIBUTOR" 'returnTo()(address)' --rpc-url "$RPC")"
+expect "distributor claim end" "$CLAIM_END" "$(num "$DISTRIBUTOR" 'claimEnd()(uint64)')"
+impersonate "$LAUNCH"
+send_from "$LAUNCH" "$DISTRIBUTOR" "$TOTAL"
+node "$ROOT/packages/deploy/src/manifest-cli.ts" "$PLAN" "$DEPLOYMENT" "$MANIFEST" "$DISTRIBUTOR_RECORD" \
+  || die "manifest with distributor failed"
+expect "circulating after funding the distributor" "2100000000000000000000001" "$(supply circulatingSupply)"
+CLAIMANT="$(node -e "console.log(Object.keys(require('./$LIST').claims)[4])")"
+claim() {
+  local c
+  c="$(node -e "const x=require('./$LIST').claims['$CLAIMANT']; console.log([x.index, x.amount, '['+x.proof.join(',')+']'].join(' '))")"
+  # shellcheck disable=SC2086
+  cast send "$DISTRIBUTOR" 'claim(uint256,address,uint256,bytes32[])' $(cut -d' ' -f1 <<<"$c") \
+    "$CLAIMANT" $(cut -d' ' -f2 <<<"$c") $(cut -d' ' -f3 <<<"$c") \
+    --unlocked --from "$DEPLOYER" --rpc-url "$RPC"
+}
+claim >/dev/null || die "claim failed"
+CLAIMED="$(listval "claims['$CLAIMANT'].amount")"
+expect "claimant balance" "$CLAIMED" "$(balance "$CLAIMANT")"
+expect "circulating after one claim" "$(node -e "console.log((2100000000000000000000001n + ${CLAIMED}n).toString())")" \
+  "$(supply circulatingSupply)"
+# The RPC reports the custom error by selector: DistributorAlreadyClaimed(uint256).
+must_fail "claim twice" "$(cast sig 'DistributorAlreadyClaimed(uint256)')" claim
+cast rpc evm_increaseTime $((30 * 86400)) --rpc-url "$RPC" >/dev/null
+cast rpc evm_mine --rpc-url "$RPC" >/dev/null
+LAUNCH_BEFORE="$(balance "$LAUNCH")"
+cast send "$DISTRIBUTOR" 'sweep()' --unlocked --from "$DEPLOYER" --rpc-url "$RPC" >/dev/null || die "sweep failed"
+expect "distributor empty after sweep" "0" "$(balance "$DISTRIBUTOR")"
+expect "remainder returned to the Public Launch Safe" \
+  "$(node -e "console.log((${LAUNCH_BEFORE}n + ${TOTAL}n - ${CLAIMED}n).toString())")" "$(balance "$LAUNCH")"
+expect "circulating after sweep" "$(node -e "console.log((2100000000000000000000001n + ${CLAIMED}n).toString())")" \
+  "$(supply circulatingSupply)"
+
 log "REHEARSAL PASSED: deployed, verified, and $NEGATIVE negative cases rejected"

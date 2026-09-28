@@ -244,11 +244,24 @@ APPROVED / LOCKED:
 - Any launch mechanism needs separate legal approval and separate
   implementation approval before it is built or announced.
 
-TBD / REQUIRES CTO DECISION: the mechanism (for example a sale, auction or other
-distribution), the operational split between public access, launch
-distribution and launch incentives, the amount distributed at TGE, any
-per-address limits, the tranche schedule for the remainder, any vesting for
-participants, and the policy for the unused remainder.
+APPROVED / LOCKED (CTO decision of 2026-09-28, legal approval confirmed by the
+CTO): the launch mechanism is a **Merkle claim**. A fixed, published list of
+accounts and amounts is committed on-chain as a Merkle root; each listed account
+can claim its amount once, within a claim window. No funds are collected from
+participants. After the window closes, the unclaimed balance returns to the
+Public Launch Safe; nothing is burned.
+
+IMPLEMENTATION CONSTRAINT: `ARLMerkleDistributor` implements the mechanism. It
+has no owner, admin, pause or upgrade path; the list, the claim window and the
+return address are fixed at deployment. `DeployDistributor` refuses every chain
+except local Anvil until the launch parameters below are approved
+(`LAUNCH_PARAMETERS_APPROVED = false`).
+
+TBD / REQUIRES CTO DECISION: the eligibility rules for the list, the operational
+split between public access, launch distribution and launch incentives, the
+amount distributed at TGE, any per-address limits, the claim window, the
+tranche schedule for the remainder, any vesting for participants, and the
+policy for the unused remainder.
 
 ## 8. Early User Policy
 
@@ -375,8 +388,9 @@ operations.
 
 1. Vesting start for investors and strategic partnerships (TGE assumed, not
    confirmed).
-2. Public Launch: mechanism, operational split, TGE amount, limits, tranches,
-   unused remainder, legal review.
+2. Public Launch: eligibility rules for the claim list, operational split, TGE
+   amount, limits, claim window, tranches, unused remainder (the mechanism, a
+   Merkle claim, is approved; section 7).
 3. Early Users: epochs, budgets, formula, eligibility, Sybil controls, limits,
    referral rules, claim mechanism and contract, vesting of claims.
 4. Staking: emission curve, duration, APY target, revenue supplement, contract.

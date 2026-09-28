@@ -152,7 +152,12 @@ export const ALLOCATIONS: readonly Allocation[] = deepFreeze([
     name: "Public Launch",
     amount: 5_000_000,
     purpose: "Initial market distribution. No sale is scheduled.",
-    release: { kind: "program", description: "Terms set before any launch.", status: "undecided" },
+    release: {
+      kind: "program",
+      description:
+        "Distributed through a Merkle claim from a published list (approved mechanism). The amount at TGE, per-address limits, the claim window and the remainder policy are not defined.",
+      status: "undecided",
+    },
     custody: { holder: "safe" },
   },
   {

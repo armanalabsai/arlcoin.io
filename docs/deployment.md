@@ -86,6 +86,24 @@ the Founder Safe is circulating.
 manifest balance at one block (viem, MIT) and prints total, locked and circulating supply as exact
 base-unit and ARL strings. Circulating supply is never estimated or hard-coded.
 
+## Public Launch claim distributor
+
+The approved Public Launch mechanism is a Merkle claim (economic specification section 7).
+
+1. Build the list: `node packages/deploy/src/distribution-cli.ts <input.json> <distribution.json>`.
+   The input (`arl-distribution-input/1`) names the funding allocation (`publicLaunch` only), a
+   budget and an optional per-address limit in base units, and the `{account, amount}` entries.
+   The output (`arl-distribution/1`) holds the Merkle root, the total to fund, and every account's
+   index, amount and proof; it is re-verified from its own claims before it is written.
+2. Deploy: `DeployDistributor` (`ARL_PLAN`, `ARL_DEPLOYMENT`, `ARL_DISTRIBUTION`, `ARL_CLAIM_END`,
+   `ARL_DISTRIBUTOR`). It checks the list's schema, allocation and total, and fixes `returnTo` to
+   the plan's Public Launch Safe. Off local Anvil it refuses to run until the launch parameters
+   are approved (`LAUNCH_PARAMETERS_APPROVED = false`).
+3. Fund: the Public Launch Safe transfers the list total to the distributor.
+4. Publish the list and add the distributor record to the manifest
+   (`manifest-cli.ts <plan> <deployment> <manifest> <distributor.json>`); its unclaimed balance
+   is not circulating.
+
 ## Local rehearsal
 
 ```
@@ -102,7 +120,9 @@ by both the plan and the verifier, as are a contract that is not a Safe proxy, a
 list and Safes that point to an unlisted singleton. The rehearsal also checks that the singleton
 built from the official Safe artifact has the canonical v1.5.0 code hash. It builds the deployment
 manifest, checks that circulating supply is exactly 2,100,000 ARL at TGE, and that it changes
-only when tokens leave a locked address (not when the Founder sells). 46 negative cases in
+only when tokens leave a locked address (not when the Founder sells). It then deploys a Public
+Launch claim distributor from the test list, funds it, claims one entry and sweeps the rest
+back after the window, checking circulating supply at each step. 48 negative cases in
 total, including a plan that still splits the Founder allocation, plans of the old
 `arl-deploy-plan/4` and `arl-deploy-plan/3` schemas and of the old
 `arl-deploy-plan/2` schema, a plan or config with `vesting.founder`, and a deployment record with a

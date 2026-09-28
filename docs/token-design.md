@@ -181,8 +181,28 @@ addresses exist yet.
 
 Public Launch, Community & Staking, Ecosystem & Growth, Liquidity, Early Users
 and Grants / Bug Bounty are minted directly to their own dedicated Safes; the
-Team allocation is minted to the team pool Safe. Their release programs are not
-defined. See [`tokenomics.md`](tokenomics.md#custody).
+Team allocation is minted to the team pool Safe. See
+[`tokenomics.md`](tokenomics.md#custody).
+
+### Public Launch claim distributor
+
+The approved Public Launch mechanism is a Merkle claim (economic specification
+section 7). `ARLMerkleDistributor` holds a fixed Merkle root of `(index,
+account, amount)` entries, encoded as an OpenZeppelin `StandardMerkleTree`
+(double-hashed leaves). Each entry can be claimed once before `claimEnd`; anyone
+may submit a claim, but the tokens always go to the listed account. After
+`claimEnd`, `sweep` returns the whole remaining balance to `returnTo`, the Public
+Launch Safe. There is no owner, admin, pause, upgrade or root change. The
+distributor is funded by a separate transfer from the Public Launch Safe; a
+claim the balance cannot cover reverts and stays claimable.
+
+The Merkle proof check is OpenZeppelin `MerkleProof`, the claimed flags are
+OpenZeppelin `BitMaps`, and transfers use `SafeERC20`, all unmodified.
+`packages/deploy` builds the list with `@openzeppelin/merkle-tree`
+(`distribution-cli.ts`), rejecting duplicate or zero addresses, amounts above a
+per-address limit, and totals above the budget or the 5,000,000 ARL Public
+Launch allocation. The other programs have no approved claim mechanism, and
+their lists are refused.
 
 ## ERC20Permit
 

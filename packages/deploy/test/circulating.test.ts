@@ -83,6 +83,22 @@ describe("deployment manifest", () => {
     assert.throws(() => buildManifest(plan, { ...deployment, token: "0x1234" }), ManifestError);
   });
 
+  it("lists a claim distributor as protocol-controlled", () => {
+    const distributor = "0x000000000000000000000000000000000000d157";
+    const m = buildManifest(plan, deployment, [{ chainId: 31337, distributor }]);
+    const h = m.holders.find((x) => x.address === distributor);
+    assert.ok(h);
+    assert.equal(h.circulating, false);
+    assert.throws(
+      () => buildManifest(plan, deployment, [{ chainId: 1, distributor }]),
+      ManifestError,
+    );
+    assert.throws(
+      () => buildManifest(plan, deployment, [{ chainId: 31337, distributor: deployment.timelock }]),
+      /same address/,
+    );
+  });
+
   it("rejects an address used for two roles", () => {
     const reused = { ...deployment, timelock: deployment.investorsVesting };
     assert.throws(

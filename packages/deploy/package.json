@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@arl/tokenomics": "0.1.0",
+    "@openzeppelin/merkle-tree": "1.0.8",
     "@safe-global/safe-deployments": "1.37.63",
     "viem": "2.56.9"
   },
