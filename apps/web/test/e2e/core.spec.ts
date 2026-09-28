@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 import { allPaths } from "../../src/content/registry.ts";
+import { SITE_PAGES } from "../../src/content/site.ts";
 
 // Behaviour of the Interactive Core against the production build.
 
@@ -112,7 +113,8 @@ test("detail content is in the server-rendered HTML", async ({ request }) => {
 
 test("sitemap lists every route and robots points to it", async ({ request }) => {
   const sitemap = await (await request.get("/sitemap.xml")).text();
-  expect(sitemap.match(/<loc>/g)).toHaveLength(allPaths().length);
+  expect(sitemap.match(/<loc>/g)).toHaveLength(allPaths().length + SITE_PAGES.length);
+  for (const path of SITE_PAGES) expect(sitemap).toContain(`<loc>https://arlcoin.io${path}</loc>`);
   const robots = await (await request.get("/robots.txt")).text();
   expect(robots).toContain("Sitemap: https://arlcoin.io/sitemap.xml");
   expect((await request.get("/core/unknown")).status()).toBe(404);
