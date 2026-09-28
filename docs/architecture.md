@@ -1,7 +1,7 @@
 # ARL Protocol — Architecture
 
-Status: Phase 1 (token, vesting, treasury contracts) implemented and tested.
-Nothing is deployed.
+Status: Phase 1 (token, vesting, treasury contracts) and the Public Launch
+Merkle claim distributor are implemented and tested. Nothing is deployed.
 
 ## Repository
 
@@ -24,7 +24,7 @@ Nothing is deployed.
 ARLCOIN/
 ├── packages/
 │   ├── tokenomics/        Allocation table, validation, share math
-│   ├── deploy/            Deployment plan builder, deployment manifest, circulating supply
+│   ├── deploy/            Deployment plan builder, manifest, circulating supply, claim lists
 │   └── monetary/          ARL Core monetary standard: reference implementation and test vectors
 ├── contracts/             Foundry project (solc 0.8.36)
 │   ├── src/               ARL-specific contracts only

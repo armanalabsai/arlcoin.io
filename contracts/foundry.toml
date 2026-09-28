@@ -16,10 +16,11 @@ remappings = [
   "solidity-datetime/=lib/solidity-datetime/contracts/",
 ]
 # Never read or write outside the project.
-# Scripts read deployment plans and write deployed addresses; nothing else.
+# Scripts read deployment plans and write deployed addresses; tests read their fixtures.
 fs_permissions = [
   { access = "read", path = "./deploy" },
   { access = "read-write", path = "./deploy/deployments" },
+  { access = "read", path = "./test/fixtures" },
 ]
 # Upstream OpenZeppelin v5.6.1 ECDSA uses `error` as an identifier; solc 0.8.36 warns it will
 # become a keyword (6335). Upstream code is not edited, so silence warnings from lib/ only.

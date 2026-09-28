@@ -51,7 +51,21 @@ function requireAddress(value: unknown, field: string): string {
 
 const SAFE = "protocol-controlled Safe";
 
-export function buildManifest(plan: DeployPlan, deployment: DeploymentRecord): DeploymentManifest {
+/** Address written by `DeployDistributor` for a Merkle claim distributor. */
+export interface DistributorRecord {
+  chainId: number;
+  distributor: string;
+}
+
+/**
+ * @param distributors Merkle claim distributors funded from an allocation. Their unclaimed
+ *   balance is protocol-controlled, so it is not circulating (economic specification section 5).
+ */
+export function buildManifest(
+  plan: DeployPlan,
+  deployment: DeploymentRecord,
+  distributors: readonly DistributorRecord[] = [],
+): DeploymentManifest {
   if (deployment.chainId !== plan.chainId) {
     fail(`deployment chainId ${String(deployment.chainId)} differs from plan chainId`);
   }
@@ -90,6 +104,15 @@ export function buildManifest(plan: DeployPlan, deployment: DeploymentRecord): D
       circulating: true,
       reason: "unlocked at TGE; not a protocol-controlled address",
     },
+    ...distributors.map((d, i): ManifestHolder => {
+      if (d.chainId !== plan.chainId) fail(`distributor ${String(i)}: wrong chainId`);
+      return {
+        role: `claimDistributor${String(i)}`,
+        address: requireAddress(d.distributor, `distributors[${String(i)}].distributor`),
+        circulating: false,
+        reason: "claim contract (unclaimed balance)",
+      };
+    }),
   ];
 
   const seen = new Map<string, string>();

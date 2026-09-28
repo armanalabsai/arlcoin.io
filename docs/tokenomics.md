@@ -71,7 +71,7 @@ in `packages/tokenomics`. Every Safe is dedicated to one allocation.
 
 | Allocation                    | Rule                                                                                                                                                | Status                              |
 | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| Public Launch                 | Terms set before any launch                                                                                                                         | undecided                           |
+| Public Launch                 | Merkle claim from a published list (approved mechanism); amount at TGE, limits, claim window and remainder policy not defined                       | mechanism approved; terms undecided |
 | Community & Staking           | Paid from this allocation or protocol revenue; never new issuance. Rates and schedule not defined                                                   | undecided                           |
 | Ecosystem & Growth            | Programs tied to genuine, verifiable activity. Rules, rates and schedule not defined                                                                | undecided                           |
 | Strategic Partnerships        | Vesting wallet: 0% at TGE, 12-month cliff, 36 months linear; start date TBD. Not an unconditional pool: partnership → milestone → vesting → release | approved (start: undecided)         |

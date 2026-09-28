@@ -37,6 +37,10 @@ Pin v5.6.1 and re-evaluate when a v5.7 audit is published.
 `wevm/viem` (MIT, npm 2.56.9) is adopted to read on-chain balances for the circulating-supply
 report.
 
+`OpenZeppelin/merkle-tree` (MIT, npm 1.0.8) is adopted to build Public Launch claim lists in the
+same `StandardMerkleTree` encoding that `ARLMerkleDistributor` verifies with OpenZeppelin
+`MerkleProof`.
+
 `safe-global/safe-deployments` (MIT, npm 1.37.63) is adopted for the canonical Safe v1.5.0
 singleton addresses and code hashes: off local Anvil, every Safe role must be a genuine Safe
 v1.5.0 proxy of a canonical singleton.
