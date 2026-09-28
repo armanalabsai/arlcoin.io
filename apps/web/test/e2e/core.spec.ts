@@ -46,7 +46,7 @@ test("the Core cycles through the layers in place", async ({ page }) => {
   await mark(page);
   await core(page).click();
   await expect(page).toHaveURL(/\/core\/team$/);
-  await expect(page.getByRole("link", { name: /Joon-Ho Park/ }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: /FoundArk/ }).first()).toBeVisible();
   await core(page).click();
   await expect(page).toHaveURL(/\/core\/token$/);
   await expect(page).toHaveTitle("Token · ARL");
@@ -126,12 +126,12 @@ test("keyboard: Enter on the Core, Space on a card, arrows between cards", async
   const first = page.locator('[data-ring-card="foundark"]');
   await first.focus();
   await page.keyboard.press("ArrowRight");
-  await expect(page.locator('[data-ring-card="joon-ho-park"]')).toBeFocused();
+  await expect(page.locator('[data-ring-card="team-growing"]')).toBeFocused();
   await page.keyboard.press(" ");
-  await expect(page).toHaveURL(/\/core\/team\/joon-ho-park$/);
+  await expect(page).toHaveURL(/\/core\/team\/team-growing$/);
   await expect(surface(page)).toBeVisible();
   await page.keyboard.press("Escape");
-  await expect(page.locator('[data-ring-card="joon-ho-park"]')).toBeFocused();
+  await expect(page.locator('[data-ring-card="team-growing"]')).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(page).toHaveURL(/\/$/);
 });
@@ -191,24 +191,24 @@ test("deployment-dependent token values are never given a number", async ({ page
   }
 });
 
-test("team layer: 12 profiles around the Core, unverified details withheld", async ({ page }) => {
+test("team layer: the founder and the team-growing note, unverified details withheld", async ({
+  page,
+}) => {
   await page.goto("/");
   await core(page).click();
   await expect(page).toHaveURL(/\/core\/team$/);
   await expect(core(page)).toBeVisible();
-  await expect(page.locator("[data-ring-card]")).toHaveCount(12);
+  await expect(page.locator("[data-ring-card]")).toHaveCount(2);
   await expect(page.locator("img")).toHaveCount(0);
 
-  await page.locator('[data-ring-card="joon-ho-park"]').click();
-  await expect(page).toHaveURL(/\/core\/team\/joon-ho-park$/);
-  await expect(surface(page).getByRole("heading", { name: "Joon-Ho Park" })).toBeVisible();
-  await expect(surface(page)).toContainText("CTO / Protocol Architect");
+  await page.locator('[data-ring-card="foundark"]').click();
+  await expect(page).toHaveURL(/\/core\/team\/foundark$/);
+  await expect(surface(page).getByRole("heading", { name: "FoundArk" })).toBeVisible();
   await expect(surface(page)).toContainText("Profile not yet verified");
-  await expect(surface(page)).not.toContainText("KAIST");
-  await expect(surface(page)).not.toContainText("Bitcoin Core");
+  await expect(surface(page)).not.toContainText("AGI Core");
   await expect(surface(page).getByRole("link")).toHaveCount(0);
 
   await page.getByRole("button", { name: "Back to Team" }).click();
   await expect(page).toHaveURL(/\/core\/team$/);
-  await expect(page.locator('[data-ring-card="joon-ho-park"]')).toBeFocused();
+  await expect(page.locator('[data-ring-card="foundark"]')).toBeFocused();
 });

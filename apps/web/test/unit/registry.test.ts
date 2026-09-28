@@ -170,12 +170,18 @@ describe("team publishing rule", () => {
   const INSTITUTIONS =
     /Bitcoin Core|MIT\b|Stanford|KAIST|Harvard|Yale|Carnegie|Berkeley|Columbia|Barcelona|Madrid|Valencia|AGI Core|University|School|Laboratory|B\.S\.|M\.S\.|Doctorate/;
 
-  it("builds the team layer from all 12 registry profiles, in order", () => {
-    assert.equal(TEAM.length, 12);
+  it("lists only the founder, then the team-growing note", () => {
+    assert.deepEqual(
+      TEAM.map((p) => p.id),
+      ["foundark"],
+    );
     assert.deepEqual(
       teamLayer?.cards.map((c) => c.id),
-      TEAM.map((p) => p.id),
+      ["foundark", "team-growing"],
     );
+    const growing = teamLayer?.cards.find((c) => c.id === "team-growing");
+    assert.equal(growing?.person, undefined);
+    assert.match(growing?.detail.summary ?? "", /only once .* verified/);
   });
 
   it("gives every profile a verification status", () => {

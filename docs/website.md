@@ -176,6 +176,6 @@ Vercel preparation, for when deployment is approved:
 
 - No approved ARL brand asset exists yet. `app/icon.svg` is a placeholder derived from the Core
   ring, and the wordmark is set in type.
-- All 12 team profiles are unverified, so their education and career details are withheld.
+- The team layer lists the founder (unverified, so education and career details are withheld) and a note that new members are published only after verification.
 - No live data provider exists yet. The `Metric` model and `DataSourceId` are the extension
   point.
