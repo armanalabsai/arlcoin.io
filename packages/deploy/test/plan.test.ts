@@ -10,7 +10,6 @@ import {
   addCalendarMonths,
   buildPlan,
   canonicalSafeSingletons,
-  founderReserveGate,
   type DeployConfig,
 } from "../src/plan.ts";
 
@@ -47,26 +46,19 @@ describe("buildPlan: valid local config", () => {
     assert.equal("ecosystemReserve" in plan.allocations, false);
   });
 
-  it("uses schema arl-deploy-plan/4", () => {
-    assert.equal(PLAN_SCHEMA, "arl-deploy-plan/4");
-    assert.equal(plan.schema, "arl-deploy-plan/4");
+  it("uses schema arl-deploy-plan/5", () => {
+    assert.equal(PLAN_SCHEMA, "arl-deploy-plan/5");
+    assert.equal(plan.schema, "arl-deploy-plan/5");
   });
 
   it("lists no Safe singletons for the local placeholder plan", () => {
     assert.deepEqual(plan.safe, { singletons: [] });
   });
 
-  it("splits the founder allocation into 2,000,000 unrestricted and 100,000 reserved", () => {
-    const unit = 10n ** 18n;
-    assert.equal(plan.allocations.founder, (2_100_000n * unit).toString());
-    assert.deepEqual(plan.founderTranches, {
-      unrestricted: (2_000_000n * unit).toString(),
-      reserved: (100_000n * unit).toString(),
-    });
-    assert.equal(
-      BigInt(plan.founderTranches.unrestricted) + BigInt(plan.founderTranches.reserved),
-      BigInt(plan.allocations.founder),
-    );
+  it("mints the whole 2,100,000 ARL founder allocation to one Founder Safe, unsplit", () => {
+    assert.equal(plan.allocations.founder, (2_100_000n * 10n ** 18n).toString());
+    assert.equal(plan.recipients.founder, LOCAL.recipients.founder);
+    assert.equal("founderTranches" in plan, false);
   });
 
   it("has no founder vesting plan", () => {
@@ -91,14 +83,13 @@ describe("buildPlan: valid local config", () => {
     assert.notEqual(plan.treasury.guardian.toLowerCase(), plan.treasury.safe.toLowerCase());
   });
 
-  it("names the nine direct recipients, including both founder tranches", () => {
+  it("names the eight direct recipients, including the Founder Safe", () => {
     assert.deepEqual(Object.keys(plan.recipients), [
       "publicLaunch",
       "communityStaking",
       "ecosystemGrowth",
       "liquidity",
-      "founderUnrestricted",
-      "founderReserved",
+      "founder",
       "team",
       "earlyUsers",
       "grantsBugBounty",
@@ -174,12 +165,8 @@ describe("buildPlan: fails closed", () => {
       /vesting\.investors\.beneficiary: zero/,
     );
     rejects(
-      config((c) => (c.recipients.founderUnrestricted = zero)),
-      /recipients\.founderUnrestricted: zero address/,
-    );
-    rejects(
-      config((c) => (c.recipients.founderReserved = zero)),
-      /recipients\.founderReserved: zero address/,
+      config((c) => (c.recipients.founder = zero)),
+      /recipients\.founder: zero address/,
     );
     rejects(
       config((c) => (c.treasury.safe = zero)),
@@ -204,19 +191,23 @@ describe("buildPlan: fails closed", () => {
       /recipients\.earlyUsers: same address as recipients\.communityStaking/,
     );
     rejects(
-      config((c) => (c.recipients.founderUnrestricted = c.vesting.investors.beneficiary)),
-      /recipients\.founderUnrestricted: same address as vesting\.investors\.beneficiary/,
+      config((c) => (c.recipients.founder = c.vesting.investors.beneficiary)),
+      /recipients\.founder: same address as vesting\.investors\.beneficiary/,
+    );
+    rejects(
+      config((c) => (c.recipients.founder = c.treasury.safe)),
+      /recipients\.founder: same address as treasury\.safe/,
     );
   });
 
-  it("rejects a founder reserved address shared with the unrestricted tranche or any role", () => {
+  it("rejects a config that still splits the founder allocation", () => {
     rejects(
-      config((c) => (c.recipients.founderReserved = c.recipients.founderUnrestricted)),
-      /recipients\.founderReserved: same address as recipients\.founderUnrestricted/,
-    );
-    rejects(
-      config((c) => (c.recipients.founderReserved = c.treasury.safe)),
-      /recipients\.founderReserved: same address as treasury\.safe/,
+      config((c) => {
+        const r = c.recipients as unknown as Record<string, unknown>;
+        r.founderUnrestricted = c.recipients.founder;
+        delete r.founder;
+      }),
+      /recipients/,
     );
   });
 
@@ -305,20 +296,6 @@ describe("buildPlan: fails closed", () => {
       }),
       /vesting\.investors: the vesting start is not confirmed \(TBD\)/,
     );
-  });
-
-  it("refuses any non-local chain while the founder reserved custody is TBD", () => {
-    assert.throws(
-      () => {
-        founderReserveGate(false, false);
-      },
-      (e: unknown) =>
-        e instanceof PlanError &&
-        /recipients\.founderReserved: custody is not approved \(TBD\)/.test(e.message),
-    );
-    // Local Anvil may rehearse with the custody still TBD; an approved custody opens the gate.
-    founderReserveGate(true, false);
-    founderReserveGate(false, true);
   });
 
   it("rejects durations other than the approved 12-month cliff and 36 months linear", () => {

@@ -33,16 +33,16 @@ Values come from their single sources:
 `keccak256("arl.local.<name>")` placeholders: nobody holds their keys and they are valid only on
 a local Anvil chain.
 
-| Field                                        | Rule                                                                                                                                                                                                                                                 |
-| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `chainId`                                    | Required; must equal the chain the script runs on                                                                                                                                                                                                    |
-| `requireRecipientCode`                       | Must be `true` on every chain except local Anvil (31337); then every Safe must be a genuine Safe v1.5.0 proxy (see below)                                                                                                                            |
-| `safe.singletons`                            | Local Anvil only: the Safe singletons a rehearsal deployed. Every other chain uses the canonical Safe v1.5.0 singletons from `@safe-global/safe-deployments` and cannot override them                                                                |
-| `vesting.<investors, strategicPartnerships>` | `beneficiary` (dedicated Safe), `start` (`YYYY-MM-DDTHH:MM:SSZ`, UTC, day 1-28), `cliffMonths` (must be 12), `vestingMonths` (must be 36). The start is TBD: accepted only on local Anvil. `vesting.founder` is rejected                             |
-| `treasury.safe`                              | Non-zero; becomes the timelock's only proposer and executor, and a canceller                                                                                                                                                                         |
-| `treasury.guardian`                          | Non-zero and different from `treasury.safe`; a separate Safe that receives only the canceller role                                                                                                                                                   |
-| `treasury.minDelayHours`                     | Integer, at least 48                                                                                                                                                                                                                                 |
-| `recipients.*`                               | Exactly nine: seven dedicated Safes (publicLaunch, communityStaking, ecosystemGrowth, liquidity, team (pool), earlyUsers, grantsBugBounty), `founderUnrestricted` (dedicated Safe) and `founderReserved` (custody TBD: accepted only on local Anvil) |
+| Field                                        | Rule                                                                                                                                                                                                                     |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `chainId`                                    | Required; must equal the chain the script runs on                                                                                                                                                                        |
+| `requireRecipientCode`                       | Must be `true` on every chain except local Anvil (31337); then every Safe must be a genuine Safe v1.5.0 proxy (see below)                                                                                                |
+| `safe.singletons`                            | Local Anvil only: the Safe singletons a rehearsal deployed. Every other chain uses the canonical Safe v1.5.0 singletons from `@safe-global/safe-deployments` and cannot override them                                    |
+| `vesting.<investors, strategicPartnerships>` | `beneficiary` (dedicated Safe), `start` (`YYYY-MM-DDTHH:MM:SSZ`, UTC, day 1-28), `cliffMonths` (must be 12), `vestingMonths` (must be 36). The start is TBD: accepted only on local Anvil. `vesting.founder` is rejected |
+| `treasury.safe`                              | Non-zero; becomes the timelock's only proposer and executor, and a canceller                                                                                                                                             |
+| `treasury.guardian`                          | Non-zero and different from `treasury.safe`; a separate Safe that receives only the canceller role                                                                                                                       |
+| `treasury.minDelayHours`                     | Integer, at least 48                                                                                                                                                                                                     |
+| `recipients.*`                               | Exactly eight dedicated Safes: publicLaunch, communityStaking, ecosystemGrowth, liquidity, `founder` (receives the whole 2,100,000 ARL Founder allocation, unlocked), team (pool), earlyUsers, grantsBugBounty           |
 
 ## Fail-closed checks
 
@@ -64,8 +64,7 @@ broadcast) each reject:
 - recipients without code where code is required.
 
 `ARLVerify` (run inside `DeployARL` and by `VerifyARL`) checks: code at every deployed contract;
-total supply and `MAX_SUPPLY` equal 21,000,000 ARL; the Founder tranches add up to the Founder
-allocation; the twelve genesis holders are distinct, each holds exactly its amount, and together
+total supply and `MAX_SUPPLY` equal 21,000,000 ARL; the eleven genesis holders are distinct, each holds exactly its amount, and together
 they hold the whole supply; zero deployer balance; code at
 every Safe where code is required, and that each such Safe runs the Safe v1.5.0 proxy code and
 points to a listed singleton (off local Anvil, only the canonical singletons with the canonical code
@@ -81,8 +80,7 @@ The verifier asserts the genesis distribution, so it must run before any token m
 After a deployment, `packages/deploy/src/manifest-cli.ts <plan.json> <deployment.json>
 <manifest.json>` writes the official deployment manifest: every genesis and protocol-controlled
 address, and whether its balance counts as circulating (economic specification section 5). Only
-the Founder Unrestricted address is circulating; the Founder Reserved holder is not counted until
-its treatment is decided.
+the Founder Safe is circulating.
 
 `packages/deploy/src/supply-cli.ts <manifest.json> <rpc-url>` reads `totalSupply` and every
 manifest balance at one block (viem, MIT) and prints total, locked and circulating supply as exact
@@ -99,22 +97,22 @@ Starts a fresh Anvil chain, builds the plan, deploys, verifies, cross-checks key
 `cast` (including the guardian's roles), and runs the negative cases. It then deploys Safe
 v1.5.0 (singleton, proxy factory and one 2-of-3 Safe per Safe role, owned by Anvil development
 accounts) from the published `@safe-global/safe-smart-account` build, redeploys the system with
-code checks enforced, and confirms that a Founder Unrestricted recipient without code is rejected
+code checks enforced, and confirms that a Founder recipient without code is rejected
 by both the plan and the verifier, as are a contract that is not a Safe proxy, a missing singleton
 list and Safes that point to an unlisted singleton. The rehearsal also checks that the singleton
 built from the official Safe artifact has the canonical v1.5.0 code hash. It builds the deployment
-manifest, checks that circulating supply is exactly 2,000,000 ARL at TGE, and that it changes
-only when tokens leave a locked address (not when the Founder sells). 45 negative cases in
-total, including plans of the old `arl-deploy-plan/3` schema and of the old
+manifest, checks that circulating supply is exactly 2,100,000 ARL at TGE, and that it changes
+only when tokens leave a locked address (not when the Founder sells). 46 negative cases in
+total, including a plan that still splits the Founder allocation, plans of the old
+`arl-deploy-plan/4` and `arl-deploy-plan/3` schemas and of the old
 `arl-deploy-plan/2` schema, a plan or config with `vesting.founder`, and a deployment record with a
 founder vesting wallet. Each must fail with its specific error, and rejected
 deployments must leave the deployer nonce unchanged. CI runs the rehearsal on every pull request.
 
 ## Before any public network
 
-See the pre-testnet requirements in the Phase 2 security scope report. In particular: a
+Required before any testnet: a
 testnet-only config with `requireRecipientCode: true` and real test Safes, a free public RPC, and
 a dedicated test Safe for every role, a confirmed vesting start for the investor and strategic
-partnership wallets, and an approved custody for the Founder Reserved tranche (until then the
-tooling refuses every public network). Private keys are never placed in config files; use a hardware wallet or Foundry keystore
+partnership wallets (until then the tooling refuses every public network). Private keys are never placed in config files; use a hardware wallet or Foundry keystore
 outside the repository.

@@ -19,8 +19,7 @@ struct Deployment {
 /// @notice Deploys the complete system from a validated plan, in this order: investors and
 /// strategic partnership vesting wallets, treasury timelock, token. The token mints every
 /// allocation in its constructor, so no transfer happens after deployment. The Founder
-/// allocation has no vesting wallet: its two tranches are minted directly to the planned
-/// Founder Unrestricted and Founder Reserved addresses.
+/// allocation has no vesting wallet: it is minted directly to the planned Founder Safe.
 /// @dev Callers must run `ARLDeployPlan.validate` first and `ARLVerify.verify` afterwards.
 library ARLDeployer {
     function deploy(Plan memory p, address deployer) internal returns (Deployment memory d) {
@@ -40,8 +39,7 @@ library ARLDeployer {
                 ecosystemGrowth: p.recipients.ecosystemGrowth,
                 strategicPartnerships: address(d.partnershipsVesting),
                 liquidity: p.recipients.liquidity,
-                founderUnrestricted: p.recipients.founderUnrestricted,
-                founderReserved: p.recipients.founderReserved,
+                founder: p.recipients.founder,
                 investors: address(d.investorsVesting),
                 treasury: address(d.timelock),
                 team: p.recipients.team,

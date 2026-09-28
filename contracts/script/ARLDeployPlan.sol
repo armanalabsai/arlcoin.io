@@ -23,23 +23,14 @@ struct Allocations {
     uint256 grantsBugBounty;
 }
 
-/// @notice The Founder allocation's two tranches, in base units. Together they must equal
-/// `Allocations.founder`.
-struct FounderTranches {
-    uint256 unrestricted;
-    uint256 reserved;
-}
-
-/// @notice Holders of the allocations that are minted directly to a planned address: seven
-/// dedicated Safes, the Founder Unrestricted Safe and the Founder Reserved holder, whose custody
-/// is not decided yet.
+/// @notice Holders of the allocations that are minted directly to a dedicated Safe, including
+/// the Founder Safe, which receives the whole Founder allocation unlocked at TGE.
 struct Recipients {
     address publicLaunch;
     address communityStaking;
     address ecosystemGrowth;
     address liquidity;
-    address founderUnrestricted;
-    address founderReserved;
+    address founder;
     address team;
     address earlyUsers;
     address grantsBugBounty;
@@ -53,14 +44,13 @@ struct VestingPlan {
     uint64 vestingEnd;
 }
 
-/// @notice A deployment plan, as produced by `packages/deploy` (schema `arl-deploy-plan/4`).
+/// @notice A deployment plan, as produced by `packages/deploy` (schema `arl-deploy-plan/5`).
 /// The Founder allocation does not vest: it has no vesting plan.
 struct Plan {
     uint256 chainId;
     bool requireRecipientCode;
     uint256 maxSupply;
     Allocations allocations;
-    FounderTranches founderTranches;
     VestingPlan investors;
     VestingPlan strategicPartnerships;
     address treasurySafe;
@@ -93,15 +83,10 @@ library ARLDeployPlan {
     /// may target a chain other than local Anvil.
     bool internal constant VESTING_SCHEDULES_APPROVED = false;
 
-    /// @dev The custody of the Founder Reserved tranche (100,000 ARL) is not decided (TBD).
-    /// Until it is approved and recorded here, no plan may target a chain other than local
-    /// Anvil. Local rehearsals use a placeholder address that is not a custody decision.
-    bool internal constant FOUNDER_RESERVE_CUSTODY_APPROVED = false;
-
-    /// @dev Plans of any other schema, including `arl-deploy-plan/2` with its founder vesting
-    /// wallet and `arl-deploy-plan/3` without Safe singletons, are rejected rather than
-    /// reinterpreted.
-    string internal constant PLAN_SCHEMA = "arl-deploy-plan/4";
+    /// @dev Plans of any other schema are rejected rather than reinterpreted: `/2` (founder
+    /// vesting wallet), `/3` (no Safe singletons) and `/4` (Founder split into an unrestricted
+    /// and a reserved tranche).
+    string internal constant PLAN_SCHEMA = "arl-deploy-plan/5";
 
     /// @dev Canonical Safe v1.5.0 deployments, from the npm package safe-deployments 1.37.63
     /// (MIT, safe-global). A test in `packages/deploy` fails if these differ from that package
@@ -123,17 +108,13 @@ library ARLDeployPlan {
     uint256 internal constant TIMELOCK_DELAY_FLOOR = 48 hours;
 
     uint256 internal constant ALLOCATION_COUNT = 11;
-    uint256 internal constant RECIPIENT_COUNT = 9;
+    uint256 internal constant RECIPIENT_COUNT = 8;
     uint256 internal constant VESTING_COUNT = 2;
-    uint256 internal constant FOUNDER_TRANCHE_COUNT = 2;
-    /// @dev Safe roles (12) plus the Founder Reserved holder.
-    uint256 internal constant PLANNED_ADDRESS_COUNT = 13;
 
     error PlanMissingChainId();
     error PlanChainMismatch(uint256 planChainId, uint256 actualChainId);
     error PlanRecipientCodeRequired(uint256 chainId);
     error PlanVestingScheduleNotApproved(uint256 chainId);
-    error PlanFounderReserveCustodyNotApproved(uint256 chainId);
     error PlanSchemaMismatch(string schema);
     error PlanFounderVestingNotAllowed();
     error PlanLegacyAllocation(string key);
@@ -168,7 +149,9 @@ library ARLDeployPlan {
         _keyCount(json, ".allocations", "allocations", ALLOCATION_COUNT);
         _keyCount(json, ".recipients", "recipients", RECIPIENT_COUNT);
         _keyCount(json, ".vesting", "vesting", VESTING_COUNT);
-        _keyCount(json, ".founderTranches", "founderTranches", FOUNDER_TRANCHE_COUNT);
+        if (VM.keyExistsJson(json, ".founderTranches")) {
+            revert PlanLegacyAllocation("founderTranches");
+        }
         _keyCount(json, ".safe", "safe", 1);
 
         p.chainId = VM.parseJsonUint(json, ".chainId");
@@ -189,11 +172,6 @@ library ARLDeployPlan {
             grantsBugBounty: VM.parseJsonUint(json, ".allocations.grantsBugBounty")
         });
 
-        p.founderTranches = FounderTranches({
-            unrestricted: VM.parseJsonUint(json, ".founderTranches.unrestricted"),
-            reserved: VM.parseJsonUint(json, ".founderTranches.reserved")
-        });
-
         p.investors = _vesting(json, ".vesting.investors");
         p.strategicPartnerships = _vesting(json, ".vesting.strategicPartnerships");
 
@@ -208,8 +186,7 @@ library ARLDeployPlan {
             communityStaking: VM.parseJsonAddress(json, ".recipients.communityStaking"),
             ecosystemGrowth: VM.parseJsonAddress(json, ".recipients.ecosystemGrowth"),
             liquidity: VM.parseJsonAddress(json, ".recipients.liquidity"),
-            founderUnrestricted: VM.parseJsonAddress(json, ".recipients.founderUnrestricted"),
-            founderReserved: VM.parseJsonAddress(json, ".recipients.founderReserved"),
+            founder: VM.parseJsonAddress(json, ".recipients.founder"),
             team: VM.parseJsonAddress(json, ".recipients.team"),
             earlyUsers: VM.parseJsonAddress(json, ".recipients.earlyUsers"),
             grantsBugBounty: VM.parseJsonAddress(json, ".recipients.grantsBugBounty")
@@ -220,7 +197,6 @@ library ARLDeployPlan {
     function validate(Plan memory p) internal view {
         _validateChain(p);
         _validateAllocations(p);
-        _validateFounderTranches(p);
         _validateAddresses(p);
         _validateSafes(p);
         validateSchedule("investors", p.investors);
@@ -235,20 +211,16 @@ library ARLDeployPlan {
         if (p.chainId != block.chainid) revert PlanChainMismatch(p.chainId, block.chainid);
         if (p.chainId != LOCAL_CHAIN_ID) {
             if (!p.requireRecipientCode) revert PlanRecipientCodeRequired(p.chainId);
-            approvalGate(p.chainId, VESTING_SCHEDULES_APPROVED, FOUNDER_RESERVE_CUSTODY_APPROVED);
+            approvalGate(p.chainId, VESTING_SCHEDULES_APPROVED);
         }
     }
 
-    /// @notice The public-network gate: off local Anvil, every pending decision must be
-    /// approved. The approval flags are parameters only so tests can exercise each branch;
-    /// `validate` always passes the constants above.
-    function approvalGate(uint256 chainId, bool vestingApproved, bool reserveCustodyApproved)
-        internal
-        pure
-    {
+    /// @notice The public-network gate: off local Anvil, the vesting start must be confirmed.
+    /// The flag is a parameter only so tests can exercise both branches; `validate` always
+    /// passes the constant above.
+    function approvalGate(uint256 chainId, bool vestingApproved) internal pure {
         if (chainId == LOCAL_CHAIN_ID) return;
         if (!vestingApproved) revert PlanVestingScheduleNotApproved(chainId);
-        if (!reserveCustodyApproved) revert PlanFounderReserveCustodyNotApproved(chainId);
     }
 
     function _validateAllocations(Plan memory p) private pure {
@@ -278,37 +250,18 @@ library ARLDeployPlan {
         }
     }
 
-    /// @dev The two Founder tranches are checked against their own constants and must add up
-    /// to the Founder allocation exactly.
-    function _validateFounderTranches(Plan memory p) private pure {
-        FounderTranches memory f = p.founderTranches;
-        _allocation(
-            "founderTranches.unrestricted", f.unrestricted, ARLAllocation.FOUNDER_UNRESTRICTED
-        );
-        _allocation("founderTranches.reserved", f.reserved, ARLAllocation.FOUNDER_RESERVED);
-        if (f.unrestricted + f.reserved != p.allocations.founder) {
-            revert PlanAllocationMismatch(
-                "founderTranches", f.unrestricted + f.reserved, p.allocations.founder
-            );
-        }
-    }
-
     /// @dev Every Safe role is a dedicated Safe: non-zero, a contract off local Anvil, and not
-    /// shared with any other role. The Founder Reserved holder must be non-zero and must not be
-    /// shared with any role. Its custody is TBD, so no code requirement is imposed on it here;
-    /// the approval gate blocks every non-local plan until that custody is approved.
+    /// shared with any other role.
     function _validateAddresses(Plan memory p) private view {
-        (string[12] memory safeField, address[12] memory safeAccount) = safeRoles(p);
+        (string[12] memory field, address[12] memory account) = safeRoles(p);
         for (uint256 i = 0; i < 12; i++) {
-            _safe(p, safeField[i], safeAccount[i]);
+            _safe(p, field[i], account[i]);
         }
-        _nonZero("recipients.founderReserved", p.recipients.founderReserved);
         if (p.treasuryGuardian == p.treasurySafe) {
             revert PlanGuardianNotIndependent(p.treasuryGuardian);
         }
-        (string[13] memory field, address[13] memory account) = plannedAddresses(p);
-        for (uint256 i = 0; i < PLANNED_ADDRESS_COUNT; i++) {
-            for (uint256 j = i + 1; j < PLANNED_ADDRESS_COUNT; j++) {
+        for (uint256 i = 0; i < 12; i++) {
+            for (uint256 j = i + 1; j < 12; j++) {
                 // forge-lint: disable-next-line(require-revert-in-loop)
                 if (account[i] == account[j]) revert PlanAddressReused(field[j], field[i]);
             }
@@ -323,7 +276,7 @@ library ARLDeployPlan {
     {
         Recipients memory r = p.recipients;
         field = [
-            "recipients.founderUnrestricted",
+            "recipients.founder",
             "vesting.investors.beneficiary",
             "vesting.strategicPartnerships.beneficiary",
             "treasury.safe",
@@ -337,7 +290,7 @@ library ARLDeployPlan {
             "recipients.grantsBugBounty"
         ];
         account = [
-            r.founderUnrestricted,
+            r.founder,
             p.investors.beneficiary,
             p.strategicPartnerships.beneficiary,
             p.treasurySafe,
@@ -354,8 +307,7 @@ library ARLDeployPlan {
 
     /// @dev Where code is required (every chain except local Anvil), every Safe role must be a
     /// genuine Safe v1.5.0 proxy of an allowed singleton, so a contract that merely has code
-    /// cannot stand in for a Safe. The Founder Reserved holder is not a Safe role: its custody is
-    /// TBD.
+    /// cannot stand in for a Safe.
     function _validateSafes(Plan memory p) private view {
         if (!p.requireRecipientCode) return;
         if (p.safeSingletons.length == 0) revert PlanSafeSingletonsMissing();
@@ -407,22 +359,6 @@ library ARLDeployPlan {
             if (singleton == singletons[i]) return true;
         }
         return false;
-    }
-
-    /// @notice Every address the plan names: the Safe roles, then the Founder Reserved holder.
-    /// No two may be equal.
-    function plannedAddresses(Plan memory p)
-        internal
-        pure
-        returns (string[13] memory field, address[13] memory account)
-    {
-        (string[12] memory safeField, address[12] memory safeAccount) = safeRoles(p);
-        for (uint256 i = 0; i < 12; i++) {
-            field[i] = safeField[i];
-            account[i] = safeAccount[i];
-        }
-        field[12] = "recipients.founderReserved";
-        account[12] = p.recipients.founderReserved;
     }
 
     /// @notice Reverts unless the schedule is ordered (as `ARLVestingWallet` also enforces) and

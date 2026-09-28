@@ -41,7 +41,12 @@ export function validateAllocations(
     } else {
       errors.push(...validateCustody(a.id, custody, a.release));
     }
-    errors.push(...validateTranches(a, ids));
+    if (
+      a.id === "founder" &&
+      (a.release.kind === "vesting" || custody?.holder === "vesting-wallet")
+    ) {
+      errors.push(`${a.id}: the Founder allocation does not vest`);
+    }
   }
 
   if (total !== maxSupply) {
@@ -78,56 +83,6 @@ function validateRelease(id: string, r: Release): string[] {
   return errors;
 }
 
-/**
- * An allocation held in tranches must say so in both its release rule and its
- * custody, have at least two tranches, and the tranche amounts must add up to
- * the allocation exactly. Each tranche is checked like an allocation.
- */
-function validateTranches(a: Allocation, ids: Set<string>): string[] {
-  const errors: string[] = [];
-  // Tables are also built from untyped data, so custody may be missing here.
-  const holder = (a as Partial<Allocation>).custody?.holder;
-  const split = a.release.kind === "tranches" || holder === "tranches";
-  const tranches = (a as Partial<Allocation>).tranches;
-  if (!split) {
-    if (tranches !== undefined)
-      errors.push(`${a.id}: tranches need a "tranches" release and custody`);
-    return errors;
-  }
-  if (a.release.kind !== "tranches" || holder !== "tranches") {
-    errors.push(`${a.id}: a "tranches" release needs "tranches" custody, and the reverse`);
-  }
-  if (!tranches || tranches.length < 2) {
-    errors.push(`${a.id}: an allocation held in tranches needs at least two tranches`);
-    return errors;
-  }
-  let total = 0;
-  for (const t of tranches) {
-    if (ids.has(t.id)) errors.push(`duplicate allocation or tranche id "${t.id}"`);
-    ids.add(t.id);
-    if (!Number.isSafeInteger(t.amount) || t.amount <= 0) {
-      errors.push(`${t.id}: amount must be a positive safe integer, got ${t.amount}`);
-      continue;
-    }
-    total += t.amount;
-    if (t.release.kind === "tranches" || t.custody.holder === "tranches") {
-      errors.push(`${t.id}: a tranche cannot itself be split`);
-    }
-    if (
-      a.id === "founder" &&
-      (t.release.kind === "vesting" || t.custody.holder === "vesting-wallet")
-    ) {
-      errors.push(`${t.id}: the Founder allocation does not vest`);
-    }
-    errors.push(...validateRelease(t.id, t.release));
-    errors.push(...validateCustody(t.id, t.custody, t.release));
-  }
-  if (total !== a.amount) {
-    errors.push(`${a.id}: tranches total ${total}, expected exactly ${a.amount}`);
-  }
-  return errors;
-}
-
 /** Checks that where tokens are held matches how they are released. */
 function validateCustody(id: string, c: Custody, r: Release): string[] {
   const errors: string[] = [];
@@ -143,14 +98,6 @@ function validateCustody(id: string, c: Custody, r: Release): string[] {
     case "safe":
     case "grant-pool":
       if (r.kind === "vesting") errors.push(`${id}: a vesting release needs a vesting wallet`);
-      if (r.kind === "reserved") errors.push(`${id}: a reserved release needs custody TBD`);
-      break;
-    case "tbd":
-      // Undecided custody holds reserved tokens only, and never decides a release by itself.
-      if (r.kind !== "reserved") errors.push(`${id}: custody TBD needs a reserved release`);
-      if (r.status === "approved") errors.push(`${id}: custody TBD cannot be approved`);
-      break;
-    case "tranches":
       break;
   }
   if (r.kind === "unrestricted" && c.holder !== "safe") {

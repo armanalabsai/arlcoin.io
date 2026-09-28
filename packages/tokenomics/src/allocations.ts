@@ -9,9 +9,8 @@
 // replacement). It supersedes the 10-allocation Phase 1 table, including the
 // former 7,000,000 ARL Ecosystem Reserve, which no longer exists.
 //
-// The Founder allocation is one economic allocation of 2,100,000 ARL held in
-// two tranches: Founder Unrestricted (2,000,000 ARL, unlocked at TGE) and
-// Founder Reserved (100,000 ARL, treatment and custody TBD). Neither vests.
+// The Founder allocation of 2,100,000 ARL is held in the Founder Safe and is
+// fully unlocked at TGE. It does not vest.
 
 /** Hard cap. No mechanism may ever create supply above this value. */
 export const MAX_SUPPLY = 21_000_000;
@@ -50,26 +49,11 @@ export type Release =
       readonly status: DecisionStatus;
     }
   | {
-      /** The allocation is held in tranches, each with its own release rule. */
-      readonly kind: "tranches";
-      readonly description: string;
-      readonly status: DecisionStatus;
-    }
-  | {
       /**
        * Fully unlocked at TGE: no cliff, vesting, timelock or protocol-level
        * transfer or sale restriction. The holder is an ordinary ERC-20 holder.
        */
       readonly kind: "unrestricted";
-      readonly description: string;
-      readonly status: DecisionStatus;
-    }
-  | {
-      /**
-       * Minted at genesis and held apart, with no release rule. Not vested and
-       * not scheduled. Its treatment is not decided.
-       */
-      readonly kind: "reserved";
       readonly description: string;
       readonly status: DecisionStatus;
     };
@@ -113,17 +97,6 @@ export type Custody =
        */
       readonly holder: "grant-pool";
       readonly grantBeneficiary: "recipient-safe";
-    }
-  | {
-      /** Each tranche has its own holder; see `tranches`. */
-      readonly holder: "tranches";
-    }
-  | {
-      /**
-       * Custody is not decided. Deployment off local Anvil is refused until it
-       * is approved; local rehearsals use a placeholder address.
-       */
-      readonly holder: "tbd";
     };
 
 /**
@@ -142,17 +115,6 @@ export interface MultisigControls {
 /** Protocol floor for any multisig timelock delay. */
 export const MIN_TIMELOCK_HOURS = 48;
 
-/** Part of an allocation with its own genesis holder and release rule. */
-export interface Tranche {
-  readonly id: string;
-  readonly name: string;
-  /** Whole ARL. */
-  readonly amount: number;
-  readonly purpose: string;
-  readonly release: Release;
-  readonly custody: Custody;
-}
-
 export interface Allocation {
   readonly id: string;
   readonly name: string;
@@ -161,11 +123,6 @@ export interface Allocation {
   readonly purpose: string;
   readonly release: Release;
   readonly custody: Custody;
-  /**
-   * Present only when the allocation is held in tranches (release kind and
-   * custody holder "tranches"). The tranche amounts add up to `amount`.
-   */
-  readonly tranches?: readonly Tranche[];
 }
 
 function deepFreeze<T>(value: T): T {
@@ -252,43 +209,14 @@ export const ALLOCATIONS: readonly Allocation[] = deepFreeze([
     id: "founder",
     name: "Founder",
     amount: 2_100_000,
-    purpose:
-      "Founder allocation, in two tranches: 2,000,000 ARL unrestricted at TGE and 100,000 ARL reserved, whose treatment is not decided.",
+    purpose: "Founder allocation, fully unlocked and available to the Founder at TGE.",
     release: {
-      kind: "tranches",
-      description: "Each tranche has its own rule. The Founder allocation does not vest.",
+      kind: "unrestricted",
+      description:
+        "No cliff, vesting, timelock or protocol-level transfer or sale restriction. An ordinary ERC-20 holder: transferable and sellable at any time.",
       status: "approved",
     },
-    custody: { holder: "tranches" },
-    tranches: [
-      {
-        id: "founder-unrestricted",
-        name: "Founder Unrestricted",
-        amount: 2_000_000,
-        purpose: "Fully unlocked and available to the Founder at TGE.",
-        release: {
-          kind: "unrestricted",
-          description:
-            "No cliff, vesting, timelock or protocol-level transfer or sale restriction. An ordinary ERC-20 holder: transferable and sellable at any time.",
-          status: "approved",
-        },
-        custody: { holder: "safe" },
-      },
-      {
-        id: "founder-reserved",
-        name: "Founder Reserved",
-        amount: 100_000,
-        purpose:
-          "Reserved part of the Founder allocation. Held apart from the unrestricted tranche.",
-        release: {
-          kind: "reserved",
-          description:
-            "Not vested and not scheduled. Its treatment and custody are not decided (TBD).",
-          status: "undecided",
-        },
-        custody: { holder: "tbd" },
-      },
-    ],
+    custody: { holder: "safe" },
   },
   {
     id: "investors",

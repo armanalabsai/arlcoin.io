@@ -76,7 +76,7 @@ export const token: Layer = {
       metric: { kind: "static", value: String(ALLOCATIONS.length), unit: "allocations" },
       detail: {
         summary:
-          "The entire supply is assigned at deployment to eleven allocations, each held by its own vesting wallet, timelock or dedicated Safe. The Founder allocation of 2,100,000 ARL is held in two parts, 2,000,000 ARL fully unlocked at TGE with no vesting and 100,000 ARL reserved, whose treatment and custody are not decided. Amounts are exact and add up to 21,000,000 ARL; shares are rounded to two decimals.",
+          "The entire supply is assigned at deployment to eleven allocations, each held by its own vesting wallet, timelock or dedicated Safe. The Founder allocation of 2,100,000 ARL is fully unlocked at TGE with no vesting. Amounts are exact and add up to 21,000,000 ARL; shares are rounded to two decimals.",
         facts: allocationFacts,
       },
       links: [{ label: "Tokenomics", href: repoDoc("docs/tokenomics.md") }],

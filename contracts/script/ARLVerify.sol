@@ -5,7 +5,7 @@ import {ARLAllocation} from "../src/ARLAllocation.sol";
 import {ARLTimelock} from "../src/ARLTimelock.sol";
 import {ARLToken} from "../src/ARLToken.sol";
 import {ARLVestingWallet} from "../src/ARLVestingWallet.sol";
-import {ARLDeployPlan, Allocations, FounderTranches, Plan, VestingPlan} from "./ARLDeployPlan.sol";
+import {ARLDeployPlan, Allocations, Plan, VestingPlan} from "./ARLDeployPlan.sol";
 import {Deployment} from "./ARLDeployer.sol";
 
 /// @title Post-deployment verification
@@ -81,39 +81,32 @@ library ARLVerify {
 
     // ------------------------------------------------------------------ distribution
 
-    /// @dev Every allocation has its own holder, and the Founder allocation has two (its
-    /// unrestricted and reserved tranches). Checks that the twelve genesis holders are distinct,
+    /// @dev Every allocation has its own holder. Checks that the eleven holders are distinct,
     /// that each holds exactly its planned amount, and that together they hold the whole supply,
-    /// so no allocation can sit at an unexpected address. The Founder holders are plan
-    /// recipients, never a vesting wallet deployed here, and no founder schedule exists.
+    /// so no allocation can sit at an unexpected address. The Founder holder is a plan
+    /// recipient, never a vesting wallet deployed here, and no founder schedule exists.
     function _distribution(Plan memory p, Deployment memory d) private view {
         Allocations memory a = p.allocations;
-        FounderTranches memory f = p.founderTranches;
-        if (f.unrestricted + f.reserved != a.founder) {
-            revert VerifyUintMismatch("founder tranches", a.founder, f.unrestricted + f.reserved);
-        }
-        address[12] memory holder = [
+        address[11] memory holder = [
             p.recipients.publicLaunch,
             p.recipients.communityStaking,
             p.recipients.ecosystemGrowth,
             address(d.partnershipsVesting),
             p.recipients.liquidity,
-            p.recipients.founderUnrestricted,
-            p.recipients.founderReserved,
+            p.recipients.founder,
             address(d.investorsVesting),
             address(d.timelock),
             p.recipients.team,
             p.recipients.earlyUsers,
             p.recipients.grantsBugBounty
         ];
-        uint256[12] memory amount = [
+        uint256[11] memory amount = [
             a.publicLaunch,
             a.communityStaking,
             a.ecosystemGrowth,
             a.strategicPartnerships,
             a.liquidity,
-            f.unrestricted,
-            f.reserved,
+            a.founder,
             a.investors,
             a.treasury,
             a.team,
@@ -122,8 +115,8 @@ library ARLVerify {
         ];
 
         uint256 accounted = 0;
-        for (uint256 i = 0; i < 12; i++) {
-            for (uint256 j = i + 1; j < 12; j++) {
+        for (uint256 i = 0; i < 11; i++) {
+            for (uint256 j = i + 1; j < 11; j++) {
                 // forge-lint: disable-next-line(require-revert-in-loop)
                 if (holder[i] == holder[j]) revert VerifyFailed("allocation holders are distinct");
             }
@@ -135,21 +128,14 @@ library ARLVerify {
 
         // Stated against the contract constants as well, so a plan that agreed with a changed
         // allocation table could not pass.
-        _eq(
-            "founder unrestricted balance",
-            ARLAllocation.FOUNDER_UNRESTRICTED,
-            d.token.balanceOf(holder[5])
-        );
-        _eq(
-            "founder reserved balance", ARLAllocation.FOUNDER_RESERVED, d.token.balanceOf(holder[6])
-        );
-        _eq("investors vesting balance", ARLAllocation.INVESTORS, d.token.balanceOf(holder[7]));
+        _eq("founder balance", ARLAllocation.FOUNDER, d.token.balanceOf(holder[5]));
+        _eq("investors vesting balance", ARLAllocation.INVESTORS, d.token.balanceOf(holder[6]));
         _eq(
             "strategic partnerships vesting balance",
             ARLAllocation.STRATEGIC_PARTNERSHIPS,
             d.token.balanceOf(holder[3])
         );
-        _eq("treasury balance", ARLAllocation.TREASURY, d.token.balanceOf(holder[8]));
+        _eq("treasury balance", ARLAllocation.TREASURY, d.token.balanceOf(holder[7]));
     }
 
     // ------------------------------------------------------------------ vesting

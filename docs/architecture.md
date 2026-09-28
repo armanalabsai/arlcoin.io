@@ -66,7 +66,7 @@ Rules:
 | Decision                                                               | Needed before                |
 | ---------------------------------------------------------------------- | ---------------------------- |
 | Production chain                                                       | Deployment scripts           |
-| Founder, investor and strategic partnership vesting schedules (TBD)    | Any public network           |
+| Vesting start (TGE) for investors and strategic partnerships (TBD)     | Any public network           |
 | Team grant schedule; program rules for staking, growth and early users | The programs                 |
 | Exact launch and grant dates (contracts take explicit timestamps)      | Deployment                   |
 | Signer sets and thresholds of the dedicated Safes                      | Production multisig creation |
@@ -99,7 +99,7 @@ Superseded on 2026-09-27 (M-2 model replacement):
   [`tokenomics.md`](tokenomics.md). Vesting durations for the new model are TBD.
 - The M-2 custody and vesting decision recorded earlier the same day (commit
   `91eaf10`) is superseded and kept in history only.
-- Still in force: the Founder Unrestricted recipient (formerly the founder
+- Still in force: the Founder recipient (formerly the founder
   vesting beneficiary) is a dedicated Safe (M-3); team
   grants are irrevocable, in tranches, to each member's own Safe (M-3); the
   treasury guardian (M-1) and zero-address checks (L-3).

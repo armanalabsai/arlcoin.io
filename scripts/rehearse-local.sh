@@ -9,9 +9,8 @@
 #   6. run negative rehearsals: each must be rejected, and rejected deployments must not
 #      broadcast anything
 #   7. deploy real Safe contracts, redeploy with every Safe role held by its own Safe and code
-#      checks enforced, and reject a Founder Unrestricted recipient without code and any Safe
-#      role that is not a genuine Safe v1.5.0 proxy. The Founder Reserved holder stays a local
-#      placeholder: its custody is TBD.
+#      checks enforced, and reject a Founder recipient without code and any Safe role that is
+#      not a genuine Safe v1.5.0 proxy.
 #
 # Exits 0 only if every step and every negative case behaves as expected.
 
@@ -93,14 +92,13 @@ expect() {
 num() { cast call "$@" --rpc-url "$RPC" | cut -d' ' -f1; }
 balance() { num "$TOKEN" 'balanceOf(address)(uint256)' "$1"; }
 expect "totalSupply" "21000000000000000000000000" "$(num "$TOKEN" 'totalSupply()(uint256)')"
-# The eleven canonical allocations at their twelve genesis holders (Founder has two tranches).
+# The eleven canonical allocations at their eleven genesis holders.
 expect "public launch balance" "5000000000000000000000000" "$(balance "$(planval recipients.publicLaunch)")"
 expect "community & staking balance" "3000000000000000000000000" "$(balance "$(planval recipients.communityStaking)")"
 expect "ecosystem & growth balance" "2000000000000000000000000" "$(balance "$(planval recipients.ecosystemGrowth)")"
 expect "strategic partnerships vesting balance" "2000000000000000000000000" "$(balance "$PARTNERSHIPS_VESTING")"
 expect "liquidity balance" "2000000000000000000000000" "$(balance "$(planval recipients.liquidity)")"
-expect "founder unrestricted balance" "2000000000000000000000000" "$(balance "$(planval recipients.founderUnrestricted)")"
-expect "founder reserved balance" "100000000000000000000000" "$(balance "$(planval recipients.founderReserved)")"
+expect "founder balance" "2100000000000000000000000" "$(balance "$(planval recipients.founder)")"
 expect "investors vesting balance" "1500000000000000000000000" "$(balance "$INVESTORS_VESTING")"
 expect "treasury balance" "1000000000000000000000000" "$(balance "$TIMELOCK")"
 expect "team pool balance" "900000000000000000000000" "$(balance "$(planval recipients.team)")"
@@ -126,8 +124,8 @@ MANIFEST="deploy/deployments/31337-manifest.json"
 node "$ROOT/packages/deploy/src/manifest-cli.ts" "$PLAN" "$DEPLOYMENT" "$MANIFEST" || die "manifest failed"
 supply() { node "$ROOT/packages/deploy/src/supply-cli.ts" "$MANIFEST" "$RPC" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>console.log(JSON.parse(s).$1))"; }
 expect "total supply (manifest read)" "21000000000000000000000000" "$(supply totalSupply)"
-expect "circulating supply at TGE" "2000000000000000000000000" "$(supply circulatingSupply)"
-expect "locked supply at TGE" "19000000000000000000000000" "$(supply lockedSupply)"
+expect "circulating supply at TGE" "2100000000000000000000000" "$(supply circulatingSupply)"
+expect "locked supply at TGE" "18900000000000000000000000" "$(supply lockedSupply)"
 
 # Writes a copy of the plan with one field changed: mutate <out> <js expression on p>.
 mutate() {
@@ -156,12 +154,9 @@ mutate "$REHEARSAL/wrong-recipient.json" "p.recipients.liquidity='$DEAD'"
 must_fail "wrong recipient" "VerifyUintMismatch\\(\"allocation balance\"" forge_verify "$REHEARSAL/wrong-recipient.json" "$DEPLOYMENT"
 mutate "$REHEARSAL/wrong-timestamp.json" "p.vesting.investors.cliffEnd += 1"
 must_fail "wrong investors timestamp" "VerifyUintMismatch\\(\"investors cliff end\"" forge_verify "$REHEARSAL/wrong-timestamp.json" "$DEPLOYMENT"
-mutate "$REHEARSAL/wrong-founder-reserved.json" "p.recipients.founderReserved='$DEAD'"
-must_fail "wrong founder reserved holder" "VerifyUintMismatch\\(\"allocation balance\"" \
-  forge_verify "$REHEARSAL/wrong-founder-reserved.json" "$DEPLOYMENT"
-mutate "$REHEARSAL/wrong-tranches.json" "p.founderTranches.reserved = (BigInt(p.founderTranches.reserved) + 1n).toString()"
-must_fail "founder tranches do not reconcile" "VerifyUintMismatch\\(\"founder tranches\"" \
-  forge_verify "$REHEARSAL/wrong-tranches.json" "$DEPLOYMENT"
+mutate "$REHEARSAL/wrong-founder.json" "p.recipients.founder='$DEAD'"
+must_fail "wrong founder holder" "VerifyUintMismatch\\(\"allocation balance\"" \
+  forge_verify "$REHEARSAL/wrong-founder.json" "$DEPLOYMENT"
 node -e "const d=require('./$DEPLOYMENT'); d.founderVesting='$DEAD'; require('fs').writeFileSync('$REHEARSAL/legacy-deployment.json', JSON.stringify(d));"
 must_fail "deployment record with a founder vesting wallet" "VerifyFailed\\(\"no founder vesting wallet\"" \
   forge_verify "$PLAN" "$REHEARSAL/legacy-deployment.json"
@@ -183,10 +178,10 @@ mutate "$REHEARSAL/schema-3.json" "p.schema = 'arl-deploy-plan/3'; delete p.safe
 must_fail "plan without Safe singletons (schema 3)" "PlanSchemaMismatch\\(\"arl-deploy-plan/3\"" forge_deploy "$REHEARSAL/schema-3.json" "$REHEARSAL/x.json"
 mutate "$REHEARSAL/founder-vesting.json" "p.vesting.founder = p.vesting.investors"
 must_fail "plan with a founder vesting wallet" "PlanFounderVestingNotAllowed" forge_deploy "$REHEARSAL/founder-vesting.json" "$REHEARSAL/x.json"
-mutate "$REHEARSAL/tranche.json" "p.founderTranches.unrestricted = (BigInt(p.founderTranches.unrestricted) + 1n).toString()"
-must_fail "founder tranche mismatch" "PlanAllocationMismatch\\(\"founderTranches.unrestricted\"" forge_deploy "$REHEARSAL/tranche.json" "$REHEARSAL/x.json"
-mutate "$REHEARSAL/reserve-reuse.json" "p.recipients.founderReserved = p.recipients.founderUnrestricted"
-must_fail "founder reserved shares the unrestricted address" "PlanAddressReused\\(\"recipients.founderReserved\"" forge_deploy "$REHEARSAL/reserve-reuse.json" "$REHEARSAL/x.json"
+mutate "$REHEARSAL/tranche.json" "p.founderTranches = {unrestricted: '2000000000000000000000000', reserved: '100000000000000000000000'}"
+must_fail "plan that splits the founder allocation" "PlanLegacyAllocation\\(\"founderTranches\"" forge_deploy "$REHEARSAL/tranche.json" "$REHEARSAL/x.json"
+mutate "$REHEARSAL/founder-reuse.json" "p.recipients.founder = p.treasury.safe"
+must_fail "founder shares an address with the treasury" "PlanAddressReused\\(\"treasury.safe\", \"recipients.founder\"" forge_deploy "$REHEARSAL/founder-reuse.json" "$REHEARSAL/x.json"
 mutate "$REHEARSAL/bad-end.json" "p.vesting.investors.vestingEnd = p.vesting.investors.cliffEnd"
 must_fail "vesting end not after cliff end" "PlanInvalidSchedule\\(\"investors vesting end is not after cliff end\"" forge_deploy "$REHEARSAL/bad-end.json" "$REHEARSAL/x.json"
 mutate "$REHEARSAL/short-vesting.json" "p.vesting.strategicPartnerships.vestingEnd -= 86400"
@@ -215,7 +210,7 @@ must_fail "legacy Ecosystem Reserve allocation" "PlanLegacyAllocation\\(\"alloca
 mutate "$REHEARSAL/legacy-recipient.json" "p.ecosystemReserve = {beneficiary: '$DEAD', start: 1798761600}"
 must_fail "legacy Ecosystem Reserve recipient" "PlanLegacyAllocation\\(\"ecosystemReserve\"" forge_deploy "$REHEARSAL/legacy-recipient.json" "$REHEARSAL/x.json"
 mutate "$REHEARSAL/extra-recipient.json" "p.recipients.earlyUserRewards = '$DEAD'"
-must_fail "wrong recipient count" "PlanUnexpectedKeys\\(\"recipients\", 10, 9" forge_deploy "$REHEARSAL/extra-recipient.json" "$REHEARSAL/x.json"
+must_fail "wrong recipient count" "PlanUnexpectedKeys\\(\"recipients\", 9, 8" forge_deploy "$REHEARSAL/extra-recipient.json" "$REHEARSAL/x.json"
 mutate "$REHEARSAL/duplicate.json" "p.recipients.liquidity = p.recipients.communityStaking"
 must_fail "duplicate allocation holder" "PlanAddressReused\\(\"recipients.liquidity\"" forge_deploy "$REHEARSAL/duplicate.json" "$REHEARSAL/x.json"
 mutate "$REHEARSAL/zero-recipient.json" "p.recipients.team='$ZERO'"
@@ -284,25 +279,24 @@ new_safe() {
   printf '%s' "$addr"
 }
 FOUNDER_SAFE="$(new_safe 1)"
-expect "founder unrestricted safe threshold" "2" "$(num "$FOUNDER_SAFE" 'getThreshold()(uint256)')"
-expect "founder unrestricted safe owners" "3" \
+expect "founder safe threshold" "2" "$(num "$FOUNDER_SAFE" 'getThreshold()(uint256)')"
+expect "founder safe owners" "3" \
   "$(cast call "$FOUNDER_SAFE" 'getOwners()(address[])' --rpc-url "$RPC" | tr ',' '\n' | grep -c 0x)"
 
-# Every Safe role (12) gets its own Safe proxy so the plan can require code everywhere. The
-# Founder Reserved holder keeps its local placeholder: its custody is TBD, so no Safe is presumed.
+# Every Safe role (12) gets its own Safe proxy so the plan can require code everywhere.
 SAFE_PLAN="$REHEARSAL/safes.json"
 node -e "
 const p = require('./$PLAN');
 const s = process.argv.slice(1);
 p.requireRecipientCode = true;
 p.safe.singletons = ['$SAFE_SINGLETON'];
-p.recipients.founderUnrestricted = s[0];
+p.recipients.founder = s[0];
 p.vesting.investors.beneficiary = s[1];
 p.vesting.strategicPartnerships.beneficiary = s[2];
 p.treasury.safe = s[3];
 p.treasury.guardian = s[4];
 Object.keys(p.recipients)
-  .filter((k) => k !== 'founderUnrestricted' && k !== 'founderReserved')
+  .filter((k) => k !== 'founder')
   .forEach((k, i) => (p.recipients[k] = s[5 + i]));
 require('fs').writeFileSync('$SAFE_PLAN', JSON.stringify(p));
 " "$FOUNDER_SAFE" $(for i in $(seq 2 12); do new_safe "$i"; printf ' '; done)
@@ -312,12 +306,12 @@ forge_verify "$SAFE_PLAN" "$SAFE_DEPLOYMENT" || die "verifier rejected the deplo
 SAFE_TOKEN="$(node -e "console.log(require('./$SAFE_DEPLOYMENT').token)")"
 expect "founder safe is a Safe v1.5.0 proxy" "$(canonical_hash SAFE_PROXY_V150_CODEHASH)" \
   "$(cast codehash "$FOUNDER_SAFE" --rpc-url "$RPC")"
-expect "founder unrestricted safe balance" "2000000000000000000000000" \
+expect "founder safe balance" "2100000000000000000000000" \
   "$(num "$SAFE_TOKEN" 'balanceOf(address)(uint256)' "$FOUNDER_SAFE")"
 
 BEFORE="$(nonce)"
-node -e "const p=require('./$SAFE_PLAN'); p.recipients.founderUnrestricted='$(account 5)'; require('fs').writeFileSync('$REHEARSAL/founder-eoa.json', JSON.stringify(p));"
-must_fail "founder unrestricted without code" "PlanRecipientHasNoCode\\(\"recipients.founderUnrestricted\"" \
+node -e "const p=require('./$SAFE_PLAN'); p.recipients.founder='$(account 5)'; require('fs').writeFileSync('$REHEARSAL/founder-eoa.json', JSON.stringify(p));"
+must_fail "founder without code" "PlanRecipientHasNoCode\\(\"recipients.founder\"" \
   forge_deploy "$REHEARSAL/founder-eoa.json" "$REHEARSAL/x.json"
 node -e "const p=require('./$SAFE_PLAN'); p.recipients.liquidity='$SAFE_FACTORY'; require('fs').writeFileSync('$REHEARSAL/not-a-safe.json', JSON.stringify(p));"
 must_fail "contract that is not a Safe proxy" "PlanNotASafe\\(\"recipients.liquidity\"" \
@@ -327,9 +321,9 @@ must_fail "code required but no Safe singleton listed" "PlanSafeSingletonsMissin
   forge_deploy "$REHEARSAL/no-singletons.json" "$REHEARSAL/x.json"
 [[ "$(nonce)" == "$BEFORE" ]] || die "a rejected deployment broadcast a transaction"
 node -e "const p=require('./$SAFE_PLAN'); p.safe.singletons=['$DEAD']; require('fs').writeFileSync('$REHEARSAL/wrong-singleton.json', JSON.stringify(p));"
-must_fail "verify: Safes point to an unlisted singleton" "VerifyFailed\\(\"recipients.founderUnrestricted is a Safe v1.5.0 proxy\"" \
+must_fail "verify: Safes point to an unlisted singleton" "VerifyFailed\\(\"recipients.founder is a Safe v1.5.0 proxy\"" \
   forge_verify "$REHEARSAL/wrong-singleton.json" "$SAFE_DEPLOYMENT"
-must_fail "verify: founder unrestricted without code" "VerifyAddressMismatch\\(\"recipients.founderUnrestricted\"" \
+must_fail "verify: founder without code" "VerifyAddressMismatch\\(\"recipients.founder\"" \
   forge_verify "$REHEARSAL/founder-eoa.json" "$SAFE_DEPLOYMENT"
 
 log "Circulating supply moves only when tokens leave a locked address"
@@ -342,13 +336,13 @@ impersonate() {
 send_from() {
   cast send "$TOKEN" 'transfer(address,uint256)' "$2" "$3" --unlocked --from "$1" --rpc-url "$RPC" >/dev/null
 }
-FOUNDER_U="$(planval recipients.founderUnrestricted)"
+FOUNDER_U="$(planval recipients.founder)"
 LIQUIDITY="$(planval recipients.liquidity)"
 impersonate "$FOUNDER_U"
 send_from "$FOUNDER_U" "$BEEF" 500000000000000000000000
-expect "circulating after a founder sale" "2000000000000000000000000" "$(supply circulatingSupply)"
+expect "circulating after a founder sale" "2100000000000000000000000" "$(supply circulatingSupply)"
 impersonate "$LIQUIDITY"
 send_from "$LIQUIDITY" "$BEEF" 1
-expect "circulating after 1 unit leaves liquidity" "2000000000000000000000001" "$(supply circulatingSupply)"
+expect "circulating after 1 unit leaves liquidity" "2100000000000000000000001" "$(supply circulatingSupply)"
 
 log "REHEARSAL PASSED: deployed, verified, and $NEGATIVE negative cases rejected"
