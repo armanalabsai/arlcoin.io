@@ -6,7 +6,7 @@ import { isAddress } from "viem";
 import type { Address } from "viem";
 import { useAccount } from "wagmi";
 
-import { AmountForm, Arl, PageTitle, RequireWallet, Stat } from "~~/components/arl/ui";
+import { AmountForm, Arl, Facts, PageTitle, RequireWallet, Stat } from "~~/components/arl/ui";
 import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 
 export default function WalletPage() {
@@ -54,7 +54,7 @@ function Wallet() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid gap-3 sm:grid-cols-3">
+      <Facts>
         <Stat label="Balance" value={<Arl value={balance} />} testId="wallet-balance" />
         <Stat
           label="Staked"
@@ -70,7 +70,7 @@ function Wallet() {
           value={<Arl value={earned} />}
           hint="Earned, not yet claimed"
         />
-      </div>
+      </Facts>
       {isBeneficiary ? (
         <div className="glass-chip border-primary/40! px-4 py-3 text-sm">
           You are the beneficiary of a vesting wallet.{" "}

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { zeroAddress } from "viem";
 import { useAccount, useBlockNumber, useReadContracts, useWriteContract } from "wagmi";
 
-import { Arl, PageTitle, RequireWallet, Stat, useChainTime } from "~~/components/arl/ui";
+import { Arl, Facts, PageTitle, RequireWallet, Stat, useChainTime } from "~~/components/arl/ui";
 import {
   useDeployedContractInfo,
   useScaffoldReadContract,
@@ -135,7 +135,7 @@ function Vesting() {
         ) : null}
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <Facts>
         <Stat
           label="Total in schedule"
           value={<Arl value={total} decimals={2} />}
@@ -163,7 +163,7 @@ function Vesting() {
             now !== undefined && vestingEnd !== undefined ? timeLeft(now, vestingEnd) : undefined
           }
         />
-      </div>
+      </Facts>
 
       <button
         type="button"

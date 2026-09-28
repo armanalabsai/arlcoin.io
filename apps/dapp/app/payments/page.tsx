@@ -11,6 +11,7 @@ import { useAccount, useWalletClient, useWriteContract } from "wagmi";
 
 import {
   AmountForm,
+  Facts,
   Arl,
   PageTitle,
   RequireWallet,
@@ -90,14 +91,14 @@ function Payments() {
             your wallet; each payment still needs your signature.
           </p>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <Facts inset>
           <Stat
             label="Current limit"
             value={<Arl value={allowance} />}
             testId="permit2-allowance"
           />
           <Stat label="Wallet balance" value={<Arl value={balance} />} />
-        </div>
+        </Facts>
         <AmountForm
           label="New limit"
           action="Set limit"
@@ -363,11 +364,13 @@ function UsageDemo({
         </div>
       ) : null}
 
-      <Stat
-        label="Demo service has received"
-        value={<Arl value={serviceBalance} />}
-        testId="service-balance"
-      />
+      <Facts inset>
+        <Stat
+          label="Demo service has received"
+          value={<Arl value={serviceBalance} />}
+          testId="service-balance"
+        />
+      </Facts>
     </section>
   );
 }

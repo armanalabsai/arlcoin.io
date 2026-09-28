@@ -4,6 +4,7 @@ import { useAccount } from "wagmi";
 
 import {
   AmountForm,
+  Facts,
   Arl,
   PageTitle,
   RequireWallet,
@@ -67,7 +68,7 @@ function Staking() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid gap-3 sm:grid-cols-3">
+      <Facts>
         <Stat
           label="Your stake"
           value={<Arl value={staked} />}
@@ -118,7 +119,7 @@ function Staking() {
           }
           hint={now !== undefined && periodFinish ? timeLeft(now, periodFinish) : undefined}
         />
-      </div>
+      </Facts>
 
       <section className="glass-strong flex flex-col gap-5 p-5">
         <AmountForm

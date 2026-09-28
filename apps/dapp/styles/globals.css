@@ -37,13 +37,15 @@
 }
 
 @theme {
+  --font-mono: "Source Code Pro", ui-monospace, monospace;
+  --font-serif: "Source Serif 4 Variable", ui-serif, Georgia, serif;
   --color-muted: #a3a6ab;
   --color-subtle: #6c7076;
   --color-line: rgb(255 255 255 / 0.08);
 }
 
-/* The base colour lives on <html>; <body> stays transparent so the ambient light layer, which
-   sits behind the content, is not painted over. */
+/* The base colour lives on <html>; <body> stays transparent so the nucleus field, which sits
+   behind the content, is not painted over. */
 html {
   background: #030817;
   /* A compact scale: every rem-based size (text, spacing, controls) follows it. */
@@ -52,41 +54,19 @@ html {
 
 body {
   background: transparent;
-  font-family:
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    sans-serif;
+  font-family: "Source Sans 3 Variable", ui-sans-serif, system-ui, sans-serif;
 }
 
 /*
  * LIQUID GLASS
  *
- * Glass needs something behind it to bend. A fixed ambient layer (soft amber and blue light, a
- * faint star field) sits behind all content and never moves. Surfaces over it are translucent:
+ * Glass needs something behind it to bend: the nucleus field (components/arl/NucleusField.tsx)
+ * moves behind all content. Surfaces over it are translucent:
  * they blur and saturate what is behind, catch light on their top edge, and cast a soft shadow.
  * Weight encodes hierarchy: the header and large panels are heavier (more blur, deeper shadow)
  * than stat tiles; interactive controls are the lightest. Glass is never stacked on glass of the
  * same weight.
  */
-.ambient {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(40rem 30rem at 85% -5%, rgb(238 165 63 / 0.3), transparent 70%),
-    radial-gradient(45rem 35rem at -10% 30%, rgb(56 104 255 / 0.28), transparent 70%),
-    radial-gradient(40rem 30rem at 60% 110%, rgb(120 80 255 / 0.2), transparent 70%),
-    radial-gradient(1px 1px at 20% 30%, rgb(255 255 255 / 0.5), transparent),
-    radial-gradient(1px 1px at 70% 20%, rgb(255 255 255 / 0.35), transparent),
-    radial-gradient(1px 1px at 40% 80%, rgb(255 255 255 / 0.3), transparent),
-    radial-gradient(1.5px 1.5px at 85% 65%, rgb(255 255 255 / 0.4), transparent),
-    radial-gradient(1px 1px at 10% 90%, rgb(255 255 255 / 0.3), transparent),
-    linear-gradient(180deg, #050b1e 0%, #030817 100%);
-}
-
 .glass,
 .glass-strong,
 .glass-chip {
@@ -121,12 +101,12 @@ body {
 }
 
 .glass {
-  border-radius: 22px;
+  border-radius: 12px;
 }
 
 /* Larger surfaces read thicker: more blur, deeper shadow. */
 .glass-strong {
-  border-radius: 26px;
+  border-radius: 16px;
   -webkit-backdrop-filter: blur(32px) saturate(180%);
   backdrop-filter: blur(32px) saturate(180%);
   box-shadow:
@@ -136,7 +116,7 @@ body {
 }
 
 .glass-chip {
-  border-radius: 18px;
+  border-radius: 10px;
   transition:
     border-color 200ms ease,
     background 200ms ease;
@@ -256,4 +236,9 @@ body {
   .btn:active:not(:disabled) {
     transform: none;
   }
+}
+
+h1,
+h2 {
+  font-family: var(--font-serif);
 }

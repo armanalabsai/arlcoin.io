@@ -1,3 +1,6 @@
+import "@fontsource-variable/source-sans-3";
+import "@fontsource-variable/source-serif-4";
+import "@fontsource/source-code-pro/400.css";
 import "@rainbow-me/rainbowkit/styles.css";
 import "~~/styles/globals.css";
 

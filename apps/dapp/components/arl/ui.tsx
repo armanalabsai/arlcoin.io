@@ -22,6 +22,13 @@ export function PageTitle({ title, children }: { title: string; children?: React
   );
 }
 
+/** A list of label and value rows on one glass panel. */
+export function Facts({ children, inset = false }: { children: ReactNode; inset?: boolean }) {
+  // Inside another glass panel the list is outlined, so glass is never stacked on glass.
+  const look = inset ? "rounded-xl border border-white/10" : "glass-strong";
+  return <dl className={`${look} divide-y divide-white/8`}>{children}</dl>;
+}
+
 export function Stat({
   label,
   value,
@@ -34,19 +41,20 @@ export function Stat({
   testId?: string;
 }) {
   return (
-    <div className="glass-chip p-4">
-      <div className="text-xs tracking-wide text-subtle uppercase">{label}</div>
-      <div className="stat-value-arl mt-1 text-base font-semibold" data-testid={testId}>
-        {value}
-      </div>
-      {hint ? <div className="mt-1 text-xs text-muted">{hint}</div> : null}
+    <div className="flex items-baseline justify-between gap-4 px-4 py-3">
+      <dt className="text-sm text-muted">{label}</dt>
+      <dd className="text-right">
+        <div className="stat-value-arl text-base font-semibold" data-testid={testId}>
+          {value}
+        </div>
+        {hint ? <div className="text-xs text-subtle">{hint}</div> : null}
+      </dd>
     </div>
   );
 }
 
 export function Arl({ value, decimals }: { value: bigint | undefined; decimals?: number }) {
-  if (value === undefined)
-    return <span className="loading loading-dots loading-sm" aria-label="Loading" />;
+  if (value === undefined) return <span className="text-sm font-normal text-subtle">reading</span>;
   return (
     <span>
       {formatArl(value, decimals)} <span className="text-xs font-medium text-muted">ARL</span>

@@ -10,6 +10,7 @@ import { WagmiProvider } from "wagmi";
 
 import { Footer } from "~~/components/arl/Footer";
 import { Header } from "~~/components/arl/Header";
+import { NucleusField } from "~~/components/arl/NucleusField";
 import { BlockieAvatar } from "~~/components/scaffold-eth";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 
@@ -37,7 +38,7 @@ export function Providers({ children }: { children: ReactNode }) {
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider avatar={BlockieAvatar} theme={theme}>
-          <div className="ambient" aria-hidden="true" />
+          <NucleusField />
           <div className="flex min-h-screen flex-col">
             <Header />
             <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">{children}</main>
