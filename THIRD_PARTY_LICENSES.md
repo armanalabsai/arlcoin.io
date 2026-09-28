@@ -118,6 +118,13 @@ license is kept verbatim in `apps/dapp/LICENSE-scaffold-eth-2`; the adapted file
 from Base Sepolia and checked against their code hashes. It is installed on the local Anvil chain
 only, for the Payments screen.
 
+`apps/dapp/fixtures/erc8004-code.json` holds the runtime bytecode of the ERC-8004
+IdentityRegistry proxy and implementation (`erc-8004/erc-8004-contracts`,
+`contracts/IdentityRegistryUpgradeable.sol`, MIT; the repository reviewed at
+`b9e466c250744a7e06b13dff9d3c2844ed64f825`) and its initialised storage, read from Base Sepolia.
+It is installed on the local Anvil chain only, for the Network screen. The bytecode was not
+rebuilt from source here; it is the deployed code.
+
 The pages (`app/`), ARL components (`components/arl/`), `lib/`, the local development wallet
 (`services/web3/localDevWallet.ts`), scripts and tests are ARL code (Apache-2.0).
 

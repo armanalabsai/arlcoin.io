@@ -4,7 +4,9 @@ import type { SettleResponse } from "@x402/core/types";
 import { UptoEvmScheme, toFacilitatorEvmSigner } from "@x402/evm";
 import type { ClientEvmSigner } from "@x402/evm";
 import { UptoEvmScheme as UptoFacilitator } from "@x402/evm/upto/facilitator";
-import { useState } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 import { createWalletClient, http, publicActions } from "viem";
 import type { Address } from "viem";
 import { useAccount, useWalletClient, useWriteContract } from "wagmi";
@@ -25,17 +27,10 @@ import {
   useTargetNetwork,
   useTransactor,
 } from "~~/hooks/scaffold-eth";
+import { useArlServices } from "~~/hooks/arl/useArlServices";
+import type { ListedService } from "~~/hooks/arl/useArlServices";
 import { formatArl, timeLeft } from "~~/lib/format";
-import {
-  DEMO_FACILITATOR,
-  DEMO_SERVICE,
-  DEMO_UNIT_PRICE,
-  PERMIT2,
-  meter,
-  nonceBitmap,
-  permit2Abi,
-  uptoRequirements,
-} from "~~/lib/payments";
+import { PERMIT2, meter, nonceBitmap, permit2Abi, uptoRequirements } from "~~/lib/payments";
 import type { SignedCeiling } from "~~/lib/payments";
 import { notification } from "~~/utils/scaffold-eth";
 
@@ -55,7 +50,9 @@ export default function PaymentsPage() {
         actually used, never more than the ceiling, and the contracts enforce it.
       </PageTitle>
       <RequireWallet>
-        <Payments />
+        <Suspense>
+          <Payments />
+        </Suspense>
       </RequireWallet>
     </>
   );
@@ -74,10 +71,15 @@ function Payments() {
     functionName: "allowance",
     args: [address, PERMIT2],
   });
+  const { data: services } = useArlServices();
+  const requested = useSearchParams().get("service");
+  const [chosen, setChosen] = useState<string | null>(null);
+  const selected =
+    services?.find((s) => s.agentId.toString() === (chosen ?? requested)) ?? services?.[0];
   const { data: serviceBalance } = useScaffoldReadContract({
     contractName: "ARLToken",
     functionName: "balanceOf",
-    args: [DEMO_SERVICE],
+    args: [selected?.terms.payTo],
   });
   const arl = useScaffoldWriteContract({ contractName: "ARLToken" });
 
@@ -122,8 +124,21 @@ function Payments() {
         </button>
       </section>
 
-      {token && address ? (
+      {services && services.length === 0 ? (
+        <p className="glass-strong p-5 text-sm text-muted">
+          No service is registered yet.{" "}
+          <Link className="link" href="/network">
+            Register one on the Network screen
+          </Link>
+          .
+        </p>
+      ) : null}
+      {token && address && selected ? (
         <UsageDemo
+          key={selected.agentId.toString()}
+          service={selected}
+          services={services ?? []}
+          onSelect={setChosen}
           payer={address}
           arl={token.address}
           spendable={
@@ -141,11 +156,17 @@ function Payments() {
 }
 
 function UsageDemo({
+  service,
+  services,
+  onSelect,
   payer,
   arl,
   spendable,
   serviceBalance,
 }: {
+  service: ListedService;
+  services: ListedService[];
+  onSelect: (agentId: string) => void;
   payer: Address;
   arl: Address;
   spendable: bigint | undefined;
@@ -164,7 +185,7 @@ function UsageDemo({
   const unitCount = /^\d+$/.test(units.trim()) ? BigInt(units.trim()) : undefined;
   const metered =
     signed && unitCount !== undefined
-      ? meter(DEMO_UNIT_PRICE, unitCount, signed.ceiling)
+      ? meter(service.terms.unitPrice, unitCount, signed.ceiling)
       : undefined;
   const expired = !!signed && now !== undefined && now >= signed.deadline;
 
@@ -174,8 +195,8 @@ function UsageDemo({
       chainId: targetNetwork.id,
       arl,
       ceiling,
-      payTo: DEMO_SERVICE,
-      facilitator: DEMO_FACILITATOR,
+      payTo: service.terms.payTo,
+      facilitator: service.terms.facilitator,
       windowSeconds: WINDOW_SECONDS,
     });
     const signer: ClientEvmSigner = {
@@ -211,13 +232,16 @@ function UsageDemo({
     setBusy(true);
     try {
       const wallet = createWalletClient({
-        account: DEMO_FACILITATOR,
+        account: service.terms.facilitator,
         chain: targetNetwork,
         transport: http(targetNetwork.rpcUrls.default.http[0]),
       }).extend(publicActions);
       type SignerInput = Parameters<typeof toFacilitatorEvmSigner>[0];
       const facilitator = new UptoFacilitator(
-        toFacilitatorEvmSigner({ ...wallet, address: DEMO_FACILITATOR } as unknown as SignerInput),
+        toFacilitatorEvmSigner({
+          ...wallet,
+          address: service.terms.facilitator,
+        } as unknown as SignerInput),
       );
       const verified = await facilitator.verify(signed.payload, signed.requirements);
       if (!verified.isValid) {
@@ -264,12 +288,27 @@ function UsageDemo({
   return (
     <section className="glass-strong flex flex-col gap-4 p-5">
       <div>
-        <h2 className="text-sm font-semibold">2 · Try a usage-based payment</h2>
+        <h2 className="text-sm font-semibold">2 · Pay a service for what you use</h2>
         <p className="mt-1 text-sm text-muted">
-          A demo AI service charges {formatArl(DEMO_UNIT_PRICE)} ARL per unit of usage. Local test
-          chain only: the service and its facilitator are local development accounts.
+          Services come from the ERC-8004 registry (Network screen). On the local chain the
+          service&rsquo;s facilitator settles from this page, as a local development account.
         </p>
       </div>
+      <label className="flex flex-col gap-1 text-sm text-muted">
+        Service
+        <select
+          className="select glass-field w-full"
+          value={service.agentId.toString()}
+          onChange={(e) => onSelect(e.target.value)}
+          data-testid="service-select"
+        >
+          {services.map((s) => (
+            <option key={s.agentId.toString()} value={s.agentId.toString()}>
+              {s.name} · {formatArl(s.terms.unitPrice, 6)} ARL per {s.terms.unit}
+            </option>
+          ))}
+        </select>
+      </label>
 
       {!signed || outcome ? (
         <AmountForm
@@ -301,18 +340,18 @@ function UsageDemo({
             </div>
             <div className="truncate">
               <span className="text-subtle">Pays</span>{" "}
-              <span className="font-mono text-xs">{DEMO_SERVICE}</span>
+              <span className="font-mono text-xs">{service.terms.payTo}</span>
             </div>
             <div className="truncate">
               <span className="text-subtle">Settled by</span>{" "}
-              <span className="font-mono text-xs">{DEMO_FACILITATOR}</span>
+              <span className="font-mono text-xs">{service.terms.facilitator}</span>
             </div>
           </div>
 
           {!outcome ? (
             <>
               <label className="text-sm text-muted" htmlFor="units">
-                Usage the service measured (units)
+                Usage the service measured ({service.terms.unit})
               </label>
               <div className="join w-full">
                 <input
@@ -366,7 +405,7 @@ function UsageDemo({
 
       <Facts inset>
         <Stat
-          label="Demo service has received"
+          label={`${service.name} has received`}
           value={<Arl value={serviceBalance} />}
           testId="service-balance"
         />

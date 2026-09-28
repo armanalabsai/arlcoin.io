@@ -12,13 +12,16 @@ OPERATOR=0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
 
 [[ "$(cast chain-id --rpc-url "$RPC")" == "31337" ]] || { echo "not a local Anvil chain: $RPC" >&2; exit 1; }
 
-# Canonical Permit2 and x402 upto proxy code, for the Payments screen.
-node "$APP/scripts/install-x402.ts" "$RPC"
+# Canonical Permit2, x402 upto proxy and ERC-8004 IdentityRegistry code (Payments, Network).
+node "$APP/scripts/install-canonical.ts" "$RPC"
 
 cd "$CONTRACTS"
 if ! out="$(forge build --skip test 2>&1)"; then echo "$out" >&2; exit 1; fi
 forge script script/DevDapp.s.sol:DevDapp --rpc-url "$RPC" --broadcast --unlocked \
   --sender "$OPERATOR" --slow -q
+# The demo service on the ERC-8004 registry (Network and Payments screens).
+node "$APP/scripts/seed-network.ts" "$RPC"
+
 if [[ "${1:-}" == "--check" ]]; then
   node "$APP/scripts/generate-contracts.ts" --check
 else

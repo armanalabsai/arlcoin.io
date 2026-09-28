@@ -15,6 +15,7 @@ changed is listed in [`THIRD_PARTY_LICENSES`](../THIRD_PARTY_LICENSES).
 | Wallet   | `ARLToken`                                  | See the ARL balance, stake and unclaimed rewards; send ARL                                                                                                       |
 | Vesting  | `ARLVestingWallet`                          | See beneficiary, cliff and end dates, released and releasable amounts; release to the beneficiary                                                                |
 | Staking  | `ARLStakingRewards` and `ARLToken`          | Stake (approving exactly the amount), withdraw, claim rewards, or withdraw everything and claim                                                                  |
+| Network  | ERC-8004 IdentityRegistry                   | List ARL services; register a service with its price, payee and facilitator; take it offline; pay it                                                             |
 | Payments | `ARLToken`, Permit2, `x402UptoPermit2Proxy` | Set or remove the Permit2 payment limit; sign a ceiling (x402 `upto`); a demo service charges the metered amount, capped at the ceiling; cancel an authorization |
 
 Design: Apple-style "liquid glass" in the website's night blue and amber. A fixed layer of soft
@@ -53,6 +54,34 @@ addresses (`scripts/install-x402.ts`, code hashes checked). The flow:
 On a public network the facilitator is the service's server with its own key and gas. In the local
 demo it runs in the browser as Anvil development account 4, which the local node unlocks; the
 service is account 3. Neither has a key in the app.
+
+## Network (ERC-8004)
+
+ARL Network does not add a registry contract of its own. Providers register their services on
+the ERC-8004 IdentityRegistry, the open "Trustless Agents" registry, which is already deployed at
+`0x8004A818BFB912233c491871b3d84c89A494BD9e` on Base Sepolia (and at `0x8004A169…a432` on mainnets).
+Each service is an ERC-8004 agent owned by the provider's wallet. Its registration file
+(registration-v1, stored on-chain as a base64 JSON data URI) adds an `arl` section:
+
+```json
+"arl": {
+  "version": 1, "scheme": "upto", "network": "eip155:31337", "asset": "<ARL>",
+  "unitPrice": "1000000000000000", "unit": "1,000 tokens",
+  "payTo": "<payee>", "facilitator": "<who settles>"
+}
+```
+
+The Network screen lists every agent whose current file has valid ARL terms for this chain and
+for ARL (other agents are ignored), lets a wallet register a service, and lets its owner take it
+offline (a new file with `active: false`). "Pay with ARL" opens the Payments screen with that
+service selected, and the payment uses the service's own price, payee and facilitator.
+
+Everything read from the registry is validated (`lib/registry.ts`): size limits, no control
+characters, addresses, a positive price, and links only over https (or http on this machine).
+
+For the local chain, `scripts/install-canonical.ts` installs the registry's proxy and
+implementation code, and the storage its initializer set, exactly as read from Base Sepolia
+(`fixtures/erc8004-code.json`), and `scripts/seed-network.ts` registers the demo service.
 
 ## Local fixture
 

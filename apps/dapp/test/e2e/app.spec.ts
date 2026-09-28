@@ -7,6 +7,9 @@ import type { Page } from "@playwright/test";
 import { E2E_RPC } from "./chain";
 
 const OTHER = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC";
+// Anvil development accounts 5 and 4: a second provider's payee, and the facilitator.
+const PROVIDER = "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc";
+const FACILITATOR = "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65";
 
 async function rpc(method: string, params: unknown[] = []): Promise<unknown> {
   const res = await fetch(E2E_RPC, {
@@ -40,7 +43,7 @@ test("asks for a wallet before showing anything", async ({ page }) => {
 
 test("phone width: no sideways scroll, bottom navigation", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  for (const path of ["/", "/staking", "/vesting", "/payments"]) {
+  for (const path of ["/", "/staking", "/vesting", "/payments", "/network"]) {
     await connect(page, path);
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - window.innerWidth,
@@ -138,6 +141,53 @@ test("payments: limit, signed ceiling, metered charge, cap, cancel", async ({ pa
 
   await page.getByTestId("limit-revoke").click();
   await expect(page.getByTestId("permit2-allowance")).toHaveText(/^0\s*ARL$/);
+});
+
+test("network: register a service, pay it through its own terms, take it offline", async ({
+  page,
+}) => {
+  await connect(page, "/network");
+  const list = page.getByTestId("service-list");
+  await expect(list).toContainText("Demo AI service");
+  await expect(list).toContainText("0.001 ARL per 1,000 tokens");
+
+  // Unsafe links are refused before anything is sent.
+  await page.getByTestId("svc-name").fill("Vision model");
+  await page.getByTestId("svc-endpoint").fill("javascript:alert(1)");
+  await page.getByTestId("svc-price").fill("0.002");
+  await page.getByTestId("svc-unit").fill("image");
+  await page.getByTestId("svc-submit").click();
+  await expect(page.getByTestId("svc-error")).toContainText("endpoint");
+
+  await page.getByTestId("svc-endpoint").fill("https://vision.example.org/v1");
+  await page.getByLabel("Paid to (default: your wallet)").fill(PROVIDER);
+  await page.getByLabel("Settled by (default: your wallet)").fill(FACILITATOR);
+  await page.getByTestId("svc-submit").click();
+  await expect(page.getByTestId("service-1")).toContainText("Vision model");
+  await expect(page.getByTestId("service-1")).toContainText("0.002 ARL per image");
+  await page.screenshot({ path: "test-results/network.png", fullPage: true });
+
+  // Paying it uses its price, payee and facilitator from the registry.
+  await page.getByTestId("pay-1").click();
+  await expect(page).toHaveURL(/\/payments\?service=1$/);
+  await expect(page.getByTestId("service-select")).toHaveValue("1");
+  await page.getByTestId("limit-input").fill("10");
+  await page.getByTestId("limit-submit").click();
+  await expect(page.getByTestId("permit2-allowance")).toContainText("10");
+  await page.getByTestId("ceiling-input").fill("1");
+  await page.getByTestId("ceiling-submit").click();
+  await page.getByTestId("units-input").fill("100");
+  await expect(page.getByTestId("metered")).toHaveText("Charge: 0.2 ARL");
+  await page.getByTestId("settle").click();
+  await expect(page.getByTestId("outcome")).toContainText("Paid 0.2 ARL of the 1 ARL ceiling");
+  await expect(page.getByTestId("service-balance")).toContainText("0.2");
+
+  // The provider (the wallet that registered it) takes it offline. A full page load drops the
+  // local development wallet, so connect again.
+  await connect(page, "/network");
+  await page.getByTestId("deactivate-1").click();
+  await expect(page.getByTestId("service-1")).toHaveCount(0);
+  await expect(page.getByTestId("service-list")).toContainText("Demo AI service");
 });
 
 test("vesting: nothing before the cliff, then a release to the beneficiary", async ({ page }) => {

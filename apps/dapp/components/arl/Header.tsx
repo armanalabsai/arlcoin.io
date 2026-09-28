@@ -10,6 +10,7 @@ const NAV = [
   { href: "/vesting", label: "Vesting" },
   { href: "/staking", label: "Staking" },
   { href: "/payments", label: "Payments" },
+  { href: "/network", label: "Network" },
 ];
 
 export function Header() {
