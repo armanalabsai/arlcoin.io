@@ -14,3 +14,5 @@ apps/dapp/playwright-report/
 apps/dapp/test-results/
 apps/dapp/next-env.d.ts
 apps/dapp/LICENSE-scaffold-eth-2
+packages/zk/circuit/
+zk/semaphore/target/

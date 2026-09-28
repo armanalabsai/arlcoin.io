@@ -38,6 +38,7 @@ contract DevDapp is Script {
     string internal constant OUTPUT = "deploy/deployments/31337-dapp.json";
 
     error DevDappLocalOnly(uint256 chainId);
+    error DevDappApproveFailed();
 
     function run()
         external
@@ -68,15 +69,25 @@ contract DevDapp is Script {
         staking = new ARLStakingRewards(
             IERC20(address(token)), IERC20(address(token)), DEV_OPERATOR, REWARDS_DURATION
         );
-        token.approve(address(staking), REWARD_AMOUNT);
+        if (!token.approve(address(staking), REWARD_AMOUNT)) revert DevDappApproveFailed();
         staking.notifyRewardAmount(REWARD_AMOUNT);
         vm.stopBroadcast();
 
-        string memory o = "dapp";
-        vm.serializeUint(o, "chainId", block.chainid);
-        vm.serializeAddress(o, "token", address(token));
-        vm.serializeAddress(o, "vesting", address(vesting));
-        vm.serializeAddress(o, "staking", address(staking));
-        vm.writeJson(vm.serializeAddress(o, "user", DEV_USER), OUTPUT);
+        vm.writeJson(
+            string.concat(
+                '{"chainId":',
+                vm.toString(block.chainid),
+                ',"token":"',
+                vm.toString(address(token)),
+                '","vesting":"',
+                vm.toString(address(vesting)),
+                '","staking":"',
+                vm.toString(address(staking)),
+                '","user":"',
+                vm.toString(DEV_USER),
+                '"}'
+            ),
+            OUTPUT
+        );
     }
 }

@@ -9,7 +9,7 @@
     "packages/*"
   ],
   "scripts": {
-    "typecheck": "tsc -p packages/tokenomics && tsc -p packages/deploy && tsc -p packages/monetary",
+    "typecheck": "tsc -p packages/tokenomics && tsc -p packages/deploy && tsc -p packages/monetary && tsc -p packages/zk",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
