@@ -95,6 +95,23 @@ Each deliberate defect was introduced, the suite run, and the defect reverted:
 | assembly, low-level-calls, solc-version (Info) | OpenZeppelin utilities                | Upstream implementation detail                               |
 | pragma (Info)                                  | ARL files                             | ARL pins `0.8.36`; OpenZeppelin uses `^0.8.20`               |
 
+## Staking rewards (`ARLStakingRewards`)
+
+Ported from Synthetix `StakingRewards` via curvefi/unipool-fork (MIT). Reward-per-token math is
+unchanged from the source; the ARL changes are about custody and accounting.
+
+| Risk                                            | Control                                                                                                                                              | Evidence                                                                                 |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Rewards paid from staked principal (same token) | Funded, accrued, paid and returned rewards are tracked separately; rewards are pulled with `transferFrom`                                            | invariants `Solvent`, `NoRewardsFromNothing`; `testFuzz_SolvencyAfterRandomActions`      |
+| Rewards created from nothing                    | No mint; the rate is set from tokens actually transferred in                                                                                         | `NoRewardsFromNothing`; `test_TopUpRollsLeftoverIntoNewPeriod`                           |
+| Admin takes stakes                              | No owner, no pause, no token recovery; the distributor can only fund, set the duration between periods and return unallocated rewards after a period | `test_RevertWhen_NotDistributor`, `test_UnallocatedRewardsReturnedWithoutTouchingStakes` |
+| Rewards lost when nobody is staked              | Unallocated amount is tracked and can be returned after the period                                                                                   | `test_UnallocatedRewardsReturnedWithoutTouchingStakes`                                   |
+| Permit front-running blocks a stake             | `stakeWithPermit` ignores a failed permit if the allowance is in place                                                                               | `test_StakeWithPermitSurvivesFrontRunPermit`                                             |
+| Claims exceed what is owed                      | Sum of `earned` never exceeds allocated, unpaid rewards                                                                                              | invariant `ClaimableCovered`                                                             |
+
+Known limitation (inherited): with a very large total stake and a very small rate, per-token
+increments round down and a small amount of dust stays in the contract.
+
 ## Compiler
 
 solc 0.8.36. Its three known bugs (`MisorderedNamedParametersInRequireWithCustomErrors`,

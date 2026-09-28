@@ -19,14 +19,15 @@ tooling only).
 
 ### Contracts (deployed on-chain)
 
-| File                                     |   nSLOC | Purpose                                                                                                            |
-| ---------------------------------------- | ------: | ------------------------------------------------------------------------------------------------------------------ |
-| `contracts/src/ARLToken.sol`             |      35 | ERC-20 + ERC20Permit; mints the fixed 21,000,000 ARL to 11 holders in the constructor; no mint, burn, admin, pause |
-| `contracts/src/ARLAllocation.sol`        |      16 | The 11 allocation constants                                                                                        |
-| `contracts/src/ARLVestingWallet.sol`     |      34 | OpenZeppelin `VestingWallet` with a cliff and an immutable beneficiary                                             |
-| `contracts/src/ARLTimelock.sol`          |      36 | OpenZeppelin `TimelockController` with a 48-hour floor, no external admin and a cancel-only guardian               |
-| `contracts/src/ARLMerkleDistributor.sol` |      56 | Public Launch Merkle claim with a fixed root, claim window and return address; no owner                            |
-| **Total**                                | **177** |                                                                                                                    |
+| File                                     |   nSLOC | Purpose                                                                                                                 |
+| ---------------------------------------- | ------: | ----------------------------------------------------------------------------------------------------------------------- |
+| `contracts/src/ARLToken.sol`             |      35 | ERC-20 + ERC20Permit; mints the fixed 21,000,000 ARL to 11 holders in the constructor; no mint, burn, admin, pause      |
+| `contracts/src/ARLAllocation.sol`        |      16 | The 11 allocation constants                                                                                             |
+| `contracts/src/ARLVestingWallet.sol`     |      34 | OpenZeppelin `VestingWallet` with a cliff and an immutable beneficiary                                                  |
+| `contracts/src/ARLTimelock.sol`          |      36 | OpenZeppelin `TimelockController` with a 48-hour floor, no external admin and a cancel-only guardian                    |
+| `contracts/src/ARLMerkleDistributor.sol` |      56 | Public Launch Merkle claim with a fixed root, claim window and return address; no owner                                 |
+| `contracts/src/ARLStakingRewards.sol`    |     186 | Stake ARL, earn ARL from a funded pool (Synthetix `StakingRewards` via curvefi/unipool-fork, MIT); no owner, no minting |
+| **Total**                                | **363** |                                                                                                                         |
 
 ### Deployment tooling (runs off-chain, decides what is deployed)
 
@@ -55,6 +56,8 @@ tooling only).
 6. The deployment tooling refuses Base Mainnet and every chain other than local Anvil and Base
    Sepolia, and refuses any Safe role that is not a genuine Safe v1.5.0 proxy of a canonical
    singleton.
+7. Staking never pays rewards that were not funded, never touches staked principal to pay
+   rewards, and returns only unallocated rewards to the distributor, between periods.
 
 ## Existing verification
 

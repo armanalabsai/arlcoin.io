@@ -41,6 +41,11 @@ report.
 same `StandardMerkleTree` encoding that `ARLMerkleDistributor` verifies with OpenZeppelin
 `MerkleProof`.
 
+`curvefi/unipool-fork` (MIT, commit `262a5747a32acd3bf7124bc21058d6905f86e22a`) is the source of
+`ARLStakingRewards`: its `StakingRewards` is Synthetix's widely deployed staking rewards contract
+with the reward pulled in by `transferFrom`. It is ported to Solidity 0.8 and OpenZeppelin v5,
+not vendored; the changes are listed in the contract header and in `THIRD_PARTY_LICENSES.md`.
+
 `safe-global/safe-deployments` (MIT, npm 1.37.63) is adopted for the canonical Safe v1.5.0
 singleton addresses and code hashes: off local Anvil, every Safe role must be a genuine Safe
 v1.5.0 proxy of a canonical singleton.

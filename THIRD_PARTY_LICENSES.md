@@ -19,6 +19,15 @@ submodule. CI verifies both commits on every run.
 Compiled ARL contracts include OpenZeppelin code under the MIT license
 (Copyright (c) 2016-2026 Zeppelin Group Ltd).
 
+## Adapted source (ported, with modifications)
+
+| Component                                                        | Source                                                 | Commit                                     | License                                                                | ARL file                                    | ARL modifications                                                                                                                                                                                                                                                                                                                         |
+| ---------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------ | ---------------------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Synthetix `StakingRewards` (as modified in curvefi/unipool-fork) | `curvefi/unipool-fork`, `contracts/StakingRewards.sol` | `262a5747a32acd3bf7124bc21058d6905f86e22a` | MIT (Copyright (c) 2019-2020 Synthetix; Copyright (c) 2020 Ben Hauser) | `contracts/src/ARLStakingRewards.sol` (MIT) | Solidity 0.8.36 and OpenZeppelin v5; owner, pause and token recovery removed; immutable rewards distributor; separate accounting of funded, accrued, paid and returned rewards so staking and reward token can both be ARL; return of unallocated rewards between periods; `stakeWithPermit` tolerant of front-run permits; custom errors |
+
+`ARLStakingRewards.sol` keeps the MIT license and copyright notices of its sources; the rest of
+the repository is Apache-2.0.
+
 ## Tools (not distributed)
 
 | Tool            | Version | Commit                                     | License           | Use                                                                |
