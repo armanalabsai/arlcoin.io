@@ -148,15 +148,17 @@ different status.
   restricted or subject to any future release schedule.
 - No schedule is assigned to the remaining 100,000 ARL. It must not be treated
   as vesting, unlocked or circulating until its treatment is decided.
-- IMPLEMENTATION CONSTRAINT: the current contracts and deployment tooling mint
-  the whole 2,100,000 ARL to one founder vesting wallet
-  (`ARLAllocation.FOUNDER`, `ARLToken.Recipients.founder`, `ARLDeployer`).
-  Implementing this decision requires a separate, approved change to the
-  contracts, the deployment planner, the verifier and their tests. This
-  specification does not make that change.
-- IMPLEMENTATION CONSTRAINT: the M-3 rule that the founder vesting beneficiary
-  is a dedicated Safe was written for a vesting wallet. It does not by itself
-  set the address that receives the unlocked 2,000,000 ARL.
+- IMPLEMENTATION CONSTRAINT: the contracts and deployment tooling mint the
+  Founder allocation to two genesis holders, with no vesting wallet:
+  `ARLAllocation.FOUNDER_UNRESTRICTED` (2,000,000 ARL) to
+  `ARLToken.Recipients.founderUnrestricted` and
+  `ARLAllocation.FOUNDER_RESERVED` (100,000 ARL) to
+  `ARLToken.Recipients.founderReserved`. The tooling refuses every public
+  network until the reserved custody is approved
+  (`FOUNDER_RESERVE_CUSTODY_APPROVED = false`).
+- IMPLEMENTATION CONSTRAINT: the M-3 rule applies to the Founder Unrestricted
+  recipient: off local Anvil it must be a contract (a dedicated Safe). The
+  address of that Safe is not set (section 15, item 12).
 
 #### Founder supply states
 
