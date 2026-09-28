@@ -107,16 +107,11 @@ milestone → vesting → release. Milestones are not defined.
 
 ### Founder allocation
 
-The 2,100,000 ARL Founder allocation is minted at genesis to two holders:
-`FOUNDER_UNRESTRICTED` (2,000,000 ARL) to a dedicated founder Safe and
-`FOUNDER_RESERVED` (100,000 ARL) to a separate address whose custody is TBD
-(`FOUNDER = FOUNDER_UNRESTRICTED + FOUNDER_RESERVED`). Neither goes through a
-vesting wallet, and the token gives neither any privilege: both use the same
-ERC-20 transfer mechanics as every holder. The planner and `ARLDeployPlan`
-refuse every chain except local Anvil until the reserved custody is approved
-(`FOUNDER_RESERVE_CUSTODY_APPROVED = false`), and every plan address must be
-distinct, so the reserved tranche cannot share the unrestricted Safe or any
-other holder.
+The whole 2,100,000 ARL Founder allocation (`FOUNDER`) is minted at genesis to
+one dedicated Founder Safe and is unlocked at TGE. It does not go through a
+vesting wallet, and the token gives the Founder Safe no privilege: it uses the
+same ERC-20 transfer mechanics as every holder. Every plan address must be
+distinct, so the Founder Safe cannot share an address with any other holder.
 
 ### Team pool
 
@@ -133,7 +128,7 @@ A beneficiary that loses its key loses the tokens in its wallet; there is no
 recovery path in the vesting wallet by design. Recovery therefore lives in the
 beneficiary itself:
 
-- The Founder Unrestricted recipient must be a dedicated Safe (for example
+- The Founder recipient must be a dedicated Safe (for example
   2-of-3). Off local Anvil, the deployment plan and the verifier reject it
   without contract code (M-3). A lost key is replaced by rotating the Safe's
   owners.

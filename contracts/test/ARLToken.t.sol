@@ -39,8 +39,6 @@ contract ARLTokenTest is ARLTestBase {
         assertEq(ARLAllocation.STRATEGIC_PARTNERSHIPS, 2_000_000e18);
         assertEq(ARLAllocation.LIQUIDITY, 2_000_000e18);
         assertEq(ARLAllocation.FOUNDER, 2_100_000e18);
-        assertEq(ARLAllocation.FOUNDER_UNRESTRICTED, 2_000_000e18);
-        assertEq(ARLAllocation.FOUNDER_RESERVED, 100_000e18);
         assertEq(ARLAllocation.INVESTORS, 1_500_000e18);
         assertEq(ARLAllocation.TREASURY, 1_000_000e18);
         assertEq(ARLAllocation.TEAM, 900_000e18);
@@ -56,8 +54,7 @@ contract ARLTokenTest is ARLTestBase {
             token.balanceOf(address(partnershipsVesting)), ARLAllocation.STRATEGIC_PARTNERSHIPS
         );
         assertEq(token.balanceOf(liquiditySafe), ARLAllocation.LIQUIDITY);
-        assertEq(token.balanceOf(founderUnrestrictedSafe), ARLAllocation.FOUNDER_UNRESTRICTED);
-        assertEq(token.balanceOf(founderReservedHolder), ARLAllocation.FOUNDER_RESERVED);
+        assertEq(token.balanceOf(founderSafe), ARLAllocation.FOUNDER);
         assertEq(token.balanceOf(address(investorsVesting)), ARLAllocation.INVESTORS);
         assertEq(token.balanceOf(address(treasury)), ARLAllocation.TREASURY);
         assertEq(token.balanceOf(teamPoolSafe), ARLAllocation.TEAM);
@@ -65,27 +62,18 @@ contract ARLTokenTest is ARLTestBase {
         assertEq(token.balanceOf(grantsSafe), ARLAllocation.GRANTS_BUG_BOUNTY);
     }
 
-    // ---------------------------------------------------------------- founder tranches
+    // ---------------------------------------------------------------- founder
 
-    /// @dev The Founder allocation is one economic allocation split into two genesis tranches.
-    function test_FounderTranchesSumToFounderAllocation() public pure {
-        assertEq(
-            ARLAllocation.FOUNDER_UNRESTRICTED + ARLAllocation.FOUNDER_RESERVED,
-            ARLAllocation.FOUNDER
-        );
+    /// @dev The whole Founder allocation is minted to the Founder Safe, unlocked at genesis.
+    function test_FounderGenesisBalance() public view {
         assertEq(ARLAllocation.FOUNDER, 2_100_000e18);
-    }
-
-    function test_FounderGenesisBalances() public view {
-        assertEq(token.balanceOf(founderUnrestrictedSafe), 2_000_000e18);
-        assertEq(token.balanceOf(founderReservedHolder), 100_000e18);
-        assertTrue(founderUnrestrictedSafe != founderReservedHolder);
+        assertEq(token.balanceOf(founderSafe), 2_100_000e18);
         assertEq(token.totalSupply(), 21_000_000e18);
     }
 
-    /// @dev Genesis is exactly twelve mints (Transfer from address(0)), all emitted by the
-    /// constructor, to twelve distinct holders, adding up to the maximum supply.
-    function test_ExactlyTwelveGenesisMintsInConstructor() public {
+    /// @dev Genesis is exactly eleven mints (Transfer from address(0)), all emitted by the
+    /// constructor, to eleven distinct holders, adding up to the maximum supply.
+    function test_ExactlyElevenGenesisMintsInConstructor() public {
         vm.recordLogs();
         ARLToken t = new ARLToken(_recipients());
         Vm.Log[] memory logs = vm.getRecordedLogs();
@@ -103,48 +91,48 @@ contract ARLTokenTest is ARLTestBase {
             to[mints++] = recipient;
             minted += abi.decode(logs[i].data, (uint256));
         }
-        assertEq(mints, 12);
+        assertEq(mints, 11);
         assertEq(minted, ARLAllocation.MAX_SUPPLY);
         assertEq(t.totalSupply(), ARLAllocation.MAX_SUPPLY);
     }
 
-    /// @dev The unrestricted tranche is an ordinary holder: it can move its whole balance at
+    /// @dev The Founder Safe is an ordinary holder: it can move the whole 2,100,000 ARL at
     /// genesis, with no cliff, vesting, timelock or restriction.
-    function test_FounderUnrestrictedTransfersEntireBalanceAtGenesis() public {
+    function test_FounderTransfersEntireAllocationAtGenesis() public {
         ARLToken t = new ARLToken(_recipients());
-        vm.prank(founderUnrestrictedSafe);
-        assertTrue(t.transfer(address(0xBEEF), ARLAllocation.FOUNDER_UNRESTRICTED));
-        assertEq(t.balanceOf(address(0xBEEF)), ARLAllocation.FOUNDER_UNRESTRICTED);
-        assertEq(t.balanceOf(founderUnrestrictedSafe), 0);
+        vm.prank(founderSafe);
+        assertTrue(t.transfer(address(0xBEEF), ARLAllocation.FOUNDER));
+        assertEq(t.balanceOf(address(0xBEEF)), ARLAllocation.FOUNDER);
+        assertEq(t.balanceOf(founderSafe), 0);
         assertEq(t.totalSupply(), ARLAllocation.MAX_SUPPLY);
     }
 
     /// @dev transferFrom follows normal ERC-20 allowance rules for the Founder, as for anyone.
-    function test_FounderUnrestrictedTransferFromFollowsAllowance() public {
+    function test_FounderTransferFromFollowsAllowance() public {
         address spender = makeAddr("exchange");
         vm.prank(spender);
         vm.expectRevert(
             abi.encodeWithSelector(IERC20Errors.ERC20InsufficientAllowance.selector, spender, 0, 1)
         );
-        token.transferFrom(founderUnrestrictedSafe, spender, 1);
+        token.transferFrom(founderSafe, spender, 1);
 
-        vm.prank(founderUnrestrictedSafe);
+        vm.prank(founderSafe);
         token.approve(spender, 500_000e18);
         vm.prank(spender);
-        assertTrue(token.transferFrom(founderUnrestrictedSafe, spender, 500_000e18));
+        assertTrue(token.transferFrom(founderSafe, spender, 500_000e18));
         assertEq(token.balanceOf(spender), 500_000e18);
-        assertEq(token.allowance(founderUnrestrictedSafe, spender), 0);
-        assertEq(token.balanceOf(founderUnrestrictedSafe), 1_500_000e18);
+        assertEq(token.allowance(founderSafe, spender), 0);
+        assertEq(token.balanceOf(founderSafe), 1_600_000e18);
     }
 
     /// @dev No Founder-specific behavior: a Founder transfer behaves exactly like the same
     /// transfer from any other holder with enough balance.
     function testFuzz_FounderTransfersBehaveLikeAnyHolder(address to, uint256 amount) public {
-        vm.assume(to != address(0) && to != founderUnrestrictedSafe && to != communitySafe);
-        amount = bound(amount, 0, ARLAllocation.FOUNDER_UNRESTRICTED);
+        vm.assume(to != address(0) && to != founderSafe && to != communitySafe);
+        amount = bound(amount, 0, ARLAllocation.FOUNDER);
         uint256 toBefore = token.balanceOf(to);
 
-        vm.prank(founderUnrestrictedSafe);
+        vm.prank(founderSafe);
         assertTrue(token.transfer(to, amount));
         assertEq(token.balanceOf(to), toBefore + amount);
 
@@ -152,12 +140,6 @@ contract ARLTokenTest is ARLTestBase {
         assertTrue(token.transfer(to, amount));
         assertEq(token.balanceOf(to), toBefore + 2 * amount);
         assertEq(token.totalSupply(), ARLAllocation.MAX_SUPPLY);
-    }
-
-    function test_FounderReservedHolderIsAnOrdinaryHolder() public {
-        vm.prank(founderReservedHolder);
-        assertTrue(token.transfer(address(0xBEEF), 1));
-        assertEq(token.balanceOf(founderReservedHolder), ARLAllocation.FOUNDER_RESERVED - 1);
     }
 
     // ---------------------------------------------------------------- recipients
@@ -173,7 +155,7 @@ contract ARLTokenTest is ARLTestBase {
     }
 
     function test_RevertWhen_AnyRecipientIsZero() public {
-        for (uint256 i = 0; i < 12; i++) {
+        for (uint256 i = 0; i < 11; i++) {
             ARLToken.Recipients memory r = _recipients();
             _zeroField(r, i);
             vm.expectRevert(
@@ -307,12 +289,11 @@ contract ARLTokenTest is ARLTestBase {
         else if (i == 2) r.ecosystemGrowth = address(0);
         else if (i == 3) r.strategicPartnerships = address(0);
         else if (i == 4) r.liquidity = address(0);
-        else if (i == 5) r.founderUnrestricted = address(0);
-        else if (i == 6) r.founderReserved = address(0);
-        else if (i == 7) r.investors = address(0);
-        else if (i == 8) r.treasury = address(0);
-        else if (i == 9) r.team = address(0);
-        else if (i == 10) r.earlyUsers = address(0);
+        else if (i == 5) r.founder = address(0);
+        else if (i == 6) r.investors = address(0);
+        else if (i == 7) r.treasury = address(0);
+        else if (i == 8) r.team = address(0);
+        else if (i == 9) r.earlyUsers = address(0);
         else r.grantsBugBounty = address(0);
     }
 }

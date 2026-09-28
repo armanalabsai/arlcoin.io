@@ -12,12 +12,8 @@ const read = (path: string) =>
 const allocationSource = read("ARLAllocation.sol");
 const tokenSource = read("ARLToken.sol");
 
-/**
- * Genesis holders in canonical order: every allocation, except that an
- * allocation held in tranches is replaced by its tranches. The Founder
- * allocation is one economic allocation with two genesis holders.
- */
-const GENESIS = ALLOCATIONS.flatMap((a) => a.tranches ?? [a]);
+/** Genesis holders in canonical order: one per allocation. */
+const GENESIS = ALLOCATIONS;
 
 /** Genesis holder id → Solidity constant → `Recipients` field. */
 const CONTRACT_NAMES: Record<string, readonly [constant: string, field: string]> = {
@@ -26,8 +22,7 @@ const CONTRACT_NAMES: Record<string, readonly [constant: string, field: string]>
   "ecosystem-growth": ["ECOSYSTEM_GROWTH", "ecosystemGrowth"],
   "strategic-partnerships": ["STRATEGIC_PARTNERSHIPS", "strategicPartnerships"],
   liquidity: ["LIQUIDITY", "liquidity"],
-  "founder-unrestricted": ["FOUNDER_UNRESTRICTED", "founderUnrestricted"],
-  "founder-reserved": ["FOUNDER_RESERVED", "founderReserved"],
+  founder: ["FOUNDER", "founder"],
   investors: ["INVESTORS", "investors"],
   treasury: ["TREASURY", "treasury"],
   team: ["TEAM", "team"],
@@ -74,14 +69,9 @@ describe("ARLAllocation.sol", () => {
     }
   });
 
-  it("FOUNDER is exactly the sum of its two tranches (2,100,000 ARL)", () => {
-    assert.match(
-      allocationSource,
-      /uint256 internal constant FOUNDER = FOUNDER_UNRESTRICTED \+ FOUNDER_RESERVED;/,
-    );
-    const founder = ALLOCATIONS.find((a) => a.id === "founder");
-    assert.equal(founder?.amount, 2_100_000);
-    assert.equal(wholeTokens("FOUNDER_UNRESTRICTED") + wholeTokens("FOUNDER_RESERVED"), 2_100_000);
+  it("FOUNDER is 2,100,000 ARL and is not split", () => {
+    assert.equal(wholeTokens("FOUNDER"), 2_100_000);
+    assert.doesNotMatch(allocationSource, /FOUNDER_(UNRESTRICTED|RESERVED)/);
   });
 
   it("the constants sum to MAX_SUPPLY", () => {
@@ -102,8 +92,8 @@ describe("ARLToken.sol", () => {
     m[2],
   ]);
 
-  it("has exactly one recipient per genesis holder (12), in canonical order", () => {
-    assert.equal(fields.length, 12);
+  it("has exactly one recipient per genesis holder (11), in canonical order", () => {
+    assert.equal(fields.length, 11);
     assert.deepEqual(
       fields,
       GENESIS.map((a) => CONTRACT_NAMES[a.id]?.[1]),
@@ -121,7 +111,7 @@ describe("ARLToken.sol", () => {
   });
 
   it("calls _mint only in the constructor (no mint path after deployment)", () => {
-    assert.equal(GENESIS.length, 12);
+    assert.equal(GENESIS.length, 11);
     assert.equal((tokenSource.match(/_mint\(/g) ?? []).length, GENESIS.length);
     const constructorBody = /constructor\([^)]*\)[^{]*\{([\s\S]*?)\n {4}\}/.exec(tokenSource)?.[1];
     assert.ok(constructorBody);

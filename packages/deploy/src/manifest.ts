@@ -85,14 +85,8 @@ export function buildManifest(plan: DeployPlan, deployment: DeploymentRecord): D
     { role: "treasurySafe", address: plan.treasury.safe, circulating: false, reason: SAFE },
     { role: "treasuryGuardian", address: plan.treasury.guardian, circulating: false, reason: SAFE },
     {
-      role: "founderReserved",
-      address: r.founderReserved,
-      circulating: false,
-      reason: "not counted until its treatment is decided",
-    },
-    {
-      role: "founderUnrestricted",
-      address: r.founderUnrestricted,
+      role: "founder",
+      address: r.founder,
       circulating: true,
       reason: "unlocked at TGE; not a protocol-controlled address",
     },

@@ -50,8 +50,7 @@ function genesis(): Map<string, bigint> {
   set("investorsVesting", a.investors);
   set("partnershipsVesting", a.strategicPartnerships);
   set("treasuryTimelock", a.treasury);
-  set("founderUnrestricted", plan.founderTranches.unrestricted);
-  set("founderReserved", plan.founderTranches.reserved);
+  set("founder", a.founder);
   return b;
 }
 
@@ -66,24 +65,17 @@ const outsider = "0x000000000000000000000000000000000000beef";
 
 describe("deployment manifest", () => {
   it("lists every genesis and protocol-controlled address once", () => {
-    assert.equal(manifest.holders.length, 14);
-    assert.equal(new Set(manifest.holders.map((h) => h.address.toLowerCase())).size, 14);
+    assert.equal(manifest.holders.length, 13);
+    assert.equal(new Set(manifest.holders.map((h) => h.address.toLowerCase())).size, 13);
     assert.equal(manifest.chainId, 31337);
     assert.equal(manifest.token, deployment.token);
   });
 
-  it("only the Founder Unrestricted address is circulating", () => {
+  it("only the Founder Safe is circulating", () => {
     assert.deepEqual(
       manifest.holders.filter((h) => h.circulating).map((h) => h.role),
-      ["founderUnrestricted"],
+      ["founder"],
     );
-  });
-
-  it("the Founder Reserved tranche is not counted until its treatment is decided", () => {
-    const reserved = manifest.holders.find((h) => h.role === "founderReserved");
-    assert.ok(reserved);
-    assert.equal(reserved.circulating, false);
-    assert.match(reserved.reason, /not counted until its treatment is decided/);
   });
 
   it("rejects a deployment record from another chain or with a malformed address", () => {
@@ -101,42 +93,42 @@ describe("deployment manifest", () => {
 });
 
 describe("circulating supply", () => {
-  it("at TGE is exactly the Founder's unlocked 2,000,000 ARL (spec section 6)", () => {
+  it("at TGE is exactly the Founder's unlocked 2,100,000 ARL (spec section 6)", () => {
     const report = supply(genesis());
     assert.equal(report.totalSupply, 21_000_000n * ARL);
-    assert.equal(report.circulatingSupply, 2_000_000n * ARL);
-    assert.equal(report.lockedSupply, 19_000_000n * ARL);
+    assert.equal(report.circulatingSupply, 2_100_000n * ARL);
+    assert.equal(report.lockedSupply, 18_900_000n * ARL);
   });
 
   it("does not change when the Founder transfers or sells unlocked tokens", () => {
     const b = genesis();
-    move(b, role("founderUnrestricted"), outsider, 500_000n * ARL);
-    assert.equal(supply(b).circulatingSupply, 2_000_000n * ARL);
+    move(b, role("founder"), outsider, 500_000n * ARL);
+    assert.equal(supply(b).circulatingSupply, 2_100_000n * ARL);
   });
 
   it("rises only when tokens leave a protocol-controlled or locked address", () => {
     const b = genesis();
     move(b, role("liquidity"), outsider, 1n);
-    assert.equal(supply(b).circulatingSupply, 2_000_000n * ARL + 1n);
+    assert.equal(supply(b).circulatingSupply, 2_100_000n * ARL + 1n);
   });
 
   it("counts vested tokens only once released out of the vesting wallet", () => {
     const b = genesis();
     const investorsSafe = plan.vesting.investors.beneficiary.toLowerCase();
     move(b, role("investorsVesting"), investorsSafe, 12_345n * ARL);
-    assert.equal(supply(b).circulatingSupply, 2_012_345n * ARL);
+    assert.equal(supply(b).circulatingSupply, 2_112_345n * ARL);
   });
 
   it("does not count treasury tokens moved to a protocol-controlled Safe", () => {
     const b = genesis();
     move(b, role("treasuryTimelock"), role("treasurySafe"), 1_000n * ARL);
-    assert.equal(supply(b).circulatingSupply, 2_000_000n * ARL);
+    assert.equal(supply(b).circulatingSupply, 2_100_000n * ARL);
   });
 
   it("formats exact base-unit and ARL strings", () => {
     const f = formatReport(supply(genesis()));
-    assert.equal(f.circulatingSupply, "2000000000000000000000000");
-    assert.equal(f.circulatingSupplyArl, "2000000");
+    assert.equal(f.circulatingSupply, "2100000000000000000000000");
+    assert.equal(f.circulatingSupplyArl, "2100000");
     assert.equal(f.totalSupplyArl, "21000000");
   });
 

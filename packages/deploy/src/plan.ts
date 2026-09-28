@@ -12,20 +12,17 @@ import {
 } from "@safe-global/safe-deployments";
 
 /**
- * Plan schema. Version 3 removed the founder vesting wallet: the Founder allocation is minted
- * to two recipients (unrestricted and reserved) and never vests. Version 4 adds the Safe
- * v1.5.0 singletons every Safe role must point to. Plans of older schemas, and configs that
- * still carry `vesting.founder`, are rejected, not reinterpreted.
+ * Plan schema. Version 3 removed the founder vesting wallet. Version 4 added the Safe v1.5.0
+ * singletons every Safe role must point to. Version 5 mints the whole Founder allocation,
+ * unlocked, to one Founder Safe (no tranches). Plans of older schemas, and configs that still
+ * carry `vesting.founder`, are rejected, not reinterpreted.
  */
-export const PLAN_SCHEMA = "arl-deploy-plan/4";
+export const PLAN_SCHEMA = "arl-deploy-plan/5";
 
 /** The Safe version every Safe role must run. */
 export const SAFE_VERSION = "1.5.0";
 
-/**
- * Anvil's default chain ID. Only here may recipients lack code, schedules be unapproved, or the
- * Founder Reserved custody be undecided.
- */
+/** Anvil's default chain ID. Only here may recipients lack code or schedules be unapproved. */
 export const LOCAL_CHAIN_ID = 31337;
 
 const DECIMALS = 18n;
@@ -35,17 +32,13 @@ const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
 const ZERO_ADDRESS = /^0x0{40}$/;
 const UTC_DATE = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})Z$/;
 
-/**
- * Holders minted to directly, in the order of the Solidity struct: seven dedicated Safes, the
- * Founder Unrestricted Safe, and the Founder Reserved holder (custody TBD).
- */
+/** Holders minted to directly, in the order of the Solidity struct: eight dedicated Safes. */
 export const RECIPIENT_KEYS = [
   "publicLaunch",
   "communityStaking",
   "ecosystemGrowth",
   "liquidity",
-  "founderUnrestricted",
-  "founderReserved",
+  "founder",
   "team",
   "earlyUsers",
   "grantsBugBounty",
@@ -73,12 +66,6 @@ const ALLOCATION_KEY: Record<string, string> = {
   "early-users": "earlyUsers",
   "grants-bug-bounty": "grantsBugBounty",
 };
-
-/** Founder tranche id → plan key (under `founderTranches`) and recipient key. */
-const FOUNDER_TRANCHES = {
-  "founder-unrestricted": { key: "unrestricted", recipient: "founderUnrestricted" },
-  "founder-reserved": { key: "reserved", recipient: "founderReserved" },
-} as const;
 
 const CONFIG_KEYS = [
   "network",
@@ -140,8 +127,6 @@ export interface DeployPlan {
   requireRecipientCode: boolean;
   maxSupply: string;
   allocations: Record<string, string>;
-  /** The Founder allocation's two tranches, in base units; together `allocations.founder`. */
-  founderTranches: { unrestricted: string; reserved: string };
   vesting: Record<VestingKey, VestingPlan>;
   treasury: { safe: string; guardian: string; minDelay: number };
   recipients: Record<RecipientKey, string>;
@@ -284,18 +269,6 @@ function buildVesting(
 }
 
 /**
- * The Founder Reserved custody is TBD. Off local Anvil the plan is refused until it is
- * approved; locally a placeholder address may rehearse it.
- */
-export function founderReserveGate(local: boolean, custodyApproved: boolean): void {
-  if (!local && !custodyApproved) {
-    fail(
-      "recipients.founderReserved: custody is not approved (TBD); only local Anvil may rehearse it with a placeholder",
-    );
-  }
-}
-
-/**
  * The canonical Safe v1.5.0 singletons (Safe and SafeL2) on `chainId`, from
  * `@safe-global/safe-deployments`. Fails if the chain has no canonical deployment.
  */
@@ -376,16 +349,6 @@ export function buildPlan(config: DeployConfig): DeployPlan {
     recipients[key] = requireAddress(config.recipients[key], `recipients.${key}`);
   }
 
-  const founder = ALLOCATIONS.find((a) => a.id === "founder");
-  const reserved = founder?.tranches?.find((t) => t.id === "founder-reserved");
-  if (!founder || !reserved || founder.tranches?.length !== 2) {
-    fail("tokenomics: the founder allocation must have exactly two tranches");
-  }
-  founderReserveGate(
-    local,
-    reserved.custody.holder !== "tbd" && reserved.release.status === "approved",
-  );
-
   let safeSingletons: string[];
   if (local) {
     requireKeys(config.safe ?? { singletons: [] }, "safe", ["singletons"]);
@@ -425,20 +388,6 @@ export function buildPlan(config: DeployConfig): DeployPlan {
   const maxSupply = BigInt(MAX_SUPPLY) * UNIT;
   if (total !== maxSupply) fail(`allocations total ${total}, expected ${maxSupply}`);
 
-  const founderTranches = { unrestricted: "", reserved: "" };
-  let founderTotal = 0n;
-  for (const t of founder.tranches) {
-    const target = FOUNDER_TRANCHES[t.id as keyof typeof FOUNDER_TRANCHES] as
-      (typeof FOUNDER_TRANCHES)[keyof typeof FOUNDER_TRANCHES] | undefined;
-    if (!target) fail(`tokenomics: founder tranche "${t.id}" has no deployment recipient`);
-    const amount = BigInt(t.amount) * UNIT;
-    founderTranches[target.key] = amount.toString();
-    founderTotal += amount;
-  }
-  if (founderTotal !== BigInt(founder.amount) * UNIT) {
-    fail(`founder tranches total ${founderTotal}, expected ${BigInt(founder.amount) * UNIT}`);
-  }
-
   return {
     schema: PLAN_SCHEMA,
     network: config.network,
@@ -446,7 +395,6 @@ export function buildPlan(config: DeployConfig): DeployPlan {
     requireRecipientCode: config.requireRecipientCode,
     maxSupply: maxSupply.toString(),
     allocations,
-    founderTranches,
     vesting,
     treasury: { safe: treasurySafe, guardian: treasuryGuardian, minDelay: delayHours * 3600 },
     recipients,

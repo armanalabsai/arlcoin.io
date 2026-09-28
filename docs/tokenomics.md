@@ -55,7 +55,7 @@ in `packages/tokenomics`. Every Safe is dedicated to one allocation.
 | Ecosystem & Growth            | Dedicated Safe                                                                |
 | Strategic Partnerships        | Vesting wallet → dedicated Safe                                               |
 | Liquidity                     | Dedicated Safe                                                                |
-| Founder                       | Two tranches: Unrestricted → dedicated founder Safe; Reserved → custody TBD   |
+| Founder                       | Dedicated Founder Safe                                                        |
 | Investors / Strategic Capital | Vesting wallet → dedicated Safe                                               |
 | Treasury                      | Treasury timelock, controlled by the Treasury Safe, cancel-only guardian      |
 | Team                          | Dedicated team pool Safe; each grant → its own vesting wallet → member's Safe |
@@ -76,27 +76,17 @@ in `packages/tokenomics`. Every Safe is dedicated to one allocation.
 | Ecosystem & Growth            | Programs tied to genuine, verifiable activity. Rules, rates and schedule not defined                                                                | undecided                           |
 | Strategic Partnerships        | Vesting wallet: 0% at TGE, 12-month cliff, 36 months linear; start date TBD. Not an unconditional pool: partnership → milestone → vesting → release | approved (start: undecided)         |
 | Liquidity                     | Held as a reserve; the amount used for any pool or listing is decided separately                                                                    | approved                            |
-| Founder                       | 2,000,000 ARL unrestricted at TGE (no vesting); 100,000 ARL reserved, not vested, treatment TBD                                                     | approved (reserved: undecided)      |
+| Founder                       | All 2,100,000 ARL unrestricted at TGE (no vesting)                                                                                                  | approved                            |
 | Investors / Strategic Capital | Vesting wallet: 0% at TGE, 12-month cliff, 36 months linear; start date TBD                                                                         | approved (start: undecided)         |
 | Treasury                      | Safe 3-of-5, minimum 48-hour timelock, cancel-only guardian                                                                                         | approved                            |
 | Team                          | Irrevocable per-member grants in tranches from the pool, each to the member's own Safe; each grant: 12-month cliff, 36 months linear                | approved (tranche sizes: undecided) |
 | Early Users                   | Rewards only for genuine, verifiable usage; connecting a wallet earns nothing. Amounts and schedule TBD                                             | undecided                           |
 | Grants / Bug Bounty           | Paid per grant or bounty award                                                                                                                      | undecided                           |
 
-The Founder allocation is one allocation of 2,100,000 ARL minted to two
-genesis holders, so the token mints to twelve holders for eleven allocations:
-
-| Founder tranche      |       ARL | Allocated | Unlocked at TGE | Custody                   |
-| -------------------- | --------: | --------- | --------------- | ------------------------- |
-| Founder Unrestricted | 2,000,000 | yes       | yes             | Dedicated founder Safe    |
-| Founder Reserved     |   100,000 | yes       | not decided     | TBD (placeholder locally) |
-| **Founder total**    | 2,100,000 |           |                 |                           |
-
-Neither tranche vests. The unrestricted tranche is an ordinary ERC-20 holder
-with no protocol-level transfer or sale restriction; tokens the Founder has not
-sold are still unlocked, not locked. The reserved tranche has no schedule; its
-treatment and custody are TBD, and the tooling refuses every public network
-until its custody is approved (`FOUNDER_RESERVE_CUSTODY_APPROVED = false`).
+The whole Founder allocation of 2,100,000 ARL is minted to the dedicated
+Founder Safe and is unlocked at TGE. It does not vest. The Founder Safe is an
+ordinary ERC-20 holder with no protocol-level transfer or sale restriction;
+tokens the Founder has not sold are still unlocked, not locked.
 
 The approved vesting durations are enforced: the planner (`packages/deploy`)
 and `ARLDeployPlan` reject any schedule whose cliff is not 12 calendar months or
@@ -127,9 +117,8 @@ These are kept separate everywhere, including the website:
 Circulating supply follows the approved definition in the economic
 specification (section 5): total supply minus the balances of protocol-controlled
 or locked addresses. Vested but unreleased tokens are not circulating; the
-Founder's unlocked 2,000,000 ARL is circulating from TGE; the Founder Reserved
-100,000 ARL is not counted until its treatment is decided. The protocol-controlled
+Founder's unlocked 2,100,000 ARL is circulating from TGE. The protocol-controlled
 and locked addresses are published in the deployment manifest
 (`packages/deploy/src/manifest.ts`), and `supply-cli.ts` reads the figure from the
-chain at a single block. At TGE it is exactly 2,000,000 ARL; the local rehearsal
+chain at a single block. At TGE it is exactly 2,100,000 ARL; the local rehearsal
 checks this on a real deployment.

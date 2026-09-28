@@ -5,7 +5,6 @@ export type {
   DecisionStatus,
   MultisigControls,
   Release,
-  Tranche,
   VestingSchedule,
 } from "./allocations.ts";
 export { validateAllocations } from "./validate.ts";

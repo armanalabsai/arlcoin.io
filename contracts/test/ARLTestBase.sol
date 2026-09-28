@@ -8,8 +8,8 @@ import {ARLTimelock} from "../src/ARLTimelock.sol";
 import {ARLToken} from "../src/ARLToken.sol";
 import {ARLVestingWallet} from "../src/ARLVestingWallet.sol";
 
-/// @dev Test fixture that assembles the full 11-allocation model (twelve genesis holders: the
-/// Founder allocation has an unrestricted and a reserved tranche, neither of which vests). Every address here is a
+/// @dev Test fixture that assembles the full 11-allocation model (the Founder allocation is
+/// minted to the Founder Safe, fully unlocked, with no vesting). Every address here is a
 /// labelled test account created by forge-std; none is a real wallet. The dates and vesting
 /// schedules are example parameters for tests only: the approved schedules are TBD.
 abstract contract ARLTestBase is Test {
@@ -27,9 +27,8 @@ abstract contract ARLTestBase is Test {
     uint64 internal constant INVESTORS_CLIFF_END = LAUNCH_PLUS_1Y;
     uint64 internal constant INVESTORS_VESTING_END = LAUNCH_PLUS_2Y;
 
-    // Holders. Every allocation has its own dedicated holder; the Founder allocation has two.
-    address internal founderUnrestrictedSafe = makeAddr("founderUnrestrictedSafe");
-    address internal founderReservedHolder = makeAddr("founderReservedHolder");
+    // Holders. Every allocation has its own dedicated holder.
+    address internal founderSafe = makeAddr("founderSafe");
     address internal investorsSafe = makeAddr("investorsSafe");
     address internal partnershipsSafe = makeAddr("partnershipsSafe");
     address internal treasurySafe = makeAddr("treasurySafe");
@@ -63,8 +62,7 @@ abstract contract ARLTestBase is Test {
                 ecosystemGrowth: growthSafe,
                 strategicPartnerships: address(partnershipsVesting),
                 liquidity: liquiditySafe,
-                founderUnrestricted: founderUnrestrictedSafe,
-                founderReserved: founderReservedHolder,
+                founder: founderSafe,
                 investors: address(investorsVesting),
                 treasury: address(treasury),
                 team: teamPoolSafe,
@@ -83,8 +81,7 @@ abstract contract ARLTestBase is Test {
             ecosystemGrowth: growthSafe,
             strategicPartnerships: partnershipsSafe,
             liquidity: liquiditySafe,
-            founderUnrestricted: founderUnrestrictedSafe,
-            founderReserved: founderReservedHolder,
+            founder: founderSafe,
             investors: investorsSafe,
             treasury: treasurySafe,
             team: teamPoolSafe,

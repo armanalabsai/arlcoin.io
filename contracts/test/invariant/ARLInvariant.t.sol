@@ -121,8 +121,8 @@ contract ARLInvariantTest is ARLTestBase {
     function setUp() public override {
         super.setUp();
 
-        address[] memory actors = new address[](15);
-        actors[0] = founderUnrestrictedSafe;
+        address[] memory actors = new address[](14);
+        actors[0] = founderSafe;
         actors[1] = investorsSafe;
         actors[2] = partnershipsSafe;
         actors[3] = launchSafe;
@@ -136,7 +136,6 @@ contract ARLInvariantTest is ARLTestBase {
         actors[11] = guardianSafe;
         actors[12] = makeAddr("userA");
         actors[13] = makeAddr("userB");
-        actors[14] = founderReservedHolder;
 
         handler = new ARLHandler(
             token, investorsVesting, partnershipsVesting, treasury, treasurySafe, actors
@@ -182,8 +181,8 @@ contract ARLInvariantTest is ARLTestBase {
     }
 
     /// The only vesting wallets hold exactly the investor and strategic partnership allocations
-    /// (less what they released). No vesting wallet holds any Founder tranche, and the Founder
-    /// holders are plain accounts, not contracts.
+    /// (less what they released). No vesting wallet holds any Founder tokens, and the Founder
+    /// holder is a plain account, not a contract.
     function invariant_NoFounderVesting() public view {
         assertEq(
             investorsVesting.released(address(token)) + token.balanceOf(address(investorsVesting)),
@@ -194,17 +193,12 @@ contract ARLInvariantTest is ARLTestBase {
                 + token.balanceOf(address(partnershipsVesting)),
             ARLAllocation.STRATEGIC_PARTNERSHIPS
         );
-        assertEq(founderUnrestrictedSafe.code.length, 0);
-        assertEq(founderReservedHolder.code.length, 0);
+        assertEq(founderSafe.code.length, 0);
     }
 
-    /// Genesis reconciles exactly: the eleven allocation constants, with the Founder allocation
-    /// as the sum of its two tranches, add up to the maximum supply.
+    /// Genesis reconciles exactly: the eleven allocation constants add up to the maximum supply.
     function invariant_AllocationsReconcile() public pure {
-        assertEq(
-            ARLAllocation.FOUNDER_UNRESTRICTED + ARLAllocation.FOUNDER_RESERVED,
-            ARLAllocation.FOUNDER
-        );
+        assertEq(ARLAllocation.FOUNDER, 2_100_000e18);
         assertEq(
             ARLAllocation.PUBLIC_LAUNCH + ARLAllocation.COMMUNITY_STAKING
                 + ARLAllocation.ECOSYSTEM_GROWTH + ARLAllocation.STRATEGIC_PARTNERSHIPS
