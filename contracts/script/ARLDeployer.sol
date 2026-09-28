@@ -4,7 +4,7 @@ pragma solidity 0.8.36;
 import {ARLTimelock} from "../src/ARLTimelock.sol";
 import {ARLToken} from "../src/ARLToken.sol";
 import {ARLVestingWallet} from "../src/ARLVestingWallet.sol";
-import {Plan, VestingPlan} from "./ARLDeployPlan.sol";
+import {ARLDeployPlan, Plan, VestingPlan} from "./ARLDeployPlan.sol";
 
 /// @notice Addresses produced by one deployment.
 struct Deployment {
@@ -23,6 +23,9 @@ struct Deployment {
 /// @dev Callers must run `ARLDeployPlan.validate` first and `ARLVerify.verify` afterwards.
 library ARLDeployer {
     function deploy(Plan memory p, address deployer) internal returns (Deployment memory d) {
+        // Checked here as well as in `validate`, so a script that skips validation still cannot
+        // deploy to Base Mainnet or an unsupported chain.
+        ARLDeployPlan.networkGate(block.chainid);
         d.deployer = deployer;
 
         d.investorsVesting = _vesting(p.investors);

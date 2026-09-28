@@ -23,12 +23,13 @@ import {ARLDeployPlan, Plan} from "./ARLDeployPlan.sol";
 contract DeployDistributor is Script {
     /// @dev The mechanism (Merkle claim) is approved, but the launch parameters are not: the
     /// amount distributed at TGE, per-address limits, the claim window and the remainder policy
-    /// (economic specification section 7). Until they are, only local Anvil is allowed.
+    /// (economic specification section 7). This records the status only: it opens no network.
+    /// The network is decided by `ARLDeployPlan.networkGate` (local Anvil and Base Sepolia only;
+    /// Base Mainnet is hard-locked).
     bool public constant LAUNCH_PARAMETERS_APPROVED = false;
 
     string internal constant DISTRIBUTION_SCHEMA = "arl-distribution/1";
 
-    error DistributorLaunchParametersNotApproved(uint256 chainId);
     error DistributorSchemaMismatch(string schema);
     error DistributorWrongAllocation(string allocation);
     error DistributorTotalExceedsAllocation(uint256 total, uint256 allocation);
@@ -37,12 +38,12 @@ contract DeployDistributor is Script {
     error DistributorNotBroadcasting();
 
     function run() external returns (ARLMerkleDistributor distributor) {
+        networkGate(block.chainid);
         Plan memory plan = ARLDeployPlan.load(vm.readFile(vm.envString("ARL_PLAN")));
         string memory deployment = vm.readFile(vm.envString("ARL_DEPLOYMENT"));
         string memory list = vm.readFile(vm.envString("ARL_DISTRIBUTION"));
         uint64 claimEnd = uint64(vm.envUint("ARL_CLAIM_END"));
 
-        launchGate(block.chainid, LAUNCH_PARAMETERS_APPROVED);
         uint256 deploymentChainId = vm.parseJsonUint(deployment, ".chainId");
         if (deploymentChainId != block.chainid || plan.chainId != block.chainid) {
             revert DistributorChainMismatch(deploymentChainId, block.chainid);
@@ -80,11 +81,9 @@ contract DeployDistributor is Script {
         );
     }
 
-    /// @notice Off local Anvil, the launch parameters must be approved. The flag is a parameter
-    /// only so tests can exercise both branches; `run` always passes the constant above.
-    function launchGate(uint256 chainId, bool approved) public pure {
-        if (chainId == ARLDeployPlan.LOCAL_CHAIN_ID) return;
-        if (!approved) revert DistributorLaunchParametersNotApproved(chainId);
+    /// @notice The shared network gate (`ARLDeployPlan.networkGate`), exposed for tests.
+    function networkGate(uint256 chainId) public pure {
+        ARLDeployPlan.networkGate(chainId);
     }
 
     /// @notice Checks a claim list's schema, allocation and total; returns its root and total.

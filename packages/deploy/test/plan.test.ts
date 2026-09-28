@@ -10,6 +10,7 @@ import {
   addCalendarMonths,
   buildPlan,
   canonicalSafeSingletons,
+  networkGate,
   type DeployConfig,
 } from "../src/plan.ts";
 
@@ -107,7 +108,8 @@ describe("Safe singletons", () => {
 
   it("uses the canonical Safe v1.5.0 singletons off local Anvil", () => {
     assert.deepEqual(canonicalSafeSingletons(1), [SAFE, SAFE_L2]);
-    assert.deepEqual(canonicalSafeSingletons(11155111), [SAFE, SAFE_L2]);
+    assert.deepEqual(canonicalSafeSingletons(84532), [SAFE, SAFE_L2]);
+    assert.deepEqual(canonicalSafeSingletons(8453), [SAFE, SAFE_L2]);
   });
 
   it("refuses a chain without a canonical Safe v1.5.0 deployment", () => {
@@ -123,7 +125,7 @@ describe("Safe singletons", () => {
     assert.deepEqual(local.safe.singletons, [SAFE]);
     rejects(
       config((c) => {
-        c.chainId = 11155111;
+        c.chainId = 84532;
         c.requireRecipientCode = true;
         c.safe = { singletons: [SAFE] };
       }),
@@ -283,19 +285,60 @@ describe("buildPlan: fails closed", () => {
 
   it("requires recipient code checks on every non-local chain", () => {
     rejects(
-      config((c) => (c.chainId = 11155111)),
+      config((c) => (c.chainId = 84532)),
       /requireRecipientCode/,
     );
   });
 
-  it("refuses any non-local chain while the vesting start is TBD", () => {
-    rejects(
+  it("refuses Base Mainnet whatever the rest of the config says", () => {
+    for (const requireRecipientCode of [true, false]) {
+      rejects(
+        config((c) => {
+          c.chainId = 8453;
+          c.network = "base";
+          c.requireRecipientCode = requireRecipientCode;
+        }),
+        /chainId: 8453 \(Base Mainnet\) is locked/,
+      );
+    }
+    assert.throws(() => {
+      networkGate(8453);
+    }, /Base Mainnet\) is locked/);
+  });
+
+  it("the network gate opens only local Anvil and Base Sepolia", () => {
+    networkGate(31337);
+    networkGate(84532);
+    for (const chainId of [0, 1, 10, 8453, 42161, 11155111]) {
+      assert.throws(() => {
+        networkGate(chainId);
+      }, PlanError);
+    }
+  });
+
+  it("builds a Base Sepolia plan with a placeholder vesting start and canonical Safes", () => {
+    const testnet = buildPlan(
       config((c) => {
-        c.chainId = 11155111;
+        c.chainId = 84532;
+        c.network = "base-sepolia";
         c.requireRecipientCode = true;
       }),
-      /vesting\.investors: the vesting start is not confirmed \(TBD\)/,
     );
+    assert.equal(testnet.chainId, 84532);
+    assert.equal(testnet.requireRecipientCode, true);
+    assert.deepEqual(testnet.safe.singletons, canonicalSafeSingletons(84532));
+  });
+
+  it("refuses every chain except local Anvil, Base Sepolia and Base", () => {
+    for (const chainId of [1, 10, 42161, 11155111]) {
+      rejects(
+        config((c) => {
+          c.chainId = chainId;
+          c.requireRecipientCode = true;
+        }),
+        /chainId: \d+ is not supported/,
+      );
+    }
   });
 
   it("rejects durations other than the approved 12-month cliff and 36 months linear", () => {

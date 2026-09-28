@@ -4,6 +4,7 @@ pragma solidity 0.8.36;
 import {Test} from "forge-std/Test.sol";
 
 import {ARLAllocation} from "../../src/ARLAllocation.sol";
+import {ARLDeployPlan} from "../../script/ARLDeployPlan.sol";
 import {DeployDistributor} from "../../script/DeployDistributor.s.sol";
 
 contract DeployDistributorTest is Test {
@@ -15,27 +16,33 @@ contract DeployDistributorTest is Test {
         list = vm.readFile("test/fixtures/distribution.json");
     }
 
-    /// @dev Flipping this requires approved launch parameters (economic specification
-    /// section 7).
+    /// @dev The launch parameters are still TBD; the flag records that and opens nothing.
     function test_LaunchParametersAreNotApprovedYet() public view {
         assertFalse(script.LAUNCH_PARAMETERS_APPROVED());
     }
 
-    function test_LaunchGate() public {
-        script.launchGate(31337, false);
-        script.launchGate(11155111, true);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                DeployDistributor.DistributorLaunchParametersNotApproved.selector, 11155111
-            )
-        );
-        script.launchGate(11155111, false);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                DeployDistributor.DistributorLaunchParametersNotApproved.selector, 1
-            )
-        );
-        script.launchGate(1, false);
+    /// @dev The distributor uses the shared network gate: local Anvil and Base Sepolia pass,
+    /// Base Mainnet and every other chain revert.
+    function test_NetworkGate() public {
+        script.networkGate(31337);
+        script.networkGate(84532);
+        vm.expectRevert(abi.encodeWithSelector(ARLDeployPlan.PlanProductionLocked.selector, 8453));
+        script.networkGate(8453);
+        vm.expectRevert(abi.encodeWithSelector(ARLDeployPlan.PlanChainNotSupported.selector, 1));
+        script.networkGate(1);
+    }
+
+    /// @dev `run` checks the network before reading any input, so no environment variable or
+    /// file can reach a Base Mainnet deployment.
+    function test_RevertWhen_RunOnBaseMainnet() public {
+        vm.chainId(8453);
+        vm.setEnv("ARL_PLAN", "test/fixtures/distribution.json");
+        vm.setEnv("ARL_DEPLOYMENT", "test/fixtures/distribution.json");
+        vm.setEnv("ARL_DISTRIBUTION", "test/fixtures/distribution.json");
+        vm.setEnv("ARL_CLAIM_END", "4102444800");
+        vm.setEnv("ARL_DISTRIBUTOR", "deploy/deployments/never.json");
+        vm.expectRevert(abi.encodeWithSelector(ARLDeployPlan.PlanProductionLocked.selector, 8453));
+        script.run();
     }
 
     function test_CheckListAcceptsToolingOutput() public view {

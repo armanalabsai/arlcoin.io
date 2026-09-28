@@ -1,8 +1,9 @@
 # Chain Evaluation
 
-Status: **requirements defined, evaluation not started.** ARL targets an
-EVM-compatible chain. The production chain is chosen before deployment, not
-now. Contracts must stay chain-agnostic: no chain IDs, addresses or
+Status: **network decision approved.** Testnet: **Base Sepolia (84532)**, the only
+deployable public network. Production: **Base Mainnet (8453)**, hard-locked; no
+deployment tooling path permits it (see
+[`deployment.md`](deployment.md#network-gate)). Nothing is deployed. Contracts must stay chain-agnostic: no chain IDs, addresses or
 chain-specific precompiles in contract code.
 
 ## Requirements by protocol layer

@@ -253,9 +253,9 @@ Public Launch Safe; nothing is burned.
 
 IMPLEMENTATION CONSTRAINT: `ARLMerkleDistributor` implements the mechanism. It
 has no owner, admin, pause or upgrade path; the list, the claim window and the
-return address are fixed at deployment. `DeployDistributor` refuses every chain
-except local Anvil until the launch parameters below are approved
-(`LAUNCH_PARAMETERS_APPROVED = false`).
+return address are fixed at deployment. The launch parameters below are not
+approved (`LAUNCH_PARAMETERS_APPROVED = false`); `DeployDistributor` runs only on
+local Anvil and Base Sepolia, and Base Mainnet is hard-locked.
 
 TBD / REQUIRES CTO DECISION: the eligibility rules for the list, the operational
 split between public access, launch distribution and launch incentives, the
@@ -410,8 +410,9 @@ operations.
 Vesting implementation status (not a decision): the approved section 4.1
 durations (12-month cliff, 36 months linear, calendar months) are enforced by
 the tokenomics package, the deployment planner, `ARLDeployPlan` and the
-verifier. The vesting start (section 4.3) is not confirmed, so the tooling
-still refuses every public network (`VESTING_SCHEDULES_APPROVED = false`).
+verifier. The vesting start (section 4.3) is not confirmed
+(`VESTING_SCHEDULES_APPROVED = false`). The tooling deploys only to local Anvil
+and Base Sepolia, which may use a placeholder start; Base Mainnet is hard-locked.
 
 Founder implementation status (not a decision): the whole Founder allocation
 (2,100,000 ARL) is minted at genesis to one dedicated Founder Safe, with no

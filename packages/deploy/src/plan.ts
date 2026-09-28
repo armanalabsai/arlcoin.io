@@ -25,6 +25,25 @@ export const SAFE_VERSION = "1.5.0";
 /** Anvil's default chain ID. Only here may recipients lack code or schedules be unapproved. */
 export const LOCAL_CHAIN_ID = 31337;
 
+/** Base Sepolia: the only public network a plan may target. It may use a placeholder vesting start. */
+export const TESTNET_CHAIN_ID = 84532;
+/**
+ * Base Mainnet: hard-locked. `networkGate` refuses it unconditionally; no config field, flag or
+ * environment variable can open it. Mirrors `ARLDeployPlan.networkGate`.
+ */
+export const PRODUCTION_CHAIN_ID = 8453;
+
+/** Local Anvil and Base Sepolia pass; Base Mainnet and every other chain are refused. */
+export function networkGate(chainId: number): void {
+  if (chainId === LOCAL_CHAIN_ID || chainId === TESTNET_CHAIN_ID) return;
+  if (chainId === PRODUCTION_CHAIN_ID) {
+    fail(`chainId: ${String(chainId)} (Base Mainnet) is locked; no plan may target it`);
+  }
+  fail(
+    `chainId: ${String(chainId)} is not supported; only ${String(LOCAL_CHAIN_ID)} (local Anvil) and ${String(TESTNET_CHAIN_ID)} (Base Sepolia)`,
+  );
+}
+
 const DECIMALS = 18n;
 const UNIT = 10n ** DECIMALS;
 const UINT64_MAX = 2n ** 64n - 1n;
@@ -226,7 +245,7 @@ function requireTimestamp(value: number, field: string): number {
 function buildVesting(
   key: VestingKey,
   value: unknown,
-  local: boolean,
+  placeholderStartAllowed: boolean,
 ): { plan: VestingPlan; source: { start: string; cliffEnd: string; vestingEnd: string } } {
   const field = `vesting.${key}`;
   requireKeys(value, field, ["beneficiary", "start", "cliffMonths", "vestingMonths"]);
@@ -236,9 +255,14 @@ function buildVesting(
   if (allocation?.release.kind !== "vesting")
     fail(`tokenomics: ${VESTING_KEYS[key]} does not vest`);
   const approved = allocation.release.schedule;
-  // The vesting start is not confirmed. Only a local rehearsal may supply one before it is.
-  if ((allocation.release.status !== "approved" || approved.start !== "approved") && !local) {
-    fail(`${field}: the vesting start is not confirmed (TBD); only local Anvil may rehearse it`);
+  // The vesting start is not confirmed. Only local Anvil and the testnet may use a placeholder.
+  if (
+    (allocation.release.status !== "approved" || approved.start !== "approved") &&
+    !placeholderStartAllowed
+  ) {
+    fail(
+      `${field}: the vesting start is not confirmed (TBD); only local Anvil and the testnet may use a placeholder`,
+    );
   }
 
   const beneficiary = requireAddress(v.beneficiary, `${field}.beneficiary`);
@@ -305,6 +329,8 @@ export function buildPlan(config: DeployConfig): DeployPlan {
     fail("requireRecipientCode: must be true or false");
   }
   const local = config.chainId === LOCAL_CHAIN_ID;
+  const testnet = config.chainId === TESTNET_CHAIN_ID;
+  networkGate(config.chainId);
   if (!config.requireRecipientCode && !local) {
     fail(`requireRecipientCode: may be false only on local chain ${LOCAL_CHAIN_ID}`);
   }
@@ -327,7 +353,7 @@ export function buildPlan(config: DeployConfig): DeployPlan {
   const vesting = {} as Record<VestingKey, VestingPlan>;
   const source = {} as DeployPlan["source"];
   for (const key of Object.keys(VESTING_KEYS) as VestingKey[]) {
-    const built = buildVesting(key, config.vesting[key], local);
+    const built = buildVesting(key, config.vesting[key], local || testnet);
     vesting[key] = built.plan;
     source[key] = built.source;
   }

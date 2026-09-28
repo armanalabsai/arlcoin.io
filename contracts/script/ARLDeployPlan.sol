@@ -73,14 +73,21 @@ library ARLDeployPlan {
     /// vesting schedules that are not yet approved may be rehearsed.
     uint256 internal constant LOCAL_CHAIN_ID = 31337;
 
+    /// @dev Base Sepolia: the only public network deployments may target.
+    uint256 internal constant TESTNET_CHAIN_ID = 84532;
+    /// @dev Base Mainnet: hard-locked. `networkGate` refuses it unconditionally; no constant,
+    /// flag, environment variable or plan field can open it. Unlocking requires changing
+    /// `networkGate` itself in a reviewed change.
+    uint256 internal constant PRODUCTION_CHAIN_ID = 8453;
+
     /// @dev Approved schedule (economic specification section 4.1): 0% at TGE, a 12-month
     /// cliff, then 36 months linear, in calendar months. Every plan must match it exactly.
     uint256 internal constant VESTING_CLIFF_MONTHS = 12;
     uint256 internal constant VESTING_LINEAR_MONTHS = 36;
 
     /// @dev The durations are approved and enforced, but the vesting start (TGE) of the
-    /// investor and strategic partnership wallets is not confirmed (TBD). Until it is, no plan
-    /// may target a chain other than local Anvil.
+    /// investor and strategic partnership wallets is not confirmed (TBD). Local Anvil and Base
+    /// Sepolia may use a placeholder start. This records the status only: it opens no network.
     bool internal constant VESTING_SCHEDULES_APPROVED = false;
 
     /// @dev Plans of any other schema are rejected rather than reinterpreted: `/2` (founder
@@ -114,7 +121,8 @@ library ARLDeployPlan {
     error PlanMissingChainId();
     error PlanChainMismatch(uint256 planChainId, uint256 actualChainId);
     error PlanRecipientCodeRequired(uint256 chainId);
-    error PlanVestingScheduleNotApproved(uint256 chainId);
+    error PlanChainNotSupported(uint256 chainId);
+    error PlanProductionLocked(uint256 chainId);
     error PlanSchemaMismatch(string schema);
     error PlanFounderVestingNotAllowed();
     error PlanLegacyAllocation(string key);
@@ -209,18 +217,19 @@ library ARLDeployPlan {
     function _validateChain(Plan memory p) private view {
         if (p.chainId == 0) revert PlanMissingChainId();
         if (p.chainId != block.chainid) revert PlanChainMismatch(p.chainId, block.chainid);
-        if (p.chainId != LOCAL_CHAIN_ID) {
-            if (!p.requireRecipientCode) revert PlanRecipientCodeRequired(p.chainId);
-            approvalGate(p.chainId, VESTING_SCHEDULES_APPROVED);
+        networkGate(p.chainId);
+        if (p.chainId != LOCAL_CHAIN_ID && !p.requireRecipientCode) {
+            revert PlanRecipientCodeRequired(p.chainId);
         }
     }
 
-    /// @notice The public-network gate: off local Anvil, the vesting start must be confirmed.
-    /// The flag is a parameter only so tests can exercise both branches; `validate` always
-    /// passes the constant above.
-    function approvalGate(uint256 chainId, bool vestingApproved) internal pure {
-        if (chainId == LOCAL_CHAIN_ID) return;
-        if (!vestingApproved) revert PlanVestingScheduleNotApproved(chainId);
+    /// @notice The network gate, shared by every deployment path. Local Anvil and Base Sepolia
+    /// pass. Base Mainnet always reverts. Every other chain reverts. It takes no flag: nothing
+    /// outside this function can change its result.
+    function networkGate(uint256 chainId) internal pure {
+        if (chainId == LOCAL_CHAIN_ID || chainId == TESTNET_CHAIN_ID) return;
+        if (chainId == PRODUCTION_CHAIN_ID) revert PlanProductionLocked(chainId);
+        revert PlanChainNotSupported(chainId);
     }
 
     function _validateAllocations(Plan memory p) private pure {

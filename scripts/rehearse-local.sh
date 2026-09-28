@@ -31,8 +31,11 @@ die() {
   exit 1
 }
 
+GATE_PIDS=()
 cleanup() {
-  if [[ -n "${ANVIL_PID:-}" ]]; then kill "$ANVIL_PID" 2>/dev/null || true; fi
+  for pid in "${ANVIL_PID:-}" "${GATE_PIDS[@]}"; do
+    if [[ -n "$pid" ]]; then kill "$pid" 2>/dev/null || true; fi
+  done
 }
 trap cleanup EXIT
 
@@ -235,10 +238,12 @@ bad_config "$REHEARSAL/cfg-guardian.json" "c.treasury.guardian=c.treasury.safe"
 must_fail "planner: guardian is the treasury safe" "treasury.guardian: must differ from treasury.safe" planner "$REHEARSAL/cfg-guardian.json"
 bad_config "$REHEARSAL/cfg-date.json" "c.vesting.investors.start='2027-01-31T00:00:00Z'"
 must_fail "planner: ambiguous month arithmetic" "day of month must be 1-28" planner "$REHEARSAL/cfg-date.json"
-bad_config "$REHEARSAL/cfg-chain.json" "c.chainId = 11155111"
+bad_config "$REHEARSAL/cfg-chain.json" "c.chainId = 84532"
 must_fail "planner: non-local chain without code checks" "requireRecipientCode: may be false only" planner "$REHEARSAL/cfg-chain.json"
-bad_config "$REHEARSAL/cfg-tbd.json" "c.chainId = 11155111; c.requireRecipientCode = true"
-must_fail "planner: TBD vesting start off local" "vesting start is not confirmed \\(TBD\\)" planner "$REHEARSAL/cfg-tbd.json"
+bad_config "$REHEARSAL/cfg-mainnet.json" "c.chainId = 8453; c.network = 'base'; c.requireRecipientCode = true"
+must_fail "planner: Base Mainnet config" "chainId: 8453 \\(Base Mainnet\\) is locked" planner "$REHEARSAL/cfg-mainnet.json"
+bad_config "$REHEARSAL/cfg-unsupported.json" "c.chainId = 11155111; c.requireRecipientCode = true"
+must_fail "planner: unsupported chain" "chainId: 11155111 is not supported" planner "$REHEARSAL/cfg-unsupported.json"
 bad_config "$REHEARSAL/cfg-cliff.json" "c.vesting.investors.cliffMonths = 6"
 must_fail "planner: cliff other than 12 months" "cliffMonths: must be 12 \\(approved schedule\\)" planner "$REHEARSAL/cfg-cliff.json"
 bad_config "$REHEARSAL/cfg-legacy.json" "c.ecosystemReserveBeneficiary = c.treasury.safe"
@@ -402,5 +407,46 @@ expect "remainder returned to the Public Launch Safe" \
   "$(node -e "console.log((${LAUNCH_BEFORE}n + ${TOTAL}n - ${CLAIMED}n).toString())")" "$(balance "$LAUNCH")"
 expect "circulating after sweep" "$(node -e "console.log((2100000000000000000000001n + ${CLAIMED}n).toString())")" \
   "$(supply circulatingSupply)"
+
+log "Network gate on separate chains: Base Mainnet (8453) locked, Base Sepolia (84532) open"
+# Each chain is a fresh local Anvil with that chain ID; nothing touches a real network.
+gate_chain() {
+  anvil --port "$2" --chain-id "$1" --silent &
+  GATE_PIDS+=($!)
+  for _ in $(seq 1 50); do
+    if cast chain-id --rpc-url "http://127.0.0.1:$2" >/dev/null 2>&1; then break; fi
+    sleep 0.2
+  done
+  [[ "$(cast chain-id --rpc-url "http://127.0.0.1:$2")" == "$1" ]] || die "gate chain $1 did not start"
+}
+gate_deploy() {
+  ARL_PLAN="$2" ARL_DEPLOYMENT="$REHEARSAL/x.json" forge script script/DeployARL.s.sol:DeployARL \
+    --rpc-url "http://127.0.0.1:$1" --broadcast --unlocked --sender "$DEPLOYER" --slow
+}
+MAINNET_PORT=$((PORT + 1))
+TESTNET_PORT=$((PORT + 2))
+gate_chain 8453 "$MAINNET_PORT"
+gate_chain 84532 "$TESTNET_PORT"
+# A Base Mainnet plan that sets every field a real one would (code checks, canonical singletons).
+mutate "$REHEARSAL/mainnet.json" "p.chainId = 8453; p.network = 'base'; p.requireRecipientCode = true; p.safe.singletons = ['0xFf51A5898e281Db6DfC7855790607438dF2ca44b', '0xEdd160fEBBD92E350D4D398fb636302fccd67C7e']"
+must_fail "DeployARL on Base Mainnet" "PlanProductionLocked\\(8453\\)" gate_deploy "$MAINNET_PORT" "$REHEARSAL/mainnet.json"
+must_fail "DeployARL on Base Mainnet with the local plan" "PlanProductionLocked\\(8453\\)" gate_deploy "$MAINNET_PORT" "$PLAN"
+must_fail "DeployDistributor on Base Mainnet" "PlanProductionLocked\\(8453\\)" env \
+  ARL_PLAN="$REHEARSAL/mainnet.json" ARL_DEPLOYMENT="$DEPLOYMENT" ARL_DISTRIBUTION="$LIST" \
+  ARL_CLAIM_END="$CLAIM_END" ARL_DISTRIBUTOR="$REHEARSAL/x.json" \
+  forge script script/DeployDistributor.s.sol:DeployDistributor \
+  --rpc-url "http://127.0.0.1:$MAINNET_PORT" --broadcast --unlocked --sender "$DEPLOYER" --slow
+expect "no transaction on the Base Mainnet chain" "0" \
+  "$(cast nonce "$DEPLOYER" --rpc-url "http://127.0.0.1:$MAINNET_PORT")"
+# A Base Sepolia plan from the planner passes the network gate and is then held to the Safe
+# rules: the placeholder recipients have no code, so it stops there, before broadcasting.
+bad_config "$REHEARSAL/cfg-testnet.json" "c.chainId = 84532; c.network = 'base-sepolia'; c.requireRecipientCode = true"
+planner "$REHEARSAL/cfg-testnet.json" >/dev/null || die "planner rejected a Base Sepolia config"
+cp "$REHEARSAL/p.json" "$REHEARSAL/testnet.json"
+expect "Base Sepolia plan chain" "84532" "$(node -e "console.log(require('./$REHEARSAL/testnet.json').chainId)")"
+must_fail "Base Sepolia passes the gate, then needs Safes" "PlanRecipientHasNoCode" \
+  gate_deploy "$TESTNET_PORT" "$REHEARSAL/testnet.json"
+expect "no transaction on the Base Sepolia chain" "0" \
+  "$(cast nonce "$DEPLOYER" --rpc-url "http://127.0.0.1:$TESTNET_PORT")"
 
 log "REHEARSAL PASSED: deployed, verified, and $NEGATIVE negative cases rejected"
