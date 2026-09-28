@@ -46,9 +46,28 @@ function profileCard(p: TeamProfile, index: number): Card {
   };
 }
 
+export const TEAM_GROWING_ID = "team-growing";
+
+const growingCard: Card = {
+  id: TEAM_GROWING_ID,
+  title: "The team is growing",
+  shortDescription: "New members are listed after verification",
+  weight: "secondary",
+  detail: {
+    summary:
+      "ARL is currently led by its founder. New team members are listed here only once they have joined, their identity, role and background have been verified, and they have agreed to be published.",
+    sections: [
+      {
+        heading: "Publishing rule",
+        body: "No profile, photo or credential is shown for anyone who has not been verified. Nobody from ARL will contact you first or ask for a payment or a seed phrase.",
+      },
+    ],
+  },
+};
+
 export const teamLayer: Layer = {
   id: "team",
   title: "Team",
-  description: "The people building ARL. Profiles are marked until verified.",
-  cards: TEAM.map(profileCard),
+  description: "The people building ARL. Only verified members are listed as the team grows.",
+  cards: [...TEAM.map(profileCard), growingCard],
 };
