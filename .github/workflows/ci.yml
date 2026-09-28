@@ -137,6 +137,42 @@ jobs:
       # Local Anvil chain only: deploys, verifies and runs the negative cases.
       - run: npm run rehearse:local
 
+  dapp:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: apps/dapp
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: apps/dapp/package-lock.json
+
+      # Anvil and forge: the end-to-end tests deploy the local fixture on a fresh Anvil chain.
+      - uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09 # v1.9.1
+        with:
+          version: v1.8.3
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      # Builds against the local chain, deploys the fixture, checks the committed contract
+      # addresses and drives the app in Chromium. Local Anvil only.
+      - run: npm run test:e2e
+      - run: npm audit --audit-level=high
+
   web:
     runs-on: ubuntu-latest
     timeout-minutes: 20

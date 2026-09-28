@@ -95,6 +95,48 @@ Development only (not distributed):
 The `scroll-morph-hero.tsx` component supplied during design was not used: its source and
 license could not be verified. See [`docs/website.md`](docs/website.md).
 
+## App (`apps/dapp`)
+
+The ARL web app is built on Scaffold-ETH 2 (MIT). Exact versions and integrity hashes of its
+packages are recorded in `apps/dapp/package-lock.json`.
+
+Adapted source: `scaffold-eth/scaffold-eth-2`, `packages/nextjs`, commit
+`6cdf354a4a02aded39c92d5e0d83cd24e4628239`, MIT (Copyright (c) 2023 BuidlGuidl). The upstream
+license is kept verbatim in `apps/dapp/LICENSE-scaffold-eth-2`; the adapted files stay under MIT.
+
+| ARL file (under `apps/dapp/`)                                                                                                                                                                                                                                                                                                                                                                 | ARL modifications                                                                                                                                                  |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `hooks/scaffold-eth/` (`useCopyToClipboard`, `useDeployedContractInfo`, `useOutsideClick`, `useScaffoldReadContract`, `useScaffoldWriteContract`, `useSelectedNetwork`, `useTargetNetwork`, `useTransactor`), `utils/scaffold-eth/` (`block`, `common`, `contract`, `contractsData`, `getParsedError`, `notification`), `components/scaffold-eth/BlockieAvatar.tsx`, `types/abitype/abi.d.ts` | None (reformatted by the repository's Prettier settings only)                                                                                                      |
+| `hooks/scaffold-eth/index.ts`, `utils/scaffold-eth/index.ts`, `services/store/store.ts`                                                                                                                                                                                                                                                                                                       | Only the modules the app uses are exported; type-only imports                                                                                                      |
+| `hooks/scaffold-eth/useNetworkColor.ts`, `utils/scaffold-eth/networks.ts`                                                                                                                                                                                                                                                                                                                     | Single theme; hosted RPC (Alchemy) URLs and other chains removed                                                                                                   |
+| `components/scaffold-eth/RainbowKitCustomConnectButton/`                                                                                                                                                                                                                                                                                                                                      | No burner-wallet private key reveal, QR code, ENS or block explorer; chain name instead of native balance                                                          |
+| `scaffold.config.ts`, `services/web3/wagmiConfig.tsx`, `services/web3/wagmiConnectors.tsx`, `components/Providers.tsx`                                                                                                                                                                                                                                                                        | Local Anvil chain only behind a network gate (`lib/network.ts`: Base Mainnet refused); no Ethereum Mainnet, hosted RPC key, WalletConnect project or burner wallet |
+
+The pages (`app/`), ARL components (`components/arl/`), `lib/`, the local development wallet
+(`services/web3/localDevWallet.ts`), scripts and tests are ARL code (Apache-2.0).
+
+Runtime packages (included in the built app), used as published:
+
+| Package                | Version | License | Purpose                              |
+| ---------------------- | ------- | ------- | ------------------------------------ |
+| next                   | 16.3.6  | MIT     | Framework                            |
+| react / react-dom      | 19.3.0  | MIT     | UI runtime                           |
+| wagmi                  | 2.19.5  | MIT     | Wallet connection and contract calls |
+| viem                   | 2.56.9  | MIT     | Ethereum client                      |
+| @rainbow-me/rainbowkit | 2.2.11  | MIT     | Wallet selection                     |
+| @tanstack/react-query  | 5.104.0 | MIT     | Data fetching cache (wagmi peer)     |
+| react-hot-toast        | 2.6.1   | MIT     | Transaction notifications            |
+| zustand                | 5.0.15  | MIT     | Selected network state               |
+| usehooks-ts            | 3.1.1   | MIT     | React hooks                          |
+| blo                    | 2.0.0   | MIT     | Address avatars                      |
+| @heroicons/react       | 2.2.0   | MIT     | Icons                                |
+
+Build and test: daisyui 5.7.46 (MIT; its generated CSS is in the built app), tailwindcss and @tailwindcss/postcss
+4.3.3 (MIT), abitype 1.2.4 (MIT), type-fest 5.6.0 (MIT or CC0-1.0), @playwright/test 1.63.0
+(Apache-2.0), eslint 9.39.5 and eslint-config-next 16.3.6 (MIT), typescript 6.0.3 (Apache-2.0).
+npm overrides pin transitive `ws` 8.22.0, `uuid` 11.1.1 and `decode-uri-component` 0.5.0 to
+patched releases (`npm audit` reports no vulnerabilities).
+
 ## CI actions
 
 | Action                       | Version | Commit                                     | License           |

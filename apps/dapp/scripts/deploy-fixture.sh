@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Deploys the app's local fixture (contracts/script/DevDapp.s.sol) to the Anvil chain at
+# $ARL_RPC_URL and regenerates contracts/deployedContracts.ts (with --check: verifies that the
+# committed file matches the deployment instead). Local Anvil only: the script
+# itself refuses any other chain. Anvil unlocks its development accounts; no key is used.
+set -euo pipefail
+
+APP="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+CONTRACTS="$APP/../../contracts"
+RPC="${ARL_RPC_URL:-http://127.0.0.1:8545}"
+OPERATOR=0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+
+[[ "$(cast chain-id --rpc-url "$RPC")" == "31337" ]] || { echo "not a local Anvil chain: $RPC" >&2; exit 1; }
+
+cd "$CONTRACTS"
+if ! out="$(forge build --skip test 2>&1)"; then echo "$out" >&2; exit 1; fi
+forge script script/DevDapp.s.sol:DevDapp --rpc-url "$RPC" --broadcast --unlocked \
+  --sender "$OPERATOR" --slow -q
+if [[ "${1:-}" == "--check" ]]; then
+  node "$APP/scripts/generate-contracts.ts" --check
+else
+  node "$APP/scripts/generate-contracts.ts"
+  (cd "$APP/../.." && npx prettier --write apps/dapp/contracts/deployedContracts.ts >/dev/null)
+fi

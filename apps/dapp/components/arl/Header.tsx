@@ -1,0 +1,57 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+import { RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
+
+const NAV = [
+  { href: "/", label: "Wallet" },
+  { href: "/vesting", label: "Vesting" },
+  { href: "/staking", label: "Staking" },
+];
+
+export function Header() {
+  const pathname = usePathname();
+  return (
+    <header className="sticky top-0 z-20 border-b border-line bg-base-100/85 backdrop-blur">
+      <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
+        <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/icon.svg" alt="" width={28} height={28} />
+          <span>ARL App</span>
+        </Link>
+        <nav className="ml-2 hidden gap-1 sm:flex" aria-label="Main">
+          {NAV.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-current={pathname === item.href ? "page" : undefined}
+              className={`btn btn-ghost btn-sm ${pathname === item.href ? "text-primary" : "text-muted"}`}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+        <div className="ml-auto">
+          <RainbowKitCustomConnectButton />
+        </div>
+      </div>
+      <nav
+        className="flex justify-around border-t border-line sm:hidden"
+        aria-label="Main (mobile)"
+      >
+        {NAV.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            aria-current={pathname === item.href ? "page" : undefined}
+            className={`flex-1 py-2 text-center text-sm ${pathname === item.href ? "text-primary" : "text-muted"}`}
+          >
+            {item.label}
+          </Link>
+        ))}
+      </nav>
+    </header>
+  );
+}

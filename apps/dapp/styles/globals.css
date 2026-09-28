@@ -1,0 +1,63 @@
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: false;
+}
+
+/* ARL night blue with the amber signature (same palette as the website, apps/web). */
+@plugin "daisyui/theme" {
+  name: "arl";
+  default: true;
+  color-scheme: dark;
+  --color-base-100: #050b1e;
+  --color-base-200: #0a1430;
+  --color-base-300: #142147;
+  --color-base-content: #f2f2f0;
+  --color-primary: #eea53f;
+  --color-primary-content: #1a1204;
+  --color-secondary: #0f1a3b;
+  --color-secondary-content: #f2f2f0;
+  --color-accent: #f4b556;
+  --color-accent-content: #1a1204;
+  --color-neutral: #142147;
+  --color-neutral-content: #f2f2f0;
+  --color-info: #7aa7ff;
+  --color-info-content: #050b1e;
+  --color-success: #4cc38a;
+  --color-success-content: #04140c;
+  --color-warning: #f4b556;
+  --color-warning-content: #1a1204;
+  --color-error: #f87171;
+  --color-error-content: #1d0404;
+  --radius-selector: 0.5rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.875rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+@theme {
+  --color-muted: #a3a6ab;
+  --color-subtle: #6c7076;
+  --color-line: rgb(255 255 255 / 0.08);
+}
+
+body {
+  background: #050b1e;
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
+}
+
+.card-arl {
+  border: 1px solid var(--color-line);
+  background: linear-gradient(180deg, #0a1430, #081127);
+  border-radius: 14px;
+}
+
+.stat-value-arl {
+  font-variant-numeric: tabular-nums;
+}

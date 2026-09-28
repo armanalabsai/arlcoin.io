@@ -9,3 +9,8 @@ apps/web/.next/
 apps/web/playwright-report/
 apps/web/test-results/
 apps/web/next-env.d.ts
+apps/dapp/.next/
+apps/dapp/playwright-report/
+apps/dapp/test-results/
+apps/dapp/next-env.d.ts
+apps/dapp/LICENSE-scaffold-eth-2
