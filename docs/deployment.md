@@ -104,6 +104,19 @@ The approved Public Launch mechanism is a Merkle claim (economic specification s
    (`manifest-cli.ts <plan> <deployment> <manifest> <distributor.json>`); its unclaimed balance
    is not circulating.
 
+## Staking rewards
+
+`ARLStakingRewards` is not part of `DeployARL`, and no deployment script exists for it yet: reward
+amounts and period lengths are not decided. Whenever it is deployed:
+
+- `rewardsDistribution` must be the plan's Community & Staking holder
+  (`recipients.communityStaking`), the address the 3,000,000 ARL allocation is minted to. The
+  contract cannot check where reward tokens come from, so this binding is enforced here.
+- Verify with `VerifyStaking` (`ARL_PLAN`, `ARL_DEPLOYMENT`, `ARL_STAKING`, optional
+  `ARL_STAKING_FRESH`, default true), read-only. It fails unless ARL is both the staking and the
+  reward token and the distributor is that holder; when fresh, nothing may be staked, funded or
+  returned yet.
+
 ## Local rehearsal
 
 ```

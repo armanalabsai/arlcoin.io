@@ -101,7 +101,7 @@ export const technology: Layer = {
           {
             heading: "Built",
             items: [
-              "Staking contract: stake ARL, earn ARL from a funded pool over fixed periods. Adapted from the Synthetix staking rewards contract (MIT); no owner and no minting. Written and tested, not deployed",
+              "Staking contract: stake ARL, earn ARL from a funded pool over fixed periods. Adapted from the Synthetix staking rewards contract (MIT). No owner, minting or upgrade; one funding role, the Community & Staking holder, which cannot touch staked tokens. Written and tested, not deployed",
             ],
           },
           {

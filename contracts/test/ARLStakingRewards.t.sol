@@ -4,8 +4,8 @@ pragma solidity 0.8.36;
 import {ARLStakingRewards} from "../src/ARLStakingRewards.sol";
 import {ARLTestBase} from "./ARLTestBase.sol";
 
-/// @dev The distributor here is the Community & Staking Safe acting directly; in production it is
-/// intended to be the treasury timelock. Durations and amounts are test values only.
+/// @dev The distributor is the Community & Staking holder (`communitySafe`), as the deployment
+/// verifier requires. Durations and amounts are test values only.
 contract ARLStakingRewardsTest is ARLTestBase {
     ARLStakingRewards internal staking;
     address internal alice = makeAddr("alice");
@@ -253,6 +253,238 @@ contract ARLStakingRewardsTest is ARLTestBase {
         assertEq(staking.totalSupply(), 0);
         assertLe(staking.rewardsPaid(), amount);
         assertEq(token.balanceOf(address(staking)), amount - staking.rewardsPaid());
+    }
+
+    // ---------------------------------------------------------------- unallocated accounting
+
+    /// Identity: funded = accrued + reserved + unallocated + returned.
+    function _assertIdentity() internal view {
+        assertEq(
+            staking.accruedRewards() + staking.reservedRewards() + staking.unallocatedRewards()
+                + staking.rewardsReturned(),
+            staking.rewardsFunded()
+        );
+    }
+
+    function _remainder(uint256 reward) internal pure returns (uint256) {
+        return reward - (reward / DURATION) * DURATION;
+    }
+
+    function test_Unallocated_BeforeAnyPeriod() public {
+        assertEq(staking.unallocatedRewards(), 0);
+        assertEq(staking.reservedRewards(), 0);
+        assertEq(staking.accruedRewards(), 0);
+        vm.prank(communitySafe);
+        vm.expectRevert(ARLStakingRewards.StakingZeroAmount.selector);
+        staking.returnUnallocated();
+    }
+
+    /// Regression: during an active period the rest of the schedule is reserved, not unallocated.
+    function test_Unallocated_DuringPeriodExcludesReserve() public {
+        vm.prank(alice);
+        staking.stake(1_000 ether);
+        _fund(REWARD);
+        uint256 rate = REWARD / DURATION;
+        vm.warp(block.timestamp + 10 days);
+        assertEq(staking.reservedRewards(), rate * (DURATION - 10 days));
+        assertEq(staking.accruedRewards(), rate * 10 days);
+        assertEq(staking.unallocatedRewards(), _remainder(REWARD));
+        _assertIdentity();
+        vm.prank(communitySafe);
+        vm.expectRevert(ARLStakingRewards.StakingPeriodActive.selector);
+        staking.returnUnallocated();
+    }
+
+    function test_Unallocated_IdleTimeInActivePeriod() public {
+        _fund(REWARD);
+        uint256 rate = REWARD / DURATION;
+        vm.warp(block.timestamp + 10 days); // nobody staked
+        assertEq(staking.unallocatedRewards(), _remainder(REWARD) + rate * 10 days);
+        assertEq(staking.reservedRewards(), rate * (DURATION - 10 days));
+        vm.prank(alice);
+        staking.stake(1_000 ether);
+        vm.warp(block.timestamp + 5 days);
+        assertEq(staking.unallocatedRewards(), _remainder(REWARD) + rate * 10 days);
+        assertEq(staking.accruedRewards(), rate * 5 days);
+        _assertIdentity();
+    }
+
+    function test_Unallocated_AtPeriodEnd() public {
+        vm.prank(alice);
+        staking.stake(1_000 ether);
+        _fund(REWARD);
+        vm.warp(staking.periodFinish());
+        assertEq(staking.reservedRewards(), 0);
+        assertEq(staking.unallocatedRewards(), _remainder(REWARD));
+        _assertIdentity();
+        // The last second still belongs to the period.
+        vm.prank(communitySafe);
+        vm.expectRevert(ARLStakingRewards.StakingPeriodActive.selector);
+        staking.returnUnallocated();
+    }
+
+    function test_Unallocated_AfterPeriodEndAndAlreadyReturned() public {
+        _fund(REWARD);
+        uint256 rate = REWARD / DURATION;
+        vm.warp(block.timestamp + DURATION / 2); // first half idle
+        vm.prank(alice);
+        staking.stake(1_000 ether);
+        vm.warp(staking.periodFinish() + 1);
+        uint256 expected = _remainder(REWARD) + rate * (DURATION / 2);
+        assertEq(staking.unallocatedRewards(), expected);
+
+        uint256 before = token.balanceOf(communitySafe);
+        vm.prank(communitySafe);
+        staking.returnUnallocated();
+        assertEq(token.balanceOf(communitySafe) - before, expected);
+        assertEq(staking.rewardsReturned(), expected);
+        assertEq(staking.unallocatedRewards(), 0);
+        _assertIdentity();
+
+        vm.prank(communitySafe);
+        vm.expectRevert(ARLStakingRewards.StakingZeroAmount.selector);
+        staking.returnUnallocated();
+
+        // A new period after a return: only its own remainder is unallocated.
+        _fund(REWARD);
+        assertEq(staking.unallocatedRewards(), _remainder(REWARD));
+        _assertIdentity();
+    }
+
+    function test_Unallocated_TopUpKeepsRolledRewardsReserved() public {
+        vm.prank(alice);
+        staking.stake(1_000 ether);
+        _fund(REWARD);
+        vm.warp(block.timestamp + 10 days);
+        uint256 leftover = staking.reservedRewards();
+        _fund(REWARD);
+        uint256 newRate = (REWARD + leftover) / DURATION;
+        assertEq(staking.rewardRate(), newRate);
+        assertEq(staking.reservedRewards(), newRate * DURATION);
+        assertEq(
+            staking.unallocatedRewards(),
+            _remainder(REWARD) + (REWARD + leftover - newRate * DURATION)
+        );
+        _assertIdentity();
+    }
+
+    function test_Unallocated_PartiallyAccruedAcrossCheckpoints() public {
+        vm.prank(alice);
+        staking.stake(1_000 ether);
+        _fund(REWARD);
+        uint256 rate = REWARD / DURATION;
+        vm.warp(block.timestamp + 3 days);
+        vm.prank(alice);
+        staking.getReward(); // checkpoint
+        vm.warp(block.timestamp + 4 days); // pending, not yet checkpointed
+        assertEq(staking.rewardsAccrued(), rate * 3 days);
+        assertEq(staking.accruedRewards(), rate * 7 days);
+        assertEq(staking.unallocatedRewards(), _remainder(REWARD));
+        _assertIdentity();
+    }
+
+    function test_RevertWhen_SetDurationZero() public {
+        vm.prank(communitySafe);
+        vm.expectRevert(ARLStakingRewards.StakingZeroDuration.selector);
+        staking.setRewardsDuration(0);
+    }
+
+    /// Whatever the timing, nothing reserved for an active period can be returned, and a return
+    /// after the period leaves every staker's principal and reward payable.
+    function testFuzz_ReturnNeverTakesReservedOrOwed(
+        uint32 idle,
+        uint32 checkAt,
+        uint96 reward,
+        uint96 stakeAmount
+    ) public {
+        uint256 amount = bound(reward, DURATION, 1_000_000 ether);
+        uint256 principal = bound(stakeAmount, 1, 100_000 ether);
+        _fund(amount);
+        vm.warp(block.timestamp + bound(idle, 0, DURATION));
+        vm.prank(alice);
+        staking.stake(principal);
+        vm.warp(block.timestamp + bound(checkAt, 0, 2 * DURATION));
+        _assertIdentity();
+        if (block.timestamp <= staking.periodFinish()) {
+            vm.prank(communitySafe);
+            vm.expectRevert(ARLStakingRewards.StakingPeriodActive.selector);
+            staking.returnUnallocated();
+            vm.warp(staking.periodFinish() + 1);
+        }
+        if (staking.unallocatedRewards() > 0) {
+            vm.prank(communitySafe);
+            staking.returnUnallocated();
+        }
+        uint256 owed = staking.earned(alice);
+        uint256 before = token.balanceOf(alice);
+        vm.prank(alice);
+        staking.exit();
+        assertEq(token.balanceOf(alice) - before, principal + owed);
+        assertEq(
+            token.balanceOf(address(staking)), staking.accruedRewards() - staking.rewardsPaid()
+        );
+    }
+
+    // ---------------------------------------------------------------- retained tokens
+
+    /// A direct transfer is not a reward and not principal: it is never paid, never returnable
+    /// and stays in the contract. Stakers are unaffected.
+    function test_DirectTransferIsRetained() public {
+        address donor = makeAddr("donor");
+        vm.prank(communitySafe);
+        token.transfer(donor, 5_000 ether);
+        vm.prank(alice);
+        staking.stake(1_000 ether);
+        _fund(REWARD);
+        vm.prank(donor);
+        token.transfer(address(staking), 5_000 ether);
+
+        assertEq(staking.unallocatedRewards(), _remainder(REWARD));
+        vm.warp(staking.periodFinish() + 1);
+        vm.prank(communitySafe);
+        staking.returnUnallocated();
+        assertEq(staking.rewardsReturned(), _remainder(REWARD));
+
+        uint256 owed = staking.earned(alice);
+        uint256 before = token.balanceOf(alice);
+        vm.prank(alice);
+        staking.exit();
+        assertEq(token.balanceOf(alice) - before, 1_000 ether + owed);
+        uint256 dust = staking.accruedRewards() - staking.rewardsPaid();
+        assertEq(token.balanceOf(address(staking)), 5_000 ether + dust);
+        assertEq(staking.unallocatedRewards(), 0);
+        vm.prank(communitySafe);
+        vm.expectRevert(ARLStakingRewards.StakingZeroAmount.selector);
+        staking.returnUnallocated();
+    }
+
+    /// With a large stake and the smallest rate, each checkpoint's per-token increment rounds to
+    /// zero: the rewards are allocated (accrued) but nobody can claim them. They stay in the
+    /// contract, are not returnable, and principal is still paid in full.
+    function test_RoundingDustIsRetained() public {
+        vm.prank(alice);
+        staking.stake(100_000 ether);
+        _fund(DURATION); // rate = 1 wei per second
+        assertEq(staking.rewardRate(), 1);
+        while (block.timestamp < staking.periodFinish()) {
+            vm.warp(block.timestamp + 10_000); // 10,000 wei per 1e23 staked rounds to zero
+            vm.prank(alice);
+            staking.getReward();
+        }
+        assertEq(staking.rewardsPaid(), 0);
+        assertEq(staking.accruedRewards(), DURATION);
+        assertEq(staking.unallocatedRewards(), 0);
+
+        vm.warp(block.timestamp + 1);
+        vm.prank(communitySafe);
+        vm.expectRevert(ARLStakingRewards.StakingZeroAmount.selector);
+        staking.returnUnallocated();
+
+        uint256 before = token.balanceOf(alice);
+        vm.prank(alice);
+        staking.exit();
+        assertEq(token.balanceOf(alice) - before, 100_000 ether);
+        assertEq(token.balanceOf(address(staking)), DURATION);
     }
 
     // ---------------------------------------------------------------- helpers

@@ -1,7 +1,30 @@
 // SPDX-License-Identifier: MIT
-// SPDX-FileCopyrightText: 2019-2020 Synthetix
-// SPDX-FileCopyrightText: 2020 Ben Hauser (curvefi/unipool-fork)
-// SPDX-FileCopyrightText: 2026 ARL Protocol contributors
+//
+// Adapted from curvefi/unipool-fork, commit 262a5747a32acd3bf7124bc21058d6905f86e22a,
+// file contracts/StakingRewards.sol, itself a modified Synthetix StakingRewards. Both carry
+// the MIT License, reproduced here as they require:
+//
+// Copyright (c) 2020 Synthetix
+// Copyright (c) 2020 Ben Hauser
+// Modifications Copyright (c) 2026 ARL Protocol contributors
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 pragma solidity 0.8.36;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -11,20 +34,37 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 
 /// @title ARL staking rewards
 /// @notice Stake ARL and earn ARL rewards paid from a funded pool, linearly over fixed reward
-/// periods. Rewards come only from tokens transferred in by the rewards distributor (the
-/// Community & Staking allocation, through the treasury timelock); nothing is minted.
+/// periods. Rewards come only from tokens that `rewardsDistribution` transfers in through
+/// `notifyRewardAmount`; nothing is minted.
 ///
-/// @dev Adapted from Synthetix `StakingRewards` as modified in curvefi/unipool-fork (both MIT):
-/// the reward-per-token accounting is unchanged. ARL changes:
-/// - Solidity 0.8 checked arithmetic and OpenZeppelin v5 `SafeERC20` / `ReentrancyGuard`.
-/// - No owner, pause or token recovery. The only privileged role is `rewardsDistribution`,
-///   fixed at deployment (intended: the treasury timelock), which can fund a period, set the
-///   duration between periods and reclaim rewards that were never allocated.
-/// - Staking and reward token may be the same (ARL). Stakes and rewards are accounted
-///   separately: `rewardsAccrued` counts rewards allocated to stakers, so the unallocated rest
-///   (time with no stakers, rate rounding) can be returned after a period and never touches
-///   staked principal.
-/// - `stakeWithPermit` tolerates a front-run permit (OpenZeppelin's recommended pattern).
+/// Privileged role. `rewardsDistribution` is a single address fixed at deployment. The intended
+/// holder is the Community & Staking allocation holder (the plan's
+/// `recipients.communityStaking`). This contract cannot tell where the tokens it receives came
+/// from economically; the deployment verifier (`script/ARLStakingVerify.sol`) enforces that the
+/// distributor is that holder. The role can:
+/// - fund a reward period (`notifyRewardAmount`), pulling the tokens from itself;
+/// - change the period length, only between periods (`setRewardsDuration`);
+/// - take back rewards that were never allocated and are not reserved for an active period,
+///   only between periods (`returnUnallocated`).
+/// It cannot: withdraw or freeze staked principal, take allocated rewards, mint, pause, upgrade,
+/// change itself, or recover arbitrary tokens. There is no owner.
+///
+/// Tokens that reach the contract other than through `stake` or `notifyRewardAmount` (a direct
+/// transfer) and reward-per-token rounding dust are not accounted to anyone and stay in the
+/// contract permanently; there is deliberately no recovery function.
+///
+/// @dev Changes from the source: Solidity 0.8 checked arithmetic and OpenZeppelin v5
+/// `SafeERC20` / `ReentrancyGuard`; owner, pause, `recoverERC20` and the owner-set duration
+/// removed; immutable `rewardsDistribution`; funded / accrued / paid / returned accounting so the
+/// staking and reward token can both be ARL; `unallocatedRewards` and `returnUnallocated`;
+/// `stakeWithPermit` that tolerates a front-run permit; a zero-rate guard; custom errors. The
+/// reward-per-token and earned formulas are unchanged.
+///
+/// Accounting identity (all terms in reward tokens, at any time):
+///   rewardsFunded = accrued + reserved + unallocated + rewardsReturned
+/// where accrued = rewardsAccrued plus the accrual pending since the last checkpoint (only while
+/// something is staked), reserved = rewardRate × (periodFinish − lastTimeRewardApplicable()), the
+/// part of the active period still to be paid out, and unallocated ≥ 0.
 contract ARLStakingRewards is ReentrancyGuard {
     using SafeERC20 for IERC20;
 
@@ -32,7 +72,7 @@ contract ARLStakingRewards is ReentrancyGuard {
 
     IERC20 public immutable stakingToken;
     IERC20 public immutable rewardsToken;
-    /// @notice Funds reward periods and manages the duration. Fixed at deployment.
+    /// @notice The limited privileged role described above. Fixed at deployment.
     address public immutable rewardsDistribution;
 
     uint256 public periodFinish;
@@ -83,7 +123,8 @@ contract ARLStakingRewards is ReentrancyGuard {
 
     /// @param stakingToken_ Token staked (ARL).
     /// @param rewardsToken_ Token paid as reward (ARL).
-    /// @param rewardsDistribution_ Funds periods; intended to be the treasury timelock.
+    /// @param rewardsDistribution_ Funds periods; must be the Community & Staking allocation holder
+    /// (checked by the deployment verifier, not here).
     /// @param rewardsDuration_ Length of each reward period in seconds. Must be non-zero.
     constructor(
         IERC20 stakingToken_,
@@ -135,12 +176,24 @@ contract ARLStakingRewards is ReentrancyGuard {
         return rewardRate * rewardsDuration;
     }
 
-    /// @notice Rewards funded but not allocated to stakers and not yet returned. Only the part
-    /// not reserved for the rest of the current period can be returned, after it ends.
+    /// @notice Rewards of the active period not yet paid out over time:
+    /// `rewardRate × (periodFinish − lastTimeRewardApplicable())`. Zero between periods.
+    function reservedRewards() public view returns (uint256) {
+        return (periodFinish - lastTimeRewardApplicable()) * rewardRate;
+    }
+
+    /// @notice Rewards allocated to stakers so far, including the accrual pending since the last
+    /// checkpoint. Allocation happens only while something is staked.
+    function accruedRewards() public view returns (uint256) {
+        if (_totalSupply == 0) return rewardsAccrued;
+        return rewardsAccrued + (lastTimeRewardApplicable() - lastUpdateTime) * rewardRate;
+    }
+
+    /// @notice Funded rewards that are neither allocated to stakers, nor reserved for the rest of
+    /// the active period, nor already returned: time elapsed with nothing staked and the
+    /// remainder of the rate division. Only this amount can be returned, between periods.
     function unallocatedRewards() public view returns (uint256) {
-        uint256 pending =
-            _totalSupply == 0 ? 0 : (lastTimeRewardApplicable() - lastUpdateTime) * rewardRate;
-        return rewardsFunded - rewardsAccrued - pending - rewardsReturned;
+        return rewardsFunded - accruedRewards() - reservedRewards() - rewardsReturned;
     }
 
     // ---------------------------------------------------------------- staking

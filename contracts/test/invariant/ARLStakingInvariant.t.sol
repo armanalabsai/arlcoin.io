@@ -8,7 +8,8 @@ import {ARLToken} from "../../src/ARLToken.sol";
 import {ARLTestBase} from "../ARLTestBase.sol";
 
 /// @dev Random stakes, withdrawals, claims, exits, fundings, duration changes, returns of
-/// unallocated rewards and time moves, by a fixed set of stakers.
+/// unallocated rewards (including attempts during an active period), direct transfers that
+/// bypass the accounting, and time moves, by a fixed set of stakers.
 contract ARLStakingHandler is Test {
     ARLStakingRewards internal immutable staking;
     ARLToken internal immutable token;
@@ -16,6 +17,8 @@ contract ARLStakingHandler is Test {
     address[] public stakers;
 
     uint256 public ghostStaked;
+    uint256 public ghostDonated;
+    address internal immutable donor = makeAddr("donor");
 
     constructor(
         ARLStakingRewards staking_,
@@ -84,6 +87,22 @@ contract ARLStakingHandler is Test {
         staking.returnUnallocated();
     }
 
+    /// Returning during an active period must always fail, whatever is unallocated.
+    function returnUnallocatedEarly() external {
+        if (block.timestamp > staking.periodFinish()) return;
+        vm.prank(distributor);
+        vm.expectRevert(ARLStakingRewards.StakingPeriodActive.selector);
+        staking.returnUnallocated();
+    }
+
+    /// A plain transfer to the contract, bypassing `stake` and `notifyRewardAmount`.
+    function donate(uint256 amount) external {
+        amount = bound(amount, 0, token.balanceOf(donor));
+        vm.prank(donor);
+        token.transfer(address(staking), amount);
+        ghostDonated += amount;
+    }
+
     function warp(uint256 by) external {
         vm.warp(block.timestamp + bound(by, 0, 20 days));
     }
@@ -106,6 +125,8 @@ contract ARLStakingInvariantTest is ARLTestBase {
             token.approve(address(staking), type(uint256).max);
         }
         handler = new ARLStakingHandler(staking, token, communitySafe, stakers);
+        vm.prank(communitySafe);
+        token.transfer(makeAddr("donor"), 100_000 ether);
         vm.prank(communitySafe);
         token.approve(address(staking), type(uint256).max);
         targetContract(address(handler));
@@ -143,5 +164,33 @@ contract ARLStakingInvariantTest is ARLTestBase {
             ? 0
             : (staking.lastTimeRewardApplicable() - staking.lastUpdateTime()) * staking.rewardRate();
         assertLe(claimable, staking.rewardsAccrued() + pending - staking.rewardsPaid());
+    }
+
+    /// Every funded reward is exactly one of: allocated to stakers, reserved for the rest of the
+    /// active period, unallocated, or returned. `unallocatedRewards()` never underflows.
+    function invariant_AccountingIdentity() public view {
+        assertEq(
+            staking.accruedRewards() + staking.reservedRewards() + staking.unallocatedRewards()
+                + staking.rewardsReturned(),
+            staking.rewardsFunded()
+        );
+    }
+
+    /// The reserve is exactly what the active period still has to pay out.
+    function invariant_ReserveIsRemainingSchedule() public view {
+        assertEq(
+            staking.reservedRewards(),
+            staking.rewardRate() * (staking.periodFinish() - staking.lastTimeRewardApplicable())
+        );
+    }
+
+    /// The balance is exactly principal, allocated-but-unpaid rewards, the reserve, the
+    /// unallocated rewards and direct transfers. Rounding dust sits inside the allocated part.
+    function invariant_BalanceFullyExplained() public view {
+        assertEq(
+            token.balanceOf(address(staking)),
+            staking.totalSupply() + staking.accruedRewards() - staking.rewardsPaid()
+                + staking.reservedRewards() + staking.unallocatedRewards() + handler.ghostDonated()
+        );
     }
 }
