@@ -91,7 +91,10 @@ const CONFIG_KEYS = [
   "safe",
 ];
 
-/** A vesting schedule supplied by configuration. The durations are policy-controlled (TBD). */
+/**
+ * A vesting schedule supplied by configuration. The durations must equal the approved schedule
+ * in `@arl/tokenomics` (12-month cliff, 36 months linear); the start date is a deployment input.
+ */
 export interface VestingConfig {
   beneficiary: string;
   /** UTC start, `YYYY-MM-DDTHH:MM:SSZ`, day of month at most 28. */
@@ -247,9 +250,10 @@ function buildVesting(
   const allocation = ALLOCATIONS.find((a) => a.id === VESTING_KEYS[key]);
   if (allocation?.release.kind !== "vesting")
     fail(`tokenomics: ${VESTING_KEYS[key]} does not vest`);
-  // The schedules are TBD. Only a local rehearsal may supply one before it is approved.
-  if (allocation.release.status !== "approved" && !local) {
-    fail(`${field}: the schedule is not approved (TBD); only local Anvil may rehearse one`);
+  const approved = allocation.release.schedule;
+  // The vesting start is not confirmed. Only a local rehearsal may supply one before it is.
+  if ((allocation.release.status !== "approved" || approved.start !== "approved") && !local) {
+    fail(`${field}: the vesting start is not confirmed (TBD); only local Anvil may rehearse it`);
   }
 
   const beneficiary = requireAddress(v.beneficiary, `${field}.beneficiary`);
@@ -258,6 +262,12 @@ function buildVesting(
   }
   if (!Number.isInteger(v.vestingMonths) || v.vestingMonths <= 0) {
     fail(`${field}.vestingMonths: must be a positive integer`);
+  }
+  if (v.cliffMonths !== approved.cliffMonths) {
+    fail(`${field}.cliffMonths: must be ${String(approved.cliffMonths)} (approved schedule)`);
+  }
+  if (v.vestingMonths !== approved.linearMonths) {
+    fail(`${field}.vestingMonths: must be ${String(approved.linearMonths)} (approved schedule)`);
   }
   const start = parseUtc(v.start, `${field}.start`);
   const cliffEnd = addCalendarMonths(start, v.cliffMonths);

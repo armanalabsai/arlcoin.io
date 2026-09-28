@@ -2,6 +2,7 @@
 pragma solidity 0.8.36;
 
 import {Test} from "forge-std/Test.sol";
+import {DateTime} from "solidity-datetime/DateTime.sol";
 
 import {ARLAllocation} from "../../src/ARLAllocation.sol";
 import {ARLTimelock} from "../../src/ARLTimelock.sol";
@@ -45,6 +46,10 @@ contract ARLDeployHarness {
         );
     }
 
+    function validateSchedule(string memory name, VestingPlan memory v) external pure {
+        ARLDeployPlan.validateSchedule(name, v);
+    }
+
     function approvalGate(uint256 chainId, bool vestingApproved, bool reserveApproved)
         external
         pure
@@ -61,11 +66,12 @@ contract ARLDeployHarness {
     }
 }
 
-/// @dev Vesting schedules here are test fixtures; the approved schedules are TBD.
+/// @dev Vesting schedules use the approved durations (12-month cliff, 36 months linear); the
+/// start date is a fixture, since the vesting start is not confirmed.
 contract ARLDeployTest is Test {
     uint64 internal constant START = 1_798_761_600; // 2027-01-01T00:00:00Z
     uint64 internal constant CLIFF_END = 1_830_297_600; // 2028-01-01T00:00:00Z
-    uint64 internal constant VESTING_END = 1_893_456_000; // 2030-01-01T00:00:00Z
+    uint64 internal constant VESTING_END = 1_924_992_000; // 2031-01-01T00:00:00Z
 
     /// @dev Runtime code of `SafeProxy` v1.5.0, copied from the official build
     /// (safe-smart-account 1.5.0, `deployedBytecode`). A test in `packages/deploy` fails if it
@@ -100,7 +106,7 @@ contract ARLDeployTest is Test {
             FounderTranches(ARLAllocation.FOUNDER_UNRESTRICTED, ARLAllocation.FOUNDER_RESERVED);
         p.investors = VestingPlan(makeAddr("investorsSafe"), START, CLIFF_END, VESTING_END);
         p.strategicPartnerships =
-            VestingPlan(makeAddr("partnershipsSafe"), START, START, VESTING_END);
+            VestingPlan(makeAddr("partnershipsSafe"), START, CLIFF_END, VESTING_END);
         p.treasurySafe = makeAddr("treasurySafe");
         p.treasuryGuardian = makeAddr("guardianSafe");
         p.minDelay = 48 hours;
@@ -337,7 +343,7 @@ contract ARLDeployTest is Test {
             '"vesting":{',
             string.concat(
                 '"vesting":{"founder":{"beneficiary":"0x1F67caa874DDec60E290e27cce758f01Bd53c380",',
-                '"cliffStart":1798761600,"cliffEnd":1830297600,"vestingEnd":1893456000},'
+                '"cliffStart":1798761600,"cliffEnd":1830297600,"vestingEnd":1924992000},'
             )
         );
         vm.expectRevert(ARLDeployPlan.PlanFounderVestingNotAllowed.selector);
@@ -752,11 +758,69 @@ contract ARLDeployTest is Test {
     function testFuzz_ScheduleOrdering(uint64 cliffStart, uint64 cliffEnd, uint64 vestingEnd)
         public
     {
+        // Keep timestamps within the calendar range the date library handles (years <= 9999).
+        cliffStart = uint64(bound(cliffStart, 0, 200_000_000_000));
         Plan memory p = _plan();
         p.investors = VestingPlan(p.investors.beneficiary, cliffStart, cliffEnd, vestingEnd);
-        bool valid = cliffStart != 0 && cliffEnd >= cliffStart && vestingEnd > cliffEnd;
+        bool valid = cliffStart != 0 && cliffEnd >= cliffStart && vestingEnd > cliffEnd
+            && cliffEnd == DateTime.addMonths(cliffStart, 12)
+            && vestingEnd == DateTime.addMonths(cliffEnd, 36);
         if (!valid) vm.expectRevert();
         h.validate(p);
+    }
+
+    /// @dev Any start date with the approved durations is accepted (the start itself is TBD).
+    function testFuzz_ApprovedDurationsAcceptedForAnyStart(uint64 start) public {
+        start = uint64(bound(start, 1, 4_102_444_800)); // up to 2100-01-01
+        Plan memory p = _plan();
+        uint64 cliffEnd = uint64(DateTime.addMonths(start, 12));
+        uint64 vestingEnd = uint64(DateTime.addMonths(cliffEnd, 36));
+        p.investors = VestingPlan(p.investors.beneficiary, start, cliffEnd, vestingEnd);
+        h.validate(p);
+    }
+
+    /// @dev The approved schedule is a 12-month cliff and 36 months of linear vesting, in
+    /// calendar months. A schedule that is ordered but has other durations is rejected.
+    function test_RevertWhen_ScheduleDurationsNotApproved() public {
+        Plan memory p = _plan();
+        p.investors.cliffEnd = 1_814_400_000; // 2027-07-01: a 6-month cliff
+        p.investors.vestingEnd = uint64(DateTime.addMonths(p.investors.cliffEnd, 36));
+        _expectSchedule("investors cliff is not 12 calendar months");
+        h.validate(p);
+
+        p = _plan();
+        p.strategicPartnerships.vestingEnd = 1_893_456_000; // 2030-01-01: 24 months linear
+        _expectSchedule("strategicPartnerships linear vesting is not 36 calendar months");
+        h.validate(p);
+
+        // One second off is not a calendar-month schedule either.
+        p = _plan();
+        p.investors.vestingEnd += 1;
+        _expectSchedule("investors linear vesting is not 36 calendar months");
+        h.validate(p);
+    }
+
+    function test_ApprovedDurationConstants() public pure {
+        assertEq(ARLDeployPlan.VESTING_CLIFF_MONTHS, 12);
+        assertEq(ARLDeployPlan.VESTING_LINEAR_MONTHS, 36);
+        // 2027-01-01 + 12 months = 2028-01-01; + 36 months = 2031-01-01.
+        assertEq(DateTime.addMonths(START, 12), CLIFF_END);
+        assertEq(DateTime.addMonths(CLIFF_END, 36), VESTING_END);
+    }
+
+    /// @dev The deployer does not validate; the verifier must still reject a deployment whose
+    /// planned schedule does not have the approved durations, even though chain and plan agree.
+    function test_RevertWhen_VerifyPlanScheduleNotApproved() public {
+        Plan memory p = _plan();
+        p.investors.vestingEnd = uint64(DateTime.addMonths(p.investors.cliffEnd, 24));
+        Deployment memory d = h.deploy(p);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ARLDeployPlan.PlanInvalidSchedule.selector,
+                "investors linear vesting is not 36 calendar months"
+            )
+        );
+        h.verify(p, d);
     }
 
     // ------------------------------------------------------------------ verification
@@ -1021,9 +1085,9 @@ contract ARLDeployTest is Test {
         );
         string memory vesting = string.concat(
             '"vesting":{"investors":{"beneficiary":"0x4bCb1679EEfBA34C88F55c0D07efe4EA9bfF4721",',
-            '"cliffStart":1798761600,"cliffEnd":1830297600,"vestingEnd":1893456000},',
+            '"cliffStart":1798761600,"cliffEnd":1830297600,"vestingEnd":1924992000},',
             '"strategicPartnerships":{"beneficiary":"0x5F611FC6df7B0e0326A6B10b135A15DdF8667c2a",',
-            '"cliffStart":1798761600,"cliffEnd":1830297600,"vestingEnd":1893456000}},'
+            '"cliffStart":1798761600,"cliffEnd":1830297600,"vestingEnd":1924992000}},'
         );
         string memory treasury = string.concat(
             '"treasury":{"safe":"0xCbA140fcD82caf116be04c2a478A0e10b55202F9",',

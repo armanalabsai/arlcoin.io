@@ -83,12 +83,15 @@ initialization is not possible.
 
 Two allocations are held by `ARLVestingWallet`s, each releasing to a
 dedicated Safe: Investors / Strategic Capital and Strategic Partnerships. Their
-schedules (start, cliff, duration) are not yet implemented and are treated as
-**TBD** by the tooling. The Founder allocation does not vest (see below). The
-deployment configuration supplies explicit UTC timestamps, and the planner and
-`ARLDeployPlan` refuse every chain except local Anvil until the schedules are
-approved (`VESTING_SCHEDULES_APPROVED = false`). The verifier asserts that each
-deployed wallet matches its planned beneficiary and timestamps.
+approved schedule is 0% at TGE, a 12-month cliff, then 36 months linear, in
+calendar months. The Founder allocation does not vest (see below). The
+deployment configuration supplies explicit UTC timestamps; the planner and
+`ARLDeployPlan` reject any schedule with other durations, checking calendar
+months with `DateTime.addMonths` from solidity-datetime (MIT). The vesting start
+(TGE) is not confirmed, so both refuse every chain except local Anvil until it
+is (`VESTING_SCHEDULES_APPROVED = false`). The verifier asserts that each
+deployed wallet matches its planned beneficiary and timestamps, and that the
+planned schedule has the approved durations.
 
 The contracts never convert months to seconds. Vested amount at time `t`:
 
@@ -119,8 +122,8 @@ other holder.
 
 The 900,000 ARL team allocation is minted to a dedicated team pool Safe. A
 member's `ARLVestingWallet` is created and funded from the pool only when an
-approved grant exists. No individual grants are defined, and the grant
-schedule is TBD. Grants are irrevocable and made in tranches; each member's
+approved grant exists. No individual grants are defined. Each grant vests with
+0% at the grant date, a 12-month cliff, then 36 months linear. Grants are irrevocable and made in tranches; each member's
 beneficiary is the member's own Safe or smart account. `ARLVestingWallet` has
 no revocation and none is added.
 

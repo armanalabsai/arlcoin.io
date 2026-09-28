@@ -403,11 +403,11 @@ operations.
     receives the unlocked 2,000,000 ARL at TGE.
 13. ARL Core: the unresolved items listed in section 17.10.
 
-Implementation gap (not a decision): the repository still records the
-investor, strategic partnership and team schedules as TBD, and the tooling
+Vesting implementation status (not a decision): the approved section 4.1
+durations (12-month cliff, 36 months linear, calendar months) are enforced by
+the tokenomics package, the deployment planner, `ARLDeployPlan` and the
+verifier. The vesting start (section 4.3) is not confirmed, so the tooling
 still refuses every public network (`VESTING_SCHEDULES_APPROVED = false`).
-Aligning the implementation with section 4 is a separate task that needs its
-own approval.
 
 Founder implementation status (not a decision): the Founder allocation
 (2,100,000 ARL) is implemented as two genesis tranches, with no vesting wallet.
