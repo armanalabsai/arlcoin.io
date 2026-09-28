@@ -152,3 +152,29 @@ deployment key.
 Before a Base Sepolia deployment: a config with `requireRecipientCode: true` and a dedicated test
 Safe for every role, and a funded deployer key. Private keys are never placed in config files; use
 a hardware wallet or Foundry keystore outside the repository.
+
+## Base Sepolia runbook
+
+Status: **not deployed.** Dry run: `npm run rehearse:base-sepolia-fork` runs every step below on a
+local Anvil fork of Base Sepolia (real canonical Safe contracts, Anvil development accounts, no
+key); nothing is sent to Base Sepolia.
+
+1. **Safes.** `CreateSafes` creates the 12 role Safes with the canonical Safe v1.5.0
+   `SafeProxyFactory`, `SafeL2` singleton and `CompatibilityFallbackHandler`, after checking their
+   code hashes. Environment overrides of those contracts are refused off local Anvil; Base Mainnet
+   is refused by the network gate. Give the guardian its own signers (`ARL_GUARDIAN_OWNERS`,
+   disjoint from `ARL_SAFE_OWNERS`, M-1).
+
+   ```
+   cd contracts
+   ARL_SAFE_OWNERS=<a>,<b>,<c> ARL_SAFE_THRESHOLD=2 \
+   ARL_GUARDIAN_OWNERS=<d>,<e> ARL_GUARDIAN_THRESHOLD=2 \
+   ARL_SAFES_OUT=deploy/deployments/84532-safes.json \
+   forge script script/CreateSafes.s.sol:CreateSafes --rpc-url https://sepolia.base.org \
+     --broadcast --account <keystore-name> --slow
+   ```
+
+2. **Config and plan.** `safes-config-cli.ts <safes.json> <placeholder-vesting-start> <config.json>`
+   writes the config (code checks on, 12 + 36 months, 48-hour delay); `cli.ts` builds the plan.
+3. **Deploy and verify.** `DeployARL` with `ARL_PLAN` and `ARL_DEPLOYMENT`, then `VerifyARL`.
+4. **Manifest.** `manifest-cli.ts`, then `supply-cli.ts` (circulating supply at TGE is 2,100,000 ARL).

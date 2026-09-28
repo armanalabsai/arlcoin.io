@@ -331,6 +331,42 @@ must_fail "verify: Safes point to an unlisted singleton" "VerifyFailed\\(\"recip
 must_fail "verify: founder without code" "VerifyAddressMismatch\\(\"recipients.founder\"" \
   forge_verify "$REHEARSAL/founder-eoa.json" "$SAFE_DEPLOYMENT"
 
+log "Safe creation script and config builder (the Base Sepolia pipeline, on Anvil)"
+PIPE_SAFES="deploy/deployments/31337-created-safes.json"
+PIPE_CONFIG="$REHEARSAL/created-safes-config.json"
+PIPE_PLAN="$REHEARSAL/created-safes-plan.json"
+PIPE_DEPLOYMENT="deploy/deployments/31337-created-safes-deployment.json"
+create_safes() {
+  ARL_SAFE_FACTORY="$SAFE_FACTORY" ARL_SAFE_SINGLETON="$SAFE_SINGLETON" \
+    ARL_SAFE_OWNERS="$(account 2),$(account 3),$(account 4)" ARL_SAFE_THRESHOLD=2 \
+    ARL_GUARDIAN_OWNERS="$1" ARL_GUARDIAN_THRESHOLD="$2" ARL_SALT="$3" ARL_SAFES_OUT="$4" \
+    forge script script/CreateSafes.s.sol:CreateSafes \
+    --rpc-url "$RPC" --broadcast --unlocked --sender "$SAFE_DEPLOYER" --slow
+}
+BEFORE_SAFES="$(cast nonce "$SAFE_DEPLOYER" --rpc-url "$RPC")"
+must_fail "guardian signers overlap the other Safes" "guardian signers overlap" \
+  create_safes "$(account 4),$(account 6)" 1 overlap "$REHEARSAL/x.json"
+[[ "$(cast nonce "$SAFE_DEPLOYER" --rpc-url "$RPC")" == "$BEFORE_SAFES" ]] || die "a rejected Safe creation broadcast a transaction"
+create_safes "$(account 6),$(account 7)" 2 pipeline "$PIPE_SAFES" >/dev/null || die "Safe creation failed"
+safeval() { node -e "console.log(require('./$PIPE_SAFES').safes.$1)"; }
+expect "created founder safe is a Safe v1.5.0 proxy" "$(canonical_hash SAFE_PROXY_V150_CODEHASH)" \
+  "$(cast codehash "$(safeval founder)" --rpc-url "$RPC")"
+expect "created treasury safe threshold" "2" "$(num "$(safeval treasury)" 'getThreshold()(uint256)')"
+expect "created guardian safe owners" "[$(account 6), $(account 7)]" \
+  "$(cast call "$(safeval guardian)" 'getOwners()(address[])' --rpc-url "$RPC" | tr 'A-F' 'a-f')"
+expect "created safes are distinct" "12" \
+  "$(node -e "console.log(new Set(Object.values(require('./$PIPE_SAFES').safes).map(a=>a.toLowerCase())).size)")"
+node "$ROOT/packages/deploy/src/safes-config-cli.ts" "$PIPE_SAFES" 2027-01-01T00:00:00Z "$PIPE_CONFIG" \
+  || die "config from created Safes rejected"
+node "$ROOT/packages/deploy/src/cli.ts" "$PIPE_CONFIG" "$PIPE_PLAN" || die "planner rejected the created-Safes config"
+forge_deploy "$PIPE_PLAN" "$PIPE_DEPLOYMENT" >/dev/null || die "deployment with created Safes failed"
+forge_verify "$PIPE_PLAN" "$PIPE_DEPLOYMENT" || die "verifier rejected the deployment with created Safes"
+expect "created founder safe balance" "2100000000000000000000000" \
+  "$(num "$(node -e "console.log(require('./$PIPE_DEPLOYMENT').token)")" 'balanceOf(address)(uint256)' "$(safeval founder)")"
+node -e "const s=require('./$PIPE_SAFES'); s.chainId=8453; require('fs').writeFileSync('$REHEARSAL/mainnet-safes.json', JSON.stringify(s));"
+must_fail "config builder: Base Mainnet Safes" "Base Mainnet\\) is locked" \
+  node "$ROOT/packages/deploy/src/safes-config-cli.ts" "$REHEARSAL/mainnet-safes.json" 2027-01-01T00:00:00Z "$REHEARSAL/x.json"
+
 log "Circulating supply moves only when tokens leave a locked address"
 # Runs last: it moves genesis tokens, after which the verifier's genesis checks no longer apply.
 BEEF=0x000000000000000000000000000000000000bEEF

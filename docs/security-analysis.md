@@ -81,7 +81,9 @@ Each deliberate defect was introduced, the suite run, and the defect reverted:
   findings**, 102 detectors. CI fails on any low-or-higher finding. The three
   `timestamp` comparisons in `ARLMerkleDistributor` (claim window open or
   closed) are suppressed inline: the window is days long, so block-timestamp
-  drift of seconds cannot change an outcome that matters.
+  drift of seconds cannot change an outcome that matters. The `calls-loop` findings in the `CreateSafes`
+  deployment script (one Safe created and checked per role, 12 in total) are
+  suppressed inline: it is a script, not a deployed contract.
 - Including OpenZeppelin: 29 findings, all in upstream code and expected by
   design:
 
