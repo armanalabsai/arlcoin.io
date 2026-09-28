@@ -13,6 +13,7 @@ cbor_metadata = false
 remappings = [
   "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
   "forge-std/=lib/forge-std/src/",
+  "solidity-datetime/=lib/solidity-datetime/contracts/",
 ]
 # Never read or write outside the project.
 # Scripts read deployment plans and write deployed addresses; nothing else.

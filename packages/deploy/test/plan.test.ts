@@ -78,10 +78,10 @@ describe("buildPlan: valid local config", () => {
     const investors = plan.vesting.investors;
     assert.equal(plan.source.investors.start, "2027-01-01T00:00:00Z");
     assert.equal(plan.source.investors.cliffEnd, "2028-01-01T00:00:00Z");
-    assert.equal(plan.source.investors.vestingEnd, "2030-01-01T00:00:00Z");
+    assert.equal(plan.source.investors.vestingEnd, "2031-01-01T00:00:00Z");
     assert.equal(investors.cliffStart, Date.UTC(2027, 0, 1) / 1000);
     assert.equal(investors.cliffEnd, Date.UTC(2028, 0, 1) / 1000);
-    assert.equal(investors.vestingEnd, Date.UTC(2030, 0, 1) / 1000);
+    assert.equal(investors.vestingEnd, Date.UTC(2031, 0, 1) / 1000);
     assert.deepEqual(Object.keys(plan.vesting), ["investors", "strategicPartnerships"]);
   });
 
@@ -297,13 +297,13 @@ describe("buildPlan: fails closed", () => {
     );
   });
 
-  it("refuses any non-local chain while vesting schedules are TBD", () => {
+  it("refuses any non-local chain while the vesting start is TBD", () => {
     rejects(
       config((c) => {
         c.chainId = 11155111;
         c.requireRecipientCode = true;
       }),
-      /vesting\.investors: the schedule is not approved \(TBD\)/,
+      /vesting\.investors: the vesting start is not confirmed \(TBD\)/,
     );
   });
 
@@ -319,6 +319,17 @@ describe("buildPlan: fails closed", () => {
     // Local Anvil may rehearse with the custody still TBD; an approved custody opens the gate.
     founderReserveGate(true, false);
     founderReserveGate(false, true);
+  });
+
+  it("rejects durations other than the approved 12-month cliff and 36 months linear", () => {
+    rejects(
+      config((c) => (c.vesting.investors.cliffMonths = 6)),
+      /vesting\.investors\.cliffMonths: must be 12 \(approved schedule\)/,
+    );
+    rejects(
+      config((c) => (c.vesting.strategicPartnerships.vestingMonths = 24)),
+      /vesting\.strategicPartnerships\.vestingMonths: must be 36 \(approved schedule\)/,
+    );
   });
 
   it("rejects invalid schedule parameters and dates", () => {
