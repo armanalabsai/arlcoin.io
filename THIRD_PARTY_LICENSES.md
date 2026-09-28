@@ -51,13 +51,13 @@ website's source is copied from third parties; these packages are used as publis
 
 Runtime (included in the built site):
 
-| Package                | Version | License | Purpose                                      |
-| ---------------------- | ------- | ------- | -------------------------------------------- |
-| next                   | 16.3.6  | MIT     | Framework, routing, static generation        |
-| react / react-dom      | 19.3.0  | MIT     | UI runtime                                   |
-| motion                 | 13.4.4  | MIT     | Springs, presence and drag animations        |
-| @radix-ui/react-dialog | 1.1.23  | MIT     | Accessible dialog (focus trap, Escape, ARIA) |
-| geist                  | 1.7.2   | OFL-1.1 | Geist Sans and Geist Mono fonts, self-hosted |
+| Package                | Version | License | Purpose                                                                                                                           |
+| ---------------------- | ------- | ------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| next                   | 16.3.6  | MIT     | Framework, routing, static generation                                                                                             |
+| react / react-dom      | 19.3.0  | MIT     | UI runtime                                                                                                                        |
+| motion                 | 13.4.4  | MIT     | Springs, presence and drag animations                                                                                             |
+| @radix-ui/react-dialog | 1.1.23  | MIT     | Accessible dialog (focus trap, Escape, ARIA)                                                                                      |
+| geist                  | 1.7.2   | OFL-1.1 | Geist Sans and Geist Mono fonts, self-hosted; Geist SemiBold and Medium glyphs are outlined in the ARL wordmark (`assets/brand/`) |
 
 Transitive runtime packages are MIT, ISC, Apache-2.0, BSD-3-Clause or 0BSD, with three
 exceptions:

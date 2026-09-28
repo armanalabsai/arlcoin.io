@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { LAYERS, nextLayer, pathFor } from "@/content/registry.ts";
 import { SITE } from "@/content/site.ts";
 
+import { BrandMark } from "./BrandMark.tsx";
 import { CoreCard } from "./CoreCard.tsx";
 import { CoreNavigation } from "./CoreNavigation.tsx";
 import { DetailSurface } from "./DetailSurface.tsx";
@@ -118,9 +119,10 @@ export function InteractiveCore() {
               e.preventDefault();
               navigate("/");
             }}
-            className="text-[17px] font-semibold tracking-[-0.03em]"
+            className="inline-flex items-center gap-2 text-[17px] font-semibold tracking-[-0.03em]"
             aria-label="ARL overview"
           >
+            <BrandMark />
             ARL
           </Link>
           <CoreNavigation
