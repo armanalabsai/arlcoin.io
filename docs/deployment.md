@@ -111,7 +111,7 @@ deployments must leave the deployer nonce unchanged. CI runs the rehearsal on ev
 
 ## Before any public network
 
-See the pre-testnet requirements in the Phase 2 security scope report. In particular: a
+Required before any testnet: a
 testnet-only config with `requireRecipientCode: true` and real test Safes, a free public RPC, and
 a dedicated test Safe for every role, a confirmed vesting start for the investor and strategic
 partnership wallets (until then the tooling refuses every public network). Private keys are never placed in config files; use a hardware wallet or Foundry keystore

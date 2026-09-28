@@ -66,7 +66,7 @@ Rules:
 | Decision                                                               | Needed before                |
 | ---------------------------------------------------------------------- | ---------------------------- |
 | Production chain                                                       | Deployment scripts           |
-| Founder, investor and strategic partnership vesting schedules (TBD)    | Any public network           |
+| Vesting start (TGE) for investors and strategic partnerships (TBD)     | Any public network           |
 | Team grant schedule; program rules for staking, growth and early users | The programs                 |
 | Exact launch and grant dates (contracts take explicit timestamps)      | Deployment                   |
 | Signer sets and thresholds of the dedicated Safes                      | Production multisig creation |
