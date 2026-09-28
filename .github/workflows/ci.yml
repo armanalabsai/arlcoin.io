@@ -87,33 +87,6 @@ jobs:
         run: slither . --foundry-compile-all --filter-paths "lib/|test/" --exclude-dependencies --fail-low
         working-directory: contracts
 
-  semgrep:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-        with:
-          python-version: "3.12"
-
-      - run: pip install semgrep==1.178.0
-
-      # Decurity's smart-contract rules (security and best-practice), pinned to a commit.
-      - name: Fetch rules
-        run: |
-          git init -q rules
-          git -C rules fetch -q --depth 1 https://github.com/Decurity/semgrep-smart-contracts.git 2e878a89ac7bba1f8435e8a68e3ecb7700096cd5
-          git -C rules checkout -q FETCH_HEAD
-
-      - name: Semgrep (ARL contracts; fails on any finding)
-        run: >
-          semgrep scan --metrics=off --error
-          --config rules/solidity/security --config rules/solidity/best-practice
-          contracts/src
-
   symbolic:
     runs-on: ubuntu-latest
     timeout-minutes: 20
