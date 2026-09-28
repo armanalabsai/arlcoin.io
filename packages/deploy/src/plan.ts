@@ -6,13 +6,21 @@
 // deploying, so a hand-edited plan cannot bypass these rules.
 
 import { ALLOCATIONS, MAX_SUPPLY, MIN_TIMELOCK_HOURS, validateAllocations } from "@arl/tokenomics";
+import {
+  getSafeL2SingletonDeployment,
+  getSafeSingletonDeployment,
+} from "@safe-global/safe-deployments";
 
 /**
- * Plan schema. Version 3 removes the founder vesting wallet: the Founder allocation is minted
- * to two recipients (unrestricted and reserved) and never vests. Plans and configs that still
- * carry `vesting.founder` are rejected, not reinterpreted.
+ * Plan schema. Version 3 removed the founder vesting wallet: the Founder allocation is minted
+ * to two recipients (unrestricted and reserved) and never vests. Version 4 adds the Safe
+ * v1.5.0 singletons every Safe role must point to. Plans of older schemas, and configs that
+ * still carry `vesting.founder`, are rejected, not reinterpreted.
  */
-export const PLAN_SCHEMA = "arl-deploy-plan/3";
+export const PLAN_SCHEMA = "arl-deploy-plan/4";
+
+/** The Safe version every Safe role must run. */
+export const SAFE_VERSION = "1.5.0";
 
 /**
  * Anvil's default chain ID. Only here may recipients lack code, schedules be unapproved, or the
@@ -80,6 +88,7 @@ const CONFIG_KEYS = [
   "vesting",
   "treasury",
   "recipients",
+  "safe",
 ];
 
 /** A vesting schedule supplied by configuration. The durations are policy-controlled (TBD). */
@@ -106,6 +115,12 @@ export interface DeployConfig {
   /** `guardian` holds only the canceller role and must differ from `safe`. */
   treasury: { safe: string; guardian: string; minDelayHours: number };
   recipients: Record<RecipientKey, string>;
+  /**
+   * Local Anvil only: the Safe singletons a rehearsal deployed. Every other chain uses the
+   * canonical Safe v1.5.0 singletons from `@safe-global/safe-deployments` and may not override
+   * them.
+   */
+  safe?: { singletons: string[] };
 }
 
 export interface VestingPlan {
@@ -127,6 +142,8 @@ export interface DeployPlan {
   vesting: Record<VestingKey, VestingPlan>;
   treasury: { safe: string; guardian: string; minDelay: number };
   recipients: Record<RecipientKey, string>;
+  /** Safe v1.5.0 singletons the plan's Safes may point to. */
+  safe: { singletons: string[] };
   source: Record<VestingKey, { start: string; cliffEnd: string; vestingEnd: string }>;
 }
 
@@ -268,11 +285,33 @@ export function founderReserveGate(local: boolean, custodyApproved: boolean): vo
   }
 }
 
+/**
+ * The canonical Safe v1.5.0 singletons (Safe and SafeL2) on `chainId`, from
+ * `@safe-global/safe-deployments`. Fails if the chain has no canonical deployment.
+ */
+export function canonicalSafeSingletons(chainId: number): string[] {
+  const singletons: string[] = [];
+  for (const deployment of [
+    getSafeSingletonDeployment({ version: SAFE_VERSION }),
+    getSafeL2SingletonDeployment({ version: SAFE_VERSION }),
+  ]) {
+    if (!deployment) fail(`safe: no Safe ${SAFE_VERSION} deployment record`);
+    const canonical = deployment.deployments.canonical?.address;
+    const onChain: unknown = deployment.networkAddresses[String(chainId)];
+    const addresses = Array.isArray(onChain) ? onChain : onChain === undefined ? [] : [onChain];
+    if (canonical && addresses.includes(canonical)) singletons.push(canonical);
+  }
+  if (singletons.length === 0) {
+    fail(`safe: no canonical Safe ${SAFE_VERSION} singleton on chain ${chainId}`);
+  }
+  return singletons;
+}
+
 export function buildPlan(config: DeployConfig): DeployPlan {
   const tokenomicsErrors = validateAllocations(ALLOCATIONS, MAX_SUPPLY);
   if (tokenomicsErrors.length > 0) fail(`tokenomics invalid: ${tokenomicsErrors.join("; ")}`);
 
-  requireKeys(config, "config", CONFIG_KEYS, ["note"]);
+  requireKeys(config, "config", CONFIG_KEYS, ["note", "safe"]);
   if (typeof config.network !== "string" || config.network.length === 0) {
     fail("network: missing");
   }
@@ -285,6 +324,9 @@ export function buildPlan(config: DeployConfig): DeployPlan {
   const local = config.chainId === LOCAL_CHAIN_ID;
   if (!config.requireRecipientCode && !local) {
     fail(`requireRecipientCode: may be false only on local chain ${LOCAL_CHAIN_ID}`);
+  }
+  if (config.safe !== undefined && !local) {
+    fail("safe: may be set only on local chain; other chains use the canonical Safe singletons");
   }
 
   // Configs are parsed from untyped JSON, so the section may be missing or malformed here.
@@ -333,6 +375,16 @@ export function buildPlan(config: DeployConfig): DeployPlan {
     local,
     reserved.custody.holder !== "tbd" && reserved.release.status === "approved",
   );
+
+  let safeSingletons: string[];
+  if (local) {
+    requireKeys(config.safe ?? { singletons: [] }, "safe", ["singletons"]);
+    const listed: unknown = config.safe?.singletons ?? [];
+    if (!Array.isArray(listed)) fail("safe.singletons: must be a list of addresses");
+    safeSingletons = listed.map((a, i) => requireAddress(a, `safe.singletons[${String(i)}]`));
+  } else {
+    safeSingletons = canonicalSafeSingletons(config.chainId);
+  }
 
   // Every address is dedicated to one role.
   const roles: [string, string][] = [
@@ -388,6 +440,7 @@ export function buildPlan(config: DeployConfig): DeployPlan {
     vesting,
     treasury: { safe: treasurySafe, guardian: treasuryGuardian, minDelay: delayHours * 3600 },
     recipients,
+    safe: { singletons: safeSingletons },
     source,
   };
 }

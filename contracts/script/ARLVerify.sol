@@ -39,6 +39,31 @@ library ARLVerify {
             for (uint256 i = 0; i < 12; i++) {
                 _hasCode(field[i], account[i]);
             }
+            // Every Safe role is a genuine Safe v1.5.0 proxy of an allowed singleton.
+            if (p.safeSingletons.length == 0) revert VerifyFailed("safe singletons listed");
+            for (uint256 i = 0; i < p.safeSingletons.length; i++) {
+                if (!ARLDeployPlan.singletonAllowed(
+                        p.chainId,
+                        p.safeSingletons[i],
+                        ARLDeployPlan.SAFE_SINGLETON_V150_CODEHASH,
+                        ARLDeployPlan.SAFE_L2_SINGLETON_V150_CODEHASH
+                    )) {
+                    // forge-lint: disable-next-line(require-revert-in-loop)
+                    revert VerifyAddressMismatch(
+                        "canonical safe singleton",
+                        ARLDeployPlan.SAFE_SINGLETON_V150,
+                        p.safeSingletons[i]
+                    );
+                }
+            }
+            for (uint256 i = 0; i < 12; i++) {
+                if (!ARLDeployPlan.isSafeProxy(
+                        account[i], p.safeSingletons, ARLDeployPlan.SAFE_PROXY_V150_CODEHASH
+                    )) {
+                    // forge-lint: disable-next-line(require-revert-in-loop)
+                    revert VerifyFailed(string.concat(field[i], " is a Safe v1.5.0 proxy"));
+                }
+            }
         }
     }
 

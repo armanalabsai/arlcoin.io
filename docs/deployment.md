@@ -36,7 +36,8 @@ a local Anvil chain.
 | Field                                        | Rule                                                                                                                                                                                                                                                 |
 | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `chainId`                                    | Required; must equal the chain the script runs on                                                                                                                                                                                                    |
-| `requireRecipientCode`                       | Must be `true` on every chain except local Anvil (31337); then every Safe must be a deployed contract                                                                                                                                                |
+| `requireRecipientCode`                       | Must be `true` on every chain except local Anvil (31337); then every Safe must be a genuine Safe v1.5.0 proxy (see below)                                                                                                                            |
+| `safe.singletons`                            | Local Anvil only: the Safe singletons a rehearsal deployed. Every other chain uses the canonical Safe v1.5.0 singletons from `@safe-global/safe-deployments` and cannot override them                                                                |
 | `vesting.<investors, strategicPartnerships>` | `beneficiary` (dedicated Safe), `start` (`YYYY-MM-DDTHH:MM:SSZ`, UTC, day 1-28), `cliffMonths`, `vestingMonths`. Schedules are TBD: accepted only on local Anvil. `vesting.founder` is rejected                                                      |
 | `treasury.safe`                              | Non-zero; becomes the timelock's only proposer and executor, and a canceller                                                                                                                                                                         |
 | `treasury.guardian`                          | Non-zero and different from `treasury.safe`; a separate Safe that receives only the canceller role                                                                                                                                                   |
@@ -64,7 +65,9 @@ broadcast) each reject:
 total supply and `MAX_SUPPLY` equal 21,000,000 ARL; the Founder tranches add up to the Founder
 allocation; the twelve genesis holders are distinct, each holds exactly its amount, and together
 they hold the whole supply; zero deployer balance; code at
-every Safe where code is required; each vesting wallet's beneficiary, cliff start, cliff end,
+every Safe where code is required, and that each such Safe runs the Safe v1.5.0 proxy code and
+points to a listed singleton (off local Anvil, only the canonical singletons with the canonical code
+hash); each vesting wallet's beneficiary, cliff start, cliff end,
 vesting end and duration; timelock delay; the Safe holds proposer, canceller and executor; the guardian
 differs from the Safe and holds the canceller role and no other; the timelock is its own admin;
 neither the zero address nor the deployer holds any role.
@@ -83,7 +86,10 @@ Starts a fresh Anvil chain, builds the plan, deploys, verifies, cross-checks key
 v1.5.0 (singleton, proxy factory and one 2-of-3 Safe per Safe role, owned by Anvil development
 accounts) from the published `@safe-global/safe-smart-account` build, redeploys the system with
 code checks enforced, and confirms that a Founder Unrestricted recipient without code is rejected
-by both the plan and the verifier. 41 negative cases in total, including a plan of the old
+by both the plan and the verifier, as are a contract that is not a Safe proxy, a missing singleton
+list and Safes that point to an unlisted singleton. The rehearsal also checks that the singleton
+built from the official Safe artifact has the canonical v1.5.0 code hash. 45 negative cases in
+total, including plans of the old `arl-deploy-plan/3` schema and of the old
 `arl-deploy-plan/2` schema, a plan or config with `vesting.founder`, and a deployment record with a
 founder vesting wallet. Each must fail with its specific error, and rejected
 deployments must leave the deployer nonce unchanged. CI runs the rehearsal on every pull request.

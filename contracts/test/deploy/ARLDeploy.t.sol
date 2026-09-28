@@ -27,6 +27,24 @@ contract ARLDeployHarness {
         ARLDeployPlan.validate(p);
     }
 
+    function singletonAllowed(uint256 chainId, address singleton, bytes32 safeHash, bytes32 l2Hash)
+        external
+        view
+        returns (bool)
+    {
+        return ARLDeployPlan.singletonAllowed(chainId, singleton, safeHash, l2Hash);
+    }
+
+    function isSafeProxy(address account, address[] memory singletons)
+        external
+        view
+        returns (bool)
+    {
+        return ARLDeployPlan.isSafeProxy(
+            account, singletons, ARLDeployPlan.SAFE_PROXY_V150_CODEHASH
+        );
+    }
+
     function approvalGate(uint256 chainId, bool vestingApproved, bool reserveApproved)
         external
         pure
@@ -48,6 +66,12 @@ contract ARLDeployTest is Test {
     uint64 internal constant START = 1_798_761_600; // 2027-01-01T00:00:00Z
     uint64 internal constant CLIFF_END = 1_830_297_600; // 2028-01-01T00:00:00Z
     uint64 internal constant VESTING_END = 1_893_456_000; // 2030-01-01T00:00:00Z
+
+    /// @dev Runtime code of `SafeProxy` v1.5.0, copied from the official build
+    /// (safe-smart-account 1.5.0, `deployedBytecode`). A test in `packages/deploy` fails if it
+    /// differs from that build. Its singleton is read from storage slot 0.
+    bytes internal constant SAFE_PROXY_RUNTIME =
+        hex"608060405260005463a619486e60003560e01c14156024578060601b606c5260206060f35b3660008037600080366000845af43d6000803e806040573d6000fd5b3d6000f3fea2646970667358221220e61834ebd2d8cd909d362bf67c47ef58fd665df38e6dd036ce65611101d072e964736f6c63430007060033";
 
     ARLDeployHarness internal h;
 
@@ -160,6 +184,7 @@ contract ARLDeployTest is Test {
         assertEq(p.minDelay, 48 hours);
         assertEq(p.treasuryGuardian, 0x0c0bA8A2630B2108D5aF98B64fA89eF1BDb7C9d4);
         assertEq(p.recipients.earlyUsers, 0x259238550bE2D033DdCBD0dDA00c427738C27991);
+        assertEq(p.safeSingletons.length, 0);
         h.validate(p);
     }
 
@@ -169,11 +194,141 @@ contract ARLDeployTest is Test {
     /// reinterpreted.
     function test_RevertWhen_PlanHasOldSchema() public {
         string memory json =
-            vm.replace(_json("", "", ""), '"arl-deploy-plan/3"', '"arl-deploy-plan/2"');
+            vm.replace(_json("", "", ""), '"arl-deploy-plan/4"', '"arl-deploy-plan/2"');
         vm.expectRevert(
             abi.encodeWithSelector(ARLDeployPlan.PlanSchemaMismatch.selector, "arl-deploy-plan/2")
         );
         h.load(json);
+
+        // Schema 3 has no Safe singletons.
+        json = vm.replace(_json("", "", ""), '"arl-deploy-plan/4"', '"arl-deploy-plan/3"');
+        vm.expectRevert(
+            abi.encodeWithSelector(ARLDeployPlan.PlanSchemaMismatch.selector, "arl-deploy-plan/3")
+        );
+        h.load(json);
+    }
+
+    function test_RevertWhen_PlanMissesSafeSection() public {
+        string memory json = vm.replace(_json("", "", ""), ',"safe":{"singletons":[]}', "");
+        vm.expectRevert();
+        h.load(json);
+    }
+
+    // ------------------------------------------------------------------ genuine Safes
+
+    function test_SafeProxyRuntimeMatchesConstant() public pure {
+        assertEq(keccak256(SAFE_PROXY_RUNTIME), ARLDeployPlan.SAFE_PROXY_V150_CODEHASH);
+    }
+
+    function test_RevertWhen_SafeRoleIsNotASafeProxy() public {
+        Plan memory p = _plan();
+        p.requireRecipientCode = true;
+        _giveCode(p);
+        // Code is present, but it is not the Safe proxy.
+        vm.etch(p.recipients.liquidity, hex"00");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ARLDeployPlan.PlanNotASafe.selector, "recipients.liquidity", p.recipients.liquidity
+            )
+        );
+        h.validate(p);
+    }
+
+    function test_RevertWhen_SafePointsToUnlistedSingleton() public {
+        Plan memory p = _plan();
+        p.requireRecipientCode = true;
+        _giveCode(p);
+        vm.store(p.treasurySafe, bytes32(0), bytes32(uint256(uint160(makeAddr("fakeSingleton")))));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ARLDeployPlan.PlanNotASafe.selector, "treasury.safe", p.treasurySafe
+            )
+        );
+        h.validate(p);
+    }
+
+    function test_RevertWhen_FounderUnrestrictedIsNotASafe() public {
+        Plan memory p = _plan();
+        p.requireRecipientCode = true;
+        _giveCode(p);
+        vm.etch(p.recipients.founderUnrestricted, hex"6000");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ARLDeployPlan.PlanNotASafe.selector,
+                "recipients.founderUnrestricted",
+                p.recipients.founderUnrestricted
+            )
+        );
+        h.validate(p);
+    }
+
+    function test_RevertWhen_SafeSingletonsMissing() public {
+        Plan memory p = _plan();
+        p.requireRecipientCode = true;
+        _giveCode(p);
+        p.safeSingletons = new address[](0);
+        vm.expectRevert(ARLDeployPlan.PlanSafeSingletonsMissing.selector);
+        h.validate(p);
+    }
+
+    /// @dev Off local Anvil only the canonical singletons with the canonical code are allowed.
+    function test_SingletonAllowedOnlyIfCanonicalOffLocal() public {
+        address safe = ARLDeployPlan.SAFE_SINGLETON_V150;
+        address safeL2 = ARLDeployPlan.SAFE_L2_SINGLETON_V150;
+        vm.etch(safe, hex"01");
+        vm.etch(safeL2, hex"02");
+        bytes32 safeHash = safe.codehash;
+        bytes32 l2Hash = safeL2.codehash;
+
+        assertTrue(h.singletonAllowed(1, safe, safeHash, l2Hash));
+        assertTrue(h.singletonAllowed(1, safeL2, safeHash, l2Hash));
+        // Right address, wrong code.
+        assertFalse(h.singletonAllowed(1, safe, l2Hash, l2Hash));
+        assertFalse(h.singletonAllowed(1, safeL2, safeHash, safeHash));
+        // Not a canonical address.
+        address other = makeAddr("otherSingleton");
+        vm.etch(other, hex"01");
+        assertFalse(h.singletonAllowed(1, other, safeHash, l2Hash));
+        // With the real constants, the etched stand-ins are rejected.
+        assertFalse(
+            h.singletonAllowed(
+                1,
+                safe,
+                ARLDeployPlan.SAFE_SINGLETON_V150_CODEHASH,
+                ARLDeployPlan.SAFE_L2_SINGLETON_V150_CODEHASH
+            )
+        );
+        // Local Anvil rehearses with its own singleton.
+        assertTrue(h.singletonAllowed(31337, other, bytes32(0), bytes32(0)));
+    }
+
+    function test_IsSafeProxyRequiresProxyCodeAndListedSingleton() public {
+        address account = makeAddr("safe");
+        address singleton = makeAddr("singleton");
+        address[] memory singletons = new address[](1);
+        singletons[0] = singleton;
+
+        assertFalse(h.isSafeProxy(account, singletons)); // no code
+        vm.etch(account, SAFE_PROXY_RUNTIME);
+        assertFalse(h.isSafeProxy(account, singletons)); // slot 0 empty
+        vm.store(account, bytes32(0), bytes32(uint256(uint160(singleton))));
+        assertTrue(h.isSafeProxy(account, singletons));
+        assertFalse(h.isSafeProxy(account, new address[](0)));
+    }
+
+    function test_RevertWhen_VerifySafeRoleIsNotASafeProxy() public {
+        Plan memory p = _plan();
+        p.requireRecipientCode = true;
+        _giveCode(p);
+        Deployment memory d = h.deploy(p);
+        h.verify(p, d);
+        vm.etch(p.treasuryGuardian, hex"00");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ARLVerify.VerifyFailed.selector, "treasury.guardian is a Safe v1.5.0 proxy"
+            )
+        );
+        h.verify(p, d);
     }
 
     function test_RevertWhen_PlanHasFounderVesting() public {
@@ -826,10 +981,15 @@ contract ARLDeployTest is Test {
 
     // ------------------------------------------------------------------ helpers
 
+    /// @dev Turns every Safe role into a Safe v1.5.0 proxy of a test singleton (local chain).
     function _giveCode(Plan memory p) internal {
+        address singleton = makeAddr("safeSingleton");
+        p.safeSingletons = new address[](1);
+        p.safeSingletons[0] = singleton;
         (, address[12] memory account) = ARLDeployPlan.safeRoles(p);
         for (uint256 i = 0; i < account.length; i++) {
-            vm.etch(account[i], hex"00");
+            vm.etch(account[i], SAFE_PROXY_RUNTIME);
+            vm.store(account[i], bytes32(0), bytes32(uint256(uint160(singleton))));
         }
     }
 
@@ -883,13 +1043,14 @@ contract ARLDeployTest is Test {
             '"grantsBugBounty":"0x2F050E3aAFBFb59BD438F97c4D280D0d38F411c4"}'
         );
         return string.concat(
-            '{"schema":"arl-deploy-plan/3","network":"local","chainId":31337,',
+            '{"schema":"arl-deploy-plan/4","network":"local","chainId":31337,',
             extraTop,
             '"requireRecipientCode":false,"maxSupply":"21000000000000000000000000",',
             allocations,
             vesting,
             treasury,
             recipients,
+            ',"safe":{"singletons":[]}',
             "}"
         );
     }

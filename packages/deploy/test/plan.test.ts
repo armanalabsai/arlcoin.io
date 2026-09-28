@@ -9,6 +9,7 @@ import {
   PlanError,
   addCalendarMonths,
   buildPlan,
+  canonicalSafeSingletons,
   founderReserveGate,
   type DeployConfig,
 } from "../src/plan.ts";
@@ -46,9 +47,13 @@ describe("buildPlan: valid local config", () => {
     assert.equal("ecosystemReserve" in plan.allocations, false);
   });
 
-  it("uses schema arl-deploy-plan/3", () => {
-    assert.equal(PLAN_SCHEMA, "arl-deploy-plan/3");
-    assert.equal(plan.schema, "arl-deploy-plan/3");
+  it("uses schema arl-deploy-plan/4", () => {
+    assert.equal(PLAN_SCHEMA, "arl-deploy-plan/4");
+    assert.equal(plan.schema, "arl-deploy-plan/4");
+  });
+
+  it("lists no Safe singletons for the local placeholder plan", () => {
+    assert.deepEqual(plan.safe, { singletons: [] });
   });
 
   it("splits the founder allocation into 2,000,000 unrestricted and 100,000 reserved", () => {
@@ -102,6 +107,50 @@ describe("buildPlan: valid local config", () => {
 
   it("is deterministic", () => {
     assert.deepEqual(buildPlan(config()), plan);
+  });
+});
+
+describe("Safe singletons", () => {
+  const SAFE = "0xFf51A5898e281Db6DfC7855790607438dF2ca44b";
+  const SAFE_L2 = "0xEdd160fEBBD92E350D4D398fb636302fccd67C7e";
+
+  it("uses the canonical Safe v1.5.0 singletons off local Anvil", () => {
+    assert.deepEqual(canonicalSafeSingletons(1), [SAFE, SAFE_L2]);
+    assert.deepEqual(canonicalSafeSingletons(11155111), [SAFE, SAFE_L2]);
+  });
+
+  it("refuses a chain without a canonical Safe v1.5.0 deployment", () => {
+    assert.throws(
+      () => canonicalSafeSingletons(31337),
+      (e: unknown) =>
+        e instanceof PlanError && /no canonical Safe 1\.5\.0 singleton/.test(e.message),
+    );
+  });
+
+  it("accepts rehearsal singletons on local Anvil only", () => {
+    const local = buildPlan(config((c) => (c.safe = { singletons: [SAFE] })));
+    assert.deepEqual(local.safe.singletons, [SAFE]);
+    rejects(
+      config((c) => {
+        c.chainId = 11155111;
+        c.requireRecipientCode = true;
+        c.safe = { singletons: [SAFE] };
+      }),
+      /safe: may be set only on local chain/,
+    );
+  });
+
+  it("rejects a malformed local singleton list", () => {
+    rejects(
+      config((c) => (c.safe = { singletons: ["0x1234"] })),
+      /safe\.singletons\[0\]: not an address/,
+    );
+    rejects(
+      config((c) => {
+        (c as unknown as { safe: unknown }).safe = { singletons: [], extra: true };
+      }),
+      /safe\.extra: unexpected key/,
+    );
   });
 });
 

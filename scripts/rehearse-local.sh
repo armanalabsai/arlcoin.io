@@ -9,8 +9,9 @@
 #   6. run negative rehearsals: each must be rejected, and rejected deployments must not
 #      broadcast anything
 #   7. deploy real Safe contracts, redeploy with every Safe role held by its own Safe and code
-#      checks enforced, and reject a Founder Unrestricted recipient without code. The Founder
-#      Reserved holder stays a local placeholder: its custody is TBD.
+#      checks enforced, and reject a Founder Unrestricted recipient without code and any Safe
+#      role that is not a genuine Safe v1.5.0 proxy. The Founder Reserved holder stays a local
+#      placeholder: its custody is TBD.
 #
 # Exits 0 only if every step and every negative case behaves as expected.
 
@@ -170,6 +171,8 @@ mutate "$REHEARSAL/bad-ordering.json" "p.vesting.investors.cliffEnd = p.vesting.
 must_fail "invalid cliff/start ordering" "PlanInvalidSchedule\\(\"investors cliff end is before its start\"" forge_deploy "$REHEARSAL/bad-ordering.json" "$REHEARSAL/x.json"
 mutate "$REHEARSAL/old-schema.json" "p.schema = 'arl-deploy-plan/2'"
 must_fail "old plan schema" "PlanSchemaMismatch\\(\"arl-deploy-plan/2\"" forge_deploy "$REHEARSAL/old-schema.json" "$REHEARSAL/x.json"
+mutate "$REHEARSAL/schema-3.json" "p.schema = 'arl-deploy-plan/3'; delete p.safe"
+must_fail "plan without Safe singletons (schema 3)" "PlanSchemaMismatch\\(\"arl-deploy-plan/3\"" forge_deploy "$REHEARSAL/schema-3.json" "$REHEARSAL/x.json"
 mutate "$REHEARSAL/founder-vesting.json" "p.vesting.founder = p.vesting.investors"
 must_fail "plan with a founder vesting wallet" "PlanFounderVestingNotAllowed" forge_deploy "$REHEARSAL/founder-vesting.json" "$REHEARSAL/x.json"
 mutate "$REHEARSAL/tranche.json" "p.founderTranches.unrestricted = (BigInt(p.founderTranches.unrestricted) + 1n).toString()"
@@ -251,6 +254,11 @@ create() {
     node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>console.log(JSON.parse(s).contractAddress))"
 }
 SAFE_SINGLETON="$(create "$(artifact Safe.sol/Safe.json)")"
+# The singleton built from the official npm artifact must have the canonical v1.5.0 code, the
+# same code hash ARLDeployPlan pins for public networks.
+canonical_hash() { perl -0ne "print \$1 if /constant $1 =\\s*(0x[0-9a-f]+);/" script/ARLDeployPlan.sol; }
+expect "safe singleton code hash is canonical" "$(canonical_hash SAFE_SINGLETON_V150_CODEHASH)" \
+  "$(cast codehash "$SAFE_SINGLETON" --rpc-url "$RPC")"
 SAFE_FACTORY="$(create "$(artifact proxies/SafeProxyFactory.sol/SafeProxyFactory.json)")"
 SAFE_SETUP="$(cast calldata 'setup(address[],uint256,address,bytes,address,address,uint256,address)' \
   "[$(account 2),$(account 3),$(account 4)]" 2 "$ZERO" 0x "$ZERO" "$ZERO" 0 "$ZERO")"
@@ -275,6 +283,7 @@ node -e "
 const p = require('./$PLAN');
 const s = process.argv.slice(1);
 p.requireRecipientCode = true;
+p.safe.singletons = ['$SAFE_SINGLETON'];
 p.recipients.founderUnrestricted = s[0];
 p.vesting.investors.beneficiary = s[1];
 p.vesting.strategicPartnerships.beneficiary = s[2];
@@ -289,6 +298,8 @@ SAFE_DEPLOYMENT="deploy/deployments/31337-safes.json"
 forge_deploy "$SAFE_PLAN" "$SAFE_DEPLOYMENT" >/dev/null || die "deployment with Safe recipients failed"
 forge_verify "$SAFE_PLAN" "$SAFE_DEPLOYMENT" || die "verifier rejected the deployment with Safe recipients"
 SAFE_TOKEN="$(node -e "console.log(require('./$SAFE_DEPLOYMENT').token)")"
+expect "founder safe is a Safe v1.5.0 proxy" "$(canonical_hash SAFE_PROXY_V150_CODEHASH)" \
+  "$(cast codehash "$FOUNDER_SAFE" --rpc-url "$RPC")"
 expect "founder unrestricted safe balance" "2000000000000000000000000" \
   "$(num "$SAFE_TOKEN" 'balanceOf(address)(uint256)' "$FOUNDER_SAFE")"
 
@@ -296,7 +307,16 @@ BEFORE="$(nonce)"
 node -e "const p=require('./$SAFE_PLAN'); p.recipients.founderUnrestricted='$(account 5)'; require('fs').writeFileSync('$REHEARSAL/founder-eoa.json', JSON.stringify(p));"
 must_fail "founder unrestricted without code" "PlanRecipientHasNoCode\\(\"recipients.founderUnrestricted\"" \
   forge_deploy "$REHEARSAL/founder-eoa.json" "$REHEARSAL/x.json"
+node -e "const p=require('./$SAFE_PLAN'); p.recipients.liquidity='$SAFE_FACTORY'; require('fs').writeFileSync('$REHEARSAL/not-a-safe.json', JSON.stringify(p));"
+must_fail "contract that is not a Safe proxy" "PlanNotASafe\\(\"recipients.liquidity\"" \
+  forge_deploy "$REHEARSAL/not-a-safe.json" "$REHEARSAL/x.json"
+node -e "const p=require('./$SAFE_PLAN'); p.safe.singletons=[]; require('fs').writeFileSync('$REHEARSAL/no-singletons.json', JSON.stringify(p));"
+must_fail "code required but no Safe singleton listed" "PlanSafeSingletonsMissing" \
+  forge_deploy "$REHEARSAL/no-singletons.json" "$REHEARSAL/x.json"
 [[ "$(nonce)" == "$BEFORE" ]] || die "a rejected deployment broadcast a transaction"
+node -e "const p=require('./$SAFE_PLAN'); p.safe.singletons=['$DEAD']; require('fs').writeFileSync('$REHEARSAL/wrong-singleton.json', JSON.stringify(p));"
+must_fail "verify: Safes point to an unlisted singleton" "VerifyFailed\\(\"recipients.founderUnrestricted is a Safe v1.5.0 proxy\"" \
+  forge_verify "$REHEARSAL/wrong-singleton.json" "$SAFE_DEPLOYMENT"
 must_fail "verify: founder unrestricted without code" "VerifyAddressMismatch\\(\"recipients.founderUnrestricted\"" \
   forge_verify "$REHEARSAL/founder-eoa.json" "$SAFE_DEPLOYMENT"
 
