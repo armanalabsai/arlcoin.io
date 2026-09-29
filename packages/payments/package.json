@@ -1,0 +1,19 @@
+{
+  "name": "@arl/payments",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ARL usage-based payments over the x402 upto scheme (Permit2), Base Sepolia only",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@x402/core": "2.27.0",
+    "@x402/evm": "2.27.0",
+    "viem": "2.56.9"
+  },
+  "scripts": {
+    "test": "node --test \"test/**/*.test.ts\"",
+    "test:fork": "node --test \"test-fork/**/*.test.ts\""
+  }
+}

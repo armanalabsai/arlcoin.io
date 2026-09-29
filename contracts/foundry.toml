@@ -37,3 +37,11 @@ fail_on_revert = true
 
 [fmt]
 line_length = 100
+
+# Fork tests against the deployed x402 upto proxy and Permit2 on Base Sepolia (read-only fork,
+# nothing is broadcast). Run: FOUNDRY_PROFILE=fork ARL_FORK_RPC=<Base Sepolia RPC> forge test
+[profile.fork]
+test = "test-fork"
+
+[profile.fork.fuzz]
+runs = 256

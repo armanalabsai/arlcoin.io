@@ -20,29 +20,29 @@ export const technology: Layer = {
       id: "ai-payments",
       title: "AI Payments",
       shortDescription: "AI services settle usage in ARL",
-      status: "PLANNED",
+      status: "IN DEVELOPMENT",
       weight: "primary",
       detail: {
         summary:
-          "AI services on the ARL network will be paid for in ARL, per use: consumers pay for what they use and providers are settled in ARL.",
+          "AI services on the ARL network will be paid for in ARL, per use: the payer signs a ceiling, the service meters actual usage and settles that amount, never more than the ceiling.",
         sections: [
           {
-            heading: "Planned scope",
+            heading: "Built",
             items: [
-              "Usage-based settlement between service consumers and providers",
-              "Metered requests, priced and settled in ARL",
-              "Third-party AI models accessed as a regular customer through their public APIs, under each provider's standard terms",
+              "Payment integration on the open x402 protocol (upto scheme, Permit2), tested against the deployed contracts on a Base Sepolia fork. Not running on any network",
+              "Settlement rules: one settlement per authorization, never above the signed ceiling, Base Sepolia only",
             ],
           },
           {
             heading: "Not yet built",
             items: [
-              "No payment contract or service exists",
-              "No agreement with any AI provider exists",
+              "No live payment service or facilitator exists",
+              "No agreement with any AI provider exists; third-party models would be used as a regular customer through their public APIs",
             ],
           },
         ],
       },
+      links: [{ label: "Payments design", href: repoDoc("docs/payments.md") }],
     },
     {
       id: "compute",
