@@ -26,10 +26,12 @@ ARLCOIN/
 ├── packages/
 │   ├── tokenomics/        Allocation table, validation, share math
 │   ├── deploy/            Deployment plan builder, manifest, circulating supply, claim lists
-│   └── monetary/          ARL Core monetary standard: reference implementation and test vectors
+│   ├── monetary/          ARL Core monetary standard: reference implementation and test vectors
+│   └── payments/          ARL usage-based payments over x402 upto (Permit2), Base Sepolia only
 ├── contracts/             Foundry project (solc 0.8.36)
 │   ├── src/               ARL-specific contracts only
 │   ├── test/              unit, fuzz, invariant and deployment tests
+│   ├── test-fork/         Base Sepolia fork tests against deployed Permit2 and x402 contracts
 │   ├── script/            deployment, plan validation and post-deployment verification
 │   ├── deploy/config/     public deployment configs (local only so far)
 │   └── lib/               OpenZeppelin v5.6.1, forge-std v1.16.2, solidity-datetime v2.2.0 (pinned submodules)

@@ -61,8 +61,21 @@ Exact versions and integrity hashes are recorded in `package-lock.json`.
 | prettier                        | 3.9.9   | MIT        | Formatting                                                                                                                                                                                                                                                                                                   |
 | @safe-global/safe-smart-account | 1.5.0   | LGPL-3.0   | Safe build artifacts deployed on local Anvil by the rehearsal only; no Safe source is copied into ARL (upstream commit `dc437e8fba8b4805d76bcbd1c668c9fd3d1e83be`)                                                                                                                                           |
 | @safe-global/safe-deployments   | 1.37.63 | MIT        | Canonical Safe v1.5.0 singleton addresses and code hashes, used by the deployment planner and pinned in `ARLDeployPlan.sol` (a test checks they match); used as published, no source copied. npm integrity `sha512-dH4V3iHH5tZdxx3DBvvBzmnlOZpKMXUx6CBFGUwlARnUa9MEVVyg8Sbpc3DplsaPB5fLh0J97+WB5ylxhLWCRA==` |
-| viem                            | 2.56.9  | MIT        | Reads `totalSupply` and manifest balances from the chain for the circulating-supply report (`packages/deploy`); used as published, no source copied                                                                                                                                                          |
+| viem                            | 2.56.9  | MIT        | Reads `totalSupply` and manifest balances from the chain for the circulating-supply report (`packages/deploy`), and address checks in `packages/payments`; used as published, no source copied                                                                                                               |
 | @openzeppelin/merkle-tree       | 1.0.8   | MIT        | Builds and verifies Public Launch claim lists (`StandardMerkleTree`) for `ARLMerkleDistributor` (`packages/deploy`); used as published, no source copied. Its transitive `uuid` is pinned to 11.1.1 by an npm override (GHSA-w5hq-g745-h8pq)                                                                 |
+
+| @x402/core | 2.27.0 | Apache-2.0 | x402 protocol types and facilitator plumbing for ARL payments (`packages/payments`); used as published, no source copied. Source: x402-foundation/x402 @ `71eb9a55e081e7b81ba3046d0bd17c3eb9c7bf81` (tag `npm-@x402/core@v2.27.0`); NOTICE: "Copyright 2026 x402 Foundation" |
+| @x402/evm | 2.27.0 | Apache-2.0 | x402 `upto` client and facilitator (Permit2) for ARL payments (`packages/payments`); used as published, no source copied. Same source commit and NOTICE as `@x402/core`. Brings `zod` (MIT) |
+
+### Third-party contracts ARL payments call (deployed, not distributed)
+
+| Contract             | Address (Base Sepolia and Base Mainnet)      | License                                            | Pinned                                                                                |
+| -------------------- | -------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Uniswap Permit2      | `0x000000000022D473030F116dDEE9F6B43aC78BA3` | MIT (Uniswap/permit2, Copyright 2022 Uniswap Labs) | Base Sepolia runtime code hash `0xdcde6555…9ebe`                                      |
+| x402UptoPermit2Proxy | `0x4020A4f3b7b90ccA423B9fabCc0CE57C6C240002` | MIT (x402-foundation/x402 `contracts/evm/src`)     | Runtime code hash `0x4662dc27…8eec`, identical to a build of the source at `71eb9a55` |
+
+ABI declarations of these two contracts are written in `contracts/test-fork/X402Interfaces.sol`
+for tests; no implementation code is copied.
 
 ## Website (`apps/web`)
 
