@@ -90,32 +90,36 @@ apps/web
 ## Visual system: ARL CORE color language
 
 ```
-BLACK / GRAPHITE  →  LIQUID GLASS  →  WHITE / SOFT GREY  →  AMBER  →  ACTIVE / IMPORTANT
+NIGHT BLUE + NUCLEUS FIELD  →  LIQUID GLASS  →  WHITE / SOFT GREY  →  AMBER  →  ACTIVE / IMPORTANT
 ```
 
 The tokens live in `app/globals.css` (`@theme`).
 
-| Token                                                         | Value                             | Use                                                       |
-| ------------------------------------------------------------- | --------------------------------- | --------------------------------------------------------- |
-| `page`                                                        | `#08090b`                         | Near-black background                                     |
-| `surface-1` / `surface-2` / `surface-3`                       | `#0f1113` / `#15171a` / `#1c1f23` | Graphite and charcoal surfaces, lightest = most important |
-| `fg` / `fg-muted` / `fg-subtle`                               | `#f2f2f0` / `#a3a6ab` / `#6c7076` | Type                                                      |
-| `accent`                                                      | `#eea53f`                         | ARL amber: warm, between yellow and orange                |
-| `accent-strong`, `accent-edge`, `accent-soft`, `accent-faint` | derived                           | Hover, edges, active backgrounds                          |
+| Token                                                         | Value                             | Use                                            |
+| ------------------------------------------------------------- | --------------------------------- | ---------------------------------------------- |
+| `page`                                                        | `#050b1e`                         | Night-blue background                          |
+| `surface-1` / `surface-2` / `surface-3`                       | `#0a1430` / `#0f1a3b` / `#142147` | Night-blue surfaces, lightest = most important |
+| `fg` / `fg-muted` / `fg-subtle`                               | `#f2f2f0` / `#a3a6ab` / `#6c7076` | Type                                           |
+| `accent`                                                      | `#eea53f`                         | ARL amber: warm, between yellow and orange     |
+| `accent-strong`, `accent-edge`, `accent-soft`, `accent-faint` | derived                           | Hover, edges, active backgrounds               |
 
 Rules:
 
-- Amber marks only the Core (ring, label, hairline, a micro glow kept inside the Core's own
-  footprint), the active layer, hovered and selected card edges, important metrics (primary cards
-  only), focus rings and key interaction points.
+- Amber marks only the Core (ring and label), the active layer, the selected card edge, important
+  metrics (primary cards only), focus rings and key interaction points.
 - No card is filled with amber. No glow spreads across the screen. No neon or fluorescent yellow,
   and nothing pushed toward orange.
-- Cards stay graphite with light translucency and a top hairline. Brightness follows weight
-  (primary > secondary > tertiary), so cards are never all equal.
-- Translucent blur is reserved for surfaces over other content: the top bar and the detail
-  surface.
-- Radii: 8px controls, 14px cards, 22px surfaces, a circle for the Core. Spacing uses the 4px
-  scale. Type: Geist Sans, with Geist Mono for numbers and identifiers, self-hosted.
+- Background: the nucleus field (`src/core/NucleusField.tsx`), thousands of ice-blue subatomic
+  particles at three depths and sun-lit nuclei with ice-blue electrons; it swirls around the
+  pointer, a press sends a shock wave, and it is a still frame under reduced motion.
+- Surfaces are liquid glass: translucent, blurred and saturated, with a lit top edge. Solid
+  fallbacks for reduced transparency and browsers without `backdrop-filter`.
+- Cards do not react to hover; they are links, and the pointer and focus ring show it. Only text
+  links and buttons change on hover.
+- Radii: 8px controls, 12px cards, 16px surfaces, a circle for the Core. Spacing uses the 4px
+  scale. Type: Source Sans 3 for text, Source Serif 4 for headings, Source Code Pro for numbers and
+  identifiers, self-hosted.
+- Copy: no em dashes, no "not X but Y" constructions, no emoji, no check-mark lists.
 
 ## Team registry and publishing rule
 

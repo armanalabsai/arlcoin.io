@@ -27,7 +27,7 @@ export const roadmap: Layer = {
       metric: { kind: "static", value: "Complete" },
       detail: {
         summary:
-          "The ARL token, vesting wallets and the treasury timelock, with tests. The contracts are written, not deployed.",
+          "The ARL token, vesting wallets and the treasury timelock, with tests. The contracts are written and tested and have not been deployed.",
       },
     },
     {

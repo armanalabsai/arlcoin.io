@@ -20,7 +20,9 @@ function profileCard(p: TeamProfile, index: number): Card {
     { label: "Role", value: p.role },
     { label: "Profile", value: verified ? "Verified" : "Not yet verified" },
   ];
-  const sections: Section[] = [{ heading: "Expertise", items: p.expertise }];
+  const sections: Section[] = p.expertise.length
+    ? [{ heading: "Expertise", items: p.expertise }]
+    : [];
   if (verified) {
     if (p.education.length) sections.push({ heading: "Education", items: p.education });
     if (p.career.length) sections.push({ heading: "Career", items: p.career });

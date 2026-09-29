@@ -253,7 +253,7 @@ function Surface({ layer, card, originRect, onClose, onStep }: SurfaceProps) {
                 className="flex flex-col gap-8 px-5 pt-7 pb-10 md:px-8 md:pt-9"
               >
                 <div className="flex flex-col gap-4">
-                  <p className="font-mono text-[11px] tracking-[0.14em] text-fg-subtle uppercase">
+                  <p className="text-[12px] text-fg-subtle">
                     {layer.title} · {String(index + 1).padStart(2, "0")} /{" "}
                     {String(layer.cards.length).padStart(2, "0")}
                   </p>
@@ -265,7 +265,7 @@ function Surface({ layer, card, originRect, onClose, onStep }: SurfaceProps) {
                       <IdentityMark initials={card.person.initials} size="surface" />
                       <div className="flex flex-col gap-1">
                         <p className="text-[15px] text-fg">{card.person.role}</p>
-                        <p className="font-mono text-[11px] tracking-[0.1em] text-fg-subtle uppercase">
+                        <p className="text-[12px] text-fg-subtle">
                           {card.person.verificationStatus === "verified"
                             ? "Verified profile"
                             : card.person.verificationStatus === "placeholder"
@@ -316,9 +316,7 @@ function Surface({ layer, card, originRect, onClose, onStep }: SurfaceProps) {
 
                 {card.detail.sections?.map((s) => (
                   <section key={s.heading} className="flex flex-col gap-3">
-                    <h3 className="font-mono text-[11px] tracking-[0.14em] text-fg-subtle uppercase">
-                      {s.heading}
-                    </h3>
+                    <h3 className="text-[12px] text-fg-subtle">{s.heading}</h3>
                     {s.body ? (
                       <p className="max-w-[60ch] text-[15px] leading-[1.6] text-fg-muted">
                         {s.body}
@@ -417,9 +415,7 @@ const STATUS_STYLE: Record<string, string> = {
 
 export function StatusBadge({ status }: { status: string }) {
   return (
-    <span
-      className={`rounded-[6px] border px-2 py-1 font-mono text-[10px] tracking-[0.12em] uppercase ${STATUS_STYLE[status] ?? ""}`}
-    >
+    <span className={`rounded-[4px] border px-2 py-0.5 text-[12px] ${STATUS_STYLE[status] ?? ""}`}>
       {status}
     </span>
   );
