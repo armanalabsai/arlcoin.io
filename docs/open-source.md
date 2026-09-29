@@ -41,6 +41,14 @@ report.
 same `StandardMerkleTree` encoding that `ARLMerkleDistributor` verifies with OpenZeppelin
 `MerkleProof`.
 
+`curvefi/unipool-fork` (MIT, commit `262a5747a32acd3bf7124bc21058d6905f86e22a`, file
+`contracts/StakingRewards.sol`) is the source of `ARLStakingRewards`. That file is a modified
+Synthetix `StakingRewards` (MIT, Copyright (c) 2020 Synthetix) in which the reward is pulled in
+with `transferFrom`. It is ported to Solidity 0.8 and OpenZeppelin v5, not vendored; the changes
+are listed in the contract header and in `THIRD_PARTY_LICENSES.md`. The original Synthetix
+repository could not be retrieved for comparison, so provenance is recorded only as far as the
+curvefi fork.
+
 `x402-foundation/x402` (npm `@x402/core` and `@x402/evm` 2.27.0, Apache-2.0; source commit
 `71eb9a55e081e7b81ba3046d0bd17c3eb9c7bf81`) is adopted for ARL payments: the `upto` scheme client
 and facilitator, used as published. ARL calls the deployed `x402UptoPermit2Proxy` (MIT, audited by

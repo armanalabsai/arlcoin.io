@@ -19,6 +19,23 @@ submodule. CI verifies both commits on every run.
 Compiled ARL contracts include OpenZeppelin code under the MIT license
 (Copyright (c) 2016-2026 Zeppelin Group Ltd).
 
+## Adapted source (ported, with modifications)
+
+| Component                                                        | Source                                                 | Commit                                     | License                                                           | ARL file                                    | ARL modifications                                                                                                                                                                                                                                                                                                                                                             |
+| ---------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------ | ----------------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Synthetix `StakingRewards` (as modified in curvefi/unipool-fork) | `curvefi/unipool-fork`, `contracts/StakingRewards.sol` | `262a5747a32acd3bf7124bc21058d6905f86e22a` | MIT (Copyright (c) 2020 Synthetix; Copyright (c) 2020 Ben Hauser) | `contracts/src/ARLStakingRewards.sol` (MIT) | Solidity 0.8.36 and OpenZeppelin v5; owner, pause and token recovery removed; immutable rewards distributor; separate accounting of funded, accrued, paid and returned rewards so staking and reward token can both be ARL; return of unallocated rewards between periods; `stakeWithPermit` tolerant of front-run permits; reserve-aware `unallocatedRewards`; custom errors |
+
+ERC-8183 (Agentic Commerce) is implemented in `contracts/src/ARLJobs.sol` (Apache-2.0) from the
+specification and its reference `AgenticCommerce` contract in `ethereum/ERCs`,
+`ERCS/erc-8183.md`, commit `ddcc49ddd0b9d5774e8f73fe8a990ea2a35b0f99` (Draft; CC0-1.0, no notice
+required). ARL changes: fixed payment token, no owner, upgrade, fees or hooks, and the
+specification's `fund(jobId, expectedBudget)` and client-or-provider `setBudget`, which the
+reference contract does not follow.
+
+`ARLStakingRewards.sol` is MIT and reproduces, in its header, the copyright notices of both
+sources and the full MIT permission notice. The upstream file's own copy of that notice is cut off
+at its last line; the standard MIT text is used. The rest of the repository is Apache-2.0.
+
 ## Tools (not distributed)
 
 | Tool            | Version | Commit                                     | License           | Use                                                                |
@@ -100,6 +117,80 @@ Development only (not distributed):
 
 The `scroll-morph-hero.tsx` component supplied during design was not used: its source and
 license could not be verified. See [`docs/website.md`](docs/website.md).
+
+## App (`apps/dapp`)
+
+The ARL web app is built on Scaffold-ETH 2 (MIT). Exact versions and integrity hashes of its
+packages are recorded in `apps/dapp/package-lock.json`.
+
+Adapted source: `scaffold-eth/scaffold-eth-2`, `packages/nextjs`, commit
+`6cdf354a4a02aded39c92d5e0d83cd24e4628239`, MIT (Copyright (c) 2023 BuidlGuidl). The upstream
+license is kept verbatim in `apps/dapp/LICENSE-scaffold-eth-2`; the adapted files stay under MIT.
+
+| ARL file (under `apps/dapp/`)                                                                                                                                                                                                                                                                                                                                       | ARL modifications                                                                                                                                                  |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `hooks/scaffold-eth/` (`useCopyToClipboard`, `useDeployedContractInfo`, `useOutsideClick`, `useScaffoldReadContract`, `useScaffoldWriteContract`, `useSelectedNetwork`, `useTargetNetwork`, `useTransactor`), `utils/scaffold-eth/` (`block`, `common`, `contract`, `contractsData`, `getParsedError`, `notification`), `components/scaffold-eth/BlockieAvatar.tsx` | None (reformatted by the repository's Prettier settings only)                                                                                                      |
+| `hooks/scaffold-eth/index.ts`, `utils/scaffold-eth/index.ts`, `services/store/store.ts`                                                                                                                                                                                                                                                                             | Only the modules the app uses are exported; type-only imports                                                                                                      |
+| `hooks/scaffold-eth/useNetworkColor.ts`, `utils/scaffold-eth/networks.ts`                                                                                                                                                                                                                                                                                           | Single theme; hosted RPC (Alchemy) URLs and other chains removed                                                                                                   |
+| `components/scaffold-eth/RainbowKitCustomConnectButton/`                                                                                                                                                                                                                                                                                                            | No burner-wallet private key reveal, QR code, ENS or block explorer; chain name instead of native balance; ARL glass styling                                       |
+| `scaffold.config.ts`, `services/web3/wagmiConfig.tsx`, `services/web3/wagmiConnectors.tsx`, `components/Providers.tsx`                                                                                                                                                                                                                                              | Local Anvil chain only behind a network gate (`lib/network.ts`: Base Mainnet refused); no Ethereum Mainnet, hosted RPC key, WalletConnect project or burner wallet |
+
+`apps/dapp/fixtures/x402-code.json` holds the runtime bytecode of the canonical Permit2
+(`Uniswap/permit2` `cc56ad0f3439c502c246fc5cfcc3db92bb8b7219`, MIT) and `x402UptoPermit2Proxy`
+(`x402-foundation/x402` `71eb9a55e081e7b81ba3046d0bd17c3eb9c7bf81`, `contracts/evm`, MIT), read
+from Base Sepolia and checked against their code hashes. It is installed on the local Anvil chain
+only, for the Payments screen.
+
+`apps/dapp/fixtures/erc8004-code.json` holds the runtime bytecode of the ERC-8004
+IdentityRegistry proxy and implementation (`erc-8004/erc-8004-contracts`,
+`contracts/IdentityRegistryUpgradeable.sol`, MIT; the repository reviewed at
+`b9e466c250744a7e06b13dff9d3c2844ed64f825`) and its initialised storage, read from Base Sepolia.
+It is installed on the local Anvil chain only, for the Network screen. The bytecode was not
+rebuilt from source here; it is the deployed code.
+
+The pages (`app/`), ARL components (`components/arl/`), `lib/`, the local development wallet
+(`services/web3/localDevWallet.ts`), scripts and tests are ARL code (Apache-2.0).
+
+Runtime packages (included in the built app), used as published:
+
+| Package                                                                                              | Version | License    | Purpose                                                             |
+| ---------------------------------------------------------------------------------------------------- | ------- | ---------- | ------------------------------------------------------------------- |
+| next                                                                                                 | 16.3.6  | MIT        | Framework                                                           |
+| react / react-dom                                                                                    | 19.3.0  | MIT        | UI runtime                                                          |
+| wagmi                                                                                                | 2.19.5  | MIT        | Wallet connection and contract calls                                |
+| viem                                                                                                 | 2.56.9  | MIT        | Ethereum client                                                     |
+| @rainbow-me/rainbowkit                                                                               | 2.2.11  | MIT        | Wallet selection                                                    |
+| @tanstack/react-query                                                                                | 5.104.0 | MIT        | Data fetching cache (wagmi peer)                                    |
+| react-hot-toast                                                                                      | 2.6.1   | MIT        | Transaction notifications                                           |
+| zustand                                                                                              | 5.0.15  | MIT        | Selected network state                                              |
+| usehooks-ts                                                                                          | 3.1.1   | MIT        | React hooks                                                         |
+| blo                                                                                                  | 2.0.0   | MIT        | Address avatars                                                     |
+| @x402/evm, @x402/core                                                                                | 2.27.0  | Apache-2.0 | x402 `upto` client and facilitator (Payments screen)                |
+| @fontsource-variable/source-sans-3, @fontsource-variable/source-serif-4, @fontsource/source-code-pro | 5.3.0   | OFL-1.1    | Source Sans 3, Source Serif 4, Source Code Pro (Adobe), self-hosted |
+| @heroicons/react                                                                                     | 2.2.0   | MIT        | Icons                                                               |
+
+Build and test: daisyui 5.7.46 (MIT; its generated CSS is in the built app), tailwindcss and @tailwindcss/postcss
+4.3.3 (MIT), abitype 1.2.4 (MIT), type-fest 5.6.0 (MIT or CC0-1.0), @playwright/test 1.63.0
+(Apache-2.0), eslint 9.39.5 and eslint-config-next 16.3.6 (MIT), typescript 6.0.3 (Apache-2.0).
+npm overrides pin transitive `ws` 8.22.0, `uuid` 11.1.1 and `decode-uri-component` 0.5.0 to
+patched releases (`npm audit` reports no vulnerabilities).
+
+## Zero-knowledge (`zk/`, `packages/zk`, `contracts/zk`)
+
+| Component                               | Source                                                                                                                      | License                                           | Use                                                                                                           |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Semaphore-Noir circuit and proof checks | `hashcloak/semaphore-noir` `6e24a48b2cb22c05a0c13361b5228d5e1c99bd0d` (`packages/circuits-noir`, `packages/contracts-noir`) | MIT (Copyright (c) 2024-2025 Ethereum Foundation) | Adapted in `zk/semaphore/src/main.nr` and `contracts/src/ARLAnonymousSignal.sol`; changes listed in each file |
+| binary-merkle-root (Noir)               | `privacy-scaling-explorations/zk-kit.noir` tag `binary-merkle-root-v0.0.2`                                                  | MIT                                               | Circuit dependency, fetched by nargo                                                                          |
+| poseidon (Noir)                         | `noir-lang/poseidon` tag `v0.3.0`                                                                                           | Apache-2.0                                        | Circuit dependency, fetched by nargo                                                                          |
+| UltraHonk Solidity verifier             | Generated by Barretenberg (bb) 5.2.0                                                                                        | Apache-2.0 (Copyright 2022 Aztec)                 | `contracts/zk/ARLSemaphoreVerifier.sol`, unmodified                                                           |
+| @noir-lang/noir_js                      | 1.0.0-rc.3                                                                                                                  | MIT or Apache-2.0                                 | Witness generation                                                                                            |
+| @aztec/bb.js                            | 5.2.0                                                                                                                       | MIT                                               | Proving and verification                                                                                      |
+| @zk-kit/lean-imt                        | 2.2.3                                                                                                                       | MIT                                               | Group Merkle tree                                                                                             |
+| poseidon-lite                           | 0.3.0                                                                                                                       | MIT                                               | Poseidon hash in TypeScript                                                                                   |
+| nargo, bb (tools, not distributed)      | 1.0.0-rc.3, 5.2.0                                                                                                           | MIT or Apache-2.0                                 | Compile the circuit, generate the verifier                                                                    |
+
+Not used: Semaphore-Noir's proof package (it depends on snarkjs, GPL-3.0) and `noir-lang/noir-edwards`
+(no license).
 
 ## CI actions
 

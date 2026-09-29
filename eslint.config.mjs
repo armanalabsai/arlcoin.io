@@ -12,6 +12,8 @@ export default defineConfig(
       "contracts/cache/**",
       // The website has its own ESLint config (Next.js rules) and runs it in its own CI job.
       "apps/web/**",
+      // The web app likewise has its own config and CI job.
+      "apps/dapp/**",
     ],
   },
   js.configs.recommended,

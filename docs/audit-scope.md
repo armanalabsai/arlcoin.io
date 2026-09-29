@@ -19,27 +19,30 @@ tooling only).
 
 ### Contracts (deployed on-chain)
 
-| File                                     |   nSLOC | Purpose                                                                                                            |
-| ---------------------------------------- | ------: | ------------------------------------------------------------------------------------------------------------------ |
-| `contracts/src/ARLToken.sol`             |      35 | ERC-20 + ERC20Permit; mints the fixed 21,000,000 ARL to 11 holders in the constructor; no mint, burn, admin, pause |
-| `contracts/src/ARLAllocation.sol`        |      16 | The 11 allocation constants                                                                                        |
-| `contracts/src/ARLVestingWallet.sol`     |      34 | OpenZeppelin `VestingWallet` with a cliff and an immutable beneficiary                                             |
-| `contracts/src/ARLTimelock.sol`          |      36 | OpenZeppelin `TimelockController` with a 48-hour floor, no external admin and a cancel-only guardian               |
-| `contracts/src/ARLMerkleDistributor.sol` |      56 | Public Launch Merkle claim with a fixed root, claim window and return address; no owner                            |
-| **Total**                                | **177** |                                                                                                                    |
+| File                                     |   nSLOC | Purpose                                                                                                                                                                      |
+| ---------------------------------------- | ------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `contracts/src/ARLToken.sol`             |      35 | ERC-20 + ERC20Permit; mints the fixed 21,000,000 ARL to 11 holders in the constructor; no mint, burn, admin, pause                                                           |
+| `contracts/src/ARLAllocation.sol`        |      16 | The 11 allocation constants                                                                                                                                                  |
+| `contracts/src/ARLVestingWallet.sol`     |      34 | OpenZeppelin `VestingWallet` with a cliff and an immutable beneficiary                                                                                                       |
+| `contracts/src/ARLTimelock.sol`          |      36 | OpenZeppelin `TimelockController` with a 48-hour floor, no external admin and a cancel-only guardian                                                                         |
+| `contracts/src/ARLMerkleDistributor.sol` |      56 | Public Launch Merkle claim with a fixed root, claim window and return address; no owner                                                                                      |
+| `contracts/src/ARLStakingRewards.sol`    |     191 | Stake ARL, earn ARL from a funded pool (Synthetix `StakingRewards` via curvefi/unipool-fork, MIT); no owner, no minting, no upgrade; one limited role, `rewardsDistribution` |
+| **Total**                                | **368** |                                                                                                                                                                              |
 
 ### Deployment tooling (runs off-chain, decides what is deployed)
 
-| File                                       | nSLOC | Purpose                                                                                        |
-| ------------------------------------------ | ----: | ---------------------------------------------------------------------------------------------- |
-| `contracts/script/ARLDeployPlan.sol`       |   330 | Loads and validates a deployment plan; network gate; Safe v1.5.0 proxy and singleton checks    |
-| `contracts/script/ARLDeployer.sol`         |    41 | Deploys the system from a validated plan                                                       |
-| `contracts/script/ARLVerify.sol`           |   167 | Post-deployment verification of every holder, balance, schedule and role                       |
-| `contracts/script/DeployARL.s.sol`         |    36 | Entry point: gate, validate, deploy, verify                                                    |
-| `contracts/script/VerifyARL.s.sol`         |    34 | Read-only re-verification                                                                      |
-| `contracts/script/DeployDistributor.s.sol` |    74 | Deploys a Public Launch distributor from a checked claim list                                  |
-| `contracts/script/CreateSafes.s.sol`       |   208 | Creates the 12 role Safes with the canonical Safe v1.5.0 contracts                             |
-| `packages/deploy/src/*.ts`                 |     — | Planner, claim-list builder, config builder, deployment manifest and circulating-supply reader |
+| File                                       | nSLOC | Purpose                                                                                              |
+| ------------------------------------------ | ----: | ---------------------------------------------------------------------------------------------------- |
+| `contracts/script/ARLDeployPlan.sol`       |   330 | Loads and validates a deployment plan; network gate; Safe v1.5.0 proxy and singleton checks          |
+| `contracts/script/ARLDeployer.sol`         |    41 | Deploys the system from a validated plan                                                             |
+| `contracts/script/ARLVerify.sol`           |   167 | Post-deployment verification of every holder, balance, schedule and role                             |
+| `contracts/script/DeployARL.s.sol`         |    36 | Entry point: gate, validate, deploy, verify                                                          |
+| `contracts/script/VerifyARL.s.sol`         |    34 | Read-only re-verification                                                                            |
+| `contracts/script/DeployDistributor.s.sol` |    74 | Deploys a Public Launch distributor from a checked claim list                                        |
+| `contracts/script/CreateSafes.s.sol`       |   208 | Creates the 12 role Safes with the canonical Safe v1.5.0 contracts                                   |
+| `contracts/script/ARLStakingVerify.sol`    |    38 | Staking verification: ARL as staking and reward token; distributor is the Community & Staking holder |
+| `contracts/script/VerifyStaking.s.sol`     |    22 | Read-only entry point for the staking verification                                                   |
+| `packages/deploy/src/*.ts`                 |     — | Planner, claim-list builder, config builder, deployment manifest and circulating-supply reader       |
 
 ## Intended properties
 
@@ -55,6 +58,10 @@ tooling only).
 6. The deployment tooling refuses Base Mainnet and every chain other than local Anvil and Base
    Sepolia, and refuses any Safe role that is not a genuine Safe v1.5.0 proxy of a canonical
    singleton.
+7. Staking never pays rewards that were not funded and never touches staked principal to pay
+   rewards. `rewardsFunded = accrued + reserved + unallocated + rewardsReturned` at all times;
+   only `unallocated` (never the reserve of an active period) can be returned, and only between
+   periods. The distributor is the Community & Staking holder, checked by the verifier.
 
 ## Existing verification
 
@@ -117,6 +124,8 @@ finish within 120 s. The same property is covered by fuzz tests and the
 
 - OpenZeppelin Contracts v5.6.1 and Safe v1.5.0 themselves (audited upstream; used unmodified).
 - The website (`apps/web`) and documentation.
+- Contracts not planned for the first deployment, reviewed separately later: `ARLJobs`
+  (ERC-8183 job escrow, [jobs.md](jobs.md)) and `ARLAnonymousSignal` ([zk-privacy.md](zk-privacy.md)).
 - Economic parameters that are not yet decided: vesting start, launch amount, claim window,
   per-address limits, liquidity parameters.
 

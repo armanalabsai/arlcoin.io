@@ -137,6 +137,92 @@ jobs:
       # Local Anvil chain only: deploys, verifies and runs the negative cases.
       - run: npm run rehearse:local
 
+  zk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+
+      - uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09 # v1.9.1
+        with:
+          version: v1.8.3
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      # Installer scripts pinned by commit and checked by hash; tool versions pinned.
+      - name: Install nargo 1.0.0-rc.3 and bb 5.2.0
+        run: |
+          curl -sSfL -o noirup.sh https://raw.githubusercontent.com/noir-lang/noirup/bedac8fbe6a059177c35e565f9f76db54a795976/install
+          echo "89dde59d8ef9e7794d694abca097fa139fa7395b947cb7b0b7a8d1839c737d8b  noirup.sh" | sha256sum -c
+          bash noirup.sh
+          "$HOME/.nargo/bin/noirup" -v 1.0.0-rc.3
+          curl -sSfL -o bbup.sh https://raw.githubusercontent.com/AztecProtocol/aztec-packages/f7638fbe5a14c5a5711e9fad78302b121bece294/barretenberg/bbup/install
+          echo "3e4b7ce2d18e7680b897d23de0328ba6365616b2c7d592a5ebb74a368f364efd  bbup.sh" | sha256sum -c
+          bash bbup.sh
+          "$HOME/.bb/bbup" -v 5.2.0
+          echo "$HOME/.nargo/bin" >> "$GITHUB_PATH"
+          echo "$HOME/.bb" >> "$GITHUB_PATH"
+
+      # Circuit tests, and the committed circuit and verifier rebuild byte for byte.
+      - run: bash zk/check.sh
+
+      # The verifier and the contract, with real proofs.
+      - run: forge build --sizes --skip test
+        working-directory: contracts
+        env:
+          FOUNDRY_PROFILE: zk
+      - run: forge test
+        working-directory: contracts
+        env:
+          FOUNDRY_PROFILE: zk
+
+  dapp:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: apps/dapp
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            apps/dapp/package-lock.json
+
+      # Anvil and forge: the end-to-end tests deploy the local fixture on a fresh Anvil chain.
+      - uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09 # v1.9.1
+        with:
+          version: v1.8.3
+
+      # @arl/zk (packages/zk) is linked into the app; its dependencies install at the root.
+      - run: npm ci
+        working-directory: .
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      # Builds against the local chain, deploys the fixture, checks the committed contract
+      # addresses and drives the app in Chromium. Local Anvil only.
+      - run: npm run test:e2e
+      - run: npm audit --audit-level=high
+
   web:
     runs-on: ubuntu-latest
     timeout-minutes: 20

@@ -87,7 +87,7 @@ export const technology: Layer = {
       id: "defi",
       title: "DeFi",
       shortDescription: "Staking and staged liquidity",
-      status: "PLANNED",
+      status: "IN DEVELOPMENT",
       weight: "secondary",
       detail: {
         summary:
@@ -97,7 +97,23 @@ export const technology: Layer = {
           { label: "Liquidity", value: arlAmount("liquidity"), mono: true },
           { label: "New issuance for rewards", value: "None" },
         ],
+        sections: [
+          {
+            heading: "Built",
+            items: [
+              "Staking contract: stake ARL, earn ARL from a funded pool over fixed periods. Adapted from the Synthetix staking rewards contract (MIT). No owner, minting or upgrade; one funding role, the Community & Staking holder, which cannot touch staked tokens. Written and tested, not deployed",
+            ],
+          },
+          {
+            heading: "Not yet built",
+            items: [
+              "Reward amounts and period lengths are not decided",
+              "No liquidity has been provided on any exchange",
+            ],
+          },
+        ],
       },
+      links: [{ label: "Staking contract", href: repoDoc("contracts/src/ARLStakingRewards.sol") }],
     },
     {
       id: "arl-network",
@@ -107,7 +123,7 @@ export const technology: Layer = {
       weight: "secondary",
       detail: {
         summary:
-          "The network that connects AI services, compute providers and users, with ARL as the unit of settlement. The deployment chain has not been selected.",
+          "The network that connects AI services, compute providers and users, with ARL as the unit of settlement. The selected chain is Base: Base Sepolia for testing, Base Mainnet for production. Nothing is deployed yet.",
       },
       links: [{ label: "Chain evaluation", href: repoDoc("docs/chain-evaluation.md") }],
     },
@@ -119,7 +135,7 @@ export const technology: Layer = {
       weight: "tertiary",
       detail: {
         summary:
-          "The token, vesting and treasury contracts are written in Solidity 0.8.36 on OpenZeppelin Contracts v5.6.1 and are under security review. They are not deployed.",
+          "The token, vesting, treasury, launch claim and staking contracts are written in Solidity 0.8.36 on OpenZeppelin Contracts v5.6.1 and are under security review. They are not deployed.",
         facts: [
           { label: "Language", value: "Solidity 0.8.36", mono: true },
           { label: "Library", value: "OpenZeppelin Contracts v5.6.1" },

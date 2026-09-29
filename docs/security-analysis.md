@@ -108,6 +108,43 @@ Symbolic execution of the runtime bytecode of `ARLToken`, `ARLTimelock`,
 test replaying Mythril's transaction and a fuzz test over arbitrary calldata. Full triage:
 `docs/audit-scope.md`.
 
+## Staking rewards (`ARLStakingRewards`)
+
+Ported from Synthetix `StakingRewards` via curvefi/unipool-fork (MIT). The reward-per-token and
+earned formulas are unchanged from the source; the ARL changes are about custody and accounting.
+
+**Privileged role.** There is no owner. One address, `rewardsDistribution`, is fixed at
+deployment and can only: fund a period from its own balance (`notifyRewardAmount`), change the
+period length between periods (`setRewardsDuration`), and take back unallocated rewards between
+periods (`returnUnallocated`). It cannot withdraw or freeze principal, take allocated or reserved
+rewards, mint, pause, upgrade, replace itself or recover tokens. The contract cannot tell where
+reward tokens come from economically; `script/ARLStakingVerify.sol` enforces that the distributor
+is the plan's Community & Staking holder (`recipients.communityStaking`) and that ARL is both the
+staking and the reward token.
+
+**Accounting identity.** `rewardsFunded = accrued + reserved + unallocated + rewardsReturned`,
+where `reserved = rewardRate × (periodFinish − lastTimeRewardApplicable())`. `unallocated` is the
+time elapsed with nothing staked plus the remainder of the rate division; the reserve of an active
+period is never part of it.
+
+| Risk                                            | Control                                                                                                     | Evidence                                                                                                     |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Rewards paid from staked principal (same token) | Funded, accrued, reserved, paid and returned rewards tracked separately; rewards pulled with `transferFrom` | invariants `Solvent`, `BalanceFullyExplained`, `NoRewardsFromNothing`; `testFuzz_SolvencyAfterRandomActions` |
+| Rewards created from nothing                    | No mint; the rate is set from tokens actually transferred in                                                | `NoRewardsFromNothing`, `AccountingIdentity`; `test_TopUpRollsLeftoverIntoNewPeriod`                         |
+| Distributor takes stakes or reserved rewards    | Only `unallocated` is returnable, only between periods                                                      | `testFuzz_ReturnNeverTakesReservedOrOwed`, `test_Unallocated_*`, handler `returnUnallocatedEarly`            |
+| Wrong distributor at deployment                 | Verifier requires the Community & Staking holder                                                            | `test/deploy/StakingVerify.t.sol` (treasury timelock and every other holder rejected)                        |
+| Rewards lost when nobody is staked              | Tracked as unallocated; returnable after the period                                                         | `test_Unallocated_IdleTimeInActivePeriod`, `test_Unallocated_AfterPeriodEndAndAlreadyReturned`               |
+| Permit front-running blocks a stake             | `stakeWithPermit` ignores a failed permit if the allowance is in place                                      | `test_StakeWithPermitSurvivesFrontRunPermit`                                                                 |
+| Claims exceed what is owed                      | Sum of `earned` never exceeds allocated, unpaid rewards                                                     | invariant `ClaimableCovered`                                                                                 |
+
+**Tokens retained permanently (by design, no recovery function).** (a) Tokens transferred
+directly to the contract, bypassing `stake` and `notifyRewardAmount`, are neither principal nor
+reward: never paid out, never returnable. (b) Reward-per-token rounding: with a large total stake
+and a small rate, per-checkpoint increments can round to zero; those rewards count as accrued but
+nobody can claim them. Both stay in the contract; `test_DirectTransferIsRetained`,
+`test_RoundingDustIsRetained` and the `BalanceFullyExplained` invariant show that principal and
+every claimable reward remain payable.
+
 ## Compiler
 
 solc 0.8.36. Its three known bugs (`MisorderedNamedParametersInRequireWithCustomErrors`,
