@@ -75,6 +75,8 @@ contract DevDapp is Script {
         jobs = new ARLJobs(IERC20(address(token)));
         vm.stopBroadcast();
 
+        // A fresh checkout has no deployments directory (it is ignored by git).
+        vm.createDir("deploy/deployments", true);
         vm.writeJson(
             string.concat(
                 '{"chainId":',

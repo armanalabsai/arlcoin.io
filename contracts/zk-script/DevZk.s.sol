@@ -24,6 +24,8 @@ contract DevZk is Script {
         HonkVerifier verifier = new HonkVerifier();
         signal = new ARLAnonymousSignal(IARLSignalVerifier(address(verifier)));
         vm.stopBroadcast();
+        // A fresh checkout has no deployments directory (it is ignored by git).
+        vm.createDir("deploy/deployments", true);
         vm.writeJson(
             string.concat(
                 '{"chainId":31337,"verifier":"',
