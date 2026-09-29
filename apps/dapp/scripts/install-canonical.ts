@@ -1,7 +1,7 @@
 // Installs canonical third-party contracts on the local Anvil chain at their canonical addresses:
-// Permit2 and the x402 upto proxy (fixtures/x402-code.json), and the ERC-8004 IdentityRegistry
-// with its implementation and initialised storage (fixtures/erc8004-code.json). Code hashes are
-// checked before and after. Local Anvil only.
+// Permit2 and the x402 upto proxy (fixtures/x402-code.json), and the ERC-8004 Identity and
+// Reputation registries with their implementations and initialised storage
+// (fixtures/erc8004-code.json). Code hashes are checked before and after. Local Anvil only.
 //
 //   node scripts/install-canonical.ts [rpc-url]
 

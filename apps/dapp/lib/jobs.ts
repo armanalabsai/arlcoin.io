@@ -29,6 +29,8 @@ export interface Job {
   expiredAt: bigint;
   status: JobStatus;
   deliverable?: Hex;
+  /** Whether the budget was ever escrowed (a Rejected job may have been cancelled while Open). */
+  funded?: boolean;
 }
 
 export type Role = "client" | "provider" | "evaluator";

@@ -9,6 +9,8 @@ import { useAccount, useWriteContract } from "wagmi";
 import { Facts, PageTitle, RequireWallet, Stat } from "~~/components/arl/ui";
 import { useArlServices } from "~~/hooks/arl/useArlServices";
 import type { ListedService } from "~~/hooks/arl/useArlServices";
+import { useJobRatings } from "~~/hooks/arl/useJobRatings";
+import type { ServiceRatings } from "~~/hooks/arl/useJobRatings";
 import { useDeployedContractInfo, useTargetNetwork, useTransactor } from "~~/hooks/scaffold-eth";
 import { formatArl, parseArl } from "~~/lib/format";
 import {
@@ -36,6 +38,7 @@ export default function NetworkPage() {
 
 function Network() {
   const { data: services, isLoading } = useArlServices();
+  const { data: ratings } = useJobRatings(services);
   return (
     <div className="flex flex-col gap-6">
       <section className="glass-strong flex flex-col gap-3 p-5" aria-labelledby="services-heading">
@@ -52,7 +55,7 @@ function Network() {
             data-testid="service-list"
           >
             {services.map((s) => (
-              <ServiceRow key={s.agentId.toString()} service={s} />
+              <ServiceRow key={s.agentId.toString()} service={s} rating={ratings?.get(s.agentId)} />
             ))}
           </ul>
         )}
@@ -62,7 +65,13 @@ function Network() {
   );
 }
 
-function ServiceRow({ service }: { service: ListedService }) {
+function ServiceRow({
+  service,
+  rating,
+}: {
+  service: ListedService;
+  rating: ServiceRatings | undefined;
+}) {
   const { address } = useAccount();
   const { writeContractAsync } = useWriteContract();
   const transact = useTransactor();
@@ -82,6 +91,13 @@ function ServiceRow({ service }: { service: ListedService }) {
       {service.description ? <p className="text-sm text-muted">{service.description}</p> : null}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-subtle">
         <span>Agent #{service.agentId.toString()}</span>
+        <span data-testid={`rating-${service.agentId.toString()}`}>
+          {rating === undefined
+            ? "Reading ratings"
+            : rating.average === undefined
+              ? "No rated jobs yet"
+              : `Rated ${String(rating.average)}/100 from ${String(rating.count)} paid ${rating.count === 1 ? "job" : "jobs"}`}
+        </span>
         <span className="font-mono">
           Provider {service.owner.slice(0, 6)}…{service.owner.slice(-4)}
         </span>

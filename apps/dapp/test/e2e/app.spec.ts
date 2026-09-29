@@ -267,7 +267,7 @@ test("vesting: nothing before the cliff, then a release to the beneficiary", asy
   await page.screenshot({ path: "test-results/vesting.png", fullPage: true });
 });
 
-test("jobs: post, fund, deliver, accept and pay; reject and refund; refund after the deadline", async ({
+test("jobs: post, fund, deliver, accept and pay; reject and refund; refund after the deadline; ratings", async ({
   page,
 }) => {
   // The demo service registered on the Network screen is Anvil account 3; the screen can play it
@@ -321,6 +321,10 @@ test("jobs: post, fund, deliver, accept and pay; reject and refund; refund after
   expect(await arlBalance(SERVICE)).toBe(serviceBefore + 250n * 10n ** 18n);
   expect(await arlBalance(ESCROW)).toBe(0n);
 
+  // The client rates the provider's ERC-8004 agent (the demo service is agent 0): 4 of 5.
+  await page.getByTestId("job-1-rate-0-4").click();
+  await expect(page.getByTestId("job-1-rated-0")).toHaveText("You rated 4 of 5");
+
   // Job 2: the evaluator rejects the funded job, the client gets the budget back.
   await post("Translate a contract", "40");
   await expect(page.getByTestId("job-2-status")).toHaveText("Open");
@@ -330,6 +334,9 @@ test("jobs: post, fund, deliver, accept and pay; reject and refund; refund after
   await page.getByTestId("job-2-reject-evaluator").click();
   await expect(page.getByTestId("job-2-status")).toHaveText("Rejected");
   expect(await arlBalance(CLIENT)).toBe(beforeReject + 40n * 10n ** 18n);
+  // A rejected job that was paid into escrow can be rated too: 1 of 5.
+  await page.getByTestId("job-2-rate-0-1").click();
+  await expect(page.getByTestId("job-2-rated-0")).toHaveText("You rated 1 of 5");
 
   // Job 3: nobody delivers before the deadline; anyone can return the budget to the client.
   await post("Label 500 images", "15");
@@ -345,4 +352,8 @@ test("jobs: post, fund, deliver, accept and pay; reject and refund; refund after
   expect(await arlBalance(CLIENT)).toBe(beforeRefund + 15n * 10n ** 18n);
   expect(await arlBalance(ESCROW)).toBe(0n);
   await page.screenshot({ path: "test-results/jobs.png", fullPage: true });
+
+  // ARL Network shows the rating from paid jobs only: (80 + 20) / 2.
+  await connect(page, "/network");
+  await expect(page.getByTestId("rating-0")).toHaveText("Rated 50/100 from 2 paid jobs");
 });
