@@ -42,8 +42,9 @@ export function Stat({
 }) {
   return (
     <div className="flex items-baseline justify-between gap-4 px-4 py-3">
-      <dt className="text-sm text-muted">{label}</dt>
-      <dd className="text-right">
+      <dt className="shrink-0 text-sm text-muted">{label}</dt>
+      {/* Long values (full addresses) wrap instead of widening the page on narrow screens. */}
+      <dd className="min-w-0 text-right [overflow-wrap:anywhere]">
         <div className="stat-value-arl text-base font-semibold" data-testid={testId}>
           {value}
         </div>
