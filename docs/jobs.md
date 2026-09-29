@@ -47,6 +47,21 @@ of with the actions its roles allow. On the local chain it can also play a provi
 that is an Anvil development account (unlocked by the node; no key in the app), so the whole flow
 can be tried with one wallet. Results are referenced on-chain by their keccak256 hash only.
 
+## Ratings (ERC-8004 reputation)
+
+After a paid job has ended (completed, rejected after funding, or expired), its client can rate
+the provider's ERC-8004 agent from 1 to 5 stars. The rating is written to the canonical ERC-8004
+ReputationRegistry (`0x8004B663…8713` on Base Sepolia) with `giveFeedback`: tag1 `starred` with a
+0-100 value, as the standard suggests, and tag2 `arl-job`. The feedback file (on-chain, as a base64
+JSON data URI; its keccak256 is the feedback hash) follows the standard's structure and names the
+job.
+
+Anyone can write feedback to the registry, so a plain average is easy to fake. The app counts a
+rating only if its file points to a funded `ARLJobs` job that has ended, whose client wrote the
+rating and whose provider is the rated service's payee; the file and the event must agree and the
+hash must match. One rating per job counts: the latest, unless it was revoked. ARL Network shows
+the result as "Rated N/100 from M paid jobs" (`apps/dapp/lib/reputation.ts`).
+
 ## Tests
 
 | Suite      | Command                                        | Covers                                                                                                                                                    |
@@ -59,5 +74,5 @@ can be tried with one wallet. Results are referenced on-chain by their keccak256
 ## Not yet
 
 - Disputes or arbitration (the standard has none; reject and expiry are final).
-- Writing job outcomes to an ERC-8004 reputation registry.
+- Responses from providers to ratings (`appendResponse`) and revoking a rating from the app.
 - Gasless use through ERC-2771 and a facilitator.

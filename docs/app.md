@@ -103,8 +103,10 @@ service selected, and the payment uses the service's own price, payee and facili
 Everything read from the registry is validated (`lib/registry.ts`): size limits, no control
 characters, addresses, a positive price, and links only over https (or http on this machine).
 
-For the local chain, `scripts/install-canonical.ts` installs the registry's proxy and
-implementation code, and the storage its initializer set, exactly as read from Base Sepolia
+Each service shows its rating from paid jobs (see [jobs.md](jobs.md#ratings-erc-8004-reputation)).
+
+For the local chain, `scripts/install-canonical.ts` installs the identity and reputation registries' proxies and
+implementation code, and the storage their initializers set, exactly as read from Base Sepolia
 (`fixtures/erc8004-code.json`), and `scripts/seed-network.ts` registers the demo service.
 
 ## Local fixture

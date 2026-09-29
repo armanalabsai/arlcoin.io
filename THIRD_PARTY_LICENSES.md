@@ -142,11 +142,14 @@ from Base Sepolia and checked against their code hashes. It is installed on the 
 only, for the Payments screen.
 
 `apps/dapp/fixtures/erc8004-code.json` holds the runtime bytecode of the ERC-8004
-IdentityRegistry proxy and implementation (`erc-8004/erc-8004-contracts`,
-`contracts/IdentityRegistryUpgradeable.sol`, MIT; the repository reviewed at
-`b9e466c250744a7e06b13dff9d3c2844ed64f825`) and its initialised storage, read from Base Sepolia.
-It is installed on the local Anvil chain only, for the Network screen. The bytecode was not
-rebuilt from source here; it is the deployed code.
+IdentityRegistry and ReputationRegistry proxies and implementations (`erc-8004/erc-8004-contracts`,
+`contracts/IdentityRegistryUpgradeable.sol` and `contracts/ReputationRegistryUpgradeable.sol`,
+MIT; the repository reviewed at `b9e466c250744a7e06b13dff9d3c2844ed64f825`) and their initialised
+storage, read from Base Sepolia. It is installed on the local Anvil chain only, for the Network and
+Jobs screens. It is the deployed code. The ReputationRegistry implementation was rebuilt from that
+commit (solc 0.8.24, via IR, 200 runs, shanghai, OpenZeppelin 5.4.0 as locked there) and is
+identical to the deployed code apart from the metadata hash; the IdentityRegistry implementation
+was not rebuilt here.
 
 The pages (`app/`), ARL components (`components/arl/`), `lib/`, the local development wallet
 (`services/web3/localDevWallet.ts`), scripts and tests are ARL code (Apache-2.0).

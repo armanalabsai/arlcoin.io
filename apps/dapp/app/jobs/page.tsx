@@ -2,13 +2,24 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { createWalletClient, getAddress, http, isAddress, parseEventLogs } from "viem";
+import type { ReactNode } from "react";
+import {
+  createWalletClient,
+  getAddress,
+  http,
+  isAddress,
+  isAddressEqual,
+  parseEventLogs,
+} from "viem";
 import type { Address, Hex } from "viem";
 import { useAccount, usePublicClient, useWriteContract } from "wagmi";
 
 import { Arl, Facts, PageTitle, RequireWallet, Stat, useChainTime } from "~~/components/arl/ui";
 import deployedContracts from "~~/contracts/deployedContracts";
 import { useArlServices } from "~~/hooks/arl/useArlServices";
+import type { ListedService } from "~~/hooks/arl/useArlServices";
+import { useJobRatings } from "~~/hooks/arl/useJobRatings";
+import type { ServiceRatings } from "~~/hooks/arl/useJobRatings";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { formatDate, timeLeft } from "~~/lib/format";
 import {
@@ -21,6 +32,15 @@ import {
 } from "~~/lib/jobs";
 import type { Job, Role } from "~~/lib/jobs";
 import { LOCAL_CHAIN_ID } from "~~/lib/network";
+import {
+  JOB_TAG,
+  RATING_TAG,
+  REPUTATION_REGISTRY,
+  STARS,
+  encodeJobFeedback,
+  reputationRegistryAbi,
+  starsToValue,
+} from "~~/lib/reputation";
 
 const JOBS = deployedContracts[31337].ARLJobs;
 const TOKEN = deployedContracts[31337].ARLToken;
@@ -61,7 +81,7 @@ function useJobs(account: Address | undefined) {
     refetchInterval: 3_000,
     queryFn: async (): Promise<Job[]> => {
       if (!client || !account) return [];
-      const [created, submitted] = await Promise.all([
+      const [created, submitted, fundedLogs] = await Promise.all([
         client.getContractEvents({
           address: JOBS.address,
           abi: JOBS.abi,
@@ -74,7 +94,16 @@ function useJobs(account: Address | undefined) {
           eventName: "JobSubmitted",
           fromBlock: 0n,
         }),
+        client.getContractEvents({
+          address: JOBS.address,
+          abi: JOBS.abi,
+          eventName: "JobFunded",
+          fromBlock: 0n,
+        }),
       ]);
+      const funded = new Set(
+        fundedLogs.flatMap((l) => (l.args.jobId === undefined ? [] : [l.args.jobId])),
+      );
       const delivered = new Map<bigint, Hex>();
       for (const s of submitted)
         if (s.args.jobId !== undefined && s.args.deliverable)
@@ -98,6 +127,7 @@ function useJobs(account: Address | undefined) {
             expiredAt: j.expiredAt,
             status: statusName(j.status),
             deliverable: delivered.get(id),
+            funded: funded.has(id),
           } satisfies Job;
         }),
       );
@@ -111,6 +141,8 @@ function Jobs() {
   const { address } = useAccount();
   const now = useChainTime();
   const { data: jobs, refetch } = useJobs(address);
+  const { data: services } = useArlServices();
+  const { data: ratings, refetch: refetchRatings } = useJobRatings(services);
   const [status, setStatus] = useState<Status>({ kind: "idle" });
 
   return (
@@ -135,6 +167,16 @@ function Jobs() {
               busy={status.kind === "busy"}
               onStatus={setStatus}
               onChanged={() => void refetch()}
+              rate={
+                <RateProvider
+                  job={job}
+                  services={services ?? []}
+                  ratings={ratings}
+                  busy={status.kind === "busy"}
+                  onStatus={setStatus}
+                  onRated={() => void refetchRatings()}
+                />
+              }
             />
           ))
         )}
@@ -323,12 +365,14 @@ function JobCard({
   busy,
   onStatus,
   onChanged,
+  rate,
 }: {
   job: Job;
   now: bigint | undefined;
   busy: boolean;
   onStatus: (s: Status) => void;
   onChanged: () => void;
+  rate: ReactNode;
 }) {
   const { address } = useAccount();
   const client = usePublicClient();
@@ -563,6 +607,108 @@ function JobCard({
         ) : null}
       </Facts>
       {buttons.length > 0 ? <div className="flex flex-wrap gap-2">{buttons}</div> : null}
+      {rate}
     </article>
+  );
+}
+
+/**
+ * After a paid job has ended, its client can rate the provider's ERC-8004 agent. The rating is
+ * public ERC-8004 feedback that names the job, so anyone can check it came from a paying client
+ * (lib/reputation.ts).
+ */
+function RateProvider({
+  job,
+  services,
+  ratings,
+  busy,
+  onStatus,
+  onRated,
+}: {
+  job: Job;
+  services: readonly ListedService[];
+  ratings: Map<bigint, ServiceRatings> | undefined;
+  busy: boolean;
+  onStatus: (s: Status) => void;
+  onRated: () => void;
+}) {
+  const { address } = useAccount();
+  const client = usePublicClient();
+  const { writeContractAsync } = useWriteContract();
+  const ended = job.status === "Completed" || job.status === "Rejected" || job.status === "Expired";
+  if (!address || !client || !ended || !job.funded || !isAddressEqual(job.client, address))
+    return null;
+  // The provider's services; an agent's owner cannot rate itself.
+  const targets = services.filter(
+    (s) => isAddressEqual(s.terms.payTo, job.provider) && !isAddressEqual(s.owner, address),
+  );
+  if (targets.length === 0) return null;
+  const id = String(job.id);
+
+  const rate = async (service: ListedService, stars: number) => {
+    try {
+      onStatus({ kind: "busy", text: "Publishing your rating" });
+      const value = starsToValue(stars);
+      const { uri, hash } = encodeJobFeedback(
+        {
+          chainId: client.chain.id,
+          agentId: service.agentId,
+          client: address,
+          jobs: JOBS.address,
+          jobId: job.id,
+          value,
+        },
+        new Date(),
+      );
+      const tx = await writeContractAsync({
+        address: REPUTATION_REGISTRY,
+        abi: reputationRegistryAbi,
+        functionName: "giveFeedback",
+        args: [service.agentId, BigInt(value), 0, RATING_TAG, JOB_TAG, "", uri, hash],
+      });
+      await client.waitForTransactionReceipt({ hash: tx });
+      onRated();
+      onStatus({
+        kind: "done",
+        text: `You rated ${service.name} ${String(stars)} of 5 for job ${id}.`,
+      });
+    } catch (e) {
+      onStatus({ kind: "error", text: firstLine(e, "Could not publish the rating") });
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-2 border-t border-white/10 pt-3">
+      {targets.map((service) => {
+        const agent = service.agentId.toString();
+        const given = ratings
+          ?.get(service.agentId)
+          ?.ratings.find((r) => r.jobId === job.id && isAddressEqual(r.client, address));
+        return (
+          <div key={agent} className="flex flex-wrap items-center gap-2 text-sm">
+            <span className="text-muted">Rate {service.name}</span>
+            {given ? (
+              <span data-testid={`job-${id}-rated-${agent}`}>
+                You rated {given.value / 20} of 5
+              </span>
+            ) : (
+              STARS.map((stars) => (
+                <button
+                  key={stars}
+                  type="button"
+                  className="btn btn-glass btn-xs"
+                  disabled={busy || ratings === undefined}
+                  aria-label={`${String(stars)} of 5`}
+                  onClick={() => void rate(service, stars)}
+                  data-testid={`job-${id}-rate-${agent}-${String(stars)}`}
+                >
+                  {stars}
+                </button>
+              ))
+            )}
+          </div>
+        );
+      })}
+    </div>
   );
 }
