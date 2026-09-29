@@ -53,7 +53,8 @@ test("asks for a wallet before showing anything", async ({ page }) => {
 });
 
 test("phone width: no sideways scroll, bottom navigation", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
+  // 360 px (a common Android width) leaves a margin for font differences between machines.
+  await page.setViewportSize({ width: 360, height: 800 });
   for (const path of ["/", "/staking", "/vesting", "/payments", "/network", "/jobs", "/private"]) {
     await connect(page, path);
     const overflow = await page.evaluate(
