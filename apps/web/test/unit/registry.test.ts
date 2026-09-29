@@ -173,11 +173,11 @@ describe("team publishing rule", () => {
   it("lists only the founder, then the team-growing note", () => {
     assert.deepEqual(
       TEAM.map((p) => p.id),
-      ["foundark"],
+      ["alaz-daghan-gokturk"],
     );
     assert.deepEqual(
       teamLayer?.cards.map((c) => c.id),
-      ["foundark", "team-growing"],
+      ["alaz-daghan-gokturk", "team-growing"],
     );
     const growing = teamLayer?.cards.find((c) => c.id === "team-growing");
     assert.equal(growing?.person, undefined);

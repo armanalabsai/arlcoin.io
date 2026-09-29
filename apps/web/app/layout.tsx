@@ -1,5 +1,7 @@
-import { GeistMono } from "geist/font/mono";
-import { GeistSans } from "geist/font/sans";
+import "@fontsource-variable/source-sans-3";
+import "@fontsource-variable/source-serif-4";
+import "@fontsource/source-code-pro/400.css";
+import "@fontsource/source-code-pro/500.css";
 import type { Metadata, Viewport } from "next";
 
 import { SITE } from "@/content/site.ts";
@@ -27,7 +29,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+    <html lang="en">
       <body>
         <NucleusField />
         {children}

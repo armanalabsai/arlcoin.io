@@ -154,7 +154,7 @@ function Done({ title, children }: { title: string; children: React.ReactNode })
   return (
     <div
       role="status"
-      className="flex flex-col gap-2 rounded-2xl border border-accent-edge bg-accent-faint p-6"
+      className="flex flex-col gap-2 rounded-(--radius-card) border border-accent-edge p-6"
     >
       <h2 className="text-[17px] font-medium">{title}</h2>
       <p className="text-[14px] leading-[1.6] text-fg-muted">{children}</p>
@@ -166,7 +166,7 @@ function Closed({ children }: { children: React.ReactNode }) {
   return (
     <div
       data-testid="form-closed"
-      className="flex flex-col gap-2 rounded-2xl border border-line-strong bg-surface-1/70 p-6 text-[14px] leading-[1.6] text-fg-muted"
+      className="flex flex-col gap-2 rounded-(--radius-card) border border-line-strong bg-surface-1 p-6 text-[14px] leading-[1.6] text-fg-muted"
     >
       {children}
     </div>
@@ -270,7 +270,7 @@ export function WhitelistForm() {
           <Link
             href="/privacy"
             prefetch={false}
-            className="text-accent underline-offset-4 hover:underline"
+            className="text-accent underline underline-offset-4"
           >
             privacy notice
           </Link>
@@ -292,10 +292,7 @@ export function ContactForm() {
       <Closed>
         <p className="font-medium text-fg">Write to the team by email.</p>
         <p>
-          <a
-            href={`mailto:${SITE.email}`}
-            className="text-accent underline-offset-4 hover:underline"
-          >
+          <a href={`mailto:${SITE.email}`} className="text-accent underline underline-offset-4">
             {SITE.email}
           </a>
         </p>
@@ -397,11 +394,7 @@ export function ContactForm() {
       </Field>
       <Check name="privacy" error={errors.privacy}>
         I have read the{" "}
-        <Link
-          href="/privacy"
-          prefetch={false}
-          className="text-accent underline-offset-4 hover:underline"
-        >
+        <Link href="/privacy" prefetch={false} className="text-accent underline underline-offset-4">
           privacy notice
         </Link>
         .

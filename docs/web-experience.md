@@ -344,12 +344,12 @@ how technical content is presented.
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Colour             | Near-black page, graphite surfaces, off-white type, ARL amber `#eea53f` only for the Core, active state, focus and primary metrics. No neon, no gradients |
 | Theme              | Dark only. A light theme is an open decision                                                                                                              |
-| Typography         | Geist Sans for text; Geist Mono for numbers, addresses, hashes and identifiers. Numbers use tabular figures                                               |
+| Typography         | Source Sans 3 for text, Source Serif 4 for headings, Source Code Pro for numbers, addresses, hashes and identifiers. Numbers use tabular figures          |
 | Spacing            | 4px scale                                                                                                                                                 |
 | Grid               | 12-column grid on wide screens; single column on phones; long-form pages capped at a readable measure                                                     |
-| Radius             | 8px controls, 14px cards, 22px surfaces, circle for the Core                                                                                              |
-| Elevation          | Brightness by importance (primary > secondary > tertiary), top hairline; no heavy shadows                                                                 |
-| Glass              | Only for surfaces over other content (top bar, detail surface). Cards, tables and diagrams are not glass                                                  |
+| Radius             | 8px controls, 12px cards, 16px surfaces, circle for the Core                                                                                              |
+| Elevation          | Glass weight by importance; lit top edge                                                                                                                  |
+| Glass              | Liquid glass for the top bar, cards, the Core and the detail surface, over the nucleus field; solid under reduced transparency                            |
 | Iconography        | Minimal line icons for status and link type only; no illustrative or 3D icons                                                                             |
 | Motion             | Short, purposeful, spring-based where it explains a transition; `prefers-reduced-motion` turns it into fades                                              |
 | Status indicators  | Text labels `PLANNED`, `IN DEVELOPMENT`, `LIVE`, `BLOCKED`, `UNAVAILABLE`, `Not deployed`; never colour alone                                             |

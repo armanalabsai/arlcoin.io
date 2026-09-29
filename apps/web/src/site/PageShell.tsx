@@ -35,12 +35,8 @@ export function PageShell({ current, eyebrow, title, lead, children }: Props) {
       <main id="content" className="flex-1 px-4 pt-14 pb-20 sm:px-8">
         <div className="mx-auto flex max-w-[680px] flex-col gap-10">
           <div className="flex flex-col gap-4">
-            <p className="font-mono text-[11px] tracking-[0.14em] text-accent uppercase">
-              {eyebrow}
-            </p>
-            <h1 className="text-[34px] leading-[1.1] font-semibold tracking-[-0.03em] sm:text-[42px]">
-              {title}
-            </h1>
+            <p className="text-[12px] text-accent">{eyebrow}</p>
+            <h1 className="text-[32px] leading-[1.15] font-semibold sm:text-[38px]">{title}</h1>
             <p className="text-[16px] leading-[1.6] text-fg-muted">{lead}</p>
           </div>
           {children}
@@ -69,6 +65,9 @@ export function FooterLinks() {
       <Link href="/privacy" prefetch={false} className="hover:text-fg">
         Privacy
       </Link>
+      <Link href="/terms" prefetch={false} className="hover:text-fg">
+        Terms
+      </Link>
       <a href={repoDoc("SECURITY.md")} rel="noopener noreferrer" className="hover:text-fg">
         Security
       </a>
@@ -82,17 +81,11 @@ export function FooterLinks() {
 /** A bordered list of short facts shown before a form. */
 export function FactList({ title, items }: { title: string; items: readonly React.ReactNode[] }) {
   return (
-    <section className="flex flex-col gap-4 rounded-2xl border border-line bg-surface-1/70 p-6">
+    <section className="flex flex-col gap-4 rounded-(--radius-card) border border-line bg-surface-1 p-6">
       <h2 className="text-[15px] font-medium">{title}</h2>
-      <ul className="flex flex-col gap-3 text-[14px] leading-[1.6] text-fg-muted">
+      <ul className="flex list-disc flex-col gap-2 pl-5 text-[14px] leading-[1.6] text-fg-muted marker:text-fg-subtle">
         {items.map((item, i) => (
-          <li key={i} className="flex gap-3">
-            <span
-              aria-hidden="true"
-              className="mt-[9px] size-1.5 shrink-0 rounded-full bg-accent"
-            />
-            <span>{item}</span>
-          </li>
+          <li key={i}>{item}</li>
         ))}
       </ul>
     </section>
