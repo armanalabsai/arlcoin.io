@@ -49,6 +49,12 @@ are listed in the contract header and in `THIRD_PARTY_LICENSES.md`. The original
 repository could not be retrieved for comparison, so provenance is recorded only as far as the
 curvefi fork.
 
+`x402-foundation/x402` (npm `@x402/core` and `@x402/evm` 2.27.0, Apache-2.0; source commit
+`71eb9a55e081e7b81ba3046d0bd17c3eb9c7bf81`) is adopted for ARL payments: the `upto` scheme client
+and facilitator, used as published. ARL calls the deployed `x402UptoPermit2Proxy` (MIT, audited by
+Cantina in February and March 2026) and Permit2 (MIT); both are pinned by address and code hash.
+See `docs/payments.md`.
+
 `safe-global/safe-deployments` (MIT, npm 1.37.63) is adopted for the canonical Safe v1.5.0
 singleton addresses and code hashes: off local Anvil, every Safe role must be a genuine Safe
 v1.5.0 proxy of a canonical singleton.
