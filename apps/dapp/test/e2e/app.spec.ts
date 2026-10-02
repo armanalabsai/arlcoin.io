@@ -202,6 +202,47 @@ test("network: register a service, pay it through its own terms, take it offline
   await expect(page.getByTestId("service-list")).toContainText("Demo AI service");
 });
 
+test("compute: list GPU capacity, pay per second used, take it offline", async ({ page }) => {
+  await connect(page, "/network");
+  await page.getByTestId("svc-name").fill("H100 pair");
+  await page.getByTestId("svc-endpoint").fill("https://gpu.example.org/jobs");
+  await page.getByTestId("svc-price").fill("0.0001");
+  await page.getByTestId("svc-kind").selectOption("gpu");
+  await expect(page.getByTestId("svc-unit")).toHaveValue("GPU second");
+  await page.getByTestId("svc-gpu-model").fill("NVIDIA H100 80GB");
+  await page.getByTestId("svc-gpus").fill("0");
+  await page.getByTestId("svc-gpu-memory").fill("80");
+  await page.getByTestId("svc-vcpus").fill("32");
+  await page.getByTestId("svc-memory").fill("256");
+  await page.getByTestId("svc-max-seconds").fill("3600");
+  await page.getByTestId("svc-submit").click();
+  // Impossible capacity is refused before anything is sent.
+  await expect(page.getByTestId("svc-error")).toContainText("GPUs must be a whole number");
+  await page.getByTestId("svc-gpus").fill("2");
+  await page.getByLabel("Paid to (default: your wallet)").fill(PROVIDER);
+  await page.getByLabel("Settled by (default: your wallet)").fill(FACILITATOR);
+  await page.getByTestId("svc-submit").click();
+  await expect(page.getByTestId("service-2")).toContainText("0.0001 ARL per GPU second");
+  await expect(page.getByTestId("capacity-2")).toContainText(
+    "2 × NVIDIA H100 80GB (80 GB), 32 vCPU, 256 GB RAM, jobs up to 1 h",
+  );
+  await page.screenshot({ path: "test-results/compute.png", fullPage: true });
+
+  // A 90-second run is billed 90 GPU seconds, under the signed ceiling.
+  await page.getByTestId("pay-2").click();
+  await expect(page.getByTestId("service-select")).toHaveValue("2");
+  await page.getByTestId("ceiling-input").fill("1");
+  await page.getByTestId("ceiling-submit").click();
+  await page.getByTestId("units-input").fill("90");
+  await expect(page.getByTestId("metered")).toHaveText("Charge: 0.009 ARL");
+  await page.getByTestId("settle").click();
+  await expect(page.getByTestId("outcome")).toContainText("Paid 0.009 ARL of the 1 ARL ceiling");
+
+  await connect(page, "/network");
+  await page.getByTestId("deactivate-2").click();
+  await expect(page.getByTestId("service-2")).toHaveCount(0);
+});
+
 test("private: identity, join, anonymous vote proven in the browser, one vote per member", async ({
   page,
 }) => {

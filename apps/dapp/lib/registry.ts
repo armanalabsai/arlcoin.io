@@ -31,11 +31,39 @@ export interface ArlTerms {
   facilitator: Address;
 }
 
+/** Capacity a compute provider offers, priced per second of use (`unit` is "GPU second" or
+ *  "CPU second"). Stated by the provider; nothing on-chain checks the hardware. */
+export interface ComputeCapacity {
+  kind: "gpu" | "cpu";
+  /** Required for GPU capacity, for example "NVIDIA H100 80GB". */
+  gpuModel?: string;
+  gpus: number;
+  gpuMemoryGb: number;
+  vcpus: number;
+  memoryGb: number;
+  /** Longest single job, in seconds: the payer's ceiling covers at most this. */
+  maxSeconds: number;
+}
+
+export const COMPUTE_UNIT = { gpu: "GPU second", cpu: "CPU second" } as const;
+
+/** Bounds for stated capacity, so a listing cannot show absurd or unreadable numbers. */
+export const COMPUTE_LIMITS = {
+  gpuModel: 60,
+  gpus: 64,
+  gpuMemoryGb: 1024,
+  vcpus: 1024,
+  memoryGb: 16_384,
+  minSeconds: 60,
+  maxSeconds: 86_400,
+} as const;
+
 export interface ArlService {
   name: string;
   description: string;
   endpoint: string;
   terms: ArlTerms;
+  compute?: ComputeCapacity;
 }
 
 export type Parsed<T> = { ok: true; value: T } | { ok: false; error: string };
@@ -72,10 +100,41 @@ export function safeEndpoint(v: unknown): string {
   return url.toString();
 }
 
+function whole(v: unknown, field: string, min: number, max: number): number {
+  if (typeof v !== "number" || !Number.isInteger(v) || v < min || v > max) {
+    throw new Error(`${field} must be a whole number from ${String(min)} to ${String(max)}`);
+  }
+  return v;
+}
+
+export function validateCompute(v: Record<string, unknown>): ComputeCapacity {
+  const L = COMPUTE_LIMITS;
+  if (v.kind !== "gpu" && v.kind !== "cpu") throw new Error("compute kind must be gpu or cpu");
+  const base = {
+    vcpus: whole(v.vcpus, "vCPUs", 1, L.vcpus),
+    memoryGb: whole(v.memoryGb, "memory (GB)", 1, L.memoryGb),
+    maxSeconds: whole(v.maxSeconds, "longest job (seconds)", L.minSeconds, L.maxSeconds),
+  };
+  if (v.kind === "cpu") {
+    if (v.gpuModel !== undefined || (v.gpus !== undefined && v.gpus !== 0)) {
+      throw new Error("CPU capacity has no GPUs");
+    }
+    return { kind: "cpu", gpus: 0, gpuMemoryGb: 0, ...base };
+  }
+  return {
+    kind: "gpu",
+    gpuModel: text(v.gpuModel, "GPU model", L.gpuModel),
+    gpus: whole(v.gpus, "GPUs", 1, L.gpus),
+    gpuMemoryGb: whole(v.gpuMemoryGb, "GPU memory (GB)", 1, L.gpuMemoryGb),
+    ...base,
+  };
+}
+
 export function validateService(input: {
   name: unknown;
   description: unknown;
   endpoint: unknown;
+  compute?: Record<string, unknown>;
   terms: {
     network: unknown;
     asset: unknown;
@@ -97,7 +156,11 @@ export function validateService(input: {
   }
   if (unitPrice <= 0n) throw new Error("unit price must be above zero");
   if (unitPrice > 10n ** 30n) throw new Error("unit price is too large");
-  return {
+  const compute = input.compute === undefined ? undefined : validateCompute(input.compute);
+  if (compute && t.unit !== COMPUTE_UNIT[compute.kind]) {
+    throw new Error(`compute capacity is priced per ${COMPUTE_UNIT[compute.kind]}`);
+  }
+  const service: ArlService = {
     name: text(input.name, "name", LIMITS.name),
     description: text(input.description, "description", LIMITS.description, false),
     endpoint: safeEndpoint(input.endpoint),
@@ -112,6 +175,8 @@ export function validateService(input: {
       facilitator: address(t.facilitator, "facilitator"),
     },
   };
+  if (compute) service.compute = compute;
+  return service;
 }
 
 /** The ERC-8004 registration file for a service, as a base64 JSON data URI. An inactive file
@@ -133,6 +198,7 @@ export function encodeRegistration(service: ArlService, active = true): string {
       unit: service.terms.unit,
       payTo: service.terms.payTo,
       facilitator: service.terms.facilitator,
+      ...(service.compute ? { compute: service.compute } : {}),
     },
   };
   const bytes = new TextEncoder().encode(JSON.stringify(file));
@@ -168,6 +234,14 @@ export function parseRegistration(uri: string): Parsed<ArlService> {
         name: file.name,
         description: file.description ?? "",
         endpoint: web?.endpoint,
+        ...(arl.compute === undefined
+          ? {}
+          : {
+              compute:
+                typeof arl.compute === "object" && arl.compute !== null
+                  ? (arl.compute as Record<string, unknown>)
+                  : { kind: "invalid" },
+            }),
         terms: {
           network: arl.network,
           asset: arl.asset,
