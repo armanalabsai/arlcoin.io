@@ -118,9 +118,12 @@ specification.
 
 ### 4.3 Vesting start
 
-- **TBD / REQUIRES CTO DECISION:** confirm that the investor and strategic
-  partnership schedules start at TGE (section 6). This specification
-  assumes TGE as the start but does not treat it as confirmed.
+- **Decided (CTO, 2026-09-29): `VESTING_START = TGE_TIMESTAMP`.** The investor
+  and strategic partnership schedules both start at the TGE (section 6). The
+  deployment config has one `tge` field and no per-schedule start; the planner
+  derives both starts from it and `ARLDeployPlan` refuses schedules that do
+  not share their start.
+- **TBD:** the TGE date itself.
 - Team schedules start at each grant's date (M-3 per-grant tracking).
 
 ### 4.4 Founder allocation
@@ -386,8 +389,8 @@ operations.
 
 ## 15. Remaining TBD Decisions
 
-1. Vesting start for investors and strategic partnerships (TGE assumed, not
-   confirmed).
+1. The TGE date. The vesting start rule is decided (`VESTING_START =
+TGE_TIMESTAMP`, section 4.3); the date is not.
 2. Public Launch: eligibility rules for the claim list, operational split, TGE
    amount, limits, claim window, tranches, unused remainder (the mechanism, a
    Merkle claim, is approved; section 7).
@@ -410,7 +413,7 @@ operations.
 Vesting implementation status (not a decision): the approved section 4.1
 durations (12-month cliff, 36 months linear, calendar months) are enforced by
 the tokenomics package, the deployment planner, `ARLDeployPlan` and the
-verifier. The vesting start (section 4.3) is not confirmed
+verifier. Both schedules start at the TGE (section 4.3); the TGE date is not confirmed
 (`VESTING_SCHEDULES_APPROVED = false`). The tooling deploys only to local Anvil
 and Base Sepolia, which may use a placeholder start; Base Mainnet is hard-locked.
 

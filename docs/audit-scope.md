@@ -67,13 +67,24 @@ tooling only).
 
 | Method               | Scope                                                                                             | Result                                          |
 | -------------------- | ------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
-| Unit and fuzz tests  | Foundry, 10,000 fuzz runs per test                                                                | 185 tests pass                                  |
+| Unit and fuzz tests  | Foundry, 10,000 fuzz runs per test                                                                | 246 tests pass (18 more in the zk profile)      |
+| Coverage             | `npm run coverage:contracts` (forge coverage, `src/`)                                             | 100% of lines and functions; see below          |
 | Invariant tests      | Supply, allocations, vesting, timelock roles, distributor funds (256 runs × depth 128)            | pass                                            |
 | Deployment rehearsal | Real Safe v1.5.0 on Anvil; 55 negative cases; Base Sepolia fork with the canonical Safe contracts | pass                                            |
 | Slither 0.11.6       | `src/` and `script/`, 102 detectors, CI fails on Low or higher                                    | 0 findings                                      |
 | Aderyn 0.6.8         | `src/`                                                                                            | 3 reported; triage below                        |
 | Halmos 0.3.3         | Symbolic checks in `contracts/test/symbolic/ARLSymbolic.t.sol`, run in CI                         | 10 of 11 proven; 1 solver timeout               |
 | Mythril 0.24.8       | Runtime bytecode of the four deployed contracts, 900 s each                                       | 9 reported, all triaged below; none exploitable |
+
+### Coverage
+
+Every contract in `src/` has 100% line and function coverage (`ARLAnonymousSignal` under the zk
+profile, the others under the default profile). Branch coverage is below 100% for these reasons only:
+
+| Contract                                                                         | Uncovered branch in the report                                                             | Why                                                                                                                                                                                                                               |
+| -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ARLStakingRewards`, `ARLTimelock`, `ARLMerkleDistributor`, `ARLAnonymousSignal` | Constructor checks (zero duration, no executors, zero root, past claim end, zero verifier) | Tested (`test_RevertWhen_ZeroAddressOrDuration`, `test_RevertWhen_ZeroExecutor`, the distributor constructor tests, `test_rejectsZeroVerifier`); forge coverage does not count a constructor that reverts under `vm.expectRevert` |
+| `ARLToken`                                                                       | `totalSupply() != MAX_SUPPLY` after minting                                                | Unreachable: the eleven allocation constants sum to `MAX_SUPPLY`, which `ARLAllocation` and the tokenomics tests check; kept as a defensive check                                                                                 |
 
 ### Aderyn triage
 
@@ -126,7 +137,7 @@ finish within 120 s. The same property is covered by fuzz tests and the
 - The website (`apps/web`) and documentation.
 - Contracts not planned for the first deployment, reviewed separately later: `ARLJobs`
   (ERC-8183 job escrow, [jobs.md](jobs.md)) and `ARLAnonymousSignal` ([zk-privacy.md](zk-privacy.md)).
-- Economic parameters that are not yet decided: vesting start, launch amount, claim window,
+- Economic parameters that are not yet decided: the TGE date (every vesting schedule starts at it), launch amount, claim window,
   per-address limits, liquidity parameters.
 
 ## Known limitations

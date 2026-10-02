@@ -90,9 +90,10 @@ tokens the Founder has not sold are still unlocked, not locked.
 
 The approved vesting durations are enforced: the planner (`packages/deploy`)
 and `ARLDeployPlan` reject any schedule whose cliff is not 12 calendar months or
-whose linear period is not 36 calendar months. The vesting start (TGE) is not
-confirmed, so both refuse any chain other than local Anvil until it is. Local
-rehearsals use a placeholder start date that is not a decision.
+whose linear period is not 36 calendar months. Every vesting schedule starts at
+the TGE (`VESTING_START = TGE_TIMESTAMP`, decided 2026-09-29): the config has a
+single `tge` date. The TGE date is not confirmed, so only local Anvil and Base
+Sepolia may use a placeholder TGE; Base Mainnet is hard-locked.
 
 Future reward programs (staking, referral, onboarding, early users) must be
 compatible with eligibility rules, Sybil resistance, abuse prevention, rate
