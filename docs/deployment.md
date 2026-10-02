@@ -88,6 +88,27 @@ the Founder Safe is circulating.
 manifest balance at one block (viem, MIT) and prints total, locked and circulating supply as exact
 base-unit and ARL strings. Circulating supply is never estimated or hard-coded.
 
+## Monitoring
+
+`VerifyARL` checks the exact genesis state and only applies before any token moves. For the life
+of the deployment, `npm run monitor -- <plan.json> <deployment.json> <rpc-url> <from-block>`
+(`packages/deploy/src/monitor.ts`, viem, MIT) reads the chain at one block, never signs or sends
+anything, and prints a JSON report.
+
+| Severity | Findings                                                                                                                                                                                                                                                                                                                                                            |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| critical | total supply is not 21,000,000 ARL; timelock delay differs from the plan or is below 48 hours; any timelock role differs from the `ARLVerify` role table; a vesting wallet's beneficiary or schedule differs from the plan, it holds less than its allocation (balance + released), it released more than vested, or its vested amount does not follow the schedule |
+| notice   | a timelock operation is waiting for its delay or is ready to execute (id, ready time, target, value, selector); a role was granted by the timelock, a role was revoked, or the delay changed after deployment                                                                                                                                                       |
+
+Exit codes: `0` healthy (notices may still need review), `3` a critical finding, `1` the check
+could not run, `2` wrong usage. Timelock events are read from `<from-block>` in ranges of 9,000
+blocks, so public RPC limits are respected; pass the deployment block on the first run and the
+previous report's `blockNumber` afterwards. Tokens sent to a vesting wallet by anyone are accepted
+(they vest with the rest). The local rehearsal runs the monitor on a deployment after tokens have
+moved, schedules a treasury transfer through the timelock, and checks that it is reported while
+waiting, again when it is ready after 48 hours, and that a plan which disagrees with the chain
+exits with code 3.
+
 ## Public Launch claim distributor
 
 The approved Public Launch mechanism is a Merkle claim (economic specification section 7).
@@ -193,3 +214,5 @@ key); nothing is sent to Base Sepolia.
    writes the config (code checks on, 12 + 36 months, 48-hour delay); `cli.ts` builds the plan.
 3. **Deploy and verify.** `DeployARL` with `ARL_PLAN` and `ARL_DEPLOYMENT`, then `VerifyARL`.
 4. **Manifest.** `manifest-cli.ts`, then `supply-cli.ts` (circulating supply at TGE is 2,100,000 ARL).
+5. **Monitoring.** Run `monitor-cli.ts` on a schedule from the deployment block (see Monitoring)
+   and have the guardian's signers review every notice.
