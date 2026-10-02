@@ -150,6 +150,10 @@ API key from `ETHERSCAN_API_KEY`; the key is never an argument and never printed
 kept out of the repository. The local rehearsal checks the arguments against its own
 deployment's broadcast and that a plan with another cliff start is refused.
 
+After signing from a phone there is no broadcast file; pass the dry-run file the Deploy screen
+signed (`dry-run/run-latest.json`) instead: it holds the same creations, and the screen checked
+that each one was created at the planned address.
+
 ## Monitoring
 
 `VerifyARL` checks the exact genesis state and only applies before any token moves. For the life
