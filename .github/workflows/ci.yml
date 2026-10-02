@@ -61,6 +61,10 @@ jobs:
         working-directory: contracts
       - run: forge test -vv
         working-directory: contracts
+      # Gas snapshot of the unit tests (fuzz and invariant runs excluded: their gas varies by
+      # input). A change in gas must be reviewed with the regenerated contracts/.gas-snapshot.
+      - run: forge snapshot --no-match-test "testFuzz|invariant" --no-match-path "test/symbolic/*" --check
+        working-directory: contracts
       - run: node scripts/check-token-abi.mjs
 
   slither:

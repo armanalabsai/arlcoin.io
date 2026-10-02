@@ -80,6 +80,25 @@ tooling only).
 | Halmos 0.3.3         | Symbolic checks in `contracts/test/symbolic/ARLSymbolic.t.sol`, run in CI                         | 10 of 11 proven; 1 solver timeout               |
 | Mythril 0.24.8       | Runtime bytecode of the four deployed contracts, 900 s each                                       | 9 reported, all triaged below; none exploitable |
 
+### Gas
+
+`contracts/.gas-snapshot` records the gas of every unit test (217; fuzz and invariant runs are
+excluded because their gas varies with the input). CI fails when it changes
+(`forge snapshot --check`); regenerate it with `npm run gas:snapshot` in the same change.
+Median gas of the main user operations (`forge test --gas-report`):
+
+| Contract               | Operation                                          |                          Median gas |
+| ---------------------- | -------------------------------------------------- | ----------------------------------: |
+| `ARLToken`             | `transfer` / `transferFrom` / `approve` / `permit` |   51,615 / 55,778 / 46,701 / 50,519 |
+| `ARLVestingWallet`     | `release`                                          |                              65,220 |
+| `ARLTimelock`          | `schedule` / `execute` / `cancel`                  |            57,269 / 32,039 / 30,755 |
+| `ARLMerkleDistributor` | `claim` / `sweep`                                  |                     27,219 / 36,595 |
+| `ARLStakingRewards`    | `stake` / `withdraw` / `getReward` / `exit`        | 120,679 / 50,153 / 55,197 / 146,662 |
+| `ARLJobs`              | `createJob` / `fund` / `submit` / `complete`       |  182,027 / 84,372 / 36,007 / 29,417 |
+
+No gas optimization was traded for readability: the contracts use OpenZeppelin and the
+Synthetix staking code as published.
+
 ### Coverage
 
 Every contract in `src/` has 100% line and function coverage (`ARLAnonymousSignal` under the zk
