@@ -14,7 +14,7 @@ const arlAmount = (id: string): string => {
 export const technology: Layer = {
   id: "technology",
   title: "Technology",
-  description: "What ARL is for. Only the token contracts exist today.",
+  description: "What ARL is for. Nothing is on a public network yet.",
   cards: [
     {
       id: "ai-payments",
@@ -48,40 +48,57 @@ export const technology: Layer = {
       id: "compute",
       title: "GPU / CPU Compute",
       shortDescription: "Compute capacity, paid in ARL",
-      status: "PLANNED",
+      status: "IN DEVELOPMENT",
       weight: "primary",
       detail: {
         summary:
-          "Providers will offer GPU and CPU capacity; consumers will run jobs and pay in ARL. Early provider participation is eligible for the Early Users program.",
+          "Providers list GPU and CPU capacity on the open ERC-8004 registry and are paid per second of use in ARL: the consumer signs a ceiling for the longest run, the provider settles the seconds used, never more. Early provider participation is eligible for the Early Users program.",
         sections: [
           {
-            heading: "Planned scope",
+            heading: "Built",
             items: [
-              "Provider registration and capacity listing",
-              "Metered jobs, settled in ARL",
-              "Reward eligibility for early providers and consumers",
+              "Provider registration and capacity listing in the ARL app: GPU model and count, GPU memory, vCPUs, memory and the longest job, priced per GPU or CPU second. Tested on a local chain",
+              "Per-second metering settled in ARL over x402 upto: seconds rounded up, never above the signed ceiling",
+              "Escrowed jobs with a deadline and refunds (ERC-8183) and ratings from paid jobs (ERC-8004)",
             ],
           },
-          { heading: "Not yet built", items: ["No marketplace or provider software exists"] },
+          {
+            heading: "Not yet built",
+            items: [
+              "No provider software that runs workloads exists; capacity is the provider's own statement and nothing on-chain checks the hardware",
+              "No provider has joined and nothing runs on a public network",
+            ],
+          },
         ],
       },
+      links: [{ label: "App design", href: repoDoc("docs/app.md") }],
     },
     {
       id: "zk-privacy",
       title: "ZK Privacy",
       shortDescription: "Verify without revealing inputs",
-      status: "PLANNED",
+      status: "IN DEVELOPMENT",
       weight: "secondary",
       detail: {
         summary:
-          "Research track: use zero-knowledge proofs so that a computation or a payment can be verified without revealing its inputs.",
+          "Zero-knowledge proofs let a member prove something about themselves without revealing who they are. The first use is anonymous polls: one vote per member, with no link between a vote and a wallet.",
         sections: [
           {
+            heading: "Built",
+            items: [
+              "Anonymous polls on the Semaphore protocol, with proofs written in Noir (UltraHonk) and generated in the browser. Tested on a local chain",
+            ],
+          },
+          {
             heading: "Not yet built",
-            items: ["No proof system has been selected", "No circuits exist"],
+            items: [
+              "Private payments and verifiable computation are research topics; no circuits exist for them",
+              "Not deployed on any public network",
+            ],
           },
         ],
       },
+      links: [{ label: "ZK design", href: repoDoc("docs/zk-privacy.md") }],
     },
     {
       id: "defi",
@@ -119,13 +136,28 @@ export const technology: Layer = {
       id: "arl-network",
       title: "ARL Network",
       shortDescription: "Services, providers and payments",
-      status: "PLANNED",
+      status: "IN DEVELOPMENT",
       weight: "secondary",
       detail: {
         summary:
-          "The network that connects AI services, compute providers and users, with ARL as the unit of settlement. The selected chain is Base: Base Sepolia for testing, Base Mainnet for production. Nothing is deployed yet.",
+          "The network that connects AI services, compute providers and users, with ARL as the unit of settlement. It uses open standards instead of new registries: ERC-8004 for services and ratings, ERC-8183 for escrowed jobs, x402 for payments. The selected chain is Base: Base Sepolia for testing, Base Mainnet for production.",
+        sections: [
+          {
+            heading: "Built",
+            items: [
+              "ARL app screens to register, list, pay, hire and rate services, against the canonical ERC-8004 registry code. Tested on a local chain",
+            ],
+          },
+          {
+            heading: "Not yet built",
+            items: ["Nothing is deployed on Base Sepolia or Base Mainnet", "No hosted app"],
+          },
+        ],
       },
-      links: [{ label: "Chain evaluation", href: repoDoc("docs/chain-evaluation.md") }],
+      links: [
+        { label: "App design", href: repoDoc("docs/app.md") },
+        { label: "Chain evaluation", href: repoDoc("docs/chain-evaluation.md") },
+      ],
     },
     {
       id: "token-contracts",

@@ -15,7 +15,7 @@ changed is listed in [`THIRD_PARTY_LICENSES`](../THIRD_PARTY_LICENSES).
 | Wallet   | `ARLToken`                                  | See the ARL balance, stake and unclaimed rewards; send ARL                                                                                                       |
 | Vesting  | `ARLVestingWallet`                          | See beneficiary, cliff and end dates, released and releasable amounts; release to the beneficiary                                                                |
 | Staking  | `ARLStakingRewards` and `ARLToken`          | Stake (approving exactly the amount), withdraw, claim rewards, or withdraw everything and claim                                                                  |
-| Network  | ERC-8004 IdentityRegistry                   | List ARL services; register a service with its price, payee and facilitator; take it offline; pay it                                                             |
+| Network  | ERC-8004 IdentityRegistry                   | List ARL services and compute capacity; register a service with its price, payee and facilitator; take it offline; pay it                                        |
 | Payments | `ARLToken`, Permit2, `x402UptoPermit2Proxy` | Set or remove the Permit2 payment limit; sign a ceiling (x402 `upto`); a demo service charges the metered amount, capped at the ceiling; cancel an authorization |
 | Private  | `ARLAnonymousSignal`                        | Create a private identity from a signature; join the demo group; vote in a poll with a zero-knowledge proof made in the browser                                  |
 | Jobs     | `ARLJobs`, `ARLToken`                       | Post a job for a service, fund it into escrow, deliver, accept and pay, reject and refund, refund after the deadline                                             |
@@ -102,6 +102,30 @@ service selected, and the payment uses the service's own price, payee and facili
 
 Everything read from the registry is validated (`lib/registry.ts`): size limits, no control
 characters, addresses, a positive price, and links only over https (or http on this machine).
+
+### Compute capacity
+
+A compute provider adds a `compute` object to its `arl` section and is priced per `GPU second` or
+`CPU second` (the unit must match the kind):
+
+```json
+"compute": {
+  "kind": "gpu", "gpuModel": "NVIDIA H100 80GB", "gpus": 2, "gpuMemoryGb": 80,
+  "vcpus": 32, "memoryGb": 256, "maxSeconds": 3600
+}
+```
+
+CPU capacity has `"kind": "cpu"`, no `gpuModel`, and `gpus` and `gpuMemoryGb` set to 0. Values are
+whole numbers within fixed bounds (`COMPUTE_LIMITS` in `lib/registry.ts`: up to 64 GPUs, 1,024 GB
+per GPU, 1,024 vCPUs, 16,384 GB memory, jobs of 60 seconds to 24 hours); a file with malformed
+capacity is not listed. The capacity is the provider's statement; nothing on-chain checks the
+hardware, which is why the listing shows ratings from paid jobs next to it.
+
+Billing (`lib/compute.ts`): the consumer signs a ceiling of price × seconds for the longest run it
+accepts (at most the provider's `maxSeconds`); the provider measures the run, bills whole seconds
+rounded up, and settles that amount, never above the ceiling, through the same x402 `upto` path
+as any service. A longer job can also be hired through the Jobs screen with an escrowed budget and
+a deadline. Provider software that runs workloads is not part of this repository.
 
 Each service shows its rating from paid jobs (see [jobs.md](jobs.md#ratings-erc-8004-reputation)).
 

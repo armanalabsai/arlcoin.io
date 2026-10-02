@@ -12,8 +12,11 @@ import type { ListedService } from "~~/hooks/arl/useArlServices";
 import { useJobRatings } from "~~/hooks/arl/useJobRatings";
 import type { ServiceRatings } from "~~/hooks/arl/useJobRatings";
 import { useDeployedContractInfo, useTargetNetwork, useTransactor } from "~~/hooks/scaffold-eth";
+import { describeCapacity } from "~~/lib/compute";
 import { formatArl, parseArl } from "~~/lib/format";
 import {
+  COMPUTE_LIMITS,
+  COMPUTE_UNIT,
   IDENTITY_REGISTRY,
   LIMITS,
   encodeRegistration,
@@ -89,6 +92,12 @@ function ServiceRow({
         </span>
       </div>
       {service.description ? <p className="text-sm text-muted">{service.description}</p> : null}
+      {service.compute ? (
+        <p className="text-sm" data-testid={`capacity-${service.agentId.toString()}`}>
+          <span className="badge badge-sm mr-2">{service.compute.kind.toUpperCase()}</span>
+          {describeCapacity(service)}
+        </p>
+      ) : null}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-subtle">
         <span>Agent #{service.agentId.toString()}</span>
         <span data-testid={`rating-${service.agentId.toString()}`}>
@@ -156,11 +165,20 @@ function RegisterForm() {
     price: "",
     payTo: "",
     facilitator: "",
+    kind: "",
+    gpuModel: "",
+    gpus: "",
+    gpuMemoryGb: "",
+    vcpus: "",
+    memoryGb: "",
+    maxSeconds: "",
   });
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
   const set = (k: keyof typeof form) => (e: { target: { value: string } }) =>
     setForm({ ...form, [k]: e.target.value });
+  const compute = form.kind === "gpu" || form.kind === "cpu" ? form.kind : undefined;
+  const count = (v: string) => (/^\d+$/.test(v.trim()) ? Number(v.trim()) : Number.NaN);
 
   const submit = async () => {
     if (!token || !address) return;
@@ -182,11 +200,24 @@ function RegisterForm() {
           name: form.name,
           description: form.description,
           endpoint: form.endpoint,
+          compute: compute && {
+            kind: compute,
+            ...(compute === "gpu"
+              ? {
+                  gpuModel: form.gpuModel,
+                  gpus: count(form.gpus),
+                  gpuMemoryGb: count(form.gpuMemoryGb),
+                }
+              : {}),
+            vcpus: count(form.vcpus),
+            memoryGb: count(form.memoryGb),
+            maxSeconds: count(form.maxSeconds),
+          },
           terms: {
             network: `eip155:${String(targetNetwork.id)}`,
             asset: token.address,
             unitPrice: price.value,
-            unit: form.unit,
+            unit: compute ? COMPUTE_UNIT[compute] : form.unit,
             payTo: payTo as Address,
             facilitator: facilitator as Address,
           },
@@ -214,6 +245,13 @@ function RegisterForm() {
           price: "",
           payTo: "",
           facilitator: "",
+          kind: "",
+          gpuModel: "",
+          gpus: "",
+          gpuMemoryGb: "",
+          vcpus: "",
+          memoryGb: "",
+          maxSeconds: "",
         });
     } finally {
       setBusy(false);
@@ -229,7 +267,9 @@ function RegisterForm() {
         </h2>
         <p className="mt-1 text-sm text-muted">
           Registers your service as an ERC-8004 agent owned by your wallet. The registration file is
-          stored on-chain and lists your price in ARL. You can take it offline later.
+          stored on-chain and lists your price in ARL. Compute providers also state their GPU or CPU
+          capacity and are paid per second used. The capacity is your own statement: nothing
+          on-chain checks the hardware. You can take the service offline later.
         </p>
       </div>
       <form
@@ -286,12 +326,70 @@ function RegisterForm() {
           <input
             className={field}
             maxLength={LIMITS.unit}
-            value={form.unit}
+            value={compute ? COMPUTE_UNIT[compute] : form.unit}
             onChange={set("unit")}
+            disabled={!!compute}
             placeholder="1,000 tokens"
             data-testid="svc-unit"
           />
         </label>
+        <label className="flex flex-col gap-1 text-sm text-muted sm:col-span-2">
+          Compute capacity
+          <select
+            className="select glass-field w-full"
+            value={form.kind}
+            onChange={set("kind")}
+            data-testid="svc-kind"
+          >
+            <option value="">None (an AI or other service)</option>
+            <option value="gpu">GPU, priced per GPU second</option>
+            <option value="cpu">CPU, priced per CPU second</option>
+          </select>
+        </label>
+        {compute === "gpu" ? (
+          <>
+            <label className="flex flex-col gap-1 text-sm text-muted sm:col-span-2">
+              GPU model
+              <input
+                className={field}
+                maxLength={COMPUTE_LIMITS.gpuModel}
+                value={form.gpuModel}
+                onChange={set("gpuModel")}
+                placeholder="NVIDIA H100 80GB"
+                data-testid="svc-gpu-model"
+              />
+            </label>
+            <NumberField label="GPUs" value={form.gpus} onChange={set("gpus")} testId="svc-gpus" />
+            <NumberField
+              label="Memory per GPU (GB)"
+              value={form.gpuMemoryGb}
+              onChange={set("gpuMemoryGb")}
+              testId="svc-gpu-memory"
+            />
+          </>
+        ) : null}
+        {compute ? (
+          <>
+            <NumberField
+              label="vCPUs"
+              value={form.vcpus}
+              onChange={set("vcpus")}
+              testId="svc-vcpus"
+            />
+            <NumberField
+              label="Memory (GB)"
+              value={form.memoryGb}
+              onChange={set("memoryGb")}
+              testId="svc-memory"
+            />
+            <NumberField
+              label={`Longest job (seconds, ${String(COMPUTE_LIMITS.minSeconds)}–${String(COMPUTE_LIMITS.maxSeconds)})`}
+              value={form.maxSeconds}
+              onChange={set("maxSeconds")}
+              testId="svc-max-seconds"
+            />
+          </>
+        ) : null}
         <label className="flex flex-col gap-1 text-sm text-muted">
           Paid to (default: your wallet)
           <input
@@ -335,5 +433,30 @@ function RegisterForm() {
         />
       </Facts>
     </section>
+  );
+}
+
+function NumberField({
+  label,
+  value,
+  onChange,
+  testId,
+}: {
+  label: string;
+  value: string;
+  onChange: (e: { target: { value: string } }) => void;
+  testId: string;
+}) {
+  return (
+    <label className="flex flex-col gap-1 text-sm text-muted">
+      {label}
+      <input
+        className="input glass-field w-full"
+        inputMode="numeric"
+        value={value}
+        onChange={onChange}
+        data-testid={testId}
+      />
+    </label>
   );
 }
