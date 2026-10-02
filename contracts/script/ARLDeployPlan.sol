@@ -209,6 +209,11 @@ library ARLDeployPlan {
         _validateSafes(p);
         validateSchedule("investors", p.investors);
         validateSchedule("strategicPartnerships", p.strategicPartnerships);
+        // Approved rule: VESTING_START = TGE_TIMESTAMP. Every vesting schedule starts at the one
+        // TGE, so the schedules must share their start.
+        if (p.investors.cliffStart != p.strategicPartnerships.cliffStart) {
+            revert PlanInvalidSchedule("vesting schedules do not start at the same TGE");
+        }
         if (p.minDelay < TIMELOCK_DELAY_FLOOR) {
             revert PlanDelayBelowFloor(p.minDelay, TIMELOCK_DELAY_FLOOR);
         }

@@ -91,6 +91,7 @@ const CONFIG_KEYS = [
   "chainId",
   "requireRecipientCode",
   "note",
+  "tge",
   "vesting",
   "treasury",
   "recipients",
@@ -99,12 +100,11 @@ const CONFIG_KEYS = [
 
 /**
  * A vesting schedule supplied by configuration. The durations must equal the approved schedule
- * in `@arl/tokenomics` (12-month cliff, 36 months linear); the start date is a deployment input.
+ * in `@arl/tokenomics` (12-month cliff, 36 months linear). There is no per-schedule start: every
+ * schedule starts at the config's `tge` (approved rule VESTING_START = TGE_TIMESTAMP).
  */
 export interface VestingConfig {
   beneficiary: string;
-  /** UTC start, `YYYY-MM-DDTHH:MM:SSZ`, day of month at most 28. */
-  start: string;
   cliffMonths: number;
   vestingMonths: number;
 }
@@ -116,6 +116,11 @@ export interface DeployConfig {
   requireRecipientCode: boolean;
   /** Free text; ignored. */
   note?: string;
+  /**
+   * The TGE (token generation event), UTC `YYYY-MM-DDTHH:MM:SSZ` with day of month at most 28.
+   * Every vesting schedule starts here (VESTING_START = TGE_TIMESTAMP).
+   */
+  tge: string;
   /**
    * Beneficiaries are dedicated Safes and must be deployed contracts off local Anvil. There is
    * no `founder` entry: the Founder allocation does not vest.
@@ -246,22 +251,27 @@ function buildVesting(
   key: VestingKey,
   value: unknown,
   placeholderStartAllowed: boolean,
+  tge: UtcDate,
 ): { plan: VestingPlan; source: { start: string; cliffEnd: string; vestingEnd: string } } {
   const field = `vesting.${key}`;
-  requireKeys(value, field, ["beneficiary", "start", "cliffMonths", "vestingMonths"]);
+  if (typeof value === "object" && value !== null && "start" in value) {
+    fail(`${field}.start: not allowed; every vesting schedule starts at tge (VESTING_START = TGE)`);
+  }
+  requireKeys(value, field, ["beneficiary", "cliffMonths", "vestingMonths"]);
   const v = value as VestingConfig;
 
   const allocation = ALLOCATIONS.find((a) => a.id === VESTING_KEYS[key]);
   if (allocation?.release.kind !== "vesting")
     fail(`tokenomics: ${VESTING_KEYS[key]} does not vest`);
   const approved = allocation.release.schedule;
-  // The vesting start is not confirmed. Only local Anvil and the testnet may use a placeholder.
+  // The TGE date (and so the vesting start) is not confirmed. Only local Anvil and the testnet
+  // may use a placeholder.
   if (
     (allocation.release.status !== "approved" || approved.start !== "approved") &&
     !placeholderStartAllowed
   ) {
     fail(
-      `${field}: the vesting start is not confirmed (TBD); only local Anvil and the testnet may use a placeholder`,
+      `${field}: the TGE date, and so the vesting start, is not confirmed (TBD); only local Anvil and the testnet may use a placeholder`,
     );
   }
 
@@ -278,13 +288,13 @@ function buildVesting(
   if (v.vestingMonths !== approved.linearMonths) {
     fail(`${field}.vestingMonths: must be ${String(approved.linearMonths)} (approved schedule)`);
   }
-  const start = parseUtc(v.start, `${field}.start`);
+  const start = tge;
   const cliffEnd = addCalendarMonths(start, v.cliffMonths);
   const vestingEnd = addCalendarMonths(cliffEnd, v.vestingMonths);
   return {
     plan: {
       beneficiary,
-      cliffStart: requireTimestamp(toUnix(start), `${field}.start`),
+      cliffStart: requireTimestamp(toUnix(start), "tge"),
       cliffEnd: requireTimestamp(toUnix(cliffEnd), `${field}.cliffEnd`),
       vestingEnd: requireTimestamp(toUnix(vestingEnd), `${field}.vestingEnd`),
     },
@@ -350,10 +360,11 @@ export function buildPlan(config: DeployConfig): DeployPlan {
     );
   }
   requireKeys(config.vesting, "vesting", Object.keys(VESTING_KEYS));
+  const tge = parseUtc(config.tge, "tge");
   const vesting = {} as Record<VestingKey, VestingPlan>;
   const source = {} as DeployPlan["source"];
   for (const key of Object.keys(VESTING_KEYS) as VestingKey[]) {
-    const built = buildVesting(key, config.vesting[key], local || testnet);
+    const built = buildVesting(key, config.vesting[key], local || testnet, tge);
     vesting[key] = built.plan;
     source[key] = built.source;
   }

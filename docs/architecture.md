@@ -69,7 +69,7 @@ Rules:
 | Decision                                                               | Needed before                |
 | ---------------------------------------------------------------------- | ---------------------------- |
 | Unlocking Base Mainnet (a reviewed change to `networkGate`)            | Production deployment        |
-| Vesting start (TGE) for investors and strategic partnerships (TBD)     | Base Mainnet                 |
+| TGE date (both vesting schedules start at it; the date is TBD)         | Base Mainnet                 |
 | Team grant schedule; program rules for staking, growth and early users | The programs                 |
 | Exact launch and grant dates (contracts take explicit timestamps)      | Deployment                   |
 | Signer sets and thresholds of the dedicated Safes                      | Production multisig creation |
