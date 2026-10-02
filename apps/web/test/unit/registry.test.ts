@@ -170,18 +170,31 @@ describe("team publishing rule", () => {
   const INSTITUTIONS =
     /Bitcoin Core|MIT\b|Stanford|KAIST|Harvard|Yale|Carnegie|Berkeley|Columbia|Barcelona|Madrid|Valencia|AGI Core|University|School|Laboratory|B\.S\.|M\.S\.|Doctorate/;
 
-  it("lists only the founder, then the team-growing note", () => {
+  it("lists only the founder, then the team-growing note and the open roles", () => {
     assert.deepEqual(
       TEAM.map((p) => p.id),
       ["alaz-daghan-gokturk"],
     );
     assert.deepEqual(
       teamLayer?.cards.map((c) => c.id),
-      ["alaz-daghan-gokturk", "team-growing"],
+      ["alaz-daghan-gokturk", "team-growing", "open-roles"],
     );
     const growing = teamLayer?.cards.find((c) => c.id === "team-growing");
     assert.equal(growing?.person, undefined);
     assert.match(growing?.detail.summary ?? "", /only once .* verified/);
+  });
+
+  it("describes open roles without people, employers or credentials", () => {
+    const roles = teamLayer?.cards.find((c) => c.id === "open-roles");
+    assert.equal(roles?.person, undefined);
+    assert.equal(roles?.links, undefined);
+    for (const text of cardTexts(roles!)) assert.doesNotMatch(text, INSTITUTIONS, text);
+    assert.ok((roles?.detail.sections?.[0]?.items?.length ?? 0) >= 10);
+  });
+
+  it("does not show an empty focus line for a profile without expertise", () => {
+    for (const card of teamLayer?.cards ?? [])
+      assert.doesNotMatch(card.detail.summary, /^Focus: \.$/);
   });
 
   it("gives every profile a verification status", () => {
