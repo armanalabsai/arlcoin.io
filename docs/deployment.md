@@ -88,6 +88,30 @@ the Founder Safe is circulating.
 manifest balance at one block (viem, MIT) and prints total, locked and circulating supply as exact
 base-unit and ARL strings. Circulating supply is never estimated or hard-coded.
 
+## Signing from a phone
+
+The owner can sign every transaction from a phone wallet, without any key leaving it:
+
+1. Someone prepares the run with the owner's **public** address only: the same `forge script`
+   command with `--sender <owner address>` and without `--broadcast` or `--account`. Foundry
+   simulates it and writes `broadcast/<Script>/84532/dry-run/run-latest.json`.
+2. The owner opens the app's `/deploy` screen in the wallet's own browser, picks that file and
+   connects. The screen refuses the file unless every transaction is either a creation of the
+   ARL build's own code (hash of the creation code, `lib/deployArtifacts.ts`, generated from the
+   Foundry build and checked in CI) or a Safe creation through the canonical Safe v1.5.0 factory
+   and singletons, all from that one address, in nonce order, sending no ETH. Base Mainnet is
+   refused.
+3. Each transaction is explained in plain words (the Safe's owners and threshold; the vesting
+   wallet's beneficiary and dates; the timelock's delay and roles; the token's one-time mint to
+   the allocation holders) before the owner signs it. Before sending, the screen checks the
+   connected address, the chain and the wallet's next nonce; after the receipt, that a created
+   contract is at the address the plan expects.
+4. Afterwards, `VerifyARL` and `bytecode-cli.ts verify` run read-only from any machine.
+
+Run the Safe creation (`CreateSafes`) and the deployment (`DeployARL`) as two files: the
+deployment plan needs the Safe addresses. The app is not hosted publicly yet; serving it for the
+phone (for example a Vercel project for `apps/dapp`) is an owner decision.
+
 ## Reproducible build and deployment proof
 
 The contracts are compiled without a metadata hash (`bytecode_hash = "none"`,
@@ -251,6 +275,7 @@ key); nothing is sent to Base Sepolia.
 2. **Config and plan.** `safes-config-cli.ts <safes.json> <placeholder-vesting-start> <config.json>`
    writes the config (code checks on, 12 + 36 months, 48-hour delay); `cli.ts` builds the plan.
 3. **Deploy and verify.** `DeployARL` with `ARL_PLAN` and `ARL_DEPLOYMENT`, then `VerifyARL`.
+   From a phone, use the app's **Deploy** screen instead of `--broadcast` (see Signing from a phone).
 4. **Manifest.** `manifest-cli.ts`, then `supply-cli.ts` (circulating supply at TGE is 2,100,000 ARL).
 5. **Explorer source.** `npm run verify:explorer -- … --check-broadcast … --run` with
    `ETHERSCAN_API_KEY` set in the environment (see Explorer source verification).
