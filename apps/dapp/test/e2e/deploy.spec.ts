@@ -16,6 +16,16 @@ test.describe.configure({ mode: "serial" });
 
 /** Prepares the deployment the way the owner would: a dry run, nothing broadcast. */
 function dryRun(): string {
+  // The plan is built from the committed local config by the planner, as on a real deployment.
+  execFileSync(
+    "node",
+    [
+      join(contracts, "..", "packages", "deploy", "src", "cli.ts"),
+      join(contracts, "deploy", "config", "local.json"),
+      join(contracts, "deploy", "deployments", "e2e-plan.json"),
+    ],
+    { stdio: "pipe" },
+  );
   execFileSync(
     "forge",
     ["script", "script/DeployARL.s.sol:DeployARL", "--rpc-url", E2E_RPC, "--sender", DEPLOYER],
@@ -23,7 +33,7 @@ function dryRun(): string {
       cwd: contracts,
       env: {
         ...process.env,
-        ARL_PLAN: "deploy/plans/local.json",
+        ARL_PLAN: "deploy/deployments/e2e-plan.json",
         ARL_DEPLOYMENT: "deploy/deployments/e2e-dry-run.json",
       },
       stdio: "pipe",
