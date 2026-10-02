@@ -112,6 +112,31 @@ Run the Safe creation (`CreateSafes`) and the deployment (`DeployARL`) as two fi
 deployment plan needs the Safe addresses. The app is not hosted publicly yet; serving it for the
 phone (for example a Vercel project for `apps/dapp`) is an owner decision.
 
+## Reproducible build and deployment proof
+
+The contracts are compiled without a metadata hash (`bytecode_hash = "none"`,
+`cbor_metadata = false` in `contracts/foundry.toml`), so the same source, solc 0.8.36 and settings
+always produce the same bytecode, whatever the checkout path.
+`contracts/deploy/bytecode.json` records the keccak-256 of the creation and runtime code of every
+contract that is deployed on a public network (token, vesting wallet, timelock, claim
+distributor, staking, jobs) and the compiler settings.
+
+- `npm run check:bytecode` (CI, rehearsal job) rebuilds and fails on any difference, so a change
+  to the deployed bytecode cannot land without updating the manifest in the same reviewed change
+  (`node packages/deploy/src/bytecode-cli.ts manifest contracts contracts/deploy/bytecode.json`).
+- `node packages/deploy/src/bytecode-cli.ts verify contracts <plan.json> <deployment.json> <rpc-url>`
+  proves a live deployment: the runtime code at each address must equal the local build
+  byte-for-byte outside its immutable slots, every copy of an immutable must hold the same value,
+  and the immutables are then checked through the contracts' own getters (the token's EIP-712
+  permit domain for name "ARL", version "1", the chain and its address; each vesting wallet's
+  cliff start, cliff end, linear duration and beneficiary against the plan). Exit code 3 on any
+  failed check.
+
+Anyone can repeat the proof from a clean checkout: `forge build --skip test --skip script` in
+`contracts/`, then `npm run check:bytecode` and `verify` against a public RPC. The local
+rehearsal runs `verify` on its deployment and checks that a record with two addresses swapped and
+a plan with another cliff start are both refused.
+
 ## Monitoring
 
 `VerifyARL` checks the exact genesis state and only applies before any token moves. For the life
@@ -182,7 +207,7 @@ built from the official Safe artifact has the canonical v1.5.0 code hash. It bui
 manifest, checks that circulating supply is exactly 2,100,000 ARL at TGE, and that it changes
 only when tokens leave a locked address (not when the Founder sells). It then deploys a Public
 Launch claim distributor from the test list, funds it, claims one entry and sweeps the rest
-back after the window, checking circulating supply at each step. 48 negative cases in
+back after the window, checking circulating supply at each step. 58 negative cases in
 total, including a plan that still splits the Founder allocation, plans of the old
 `arl-deploy-plan/4` and `arl-deploy-plan/3` schemas and of the old
 `arl-deploy-plan/2` schema, a plan or config with `vesting.founder`, and a deployment record with a
@@ -237,7 +262,9 @@ key); nothing is sent to Base Sepolia.
 2. **Config and plan.** `safes-config-cli.ts <safes.json> <placeholder-vesting-start> <config.json>`
    writes the config (code checks on, 12 + 36 months, 48-hour delay); `cli.ts` builds the plan.
 3. **Deploy and verify.** `DeployARL` with `ARL_PLAN` and `ARL_DEPLOYMENT`, then `VerifyARL`.
-   From a phone, use the app's **Deploy** screen instead of `--broadcast` (see below).
+   From a phone, use the app's **Deploy** screen instead of `--broadcast` (see Signing from a phone).
 4. **Manifest.** `manifest-cli.ts`, then `supply-cli.ts` (circulating supply at TGE is 2,100,000 ARL).
-5. **Monitoring.** Run `monitor-cli.ts` on a schedule from the deployment block (see Monitoring)
+5. **Deployment proof.** `bytecode-cli.ts verify` against the Base Sepolia RPC; publish its
+   output with the addresses.
+6. **Monitoring.** Run `monitor-cli.ts` on a schedule from the deployment block (see Monitoring)
    and have the guardian's signers review every notice.

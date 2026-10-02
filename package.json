@@ -17,6 +17,7 @@
     "check": "npm run typecheck && npm run lint && npm run format:check && npm test",
     "check:contracts": "cd contracts && forge fmt --check && forge build --sizes --skip test --skip script && forge test && cd .. && node scripts/check-token-abi.mjs",
     "coverage:contracts": "cd contracts && forge coverage --report summary --no-match-coverage \"test|lib|script\" && FOUNDRY_PROFILE=zk forge coverage --report summary --no-match-coverage \"test|lib|zk/\"",
+    "check:bytecode": "node packages/deploy/src/bytecode-cli.ts check contracts contracts/deploy/bytecode.json",
     "monitor": "node packages/deploy/src/monitor-cli.ts",
     "rehearse:local": "bash scripts/rehearse-local.sh",
     "rehearse:base-sepolia-fork": "bash scripts/rehearse-base-sepolia-fork.sh"

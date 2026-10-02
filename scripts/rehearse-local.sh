@@ -444,6 +444,22 @@ expect "remainder returned to the Public Launch Safe" \
 expect "circulating after sweep" "$(node -e "console.log((2100000000000000000000001n + ${CLAIMED}n).toString())")" \
   "$(supply circulatingSupply)"
 
+log "Deployment proof: every address runs this build's code with the planned immutables"
+bytecode() { node "$ROOT/packages/deploy/src/bytecode-cli.ts" "$@"; }
+bytecode verify . "$PLAN" "$DEPLOYMENT" "$RPC" || die "deployed code does not match the build"
+node -e "const d=require('./$DEPLOYMENT'); [d.token, d.timelock] = [d.timelock, d.token]; require('fs').writeFileSync('$REHEARSAL/swapped.json', JSON.stringify(d));"
+mutate "$REHEARSAL/other-cliff.json" "p.vesting.investors.cliffStart += 1"
+refused() {
+  set +e
+  bytecode verify . "$2" "$3" "$RPC" >/dev/null
+  CODE=$?
+  set -e
+  expect "deployment proof refuses $1" "3" "$CODE"
+  NEGATIVE=$((NEGATIVE + 1))
+}
+refused "a record with token and timelock swapped" "$PLAN" "$REHEARSAL/swapped.json"
+refused "a plan with another cliff start" "$REHEARSAL/other-cliff.json" "$DEPLOYMENT"
+
 log "Monitor: read-only health check of the live deployment"
 monitor() { node "$ROOT/packages/deploy/src/monitor-cli.ts" "$1" "$DEPLOYMENT" "$RPC" 0; }
 report() { monitor "$PLAN" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>console.log(JSON.parse(s).$1))"; }
