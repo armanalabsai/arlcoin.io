@@ -113,6 +113,19 @@ Anyone can repeat the proof from a clean checkout: `forge build --skip test --sk
 rehearsal runs `verify` on its deployment and checks that a record with two addresses swapped and
 a plan with another cliff start are both refused.
 
+## Explorer source verification
+
+`npm run verify:explorer -- <plan.json> <deployment.json> --check-broadcast <run-latest.json>`
+(`packages/deploy/src/explorer.ts`) rebuilds, from the plan and the deployment record, the
+constructor arguments of every contract `DeployARL` created (both vesting wallets, the treasury
+timelock and the token with its eleven recipients), checks that each creation in the
+deployment's broadcast file ends with exactly those arguments (exit code 3 otherwise), and prints
+the `forge verify-contract --chain 84532 --verifier etherscan` command for each contract, to run
+in `contracts/`. With `--run` it executes them, on Base Sepolia only. Foundry reads the Basescan
+API key from `ETHERSCAN_API_KEY`; the key is never an argument and never printed, and it is
+kept out of the repository. The local rehearsal checks the arguments against its own
+deployment's broadcast and that a plan with another cliff start is refused.
+
 ## Monitoring
 
 `VerifyARL` checks the exact genesis state and only applies before any token moves. For the life
@@ -183,7 +196,7 @@ built from the official Safe artifact has the canonical v1.5.0 code hash. It bui
 manifest, checks that circulating supply is exactly 2,100,000 ARL at TGE, and that it changes
 only when tokens leave a locked address (not when the Founder sells). It then deploys a Public
 Launch claim distributor from the test list, funds it, claims one entry and sweeps the rest
-back after the window, checking circulating supply at each step. 58 negative cases in
+back after the window, checking circulating supply at each step. 59 negative cases in
 total, including a plan that still splits the Founder allocation, plans of the old
 `arl-deploy-plan/4` and `arl-deploy-plan/3` schemas and of the old
 `arl-deploy-plan/2` schema, a plan or config with `vesting.founder`, and a deployment record with a
@@ -239,7 +252,9 @@ key); nothing is sent to Base Sepolia.
    writes the config (code checks on, 12 + 36 months, 48-hour delay); `cli.ts` builds the plan.
 3. **Deploy and verify.** `DeployARL` with `ARL_PLAN` and `ARL_DEPLOYMENT`, then `VerifyARL`.
 4. **Manifest.** `manifest-cli.ts`, then `supply-cli.ts` (circulating supply at TGE is 2,100,000 ARL).
-5. **Deployment proof.** `bytecode-cli.ts verify` against the Base Sepolia RPC; publish its
+5. **Explorer source.** `npm run verify:explorer -- … --check-broadcast … --run` with
+   `ETHERSCAN_API_KEY` set in the environment (see Explorer source verification).
+6. **Deployment proof.** `bytecode-cli.ts verify` against the Base Sepolia RPC; publish its
    output with the addresses.
-6. **Monitoring.** Run `monitor-cli.ts` on a schedule from the deployment block (see Monitoring)
+7. **Monitoring.** Run `monitor-cli.ts` on a schedule from the deployment block (see Monitoring)
    and have the guardian's signers review every notice.
