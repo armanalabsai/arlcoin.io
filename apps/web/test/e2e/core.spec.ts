@@ -200,7 +200,7 @@ test("team layer: the founder and the team-growing note, unverified details with
   await core(page).click();
   await expect(page).toHaveURL(/\/core\/team$/);
   await expect(core(page)).toBeVisible();
-  await expect(page.locator("[data-ring-card]")).toHaveCount(2);
+  await expect(page.locator("[data-ring-card]")).toHaveCount(3);
   await expect(page.locator("img")).toHaveCount(0);
 
   await page.locator('[data-ring-card="alaz-daghan-gokturk"]').click();
@@ -212,4 +212,10 @@ test("team layer: the founder and the team-growing note, unverified details with
   await page.getByRole("button", { name: "Back to Team" }).click();
   await expect(page).toHaveURL(/\/core\/team$/);
   await expect(page.locator('[data-ring-card="alaz-daghan-gokturk"]')).toBeFocused();
+
+  await page.locator('[data-ring-card="open-roles"]').click();
+  await expect(page).toHaveURL(/\/core\/team\/open-roles$/);
+  await expect(surface(page).getByRole("heading", { name: "Open roles" })).toBeVisible();
+  await expect(surface(page)).toContainText("Security engineer");
+  await expect(surface(page)).toContainText("never asks applicants for a payment");
 });
