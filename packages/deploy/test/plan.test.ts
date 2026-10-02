@@ -362,16 +362,34 @@ describe("buildPlan: fails closed", () => {
       /cliffMonths: must be a non-negative integer/,
     );
     rejects(
-      config((c) => (c.vesting.investors.start = "2027-01-01")),
+      config((c) => (c.tge = "2027-01-01")),
       /YYYY-MM-DDTHH:MM:SSZ/,
     );
     rejects(
-      config((c) => (c.vesting.investors.start = "2027-02-30T00:00:00Z")),
+      config((c) => (c.tge = "2027-02-30T00:00:00Z")),
       /not a real calendar date/,
     );
     rejects(
-      config((c) => (c.vesting.strategicPartnerships.start = "2027-01-31T00:00:00Z")),
+      config((c) => (c.tge = "2027-01-31T00:00:00Z")),
       /day of month must be 1-28/,
+    );
+    rejects(
+      config((c) => delete (c as Partial<typeof c>).tge),
+      /tge/,
+    );
+  });
+
+  it("starts every vesting schedule at the TGE (VESTING_START = TGE_TIMESTAMP)", () => {
+    const plan = buildPlan(config((c) => (c.tge = "2027-03-15T12:00:00Z")));
+    assert.equal(plan.source.investors.start, "2027-03-15T12:00:00Z");
+    assert.equal(plan.source.strategicPartnerships.start, "2027-03-15T12:00:00Z");
+    assert.equal(plan.vesting.investors.cliffStart, plan.vesting.strategicPartnerships.cliffStart);
+    // A per-schedule start, as in older configs, is refused rather than silently ignored.
+    rejects(
+      config((c) => {
+        (c.vesting.investors as unknown as Record<string, unknown>).start = "2028-01-01T00:00:00Z";
+      }),
+      /vesting\.investors\.start: not allowed; every vesting schedule starts at tge/,
     );
   });
 });

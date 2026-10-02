@@ -64,7 +64,10 @@ export interface VestingSchedule {
   readonly cliffMonths: number;
   /** Calendar months of linear vesting after the cliff. */
   readonly linearMonths: number;
-  /** Whether the start date (TGE for investors and partnerships) is confirmed. */
+  /**
+   * Whether the start date is confirmed. Investors and partnerships start at the TGE
+   * (VESTING_START = TGE_TIMESTAMP, decided); this stays "tbd" until the TGE date is set.
+   */
   readonly start: "tbd" | "approved";
 }
 
@@ -137,7 +140,8 @@ function deepFreeze<T>(value: T): T {
 
 /**
  * Approved schedule (economic specification section 4.1): 0% at TGE, a
- * 12-month cliff, then 36 months linear. The start (TGE) is not confirmed.
+ * 12-month cliff, then 36 months linear, starting at the TGE (VESTING_START =
+ * TGE_TIMESTAMP). The TGE date is not confirmed.
  */
 const VESTING_12_36: Release = {
   kind: "vesting",

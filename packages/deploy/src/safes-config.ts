@@ -41,8 +41,9 @@ function fail(message: string): never {
 }
 
 /**
- * @param vestingStart Placeholder vesting start, `YYYY-MM-DDT00:00:00Z` with day 1-28. The real
- *   start is not confirmed; this value is accepted only on local Anvil and Base Sepolia.
+ * @param vestingStart Placeholder TGE, `YYYY-MM-DDT00:00:00Z` with day 1-28. Every vesting schedule
+ *   starts at the TGE (VESTING_START = TGE_TIMESTAMP). The real TGE date is not confirmed; this value
+ *   is accepted only on local Anvil and Base Sepolia.
  */
 export function configFromSafes(record: SafesRecord, vestingStart: string): DeployConfig {
   networkGate(record.chainId);
@@ -60,7 +61,6 @@ export function configFromSafes(record: SafesRecord, vestingStart: string): Depl
   const local = record.chainId === LOCAL_CHAIN_ID;
   const vesting = (beneficiary: string) => ({
     beneficiary,
-    start: vestingStart,
     cliffMonths: 12,
     vestingMonths: 36,
   });
@@ -68,7 +68,8 @@ export function configFromSafes(record: SafesRecord, vestingStart: string): Depl
     network: record.chainId === TESTNET_CHAIN_ID ? "base-sepolia" : "local",
     chainId: record.chainId,
     requireRecipientCode: true,
-    note: `Safes created by CreateSafes.s.sol. The vesting start ${vestingStart} is a placeholder: the real start is not confirmed.`,
+    note: `Safes created by CreateSafes.s.sol. The TGE ${vestingStart} is a placeholder: the real TGE date is not confirmed. Every vesting schedule starts at the TGE.`,
+    tge: vestingStart,
     vesting: {
       investors: vesting(s.investors),
       strategicPartnerships: vesting(s.strategicPartnerships),
