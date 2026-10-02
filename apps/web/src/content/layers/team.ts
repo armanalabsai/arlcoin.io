@@ -1,5 +1,6 @@
 import { ALLOCATIONS } from "../../../../../packages/tokenomics/src/index.ts";
 import { TEAM, type TeamProfile } from "../team/registry.ts";
+import { SITE } from "../site.ts";
 import type { Card, Fact, Layer, Section } from "../types.ts";
 
 // Maps the team registry to Core cards. This is where the publishing rule is
@@ -43,7 +44,11 @@ function profileCard(p: TeamProfile, index: number): Card {
       verificationStatus: p.verificationStatus,
       initials: p.initials,
     },
-    detail: { summary: `Focus: ${p.expertise.join(", ").toLowerCase()}.`, facts, sections },
+    detail: {
+      summary: p.expertise.length ? `Focus: ${p.expertise.join(", ").toLowerCase()}.` : p.role,
+      facts,
+      sections,
+    },
     ...(verified && p.links?.length ? { links: p.links } : {}),
   };
 }
@@ -67,9 +72,44 @@ const growingCard: Card = {
   },
 };
 
+export const OPEN_ROLES_ID = "open-roles";
+
+// Roles ARL wants to fill. A role is a need, not a person: no names, employers or credentials.
+export const OPEN_ROLES: readonly string[] = [
+  "Blockchain protocol engineer: consensus, execution, transaction processing",
+  "Security engineer: smart-contract security, threat modeling, incident response",
+  "Cryptography and privacy engineer: zero-knowledge proofs, applied cryptography",
+  "Distributed systems engineer: peer-to-peer networks, fault tolerance",
+  "GPU and compute infrastructure engineer: GPU scheduling, distributed inference",
+  "DeFi engineer: liquidity, settlement, financial smart contracts",
+  "Developer platform engineer: SDKs, APIs, documentation",
+  "Frontend engineer: design systems, wallet and Web3 interfaces",
+  "Product and platform architect: API design, developer experience",
+  "Site reliability engineer: observability, automation, operations",
+  "Quality engineer: automated testing, fuzzing, release validation",
+];
+
+const openRolesCard: Card = {
+  id: OPEN_ROLES_ID,
+  title: "Open roles",
+  shortDescription: "Engineering roles ARL is looking to fill",
+  weight: "secondary",
+  detail: {
+    summary:
+      "ARL is looking for engineers in the areas below. Whoever joins is listed on this page only after their identity, role and background have been verified and they have agreed to be published.",
+    sections: [
+      { heading: "Roles", items: OPEN_ROLES },
+      {
+        heading: "How to apply",
+        body: `Write to ${SITE.email} with the role, a short introduction and links to your work. ARL never asks applicants for a payment, a private key or a seed phrase.`,
+      },
+    ],
+  },
+};
+
 export const teamLayer: Layer = {
   id: "team",
   title: "Team",
   description: "The people building ARL. Only verified members are listed as the team grows.",
-  cards: [...TEAM.map(profileCard), growingCard],
+  cards: [...TEAM.map(profileCard), growingCard, openRolesCard],
 };

@@ -20,12 +20,12 @@ contracts/deploy/deployments/<chain>.json   deployed addresses (git-ignored)
 
 Values come from their single sources:
 
-| Value                          | Source                                                                                                                        |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| Allocation amounts, max supply | `packages/tokenomics` (planner) and `ARLAllocation.sol` (cross-checked)                                                       |
-| Vesting start (TBD)            | The deployment config; durations must be 12 + 36 months; a placeholder start is accepted on local Anvil and Base Sepolia only |
-| 48-hour timelock floor         | `packages/tokenomics` (planner); `ARLTimelock.MIN_DELAY_FLOOR` (constructor; a test pins the script's copy to it)             |
-| Addresses, chain ID            | The deployment config                                                                                                         |
+| Value                          | Source                                                                                                                                                                   |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Allocation amounts, max supply | `packages/tokenomics` (planner) and `ARLAllocation.sol` (cross-checked)                                                                                                  |
+| TGE date (TBD)                 | The deployment config (`tge`); every vesting schedule starts at it; durations must be 12 + 36 months; a placeholder TGE is accepted on local Anvil and Base Sepolia only |
+| 48-hour timelock floor         | `packages/tokenomics` (planner); `ARLTimelock.MIN_DELAY_FLOOR` (constructor; a test pins the script's copy to it)                                                        |
+| Addresses, chain ID            | The deployment config                                                                                                                                                    |
 
 ## Configuration
 
@@ -33,16 +33,17 @@ Values come from their single sources:
 `keccak256("arl.local.<name>")` placeholders: nobody holds their keys and they are valid only on
 a local Anvil chain.
 
-| Field                                        | Rule                                                                                                                                                                                                                     |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `chainId`                                    | Required; must equal the chain the script runs on                                                                                                                                                                        |
-| `requireRecipientCode`                       | Must be `true` on every chain except local Anvil (31337); then every Safe must be a genuine Safe v1.5.0 proxy (see below)                                                                                                |
-| `safe.singletons`                            | Local Anvil only: the Safe singletons a rehearsal deployed. Every other chain uses the canonical Safe v1.5.0 singletons from `@safe-global/safe-deployments` and cannot override them                                    |
-| `vesting.<investors, strategicPartnerships>` | `beneficiary` (dedicated Safe), `start` (`YYYY-MM-DDTHH:MM:SSZ`, UTC, day 1-28), `cliffMonths` (must be 12), `vestingMonths` (must be 36). The start is TBD: accepted only on local Anvil. `vesting.founder` is rejected |
-| `treasury.safe`                              | Non-zero; becomes the timelock's only proposer and executor, and a canceller                                                                                                                                             |
-| `treasury.guardian`                          | Non-zero and different from `treasury.safe`; a separate Safe that receives only the canceller role                                                                                                                       |
-| `treasury.minDelayHours`                     | Integer, at least 48                                                                                                                                                                                                     |
-| `recipients.*`                               | Exactly eight dedicated Safes: publicLaunch, communityStaking, ecosystemGrowth, liquidity, `founder` (receives the whole 2,100,000 ARL Founder allocation, unlocked), team (pool), earlyUsers, grantsBugBounty           |
+| Field                                        | Rule                                                                                                                                                                                                                              |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `chainId`                                    | Required; must equal the chain the script runs on                                                                                                                                                                                 |
+| `requireRecipientCode`                       | Must be `true` on every chain except local Anvil (31337); then every Safe must be a genuine Safe v1.5.0 proxy (see below)                                                                                                         |
+| `safe.singletons`                            | Local Anvil only: the Safe singletons a rehearsal deployed. Every other chain uses the canonical Safe v1.5.0 singletons from `@safe-global/safe-deployments` and cannot override them                                             |
+| `tge`                                        | The TGE, `YYYY-MM-DDTHH:MM:SSZ` (UTC, day 1-28). Every vesting schedule starts here (`VESTING_START = TGE_TIMESTAMP`). The date is TBD: a placeholder is accepted only on local Anvil and Base Sepolia                            |
+| `vesting.<investors, strategicPartnerships>` | `beneficiary` (dedicated Safe), `cliffMonths` (must be 12), `vestingMonths` (must be 36). A per-schedule `start` is rejected; `ARLDeployPlan` also refuses schedules that do not share their start. `vesting.founder` is rejected |
+| `treasury.safe`                              | Non-zero; becomes the timelock's only proposer and executor, and a canceller                                                                                                                                                      |
+| `treasury.guardian`                          | Non-zero and different from `treasury.safe`; a separate Safe that receives only the canceller role                                                                                                                                |
+| `treasury.minDelayHours`                     | Integer, at least 48                                                                                                                                                                                                              |
+| `recipients.*`                               | Exactly eight dedicated Safes: publicLaunch, communityStaking, ecosystemGrowth, liquidity, `founder` (receives the whole 2,100,000 ARL Founder allocation, unlocked), team (pool), earlyUsers, grantsBugBounty                    |
 
 ## Fail-closed checks
 
@@ -55,7 +56,8 @@ broadcast) each reject:
 - a zero address anywhere, and any address used for two roles (every Safe is dedicated);
 - a treasury guardian equal to the treasury Safe;
 - invalid schedule ordering or a zero start;
-- any chain other than local Anvil while the vesting start is TBD;
+- any chain other than local Anvil and Base Sepolia while the TGE date is TBD;
+- vesting schedules that do not start at the same TGE;
 - a vesting schedule whose cliff is not 12 calendar months or whose linear period is not 36
   calendar months;
 - a timelock delay below 48 hours;
@@ -168,12 +170,12 @@ deployments must leave the deployer nonce unchanged. CI runs the rehearsal on ev
 Approved network decision: **Base Sepolia (84532) is the only deployable public network. Base
 Mainnet (8453) is hard-locked.**
 
-| Chain                | Gate       | Notes                                                                                                                   |
-| -------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------- |
-| Local Anvil (31337)  | open       | Rehearsals; recipients may lack code                                                                                    |
-| Base Sepolia (84532) | open       | `requireRecipientCode: true`; every Safe role must be a canonical Safe v1.5.0 proxy; placeholder vesting start accepted |
-| Base Mainnet (8453)  | **locked** | Always refused (`PlanProductionLocked`)                                                                                 |
-| Any other chain      | refused    | `PlanChainNotSupported`                                                                                                 |
+| Chain                | Gate       | Notes                                                                                                         |
+| -------------------- | ---------- | ------------------------------------------------------------------------------------------------------------- |
+| Local Anvil (31337)  | open       | Rehearsals; recipients may lack code                                                                          |
+| Base Sepolia (84532) | open       | `requireRecipientCode: true`; every Safe role must be a canonical Safe v1.5.0 proxy; placeholder TGE accepted |
+| Base Mainnet (8453)  | **locked** | Always refused (`PlanProductionLocked`)                                                                       |
+| Any other chain      | refused    | `PlanChainNotSupported`                                                                                       |
 
 One gate, `ARLDeployPlan.networkGate`, is checked by `DeployARL` and `DeployDistributor` before they
 read any input, by `ARLDeployPlan.validate`, and by `ARLDeployer.deploy` itself, so a script that

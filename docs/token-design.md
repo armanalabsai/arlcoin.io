@@ -87,9 +87,10 @@ approved schedule is 0% at TGE, a 12-month cliff, then 36 months linear, in
 calendar months. The Founder allocation does not vest (see below). The
 deployment configuration supplies explicit UTC timestamps; the planner and
 `ARLDeployPlan` reject any schedule with other durations, checking calendar
-months with `DateTime.addMonths` from solidity-datetime (MIT). The vesting start
-(TGE) is not confirmed (`VESTING_SCHEDULES_APPROVED = false`); local Anvil and
-Base Sepolia may use a placeholder start, and Base Mainnet is hard-locked by the
+months with `DateTime.addMonths` from solidity-datetime (MIT). Every schedule
+starts at the TGE (`VESTING_START = TGE_TIMESTAMP`); the TGE date is not confirmed
+(`VESTING_SCHEDULES_APPROVED = false`); local Anvil and Base Sepolia may use a
+placeholder TGE, and Base Mainnet is hard-locked by the
 network gate (see [`deployment.md`](deployment.md#network-gate)). The verifier asserts that each
 deployed wallet matches its planned beneficiary and timestamps, and that the
 planned schedule has the approved durations.

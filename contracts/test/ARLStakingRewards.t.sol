@@ -32,6 +32,40 @@ contract ARLStakingRewardsTest is ARLTestBase {
         staking.notifyRewardAmount(amount);
     }
 
+    // ---------------------------------------------------------------- views
+
+    /// @dev The public views agree with the period's state: before funding, during the period
+    /// and after it ends.
+    function test_ViewsFollowThePeriod() public {
+        // Nothing funded: no rate, no reward per token, the applicable time is the (zero) finish.
+        assertEq(staking.getRewardForDuration(), 0);
+        assertEq(staking.rewardPerToken(), 0);
+        assertEq(staking.lastTimeRewardApplicable(), 0);
+
+        _fund(REWARD);
+        uint256 rate = staking.rewardRate();
+        // The period pays out what was funded, up to the rounding of the rate.
+        assertEq(staking.getRewardForDuration(), rate * DURATION);
+        assertLe(REWARD - staking.getRewardForDuration(), DURATION);
+        // Nobody staked yet: the reward per token stays put.
+        assertEq(staking.rewardPerToken(), 0);
+        assertEq(staking.lastTimeRewardApplicable(), block.timestamp);
+
+        vm.prank(alice);
+        staking.stake(1_000 ether);
+        vm.warp(block.timestamp + 1 days);
+        assertEq(staking.lastTimeRewardApplicable(), block.timestamp);
+        assertEq(staking.rewardPerToken(), (1 days * rate * 1e18) / 1_000 ether);
+
+        // After the period ends, time stops at periodFinish and the reward per token is frozen.
+        vm.warp(staking.periodFinish() + 10 days);
+        assertEq(staking.lastTimeRewardApplicable(), staking.periodFinish());
+        uint256 frozen = staking.rewardPerToken();
+        vm.warp(block.timestamp + 10 days);
+        assertEq(staking.rewardPerToken(), frozen);
+        assertEq(staking.earned(alice), (1_000 ether * frozen) / 1e18);
+    }
+
     // ---------------------------------------------------------------- construction
 
     function test_RevertWhen_ZeroAddressOrDuration() public {

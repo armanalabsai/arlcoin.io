@@ -734,20 +734,42 @@ contract ARLDeployTest is Test {
         cliffStart = uint64(bound(cliffStart, 0, 200_000_000_000));
         Plan memory p = _plan();
         p.investors = VestingPlan(p.investors.beneficiary, cliffStart, cliffEnd, vestingEnd);
+        // Every schedule starts at the one TGE, so only the other schedule's start is valid.
         bool valid = cliffStart != 0 && cliffEnd >= cliffStart && vestingEnd > cliffEnd
             && cliffEnd == DateTime.addMonths(cliffStart, 12)
-            && vestingEnd == DateTime.addMonths(cliffEnd, 36);
+            && vestingEnd == DateTime.addMonths(cliffEnd, 36)
+            && cliffStart == p.strategicPartnerships.cliffStart;
         if (!valid) vm.expectRevert();
         h.validate(p);
     }
 
-    /// @dev Any start date with the approved durations is accepted (the start itself is TBD).
-    function testFuzz_ApprovedDurationsAcceptedForAnyStart(uint64 start) public {
-        start = uint64(bound(start, 1, 4_102_444_800)); // up to 2100-01-01
+    /// @dev Any TGE with the approved durations is accepted (the TGE date itself is TBD), as long
+    /// as every schedule starts at it.
+    function testFuzz_ApprovedDurationsAcceptedForAnyTge(uint64 tge) public {
+        tge = uint64(bound(tge, 1, 4_102_444_800)); // up to 2100-01-01
         Plan memory p = _plan();
-        uint64 cliffEnd = uint64(DateTime.addMonths(start, 12));
+        uint64 cliffEnd = uint64(DateTime.addMonths(tge, 12));
         uint64 vestingEnd = uint64(DateTime.addMonths(cliffEnd, 36));
-        p.investors = VestingPlan(p.investors.beneficiary, start, cliffEnd, vestingEnd);
+        p.investors = VestingPlan(p.investors.beneficiary, tge, cliffEnd, vestingEnd);
+        p.strategicPartnerships =
+            VestingPlan(p.strategicPartnerships.beneficiary, tge, cliffEnd, vestingEnd);
+        h.validate(p);
+    }
+
+    /// @dev VESTING_START = TGE_TIMESTAMP: schedules with valid durations but different starts are
+    /// refused, whichever one differs and by however little.
+    function testFuzz_RevertWhen_VestingStartsDiffer(uint64 shift) public {
+        shift = uint64(bound(shift, 1, 365 days));
+        Plan memory p = _plan();
+        uint64 start = p.investors.cliffStart + shift;
+        uint64 cliffEnd = uint64(DateTime.addMonths(start, 12));
+        p.strategicPartnerships = VestingPlan(
+            p.strategicPartnerships.beneficiary,
+            start,
+            cliffEnd,
+            uint64(DateTime.addMonths(cliffEnd, 36))
+        );
+        _expectSchedule("vesting schedules do not start at the same TGE");
         h.validate(p);
     }
 
