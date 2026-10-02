@@ -31,18 +31,19 @@ tooling only).
 
 ### Deployment tooling (runs off-chain, decides what is deployed)
 
-| File                                       | nSLOC | Purpose                                                                                              |
-| ------------------------------------------ | ----: | ---------------------------------------------------------------------------------------------------- |
-| `contracts/script/ARLDeployPlan.sol`       |   330 | Loads and validates a deployment plan; network gate; Safe v1.5.0 proxy and singleton checks          |
-| `contracts/script/ARLDeployer.sol`         |    41 | Deploys the system from a validated plan                                                             |
-| `contracts/script/ARLVerify.sol`           |   167 | Post-deployment verification of every holder, balance, schedule and role                             |
-| `contracts/script/DeployARL.s.sol`         |    36 | Entry point: gate, validate, deploy, verify                                                          |
-| `contracts/script/VerifyARL.s.sol`         |    34 | Read-only re-verification                                                                            |
-| `contracts/script/DeployDistributor.s.sol` |    74 | Deploys a Public Launch distributor from a checked claim list                                        |
-| `contracts/script/CreateSafes.s.sol`       |   208 | Creates the 12 role Safes with the canonical Safe v1.5.0 contracts                                   |
-| `contracts/script/ARLStakingVerify.sol`    |    38 | Staking verification: ARL as staking and reward token; distributor is the Community & Staking holder |
-| `contracts/script/VerifyStaking.s.sol`     |    22 | Read-only entry point for the staking verification                                                   |
-| `packages/deploy/src/*.ts`                 |     — | Planner, claim-list builder, config builder, deployment manifest and circulating-supply reader       |
+| File                                       | nSLOC | Purpose                                                                                                                                                                            |
+| ------------------------------------------ | ----: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `contracts/script/ARLDeployPlan.sol`       |   330 | Loads and validates a deployment plan; network gate; Safe v1.5.0 proxy and singleton checks                                                                                        |
+| `contracts/script/ARLDeployer.sol`         |    41 | Deploys the system from a validated plan                                                                                                                                           |
+| `contracts/script/ARLVerify.sol`           |   167 | Post-deployment verification of every holder, balance, schedule and role                                                                                                           |
+| `contracts/script/DeployARL.s.sol`         |    36 | Entry point: gate, validate, deploy, verify                                                                                                                                        |
+| `contracts/script/VerifyARL.s.sol`         |    34 | Read-only re-verification                                                                                                                                                          |
+| `contracts/script/DeployDistributor.s.sol` |    74 | Deploys a Public Launch distributor from a checked claim list                                                                                                                      |
+| `contracts/script/CreateSafes.s.sol`       |   208 | Creates the 12 role Safes with the canonical Safe v1.5.0 contracts                                                                                                                 |
+| `contracts/script/ARLStakingVerify.sol`    |    38 | Staking verification: ARL as staking and reward token; distributor is the Community & Staking holder                                                                               |
+| `contracts/script/VerifyStaking.s.sol`     |    22 | Read-only entry point for the staking verification                                                                                                                                 |
+| `packages/deploy/src/*.ts`                 |     — | Planner, claim-list builder, config builder, deployment manifest and circulating-supply reader                                                                                     |
+| `apps/dapp/lib/deploySteps.ts`             |     — | Deploy screen: checks a prepared dry run (ARL build code, canonical Safe factory and singletons, one sender, consecutive nonces, no ETH) before the owner signs it in their wallet |
 
 ## Intended properties
 
@@ -62,6 +63,9 @@ tooling only).
    rewards. `rewardsFunded = accrued + reserved + unallocated + rewardsReturned` at all times;
    only `unallocated` (never the reserve of an active period) can be returned, and only between
    periods. The distributor is the Community & Staking holder, checked by the verifier.
+8. The Deploy screen offers for signing only transactions that create the ARL build's own
+   contracts or a Safe through the canonical Safe v1.5.0 factory, from the one prepared sender,
+   in nonce order, sending no ETH; it never handles a key.
 
 ## Existing verification
 
@@ -137,6 +141,7 @@ finish within 120 s. The same property is covered by fuzz tests and the
 - The website (`apps/web`) and documentation.
 - Contracts not planned for the first deployment, reviewed separately later: `ARLJobs`
   (ERC-8183 job escrow, [jobs.md](jobs.md)) and `ARLAnonymousSignal` ([zk-privacy.md](zk-privacy.md)).
+- Third-party launchpad sale and vesting contracts, if a launchpad sale is used.
 - Economic parameters that are not yet decided: the TGE date (every vesting schedule starts at it), launch amount, claim window,
   per-address limits, liquidity parameters.
 
