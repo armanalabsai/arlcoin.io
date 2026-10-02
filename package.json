@@ -20,6 +20,7 @@
     "gas:snapshot": "cd contracts && forge snapshot --no-match-test \"testFuzz|invariant\" --no-match-path \"test/symbolic/*\"",
     "check:bytecode": "node packages/deploy/src/bytecode-cli.ts check contracts contracts/deploy/bytecode.json",
     "monitor": "node packages/deploy/src/monitor-cli.ts",
+    "verify:explorer": "node packages/deploy/src/explorer-cli.ts",
     "rehearse:local": "bash scripts/rehearse-local.sh",
     "rehearse:base-sepolia-fork": "bash scripts/rehearse-base-sepolia-fork.sh"
   },

@@ -79,6 +79,12 @@ forge_deploy "$PLAN" "$DEPLOYMENT" || die "deployment failed"
 
 log "Running the post-deployment verifier"
 forge_verify "$PLAN" "$DEPLOYMENT" || die "verifier rejected the deployment"
+# Explorer source verification: the constructor arguments are rebuilt from the plan and the
+# record, and must equal the ones in this deployment's broadcast. Copied now; later runs replace it.
+cp broadcast/DeployARL.s.sol/31337/run-latest.json "$REHEARSAL/deploy-broadcast.json"
+node "$ROOT/packages/deploy/src/explorer-cli.ts" "$PLAN" "$DEPLOYMENT" \
+  --check-broadcast "$REHEARSAL/deploy-broadcast.json" >/dev/null \
+  || die "explorer constructor arguments differ from the broadcast"
 
 log "Independent checks with cast"
 addr() { node -e "console.log(require('./$DEPLOYMENT').$1)"; }
@@ -459,6 +465,15 @@ refused() {
 }
 refused "a record with token and timelock swapped" "$PLAN" "$REHEARSAL/swapped.json"
 refused "a plan with another cliff start" "$REHEARSAL/other-cliff.json" "$DEPLOYMENT"
+
+log "Explorer verification refuses arguments that differ from the broadcast"
+set +e
+node "$ROOT/packages/deploy/src/explorer-cli.ts" "$REHEARSAL/other-cliff.json" "$DEPLOYMENT" \
+  --check-broadcast "$REHEARSAL/deploy-broadcast.json" >/dev/null 2>&1
+CODE=$?
+set -e
+expect "explorer check with another cliff start" "3" "$CODE"
+NEGATIVE=$((NEGATIVE + 1))
 
 log "Monitor: read-only health check of the live deployment"
 monitor() { node "$ROOT/packages/deploy/src/monitor-cli.ts" "$1" "$DEPLOYMENT" "$RPC" 0; }
