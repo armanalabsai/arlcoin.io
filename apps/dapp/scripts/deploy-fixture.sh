@@ -29,7 +29,9 @@ node "$APP/scripts/seed-network.ts" "$RPC"
 
 if [[ "${1:-}" == "--check" ]]; then
   node "$APP/scripts/generate-contracts.ts" --check
+  node "$APP/scripts/generate-deploy-artifacts.ts" --check
 else
   node "$APP/scripts/generate-contracts.ts"
-  (cd "$APP/../.." && npx prettier --write apps/dapp/contracts/deployedContracts.ts >/dev/null)
+  node "$APP/scripts/generate-deploy-artifacts.ts"
+  (cd "$APP/../.." && npx prettier --write apps/dapp/contracts/deployedContracts.ts apps/dapp/lib/deployArtifacts.ts >/dev/null)
 fi
