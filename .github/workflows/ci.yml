@@ -134,6 +134,11 @@ jobs:
 
       - run: npm ci
 
+      # Reproducible build: a clean build must match the committed bytecode hashes.
+      - run: forge build --skip test --skip script
+        working-directory: contracts
+      - run: npm run check:bytecode
+
       # Local Anvil chain only: deploys, verifies and runs the negative cases.
       - run: npm run rehearse:local
 

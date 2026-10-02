@@ -70,7 +70,7 @@ tooling only).
 | Unit and fuzz tests  | Foundry, 10,000 fuzz runs per test                                                                | 246 tests pass (18 more in the zk profile)      |
 | Coverage             | `npm run coverage:contracts` (forge coverage, `src/`)                                             | 100% of lines and functions; see below          |
 | Invariant tests      | Supply, allocations, vesting, timelock roles, distributor funds (256 runs × depth 128)            | pass                                            |
-| Deployment rehearsal | Real Safe v1.5.0 on Anvil; 56 negative cases; Base Sepolia fork with the canonical Safe contracts | pass                                            |
+| Deployment rehearsal | Real Safe v1.5.0 on Anvil; 58 negative cases; Base Sepolia fork with the canonical Safe contracts | pass                                            |
 | Slither 0.11.6       | `src/` and `script/`, 102 detectors, CI fails on Low or higher                                    | 0 findings                                      |
 | Aderyn 0.6.8         | `src/`                                                                                            | 3 reported; triage below                        |
 | Halmos 0.3.3         | Symbolic checks in `contracts/test/symbolic/ARLSymbolic.t.sol`, run in CI                         | 10 of 11 proven; 1 solver timeout               |

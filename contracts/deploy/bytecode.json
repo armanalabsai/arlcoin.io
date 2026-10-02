@@ -1,0 +1,41 @@
+{
+  "schema": "arl-bytecode-manifest/1",
+  "compiler": {
+    "solc": "0.8.36",
+    "evmVersion": "cancun",
+    "optimizerRuns": 200,
+    "viaIR": false
+  },
+  "contracts": {
+    "ARLToken": {
+      "creationHash": "0xe45878e1c9fca3c5b5450898e5ebf53ee2574d19c80c0011ac8acbabd6fcb0b1",
+      "runtimeHash": "0xc9691c5eb919296743823c6ec63b0ed5c78bc518f08910b078ef733a1041943e",
+      "runtimeSize": 3775
+    },
+    "ARLVestingWallet": {
+      "creationHash": "0xec33acfaaeb7a7eeec179484b0b7e26f649feca2ebe45ad2d7e56e53c809b1ca",
+      "runtimeHash": "0xc3537e8e99f1a3c23cdd7c0672cf0198022538bd3fff28a5c703d7dbdb87eaf0",
+      "runtimeSize": 2256
+    },
+    "ARLTimelock": {
+      "creationHash": "0x7ebd1071cb25c96daf20bbcf5c524c0946d38d49511ff775081d86f5e0f81356",
+      "runtimeHash": "0x539dbbb27227002eeec039605f82c2d008c086c97f73805e02771dc240823905",
+      "runtimeSize": 6599
+    },
+    "ARLMerkleDistributor": {
+      "creationHash": "0x7142d02789a5a79cd8436f5ffd85dfb28688bfdb927ee94256ba98a3603e3a81",
+      "runtimeHash": "0xeb15086448445ff9e6f5ed9ef4e10058ba7aca5fd73db436ab746cc203161408",
+      "runtimeSize": 1853
+    },
+    "ARLStakingRewards": {
+      "creationHash": "0xe094f364c673f2ba707750bfd66c1b89c5a9d9be2f56b16013e6784e31454ca5",
+      "runtimeHash": "0x6c9a7be1fa5d87c8f58e2c7f8c689874969629bb6925220a7001755a12b75c1f",
+      "runtimeSize": 4276
+    },
+    "ARLJobs": {
+      "creationHash": "0xdb31fe27bf1443a256da4e52fa9fa243ce9e86d7f43863e7ef014449e17df327",
+      "runtimeHash": "0x38ed405a3a6802286f84f37059d5ca307f91a45aeeab5bd4fee3dea3a7261d31",
+      "runtimeSize": 4952
+    }
+  }
+}
