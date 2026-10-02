@@ -444,6 +444,34 @@ expect "remainder returned to the Public Launch Safe" \
 expect "circulating after sweep" "$(node -e "console.log((2100000000000000000000001n + ${CLAIMED}n).toString())")" \
   "$(supply circulatingSupply)"
 
+log "Monitor: read-only health check of the live deployment"
+monitor() { node "$ROOT/packages/deploy/src/monitor-cli.ts" "$1" "$DEPLOYMENT" "$RPC" 0; }
+report() { monitor "$PLAN" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>console.log(JSON.parse(s).$1))"; }
+# Tokens have moved (founder sale, claims), which the genesis verifier would refuse; the monitor
+# checks the rules that hold for the life of the deployment.
+monitor "$PLAN" >/dev/null || die "monitor reported a healthy deployment as unhealthy"
+expect "monitor findings on a healthy deployment" "" "$(report "findings.map(f=>f.check+': '+f.detail).join('; ')")"
+TREASURY_SAFE="$(planval treasury.safe)"
+DELAY="$(planval treasury.minDelay)"
+impersonate "$TREASURY_SAFE"
+cast send "$TIMELOCK" 'schedule(address,uint256,bytes,bytes32,bytes32,uint256)' "$TOKEN" 0 \
+  "$(cast calldata 'transfer(address,uint256)' "$BEEF" 1)" "$(cast to-uint256 0)" "$(cast to-uint256 0)" \
+  "$DELAY" --unlocked --from "$TREASURY_SAFE" --rpc-url "$RPC" >/dev/null || die "schedule failed"
+expect "monitor sees the scheduled treasury transfer" "timelock operation waiting" "$(report 'findings[0].check')"
+expect "a pending operation is a notice, not a failure" "true" "$(report healthy)"
+cast rpc evm_increaseTime "$DELAY" --rpc-url "$RPC" >/dev/null
+cast rpc evm_mine --rpc-url "$RPC" >/dev/null
+expect "monitor sees the operation ready after 48 hours" "timelock operation ready to execute" \
+  "$(report 'findings[0].check')"
+# A plan that disagrees with the chain (another guardian) is a critical finding: exit code 3.
+mutate "$REHEARSAL/other-guardian.json" "p.treasury.guardian = '$BEEF'"
+set +e
+monitor "$REHEARSAL/other-guardian.json" >/dev/null
+CODE=$?
+set -e
+expect "monitor exit code on a critical finding" "3" "$CODE"
+NEGATIVE=$((NEGATIVE + 1))
+
 log "Network gate on separate chains: Base Mainnet (8453) locked, Base Sepolia (84532) open"
 # Each chain is a fresh local Anvil with that chain ID; nothing touches a real network.
 gate_chain() {
