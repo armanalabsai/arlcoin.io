@@ -10,9 +10,11 @@
   "dependencies": {
     "@arl/payments": "0.1.0",
     "@x402/core": "2.27.0",
+    "@x402/evm": "2.27.0",
     "viem": "2.56.9"
   },
   "scripts": {
-    "test": "node --test \"test/**/*.test.ts\""
+    "test": "node --test \"test/**/*.test.ts\"",
+    "test:fork": "node --test \"test-fork/**/*.test.ts\""
   }
 }

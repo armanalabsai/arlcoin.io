@@ -61,6 +61,18 @@ const provider = new ComputeProvider({
 createProviderServer(provider).listen(8080); // behind a TLS-terminating proxy
 ```
 
+## Tests
+
+- `npm test -w @arl/provider` runs the unit tests: real processes, and ARL's facilitator wrapper
+  with a stand-in for the SDK scheme.
+- `ARL_FORK_RPC=<Base Sepolia RPC> npm run test:fork -w @arl/provider` runs end to end on a local
+  Anvil fork of Base Sepolia, with the real x402 SDK client and facilitator and the real Permit2
+  and upto proxy. It needs `forge build` and `anvil`. Every transaction stays in the fork. It
+  shows that:
+  - a job is billed for the seconds it used, and the payment moves on-chain;
+  - a job is killed at the paid time and settled at the ceiling;
+  - a replayed payment is refused before it runs.
+
 ## Limits
 
 - One authorization pays for one run. The payments policy accepts authorizations that live at
