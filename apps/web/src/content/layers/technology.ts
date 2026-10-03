@@ -31,12 +31,13 @@ export const technology: Layer = {
             items: [
               "Payment integration on the open x402 protocol (upto scheme, Permit2), tested against the deployed contracts on a Base Sepolia fork. Not running on any network",
               "Settlement rules: one settlement per authorization, never above the signed ceiling, Base Sepolia only",
+              "Facilitator service on the standard x402 facilitator API, with its settlement record kept on disk. Tested on a Base Sepolia fork, not running anywhere",
             ],
           },
           {
             heading: "Not yet built",
             items: [
-              "No live payment service or facilitator exists",
+              "No facilitator is running: running one needs an operator with a funded settlement account",
               "No agreement with any AI provider exists; third-party models would be used as a regular customer through their public APIs",
             ],
           },

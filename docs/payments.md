@@ -61,6 +61,37 @@ Added by `@arl/payments` (`packages/payments`):
   seconds ahead, or already expired, are refused.
 - **Failures are not retried** with the same authorization; the payer signs a new one.
 
+## Facilitator service
+
+`createFacilitatorServer` (`src/service.ts`) serves the facilitator over the x402 facilitator API.
+That is the API the SDK's `HTTPFacilitatorClient` calls, so any x402 resource server can use
+it, including `@arl/provider`:
+
+| Endpoint         | Does                                                                              |
+| ---------------- | --------------------------------------------------------------------------------- |
+| `GET /supported` | The one kind ARL settles (x402 v2, `upto`, Base Sepolia) and the settling address |
+| `POST /verify`   | `{ x402Version, paymentPayload, paymentRequirements }` → `VerifyResponse`         |
+| `POST /settle`   | The same body → `SettleResponse`                                                  |
+
+- Every request goes through `ArlUptoFacilitator`.
+- Bodies are shape-checked with the SDK's own schemas.
+- Settling spends the facilitator's gas, so `/verify` and `/settle` can require a bearer token
+  that only the operator's resource servers hold. The token is compared in constant time.
+- Error details are not echoed to the caller.
+
+`FileAuthorizationStore` (`src/store.ts`) keeps the settlement record on disk:
+
+- It appends every state change to a file and flushes it to disk before acknowledging.
+- It replays the file at start, so a restarted facilitator never settles an authorization twice.
+- A settlement that was in progress when the process stopped stays recorded as `settling` and is
+  never sent again.
+- A last record cut short by a crash is dropped (it was never acknowledged). A damaged record
+  anywhere else stops the start-up.
+- It is for one process; several instances need a shared store with compare-and-set.
+
+The service is tested, but no instance runs, and the settlement account is the operator's (see
+below).
+
 ## Known limitations
 
 - **Facilitator trust.** The facilitator chooses the settled amount (up to the ceiling). Payers
@@ -68,19 +99,20 @@ Added by `@arl/payments` (`packages/payments`):
 - **Residual allowance.** An EIP-2612 permit approves Permit2 for the whole ceiling; after a
   partial settlement the rest stays approved to Permit2 (usable only with a new valid Permit2
   signature from the payer).
-- **Shared store.** `InMemoryAuthorizationStore` is for tests and single-process use. Several
-  facilitator instances must share a durable store with compare-and-set semantics.
+- **Shared store.** `InMemoryAuthorizationStore` is for tests. `FileAuthorizationStore` survives
+  restarts of one process. Several facilitator instances must share a durable store with
+  compare-and-set semantics, for example a database row with a unique key.
 - **Facilitator key and gas.** Running a facilitator needs a signing key with ETH for gas on Base
   Sepolia. Not created; an owner decision.
 - ARL is not deployed; `arlToken` must come from the deployment manifest.
 
 ## Tests
 
-| Suite               | Command                                                                                                | Covers                                                                                                                                                                                                                         |
-| ------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Unit                | `npm test -w @arl/payments`                                                                            | network gate, pinned-code check, requirements, metering, settlement policy, facilitator wrapper (with a stand-in SDK scheme)                                                                                                   |
-| Contract fork       | `FOUNDRY_PROFILE=fork ARL_FORK_RPC=<Base Sepolia RPC> forge test` in `contracts/`                      | the 15 agreed cases against the real Permit2 and proxy, fuzzing both sides of the ceiling, EIP-2612 → Permit2 (gasless, front-run, value mismatch), pinned code                                                                |
-| SDK end-to-end fork | `ARL_FORK_RPC=<Base Sepolia RPC> npm run test:fork -w @arl/payments` (needs `forge build` and `anvil`) | real `@x402/evm` client and facilitator through `ArlUptoFacilitator` on a local Anvil fork: verify, metered settlement, replay refusal, ceiling, zero retirement, tampered payee                                               |
-| Provider fork       | `ARL_FORK_RPC=<Base Sepolia RPC> npm run test:fork -w @arl/provider` (needs `forge build` and `anvil`) | the reference compute provider over HTTP, paid by the real SDK client: a job billed for seconds used and settled on-chain, a job killed at the paid time and settled at the ceiling, a replayed payment refused before it runs |
+| Suite               | Command                                                                                                | Covers                                                                                                                                                                                                                                                                                                |
+| ------------------- | ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit                | `npm test -w @arl/payments`                                                                            | network gate, pinned-code check, requirements, metering, settlement policy, facilitator wrapper (with a stand-in SDK scheme), file store across restarts and crashes, the HTTP service through the SDK's `HTTPFacilitatorClient` (bearer token, malformed bodies)                                     |
+| Contract fork       | `FOUNDRY_PROFILE=fork ARL_FORK_RPC=<Base Sepolia RPC> forge test` in `contracts/`                      | the 15 agreed cases against the real Permit2 and proxy, fuzzing both sides of the ceiling, EIP-2612 → Permit2 (gasless, front-run, value mismatch), pinned code                                                                                                                                       |
+| SDK end-to-end fork | `ARL_FORK_RPC=<Base Sepolia RPC> npm run test:fork -w @arl/payments` (needs `forge build` and `anvil`) | real `@x402/evm` client and facilitator through `ArlUptoFacilitator` on a local Anvil fork: verify, metered settlement, replay refusal, ceiling, zero retirement, tampered payee                                                                                                                      |
+| Provider fork       | `ARL_FORK_RPC=<Base Sepolia RPC> npm run test:fork -w @arl/provider` (needs `forge build` and `anvil`) | the reference compute provider over HTTP, paid by the real SDK client and settled through the facilitator service (bearer token, file store): a job billed for seconds used and settled on-chain, a job killed at the paid time and settled at the ceiling, a replayed payment refused before it runs |
 
 Fork tests read chain state only; every transaction stays in the local fork.

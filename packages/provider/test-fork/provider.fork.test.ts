@@ -1,6 +1,7 @@
-// End-to-end: the reference compute provider over HTTP, paid by the real x402 SDK client and
-// settled by the real SDK facilitator through ARL's wrapper, on a local Anvil fork of Base Sepolia
-// with the real Permit2 and x402UptoPermit2Proxy.
+// End-to-end: the reference compute provider over HTTP, paid by the real x402 SDK client, and
+// settled through ARL's facilitator service (HTTP, bearer token, records on disk) running the real
+// SDK facilitator, on a local Anvil fork of Base Sepolia with the real Permit2 and
+// x402UptoPermit2Proxy.
 //
 // Nothing leaves the machine: Anvil forks read state from the RPC and every transaction stays
 // local. Accounts are Anvil's publicly known development accounts, which only have funds on the
@@ -11,17 +12,21 @@
 
 import assert from "node:assert/strict";
 import { spawn, type ChildProcess } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync } from "node:fs";
 import type { AddressInfo } from "node:net";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { after, before, describe, it } from "node:test";
 
 import {
   ArlUptoFacilitator,
   BASE_SEPOLIA,
-  InMemoryAuthorizationStore,
+  FileAuthorizationStore,
   assertPinnedCode,
+  createFacilitatorServer,
 } from "@arl/payments";
 import {
+  HTTPFacilitatorClient,
   decodePaymentRequiredHeader,
   decodePaymentResponseHeader,
   encodePaymentSignatureHeader,
@@ -84,7 +89,8 @@ async function waitForAnvil(): Promise<void> {
   throw new Error("anvil did not start");
 }
 
-function facilitator() {
+/** ARL's facilitator as a service; returns the SDK client a resource server uses to reach it. */
+async function startFacilitator(token: string) {
   const wallet = createWalletClient({
     account: facilitatorAccount,
     chain,
@@ -97,12 +103,26 @@ function facilitator() {
     ...wallet,
     address: facilitatorAccount.address,
   } as unknown as SignerInput);
-  return new ArlUptoFacilitator({
+  const server = createFacilitatorServer({
     chainId: 84_532,
-    arlToken: arl,
-    scheme: new UptoFacilitator(signer),
-    store: new InMemoryAuthorizationStore(),
+    signer: facilitatorAccount.address,
+    bearerToken: token,
+    facilitator: new ArlUptoFacilitator({
+      chainId: 84_532,
+      arlToken: arl,
+      scheme: new UptoFacilitator(signer),
+      store: new FileAuthorizationStore(
+        join(mkdtempSync(join(tmpdir(), "arl-facilitator-")), "authorizations.jsonl"),
+      ),
+    }),
+  }).listen(0, "127.0.0.1");
+  await new Promise((r) => server.once("listening", r));
+  const auth = { Authorization: `Bearer ${token}` };
+  const client = new HTTPFacilitatorClient({
+    url: `http://127.0.0.1:${String((server.address() as AddressInfo).port)}`,
+    createAuthHeaders: () => Promise.resolve({ verify: auth, settle: auth, supported: {} }),
   });
+  return { client, close: () => server.close() };
 }
 
 const balance = async (who: Hex) =>
@@ -202,7 +222,8 @@ describe(
       anvil?.kill();
     });
 
-    before(() => {
+    before(async () => {
+      const f = await startFacilitator("fork-test-token");
       const server = createProviderServer(
         new ComputeProvider({
           chainId: 84_532,
@@ -216,10 +237,13 @@ describe(
             echo: node("setTimeout(() => process.stdin.pipe(process.stdout), 1200)"),
             forever: node("setInterval(() => {}, 1000)"),
           },
-          facilitator: facilitator(),
+          facilitator: f.client,
         }),
       ).listen(0, "127.0.0.1");
-      close = () => server.close();
+      close = () => {
+        server.close();
+        f.close();
+      };
       return new Promise<void>((resolve) => {
         server.once("listening", () => {
           base = `http://127.0.0.1:${String((server.address() as AddressInfo).port)}`;
