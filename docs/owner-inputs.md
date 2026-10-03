@@ -22,6 +22,14 @@ contracts, tokenomics Source of Truth, deployment logic or vesting changes.
 | Investors and Strategic Partnerships: 12-month cliff, then 36 months linear, from TGE                                  | `VESTING_12_36` in `packages/tokenomics`; the planner, `ARLDeployPlan` and the verifier refuse others |
 | Founder: one allocation of 2,100,000 ARL, fully unlocked at TGE, no Founder vesting wallet                             | `packages/tokenomics`, `ARLAllocation.FOUNDER`; minted once to the Founder recipient                  |
 
+## Launch targets (owner decision, 2026-10-03)
+
+| Decision                                                                                                    | Status                                                                   |
+| ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Listing price: 0.20 USD per ARL (FDV 4,200,000 USD at the 21,000,000 ARL supply)                            | Decided; raise, accepted currency and liquidity size still TBD           |
+| Target TGE: 2026-12-01, only if an independent audit is complete by 2026-11-20; otherwise moved to Jan 2027 | Target, not a lock: Base Mainnet stays locked in every tool until then   |
+| Audit route: a competitive audit (Sherlock or Cyfrin CodeHawks), applied for by the owner                   | Recommended and accepted; no platform is contacted on the owner's behalf |
+
 A split of the Founder allocation into 2,000,000 ARL unrestricted and 100,000 ARL reserved is
 **not** adopted. It remains a possible future owner decision and is not implemented.
 
@@ -31,9 +39,9 @@ A split of the Founder allocation into 2,000,000 ARL unrestricted and 100,000 AR
 | ---------------------------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
 | Presale parameters                 | `packages/tokenomics` (Source of Truth), then contracts, deploy plan, site and launchpad pack | Proposed values recorded; not applied until explicitly approved |
 | Founder recipient                  | The Founder Safe in the deployment config (receives the 2,100,000 ARL)                        | Address TBD                                                     |
-| TGE date                           | `tge` in the deployment config; every vesting schedule starts at it                           | Placeholder `2027-01-01` in the local config; not confirmed     |
+| TGE date                           | `tge` in the deployment config; every vesting schedule starts at it                           | Target 2026-12-01 (audit-conditional); local config placeholder |
 | Public Launch claim parameters     | `ARLMerkleDistributor` via `DeployDistributor` (`LAUNCH_PARAMETERS_APPROVED = false`)         | Eligibility, claim duration and per-address cap TBD             |
-| Listing price and liquidity size   | Liquidity allocation use; launchpad pack "Sale parameters"                                    | Not locked                                                      |
+| Liquidity size                     | Liquidity allocation use; launchpad pack "Sale parameters"                                    | Not locked (listing price decided: 0.20 USD)                    |
 | Staking reward amount and duration | Funding calls from the Community & Staking holder to `ARLStakingRewards`                      | Not decided                                                     |
 | Audit firm                         | `docs/audit-scope.md` is the package to send                                                  | Not selected; no firm is contacted on the owner's behalf        |
 | Bug bounty terms                   | `SECURITY.md`                                                                                 | Published before mainnet                                        |
