@@ -8,22 +8,29 @@ Never send a seed phrase, private key or wallet password. Only public addresses 
 (API keys, signer keys) go into environment variables or the owner's own tools, never into the
 repository or a message.
 
-## Approved decisions (owner-input review, 2026-10-03)
+## Settled decisions (owner decision, 2026-10-03)
 
-| Decision                                                                                                                   | Where it is enforced                                                                                                           | State in the repository                                                                                                                                                                                                                                                                                                |
-| -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `VESTING_START = TGE_TIMESTAMP`                                                                                            | `packages/deploy/src/plan.ts`, `ARLDeployPlan`, the verifier                                                                   | In sync. Every vesting schedule starts at the config's `tge`                                                                                                                                                                                                                                                           |
-| TGE is when ARL first enters real economic circulation on Base Mainnet. A Base Sepolia deployment is not TGE               | Base Mainnet is hard-locked in every tool; a Base Sepolia `tge` is a test placeholder only                                     | **Conflict, owner call needed.** `docs/tokenomics-economic-spec.md` section 6 (LOCKED) says TGE is "the block in which the ARL token contract is deployed". Not changed in this review (tokenomics document)                                                                                                           |
-| Investors and Strategic Partnerships: 12-month cliff, then 36 months linear, from TGE                                      | `VESTING_12_36` in `packages/tokenomics`, the planner, `ARLDeployPlan` and the verifier reject any other schedule              | In sync                                                                                                                                                                                                                                                                                                                |
-| Founder: 2,000,000 ARL Founder Unrestricted, 100,000 ARL Founder Reserved, no Founder vesting wallet; Reserved custody TBD | `packages/tokenomics` (Source of Truth), `ARLAllocation.FOUNDER`, `ARLToken` recipients, deploy plan, circulating supply, site | **Conflict, owner call needed.** The repository has one Founder allocation of 2,100,000 ARL, fully unlocked at TGE, minted to one Founder recipient (decision of 2026-09-28, PR #21). No Founder vesting wallet exists (in sync). Splitting it needs a tokenomics and contract change, which this review does not make |
+These are the repository's existing decisions, confirmed by the owner. Nothing in the
+contracts, tokenomics Source of Truth, deployment logic or vesting changes.
+
+| Decision                                                                                                               | Where it is enforced                                                                                  |
+| ---------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| TGE is the block in which the ARL token contract is deployed (`docs/tokenomics-economic-spec.md` section 6, unchanged) | The deployment tooling; Base Mainnet is hard-locked in every tool                                     |
+| A Base Sepolia deployment is a testnet deployment and is not the economic TGE                                          | Its `tge` config value is a test placeholder                                                          |
+| The Base Mainnet token deployment is the TGE                                                                           | The TGE date and block are TBD until a Mainnet launch is approved                                     |
+| `VESTING_START = TGE_TIMESTAMP`                                                                                        | `packages/deploy/src/plan.ts`, `ARLDeployPlan`, the verifier                                          |
+| Investors and Strategic Partnerships: 12-month cliff, then 36 months linear, from TGE                                  | `VESTING_12_36` in `packages/tokenomics`; the planner, `ARLDeployPlan` and the verifier refuse others |
+| Founder: one allocation of 2,100,000 ARL, fully unlocked at TGE, no Founder vesting wallet                             | `packages/tokenomics`, `ARLAllocation.FOUNDER`; minted once to the Founder recipient                  |
+
+A split of the Founder allocation into 2,000,000 ARL unrestricted and 100,000 ARL reserved is
+**not** adopted. It remains a possible future owner decision and is not implemented.
 
 ## Decisions
 
 | Input                              | Plugs into                                                                                    | Status                                                          |
 | ---------------------------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
 | Presale parameters                 | `packages/tokenomics` (Source of Truth), then contracts, deploy plan, site and launchpad pack | Proposed values recorded; not applied until explicitly approved |
-| Founder Reserved (100,000 ARL)     | Custody and the Founder split above                                                           | Custody unapproved / TBD                                        |
-| Founder Unrestricted recipient     | Founder recipient in the deployment config                                                    | Address TBD                                                     |
+| Founder recipient                  | The Founder Safe in the deployment config (receives the 2,100,000 ARL)                        | Address TBD                                                     |
 | TGE date                           | `tge` in the deployment config; every vesting schedule starts at it                           | Placeholder `2027-01-01` in the local config; not confirmed     |
 | Public Launch claim parameters     | `ARLMerkleDistributor` via `DeployDistributor` (`LAUNCH_PARAMETERS_APPROVED = false`)         | Eligibility, claim duration and per-address cap TBD             |
 | Listing price and liquidity size   | Liquidity allocation use; launchpad pack "Sale parameters"                                    | Not locked                                                      |
@@ -32,27 +39,42 @@ repository or a message.
 | Bug bounty terms                   | `SECURITY.md`                                                                                 | Published before mainnet                                        |
 | Legal opinion, KYC provider        | Launchpad pack                                                                                | Not started                                                     |
 
-## Base Sepolia deployment
+## Base Sepolia deployment checklist
 
-| Input                                                   | Plugs into                                                                             |
-| ------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Public address of the deployer wallet                   | `--sender` of the dry run; the `/deploy` screen checks the connected wallet against it |
-| Public addresses of the Safe owners and the threshold   | `CreateSafes` (Safe v1.5.0)                                                            |
-| Public addresses of the allocation holders and guardian | A Base Sepolia config next to `contracts/deploy/config/local.json`                     |
+A testnet deployment; it is not the TGE. Nothing is deployed until every item below is provided
+and the owner gives the go-ahead. Only **public** addresses are recorded. No private key, seed
+phrase, password or API key value is ever sent, written to this repository or put in a config
+file.
 
-The Base Sepolia deployment is a test deployment, not TGE. Its `tge` value is a placeholder.
-| At least 0.01 Base Sepolia ETH on the deployer | Gas for the Safe and contract creations |
-| A Basescan API key, as `ETHERSCAN_API_KEY` in the shell | `npm run verify:explorer -- --run`; the key is never printed |
+| #   | Owner input                                                                                         | Used by                                                                                                                                                                                                                       | Status                |
+| --- | --------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| 1   | Deployer public address                                                                             | `--sender` of the dry run; the `/deploy` screen checks the connected wallet against it                                                                                                                                        | Required              |
+| 2   | Deployer balance of at least 0.01 Base Sepolia ETH                                                  | Gas for the Safe and contract creations                                                                                                                                                                                       | Required              |
+| 3   | Safe owner public addresses                                                                         | `ARL_SAFE_OWNERS` for `CreateSafes`: the signers of the 11 role Safes other than the guardian                                                                                                                                 | Required              |
+| 4   | Safe threshold                                                                                      | `ARL_SAFE_THRESHOLD`: signatures required on those Safes                                                                                                                                                                      | Required              |
+| 5   | Guardian Safe owner public addresses, disjoint from item 3                                          | `ARL_GUARDIAN_OWNERS`; the guardian is the treasury timelock's cancel-only role and is required                                                                                                                               | Required              |
+| 6   | Guardian Safe threshold                                                                             | `ARL_GUARDIAN_THRESHOLD`                                                                                                                                                                                                      | Required              |
+| 7   | Distribution recipients                                                                             | Every recipient must be a dedicated Safe v1.5.0 proxy. `CreateSafes` creates the 12 role Safes from items 3–6 and writes their addresses. Alternatively the owner gives 12 existing Safe v1.5.0 proxy addresses, one per role | Required              |
+| 8   | Basescan API key, set by the owner as `ETHERSCAN_API_KEY` on the machine that runs the verification | `npm run verify:explorer -- --run`; the value is never printed or shared                                                                                                                                                      | Required              |
+| 9   | App hosting (for example a Vercel project) and a Base Sepolia RPC URL                               | Serves `apps/dapp`, including the `/deploy` screen used to sign from a phone; `NEXT_PUBLIC_ARL_RPC_URL`                                                                                                                       | Required              |
+| 10  | Facilitator settlement public address                                                               | Pays the gas of payment settlements in `@arl/payments`; its key stays with the operator                                                                                                                                       | Required for payments |
+| 11  | Base Sepolia ETH on the settlement address                                                          | Gas for settlements                                                                                                                                                                                                           | Required for payments |
 
-Once these arrive, the runbook in [deployment.md](deployment.md) is followed step by step. Each
-transaction is explained before it is signed on the phone.
+The 12 roles of item 7: Founder, Investors, Strategic Partnerships, Treasury, Guardian, Public
+Launch, Community & Staking, Ecosystem & Growth, Liquidity, Team, Early Users, Grants & Bug
+Bounty. The Investors and Strategic Partnerships Safes are the vesting wallets' beneficiaries.
+
+Not needed for the Base Sepolia deployment and not chosen here: the TGE date (a test placeholder
+is used), staking reward amount and duration, Public Launch eligibility, claim duration and
+per-address cap, liquidity size and listing price.
+
+Once items 1–9 arrive, the runbook in [deployment.md](deployment.md#base-sepolia-runbook) is
+followed step by step. Each transaction is explained before it is signed.
 
 ## Hosting and accounts
 
-| Input                                                              | Plugs into                                                                       |
-| ------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
-| Hosting for `apps/dapp` (for example a Vercel project)             | The `/deploy` screen on the phone and the public app                             |
-| A Base Sepolia RPC URL for the app                                 | `NEXT_PUBLIC_ARL_RPC_URL`                                                        |
-| Own Web3Forms access key (optional)                                | `NEXT_PUBLIC_WEB3FORMS_KEY`; a key is already set for the site's forms           |
-| Social accounts                                                    | Site footer and launchpad pack                                                   |
-| A facilitator operator and its settlement address (funded for gas) | `@arl/payments` facilitator and `@arl/provider`; its key stays with the operator |
+| Input                               | Plugs into                                                                       |
+| ----------------------------------- | -------------------------------------------------------------------------------- |
+| Own Web3Forms access key (optional) | `NEXT_PUBLIC_WEB3FORMS_KEY`; a key is already set for the site's forms           |
+| Social accounts                     | Site footer and launchpad pack                                                   |
+| A facilitator operator              | Runs `@arl/payments`' facilitator service; uses the settlement address (item 10) |
