@@ -110,10 +110,8 @@ jobs:
 
       - run: pip install halmos==0.3.3
 
-      # check_VestedIsMonotonic is nonlinear and times out in the solver; the property is covered
-      # by fuzzing and the VestingNeverOverReleases invariant (docs/audit-scope.md).
       - name: Halmos symbolic checks
-        run: halmos --match-contract ARLSymbolic --function 'check_(?!VestedIsMonotonic)' --solver-timeout-assertion 120000
+        run: halmos --match-contract ARLSymbolic --solver-timeout-assertion 120000
         working-directory: contracts
         env:
           FOUNDRY_DYNAMIC_TEST_LINKING: "false"

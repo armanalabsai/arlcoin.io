@@ -135,12 +135,14 @@ contract ARLSymbolic is Test {
         assertEq(vesting.vestedAmount(address(token), t), ARLAllocation.INVESTORS);
     }
 
-    /// @dev The vested amount never decreases. Nonlinear (a product and a division of symbolic
-    /// timestamps), so the solver may time out; the same property is covered by fuzzing and the
-    /// `VestingNeverOverReleases` invariant.
-    function check_VestedIsMonotonic(uint64 t1, uint64 t2) public view {
-        vm.assume(t1 <= t2);
-        assertLe(vesting.vestedAmount(address(token), t1), vesting.vestedAmount(address(token), t2));
+    /// @dev The vested amount never decreases: from any second to the next it stays or grows.
+    /// Timestamps are integers, so by induction this holds between any two times t1 <= t2. (The
+    /// two-timestamp form is nonlinear in two symbolic values and times out in the solver.)
+    function check_VestedIsMonotonic(uint64 t) public view {
+        vm.assume(t < type(uint64).max);
+        assertLe(
+            vesting.vestedAmount(address(token), t), vesting.vestedAmount(address(token), t + 1)
+        );
     }
 
     /// @dev The beneficiary can never be changed, by anyone.

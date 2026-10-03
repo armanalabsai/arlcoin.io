@@ -119,7 +119,7 @@ needs a reviewed change to the token, deployment plan and verifier.
 | Invariant tests      | Supply, allocations, vesting, timelock roles, distributor funds, staking accounting, job escrow                |
 | Coverage             | 100% of lines and functions in every `src/` contract (`npm run coverage:contracts`)                            |
 | Static analysis      | Slither: 0 findings (fails CI on Low or higher); Aderyn and Mythril reviewed (`docs/audit-scope.md`)           |
-| Symbolic checks      | Halmos, 10 of 11 properties proven                                                                             |
+| Symbolic checks      | Halmos, 11 of 11 properties proven                                                                             |
 | Deployment rehearsal | Local chain and Base Sepolia fork: deployed, verified, 59 negative cases refused                               |
 | Reproducible build   | Committed bytecode hashes checked by CI; deployed code verifiable against a clean build (`docs/deployment.md`) |
 | Independent audit    | **Not yet**                                                                                                    |

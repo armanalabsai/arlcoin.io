@@ -77,7 +77,7 @@ tooling only).
 | Deployment rehearsal | Real Safe v1.5.0 on Anvil; 59 negative cases; Base Sepolia fork with the canonical Safe contracts | pass                                            |
 | Slither 0.11.6       | `src/` and `script/`, 102 detectors, CI fails on Low or higher                                    | 0 findings                                      |
 | Aderyn 0.6.8         | `src/`                                                                                            | 3 reported; triage below                        |
-| Halmos 0.3.3         | Symbolic checks in `contracts/test/symbolic/ARLSymbolic.t.sol`, run in CI                         | 10 of 11 proven; 1 solver timeout               |
+| Halmos 0.3.3         | Symbolic checks in `contracts/test/symbolic/ARLSymbolic.t.sol`, run in CI                         | 11 of 11 proven                                 |
 | Mythril 0.24.8       | Runtime bytecode of the four deployed contracts, 900 s each                                       | 9 reported, all triaged below; none exploitable |
 
 ### Gas
@@ -133,26 +133,27 @@ in its model. Findings:
 ### Halmos (symbolic)
 
 Every argument of a `check_` function is symbolic, so a pass holds for all values, within
-Halmos' bounds (loops unrolled twice; `bytes` calldata up to 1,024 bytes). CI runs every check
-except `check_VestedIsMonotonic`.
+Halmos' bounds (loops unrolled twice; `bytes` calldata up to 1,024 bytes). CI runs every check;
+all 11 pass.
 
-| Check                                      | Property                                                                                    | Result         |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------- | -------------- |
-| `check_NoCallChangesSupply`                | No call, from any caller with any calldata, changes total supply                            | pass           |
-| `check_TransferConservesSupplyAndBalances` | A transfer of any amount moves exactly that amount and keeps supply at 21,000,000 ARL       | pass           |
-| `check_TransferFromNeverExceedsAllowance`  | `transferFrom` never moves more than the allowance                                          | pass           |
-| `check_NothingVestsBeforeCliffEnd`         | Nothing vests before the cliff end                                                          | pass           |
-| `check_VestedNeverExceedsAllocation`       | The vested amount never exceeds the allocation                                              | pass           |
-| `check_EverythingVestedAtEnd`              | Everything is vested from the vesting end                                                   | pass           |
-| `check_BeneficiaryIsImmutable`             | No caller can change the beneficiary                                                        | pass           |
-| `check_DelayFloorHolds`                    | Even through the timelock itself, the delay never goes below 48 hours                       | pass           |
-| `check_ClaimPaysOnlyListedEntriesOnce`     | A claim succeeds only for a listed entry, pays exactly its amount to its account, only once | pass           |
-| `check_SweepOnlyToReturnAddressAfterEnd`   | No sweep before `claimEnd`; after it the whole balance goes to `returnTo` only              | pass           |
-| `check_VestedIsMonotonic`                  | The vested amount never decreases                                                           | solver timeout |
+| Check                                      | Property                                                                                    | Result |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------- | ------ |
+| `check_NoCallChangesSupply`                | No call, from any caller with any calldata, changes total supply                            | pass   |
+| `check_TransferConservesSupplyAndBalances` | A transfer of any amount moves exactly that amount and keeps supply at 21,000,000 ARL       | pass   |
+| `check_TransferFromNeverExceedsAllowance`  | `transferFrom` never moves more than the allowance                                          | pass   |
+| `check_NothingVestsBeforeCliffEnd`         | Nothing vests before the cliff end                                                          | pass   |
+| `check_VestedNeverExceedsAllocation`       | The vested amount never exceeds the allocation                                              | pass   |
+| `check_EverythingVestedAtEnd`              | Everything is vested from the vesting end                                                   | pass   |
+| `check_BeneficiaryIsImmutable`             | No caller can change the beneficiary                                                        | pass   |
+| `check_DelayFloorHolds`                    | Even through the timelock itself, the delay never goes below 48 hours                       | pass   |
+| `check_ClaimPaysOnlyListedEntriesOnce`     | A claim succeeds only for a listed entry, pays exactly its amount to its account, only once | pass   |
+| `check_SweepOnlyToReturnAddressAfterEnd`   | No sweep before `claimEnd`; after it the whole balance goes to `returnTo` only              | pass   |
+| `check_VestedIsMonotonic`                  | From any second to the next, the vested amount never decreases                              | pass   |
 
-The monotonicity check divides a product of symbolic timestamps, which the SMT solver does not
-finish within 120 s. The same property is covered by fuzz tests and the
-`VestingNeverOverReleases` invariant, and the vesting math is unmodified OpenZeppelin code.
+Monotonicity is proved one second at a time (`t` to `t + 1`, for every `t`); timestamps are
+integers, so by induction it holds between any two times. The two-timestamp form divides a product
+of two symbolic values and does not finish in the solver. Fuzz tests and the
+`VestingNeverOverReleases` invariant cover it as well.
 
 ## Out of scope
 
