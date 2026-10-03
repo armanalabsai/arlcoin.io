@@ -60,12 +60,14 @@ export const technology: Layer = {
               "Provider registration and capacity listing in the ARL app: GPU model and count, GPU memory, vCPUs, memory and the longest job, priced per GPU or CPU second. Tested on a local chain",
               "Per-second metering settled in ARL over x402 upto: seconds rounded up, never above the signed ceiling",
               "Escrowed jobs with a deadline and refunds (ERC-8183) and ratings from paid jobs (ERC-8004)",
+              "Reference provider software: runs the provider's own jobs for the paid time, bills the seconds used and settles them over x402. Tested locally, not running anywhere",
             ],
           },
           {
             heading: "Not yet built",
             items: [
-              "No provider software that runs workloads exists; capacity is the provider's own statement and nothing on-chain checks the hardware",
+              "Capacity is the provider's own statement; nothing on-chain checks the hardware",
+              "One payment covers a run of up to 9 minutes; longer jobs go through escrowed jobs, and streaming payment is not built",
               "No provider has joined and nothing runs on a public network",
             ],
           },

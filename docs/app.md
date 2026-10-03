@@ -126,7 +126,8 @@ Billing (`lib/compute.ts`): the consumer signs a ceiling of price × seconds for
 accepts (at most the provider's `maxSeconds`); the provider measures the run, bills whole seconds
 rounded up, and settles that amount, never above the ceiling, through the same x402 `upto` path
 as any service. A longer job can also be hired through the Jobs screen with an escrowed budget and
-a deadline. Provider software that runs workloads is not part of this repository.
+a deadline. Reference provider software that runs jobs and settles them this way is in
+`packages/provider` ([compute-provider.md](compute-provider.md)).
 
 Each service shows its rating from paid jobs (see [jobs.md](jobs.md#ratings-erc-8004-reputation)).
 

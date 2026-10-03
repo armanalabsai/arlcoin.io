@@ -27,7 +27,8 @@ ARLCOIN/
 │   ├── tokenomics/        Allocation table, validation, share math
 │   ├── deploy/            Deployment plan builder, manifest, circulating supply, claim lists
 │   ├── monetary/          ARL Core monetary standard: reference implementation and test vectors
-│   └── payments/          ARL usage-based payments over x402 upto (Permit2), Base Sepolia only
+│   ├── payments/          ARL usage-based payments over x402 upto (Permit2), Base Sepolia only
+│   └── provider/          Reference compute provider: runs paid jobs, settles seconds used
 ├── contracts/             Foundry project (solc 0.8.36)
 │   ├── src/               ARL-specific contracts only
 │   ├── test/              unit, fuzz, invariant and deployment tests
