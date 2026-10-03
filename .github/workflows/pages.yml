@@ -1,6 +1,7 @@
 name: Pages
 
-# Publishes the website (apps/web) as a static site to GitHub Pages: at https://arlcoin.io when
+# Publishes the website (apps/web) as a static site to GitHub Pages, with a static copy of the app
+# (apps/dapp) under /app so a prepared Base Sepolia deployment can be signed from a phone wallet: at https://arlcoin.io when
 # the custom domain is set in the repository's Pages settings, otherwise at the project URL
 # https://gokturkalazdaghan-dot.github.io/ARLCOIN/ (configure-pages reports the sub-path).
 # Runs only on main; pull requests are built and tested by the CI workflow.
@@ -9,7 +10,9 @@ on:
     branches: [main]
     paths:
       - "apps/web/**"
+      - "apps/dapp/**"
       - "packages/tokenomics/**"
+      - "packages/zk/**"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
@@ -43,7 +46,10 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-          cache-dependency-path: apps/web/package-lock.json
+          cache-dependency-path: |
+            apps/web/package-lock.json
+            package-lock.json
+            apps/dapp/package-lock.json
 
       - id: pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
@@ -53,6 +59,17 @@ jobs:
       - run: npm run build
         env:
           ARL_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+
+      # The app: @arl/zk (packages/zk) is linked into it and its dependencies install at the root.
+      - run: npm ci
+        working-directory: .
+      - run: npm ci
+        working-directory: apps/dapp
+      - run: npm run build
+        working-directory: apps/dapp
+        env:
+          ARL_BASE_PATH: ${{ steps.pages.outputs.base_path }}/app
+      - run: cp -r ../dapp/out out/app
 
       # No Jekyll processing (it would drop the _next directory). The custom domain comes from
       # the Pages settings; a CNAME file is ignored for workflow deployments.

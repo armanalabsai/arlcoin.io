@@ -4,7 +4,7 @@
 // browser), one transaction at a time. See lib/deploySteps.ts for the checks applied to the file.
 // This page never asks for, receives or stores a seed phrase, private key or password.
 
-import { useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import {
   createPublicClient,
   createWalletClient,
@@ -20,6 +20,7 @@ import {
   checkBeforeSend,
   describeStep,
   parseRun,
+  publishedPlanPath,
   type DeployRun,
   type DeployStep,
 } from "~~/lib/deploySteps";
@@ -28,12 +29,46 @@ import { BASE_SEPOLIA_CHAIN_ID, localChain } from "~~/lib/network";
 type Status =
   { kind: "waiting" } | { kind: "sent"; hash: string } | { kind: "failed"; error: string };
 
+const noSubscription = () => () => undefined;
+
 const chainFor = (id: number) =>
   id === BASE_SEPOLIA_CHAIN_ID ? baseSepolia : localChain(process.env.NEXT_PUBLIC_ARL_RPC_URL);
 
 export default function DeployPage() {
   const [run, setRun] = useState<DeployRun>();
   const [error, setError] = useState<string>();
+  // Static hosting cannot send X-Frame-Options, so the screen refuses to run inside a frame,
+  // where another site could overlay it.
+  const framed = useSyncExternalStore(
+    noSubscription,
+    () => window.top !== window.self,
+    () => false,
+  );
+
+  useEffect(() => {
+    if (window.top !== window.self) return;
+    const name = new URLSearchParams(window.location.search).get("plan");
+    if (!name) return;
+    void (async () => {
+      try {
+        const res = await fetch(publishedPlanPath(name, process.env.NEXT_PUBLIC_BASE_PATH ?? ""), {
+          cache: "no-store",
+        });
+        if (!res.ok) throw new Error(`the prepared plan "${name}" was not found`);
+        setRun(parseRun((await res.json()) as unknown));
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "unreadable plan");
+      }
+    })();
+  }, []);
+
+  if (framed) {
+    return (
+      <p className="text-sm text-error" data-testid="deploy-framed">
+        This page cannot be used inside a frame. Open it directly in your wallet&apos;s browser.
+      </p>
+    );
+  }
 
   const load = async (file: File | undefined) => {
     setError(undefined);
