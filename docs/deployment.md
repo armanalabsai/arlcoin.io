@@ -117,7 +117,8 @@ website (for example `https://arlcoin.io/app/deploy/`). A prepared run committed
 copied to the phone. Only plain names are accepted, the file is still checked by `parseRun` like
 an uploaded one, and the screen refuses to run inside a frame (static hosting cannot send
 `X-Frame-Options`). The first published plan is `84532-safes`: the twelve role Safes on Base
-Sepolia, each 1-of-1 owned by the owner's address, for a testnet run only.
+Sepolia from the deployer `0x3c3f…b165`: eleven 1-of-1 Safes owned by that address and the guardian
+Safe 1-of-1 owned by its own signer `0x72F7…4144`, for a testnet run only.
 
 ## Reproducible build and deployment proof
 

@@ -70,7 +70,11 @@ contract ARLStakingHandler is Test {
 
     function fund(uint256 amount) external {
         uint256 duration = staking.rewardsDuration();
-        amount = bound(amount, duration, 100_000 ether);
+        // The distributor holds a finite allocation: a long campaign can spend it, and funding
+        // more than it holds reverts in the token, not in the staking contract.
+        uint256 available = token.balanceOf(distributor);
+        if (available < duration) return;
+        amount = bound(amount, duration, available < 100_000 ether ? available : 100_000 ether);
         vm.prank(distributor);
         staking.notifyRewardAmount(amount);
     }
