@@ -24,11 +24,11 @@ contracts, tokenomics Source of Truth, deployment logic or vesting changes.
 
 ## Launch targets (owner decision, 2026-10-03)
 
-| Decision                                                                                                    | Status                                                                   |
-| ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| Listing price: 0.20 USD per ARL (FDV 4,200,000 USD at the 21,000,000 ARL supply)                            | Decided; raise, accepted currency and liquidity size still TBD           |
-| Target TGE: 2026-12-01, only if an independent audit is complete by 2026-11-20; otherwise moved to Jan 2027 | Target, not a lock: Base Mainnet stays locked in every tool until then   |
-| Audit route: a competitive audit (Sherlock or Cyfrin CodeHawks), applied for by the owner                   | Recommended and accepted; no platform is contacted on the owner's behalf |
+| Decision                                                                                                                                                          | Status                                                                               |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Listing price: 0.20 USD per ARL (FDV 4,200,000 USD at the 21,000,000 ARL supply)                                                                                  | Decided; raise, accepted currency and liquidity size still TBD                       |
+| Target TGE: 2026-12-01, if the public Base Sepolia test period (about 4 weeks) ends with no open Critical or High finding; otherwise moved                        | Target, not a lock: Base Mainnet stays locked in every tool until then               |
+| No paid audit (owner decision, 2026-10-04): free checks, a public test period and a bounty paid in ARL only for accepted reports ([bug-bounty.md](bug-bounty.md)) | Decided; listings and launchpads are told plainly that no independent audit was done |
 
 A split of the Founder allocation into 2,000,000 ARL unrestricted and 100,000 ARL reserved is
 **not** adopted. It remains a possible future owner decision and is not implemented.
@@ -43,8 +43,7 @@ A split of the Founder allocation into 2,000,000 ARL unrestricted and 100,000 AR
 | Public Launch claim parameters     | `ARLMerkleDistributor` via `DeployDistributor` (`LAUNCH_PARAMETERS_APPROVED = false`)         | Eligibility, claim duration and per-address cap TBD             |
 | Liquidity size                     | Liquidity allocation use; launchpad pack "Sale parameters"                                    | Not locked (listing price decided: 0.20 USD)                    |
 | Staking reward amount and duration | Funding calls from the Community & Staking holder to `ARLStakingRewards`                      | Not decided                                                     |
-| Audit firm                         | `docs/audit-scope.md` is the package to send                                                  | Not selected; no firm is contacted on the owner's behalf        |
-| Bug bounty terms                   | `SECURITY.md`                                                                                 | Published before mainnet                                        |
+| Bug bounty terms                   | [bug-bounty.md](bug-bounty.md)                                                                | Proposed; reward table, period cap and a private contact needed |
 | Legal opinion, KYC provider        | Launchpad pack                                                                                | Not started                                                     |
 
 ## Base Sepolia deployment checklist

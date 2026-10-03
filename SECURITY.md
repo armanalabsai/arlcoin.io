@@ -14,9 +14,9 @@ Do not open a public issue.
 Include the affected file or component, the commit, steps to reproduce and
 the impact you expect. We aim to acknowledge reports within 3 business days.
 
-A bug bounty will be published separately, funded from the Grants / Bug
-Bounty allocation, before any mainnet deployment. Until then there is no
-bounty program.
+A bug bounty paid in ARL from the Grants / Bug Bounty allocation is proposed
+in [docs/bug-bounty.md](docs/bug-bounty.md). It goes live with the public
+Base Sepolia test period; until then there is no bounty program.
 
 ## Scope
 

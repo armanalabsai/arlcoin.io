@@ -132,19 +132,19 @@ The Founder allocation is 2,100,000 ARL. All of it is fully unlocked at TGE
 (CTO decision of 2026-09-28, which replaces the earlier split into 2,000,000
 ARL unlocked and 100,000 ARL TBD).
 
-| Parameter                                      | Value                                                                                 | Status |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------- | ------ |
-| Total Founder allocation                       | 2,100,000 ARL                                                                         | LOCKED |
-| Fully unlocked amount                          | 2,100,000 ARL (the whole allocation)                                                  | LOCKED |
-| Availability                                   | Available to the Founder at TGE                                                       | LOCKED |
-| Cliff                                          | None                                                                                  | LOCKED |
-| Vesting                                        | None                                                                                  | LOCKED |
-| Timelock                                       | None                                                                                  | LOCKED |
-| Protocol-level transfer restriction            | None                                                                                  | LOCKED |
-| Protocol-level sale restriction                | None                                                                                  | LOCKED |
-| Right to transfer, use or sell                 | At any time, including through public exchanges, without protocol permission          | LOCKED |
-| Address that receives the 2,100,000 ARL at TGE | Not specified                                                                         | TBD    |
-| Public disclosure of this structure            | The unlocked status and the Founder's right to sell are published with the tokenomics | LOCKED |
+| Parameter                                      | Value                                                                                                                                                                                                                                            | Status  |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
+| Total Founder allocation                       | 2,100,000 ARL                                                                                                                                                                                                                                    | LOCKED  |
+| Fully unlocked amount                          | 2,100,000 ARL (the whole allocation)                                                                                                                                                                                                             | LOCKED  |
+| Availability                                   | Available to the Founder at TGE                                                                                                                                                                                                                  | LOCKED  |
+| Cliff                                          | None                                                                                                                                                                                                                                             | LOCKED  |
+| Vesting                                        | None                                                                                                                                                                                                                                             | LOCKED  |
+| Timelock                                       | None                                                                                                                                                                                                                                             | LOCKED  |
+| Protocol-level transfer restriction            | None                                                                                                                                                                                                                                             | LOCKED  |
+| Protocol-level sale restriction                | None                                                                                                                                                                                                                                             | LOCKED  |
+| Right to transfer, use or sell                 | At any time, including through public exchanges, without protocol permission                                                                                                                                                                     | LOCKED  |
+| Address that receives the 2,100,000 ARL at TGE | The dedicated Founder Safe (Safe v1.5.0), owned by the Founder's wallet `0x3c3f71d694f709cBe60f015717c54A795636b165`; on Base Sepolia its address is in `apps/dapp/public/plans/84532-safes.json`. The Mainnet Founder Safe is created at launch | DECIDED |
+| Public disclosure of this structure            | The unlocked status and the Founder's right to sell are published with the tokenomics                                                                                                                                                            | LOCKED  |
 
 - The 2,100,000 ARL is unlocked. It is not locked, vested, timelocked,
   restricted, reserved or subject to any future release schedule.
