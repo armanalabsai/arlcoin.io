@@ -266,18 +266,41 @@ log "Dedicated Safes: real Safe v1.5.0 contracts on Anvil, code checks enforced"
 ACCOUNTS="$(cast rpc eth_accounts --rpc-url "$RPC" | tr -d '[]" ')"
 account() { cut -d, -f"$(($1 + 1))" <<<"$ACCOUNTS"; }
 SAFE_DEPLOYER="$(account 1)"
-artifact() { node -e "console.log(require('@safe-global/safe-smart-account/build/artifacts/contracts/$1').bytecode)"; }
+# create <artifact>: deploys a Safe build artifact from the unlocked SAFE_DEPLOYER and prints its
+# address. The bytecode is read and sent by Node, not passed on a command line: Safe's creation code
+# exceeds the Windows command-line limit.
 create() {
-  cast send --unlocked --from "$SAFE_DEPLOYER" --rpc-url "$RPC" --json --create "$1" |
-    node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>console.log(JSON.parse(s).contractAddress))"
+  node -e "
+    const [rpc, from, path] = process.argv.slice(1);
+    const { bytecode } = require('@safe-global/safe-smart-account/build/artifacts/contracts/' + path);
+    const call = async (method, params) => {
+      const res = await fetch(rpc, { method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }) });
+      const { result, error } = await res.json();
+      if (error) throw new Error(method + ': ' + error.message);
+      return result;
+    };
+    (async () => {
+      const hash = await call('eth_sendTransaction', [{ from, data: bytecode }]);
+      for (;;) {
+        const receipt = await call('eth_getTransactionReceipt', [hash]);
+        if (receipt) {
+          if (receipt.status !== '0x1') throw new Error('creation of ' + path + ' reverted');
+          console.log(receipt.contractAddress);
+          return;
+        }
+        await new Promise((r) => setTimeout(r, 100));
+      }
+    })().catch((e) => { console.error(e.message); process.exit(1); });
+  " "$RPC" "$SAFE_DEPLOYER" "$1"
 }
-SAFE_SINGLETON="$(create "$(artifact Safe.sol/Safe.json)")"
+SAFE_SINGLETON="$(create Safe.sol/Safe.json)"
 # The singleton built from the official npm artifact must have the canonical v1.5.0 code, the
 # same code hash ARLDeployPlan pins for public networks.
 canonical_hash() { perl -0ne "print \$1 if /constant $1 =\\s*(0x[0-9a-f]+);/" script/ARLDeployPlan.sol; }
 expect "safe singleton code hash is canonical" "$(canonical_hash SAFE_SINGLETON_V150_CODEHASH)" \
   "$(cast codehash "$SAFE_SINGLETON" --rpc-url "$RPC")"
-SAFE_FACTORY="$(create "$(artifact proxies/SafeProxyFactory.sol/SafeProxyFactory.json)")"
+SAFE_FACTORY="$(create proxies/SafeProxyFactory.sol/SafeProxyFactory.json)"
 SAFE_SETUP="$(cast calldata 'setup(address[],uint256,address,bytes,address,address,uint256,address)' \
   "[$(account 2),$(account 3),$(account 4)]" 2 "$ZERO" 0x "$ZERO" "$ZERO" 0 "$ZERO")"
 # new_safe <salt>: deploys a 2-of-3 Safe proxy and prints its address.
