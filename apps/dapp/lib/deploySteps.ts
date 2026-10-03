@@ -248,6 +248,16 @@ export function describeStep(step: DeployStep): { title: string; detail: string 
   }
 }
 
+/**
+ * Path of a prepared run published with the app (under `public/plans/`), selected with
+ * `?plan=<name>`. Only plain names are accepted, so the file always comes from this site; its
+ * content is still untrusted and goes through `parseRun`.
+ */
+export function publishedPlanPath(name: string, basePath = ""): string {
+  if (!/^[a-z0-9-]{1,64}$/.test(name)) fail("the plan name is not valid");
+  return `${basePath}/plans/${name}.json`;
+}
+
 /** Checks the connected wallet against a step just before it is sent. */
 export function checkBeforeSend(
   step: DeployStep,

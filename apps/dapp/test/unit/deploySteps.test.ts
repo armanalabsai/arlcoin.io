@@ -10,6 +10,7 @@ import {
   checkBeforeSend,
   describeStep,
   parseRun,
+  publishedPlanPath,
 } from "../../lib/deploySteps.ts";
 import { NetworkLocked } from "../../lib/network.ts";
 
@@ -128,5 +129,29 @@ describe("before each signature", () => {
       checkBeforeSend(step, { ...ok, nonce: step.nonce + 1 }, run.chainId) ?? "",
       /prepared again/,
     );
+  });
+});
+
+describe("published plans", () => {
+  it("accepts only plain names under the site's plans folder", () => {
+    assert.equal(publishedPlanPath("84532-safes"), "/plans/84532-safes.json");
+    assert.equal(publishedPlanPath("84532-safes", "/app"), "/app/plans/84532-safes.json");
+    for (const bad of ["", "../secret", "a/b", "https://evil.example/x", "A", "x".repeat(65)]) {
+      assert.throws(() => publishedPlanPath(bad), /not valid/);
+    }
+  });
+
+  it("the published Base Sepolia Safe plan is accepted and creates twelve 1-of-1 Safes", () => {
+    const run = parseRun(
+      JSON.parse(
+        readFileSync(new URL("../../public/plans/84532-safes.json", import.meta.url), "utf8"),
+      ),
+    );
+    assert.equal(run.chainId, 84532);
+    assert.equal(run.steps.length, 12);
+    for (const step of run.steps) {
+      assert.equal(step.kind, "safe");
+      if (step.kind === "safe") assert.equal(step.threshold, 1n);
+    }
   });
 });
