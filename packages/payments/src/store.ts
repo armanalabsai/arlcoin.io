@@ -5,7 +5,15 @@
 // It is for a single process. Several instances must share one store with an atomic
 // compare-and-set (for example a database row with a unique key).
 
-import { closeSync, fsyncSync, ftruncateSync, openSync, readFileSync, writeSync } from "node:fs";
+import {
+  closeSync,
+  constants,
+  fsyncSync,
+  ftruncateSync,
+  openSync,
+  readFileSync,
+  writeSync,
+} from "node:fs";
 
 import type { AuthorizationState, AuthorizationStore } from "./policy.ts";
 
@@ -16,11 +24,15 @@ export class FileAuthorizationStore implements AuthorizationStore {
    *  so nothing can swap the file between a check and a write. */
   readonly #fd: number;
   readonly #records = new Map<string, AuthorizationState>();
+  /** Byte length of the file: the position of the next append. */
+  #size = 0;
 
   constructor(path: string) {
-    // "a+": created if missing, readable, and every write lands at the end.
-    this.#fd = openSync(path, "a+", 0o600);
+    // Created if missing, readable and writable. Not opened in append mode: on Windows an
+    // append-mode descriptor cannot be truncated, so every write is placed at #size instead.
+    this.#fd = openSync(path, constants.O_RDWR | constants.O_CREAT, 0o600);
     const text = readFileSync(this.#fd, "utf8");
+    this.#size = Buffer.byteLength(text);
     let offset = 0;
     let line = 0;
     while (offset < text.length) {
@@ -36,7 +48,8 @@ export class FileAuthorizationStore implements AuthorizationStore {
       if (end === -1 && entry === undefined) {
         // A last record cut short by a crash was never acknowledged: drop it, so the next record
         // starts on a clean line.
-        ftruncateSync(this.#fd, Buffer.byteLength(text.slice(0, offset)));
+        this.#size = Buffer.byteLength(text.slice(0, offset));
+        ftruncateSync(this.#fd, this.#size);
         break;
       }
       const state = entry?.state as AuthorizationState;
@@ -47,7 +60,7 @@ export class FileAuthorizationStore implements AuthorizationStore {
       this.#records.set(entry.key, state);
       if (end === -1) {
         // A complete last record without its newline: add it before appending.
-        writeSync(this.#fd, "\n");
+        this.#write("\n");
         break;
       }
       offset = end + 1;
@@ -56,8 +69,17 @@ export class FileAuthorizationStore implements AuthorizationStore {
     // chain. It stays recorded as `settling`, so it is never sent again.
   }
 
+  #write(text: string) {
+    const bytes = Buffer.from(text, "utf8");
+    let done = 0;
+    while (done < bytes.length) {
+      done += writeSync(this.#fd, bytes, done, bytes.length - done, this.#size + done);
+    }
+    this.#size += bytes.length;
+  }
+
   #append(key: string, state: AuthorizationState) {
-    writeSync(this.#fd, `${JSON.stringify({ key, state })}\n`);
+    this.#write(`${JSON.stringify({ key, state })}\n`);
     fsyncSync(this.#fd);
     this.#records.set(key, state);
   }
