@@ -32,7 +32,7 @@ jobs:
       - run: npm run lint
       - run: npm run format:check
       - run: npm test
-      - run: npm audit --audit-level=high
+      - run: node scripts/audit.mjs
 
   contracts:
     runs-on: ubuntu-latest
@@ -228,7 +228,7 @@ jobs:
       # Builds against the local chain, deploys the fixture, checks the committed contract
       # addresses and drives the app in Chromium. Local Anvil only.
       - run: npm run test:e2e
-      - run: npm audit --audit-level=high
+      - run: node ../../scripts/audit.mjs
 
   web:
     runs-on: ubuntu-latest
@@ -256,4 +256,4 @@ jobs:
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
-      - run: npm audit --audit-level=high
+      - run: node ../../scripts/audit.mjs

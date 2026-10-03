@@ -145,6 +145,18 @@ nobody can claim them. Both stay in the contract; `test_DirectTransferIsRetained
 `test_RoundingDustIsRetained` and the `BalanceFullyExplained` invariant show that principal and
 every claimable reward remain payable.
 
+## Dependency audit
+
+CI runs `scripts/audit.mjs` at the root and in each app instead of a bare
+`npm audit --audit-level=high`. Any high or critical advisory fails the build unless
+`.audit-allowlist.json` lists its GHSA id with a reason and an expiry date. An expired entry fails,
+so every exception is reviewed again, and an entry that no longer matches anything fails, so it
+gets removed.
+
+| Advisory              | Package (path)                                                                    | Why it is allowed                                                                                                        | Expires    |
+| --------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------- |
+| `GHSA-vfj7-8cjw-p6xm` | `braces` (eslint-config-next → @next/eslint-plugin-next → fast-glob → micromatch) | Lint-time only, on glob patterns written in this repository; not in the built sites. No patched `braces` release exists. | 2026-11-02 |
+
 ## Compiler
 
 solc 0.8.36. Its three known bugs (`MisorderedNamedParametersInRequireWithCustomErrors`,
