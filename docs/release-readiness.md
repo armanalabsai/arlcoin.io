@@ -82,22 +82,22 @@ Likely request content (to confirm when the site loads):
 
 ## 3. Remaining items by type
 
-| Item (launchpad-readiness #)                | Type                 | Minimum action                                                                       |
-| ------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------ |
-| EIP-7702 delegation on the deployer (8)     | TECHNICAL BLOCKER    | Switch back to a standard account on Base Sepolia; or use a fresh Ledger for mainnet |
-| Mainnet Safe signers and threshold (7)      | TECHNICAL BLOCKER    | Provide signer addresses (section 4)                                                 |
-| Aderyn, Halmos, Mythril re-run on Linux (5) | TECHNICAL BLOCKER    | Run on any Linux machine or restored CI                                              |
-| Basescan verification (2)                   | TECHNICAL BLOCKER    | Set `ETHERSCAN_API_KEY` (section 5)                                                  |
-| Public source repository (16)               | TECHNICAL BLOCKER    | Restore GitHub (ticket 4818868) or publish to another owned host                     |
-| Liquidity plan (13)                         | ADMIN/LEGAL          | Pool size, pair, venue, LP custody                                                   |
-| Sale parameters (14)                        | ADMIN/LEGAL          | Tokens offered, raise, currency, buyer unlock                                        |
-| Security contact (18)                       | ADMIN/LEGAL          | Email on the project domain                                                          |
-| Legal opinion, KYC (19)                     | ADMIN/LEGAL          | Counsel and provider, if the launchpad requires them                                 |
-| Independent audit (3)                       | ADMIN/LEGAL          | Decide: paid audit, or disclose "not audited"                                        |
-| Social channels (20)                        | OPTIONAL             | Required by most launchpads in practice                                              |
-| Public test period and bug bounty (21)      | OPTIONAL             | Needs items 16 and 18                                                                |
-| Runtime Verification readiness assessment   | OPTIONAL             | Free; needs items 16 and 18                                                          |
-| Mainnet deployment (22)                     | Follows the blockers | After all technical blockers and an approved TGE                                     |
+| Item (launchpad-readiness #)                | Type                 | Minimum action                                                                                               |
+| ------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------ |
+| EIP-7702 delegation on the deployer (8)     | TECHNICAL BLOCKER    | Switch back to a standard account on Base Sepolia; or use a fresh Ledger for mainnet                         |
+| Mainnet Safe signers and threshold (7)      | TECHNICAL BLOCKER    | Provide signer addresses (section 4)                                                                         |
+| Aderyn, Halmos, Mythril re-run on Linux (5) | OPTIONAL             | Supplementary (owner decision 2026-10-05); tests, fuzz, invariants, Slither and reproducibility already pass |
+| Basescan verification (2)                   | TECHNICAL BLOCKER    | Set `ETHERSCAN_API_KEY` (section 5)                                                                          |
+| Public source repository (16)               | TECHNICAL BLOCKER    | Restore GitHub (ticket 4818868) or publish to another owned host                                             |
+| Liquidity plan (13)                         | ADMIN/LEGAL          | Pool size, pair, venue, LP custody                                                                           |
+| Sale parameters (14)                        | ADMIN/LEGAL          | Tokens offered, raise, currency, buyer unlock                                                                |
+| Security contact (18)                       | ADMIN/LEGAL          | Choose an address: the site already lists `armanalabsai@gmail.com`; a project-domain address is preferred    |
+| Legal opinion, KYC (19)                     | ADMIN/LEGAL          | Counsel and provider, if the launchpad requires them                                                         |
+| Independent audit (3)                       | ADMIN/LEGAL          | Decide: paid audit, or disclose "not audited"                                                                |
+| Social channels (20)                        | OPTIONAL             | Required by most launchpads in practice                                                                      |
+| Public test period and bug bounty (21)      | OPTIONAL             | Needs items 16 and 18                                                                                        |
+| Runtime Verification readiness assessment   | OPTIONAL             | Free; needs items 16 and 18                                                                                  |
+| Mainnet deployment (22)                     | Follows the blockers | After all technical blockers and an approved TGE                                                             |
 
 ## 4. Base Mainnet security architecture (proposal; nothing created)
 
@@ -111,14 +111,14 @@ reviewed change made only after the blockers below are closed.
 | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------ | ---------- |
 | Deployer                                                                                 | 1 fresh EOA, never delegated, used only to deploy; holds no role                   | n/a                      | Ledger     |
 | 11 role Safes (incl. Founder, Treasury, Liquidity, Public Launch, vesting beneficiaries) | 3 signers: Founder + 2 trusted signers in different locations                      | **2-of-3**               | 3 Ledgers  |
-| Guardian Safe                                                                            | 2 signers, disjoint from the role-Safe signers                                     | **1-of-2** (fast cancel) | 2 Ledgers  |
+| Guardian Safe                                                                            | 2 signers (minimum 1), disjoint from the role-Safe signers                         | **1-of-2** (fast cancel) | 2 Ledgers  |
 | Treasury timelock                                                                        | Proposer and executor: Treasury Safe; canceller: Guardian Safe; delay 48 h (floor) | n/a                      | (contract) |
 
 - Guardian 1-of-2 is safe because the guardian can only cancel; it cannot propose, execute or move
   funds. A higher threshold would slow an emergency cancel.
-- The Founder allocation is ordinary ERC-20 held by the Founder Safe. With a shared signer set the
-  co-signers can also move it; if the Founder wants sole control, that needs a tooling change and a
-  documented decision.
+- Founder Safe: under the approved 2-of-3 architecture (owner decision 2026-10-05), like every
+  role Safe. It holds the 2,100,000 ARL Founder allocation, unlocked at TGE; moving it needs two of
+  the three signers. No tooling change.
 - Ledger: each signer connects the Ledger to the Safe{Wallet} web app (directly or through
   MetaMask). Keep MetaMask's smart-account and gas-sponsorship off for every signer and the
   deployer. Verify every transaction hash on the Ledger screen.
@@ -148,3 +148,35 @@ Foundry 1.8.3 uses the Etherscan V2 API, so one free Etherscan key covers Base S
 
 4. Confirm on `sepolia.basescan.org` that each of the four addresses shows "Contract Source Code
    Verified".
+
+## 6. Public repository
+
+### What the reviewers need
+
+| Reviewer                | Need                                                                                                              | Source                                                          |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Runtime Verification    | Code access for the readiness assessment: a public repository, or read access to a private one, at a fixed commit | Inferred from their audit process; not stated on the Base offer |
+| Security.xyz auditors   | Code to scope a proposal: repository link and commit                                                              | Inferred; site unreachable on 2026-10-05                        |
+| Launchpads and listings | A public repository link next to the verified contracts                                                           | `docs/listing-applications.md`                                  |
+
+A private repository with read access for one reviewer is enough for Runtime Verification. A
+public one is needed for launchpads.
+
+### Checklist before publishing (nothing published)
+
+| Check                                                   | Result (2026-10-05)                                                                                                            |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| No private keys, seeds or API keys in tracked files     | PASS: pattern scan of every tracked file found none                                                                            |
+| Signer configuration not committed                      | PASS: `contracts/deploy/deployments/` and `deploy/plans/` are git-ignored                                                      |
+| Web3Forms access key in `apps/web/src/content/forms.ts` | Accepted: a Web3Forms access key is a public, client-side key by design; it only lets forms post to the team inbox             |
+| Contact email in the site and docs                      | `armanalabsai@gmail.com` is public by intent (contact form)                                                                    |
+| Author emails in Git history                            | 4 author names, all with `gokturkalazdaghan@gmail.com`. Publishing shows this address. History is not rewritten; owner decides |
+| Licences                                                | PASS: `LICENSE` (Apache-2.0), `NOTICE`, `THIRD_PARTY_LICENSES.md`                                                              |
+| Security policy and contact                             | `SECURITY.md` present; the reporting link must be updated to the new host                                                      |
+| Submodules                                              | OpenZeppelin, forge-std, solidity-datetime from their public upstreams (pinned commits)                                        |
+| Branches                                                | 53 local branches; publish `main` (others are merged or superseded)                                                            |
+| README, docs, deployment addresses                      | Present; Base Sepolia addresses in `docs/audit-evidence.md`                                                                    |
+| Repository URL in docs                                  | `gokturkalazdaghan-dot/ARLCOIN` appears in docs; update if the host changes                                                    |
+
+To publish (owner action): restore the GitHub account (ticket 4818868) and push `main` from the
+local repository, or create a repository on another host the owner controls and push `main` there.
