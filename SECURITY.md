@@ -2,14 +2,17 @@
 
 ## Status
 
-ARL Protocol is under development. No contract is deployed on any network,
-and the code has **not** been audited. Do not use it to hold value.
+ARL Protocol is under development. It is deployed on Base Sepolia (testnet)
+only; nothing is on Base Mainnet. The code has **not** been independently
+audited. Free, reproducible security checks and their results are in
+[docs/audit-evidence.md](docs/audit-evidence.md). Do not use it to hold value.
 
 ## Reporting a vulnerability
 
 Report vulnerabilities privately through
 [GitHub private vulnerability reporting](https://github.com/gokturkalazdaghan-dot/ARLCOIN/security/advisories/new).
-Do not open a public issue.
+Do not open a public issue. While the GitHub account is suspended this link
+is unavailable; a project email address will be published here.
 
 Include the affected file or component, the commit, steps to reproduce and
 the impact you expect. We aim to acknowledge reports within 3 business days.

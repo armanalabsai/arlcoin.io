@@ -1,6 +1,6 @@
 # External Audit Scope
 
-Status: **prepared for an external audit; no audit has been performed.** Nothing is deployed.
+Status: **prepared for an external audit; no audit has been performed.** Deployed on Base Sepolia only (testnet, 2026-10-04); addresses and the free security evidence are in [`audit-evidence.md`](audit-evidence.md). Nothing is on Base Mainnet.
 Base Mainnet is hard-locked in the deployment tooling (see
 [`deployment.md`](deployment.md#network-gate)).
 
