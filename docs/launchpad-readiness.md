@@ -30,13 +30,13 @@ Status as of 2026-10-05. ARL is deployed on **Base Sepolia only**; nothing is on
 
 ## Free or subsidised audit routes (checked 2026-10-05)
 
-| Route                                   | What it offers                                                       | Fit for ARL                                                         |
-| --------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| Base Services Hub: Security.xyz         | Security grants, up to 100,000 USD per auditor, via an audit request | Best free route; needs an application and a public repo             |
-| Base Services Hub: Runtime Verification | Free audit-readiness assessment                                      | Free; useful as a first independent look, not an audit              |
-| Sherlock, Code4rena, CodeHawks contests | Paid by the project (prize pool)                                     | No free route found for project audits                              |
-| CodeHawks First Flights                 | Practice contests on codebases chosen by Cyfrin                      | Not an application route for projects; no claim can be made from it |
-| Superchain / Hacken audit grants        | Subsidised audits for OP Stack projects                              | Possible; eligibility not confirmed                                 |
+| Route                                   | What it offers                                                                                                                                   | Fit for ARL                                                                                                          |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| Base Services Hub: Security.xyz         | Marketplace: an audit request returns proposals from auditors, each offering up to 100,000 USD of discount ("security grants") for Base builders | Not free: it lowers a paid audit's price. Site unreachable on 2026-10-05; terms from docs.base.org/base-services-hub |
+| Base Services Hub: Runtime Verification | Free audit-readiness assessment and consultation, for Base builders who select "Base" or mention Base when contacting                            | The only genuinely free item found; an assessment, not an audit                                                      |
+| Sherlock, Code4rena, CodeHawks contests | Paid by the project (prize pool)                                                                                                                 | No free route found for project audits                                                                               |
+| CodeHawks First Flights                 | Practice contests on codebases chosen by Cyfrin                                                                                                  | Not an application route for projects; no claim can be made from it                                                  |
+| Superchain / Hacken audit grants        | Subsidised audits for OP Stack projects                                                                                                          | Possible; eligibility not confirmed                                                                                  |
 
 No application has been submitted. Each needs the owner's approval because it sends project
 information to a third party.
