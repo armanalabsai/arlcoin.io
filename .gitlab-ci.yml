@@ -1,0 +1,121 @@
+# GitLab CI: the same checks as .github/workflows/ci.yml, for the GitLab repository.
+# Foundry is installed from its pinned v1.8.3 release archive and checked by SHA-256.
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+  GIT_SUBMODULE_DEPTH: 1
+  NEXT_TELEMETRY_DISABLED: "1"
+  FOUNDRY_URL: https://github.com/foundry-rs/foundry/releases/download/v1.8.3/foundry_v1.8.3_linux_amd64.tar.gz
+  FOUNDRY_SHA256: 7ca48e6ca3cac1bce1403ca67e5bc1dc3bc1fd818199c9957c7165079c228568
+
+default:
+  image: node:22-bookworm
+  interruptible: true
+
+.foundry: &foundry
+  - curl -sSfL -o /tmp/foundry.tar.gz "$FOUNDRY_URL"
+  - echo "$FOUNDRY_SHA256  /tmp/foundry.tar.gz" | sha256sum -c
+  - mkdir -p "$HOME/.foundry/bin" && tar xzf /tmp/foundry.tar.gz -C "$HOME/.foundry/bin"
+  - export PATH="$HOME/.foundry/bin:$PATH"
+  - forge --version | grep -q cae51ad458f6abb64852b7709eb784352429825d
+
+typescript:
+  timeout: 10m
+  script:
+    - npm ci
+    - npm run typecheck
+    - npm run lint
+    - npm run format:check
+    - npm test
+    - node scripts/audit.mjs
+
+contracts:
+  timeout: 20m
+  script:
+    - *foundry
+    - test "$(git -C contracts/lib/openzeppelin-contracts rev-parse HEAD)" = 5fd1781b1454fd1ef8e722282f86f9293cacf256
+    - test "$(git -C contracts/lib/forge-std rev-parse HEAD)" = bf647bd6046f2f7da30d0c2bf435e5c76a780c1b
+    - test "$(git -C contracts/lib/solidity-datetime rev-parse HEAD)" = 294fc244973cc5f9ec374713affde12c1403927c
+    - cd contracts
+    - forge fmt --check
+    - forge build --sizes --skip test --skip script
+    - forge test -vv
+    - forge snapshot --no-match-test "testFuzz|invariant" --no-match-path "test/symbolic/*" --check
+    - cd ..
+    - node scripts/check-token-abi.mjs
+
+slither:
+  image: python:3.12-bookworm
+  timeout: 20m
+  script:
+    - *foundry
+    - pip install slither-analyzer==0.11.6
+    - cd contracts
+    - slither . --foundry-compile-all --filter-paths "lib/|test/" --exclude-dependencies --fail-low
+
+symbolic:
+  image: python:3.12-bookworm
+  timeout: 20m
+  variables:
+    FOUNDRY_DYNAMIC_TEST_LINKING: "false"
+  script:
+    - *foundry
+    - pip install halmos==0.3.3
+    - cd contracts
+    - halmos --match-contract ARLSymbolic --solver-timeout-assertion 120000
+
+rehearsal:
+  timeout: 20m
+  script:
+    - *foundry
+    - npm ci
+    - (cd contracts && forge build --skip test --skip script)
+    - npm run check:bytecode
+    - npm run rehearse:local
+
+dapp:
+  timeout: 25m
+  script:
+    - *foundry
+    - npm ci
+    - cd apps/dapp
+    - npm ci
+    - npm run typecheck
+    - npm run lint
+    - npm test
+    - npm run build
+    - npx playwright install --with-deps chromium
+    - npm run test:e2e
+    - node ../../scripts/audit.mjs
+
+web:
+  timeout: 20m
+  script:
+    - cd apps/web
+    - npm ci
+    - npm run typecheck
+    - npm run lint
+    - npm test
+    - npm run build
+    - npx playwright install --with-deps chromium
+    - npm run test:e2e
+    - node ../../scripts/audit.mjs
+
+# Supplementary analysers (not blockers): results are kept as artifacts and triaged in
+# docs/audit-scope.md. Aderyn reports triaged findings, so the job does not fail the pipeline.
+aderyn:
+  timeout: 20m
+  allow_failure: true
+  script:
+    - *foundry
+    - npm i -g @cyfrin/aderyn@0.6.8
+    - cd contracts
+    - aderyn . --src src -o aderyn-report.md
+  artifacts:
+    paths: [contracts/aderyn-report.md]
+    expire_in: 30 days
