@@ -180,3 +180,19 @@ public one is needed for launchpads.
 
 To publish (owner action): restore the GitHub account (ticket 4818868) and push `main` from the
 local repository, or create a repository on another host the owner controls and push `main` there.
+
+## 7. Remaining release checklist (CTO decision 2026-10-05: no mainnet yet)
+
+| #   | Item                                                                              | Owner action                        | Status                                      |
+| --- | --------------------------------------------------------------------------------- | ----------------------------------- | ------------------------------------------- |
+| 1   | EIP-7702 delegation removed on Base Sepolia                                       | MetaMask clean-up on Base Sepolia   | Open; `cast code` still `0xef0100…e32b`     |
+| 2   | Private GitLab repository `armanalabs-group/arlcoin`                              | Push `main` (owner runs the push)   | Not created yet; stays private when created |
+| 3   | Basescan verification                                                             | Set `ETHERSCAN_API_KEY` (section 5) | Ready; variable not set                     |
+| 4   | Runtime Verification readiness assessment                                         | Approve sending                     | Draft only (section 2)                      |
+| 5   | Mainnet signers: 3 Ledger role signers, guardian signer(s), clean Ledger deployer | Provide public addresses            | Open                                        |
+| 6   | Liquidity plan and sale parameters                                                | Decide                              | Open                                        |
+| 7   | Legal opinion / KYC, social channels                                              | Decide                              | Open                                        |
+| 8   | Audit position: paid audit or "not audited" disclosure                            | Decide (no spending now)            | Open                                        |
+| 9   | Mainnet network gate                                                              | Separate reviewed change after 1-8  | Locked                                      |
+
+Supplementary (not blockers): Aderyn, Halmos and Mythril re-run on Linux.
