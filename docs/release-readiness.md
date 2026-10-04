@@ -41,7 +41,7 @@ Form at `runtimeverification.com/contact`, step 1 (steps 2 "Scope" and 3 "Contac
 | How soon                     | Planning ahead 1-3 months                                                  |
 | Project description          | See text below                                                             |
 | Scope (step 2)               | 6 contracts, 368 nSLOC (`docs/audit-scope.md`); 4 deployed on Base Sepolia |
-| Contact (step 3)             | Owner's name and a project email (needed; not yet available)               |
+| Contact (step 3)             | armanalabsai@gmail.com                                                     |
 
 Description / email text:
 
@@ -78,7 +78,7 @@ Likely request content (to confirm when the site loads):
 | Documentation | `docs/audit-scope.md`, `docs/token-design.md`, `docs/audit-evidence.md`                                                      |
 | Timeline      | Before 2026-11-20, for a 2026-12-01 TGE target                                                                               |
 | Budget        | Owner decision; paid engagement                                                                                              |
-| Contact       | Project email (needed)                                                                                                       |
+| Contact       | armanalabsai@gmail.com                                                                                                       |
 
 ## 3. Remaining items by type
 
@@ -91,7 +91,7 @@ Likely request content (to confirm when the site loads):
 | Public source repository (16)               | TECHNICAL BLOCKER    | Restore GitHub (ticket 4818868) or publish to another owned host                                             |
 | Liquidity plan (13)                         | ADMIN/LEGAL          | Pool size, pair, venue, LP custody                                                                           |
 | Sale parameters (14)                        | ADMIN/LEGAL          | Tokens offered, raise, currency, buyer unlock                                                                |
-| Security contact (18)                       | ADMIN/LEGAL          | Choose an address: the site already lists `armanalabsai@gmail.com`; a project-domain address is preferred    |
+| Security contact (18)                       | DONE                 | `armanalabsai@gmail.com` (owner decision 2026-10-05)                                                         |
 | Legal opinion, KYC (19)                     | ADMIN/LEGAL          | Counsel and provider, if the launchpad requires them                                                         |
 | Independent audit (3)                       | ADMIN/LEGAL          | Decide: paid audit, or disclose "not audited"                                                                |
 | Social channels (20)                        | OPTIONAL             | Required by most launchpads in practice                                                                      |
