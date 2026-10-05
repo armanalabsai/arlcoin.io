@@ -11,11 +11,13 @@ Everything uses contracts and tooling already in this repository; only Base gas 
 1. **Deploy** the 12 Safes and the 4 contracts on Base Mainnet from the clean deployer, after the
    reviewed `networkGate` change. The token mints 5,000,000 ARL to the Public Launch Safe and
    2,000,000 ARL to the Liquidity Safe.
-2. **Pool, single-sided:** the Liquidity Safe (2-of-3) opens an ARL/USDC concentrated-liquidity
+2. **Pools, single-sided:** the Liquidity Safe (2-of-3) opens ARL/USDC, ARL/USDT, ARL/WETH and
+   ARL/cbBTC pools (owner decision 2026-10-05); each is an ARL-only concentrated-liquidity
    position on Uniswap on Base, initialised at 0.20 USD per ARL, with a price range that starts
-   at 0.20 USD and lies entirely above the current price, so it holds only ARL. Buyers pay USDC
-   into the pool; nothing is sold below 0.20 USD and no USDC is needed to open it. The position
-   NFT stays in the Liquidity Safe for at least 12 months. The ARL amount in the range is a Safe
+   at 0.20 USD and lies entirely above the current price, so it holds only ARL. Buyers pay the
+   quote token into the pool; nothing is sold below the floor and no quote token is needed to
+   open it. The WETH and cbBTC floors are fixed in ETH and BTC at the ETH and BTC prices when the
+   batch is built. The position NFTs stay in the Liquidity Safe for at least 12 months. The ARL amount in the range is a Safe
    decision at the time (not set here).
 3. **Public Launch claim:** the Public Launch Safe funds `ARLMerkleDistributor` with at most
    1,000,000 ARL for whitelist sign-ups and any launchpad buyers, at most 10,000 ARL each,

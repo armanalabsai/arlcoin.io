@@ -7,7 +7,7 @@ import { FactList, PageShell } from "@/site/PageShell.tsx";
 
 const title = "How to get ARL · ARL";
 const description =
-  "Where ARL becomes available: the official ARL/USDC pool on Uniswap on Base, from 0.20 USD per ARL, opened at the TGE on 1 November 2026. Only the official contract address is ARL.";
+  "Where ARL becomes available: the official ARL/USDC, ARL/USDT, ARL/ETH and ARL/BTC pools on Uniswap on Base, from 0.20 USD per ARL, opened at the TGE on 1 November 2026. Only the official contract address is ARL.";
 
 const USDC_BASE = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const token = SITE.mainnet.token;
@@ -29,8 +29,8 @@ export default function BuyPage() {
       title="How to get ARL"
       lead={
         token
-          ? "ARL trades in the official ARL/USDC pool on Uniswap on Base. Check the contract address before you buy."
-          : `ARL is not available yet. It becomes available at the TGE, targeted for ${SITE.tgeTarget}, in the official ARL/USDC pool on Uniswap on Base.`
+          ? "ARL trades in the official ARL/USDC, ARL/USDT, ARL/ETH and ARL/BTC pools on Uniswap on Base. Check the contract address before you buy."
+          : `ARL is not available yet. It becomes available at the TGE, targeted for ${SITE.tgeTarget}, in the official ARL/USDC, ARL/USDT, ARL/ETH and ARL/BTC pools on Uniswap on Base.`
       }
     >
       {swapUrl && token ? (
@@ -53,7 +53,7 @@ export default function BuyPage() {
       <FactList
         title="Before you buy"
         items={[
-          "The official pool is ARL/USDC (1% fee tier) on Uniswap v3 on Base, opened by the Liquidity Safe. It starts at 0.20 USD per ARL and holds only ARL, so no ARL in it is sold below 0.20 USD.",
+          "The official pools are ARL/USDC, ARL/USDT, ARL/WETH and ARL/cbBTC (1% fee tier) on Uniswap v3 on Base, opened by the Liquidity Safe. Each starts at 0.20 USD per ARL and holds only ARL, so no ARL in them is sold below that floor. The ETH and BTC floors are fixed in ETH and BTC at launch, so their dollar value moves with those markets.",
           "Only the contract address published on this page and in the repository is ARL. Tokens with the same name on other networks or at other addresses are not ARL.",
           "ARL will never ask for your private key, your seed phrase or a payment to a personal address. Anyone who does is attempting theft.",
           "No independent audit has been performed. Tokens can lose all their value. Nothing here is investment advice or a promise of price or listing.",

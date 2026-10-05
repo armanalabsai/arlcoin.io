@@ -1,14 +1,14 @@
-// The Liquidity Safe's launch position on Uniswap v3 (Base): a single-sided ARL/USDC position
-// whose range starts at the listing price, so it holds only ARL and never sells below that
-// price (docs/launch-route.md, section 1). This module builds the three calls the Safe makes:
+// The Liquidity Safe's launch positions on Uniswap v3 (Base): one single-sided pool per quote
+// token (USDC, USDT, WETH, cbBTC), each with a range that starts at the listing price, so it
+// holds only ARL and never sells below that price (docs/launch-route.md, section 1). The batch:
 //
-//   1. NonfungiblePositionManager.createAndInitializePoolIfNecessary, just below the range
-//   2. ARL.approve(positionManager, amount)
-//   3. NonfungiblePositionManager.mint, ARL only, recipient the Liquidity Safe
+//   1. NonfungiblePositionManager.createAndInitializePoolIfNecessary per pool, below its range
+//   2. ARL.approve(positionManager, total)
+//   3. NonfungiblePositionManager.mint per pool, ARL only, recipient the Liquidity Safe
 //
-// and writes them as a Safe Transaction Builder batch. Uniswap's TickMath is ported to BigInt;
-// no Uniswap SDK is needed. Addresses: developers.uniswap.org v3 Base deployments and Circle's
-// USDC list, checked 2026-10-05.
+// written as one Safe Transaction Builder batch. Uniswap's TickMath is ported to BigInt; no
+// Uniswap SDK is needed. Addresses: developers.uniswap.org v3 Base deployments, Circle's USDC
+// list, and on-chain symbol, decimals and supply checks on Base, 2026-10-05.
 
 import { encodeFunctionData, getAddress, isAddress, parseUnits, type Hex } from "viem";
 
@@ -27,10 +27,20 @@ export const UNISWAP_V3_BASE = {
   quoterV2: "0x3d4e44Eb1374240CE5F1B871ab261CD16335B76a",
 } as const;
 
-/** Circle-issued USDC on Base Mainnet (6 decimals). */
-export const USDC_BASE = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
-export const USDC_DECIMALS = 6;
+/**
+ * Quote tokens on Base Mainnet. USDT is the bridged Tether USD on Base (the one with real
+ * supply; look-alike "USDT" contracts exist); cbBTC is Coinbase Wrapped BTC.
+ */
+export const QUOTES = {
+  USDC: { address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", decimals: 6 },
+  USDT: { address: "0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2", decimals: 6 },
+  WETH: { address: "0x4200000000000000000000000000000000000006", decimals: 18 },
+  cbBTC: { address: "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf", decimals: 8 },
+} as const;
+export type QuoteSymbol = keyof typeof QUOTES;
+export const USDC_BASE = QUOTES.USDC.address;
 export const ARL_DECIMALS = 18;
+export const LIQUIDITY_ALLOCATION = 2_000_000n;
 
 /** The 1% fee tier, the usual tier for a new token, and its tick spacing. */
 export const FEE = 10_000;
@@ -94,17 +104,35 @@ function tickAtOrBelow(num: bigint, den: bigint): number {
 const floorTo = (t: number, s: number) => Math.floor(t / s) * s;
 const ceilTo = (t: number, s: number) => Math.ceil(t / s) * s;
 
+/** A positive decimal string as a fraction [numerator, denominator]. */
+function decimal(name: string, value: string): [bigint, bigint] {
+  const m = /^(\d+)(?:\.(\d+))?$/.exec(value);
+  if (!m) return fail(`${name}: positive decimal`);
+  const whole = m[1] ?? "0";
+  const frac = m[2] ?? "";
+  const num = BigInt(whole + frac);
+  if (num === 0n) fail(`${name}: positive decimal`);
+  return [num, 10n ** BigInt(frac.length)];
+}
+
+export interface PoolLeg {
+  readonly quote: QuoteSymbol;
+  /** Whole ARL placed in this pool. */
+  readonly arlAmount: string;
+  /** USD price of one quote token when the batch is built ("1" for USDC and USDT). */
+  readonly quoteUsd: string;
+}
+
 export interface PoolInput {
   /** The ARL token address on Base Mainnet. */
   readonly token: string;
-  /** The Liquidity Safe: it signs the batch and receives the position NFT. */
+  /** The Liquidity Safe: it signs the batch and receives every position NFT. */
   readonly liquiditySafe: string;
-  /** Whole ARL placed in the position (decided by the Safe owners at the time). */
-  readonly arlAmount: string;
   /** Listing price in USD per ARL, as a decimal string (approved: "0.20"). */
   readonly priceUsd: string;
-  /** Unix seconds after which the mint call reverts. */
+  /** Unix seconds after which the mint calls revert. */
   readonly deadline: number;
+  readonly legs: readonly PoolLeg[];
 }
 
 export interface SafeTx {
@@ -114,8 +142,9 @@ export interface SafeTx {
   readonly description: string;
 }
 
-export interface PoolPlan {
-  readonly chainId: number;
+export interface PoolLegPlan {
+  readonly quote: QuoteSymbol;
+  readonly quoteUsd: string;
   readonly token0: string;
   readonly token1: string;
   readonly arlIsToken0: boolean;
@@ -124,7 +153,16 @@ export interface PoolPlan {
   readonly tickUpper: number;
   readonly sqrtPriceX96: string;
   readonly arlAmountWei: string;
+  /** Floor price in raw units: quote raw per ARL raw = priceNum / priceDen. */
+  readonly priceNum: string;
+  readonly priceDen: string;
+}
+
+export interface PoolPlan {
+  readonly chainId: number;
   readonly priceUsd: string;
+  readonly totalArlWei: string;
+  readonly legs: readonly PoolLegPlan[];
   readonly transactions: readonly SafeTx[];
 }
 
@@ -193,92 +231,43 @@ function address(name: string, value: string): `0x${string}` {
 }
 
 /**
- * Builds the Liquidity Safe's three calls. The range starts at the first tick whose price is at
- * least `priceUsd` and runs to the edge of the price space; the pool starts one tick below it,
- * so the position holds only ARL and the first purchase moves the price into it.
+ * One pool. The range starts at the first tick whose price is at least the floor and runs to the
+ * edge of the price space; the pool starts one tick below it, so the position holds only ARL and
+ * the first purchase moves the price into it.
  */
-export function buildPoolPlan(input: PoolInput): PoolPlan {
-  const token = address("token", input.token);
-  const safe = address("liquiditySafe", input.liquiditySafe);
-  if (!/^[1-9]\d*$/.test(input.arlAmount)) fail("arlAmount: whole ARL, a positive integer");
-  if (!/^\d+(\.\d+)?$/.test(input.priceUsd) || Number(input.priceUsd) <= 0)
-    fail("priceUsd: positive decimal");
-  if (!Number.isInteger(input.deadline) || input.deadline <= 0) fail("deadline: unix seconds");
-  const amount = parseUnits(input.arlAmount, ARL_DECIMALS);
-  if (amount > parseUnits("2000000", ARL_DECIMALS))
-    fail("arlAmount: more than the 2,000,000 ARL Liquidity allocation");
+function buildLeg(token: `0x${string}`, leg: PoolLeg, priceUsd: string): PoolLegPlan {
+  if (!Object.hasOwn(QUOTES, leg.quote)) fail(`quote: one of ${Object.keys(QUOTES).join(", ")}`);
+  const quote = QUOTES[leg.quote];
+  if (!/^[1-9]\d*$/.test(leg.arlAmount)) fail(`${leg.quote}: arlAmount must be whole ARL`);
+  const [pn, pd] = decimal("priceUsd", priceUsd);
+  const [qn, qd] = decimal(`${leg.quote}.quoteUsd`, leg.quoteUsd);
+  if ((leg.quote === "USDC" || leg.quote === "USDT") && leg.quoteUsd !== "1")
+    fail(`${leg.quote}.quoteUsd: stablecoins are priced at 1`);
+  // Quote raw per ARL raw = (priceUsd / quoteUsd) * 10^quoteDecimals / 10^18.
+  const priceNum = pn * qd * 10n ** BigInt(quote.decimals);
+  const priceDen = pd * qn * 10n ** BigInt(ARL_DECIMALS);
 
-  // USD per ARL as a fraction of raw units: usdcRaw / arlRaw = price * 10^6 / 10^18.
-  const [whole, frac = ""] = input.priceUsd.split(".");
-  const priceNum = BigInt(whole + frac) * 10n ** BigInt(USDC_DECIMALS);
-  const priceDen = 10n ** BigInt(frac.length) * 10n ** BigInt(ARL_DECIMALS);
-
-  const arlIsToken0 = token.toLowerCase() < USDC_BASE.toLowerCase();
+  const arlIsToken0 = token.toLowerCase() < quote.address.toLowerCase();
   let tickLower: number;
   let tickUpper: number;
   let sqrtPriceX96: bigint;
   if (arlIsToken0) {
-    // Price is USDC per ARL. ARL-only positions lie above the current price.
+    // Price is quote per ARL. ARL-only positions lie above the current price.
     const t = tickAtOrBelow(priceNum, priceDen);
     const atOrAbove = sqrtRatioAtTick(t) ** 2n * priceDen === priceNum * Q96 * Q96 ? t : t + 1;
     tickLower = ceilTo(atOrAbove, TICK_SPACING);
     tickUpper = floorTo(MAX_TICK, TICK_SPACING);
     sqrtPriceX96 = sqrtRatioAtTick(tickLower) - 1n; // current tick = tickLower - 1
   } else {
-    // Price is ARL per USDC. ARL-only positions lie below the current price.
+    // Price is ARL per quote. ARL-only positions lie below the current price.
     tickUpper = floorTo(tickAtOrBelow(priceDen, priceNum), TICK_SPACING);
     tickLower = ceilTo(MIN_TICK, TICK_SPACING);
     sqrtPriceX96 = sqrtRatioAtTick(tickUpper); // current tick = tickUpper
   }
-
-  const [token0, token1] = arlIsToken0 ? [token, USDC_BASE] : [USDC_BASE, token];
-  const amountMin = (amount * 999n) / 1000n;
-  const pm = UNISWAP_V3_BASE.positionManager;
-  const transactions: SafeTx[] = [
-    {
-      to: pm,
-      value: "0",
-      data: encodeFunctionData({
-        abi: positionManagerAbi,
-        functionName: "createAndInitializePoolIfNecessary",
-        args: [token0 as `0x${string}`, token1 as `0x${string}`, FEE, sqrtPriceX96],
-      }),
-      description: `Create the ARL/USDC 1% pool, starting just below ${input.priceUsd} USD per ARL`,
-    },
-    {
-      to: token,
-      value: "0",
-      data: encodeFunctionData({ abi: erc20Abi, functionName: "approve", args: [pm, amount] }),
-      description: `Allow the position manager to take exactly ${input.arlAmount} ARL`,
-    },
-    {
-      to: pm,
-      value: "0",
-      data: encodeFunctionData({
-        abi: positionManagerAbi,
-        functionName: "mint",
-        args: [
-          {
-            token0: token0 as `0x${string}`,
-            token1: token1 as `0x${string}`,
-            fee: FEE,
-            tickLower,
-            tickUpper,
-            amount0Desired: arlIsToken0 ? amount : 0n,
-            amount1Desired: arlIsToken0 ? 0n : amount,
-            amount0Min: arlIsToken0 ? amountMin : 0n,
-            amount1Min: arlIsToken0 ? 0n : amountMin,
-            recipient: safe,
-            deadline: BigInt(input.deadline),
-          },
-        ],
-      }),
-      description: `Open the ARL-only position (${input.arlAmount} ARL from ${input.priceUsd} USD up); the NFT goes to the Liquidity Safe`,
-    },
-  ];
-
+  const [token0, token1] = arlIsToken0 ? [token, quote.address] : [quote.address, token];
   return {
-    chainId: PRODUCTION_CHAIN_ID,
+    quote: leg.quote,
+    quoteUsd: leg.quoteUsd,
     token0,
     token1,
     arlIsToken0,
@@ -286,20 +275,92 @@ export function buildPoolPlan(input: PoolInput): PoolPlan {
     tickLower,
     tickUpper,
     sqrtPriceX96: sqrtPriceX96.toString(),
-    arlAmountWei: amount.toString(),
+    arlAmountWei: parseUnits(leg.arlAmount, ARL_DECIMALS).toString(),
+    priceNum: priceNum.toString(),
+    priceDen: priceDen.toString(),
+  };
+}
+
+/** Builds every pool, one approval for the total, and the mints, as one batch. */
+export function buildPoolPlan(input: PoolInput): PoolPlan {
+  const token = address("token", input.token);
+  const safe = address("liquiditySafe", input.liquiditySafe);
+  if (!Number.isInteger(input.deadline) || input.deadline <= 0) fail("deadline: unix seconds");
+  if (input.legs.length === 0) fail("legs: at least one pool");
+  const seen = new Set<string>();
+  for (const leg of input.legs) {
+    if (seen.has(leg.quote)) fail(`${leg.quote}: listed twice`);
+    seen.add(leg.quote);
+  }
+  const legs = input.legs.map((leg) => buildLeg(token, leg, input.priceUsd));
+  const total = legs.reduce((sum, l) => sum + BigInt(l.arlAmountWei), 0n);
+  if (total > LIQUIDITY_ALLOCATION * 10n ** BigInt(ARL_DECIMALS))
+    fail("legs: more than the 2,000,000 ARL Liquidity allocation in total");
+
+  const pm = UNISWAP_V3_BASE.positionManager;
+  const creates: SafeTx[] = legs.map((l) => ({
+    to: pm,
+    value: "0",
+    data: encodeFunctionData({
+      abi: positionManagerAbi,
+      functionName: "createAndInitializePoolIfNecessary",
+      args: [l.token0 as `0x${string}`, l.token1 as `0x${string}`, FEE, BigInt(l.sqrtPriceX96)],
+    }),
+    description: `Create the ARL/${l.quote} 1% pool just below ${input.priceUsd} USD per ARL`,
+  }));
+  const approve: SafeTx = {
+    to: token,
+    value: "0",
+    data: encodeFunctionData({ abi: erc20Abi, functionName: "approve", args: [pm, total] }),
+    description: "Allow the position manager to take exactly the total ARL for the pools",
+  };
+  const mints: SafeTx[] = legs.map((l) => {
+    const amount = BigInt(l.arlAmountWei);
+    const min = (amount * 999n) / 1000n;
+    return {
+      to: pm,
+      value: "0",
+      data: encodeFunctionData({
+        abi: positionManagerAbi,
+        functionName: "mint",
+        args: [
+          {
+            token0: l.token0 as `0x${string}`,
+            token1: l.token1 as `0x${string}`,
+            fee: FEE,
+            tickLower: l.tickLower,
+            tickUpper: l.tickUpper,
+            amount0Desired: l.arlIsToken0 ? amount : 0n,
+            amount1Desired: l.arlIsToken0 ? 0n : amount,
+            amount0Min: l.arlIsToken0 ? min : 0n,
+            amount1Min: l.arlIsToken0 ? 0n : min,
+            recipient: safe,
+            deadline: BigInt(input.deadline),
+          },
+        ],
+      }),
+      description: `Open the ARL-only ARL/${l.quote} position from ${input.priceUsd} USD up; the NFT goes to the Liquidity Safe`,
+    };
+  });
+
+  return {
+    chainId: PRODUCTION_CHAIN_ID,
     priceUsd: input.priceUsd,
-    transactions,
+    totalArlWei: total.toString(),
+    legs,
+    transactions: [...creates, approve, ...mints],
   };
 }
 
 /** The batch in the Safe{Wallet} Transaction Builder's import format. */
 export function safeBatch(plan: PoolPlan, safe: string, createdAt: number) {
+  const pairs = plan.legs.map((l) => `ARL/${l.quote}`).join(", ");
   return {
     version: "1.0",
     chainId: String(plan.chainId),
     createdAt,
     meta: {
-      name: "ARL launch liquidity (Uniswap v3, ARL/USDC 1%)",
+      name: `ARL launch liquidity (Uniswap v3 1%: ${pairs})`,
       description: plan.transactions.map((t, i) => `${String(i + 1)}. ${t.description}`).join(" "),
       txBuilderVersion: "1.18.0",
       createdFromSafeAddress: getAddress(safe),

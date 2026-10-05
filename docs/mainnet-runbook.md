@@ -32,12 +32,14 @@ the simulation are in [mainnet-plan.md](mainnet-plan.md); the testnet run of the
    Public Launch Safe (2-of-3) funds it with exactly the list total.
 7. **Pool.** The Liquidity Safe opens the single-sided ARL position at and above 0.20 USD
    ([launch-route.md](launch-route.md)); the position stays in the Safe for 12 months.
-   - Check that no ARL/USDC 1% pool exists yet (`getPool` on the Uniswap v3 factory
+   - Check that no ARL/USDC, ARL/USDT, ARL/WETH or ARL/cbBTC 1% pool exists yet (`getPool` on the Uniswap v3 factory
      `0x33128a8fC17869897dcE68Ed026d694621f6FDfD` returns zero). If one exists, its price must be
      at or below 0.20 USD; otherwise the batch reverts and nothing is deposited (fork-tested).
-   - `node packages/deploy/src/pool-cli.ts <ARL token> <Liquidity Safe> <ARL amount> pool.json`
-     writes `pool.json` (Safe Transaction Builder batch: create the pool, approve exactly the
-     amount, mint the ARL-only position to the Safe) and `pool.plan.json` (ticks, start price).
+   - Write `pools.json` (example: `contracts/test-fork/fixtures/pools.json`) with the ARL amount
+     per pool and the ETH and BTC prices in USD at that moment, then
+     `node packages/deploy/src/pool-cli.ts pools.json pool.json`
+     writes `pool.json` (Safe Transaction Builder batch: create the four pools, approve exactly
+     the total, mint the ARL-only positions to the Safe) and `pool.plan.json` (ticks, prices).
    - Rehearse on a fork with the real addresses: copy both files to
      `contracts/test-fork/fixtures/pool-batch*.json`, then
      `FOUNDRY_PROFILE=fork ARL_BASE_RPC=<Base RPC> forge test --match-contract UniswapLaunchFork`.
