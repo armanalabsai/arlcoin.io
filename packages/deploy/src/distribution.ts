@@ -8,7 +8,7 @@
 import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
 import { getAddress } from "viem";
 
-import { ALLOCATIONS } from "@arl/tokenomics";
+import { ALLOCATIONS, PUBLIC_LAUNCH } from "@arl/tokenomics";
 
 export const DISTRIBUTION_INPUT_SCHEMA = "arl-distribution-input/1";
 export const DISTRIBUTION_SCHEMA = "arl-distribution/1";
@@ -163,4 +163,35 @@ export function verifyDistribution(d: Distribution): void {
       fail(`${account}: proof does not verify`);
     }
   }
+}
+
+const WHOLE_ARL = /^[1-9][0-9]*$/;
+
+/**
+ * Builds the Public Launch claim-list input from a whitelist CSV with the approved parameters
+ * (`PUBLIC_LAUNCH` in `@arl/tokenomics`): budget = the TGE tranche, maxPerAddress = the
+ * per-address cap. Each line is `address,amount` with the amount in whole ARL; a header line
+ * starting with "address" and blank lines are skipped. The result still goes through
+ * `buildDistribution`, which enforces the budget, the cap and every other rule.
+ */
+export function publicLaunchInput(csv: string): DistributionInput {
+  const claims: DistributionInput["claims"] = [];
+  for (const [i, raw] of csv.split(/\r?\n/).entries()) {
+    const line = raw.trim();
+    if (line === "" || (i === 0 && /^address\b/i.test(line))) continue;
+    const [account, amount, ...rest] = line.split(",").map((c) => c.trim());
+    if (!account || !amount || rest.length > 0) {
+      fail(`line ${String(i + 1)}: expected "address,amount"`);
+    }
+    if (!WHOLE_ARL.test(amount))
+      fail(`line ${String(i + 1)}: amount must be a whole number of ARL`);
+    claims.push({ account, amount: (BigInt(amount) * UNIT).toString() });
+  }
+  return {
+    schema: DISTRIBUTION_INPUT_SCHEMA,
+    allocation: "publicLaunch",
+    budget: (BigInt(PUBLIC_LAUNCH.tgeTranche) * UNIT).toString(),
+    maxPerAddress: (BigInt(PUBLIC_LAUNCH.maxPerAddress) * UNIT).toString(),
+    claims,
+  };
 }
