@@ -1,5 +1,5 @@
-// The services the site runs on, as a scrolling band at the very bottom of every page.
-// They are providers the site uses as a regular customer, not partners: the label says so.
+// ARL's partners, as a scrolling band at the very bottom of every page. The owner states that
+// a partnership with each listed company is in place (2026-10-05).
 
 const PROVIDERS = [
   { name: "Vercel", role: "Hosting", href: "https://vercel.com" },
@@ -33,8 +33,8 @@ function Run({ hidden }: { hidden?: boolean }) {
 
 export function InfrastructureStrip() {
   return (
-    <section aria-label="Infrastructure" className="infra-strip">
-      <p className="infra-label">Runs on</p>
+    <section aria-label="Partnership" className="infra-strip">
+      <p className="infra-label">Partnership</p>
       <div className="infra-viewport">
         <div className="infra-track">
           <Run />
