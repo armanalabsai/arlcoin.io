@@ -25,7 +25,7 @@ guaranteed listing.
 | Audit                     | None. Audit requests sent 2026-10-05 ([independent-audit-plan.md](independent-audit-plan.md)); bug bounty open                                   |
 | Logo                      | https://arlcoin.io/arl-token-200.png (200 × 200 PNG), https://arlcoin.io/arl-token-512.png, https://arlcoin.io/arl-token.svg                     |
 | Social accounts           | https://x.com/armanalabsai, https://www.instagram.com/armanalabsai                                                                               |
-| Contact                   | armanalabsai@gmail.com; Alaz Dağhan Göktürk, Founder and CEO                                                                                     |
+| Contact                   | team@arlcoin.io (forwards to armanalabsai@gmail.com); Alaz Dağhan Göktürk, Founder and CEO                                                       |
 
 ### Short description (English, for the form)
 
