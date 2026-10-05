@@ -120,7 +120,7 @@ export function InteractiveCore() {
               e.preventDefault();
               navigate("/");
             }}
-            className="inline-flex items-center gap-2 text-[17px] font-semibold tracking-[-0.03em]"
+            className="arl-neon inline-flex items-center gap-2 text-[17px] tracking-[-0.03em]"
             aria-label="ARL overview"
           >
             <BrandMark />

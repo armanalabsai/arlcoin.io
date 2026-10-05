@@ -470,3 +470,13 @@
     display: none;
   }
 }
+
+/* The ARL name on the Core and in the header: bold white with a soft neon glow. */
+.arl-neon {
+  color: #fff;
+  font-weight: 800;
+  text-shadow:
+    0 0 1px rgb(255 255 255 / 0.9),
+    0 0 6px rgb(255 255 255 / 0.55),
+    0 0 16px rgb(190 225 255 / 0.35);
+}

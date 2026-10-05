@@ -63,7 +63,7 @@ export function CoreCard({ layer, onActivate }: Props) {
         ))}
       </svg>
       <span className="flex flex-col items-center gap-2">
-        <span className="text-[44px] leading-none font-semibold tracking-[-0.04em] min-[1100px]:text-[52px] min-[1100px]:[@media(max-height:899px)]:text-[44px]">
+        <span className="arl-neon text-[44px] leading-none tracking-[-0.04em] min-[1100px]:text-[52px] min-[1100px]:[@media(max-height:899px)]:text-[44px]">
           ARL
         </span>
         <span className="text-[12px] text-accent">{layer ? layer.title : "Core"}</span>
