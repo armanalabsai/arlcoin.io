@@ -4,6 +4,9 @@
 //   node scripts/indexnow.mjs
 // Google does not use IndexNow; it reads the sitemap through Search Console and robots.txt.
 
+/* global fetch */
+import process from "node:process";
+
 const KEY = "b724c1741fd52e966e7dadc12f4b8050";
 const HOST = "arlcoin.io";
 
@@ -20,5 +23,6 @@ const res = await fetch("https://api.indexnow.org/indexnow", {
     urlList,
   }),
 });
-console.log(`IndexNow: ${String(res.status)} for ${String(urlList.length)} URLs`);
+process.stdout.write(`IndexNow: ${String(res.status)} for ${String(urlList.length)} URLs` + "
+");
 if (!res.ok && res.status !== 202) process.exitCode = 1;

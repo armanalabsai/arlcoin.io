@@ -12,6 +12,7 @@ import {
   buildPoolPlan,
   safeBatch,
   sqrtRatioAtTick,
+  type SafeTx,
 } from "../src/pool.ts";
 
 // Expected Base Mainnet addresses (docs/mainnet-plan.md).
@@ -75,7 +76,7 @@ describe("launch liquidity plan", () => {
   });
 
   it("encodes create, approve and mint for the Liquidity Safe", () => {
-    const [create, approve, mint] = plan.transactions;
+    const [create, approve, mint] = plan.transactions as [SafeTx, SafeTx, SafeTx];
     assert.equal(create.to, UNISWAP_V3_BASE.positionManager);
     const c = decodeFunctionData({ abi: pmAbi, data: create.data });
     assert.deepEqual(c.args, [ARL, USDC_BASE, FEE, BigInt(plan.sqrtPriceX96)]);
