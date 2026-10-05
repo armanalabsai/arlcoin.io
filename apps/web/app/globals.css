@@ -900,3 +900,77 @@ html.js .reveal.is-in {
     transform: none;
   }
 }
+
+/* Short screens (laptops at 1366x768 with browser chrome and taskbar): the technology slides
+   shrink with the viewport height so a whole card fits on screen. Unlayered, so these win over
+   the Tailwind utilities on the slide. */
+@media (max-height: 860px) and (min-width: 640px) {
+  .rail > * {
+    flex-basis: min(88vw, 500px);
+  }
+  .rail {
+    padding-top: 4px;
+    padding-bottom: 16px;
+  }
+  .rail-slide {
+    gap: 14px;
+    padding: 20px 24px;
+    border-radius: 24px;
+  }
+  .rail-slide h3 {
+    margin-top: 6px;
+    font-size: 22px;
+  }
+  .rail-slide p,
+  .rail-slide label span {
+    font-size: 14px;
+  }
+  .rail-slide > div:nth-child(2) {
+    gap: 12px;
+  }
+  .rail-slide .h-12,
+  .rail-slide .h-11 {
+    height: 40px;
+    font-size: 15px;
+  }
+  .rail-slide .min-h-11 {
+    min-height: 36px;
+  }
+  .rail-slide .min-h-16 {
+    min-height: 52px;
+    padding-block: 8px;
+  }
+  .rail-slide .min-h-\[48px\] {
+    min-height: 40px;
+  }
+}
+@media (max-height: 700px) and (min-width: 640px) {
+  .rail > * {
+    flex-basis: min(88vw, 440px);
+  }
+  .rail-slide {
+    gap: 10px;
+    padding: 14px 20px;
+  }
+  .rail-slide h3 {
+    font-size: 19px;
+  }
+  .rail-slide p,
+  .rail-slide label span {
+    font-size: 13px;
+  }
+  .rail-slide .h-12,
+  .rail-slide .h-11 {
+    height: 34px;
+  }
+  .rail-slide .min-h-16 {
+    min-height: 44px;
+    padding-block: 6px;
+  }
+  .rail-slide input[type="range"] {
+    height: 28px;
+  }
+  .rail-slide .min-h-\[48px\] {
+    min-height: 34px;
+  }
+}
