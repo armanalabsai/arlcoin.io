@@ -35,11 +35,11 @@ Checked 2026-10-05. Application fees are not published by either platform; the s
 free application and curated selection. Any fee or token allocation asked later is decided by
 the owner before accepting.
 
-| Platform     | How to apply                                                                                                        | What the form asks                                                                                       | Gaps for ARL                                                                    |
-| ------------ | ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| Seedify      | Not available: on 2026-10-05 seedify.fund redirects to an unrelated token-creating testnet launchpad (vibevibe.fun) | -                                                                                                        | Excluded                                                                        |
-| Polkastarter | forms.polkastarter.com/apply, then research review and a council vote                                               | Telegram handle, pitch deck, tokenomics link, investors, public-sale raise amount and FDV (all required) | Telegram, pitch deck, a public-sale amount (owner decision; legal opinion open) |
-| TrustSwap    | Curated, "by arrangement"                                                                                           | Not published                                                                                            | Unknown terms                                                                   |
+| Platform     | How to apply                                                                                                                                                   | What the form asks | Gaps for ARL           |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ---------------------- |
+| Seedify      | Not available: on 2026-10-05 seedify.fund redirects to an unrelated token-creating testnet launchpad (vibevibe.fun)                                            | -                  | Excluded               |
+| Polkastarter | Applied 2026-10-05 (forms.polkastarter.com/apply; answers in [polkastarter-application.md](polkastarter-application.md)); research review, then a council vote | -                  | Waiting for the review |
+| TrustSwap    | Curated, "by arrangement"                                                                                                                                      | Not published      | Unknown terms          |
 
 Excluded: PinkSale (0.2 ETH upfront), and token-creating launchpads (Clanker, Zora, Flaunch, Mint
 Club, Virtuals), which deploy their own token instead of selling ARL.

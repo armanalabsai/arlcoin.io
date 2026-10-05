@@ -1,8 +1,8 @@
 # Polkastarter IDO application (answers, ready to paste)
 
 Form: https://forms.polkastarter.com/apply. The form ends with a reCAPTCHA, so the owner submits
-it. Nothing has been submitted. The raise below is the recommendation (the Public Launch remainder
-at the listing price, no tokenomics change); the owner confirms it before sending.
+it. **Submitted by the owner on 2026-10-05** with the answers below; Polkastarter research reviews
+it and replies by e-mail.
 
 ## Basic information
 
