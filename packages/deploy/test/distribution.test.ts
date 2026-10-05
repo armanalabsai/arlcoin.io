@@ -8,6 +8,7 @@ import { encodeAbiParameters, keccak256 } from "viem";
 import {
   DistributionError,
   buildDistribution,
+  publicLaunchInput,
   verifyDistribution,
   type Distribution,
   type DistributionInput,
@@ -166,5 +167,35 @@ describe("distribution validation (fails closed)", () => {
     assert.throws(() => {
       verifyDistribution(wrongRoot);
     }, /merkleRoot does not match/);
+  });
+});
+
+describe("Public Launch list from a whitelist CSV (approved parameters)", () => {
+  const A = "0xd18d96980742bc5fab940fc9078fa882cf85ecad";
+  const B = "0xfedb036a961ad2d2224a293e4362665480963578";
+
+  it("applies the approved budget and per-address cap", () => {
+    const i = publicLaunchInput(`address,amount\n${A},10000\n${B},250\n`);
+    assert.equal(i.budget, (1_000_000n * 10n ** 18n).toString());
+    assert.equal(i.maxPerAddress, (10_000n * 10n ** 18n).toString());
+    assert.equal(buildDistribution(i).total, (10_250n * 10n ** 18n).toString());
+  });
+
+  it("rejects a claim above 10,000 ARL", () => {
+    rejects(publicLaunchInput(`${A},10001`), /exceeds maxPerAddress/);
+  });
+
+  it("rejects a list above the 1,000,000 ARL tranche", () => {
+    const lines = Array.from({ length: 101 }, (_, k) => {
+      const addr = `0x${(k + 1).toString(16).padStart(40, "0")}`;
+      return `${addr},10000`;
+    });
+    rejects(publicLaunchInput(lines.join("\n")), /exceeds budget/);
+  });
+
+  it("rejects malformed lines and fractional amounts", () => {
+    assert.throws(() => publicLaunchInput(A), /expected "address,amount"/);
+    assert.throws(() => publicLaunchInput(`${A},1.5`), /whole number of ARL/);
+    assert.throws(() => publicLaunchInput(`${A},10,x`), /expected "address,amount"/);
   });
 });
