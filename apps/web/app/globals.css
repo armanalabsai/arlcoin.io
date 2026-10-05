@@ -389,3 +389,80 @@
     display: none;
   }
 }
+
+/* Infrastructure band: black with a green dot grid, providers scrolling right to left. */
+.infra-strip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  overflow: hidden;
+  border-top: 1px solid rgb(62 207 142 / 0.25);
+  background-color: #000;
+  background-image: radial-gradient(rgb(62 207 142 / 0.35) 1px, transparent 1.2px);
+  background-size: 12px 12px;
+  padding: 14px 16px;
+}
+.infra-label {
+  flex-shrink: 0;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(62 207 142);
+}
+.infra-viewport {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
+.infra-track {
+  display: flex;
+  width: max-content;
+  animation: infra-scroll 40s linear infinite;
+}
+.infra-strip:hover .infra-track,
+.infra-strip:focus-within .infra-track {
+  animation-play-state: paused;
+}
+.infra-run {
+  display: flex;
+  flex-shrink: 0;
+}
+.infra-item {
+  padding: 0 28px;
+}
+.infra-link {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  white-space: nowrap;
+  color: #f2f2f0;
+}
+.infra-link:hover .infra-name {
+  color: rgb(62 207 142);
+}
+.infra-name {
+  font-size: 15px;
+  font-weight: 600;
+}
+.infra-role {
+  font-size: 12px;
+  color: rgb(255 255 255 / 0.5);
+}
+@keyframes infra-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .infra-track {
+    animation: none;
+  }
+  .infra-run[aria-hidden="true"] {
+    display: none;
+  }
+}
