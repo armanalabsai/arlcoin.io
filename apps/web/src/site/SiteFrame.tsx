@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { docPath } from "@/content/docs.ts";
 import { LAYERS, pathFor } from "@/content/registry.ts";
-import { TOKEN_DISCLAIMER } from "@/content/site.ts";
+import { SITE, TOKEN_DISCLAIMER } from "@/content/site.ts";
 import { BrandMark } from "@/core/BrandMark.tsx";
 
 import { SiteLinks } from "./SiteLinks.tsx";
@@ -87,6 +87,12 @@ export function FooterLinks() {
       <Link href="/docs" prefetch={false} className={link}>
         Docs · Apache-2.0
       </Link>
+      <a href={SITE.social.x} rel="me noopener noreferrer" target="_blank" className={link}>
+        X
+      </a>
+      <a href={SITE.social.instagram} rel="me noopener noreferrer" target="_blank" className={link}>
+        Instagram
+      </a>
     </nav>
   );
 }

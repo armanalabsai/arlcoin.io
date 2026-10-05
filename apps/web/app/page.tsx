@@ -27,6 +27,14 @@ const websiteJsonLd = {
   url: SITE.url,
   description: SITE.description,
   inLanguage: "en",
+  publisher: {
+    "@type": "Organization",
+    name: "ARL Protocol",
+    url: SITE.url,
+    logo: `${SITE.url}/icon.svg`,
+    email: SITE.email,
+    sameAs: [SITE.social.x, SITE.social.instagram, SITE.repository],
+  },
 };
 
 /** Cards of one layer, in the given order, straight from the Core's content. */
@@ -128,7 +136,7 @@ export default function Home() {
             <span className="mt-2 text-[13px] text-accent">Overview</span>
           </Link>
           <p className="mt-6 text-[12px] text-fg-subtle">
-            ARL is not yet deployed. Nothing is for sale. Registering is free.
+            ARL is live on the Base Sepolia testnet. Nothing is for sale. Registering is free.
           </p>
         </section>
 
@@ -156,7 +164,7 @@ export default function Home() {
 
         <Section
           heading="Built for AI and compute."
-          sub="Swipe through how each one is meant to work. Nothing is on a public network yet."
+          sub="Swipe through how each one is meant to work. The token runs on the Base Sepolia testnet; nothing is on Base Mainnet yet."
         >
           <Reveal delay={120} className="mt-12">
             <TechShowcase />

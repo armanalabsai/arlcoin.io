@@ -27,7 +27,7 @@ export const roadmap: Layer = {
       metric: { kind: "static", value: "Complete" },
       detail: {
         summary:
-          "The ARL token, vesting wallets and the treasury timelock, with tests. The contracts are written and tested and have not been deployed.",
+          "The ARL token, vesting wallets and the treasury timelock, with tests. Written, tested and deployed on the Base Sepolia testnet.",
       },
     },
     {
@@ -35,10 +35,10 @@ export const roadmap: Layer = {
       title: "Phase 2 · Security Review",
       shortDescription: "Review and remediation",
       weight: "primary",
-      metric: { kind: "static", value: "In progress" },
+      metric: { kind: "static", value: "Internal review complete" },
       detail: {
         summary:
-          "Security review of the contracts and the deployment process. The internal review and the deployment tooling are complete; an independent external audit is still to be done before mainnet.",
+          "Security review of the contracts and the deployment process. The internal review is complete: tests, fuzzing, invariants, Slither with no findings, Halmos proofs and a reproducible build. No independent external audit has been performed; a bug bounty paid in ARL opens with the public test period.",
       },
     },
     {
@@ -46,10 +46,10 @@ export const roadmap: Layer = {
       title: "Testnet",
       shortDescription: "Public test deployment",
       weight: "tertiary",
-      metric: { kind: "static", value: "Not started" },
+      metric: { kind: "static", value: "Live on Base Sepolia" },
       detail: {
         summary:
-          "A deployment to a public test network. It requires a completed security review and a selected chain.",
+          "Deployed on the Base Sepolia testnet on 4 October 2026: 12 Safes, the token, two vesting wallets and the treasury timelock, source-verified on Basescan, Blockscout and Sourcify. Testnet tokens have no value.",
       },
     },
     {
@@ -57,8 +57,11 @@ export const roadmap: Layer = {
       title: "Mainnet",
       shortDescription: "Production deployment",
       weight: "tertiary",
-      metric: { kind: "static", value: "Not started" },
-      detail: { summary: "The production deployment of ARL. No date is set." },
+      metric: { kind: "static", value: "Target 2026-12-01" },
+      detail: {
+        summary:
+          "The production deployment of ARL on Base Mainnet, which is the TGE. Targeted for 1 December 2026; it is not deployed yet.",
+      },
     },
     {
       id: "services",

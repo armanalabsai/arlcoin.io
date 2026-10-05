@@ -71,7 +71,7 @@ identity and verifiable facts, not marketing copy:
 
 - network identity (the Core);
 - `21,000,000 ARL`, fixed; no mint after deployment;
-- treasury control: Safe 3-of-5, 48-hour timelock, cancel-only guardian;
+- treasury control: Safe 2-of-3, 48-hour timelock, cancel-only guardian;
 - contract status: `Not deployed`;
 - source: link to the repository.
 
@@ -152,10 +152,10 @@ SOURCE        the repository file and commit (or, after deployment, the contract
 | When do tokens unlock?                | Investors and Strategic Partnerships vest through `ARLVestingWallet`s: 12-month cliff, then 36 months linear; the start date is **TBD** and no public deployment is possible until it is confirmed. Founder: all 2,100,000 ARL unrestricted at TGE (no vesting). Team grants: schedule TBD (`docs/tokenomics.md`) | `ARLVestingWallet` start, cliff, end, released, vested |
 | How is the team allocation protected? | Unassigned tokens sit in a dedicated team pool Safe. Grants are irrevocable, made in tranches, each an `ARLVestingWallet` whose beneficiary is the member's own Safe or smart account                                                                                                                             | Each grant's wallet and schedule                       |
 | Can more tokens be minted?            | No. The full supply is minted once in the constructor; no mint function exists; a CI check fails if the token interface changes (`ARLToken.sol`, `scripts/check-token-abi.mjs`)                                                                                                                                   | `totalSupply` = 21,000,000; verified source            |
-| Who controls the treasury?            | Treasury Safe (3-of-5) is the only proposer and executor on `ARLTimelock`; the timelock is its own admin                                                                                                                                                                                                          | Role checks on the deployed timelock                   |
+| Who controls the treasury?            | Treasury Safe (2-of-3) is the only proposer and executor on `ARLTimelock`; the timelock is its own admin                                                                                                                                                                                                          | Role checks on the deployed timelock                   |
 | How does the timelock work?           | Every operation waits at least 48 hours; the delay cannot be lowered below 48 hours (`ARLTimelock.sol`)                                                                                                                                                                                                           | `getMinDelay`; the operation queue                     |
 | What can the guardian do?             | Only cancel pending operations. It cannot propose, execute, move funds or change roles (`ARLTimelock.sol`, `ARLVerify.sol`)                                                                                                                                                                                       | Guardian role check; cancelled operations              |
-| What is the Safe structure?           | Treasury Safe 3-of-5; separate guardian Safe; dedicated founder Safe. Signers and thresholds are Safe configuration, not stored in the repository                                                                                                                                                                 | Safe addresses; code present at each                   |
+| What is the Safe structure?           | Treasury Safe 2-of-3; separate guardian Safe; dedicated founder Safe. Signers and thresholds are Safe configuration, not stored in the repository                                                                                                                                                                 | Safe addresses; code present at each                   |
 | How is circulating supply calculated? | Total supply minus the balances of protocol-controlled or locked addresses, which are published in the deployment manifest (economic specification section 5). At TGE it is the Founder's unlocked 2,100,000 ARL                                                                                                  | Published methodology + on-chain reads                 |
 | Is the contract really verified?      | No contract is deployed. Pre-deployment evidence: unit, fuzz and invariant tests, Slither, and a deployment rehearsal in CI. **No external audit has been performed**                                                                                                                                             | Explorer source verification + `VerifyARL` result      |
 
@@ -175,7 +175,7 @@ Investors              ───▶ ARLVestingWallet (12 + 36 months, start TBD)
 Strategic Partnerships ───▶ ARLVestingWallet (12 + 36 months, start TBD) ───▶ dedicated Safe
 Treasury allocation    ───▶ ARLTimelock (≥ 48 h, admin = itself)
 
-Treasury Safe (3-of-5) ──schedule / execute──▶ ARLTimelock ──after the delay──▶ execution
+Treasury Safe (2-of-3) ──schedule / execute──▶ ARLTimelock ──after the delay──▶ execution
 Guardian Safe          ──cancel only─────────▶ ARLTimelock
 
 Six other allocations ──minted directly──▶ their own dedicated Safes

@@ -141,11 +141,11 @@ this repository.
 
 ## Treasury
 
-Policy: Safe 3-of-5, minimum 48-hour delay, independent guardian that can
+Policy: Safe 2-of-3, minimum 48-hour delay, independent guardian that can
 only cancel.
 
 ```
-Safe (3-of-5) ──schedule / cancel / execute──▶ ARLTimelock (≥ 48 h)
+Safe (2-of-3) ──schedule / cancel / execute──▶ ARLTimelock (≥ 48 h)
                                                    ▲  │ holds 1,000,000 ARL
 Guardian Safe ─────────── cancel only ─────────────┘  ▼
                                               token transfers
@@ -173,7 +173,7 @@ or legal means. This trade-off was accepted on 2026-09-27. If the guardian's
 keys are lost, the Treasury replaces it through a scheduled `revokeRole` and
 `grantRole`, which a guardian without keys cannot cancel.
 
-The Safe's 3-of-5 threshold and the guardian Safe's threshold are Safe
+The Safe's 2-of-3 threshold (owner decision 2026-10-05, previously 3-of-5) and the guardian Safe's threshold are Safe
 configuration. They are verified when the production Safes are created, not by
 these contracts. The guardian's signers are to be disjoint from the Treasury
 Safe's. Tests use labelled test accounts in place of the Safes. No signer

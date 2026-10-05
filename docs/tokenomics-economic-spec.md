@@ -25,7 +25,7 @@ Every rule in this document carries one of these labels:
   restriction (APPROVED / LOCKED). See section 4.4.
 - Investors, Strategic Partnerships and Team vest with **0% at TGE, a 12-month
   cliff, then 36 months linear** (APPROVED / LOCKED).
-- The Treasury is held by a timelock under a **3-of-5 Safe** with a minimum
+- The Treasury is held by a timelock under a **2-of-3 Safe** with a minimum
   **48-hour delay** and a cancel-only guardian (APPROVED / LOCKED).
 - **Circulating supply** is total supply minus balances held by
   protocol-controlled or locked addresses. An allocation never counts as
@@ -77,7 +77,7 @@ authoritative.
 - Every Safe is dedicated to one allocation. No address may hold two
   allocations (APPROVED / LOCKED).
 - Safe signer lists and thresholds are operational configuration and are not
-  stored in the repository. Only the Treasury's 3-of-5 policy is recorded
+  stored in the repository. Only the Treasury's 2-of-3 policy is recorded
   (APPROVED / LOCKED). All other thresholds are TBD.
 - The user- and ecosystem-facing allocations (Community & Staking, Ecosystem &
   Growth, Early Users) total 6,100,000 ARL (29.05%).
@@ -123,7 +123,7 @@ specification.
   deployment config has one `tge` field and no per-schedule start; the planner
   derives both starts from it and `ARLDeployPlan` refuses schedules that do
   not share their start.
-- **TBD:** the TGE date itself.
+- **Decided (owner, 2026-10-05): TGE date 2026-12-01** (`TGE_DATE` in `packages/tokenomics`).
 - Team schedules start at each grant's date (M-3 per-grant tracking).
 
 ### 4.4 Founder allocation
@@ -132,19 +132,19 @@ The Founder allocation is 2,100,000 ARL. All of it is fully unlocked at TGE
 (CTO decision of 2026-09-28, which replaces the earlier split into 2,000,000
 ARL unlocked and 100,000 ARL TBD).
 
-| Parameter                                      | Value                                                                                 | Status |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------- | ------ |
-| Total Founder allocation                       | 2,100,000 ARL                                                                         | LOCKED |
-| Fully unlocked amount                          | 2,100,000 ARL (the whole allocation)                                                  | LOCKED |
-| Availability                                   | Available to the Founder at TGE                                                       | LOCKED |
-| Cliff                                          | None                                                                                  | LOCKED |
-| Vesting                                        | None                                                                                  | LOCKED |
-| Timelock                                       | None                                                                                  | LOCKED |
-| Protocol-level transfer restriction            | None                                                                                  | LOCKED |
-| Protocol-level sale restriction                | None                                                                                  | LOCKED |
-| Right to transfer, use or sell                 | At any time, including through public exchanges, without protocol permission          | LOCKED |
-| Address that receives the 2,100,000 ARL at TGE | Not specified                                                                         | TBD    |
-| Public disclosure of this structure            | The unlocked status and the Founder's right to sell are published with the tokenomics | LOCKED |
+| Parameter                                      | Value                                                                                                                                                                                                                                            | Status  |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
+| Total Founder allocation                       | 2,100,000 ARL                                                                                                                                                                                                                                    | LOCKED  |
+| Fully unlocked amount                          | 2,100,000 ARL (the whole allocation)                                                                                                                                                                                                             | LOCKED  |
+| Availability                                   | Available to the Founder at TGE                                                                                                                                                                                                                  | LOCKED  |
+| Cliff                                          | None                                                                                                                                                                                                                                             | LOCKED  |
+| Vesting                                        | None                                                                                                                                                                                                                                             | LOCKED  |
+| Timelock                                       | None                                                                                                                                                                                                                                             | LOCKED  |
+| Protocol-level transfer restriction            | None                                                                                                                                                                                                                                             | LOCKED  |
+| Protocol-level sale restriction                | None                                                                                                                                                                                                                                             | LOCKED  |
+| Right to transfer, use or sell                 | At any time, including through public exchanges, without protocol permission                                                                                                                                                                     | LOCKED  |
+| Address that receives the 2,100,000 ARL at TGE | The dedicated Founder Safe (Safe v1.5.0), owned by the Founder's wallet `0x3c3f71d694f709cBe60f015717c54A795636b165`; on Base Sepolia its address is in `apps/dapp/public/plans/84532-safes.json`. The Mainnet Founder Safe is created at launch | DECIDED |
+| Public disclosure of this structure            | The unlocked status and the Founder's right to sell are published with the tokenomics                                                                                                                                                            | LOCKED  |
 
 - The 2,100,000 ARL is unlocked. It is not locked, vested, timelocked,
   restricted, reserved or subject to any future release schedule.
@@ -232,6 +232,12 @@ block is therefore the Founder's 2,100,000 ARL. It rises only as approved
 mechanisms distribute other tokens.
 
 ## 7. Public Launch Policy
+
+**Owner decision, 2026-10-05 (APPROVED):** 1,000,000 ARL distributed at TGE through the Merkle
+claim to launchpad buyers and whitelist sign-ups; at most 10,000 ARL per address; 60-day claim
+window; unclaimed tokens and the remaining 4,000,000 ARL stay in the Public Launch Safe for later
+tranches; no participant vesting from this allocation. Enforced by `DeployDistributor`
+(`TGE_TRANCHE`, `MAX_CLAIM_WINDOW`) and by the claim list's `maxPerAddress`.
 
 APPROVED / LOCKED:
 
@@ -357,6 +363,12 @@ with `SECURITY.md`, and whether bounty payouts are exempt from tranche rules.
 
 ## 13. Liquidity Policy
 
+**Owner decision, 2026-10-05 (APPROVED):** no project cash. The first pool is paired with
+launch proceeds; if there is no sale, it is opened single-sided with ARL only, in a range at or
+above the 0.20 USD listing price. LP positions are held by the Liquidity Safe (2-of-3) and locked
+for 12 months. Venue and pair are chosen at listing (Uniswap or Aerodrome on Base; USDC preferred).
+The security work uses only free tools, and only launchpads without an upfront fee are used.
+
 APPROVED / LOCKED:
 
 - The 2,000,000 ARL Liquidity allocation is held in a **dedicated Safe** until
@@ -376,7 +388,7 @@ market-maker terms for any centralized exchange, and the tranche schedule.
 
 APPROVED / LOCKED (unchanged):
 
-- The 1,000,000 ARL Treasury is held by `ARLTimelock`, controlled by a 3-of-5
+- The 1,000,000 ARL Treasury is held by `ARLTimelock`, controlled by a 2-of-3
   Safe.
 - Every operation waits at least 48 hours.
 - A separate guardian Safe can only cancel pending operations. It has no

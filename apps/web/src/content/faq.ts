@@ -10,12 +10,12 @@ export const FAQ: readonly FaqEntry[] = [
   {
     question: "Is ARL for sale?",
     answer:
-      "No. ARL is not deployed and nothing is for sale. No ARL contract exists on any network yet, so any token that claims to be ARL today is not.",
+      "No. ARL is live on the Base Sepolia testnet only, where tokens have no value, and nothing is for sale. No ARL contract exists on Base Mainnet yet, so any token that claims to be ARL on a main network today is not.",
   },
   {
     question: "What is ARL for?",
     answer:
-      "ARL is the native utility token planned for decentralized AI and compute services: AI services paid per use, GPU and CPU capacity paid per second, and staking. None of it is on a public network yet.",
+      "ARL is the native utility token planned for decentralized AI and compute services: AI services paid per use, GPU and CPU capacity paid per second, and staking. The token contracts run on the Base Sepolia testnet; nothing is on Base Mainnet yet.",
   },
   {
     question: "What is the maximum supply?",
@@ -25,22 +25,22 @@ export const FAQ: readonly FaqEntry[] = [
   {
     question: "Does registering on the whitelist guarantee an allocation?",
     answer:
-      "No. Eligibility rules, amounts and the claim window are not decided; they will be published before the launch. Registration is free and no payment is requested.",
+      "No. The Public Launch distributes up to 1,000,000 ARL at the TGE through a claim open for 60 days, at most 10,000 ARL per address; the exact list is published before the launch. Registration is free and no payment is requested.",
   },
   {
     question: "Has ARL been audited?",
     answer:
-      "The internal review is complete: unit, fuzz and invariant tests, static analysis and symbolic checks. No external audit has been performed. Any claim that ARL has been audited is false until an audit report is published.",
+      "The internal review is complete: unit, fuzz and invariant tests, Slither with no findings, Halmos symbolic proofs and a reproducible build. No independent external audit has been performed; a bug bounty paid in ARL covers the contracts instead. Any claim that ARL has been audited is false.",
   },
   {
     question: "Which blockchain will ARL use?",
     answer:
-      "ARL is an ERC-20 token built for EVM-compatible chains. The deployment chain has not been selected yet.",
+      "Base. ARL is an ERC-20 token on Base: Base Sepolia for the testnet (live) and Base Mainnet for production.",
   },
   {
     question: "When is the launch?",
     answer:
-      "No dates are set. The token contracts are written and tested; the security review is in progress, and testnet and mainnet have not started.",
+      "The Base Mainnet launch (TGE) is targeted for 1 December 2026. The contracts are deployed and source-verified on the Base Sepolia testnet; Base Mainnet has not started.",
   },
   {
     question: "Will ARL ever ask for my private key or seed phrase?",

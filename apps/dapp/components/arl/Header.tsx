@@ -22,7 +22,12 @@ export function Header() {
       <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
         <Link href="/" className="flex items-center gap-2 text-sm font-semibold tracking-tight">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/icon.svg" alt="" width={24} height={24} />
+          <img
+            src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/icon.svg`}
+            alt=""
+            width={24}
+            height={24}
+          />
           <span>ARL App</span>
         </Link>
         <nav className="ml-2 hidden gap-1 sm:flex" aria-label="Main">

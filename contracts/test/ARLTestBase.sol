@@ -23,7 +23,8 @@ abstract contract ARLTestBase is Test {
     uint64 internal constant TEAM_CLIFF_END = 1_846_022_400; // 2028-07-01
     uint64 internal constant TEAM_VESTING_END = 1_940_630_400; // 2031-07-01
 
-    // Fixture schedule only (the approved schedules are not implemented yet).
+    // Fixture schedule for the generic vesting tests. The approved 12 + 36 month schedule is
+    // enforced by the deployment plan (`ARLDeployPlan`, `packages/deploy`), not by this fixture.
     uint64 internal constant INVESTORS_CLIFF_END = LAUNCH_PLUS_1Y;
     uint64 internal constant INVESTORS_VESTING_END = LAUNCH_PLUS_2Y;
 

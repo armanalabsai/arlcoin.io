@@ -6,11 +6,25 @@ export const SITE = {
   name: "ARL",
   url: "https://arlcoin.io",
   description:
-    "ARL is the native utility token planned for decentralized AI and compute services. 21,000,000 ARL maximum supply. Not yet deployed.",
+    "ARL is the utility token for AI and compute services on Base: 21,000,000 ARL fixed supply, no owner, mint or upgrade. Live on Base Sepolia testnet; Base Mainnet launch targeted for 2026-12-01.",
   /** Short line under the Core on the overview. */
-  tagline: "The native utility token planned for AI and compute services. Not yet deployed.",
+  tagline: "The utility token for AI and compute services on Base. Live on Base Sepolia testnet.",
+  repository: "https://gitlab.com/armanalabs-group/arlcoin",
   /** Public contact address of the team. */
   email: "armanalabsai@gmail.com",
+  /** Official social accounts. */
+  social: {
+    x: "https://x.com/armanalabsai",
+    instagram: "https://www.instagram.com/armanalabsai",
+  },
+  /** Base Sepolia (testnet) deployment, source-verified on Basescan, Blockscout and Sourcify. */
+  testnet: {
+    chain: "Base Sepolia",
+    token: "0x244312b619127B6458154F3467eFD7c87CD28500",
+    explorer: "https://sepolia.basescan.org/token/0x244312b619127B6458154F3467eFD7c87CD28500",
+  },
+  /** Target date of the Base Mainnet token deployment (the TGE). */
+  tgeTarget: "2026-12-01",
   /** Data controller named in the privacy notice, as given by the owner. */
   controller: {
     name: "Alaz Daghan Gokturk",
@@ -31,7 +45,7 @@ export const SITE_PAGES = [
   "/terms",
 ] as const;
 
-export const NOT_DEPLOYED = "Not yet deployed";
+export const NOT_DEPLOYED = "Not yet on Base Mainnet";
 
 /** Social preview image (app/opengraph-image.png). Pages that set `openGraph` repeat it,
  * because a page-level `openGraph` object replaces the inherited one. */
@@ -43,4 +57,4 @@ export const OG_IMAGE = {
 } as const;
 
 export const TOKEN_DISCLAIMER =
-  "ARL is not deployed. No contract exists on any network, nothing is for sale, and nothing here is an offer, investment advice or a promise of listing.";
+  "ARL is deployed on the Base Sepolia testnet only; testnet tokens have no value. No ARL contract exists on Base Mainnet, nothing is for sale, and nothing here is an offer, investment advice or a promise of listing. No independent audit has been performed.";

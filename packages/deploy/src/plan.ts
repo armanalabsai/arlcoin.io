@@ -5,7 +5,13 @@
 // when every rule passes. The Foundry script re-validates the plan on-chain-side before
 // deploying, so a hand-edited plan cannot bypass these rules.
 
-import { ALLOCATIONS, MAX_SUPPLY, MIN_TIMELOCK_HOURS, validateAllocations } from "@arl/tokenomics";
+import {
+  ALLOCATIONS,
+  MAX_SUPPLY,
+  MIN_TIMELOCK_HOURS,
+  TGE_DATE,
+  validateAllocations,
+} from "@arl/tokenomics";
 import {
   getSafeL2SingletonDeployment,
   getSafeSingletonDeployment,
@@ -32,6 +38,19 @@ export const TESTNET_CHAIN_ID = 84532;
  * environment variable can open it. Mirrors `ARLDeployPlan.networkGate`.
  */
 export const PRODUCTION_CHAIN_ID = 8453;
+
+/**
+ * Local Anvil and the testnet may use a placeholder TGE; every other network must use the
+ * approved TGE date (`TGE_DATE` in `@arl/tokenomics`).
+ */
+export function checkTge(chainId: number, tge: unknown): void {
+  if (chainId === LOCAL_CHAIN_ID || chainId === TESTNET_CHAIN_ID) return;
+  if (tge !== TGE_DATE) {
+    fail(
+      `tge: must be the approved TGE ${TGE_DATE} on chain ${String(chainId)}, got "${String(tge)}"`,
+    );
+  }
+}
 
 /** Local Anvil and Base Sepolia pass; Base Mainnet and every other chain are refused. */
 export function networkGate(chainId: number): void {
@@ -264,8 +283,8 @@ function buildVesting(
   if (allocation?.release.kind !== "vesting")
     fail(`tokenomics: ${VESTING_KEYS[key]} does not vest`);
   const approved = allocation.release.schedule;
-  // The TGE date (and so the vesting start) is not confirmed. Only local Anvil and the testnet
-  // may use a placeholder.
+  // Guard for a schedule whose start is not approved in the tokenomics source: only local Anvil
+  // and the testnet may then use a placeholder.
   if (
     (allocation.release.status !== "approved" || approved.start !== "approved") &&
     !placeholderStartAllowed
@@ -361,6 +380,7 @@ export function buildPlan(config: DeployConfig): DeployPlan {
   }
   requireKeys(config.vesting, "vesting", Object.keys(VESTING_KEYS));
   const tge = parseUtc(config.tge, "tge");
+  checkTge(config.chainId, config.tge);
   const vesting = {} as Record<VestingKey, VestingPlan>;
   const source = {} as DeployPlan["source"];
   for (const key of Object.keys(VESTING_KEYS) as VestingKey[]) {

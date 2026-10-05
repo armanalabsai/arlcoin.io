@@ -18,7 +18,7 @@ carry over and must be re-reviewed for this one.
 
 - OpenZeppelin v5.6.1 `ERC20`, `VestingWallet`, `TimelockController` and their
   dependencies are correct (audited upstream; see `open-source.md`).
-- The Safe contract used for the treasury is a correctly configured 3-of-5 Safe.
+- The Safe contract used for the treasury is a correctly configured 2-of-3 Safe.
 - The treasury guardian is a separate, correctly configured Safe whose signers
   are disjoint from the treasury Safe's.
 - Deployment passes correct, explicit timestamps and the intended holder

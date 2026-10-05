@@ -16,9 +16,51 @@ contract DeployDistributorTest is Test {
         list = vm.readFile("test/fixtures/distribution.json");
     }
 
-    /// @dev The launch parameters are still TBD; the flag records that and opens nothing.
-    function test_LaunchParametersAreNotApprovedYet() public view {
-        assertFalse(script.LAUNCH_PARAMETERS_APPROVED());
+    /// @dev Approved 2026-10-05; the flag records that and opens no network.
+    function test_LaunchParametersAreApproved() public view {
+        assertTrue(script.LAUNCH_PARAMETERS_APPROVED());
+        assertEq(script.TGE_TRANCHE(), 1_000_000 * ARLAllocation.UNIT);
+        assertEq(script.MAX_CLAIM_WINDOW(), 60 days);
+    }
+
+    function test_LaunchParametersAcceptTheApprovedBounds() public view {
+        script.checkLaunchParameters(1_000_000 * ARLAllocation.UNIT, uint64(1000 + 60 days), 1000);
+        script.checkLaunchParameters(1, uint64(1001), 1000);
+    }
+
+    function test_RevertWhen_TotalExceedsTheTranche() public {
+        uint256 tranche = 1_000_000 * ARLAllocation.UNIT;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                DeployDistributor.DistributorTotalExceedsTranche.selector, tranche + 1, tranche
+            )
+        );
+        script.checkLaunchParameters(tranche + 1, uint64(2000), 1000);
+    }
+
+    function test_RevertWhen_ClaimWindowIsLongerThan60Days() public {
+        uint64 claimEnd = uint64(1000 + 60 days + 1);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                DeployDistributor.DistributorClaimWindowTooLong.selector, claimEnd, 1000 + 60 days
+            )
+        );
+        script.checkLaunchParameters(1, claimEnd, 1000);
+    }
+
+    function testFuzz_LaunchParameters(uint256 total, uint64 claimEnd, uint32 nowTs) public view {
+        bool ok = total <= script.TGE_TRANCHE() && claimEnd <= uint256(nowTs) + 60 days;
+        if (ok) {
+            script.checkLaunchParameters(total, claimEnd, nowTs);
+        } else {
+            (bool success,) = address(script)
+                .staticcall(
+                    abi.encodeCall(
+                        DeployDistributor.checkLaunchParameters, (total, claimEnd, nowTs)
+                    )
+                );
+            assertFalse(success);
+        }
     }
 
     /// @dev The distributor uses the shared network gate: local Anvil and Base Sepolia pass,

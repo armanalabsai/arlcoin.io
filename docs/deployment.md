@@ -109,8 +109,16 @@ The owner can sign every transaction from a phone wallet, without any key leavin
 4. Afterwards, `VerifyARL` and `bytecode-cli.ts verify` run read-only from any machine.
 
 Run the Safe creation (`CreateSafes`) and the deployment (`DeployARL`) as two files: the
-deployment plan needs the Safe addresses. The app is not hosted publicly yet; serving it for the
-phone (for example a Vercel project for `apps/dapp`) is an owner decision.
+deployment plan needs the Safe addresses.
+
+**Hosted copy.** The Pages workflow publishes a static copy of the app under `/app` next to the
+website (for example `https://arlcoin.io/app/deploy/`). A prepared run committed as
+`apps/dapp/public/plans/<name>.json` opens with `/app/deploy/?plan=<name>`, so nothing has to be
+copied to the phone. Only plain names are accepted, the file is still checked by `parseRun` like
+an uploaded one, and the screen refuses to run inside a frame (static hosting cannot send
+`X-Frame-Options`). The first published plan is `84532-safes`: the twelve role Safes on Base
+Sepolia from the deployer `0x3c3f…b165`: eleven 1-of-1 Safes owned by that address and the guardian
+Safe 1-of-1 owned by its own signer `0x72F7…4144`, for a testnet run only.
 
 ## Reproducible build and deployment proof
 

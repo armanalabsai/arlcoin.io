@@ -27,9 +27,9 @@ export default function WhitelistPage() {
       <FactList
         title="Before you register"
         items={[
-          "ARL is not deployed. No ARL contract exists on any network yet, so any token that claims to be ARL today is not.",
+          "ARL is live on the Base Sepolia testnet only; testnet tokens have no value. No ARL contract exists on Base Mainnet yet, so any token that claims to be ARL there today is not.",
           "Registration is free. No payment is requested, and nothing is for sale.",
-          "Registering does not guarantee an allocation. Eligibility rules, amounts and the claim window are not decided; they will be published before the launch.",
+          "Registering does not guarantee an allocation. The Public Launch claim is up to 1,000,000 ARL, at most 10,000 ARL per address, open for 60 days; the list is published before the launch.",
           "ARL will never ask for your private key or seed phrase. Anyone who does is attempting theft.",
           <>
             Your address and email are handled as described in the{" "}

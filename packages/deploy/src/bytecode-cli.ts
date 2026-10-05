@@ -72,11 +72,13 @@ async function run(args: string[]): Promise<number> {
   usage();
 }
 
+// The exit code is set, not forced: process.exit() while the RPC client's sockets are still
+// closing aborts Node on Windows.
 try {
-  process.exit(await run(process.argv.slice(2)));
+  process.exitCode = await run(process.argv.slice(2));
 } catch (error) {
   process.stderr.write(
     `bytecode check failed: ${error instanceof Error ? error.message : String(error)}\n`,
   );
-  process.exit(1);
+  process.exitCode = 1;
 }

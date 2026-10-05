@@ -29,10 +29,12 @@ try {
     await readSnapshot(plan, deployment, rpcUrl, BigInt(from)),
   );
   process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
-  process.exit(report.healthy ? 0 : 3);
+  // Set, not forced: process.exit() while the RPC client's sockets are still closing aborts Node
+  // on Windows.
+  process.exitCode = report.healthy ? 0 : 3;
 } catch (error) {
   process.stderr.write(
     `monitor failed: ${error instanceof Error ? error.message : String(error)}\n`,
   );
-  process.exit(1);
+  process.exitCode = 1;
 }

@@ -22,7 +22,7 @@ contract, so the readiness table below is the real starting point.
 | Deployed contract (testnet)                     | **Missing.** Base Sepolia deployment rehearsed on a fork; not yet broadcast (needs the owner's wallet)                    |
 | Deployed contract (mainnet)                     | **Missing.** Base Mainnet is locked in code until audit and release review                                                |
 | Sale parameters (allocation, price, raise, FDV) | **TBD** (owner decision; see Sale parameters)                                                                             |
-| TGE date                                        | **TBD.** Rule decided: every vesting schedule starts at the TGE                                                           |
+| TGE date                                        | 2026-12-01 (approved 2026-10-05). Every vesting schedule starts at the TGE                                                |
 | Liquidity plan                                  | **TBD.** 2,000,000 ARL Liquidity reserve exists; pool size, pair and LP custody not decided                               |
 | Team identity (KYC with the launchpad)          | Founder: Alaz Daghan Gokturk, Founder and CEO. KYC is done privately with each launchpad by the founder                   |
 | Legal opinion on the token                      | **TBD.** Not obtained                                                                                                     |
@@ -102,14 +102,14 @@ needs a reviewed change to the token, deployment plan and verifier.
 
 ## Sale parameters (all TBD; owner decisions)
 
-| Parameter                         | Value                                                                         |
-| --------------------------------- | ----------------------------------------------------------------------------- |
-| Tokens offered on the launchpad   | `TBD` (would come from the Public Launch allocation)                          |
-| Price per ARL, raise, FDV         | `TBD`                                                                         |
-| Accepted currency                 | `TBD`                                                                         |
-| TGE unlock for buyers and vesting | `TBD`                                                                         |
-| Listing and initial liquidity     | `TBD` (from the 2,000,000 ARL Liquidity reserve; LP custody documented first) |
-| Jurisdictions excluded            | `TBD` (with legal advice)                                                     |
+| Parameter                         | Value                                                                                                                         |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Tokens offered on the launchpad   | From the 1,000,000 ARL Public Launch TGE tranche; at most 10,000 ARL per address; 60-day claim                                |
+| Price per ARL, raise, FDV         | 0.20 USD per ARL; FDV 4,200,000 USD; raise `TBD`                                                                              |
+| Accepted currency                 | `TBD`                                                                                                                         |
+| TGE unlock for buyers and vesting | `TBD`                                                                                                                         |
+| Listing and initial liquidity     | 0.20 USD; pool paired with launch proceeds, or single-sided ARL at or above 0.20 USD; LP in the Liquidity Safe, 12-month lock |
+| Jurisdictions excluded            | `TBD` (with legal advice)                                                                                                     |
 
 ## Security
 
@@ -122,7 +122,7 @@ needs a reviewed change to the token, deployment plan and verifier.
 | Symbolic checks      | Halmos, 11 of 11 properties proven                                                                             |
 | Deployment rehearsal | Local chain and Base Sepolia fork: deployed, verified, 59 negative cases refused                               |
 | Reproducible build   | Committed bytecode hashes checked by CI; deployed code verifiable against a clean build (`docs/deployment.md`) |
-| Independent audit    | **Not yet**                                                                                                    |
+| Independent audit    | **None** (owner decision); bug bounty in ARL, see `docs/bug-bounty.md`                                         |
 | Admin keys           | No owner, upgrade or mint function in the token; allocations held by dedicated Safes; treasury timelock        |
 
 ## Roadmap to launch
