@@ -240,6 +240,8 @@ library ARLDeployPlan {
     function networkGate(uint256 chainId) internal view {
         if (chainId == LOCAL_CHAIN_ID || chainId == TESTNET_CHAIN_ID) return;
         if (chainId == PRODUCTION_CHAIN_ID) {
+            // A day-scale opening time; a few seconds of validator skew do not matter here.
+            // slither-disable-next-line timestamp
             if (block.timestamp < PRODUCTION_OPENS_AT) revert PlanProductionLocked(chainId);
             return;
         }
