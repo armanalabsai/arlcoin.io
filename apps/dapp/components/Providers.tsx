@@ -15,7 +15,7 @@ import { BlockieAvatar } from "~~/components/scaffold-eth";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 
 const base = darkTheme({
-  accentColor: "#eea53f",
+  accentColor: "#ffbf2e",
   accentColorForeground: "#1a1204",
   overlayBlur: "small",
 });
@@ -51,7 +51,7 @@ export function Providers({ children }: { children: ReactNode }) {
                 background: "rgba(10, 20, 48, 0.85)",
                 backdropFilter: "blur(20px)",
                 border: "1px solid rgba(255,255,255,0.14)",
-                color: "#f2f2f0",
+                color: "#ffd84d",
               },
             }}
           />

@@ -22,8 +22,8 @@
   },
   "dependencies": {
     "@arl/zk": "file:../../packages/zk",
-    "@fontsource-variable/source-sans-3": "5.3.0",
-    "@fontsource-variable/source-serif-4": "5.3.0",
+    "@fontsource-variable/fraunces": "5.3.0",
+    "@fontsource-variable/manrope": "5.3.0",
     "@fontsource/source-code-pro": "5.3.0",
     "@heroicons/react": "2.2.0",
     "@rainbow-me/rainbowkit": "2.2.11",

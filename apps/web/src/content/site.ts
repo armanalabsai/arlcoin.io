@@ -10,6 +10,12 @@ export const SITE = {
   repository: "https://github.com/gokturkalazdaghan-dot/ARLCOIN",
   /** Public contact address of the team. */
   email: "armanalabsai@gmail.com",
+  /** Data controller under KVKK (Law No. 6698) and the GDPR, as given by the owner. */
+  controller: {
+    name: "Alaz Dağhan Göktürk",
+    business: "Armanalabs",
+    address: "Taşköprü, 5. Sokak, Sanayi Sitesi No: 22, Yalova, Türkiye",
+  },
 } as const;
 
 export const repoDoc = (path: string): `https://${string}` =>

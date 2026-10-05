@@ -4,8 +4,9 @@
  * ARL colour
  *
  * Night blue behind everything, a field of ice-blue particles and sun-lit nuclei, liquid glass
- * surfaces over it, white and greys for text, and amber for the one thing that matters on a
- * screen: the Core, the selected card, key figures and focus.
+ * surfaces over it, sun yellow for text in three strengths, and gold for the one thing that
+ * matters on a screen: the Core, the selected card, key figures, buttons and focus. Every text
+ * tone keeps at least 7:1 contrast on the page colour.
  */
 @theme {
   --color-page: #050b1e;
@@ -14,21 +15,23 @@
   --color-surface-3: #142147;
   --color-line: rgb(255 255 255 / 0.07);
   --color-line-strong: rgb(255 255 255 / 0.14);
-  --color-fg: #f2f2f0;
-  --color-fg-muted: #a3a6ab;
-  --color-fg-subtle: #6c7076;
+  /* Sun yellow: bright for headings and key text, paler for running text so long passages stay
+     easy to read, and a soft khaki for notes. */
+  --color-fg: #ffd84d;
+  --color-fg-muted: #f3e4b0;
+  --color-fg-subtle: #c4b483;
 
-  /* Amber: warm, between yellow and orange. Never neon, never a fill. */
-  --color-accent: #eea53f;
-  --color-accent-strong: #f4b556;
-  --color-accent-edge: rgb(238 165 63 / 0.5);
-  --color-accent-soft: rgb(238 165 63 / 0.12);
-  --color-accent-faint: rgb(238 165 63 / 0.06);
+  /* Gold: deeper than the text, for buttons, links, the Core and focus. */
+  --color-accent: #ffbf2e;
+  --color-accent-strong: #ffcf5c;
+  --color-accent-edge: rgb(255 191 46 / 0.55);
+  --color-accent-soft: rgb(255 191 46 / 0.14);
+  --color-accent-faint: rgb(255 191 46 / 0.06);
 
-  /* Source Sans 3 for text, Source Serif 4 for headings, Source Code Pro for figures and
-     addresses (Adobe, SIL Open Font License, self-hosted from @fontsource). */
-  --font-sans: "Source Sans 3 Variable", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Source Serif 4 Variable", ui-serif, Georgia, serif;
+  /* Manrope for text and buttons, Fraunces for headings, Source Code Pro for figures and
+     addresses (SIL Open Font License, self-hosted from @fontsource). */
+  --font-sans: "Manrope Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Fraunces Variable", ui-serif, Georgia, serif;
   --font-mono: "Source Code Pro", ui-monospace, "SFMono-Regular", monospace;
 
   --radius-control: 8px;
@@ -62,6 +65,7 @@
   h1,
   h2 {
     font-family: var(--font-serif);
+    font-optical-sizing: auto;
     letter-spacing: -0.01em;
   }
 
@@ -129,7 +133,7 @@
     backdrop-filter: blur(18px) saturate(1.6);
     box-shadow:
       inset 0 1px 0 rgb(255 255 255 / 0.22),
-      inset 0 0 0 1px rgb(238 165 63 / 0.14);
+      inset 0 0 0 1px rgb(255 191 46 / 0.14);
   }
 
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -437,7 +441,7 @@
   align-items: baseline;
   gap: 8px;
   white-space: nowrap;
-  color: #f2f2f0;
+  color: var(--color-fg);
 }
 .infra-link:hover .infra-name {
   color: rgb(62 207 142);

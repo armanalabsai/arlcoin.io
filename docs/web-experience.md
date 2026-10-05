@@ -344,7 +344,7 @@ how technical content is presented.
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Colour             | Near-black page, graphite surfaces, off-white type, ARL amber `#eea53f` only for the Core, active state, focus and primary metrics. No neon, no gradients |
 | Theme              | Dark only. A light theme is an open decision                                                                                                              |
-| Typography         | Source Sans 3 for text, Source Serif 4 for headings, Source Code Pro for numbers, addresses, hashes and identifiers. Numbers use tabular figures          |
+| Typography         | Manrope for text, Fraunces for headings, Source Code Pro for numbers, addresses, hashes and identifiers. Numbers use tabular figures          |
 | Spacing            | 4px scale                                                                                                                                                 |
 | Grid               | 12-column grid on wide screens; single column on phones; long-form pages capped at a readable measure                                                     |
 | Radius             | 8px controls, 12px cards, 16px surfaces, circle for the Core                                                                                              |

@@ -31,8 +31,19 @@ export default function PrivacyPage() {
     <PageShell
       eyebrow="Privacy notice"
       title="Privacy"
-      lead="This site collects personal data only when you submit a form. This notice explains what, why and for how long."
+      lead="This site collects personal data only when you submit a form. This notice explains who is responsible for it, what is collected, why, for how long and what your rights are. It is the information notice required by the Turkish Personal Data Protection Law No. 6698 (KVKK)."
     >
+      <Section heading="Data controller">
+        <p>
+          {SITE.controller.name}, trading as {SITE.controller.business}, {SITE.controller.address}.
+          Contact:{" "}
+          <a href={`mailto:${SITE.email}`} className={link}>
+            {SITE.email}
+          </a>
+          .
+        </p>
+      </Section>
+
       <Section heading="What is collected">
         <p>
           <strong className="font-medium text-fg">Whitelist:</strong> your wallet address and email
@@ -49,11 +60,17 @@ export default function PrivacyPage() {
         </p>
       </Section>
 
-      <Section heading="Why">
+      <Section heading="Why, and on what legal basis">
         <p>
           Whitelist data is used to prepare the launch claim list and to send launch updates.
           Contact data is used to answer your message. Neither is sold, rented or used for
           advertising.
+        </p>
+        <p>
+          The data is collected through the forms on this site, by automated means. It is processed
+          because it is necessary to take the step you ask for, registering or getting an answer,
+          and for the legitimate interest of running the launch list (KVKK Article 5(2)(c) and (f)).
+          Server logs are kept for the security of the site on the same legitimate interest basis.
         </p>
       </Section>
 
@@ -74,8 +91,9 @@ export default function PrivacyPage() {
         </p>
         <p>
           Supabase and Web3Forms are located outside Turkey. Your data is transferred to them only
-          with the explicit consent you give on the whitelist form, and a registration is not
-          possible without it.
+          with the explicit consent you give on the whitelist form (KVKK Article 9), and a
+          registration is not possible without it. The data is not shared with anyone else unless a
+          court or authority requires it by law.
         </p>
         <p>
           A wallet address is public on the blockchain by nature. It is linked to your email only in
@@ -88,6 +106,27 @@ export default function PrivacyPage() {
           Whitelist data is kept until the launch claim list is final and launch updates end.
           Contact messages are kept for as long as the conversation needs. After that the data is
           deleted.
+        </p>
+      </Section>
+
+      <Section heading="Your rights">
+        <p>Under KVKK Article 11 you can ask the data controller to:</p>
+        <ul className="flex list-disc flex-col gap-1 pl-5">
+          <li>
+            tell you whether your personal data is processed, and give you information about it;
+          </li>
+          <li>tell you the purpose of the processing and whether the data is used for it;</li>
+          <li>tell you who, in Turkey or abroad, the data is transferred to;</li>
+          <li>correct data that is incomplete or wrong, and tell those it was transferred to;</li>
+          <li>delete or destroy the data, and tell those it was transferred to;</li>
+          <li>
+            object to a result against you that comes only from automated analysis of the data;
+          </li>
+          <li>compensate a loss caused by unlawful processing.</li>
+        </ul>
+        <p>
+          Requests are answered free of charge within 30 days. If you are not satisfied with the
+          answer, you can complain to the Personal Data Protection Authority (KVKK).
         </p>
       </Section>
 

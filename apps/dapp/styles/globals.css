@@ -3,7 +3,7 @@
   themes: false;
 }
 
-/* ARL night blue with the amber signature (same palette as the website, apps/web). */
+/* ARL night blue with sun-yellow text and gold (same palette as the website, apps/web: sun-yellow text, gold accents). */
 @plugin "daisyui/theme" {
   name: "arl";
   default: true;
@@ -11,20 +11,20 @@
   --color-base-100: #050b1e;
   --color-base-200: #0a1430;
   --color-base-300: #142147;
-  --color-base-content: #f2f2f0;
-  --color-primary: #eea53f;
+  --color-base-content: #ffd84d;
+  --color-primary: #ffbf2e;
   --color-primary-content: #1a1204;
   --color-secondary: #0f1a3b;
-  --color-secondary-content: #f2f2f0;
-  --color-accent: #f4b556;
+  --color-secondary-content: #ffd84d;
+  --color-accent: #ffcf5c;
   --color-accent-content: #1a1204;
   --color-neutral: #142147;
-  --color-neutral-content: #f2f2f0;
+  --color-neutral-content: #ffd84d;
   --color-info: #7aa7ff;
   --color-info-content: #050b1e;
   --color-success: #4cc38a;
   --color-success-content: #04140c;
-  --color-warning: #f4b556;
+  --color-warning: #ffcf5c;
   --color-warning-content: #1a1204;
   --color-error: #f87171;
   --color-error-content: #1d0404;
@@ -38,9 +38,9 @@
 
 @theme {
   --font-mono: "Source Code Pro", ui-monospace, monospace;
-  --font-serif: "Source Serif 4 Variable", ui-serif, Georgia, serif;
-  --color-muted: #a3a6ab;
-  --color-subtle: #6c7076;
+  --font-serif: "Fraunces Variable", ui-serif, Georgia, serif;
+  --color-muted: #f3e4b0;
+  --color-subtle: #c4b483;
   --color-line: rgb(255 255 255 / 0.08);
 }
 
@@ -54,7 +54,7 @@ html {
 
 body {
   background: transparent;
-  font-family: "Source Sans 3 Variable", ui-sans-serif, system-ui, sans-serif;
+  font-family: "Manrope Variable", ui-sans-serif, system-ui, sans-serif;
 }
 
 /*
@@ -144,7 +144,7 @@ body {
 
 .glass-field:focus,
 .glass-field:focus-within {
-  border-color: rgb(238 165 63 / 0.6);
+  border-color: rgb(255 191 46 / 0.6);
   outline: none;
 }
 
@@ -177,7 +177,7 @@ body {
 .btn.btn-primary {
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.45),
-    0 8px 22px -10px rgb(238 165 63 / 0.7);
+    0 8px 22px -10px rgb(255 191 46 / 0.7);
 }
 
 .btn.btn-primary:disabled {
