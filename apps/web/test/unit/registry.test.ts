@@ -11,6 +11,7 @@ import {
   pathFor,
 } from "../../src/content/registry.ts";
 import { TEAM } from "../../src/content/team/registry.ts";
+import { DOCS, docPath } from "../../src/content/docs.ts";
 import type { Card, Layer } from "../../src/content/types.ts";
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -60,10 +61,14 @@ describe("registry structure", () => {
     }
   });
 
-  it("links only to https URLs", () => {
+  it("links only to https URLs or to pages of this site that exist", () => {
+    const docs = new Set(["/docs", ...DOCS.map((d) => docPath(d.slug))]);
     for (const layer of LAYERS) {
       for (const card of layer.cards) {
-        for (const link of card.links ?? []) assert.match(link.href, /^https:\/\//);
+        for (const link of card.links ?? []) {
+          if (link.href.startsWith("/")) assert.ok(docs.has(link.href), link.href);
+          else assert.match(link.href, /^https:\/\//);
+        }
       }
     }
   });
@@ -84,11 +89,12 @@ describe("routing", () => {
   });
 
   it("rejects unknown and malformed paths", () => {
-    for (const p of ["/core", "/core/nope", "/core/team/nope", "/core/team/founder/x", "/team"]) {
+    for (const p of ["/", "/core/nope", "/core/team/nope", "/core/team/founder/x", "/team"]) {
       assert.equal(parsePath(p), null, p);
     }
     assert.deepEqual(parsePath("/core/team/"), parsePath("/core/team"));
-    assert.deepEqual(parsePath("/"), HOME);
+    assert.deepEqual(parsePath("/core"), HOME);
+    assert.deepEqual(parsePath("/core/"), HOME);
   });
 
   it("cycles home → every layer → home", () => {

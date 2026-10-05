@@ -44,7 +44,8 @@ export interface Section {
 
 export interface ExternalLink {
   readonly label: string;
-  readonly href: `https://${string}`;
+  /** An https URL, or a page of this site such as a published document under /docs. */
+  readonly href: `https://${string}` | `/${string}`;
 }
 
 /**

@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
+import { DOCS } from "../../src/content/docs.ts";
 import { allPaths } from "../../src/content/registry.ts";
 import { SITE_PAGES } from "../../src/content/site.ts";
 
@@ -33,7 +34,7 @@ const surface = (page: Page) => page.getByTestId("detail-surface");
 
 test("overview renders the Core and every layer without errors", async ({ page }) => {
   const errors = watchErrors(page);
-  await page.goto("/");
+  await page.goto("/core");
   await expect(core(page)).toBeVisible();
   const layers = page.getByRole("list", { name: "Layers" }).getByRole("link");
   await expect(layers).toHaveCount(6);
@@ -43,7 +44,7 @@ test("overview renders the Core and every layer without errors", async ({ page }
 
 test("the Core cycles through the layers in place", async ({ page }) => {
   const errors = watchErrors(page);
-  await page.goto("/");
+  await page.goto("/core");
   await mark(page);
   await core(page).click();
   await expect(page).toHaveURL(/\/core\/team$/);
@@ -113,7 +114,9 @@ test("detail content is in the server-rendered HTML", async ({ request }) => {
 
 test("sitemap lists every route and robots points to it", async ({ request }) => {
   const sitemap = await (await request.get("/sitemap.xml")).text();
-  expect(sitemap.match(/<loc>/g)).toHaveLength(allPaths().length + SITE_PAGES.length);
+  expect(sitemap.match(/<loc>/g)).toHaveLength(
+    1 + allPaths().length + SITE_PAGES.length + DOCS.length,
+  );
   for (const path of SITE_PAGES) expect(sitemap).toContain(`<loc>https://arlcoin.io${path}</loc>`);
   const robots = await (await request.get("/robots.txt")).text();
   expect(robots).toContain("Sitemap: https://arlcoin.io/sitemap.xml");
@@ -121,7 +124,7 @@ test("sitemap lists every route and robots points to it", async ({ request }) =>
 });
 
 test("keyboard: Enter on the Core, Space on a card, arrows between cards", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/core");
   await core(page).focus();
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/\/core\/team$/);
@@ -135,7 +138,7 @@ test("keyboard: Enter on the Core, Space on a card, arrows between cards", async
   await page.keyboard.press("Escape");
   await expect(page.locator('[data-ring-card="team-growing"]')).toBeFocused();
   await page.keyboard.press("Escape");
-  await expect(page).toHaveURL(/\/$/);
+  await expect(page).toHaveURL(/\/core$/);
 });
 
 test("the detail surface traps focus while open", async ({ page }) => {
@@ -160,7 +163,7 @@ test("reduced motion still opens and closes the detail", async ({ page }) => {
 });
 
 test("the index opens cards without a page load", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/core");
   await mark(page);
   await page.getByRole("contentinfo").getByRole("link", { name: "External Audit" }).click();
   await expect(page).toHaveURL(/\/core\/security\/audit$/);
@@ -196,7 +199,7 @@ test("deployment-dependent token values are never given a number", async ({ page
 test("team layer: the founder and the team-growing note, unverified details withheld", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/core");
   await core(page).click();
   await expect(page).toHaveURL(/\/core\/team$/);
   await expect(core(page)).toBeVisible();

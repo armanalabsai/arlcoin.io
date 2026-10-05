@@ -14,7 +14,7 @@ import { Orbit } from "./Orbit.tsx";
 import { ProtocolIndex } from "./ProtocolIndex.tsx";
 import { SiteLinks } from "@/site/SiteLinks.tsx";
 import type { RingEntry } from "./RingCard.tsx";
-import { isPlainClick, useCoreRoute } from "./useCoreRoute.ts";
+import { useCoreRoute } from "./useCoreRoute.ts";
 
 /**
  * The ARL Interactive Core. One component renders every view: the overview
@@ -87,7 +87,7 @@ export function InteractiveCore() {
     if (!layer || card) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape" || e.defaultPrevented) return;
-      navigate("/");
+      navigate(pathFor());
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -115,13 +115,8 @@ export function InteractiveCore() {
           <Link
             href="/"
             prefetch={false}
-            onClick={(e) => {
-              if (!isPlainClick(e)) return;
-              e.preventDefault();
-              navigate("/");
-            }}
-            className="arl-neon inline-flex items-center gap-2 text-[17px] tracking-[-0.03em]"
-            aria-label="ARL overview"
+            className="arl-neon inline-flex min-h-11 items-center gap-2 text-[17px] tracking-[-0.03em]"
+            aria-label="ARL home"
           >
             <BrandMark />
             ARL
@@ -155,8 +150,8 @@ export function InteractiveCore() {
               {layer ? (
                 <button
                   type="button"
-                  onClick={() => navigate("/")}
-                  className="orbit-hide inline-flex h-8 items-center gap-2 rounded-(--radius-control) px-2 text-[13px] text-fg-subtle transition-colors hover:bg-surface-3 hover:text-fg"
+                  onClick={() => navigate(pathFor())}
+                  className="orbit-hide inline-flex h-11 items-center gap-2 rounded-full px-4 text-[13px] text-fg-subtle transition-colors hover:bg-surface-3 hover:text-fg"
                 >
                   <span aria-hidden="true">←</span> Overview
                 </button>

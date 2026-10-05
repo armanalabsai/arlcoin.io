@@ -84,14 +84,14 @@ website's source is copied from third parties; these packages are used as publis
 
 Runtime (included in the built site):
 
-| Package                                                                                              | Version | License | Purpose                                                                                                         |
-| ---------------------------------------------------------------------------------------------------- | ------- | ------- | --------------------------------------------------------------------------------------------------------------- |
-| next                                                                                                 | 16.3.6  | MIT     | Framework, routing, static generation                                                                           |
-| react / react-dom                                                                                    | 19.3.0  | MIT     | UI runtime                                                                                                      |
-| motion                                                                                               | 13.4.4  | MIT     | Springs, presence and drag animations                                                                           |
-| @radix-ui/react-dialog                                                                               | 1.1.23  | MIT     | Accessible dialog (focus trap, Escape, ARIA)                                                                    |
-| @fontsource-variable/manrope, @fontsource/source-code-pro | 5.3.0   | OFL-1.1 | Manrope (text and headings), Source Code Pro (figures, addresses); self-hosted |
-| @noble/hashes                                                                                        | 2.4.0   | MIT     | Keccak-256 for the EIP-55 address checksum in the whitelist form                                                |
+| Package                                                         | Version | License | Purpose                                                                             |
+| --------------------------------------------------------------- | ------- | ------- | ----------------------------------------------------------------------------------- |
+| next                                                            | 16.3.6  | MIT     | Framework, routing, static generation                                               |
+| react / react-dom                                               | 19.3.0  | MIT     | UI runtime                                                                          |
+| motion                                                          | 13.4.4  | MIT     | Springs, presence and drag animations                                               |
+| @radix-ui/react-dialog                                          | 1.1.23  | MIT     | Accessible dialog (focus trap, Escape, ARIA)                                        |
+| @fontsource-variable/inter, @fontsource-variable/jetbrains-mono | 5.3.0   | OFL-1.1 | Inter (text and headings), JetBrains Mono (figures, badges, addresses); self-hosted |
+| @noble/hashes                                                   | 2.4.0   | MIT     | Keccak-256 for the EIP-55 address checksum in the whitelist form                    |
 
 The ARL wordmark (`assets/brand/`) contains Geist SemiBold and Medium glyphs outlined to vector
 (Geist, OFL-1.1); the site no longer loads the Geist fonts.
@@ -156,21 +156,21 @@ The pages (`app/`), ARL components (`components/arl/`), `lib/`, the local develo
 
 Runtime packages (included in the built app), used as published:
 
-| Package                                                                                              | Version | License    | Purpose                                                             |
-| ---------------------------------------------------------------------------------------------------- | ------- | ---------- | ------------------------------------------------------------------- |
-| next                                                                                                 | 16.3.6  | MIT        | Framework                                                           |
-| react / react-dom                                                                                    | 19.3.0  | MIT        | UI runtime                                                          |
-| wagmi                                                                                                | 2.19.5  | MIT        | Wallet connection and contract calls                                |
-| viem                                                                                                 | 2.56.9  | MIT        | Ethereum client                                                     |
-| @rainbow-me/rainbowkit                                                                               | 2.2.11  | MIT        | Wallet selection                                                    |
-| @tanstack/react-query                                                                                | 5.104.0 | MIT        | Data fetching cache (wagmi peer)                                    |
-| react-hot-toast                                                                                      | 2.6.1   | MIT        | Transaction notifications                                           |
-| zustand                                                                                              | 5.0.15  | MIT        | Selected network state                                              |
-| usehooks-ts                                                                                          | 3.1.1   | MIT        | React hooks                                                         |
-| blo                                                                                                  | 2.0.0   | MIT        | Address avatars                                                     |
-| @x402/evm, @x402/core                                                                                | 2.27.0  | Apache-2.0 | x402 `upto` client and facilitator (Payments screen)                |
-| @fontsource-variable/manrope, @fontsource/source-code-pro | 5.3.0   | OFL-1.1    | Manrope, Source Code Pro (Adobe), self-hosted |
-| @heroicons/react                                                                                     | 2.2.0   | MIT        | Icons                                                               |
+| Package                                                 | Version | License    | Purpose                                              |
+| ------------------------------------------------------- | ------- | ---------- | ---------------------------------------------------- |
+| next                                                    | 16.3.6  | MIT        | Framework                                            |
+| react / react-dom                                       | 19.3.0  | MIT        | UI runtime                                           |
+| wagmi                                                   | 2.19.5  | MIT        | Wallet connection and contract calls                 |
+| viem                                                    | 2.56.9  | MIT        | Ethereum client                                      |
+| @rainbow-me/rainbowkit                                  | 2.2.11  | MIT        | Wallet selection                                     |
+| @tanstack/react-query                                   | 5.104.0 | MIT        | Data fetching cache (wagmi peer)                     |
+| react-hot-toast                                         | 2.6.1   | MIT        | Transaction notifications                            |
+| zustand                                                 | 5.0.15  | MIT        | Selected network state                               |
+| usehooks-ts                                             | 3.1.1   | MIT        | React hooks                                          |
+| blo                                                     | 2.0.0   | MIT        | Address avatars                                      |
+| @x402/evm, @x402/core                                   | 2.27.0  | Apache-2.0 | x402 `upto` client and facilitator (Payments screen) |
+| @fontsource-variable/inter, @fontsource/source-code-pro | 5.3.0   | OFL-1.1    | Inter, Source Code Pro (Adobe), self-hosted          |
+| @heroicons/react                                        | 2.2.0   | MIT        | Icons                                                |
 
 Build and test: daisyui 5.7.46 (MIT; its generated CSS is in the built app), tailwindcss and @tailwindcss/postcss
 4.3.3 (MIT), abitype 1.2.4 (MIT), type-fest 5.6.0 (MIT or CC0-1.0), @playwright/test 1.63.0

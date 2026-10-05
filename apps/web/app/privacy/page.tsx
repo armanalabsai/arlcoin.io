@@ -53,9 +53,11 @@ export default function PrivacyPage() {
           your message and, if you give it, your name.
         </p>
         <p>
-          The site sets no cookies and runs no analytics or advertising trackers. The hosting
-          provider records standard server logs, such as IP addresses, to operate and protect the
-          site.
+          The site sets no cookies and runs no advertising trackers. It counts page views with
+          Vercel Web Analytics, which uses no cookies and stores no personal data: visits are
+          counted in aggregate and no visitor can be identified or followed across sites. The
+          hosting provider records standard server logs, such as IP addresses, to operate and
+          protect the site.
         </p>
       </Section>
 

@@ -21,7 +21,7 @@ test.skip(({ isMobile }) => isMobile, "desktop geometry only");
 for (const [width, height] of VIEWPORTS) {
   test(`no collisions at ${width}×${height}`, async ({ page }) => {
     await page.setViewportSize({ width, height });
-    for (const path of ["/", ...LAYERS.map((l) => pathFor(l.id))]) {
+    for (const path of [pathFor(), ...LAYERS.map((l) => pathFor(l.id))]) {
       await page.goto(path);
       const result = await page.evaluate(() => {
         const cards = [...document.querySelectorAll("[data-ring-card]")].map((e) =>

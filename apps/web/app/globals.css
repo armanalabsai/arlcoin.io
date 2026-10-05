@@ -3,37 +3,33 @@
 /*
  * ARL colour
  *
- * Night blue behind everything, a field of ice-blue particles and sun-lit nuclei, liquid glass
- * surfaces over it, sun yellow for text in three strengths, and gold for the one thing that
- * matters on a screen: the Core, the selected card, key figures, buttons and focus. Every text
- * tone keeps at least 7:1 contrast on the page colour.
+ * Night blue behind everything and ice blue as the one accent: buttons, links, figures, the
+ * Core and focus. Headings are white, running text a cool off-white, notes a blue-grey. Every
+ * text tone keeps at least 4.5:1 contrast on the page colour.
  */
 @theme {
   --color-page: #050b1e;
   --color-surface-1: #0a1430;
-  --color-surface-2: #0f1a3b;
-  --color-surface-3: #142147;
-  --color-line: rgb(255 255 255 / 0.07);
-  --color-line-strong: rgb(255 255 255 / 0.14);
-  /* Sun yellow: bright for headings and key text, paler for running text so long passages stay
-     easy to read, and a soft khaki for notes. */
-  /* White for headings and titles, so the yellow text sits under a clean, bold line. */
+  --color-surface-2: #0d1a38;
+  --color-surface-3: #13224a;
+  --color-line: rgb(255 255 255 / 0.1);
+  --color-line-strong: rgb(255 255 255 / 0.18);
   --color-heading: #ffffff;
-  --color-fg: #ffd84d;
-  --color-fg-muted: #f3e4b0;
-  --color-fg-subtle: #c4b483;
+  --color-fg: #f5f7fa;
+  --color-fg-muted: #a7b3c7;
+  --color-fg-subtle: #8290a8;
 
-  /* Gold: deeper than the text, for buttons, links, the Core and focus. */
-  --color-accent: #ffbf2e;
-  --color-accent-strong: #ffcf5c;
-  --color-accent-edge: rgb(255 191 46 / 0.55);
-  --color-accent-soft: rgb(255 191 46 / 0.14);
-  --color-accent-faint: rgb(255 191 46 / 0.06);
+  /* Ice blue: the single accent. Text on an ice-blue fill is night blue. */
+  --color-accent: #9fd8ff;
+  --color-accent-strong: #c8ebff;
+  --color-accent-edge: rgb(159 216 255 / 0.5);
+  --color-accent-soft: rgb(159 216 255 / 0.14);
+  --color-accent-faint: rgb(159 216 255 / 0.06);
 
-  /* Manrope for text, buttons and (extra bold, in white) headings, Source Code Pro for figures
-     and addresses (SIL Open Font License, self-hosted from @fontsource). */
-  --font-sans: "Manrope Variable", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Source Code Pro", ui-monospace, "SFMono-Regular", monospace;
+  /* Inter for text and headings, JetBrains Mono for figures, badges and addresses (SIL Open
+     Font License, self-hosted from @fontsource). */
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, "SFMono-Regular", monospace;
 
   --radius-control: 8px;
   --radius-card: 12px;
@@ -67,7 +63,7 @@
   h2,
   h3 {
     color: var(--color-heading);
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
   }
 
   :focus-visible {
@@ -134,7 +130,7 @@
     backdrop-filter: blur(18px) saturate(1.6);
     box-shadow:
       inset 0 1px 0 rgb(255 255 255 / 0.22),
-      inset 0 0 0 1px rgb(255 191 46 / 0.14);
+      inset 0 0 0 1px rgb(159 216 255 / 0.16);
   }
 
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -439,7 +435,8 @@
 }
 .infra-link {
   display: inline-flex;
-  align-items: baseline;
+  min-height: 44px;
+  align-items: center;
   gap: 8px;
   white-space: nowrap;
   color: var(--color-fg);
@@ -472,12 +469,188 @@
   }
 }
 
-/* The ARL name on the Core and in the header: bold white with a soft neon glow. */
+/* The ARL name on the Core and in the header: bold white. */
 .arl-neon {
   color: #fff;
-  font-weight: 800;
-  text-shadow:
-    0 0 1px rgb(255 255 255 / 0.9),
-    0 0 6px rgb(255 255 255 / 0.55),
-    0 0 16px rgb(190 225 255 / 0.35);
+  font-weight: 700;
+}
+
+/* Published documents. */
+.doc-prose {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--color-fg-muted);
+}
+.doc-prose > * + * {
+  margin-top: 16px;
+}
+.doc-prose h2 {
+  margin-top: 48px;
+  font-size: 24px;
+  line-height: 1.25;
+  font-weight: 700;
+}
+.doc-prose h3 {
+  margin-top: 32px;
+  font-size: 19px;
+  font-weight: 700;
+}
+.doc-prose h4 {
+  margin-top: 24px;
+  font-weight: 600;
+  color: var(--color-fg);
+}
+.doc-prose a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.doc-prose strong {
+  color: var(--color-fg);
+  font-weight: 600;
+}
+.doc-prose ul,
+.doc-prose ol {
+  padding-left: 24px;
+}
+.doc-prose ul {
+  list-style: disc;
+}
+.doc-prose ol {
+  list-style: decimal;
+}
+.doc-prose li + li {
+  margin-top: 8px;
+}
+.doc-prose code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  color: var(--color-fg);
+}
+.doc-prose pre,
+.doc-code {
+  overflow-x: auto;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: var(--color-surface-1);
+  padding: 16px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.doc-code code {
+  font-family: var(--font-mono);
+}
+.doc-prose table {
+  display: block;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.doc-prose th,
+.doc-prose td {
+  border: 1px solid var(--color-line);
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+.doc-prose th {
+  color: var(--color-fg);
+  font-weight: 600;
+}
+.doc-prose blockquote {
+  border-left: 2px solid var(--color-accent-edge);
+  padding-left: 16px;
+}
+.doc-prose hr {
+  border: 0;
+  border-top: 1px solid var(--color-line);
+}
+
+/* FAQ rows: the + turns into a − when open. */
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+.faq-mark {
+  transition: transform 200ms var(--ease-out-quint);
+}
+.faq-item[open] .faq-mark {
+  transform: rotate(45deg);
+}
+
+/* Landing page. */
+.landing-hero {
+  background: radial-gradient(60% 50% at 50% 18%, rgb(111 185 232 / 0.16), transparent 70%);
+}
+.landing-core {
+  position: relative;
+  background: radial-gradient(circle at 50% 35%, #13264f 0%, rgb(8 18 41 / 0.92) 70%);
+  border: 1px solid rgb(159 216 255 / 0.25);
+  transition: border-color 200ms;
+}
+.landing-core::before {
+  content: "";
+  position: absolute;
+  inset: 16px;
+  border-radius: 50%;
+  border: 1px solid rgb(255 255 255 / 0.08);
+}
+.landing-core::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: var(--color-accent);
+  border-right-color: var(--color-accent);
+  transform: rotate(-20deg);
+}
+.landing-core:hover {
+  border-color: var(--color-accent-edge);
+}
+.landing-road {
+  display: grid;
+  grid-template-columns: 1fr;
+  border-left: 1px solid var(--color-line);
+  margin-left: 4px;
+}
+.landing-road li {
+  position: relative;
+  padding: 0 0 24px 24px;
+}
+.landing-road li::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: -5px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--color-fg-subtle);
+}
+.landing-road li[data-status="Complete"]::before {
+  background: var(--color-accent);
+}
+.landing-road li[data-status="In progress"]::before {
+  background: var(--color-page);
+  border: 2px solid var(--color-accent);
+}
+@media (min-width: 768px) {
+  .landing-road {
+    grid-template-columns: repeat(6, 1fr);
+    border-left: 0;
+    border-top: 1px solid var(--color-line);
+    margin-left: 0;
+  }
+  .landing-road li {
+    padding: 24px 16px 0 0;
+  }
+  .landing-road li::before {
+    top: -5px;
+    left: 0;
+  }
+}
+.landing-final {
+  background: linear-gradient(180deg, transparent 0%, rgb(11 29 68 / 0.9) 100%);
 }

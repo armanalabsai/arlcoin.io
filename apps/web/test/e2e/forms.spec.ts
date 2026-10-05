@@ -19,7 +19,7 @@ for (const [path, heading] of PAGES) {
     page.on("pageerror", (e) => errors.push(e.message));
     await page.goto(path);
     await expect(page.getByRole("heading", { level: 1, name: heading })).toBeVisible();
-    await expect(page.getByRole("link", { name: "ARL overview" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "ARL home" })).toBeVisible();
     const hscroll = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );
@@ -29,10 +29,10 @@ for (const [path, heading] of PAGES) {
 }
 
 test("the Core header and footer link to the whitelist and contact pages", async ({ page }) => {
-  await page.goto("/");
-  await page.getByRole("banner").getByRole("link", { name: "Whitelist" }).click();
+  await page.goto("/core");
+  await page.getByRole("banner").getByRole("link", { name: "Join whitelist" }).click();
   await expect(page).toHaveURL(/\/whitelist\/?$/);
-  await page.goto("/");
+  await page.goto("/core");
   const footer = page.getByRole("navigation", { name: "Site" });
   await expect(footer.getByRole("link", { name: "Contact" })).toBeVisible();
   await expect(footer.getByRole("link", { name: "Privacy" })).toBeVisible();
@@ -40,9 +40,7 @@ test("the Core header and footer link to the whitelist and contact pages", async
 
 test("the contact page shows the team email address", async ({ page }) => {
   await page.goto("/contact");
-  await expect(
-    page.getByRole("main").getByRole("link", { name: SITE.email }).first(),
-  ).toHaveAttribute("href", `mailto:${SITE.email}`);
+  await expect(page.locator(`main a[href="mailto:${SITE.email}"]`).first()).toBeVisible();
 });
 
 test.describe("forms closed", () => {

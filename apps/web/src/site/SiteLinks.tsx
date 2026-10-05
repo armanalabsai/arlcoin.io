@@ -1,22 +1,25 @@
 import Link from "next/link";
 
-import { SITE } from "@/content/site.ts";
+// Header actions shared by the Core and the standalone pages. Each link is at least 44px tall
+// for touch; the visible pill inside it can be smaller.
+const tap = "inline-flex min-h-11 items-center";
 
-const button =
-  "h-8 items-center rounded-(--radius-control) border px-3 text-[13px] transition-colors";
-const quietLook = `${button} border-line-strong text-fg-muted hover:border-[rgb(255_255_255/0.28)] hover:text-fg`;
-const quiet = `inline-flex ${quietLook}`;
-const accent = `inline-flex ${button} border-accent-edge bg-accent-faint text-accent hover:bg-accent-soft hover:text-accent-strong`;
-
-/** Header actions shared by the Core and the standalone pages. */
-export function SiteLinks({ current }: { current?: "whitelist" | "contact" }) {
+export function SiteLinks({ current }: { current?: "whitelist" | "contact" | "faq" }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-4">
+      <Link
+        href="/faq"
+        prefetch={false}
+        aria-current={current === "faq" ? "page" : undefined}
+        className={`${tap} hidden text-[13px] text-fg-muted transition-colors hover:text-fg min-[420px]:inline-flex`}
+      >
+        FAQ
+      </Link>
       <Link
         href="/contact"
         prefetch={false}
         aria-current={current === "contact" ? "page" : undefined}
-        className={`hidden min-[360px]:inline-flex ${quietLook}`}
+        className={`${tap} hidden text-[13px] text-fg-muted transition-colors hover:text-fg min-[360px]:inline-flex`}
       >
         Contact
       </Link>
@@ -24,13 +27,12 @@ export function SiteLinks({ current }: { current?: "whitelist" | "contact" }) {
         href="/whitelist"
         prefetch={false}
         aria-current={current === "whitelist" ? "page" : undefined}
-        className={accent}
+        className={`${tap} group`}
       >
-        Whitelist
+        <span className="inline-flex h-8 items-center rounded-full bg-accent px-4 text-[13px] font-semibold text-page transition-colors group-hover:bg-accent-strong">
+          Join whitelist
+        </span>
       </Link>
-      <a href={SITE.repository} rel="noopener noreferrer" className={quiet}>
-        GitHub
-      </a>
     </div>
   );
 }

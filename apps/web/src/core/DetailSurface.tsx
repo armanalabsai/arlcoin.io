@@ -14,6 +14,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import type { Card, Layer } from "@/content/types.ts";
 
+import { withBase } from "./basePath.ts";
 import { FADE_FAST, SPRING_SHEET, SPRING_SURFACE } from "./motion.ts";
 import { IdentityMark, MetricValue } from "./RingCard.tsx";
 
@@ -230,7 +231,7 @@ function Surface({ layer, card, originRect, onClose, onStep }: SurfaceProps) {
             <Dialog.Close asChild>
               <button
                 type="button"
-                className="-ml-2 inline-flex h-9 items-center gap-2 rounded-(--radius-control) px-2 text-[13px] text-fg-muted transition-colors hover:bg-surface-3 hover:text-fg"
+                className="-ml-2 inline-flex h-11 items-center gap-2 rounded-full px-3 text-[13px] text-fg-muted transition-colors hover:bg-surface-3 hover:text-fg"
               >
                 <span aria-hidden="true">←</span>
                 <span>Back to {layer.title}</span>
@@ -343,21 +344,34 @@ function Surface({ layer, card, originRect, onClose, onStep }: SurfaceProps) {
 
                 {card.links?.length ? (
                   <div className="flex flex-wrap gap-2">
-                    {card.links.map((l) => (
-                      <a
-                        key={l.href}
-                        href={l.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex h-9 items-center gap-2 rounded-(--radius-control) border border-line-strong px-3 text-[13px] transition-colors hover:border-[rgb(255_255_255/0.28)] hover:bg-surface-3"
-                      >
-                        {l.label}
-                        <span aria-hidden="true" className="text-fg-subtle">
-                          ↗
-                        </span>
-                        <span className="sr-only">(opens in a new tab)</span>
-                      </a>
-                    ))}
+                    {card.links.map((l) =>
+                      l.href.startsWith("/") ? (
+                        <a
+                          key={l.href}
+                          href={withBase(l.href)}
+                          className="inline-flex h-11 items-center gap-2 rounded-full border border-line-strong px-4 text-[13px] transition-colors hover:border-accent-edge hover:text-accent"
+                        >
+                          {l.label}
+                          <span aria-hidden="true" className="text-fg-subtle">
+                            ›
+                          </span>
+                        </a>
+                      ) : (
+                        <a
+                          key={l.href}
+                          href={l.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex h-11 items-center gap-2 rounded-full border border-line-strong px-4 text-[13px] transition-colors hover:border-accent-edge hover:text-accent"
+                        >
+                          {l.label}
+                          <span aria-hidden="true" className="text-fg-subtle">
+                            ↗
+                          </span>
+                          <span className="sr-only">(opens in a new tab)</span>
+                        </a>
+                      ),
+                    )}
                   </div>
                 ) : null}
 
@@ -395,7 +409,7 @@ function StepButton({
     <button
       type="button"
       onClick={() => onStep(card.id)}
-      className={`inline-flex h-9 max-w-[48%] items-center gap-2 rounded-(--radius-control) px-2 text-[13px] text-fg-muted transition-colors hover:bg-surface-3 hover:text-fg ${isNext ? "-mr-2 ml-auto" : "-ml-2"}`}
+      className={`inline-flex h-11 max-w-[48%] items-center gap-2 rounded-full px-3 text-[13px] text-fg-muted transition-colors hover:bg-surface-3 hover:text-fg ${isNext ? "-mr-2 ml-auto" : "-ml-2"}`}
     >
       {isNext ? null : <span aria-hidden="true">←</span>}
       <span className="truncate">

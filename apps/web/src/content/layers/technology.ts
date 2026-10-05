@@ -1,5 +1,5 @@
 import { ALLOCATIONS } from "../../../../../packages/tokenomics/src/index.ts";
-import { SITE, repoDoc } from "../site.ts";
+import { repoDoc } from "../site.ts";
 import type { Layer } from "../types.ts";
 
 // Planned components are described as plans. Nothing here claims a working
@@ -180,7 +180,7 @@ export const technology: Layer = {
       },
       links: [
         { label: "Architecture", href: repoDoc("docs/architecture.md") },
-        { label: "Repository", href: SITE.repository },
+        { label: "Documents", href: "/docs" },
       ],
     },
   ],

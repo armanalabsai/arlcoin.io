@@ -128,14 +128,14 @@ function Check({
     <div className="flex flex-col gap-1">
       <label
         htmlFor={id}
-        className="flex items-start gap-3 text-[14px] leading-[1.5] text-fg-muted"
+        className="flex min-h-11 items-start gap-3 py-2 text-[15px] leading-[1.5] text-fg-muted"
       >
         <input
           id={id}
           name={name}
           type="checkbox"
           aria-invalid={error ? true : undefined}
-          className="mt-[3px] size-4 shrink-0 accent-[var(--color-accent)]"
+          className="mt-[1px] size-5 shrink-0 accent-[var(--color-accent)]"
         />
         <span>{children}</span>
       </label>
@@ -169,7 +169,7 @@ function Submit({ status, label }: { status: Status; label: string }) {
       <button
         type="submit"
         disabled={status.kind === "sending"}
-        className="inline-flex h-11 items-center justify-center rounded-(--radius-control) bg-accent px-5 text-[15px] font-medium text-[#1a1203] transition-colors hover:bg-accent-strong disabled:opacity-60 sm:self-start"
+        className="inline-flex h-12 items-center justify-center rounded-full bg-accent px-6 text-[17px] font-semibold text-page transition-colors hover:bg-accent-strong disabled:opacity-60 sm:self-start"
       >
         {status.kind === "sending" ? "Sending…" : label}
       </button>

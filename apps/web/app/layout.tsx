@@ -1,6 +1,6 @@
-import "@fontsource-variable/manrope";
-import "@fontsource/source-code-pro/400.css";
-import "@fontsource/source-code-pro/500.css";
+import "@fontsource-variable/inter";
+import "@fontsource-variable/jetbrains-mono";
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 
 import { SITE } from "@/content/site.ts";
@@ -34,6 +34,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <NucleusField />
         {children}
         <InfrastructureStrip />
+        {/* Cookieless page counts; on only for the Vercel deployment, where the script is served. */}
+        {process.env.NEXT_PUBLIC_ARL_ANALYTICS === "1" ? <Analytics /> : null}
       </body>
     </html>
   );

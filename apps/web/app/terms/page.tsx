@@ -66,10 +66,10 @@ export default function TermsPage() {
         <p>
           The team keeps the content current and marks what is planned, in development or complete.
           It can still be incomplete or out of date. For the code itself, the{" "}
-          <a href={SITE.repository} rel="noopener noreferrer" className={link}>
-            source repository
-          </a>{" "}
-          is the reference.
+          <Link href="/docs" prefetch={false} className={link}>
+            published documents
+          </Link>{" "}
+          and the source code are the reference.
         </p>
       </Section>
 
@@ -83,15 +83,18 @@ export default function TermsPage() {
 
       <Section heading="Other sites">
         <p>
-          Links to other sites, such as GitHub or the form delivery service, are provided for
-          convenience. Those sites have their own terms, and the project is not responsible for
-          them.
+          Links to other sites, such as the form delivery service, are provided for convenience.
+          Those sites have their own terms, and the project is not responsible for them.
         </p>
       </Section>
 
       <Section heading="Security reports">
         <p>
-          Report vulnerabilities privately, as described in the repository&rsquo;s security policy.
+          Report vulnerabilities privately, as described in the{" "}
+          <Link href="/docs/security" prefetch={false} className={link}>
+            security policy
+          </Link>
+          .
         </p>
       </Section>
 

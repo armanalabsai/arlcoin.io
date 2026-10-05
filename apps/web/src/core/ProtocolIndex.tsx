@@ -2,7 +2,7 @@
 
 import { LAYERS, pathFor } from "@/content/registry.ts";
 import { TOKEN_DISCLAIMER } from "@/content/site.ts";
-import { FooterLinks } from "@/site/PageShell.tsx";
+import { FooterLinks } from "@/site/SiteFrame.tsx";
 
 import { withBase } from "./basePath.ts";
 import { isPlainClick } from "./useCoreRoute.ts";
@@ -31,12 +31,12 @@ export function ProtocolIndex({ onOpen }: Props) {
                     e.preventDefault();
                     onOpen(layer.id);
                   }}
-                  className="hover:text-accent"
+                  className="inline-flex min-h-11 items-center hover:text-accent"
                 >
                   {layer.title}
                 </a>
               </h3>
-              <ul className="flex flex-col gap-2">
+              <ul className="flex flex-col">
                 {layer.cards.map((card) => (
                   <li key={card.id}>
                     <a
@@ -46,7 +46,7 @@ export function ProtocolIndex({ onOpen }: Props) {
                         e.preventDefault();
                         onOpen(layer.id, card.id);
                       }}
-                      className="text-[13px] leading-snug text-fg-muted hover:text-fg"
+                      className="inline-flex min-h-11 items-center text-[13px] leading-snug text-fg-muted hover:text-fg"
                     >
                       {card.title}
                     </a>

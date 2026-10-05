@@ -1,3 +1,5 @@
+import { docPathFor } from "./docs.ts";
+
 // Site-wide constants. The domain is configuration, not a claim about content.
 
 export const SITE = {
@@ -7,7 +9,6 @@ export const SITE = {
     "ARL is the native utility token planned for decentralized AI and compute services. 21,000,000 ARL maximum supply. Not yet deployed.",
   /** Short line under the Core on the overview. */
   tagline: "The native utility token planned for AI and compute services. Not yet deployed.",
-  repository: "https://github.com/gokturkalazdaghan-dot/ARLCOIN",
   /** Public contact address of the team. */
   email: "armanalabsai@gmail.com",
   /** Data controller named in the privacy notice, as given by the owner. */
@@ -17,11 +18,18 @@ export const SITE = {
   },
 } as const;
 
-export const repoDoc = (path: string): `https://${string}` =>
-  `https://github.com/gokturkalazdaghan-dot/ARLCOIN/blob/main/${path}`;
+/** The site page that publishes a repository file (see docs.ts). */
+export const repoDoc = (path: string): `/${string}` => docPathFor(path);
 
 /** Pages outside the Core. */
-export const SITE_PAGES = ["/whitelist", "/contact", "/privacy", "/terms"] as const;
+export const SITE_PAGES = [
+  "/whitelist",
+  "/faq",
+  "/docs",
+  "/contact",
+  "/privacy",
+  "/terms",
+] as const;
 
 export const NOT_DEPLOYED = "Not yet deployed";
 

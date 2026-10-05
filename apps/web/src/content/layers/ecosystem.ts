@@ -1,5 +1,5 @@
 import { ALLOCATIONS } from "../../../../../packages/tokenomics/src/index.ts";
-import { SITE, repoDoc } from "../site.ts";
+import { repoDoc } from "../site.ts";
 import type { Layer } from "../types.ts";
 
 // The open-source software ARL is built on, named because ARL depends on it.
@@ -11,19 +11,19 @@ if (!grants) throw new Error("Grants allocation is missing from packages/tokenom
 export const ecosystem: Layer = {
   id: "ecosystem",
   title: "Ecosystem",
-  description: "Open-source software ARL builds on, and builder programs. No partnerships.",
+  description: "Open-source software ARL builds on, and builder programs.",
   cards: [
     {
       id: "repository",
       title: "Open Source",
-      shortDescription: "Apache-2.0, public repository",
+      shortDescription: "Apache-2.0 licensed",
       weight: "primary",
       detail: {
         summary:
           "All ARL code, documentation and decisions are public. The code is licensed under Apache-2.0.",
       },
       links: [
-        { label: "Repository", href: SITE.repository },
+        { label: "Documents", href: "/docs" },
         { label: "Contributing", href: repoDoc("CONTRIBUTING.md") },
       ],
     },

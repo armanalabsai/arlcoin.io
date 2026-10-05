@@ -7,7 +7,7 @@ const dir = process.env.SHOTS_DIR ?? "test-results/shots";
 
 test("capture", async ({ page }, info) => {
   const p = info.project.name;
-  await page.goto("/");
+  await page.goto("/core");
   await page.waitForTimeout(400);
   await page.screenshot({ path: `${dir}/${p}-home.png` });
   await page.goto("/core/token");
@@ -28,7 +28,7 @@ test("capture", async ({ page }, info) => {
   await page.goto("/core/token/allocation");
   await page.waitForTimeout(700);
   await page.screenshot({ path: `${dir}/${p}-allocation.png` });
-  await page.goto("/");
+  await page.goto("/core");
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   await page.waitForTimeout(300);
   await page.screenshot({ path: `${dir}/${p}-index.png` });

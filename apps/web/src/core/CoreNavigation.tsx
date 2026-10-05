@@ -29,7 +29,7 @@ export function CoreNavigation({ current, onSelect, className = "" }: Props) {
                   e.preventDefault();
                   onSelect(l.id);
                 }}
-                className={`inline-flex h-8 items-center rounded-(--radius-control) px-3 text-[13px] transition-colors ${
+                className={`inline-flex h-11 items-center rounded-full px-4 text-[13px] transition-colors ${
                   active
                     ? "bg-accent-soft text-accent"
                     : "text-fg-muted hover:bg-surface-3 hover:text-fg"

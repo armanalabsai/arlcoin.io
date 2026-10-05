@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { OG_IMAGE, repoDoc, SITE } from "@/content/site.ts";
 import { FactList, PageShell } from "@/site/PageShell.tsx";
@@ -29,18 +30,14 @@ export default function ContactPage() {
         title="Before you write"
         items={[
           <>
-            Security vulnerabilities: report them privately through{" "}
-            <a
-              href="https://github.com/gokturkalazdaghan-dot/ARLCOIN/security/advisories/new"
-              rel="noopener noreferrer"
-              className={link}
-            >
-              GitHub private vulnerability reporting
-            </a>
-            . See the{" "}
-            <a href={repoDoc("SECURITY.md")} rel="noopener noreferrer" className={link}>
+            Security vulnerabilities: report them privately by email to{" "}
+            <a href={`mailto:${SITE.email}?subject=Security`} className={link}>
+              {SITE.email}
+            </a>{" "}
+            with &ldquo;Security&rdquo; in the subject, not through this form. See the{" "}
+            <Link href={repoDoc("SECURITY.md")} prefetch={false} className={link}>
               security policy
-            </a>
+            </Link>
             .
           </>,
           <>

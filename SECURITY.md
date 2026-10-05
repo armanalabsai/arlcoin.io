@@ -7,8 +7,8 @@ and the code has **not** been audited. Do not use it to hold value.
 
 ## Reporting a vulnerability
 
-Report vulnerabilities privately through
-[GitHub private vulnerability reporting](https://github.com/gokturkalazdaghan-dot/ARLCOIN/security/advisories/new).
+Report vulnerabilities privately by email to
+[armanalabsai@gmail.com](mailto:armanalabsai@gmail.com) with "Security" in the subject.
 Do not open a public issue.
 
 Include the affected file or component, the commit, steps to reproduce and

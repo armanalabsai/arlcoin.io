@@ -31,17 +31,17 @@ export function getCard(layer: Layer, id: string): Card | undefined {
   return layer.cards.find((c) => c.id === id);
 }
 
-/** `/`, `/core/<layer>` or `/core/<layer>/<card>`. */
+/** `/core`, `/core/<layer>` or `/core/<layer>/<card>`. The landing page is `/`. */
 export function pathFor(layerId?: string, cardId?: string): string {
-  if (!layerId) return "/";
+  if (!layerId) return "/core";
   return cardId ? `/core/${layerId}/${cardId}` : `/core/${layerId}`;
 }
 
 /** Parses a pathname into a route, or returns null when it names nothing. */
 export function parsePath(pathname: string): CoreRoute | null {
   const parts = pathname.replace(/\/+$/, "").split("/").filter(Boolean);
-  if (parts.length === 0) return HOME;
   if (parts[0] !== "core" || parts.length > 3) return null;
+  if (parts.length === 1) return HOME;
   const layer = parts[1] ? getLayer(parts[1]) : undefined;
   if (!layer) return null;
   if (parts.length === 2) return { layer, card: null };
@@ -56,10 +56,10 @@ export function nextLayer(current: Layer | null): Layer | null {
   return LAYERS[index + 1] ?? null;
 }
 
-/** Every path the site serves, for static generation and the sitemap. */
+/** Every path of the Core, for static generation and the sitemap. */
 export function allPaths(): string[] {
   return [
-    "/",
+    pathFor(),
     ...LAYERS.flatMap((l) => [pathFor(l.id), ...l.cards.map((c) => pathFor(l.id, c.id))]),
   ];
 }
