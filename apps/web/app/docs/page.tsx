@@ -22,9 +22,9 @@ export default function DocsIndex() {
       title="Documents"
       lead="How ARL is designed, how the token works and how it is secured. The code is licensed under Apache-2.0."
     >
-      <ul className="flex flex-col">
+      <ul className="glass flex flex-col rounded-[28px] px-6 sm:px-8">
         {DOCS.map((d) => (
-          <li key={d.slug} className="border-b border-line">
+          <li key={d.slug} className="border-b border-line last:border-b-0">
             <Link
               href={docPath(d.slug)}
               prefetch={false}

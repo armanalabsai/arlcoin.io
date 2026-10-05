@@ -77,7 +77,7 @@ async function store(wallet: string, email: string): Promise<Status> {
 }
 
 const input =
-  "h-11 w-full rounded-(--radius-control) border border-line-strong bg-surface-1 px-3 text-[15px] text-fg placeholder:text-fg-subtle focus:border-accent-edge aria-[invalid=true]:border-[rgb(248_113_113/0.7)]";
+  "h-12 w-full rounded-2xl border border-line-strong bg-[rgb(255_255_255/0.06)] px-4 text-[16px] text-fg shadow-[inset_0_1px_0_rgb(255_255_255/0.08)] backdrop-blur-xl placeholder:text-fg-subtle focus:border-accent-edge focus:bg-[rgb(255_255_255/0.09)] aria-[invalid=true]:border-[rgb(248_113_113/0.7)]";
 
 function Field({
   label,

@@ -26,7 +26,9 @@ export default function FaqPage() {
       lead="Short answers about ARL. Everything here is also stated in the Core and the documents."
     >
       <JsonLd data={faqJsonLd} />
-      <FaqList />
+      <div className="glass rounded-[28px] px-6 pt-2 pb-2 sm:px-8">
+        <FaqList />
+      </div>
     </PageShell>
   );
 }

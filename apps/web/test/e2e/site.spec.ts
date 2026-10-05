@@ -70,15 +70,29 @@ test("header, footer and landing controls are at least 44px tall", async ({ page
       .locator("header a, header button, footer a, main a.inline-flex, main button")
       .evaluateAll((els) =>
         els
+          // Layout size, so the scale-down of slides that are not in focus does not count.
           .filter((e) => {
-            const r = e.getBoundingClientRect();
-            return r.width > 0 && r.height > 0 && r.height < 44;
+            const el = e as HTMLElement;
+            return el.offsetWidth > 0 && el.offsetHeight > 0 && el.offsetHeight < 44;
           })
           .map(
-            (e) =>
-              `${e.textContent?.trim() ?? ""} ${String(Math.round(e.getBoundingClientRect().height))}px`,
+            (e) => `${e.textContent?.trim() ?? ""} ${String((e as HTMLElement).offsetHeight)}px`,
           ),
       );
     expect(small, path).toEqual([]);
   }
+});
+
+test("the technology previews swipe and run, and say they are simulated", async ({ page }) => {
+  await page.goto("/");
+  const rail = page.getByRole("group", { name: /1 of 4: AI Payments/ });
+  await rail.scrollIntoViewIfNeeded();
+  await expect(rail).toContainText("simulated");
+  await rail.getByRole("button", { name: "Run a request" }).click();
+  await expect(rail).toContainText("never left your wallet", { timeout: 5000 });
+  await page.getByRole("button", { name: "Show ZK Privacy" }).click();
+  const zk = page.getByRole("group", { name: /3 of 4: ZK Privacy/ });
+  await expect(zk).toHaveAttribute("data-active", "true", { timeout: 5000 });
+  await zk.getByRole("button", { name: "AI payments first" }).click();
+  await expect(zk).toContainText("Proof verified", { timeout: 5000 });
 });
