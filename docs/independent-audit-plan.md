@@ -1,8 +1,8 @@
-# Independent audit without cash (plan; nothing sent)
+# Independent audit without cash
 
 ARL has **no independent audit**. The owner pays no cash, so a classic paid audit is out. This page
 lists the routes checked on 2026-10-05 that need no cash from the project, and the drafts for each.
-Nothing here has been sent. Until a report from an independent party is published, every public
+Route C (with A) was sent on 2026-10-05 by email from gokturkalazdaghan@gmail.com, cc armanalabsai@gmail.com, to hello@nethermind.io, support@hacken.io and gregory.makodzeba@runtimeverification.com; no answer yet. Until a report from an independent party is published, every public
 text keeps saying "not audited" ([audit-evidence.md](audit-evidence.md)).
 
 ## Routes checked
@@ -92,7 +92,7 @@ group and repository to be public (owner action; see [release-readiness.md](rele
 
 ## What the owner does
 
-1. Approve sending C (with A to Runtime Verification).
+1. Sending C approved and done (2026-10-05).
 2. Make `armanalabs-group` and `armanalabs-group/arlcoin` public, so reviewers can read the code.
 
 Only when an independent party publishes a report does the site's audit card change, and then it
