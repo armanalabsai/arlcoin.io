@@ -17,8 +17,9 @@ text keeps saying "not audited" ([audit-evidence.md](audit-evidence.md)).
 | Arbitrum Audit Program                             | -                                  | Arbitrum projects only                        | Rejected: wrong chain                                                                         |
 | Security.xyz, Sherlock, Code4rena, Cantina         | Paid by the project                | -                                             | Rejected: costs cash                                                                          |
 
-Order: send A and B together, C only to firms that answer B, D starts when the repository is
-public. A alone is not an audit and is never described as one.
+Owner decision (2026-10-05): the audit is paid in ARL (route C). Order: send C to the firms below,
+with A alongside and B as the alternative a firm may offer; D starts when the repository is public.
+A alone is not an audit and is never described as one.
 
 Sources: Optimism audit grants ([atlas.optimism.io/missions/audit-grants](https://atlas.optimism.io/missions/audit-grants),
 [Hacken Superchain grants](https://hacken.io/services/superchain-audit-grants/)); EF subsidy
@@ -54,16 +55,35 @@ Recipients (whitelisted ASPs seen publicly): Hacken, Nethermind. Contact through
 >
 > Alaz Dağhan Göktürk, ARL Protocol
 
-## C. Audit paid in ARL
+## C. Audit paid in ARL (chosen)
 
-Same text as B, with this paragraph instead of the grant request:
+Recipients: Hacken, Nethermind, Runtime Verification (one message each, through their contact form
+or email). No firm has said it accepts token payment; each must answer for itself.
 
-> If the grant is not available, would you consider being paid in ARL instead of cash? The payment
-> would come from the Grants / Bug Bounty allocation (400,000 ARL, held in a 2-of-3 Safe) after the
-> mainnet launch, with the amount and any vesting agreed in writing before work starts.
+> Subject: ARL Protocol (Base) - smart contract audit paid in ARL tokens
+>
+> Hello, we are building ARL Protocol on Base and are looking for an independent audit. We have no
+> cash budget, so we propose to pay the audit fee in ARL from our Grants / Bug Bounty allocation
+> (400,000 ARL, held in a 2-of-3 Safe), transferred after the Base Mainnet launch. The amount and
+> any vesting would be agreed in writing before work starts. If you are an Audit Service Provider
+> for the Optimism Superchain Audit Grant, applying for it on our behalf is equally welcome.
+>
+> Scope: 6 Solidity contracts, 368 nSLOC, solc 0.8.36, OpenZeppelin v5.6.1 unmodified: a fixed-supply
+> ERC-20 (21,000,000 ARL, no owner, mint, pause or upgrade), vesting wallets, a TimelockController
+> treasury (48-hour floor, cancel-only guardian), a Merkle claim distributor and a staking contract.
+> Deployed and source-verified on Base Sepolia (token 0x244312b619127B6458154F3467eFD7c87CD28500);
+> mainnet launch on Base targeted for 2026-12-01. No independent audit yet. Existing evidence: 251
+> Foundry tests with fuzzing and invariants, Slither 0 results, Halmos symbolic proofs, reproducible
+> bytecode, deployment rehearsals.
+>
+> Would you take this on, and what amount and timeline would you propose?
+> Website: https://arlcoin.io - Contact: armanalabsai@gmail.com
+>
+> Alaz Dağhan Göktürk, ARL Protocol
 
-Limits: an amount must be agreed by the owners and signed from the Grants / Bug Bounty Safe; it
-cannot be promised before the TGE exists; it is not a sale and no price is quoted.
+Limits: the amount is agreed by the owners and signed from the Grants / Bug Bounty Safe; nothing is
+transferred before the TGE; ARL is not sold and no price is quoted to the firm. The report is
+published as delivered, with its findings and fixes.
 
 ## D. Public review
 
@@ -72,7 +92,7 @@ group and repository to be public (owner action; see [release-readiness.md](rele
 
 ## What the owner does
 
-1. Approve sending A, B (and C with B).
+1. Approve sending C (with A to Runtime Verification).
 2. Make `armanalabs-group` and `armanalabs-group/arlcoin` public, so reviewers can read the code.
 
 Only when an independent party publishes a report does the site's audit card change, and then it
