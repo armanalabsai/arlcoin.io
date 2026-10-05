@@ -32,8 +32,23 @@ the simulation are in [mainnet-plan.md](mainnet-plan.md); the testnet run of the
    Public Launch Safe (2-of-3) funds it with exactly the list total.
 7. **Pool.** The Liquidity Safe opens the single-sided ARL position at and above 0.20 USD
    ([launch-route.md](launch-route.md)); the position stays in the Safe for 12 months.
-8. **Announce.** Publish the addresses on arlcoin.io and in the repository; start
-   `monitor-cli.ts` from the deployment block; open the bug bounty.
+   - Check that no ARL/USDC 1% pool exists yet (`getPool` on the Uniswap v3 factory
+     `0x33128a8fC17869897dcE68Ed026d694621f6FDfD` returns zero). If one exists, its price must be
+     at or below 0.20 USD; otherwise the batch reverts and nothing is deposited (fork-tested).
+   - `node packages/deploy/src/pool-cli.ts <ARL token> <Liquidity Safe> <ARL amount> pool.json`
+     writes `pool.json` (Safe Transaction Builder batch: create the pool, approve exactly the
+     amount, mint the ARL-only position to the Safe) and `pool.plan.json` (ticks, start price).
+   - Rehearse on a fork with the real addresses: copy both files to
+     `contracts/test-fork/fixtures/pool-batch*.json`, then
+     `FOUNDRY_PROFILE=fork ARL_BASE_RPC=<Base RPC> forge test --match-contract UniswapLaunchFork`.
+   - Import `pool.json` in the Safe app (Apps → Transaction Builder), check the three calls, and
+     sign with two of three owners. Buyers then trade on Uniswap, and aggregators and
+     DexScreener/GeckoTerminal pick the pool up from the chain; no listing application is needed.
+8. **Announce.** Publish the addresses on arlcoin.io and in the repository: set
+   `SITE.mainnet.token` (shows "Add ARL to your wallet") and write the token list with
+   `node packages/deploy/src/tokenlist-cli.ts apps/web/public/tokenlist.json 8453=<ARL token>`;
+   start `monitor-cli.ts` from the deployment block. After a few days of trading, apply to
+   CoinGecko and CoinMarketCap (free forms; they need the live pool and the verified contract).
 
 Stop at the first mismatch. A wrong Safe or contract address means the deployer's nonce or the
 salt changed; nothing is funded until every check passes.

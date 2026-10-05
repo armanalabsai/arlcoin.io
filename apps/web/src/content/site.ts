@@ -23,6 +23,14 @@ export const SITE = {
     token: "0x244312b619127B6458154F3467eFD7c87CD28500",
     explorer: "https://sepolia.basescan.org/token/0x244312b619127B6458154F3467eFD7c87CD28500",
   },
+  /**
+   * Base Mainnet deployment. `token` stays null until the token is deployed and verified; the
+   * "Add ARL to your wallet" button and the token list appear only once it is set.
+   */
+  mainnet: {
+    chain: "Base",
+    token: null as string | null,
+  },
   /** Target date of the Base Mainnet token deployment (the TGE). */
   tgeTarget: "2026-11-01",
   /** Data controller named in the privacy notice, as given by the owner. */

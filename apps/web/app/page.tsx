@@ -5,6 +5,7 @@ import { faqJsonLd } from "@/content/faq.ts";
 import { getCard, getLayer, pathFor } from "@/content/registry.ts";
 import { OG_IMAGE, SITE } from "@/content/site.ts";
 import type { Card } from "@/content/types.ts";
+import { AddToWallet } from "@/site/AddToWallet.tsx";
 import { FaqList } from "@/site/FaqList.tsx";
 import { JsonLd } from "@/site/JsonLd.tsx";
 import { Reveal } from "@/site/Reveal.tsx";
@@ -124,6 +125,7 @@ export default function Home() {
               Explore the Core ›
             </Link>
           </div>
+          <AddToWallet className="mt-4" />
           <Link
             href={pathFor()}
             prefetch={false}

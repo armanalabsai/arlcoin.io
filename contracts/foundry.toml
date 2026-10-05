@@ -21,6 +21,7 @@ fs_permissions = [
   { access = "read", path = "./deploy" },
   { access = "read-write", path = "./deploy/deployments" },
   { access = "read", path = "./test/fixtures" },
+  { access = "read", path = "./test-fork/fixtures" },
 ]
 # Upstream OpenZeppelin v5.6.1 ECDSA uses `error` as an identifier; solc 0.8.36 warns it will
 # become a keyword (6335). Upstream code is not edited, so silence warnings from lib/ only.

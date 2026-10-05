@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="ARL"><title>ARL</title>
+  <defs>
+    <radialGradient id="bg" cx="0.5" cy="0" r="1.2">
+      <stop offset="0" stop-color="#1D2025"/><stop offset="1" stop-color="#08090B"/>
+    </radialGradient>
+  </defs>
+  <rect width="256" height="256" rx="58" fill="url(#bg)"/>
+  <rect x="1" y="1" width="254" height="254" rx="57" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
+  <g transform="translate(128 128) scale(0.84) translate(-128 -128)">
+  <defs>
+    <linearGradient id="app-orbit" x1="128" y1="28" x2="214" y2="178" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F6BE5F"/><stop offset="1" stop-color="#C9822A"/>
+    </linearGradient>
+    <radialGradient id="app-apex" cx="0.35" cy="0.35" r="0.75">
+      <stop offset="0" stop-color="#F6BE5F"/><stop offset="1" stop-color="#C9822A"/>
+    </radialGradient>
+  </defs>
+  <circle cx="128" cy="128" r="100" fill="none" stroke="rgba(255,255,255,0.16)" stroke-width="9"/>
+  <path d="M128 28A100 100 0 0 1 214.6 178" fill="none" stroke="url(#app-orbit)" stroke-width="9" stroke-linecap="round"/>
+  <path d="M80 174L128 64L176 174" fill="none" stroke="#F2F2F0" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M95.7 138H160.3" stroke="rgba(242,242,240,0.7)" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="80" cy="174" r="11" fill="#F2F2F0"/>
+  <circle cx="176" cy="174" r="11" fill="#F2F2F0"/>
+  <circle cx="128" cy="64" r="22" fill="#EEA53F" opacity="0.18"/>
+  <circle cx="128" cy="64" r="14" fill="url(#app-apex)"/></g>
+</svg>
