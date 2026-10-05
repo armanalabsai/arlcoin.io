@@ -2,7 +2,7 @@
 
 ARL has **no independent audit**. The owner pays no cash, so a classic paid audit is out. This page
 lists the routes checked on 2026-10-05 that need no cash from the project, and the drafts for each.
-Route C (with A) was sent on 2026-10-05 by email from gokturkalazdaghan@gmail.com, cc armanalabsai@gmail.com, to hello@nethermind.io, support@hacken.io and gregory.makodzeba@runtimeverification.com; no answer yet. Until a report from an independent party is published, every public
+Route C (with A) was sent on 2026-10-05 by email from gokturkalazdaghan@gmail.com, cc armanalabsai@gmail.com, to hello@nethermind.io, support@hacken.io and Runtime Verification (its Base Services Hub contact); no answer yet. Until a report from an independent party is published, every public
 text keeps saying "not audited" ([audit-evidence.md](audit-evidence.md)).
 
 ## Routes checked

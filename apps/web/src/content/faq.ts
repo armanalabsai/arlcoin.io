@@ -30,7 +30,7 @@ export const FAQ: readonly FaqEntry[] = [
   {
     question: "Has ARL been audited?",
     answer:
-      "The internal review is complete: unit, fuzz and invariant tests, Slither with no findings, Halmos symbolic proofs and a reproducible build. No independent external audit has been performed; a bug bounty paid in ARL covers the contracts instead. Any claim that ARL has been audited is false.",
+      "The internal review is complete: unit, fuzz and invariant tests, Slither with no findings, Halmos symbolic proofs and a reproducible build. No independent external audit has been performed; audit requests were sent to independent firms, and a bug bounty paid in ARL is open for the contracts. Any claim that ARL has been audited is false.",
   },
   {
     question: "Which blockchain will ARL use?",

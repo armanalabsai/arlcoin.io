@@ -1,7 +1,7 @@
 # Bug bounty
 
-Status: **approved by the owner on 2026-10-05, not yet live.** The program goes live with the public Base Sepolia test
-period, before any Base Mainnet deployment. The amounts below are paid only when a valid report
+Status: **live since 2026-10-05**, with the public Base Sepolia test period and the public
+repository (https://gitlab.com/armanalabs-group/arlcoin). Scope commit: `00d9056`. The amounts below are paid only when a valid report
 is accepted; nothing is paid up front.
 
 ## Why a bounty instead of a paid audit
@@ -43,4 +43,4 @@ Bounty allocation never exceed its 400,000 ARL.
 
 ## Open items (owner)
 
-- None for the terms. The program is announced with the public Base Sepolia test period.
+- None. The program is open; it is listed on arlcoin.io next to the audit status.

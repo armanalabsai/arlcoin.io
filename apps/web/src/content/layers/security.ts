@@ -38,14 +38,18 @@ export const security: Layer = {
     {
       id: "audit",
       title: "External Audit",
-      shortDescription: "Not performed",
+      shortDescription: "Requested, not performed",
       status: "PLANNED",
       weight: "secondary",
       metric: { kind: "static", value: "None" },
       detail: {
         summary:
-          "No external audit has been performed. Any claim that ARL has been audited is false until an audit report is published in the repository.",
+          "No external audit has been performed. On 5 October 2026 ARL asked independent audit firms for an audit paid in ARL from the Grants / Bug Bounty allocation; none has accepted yet. A bug bounty paid in ARL is open for the contracts. Any claim that ARL has been audited is false until an audit report is published in the repository.",
       },
+      links: [
+        { label: "Bug bounty", href: repoDoc("docs/bug-bounty.md") },
+        { label: "Audit plan", href: repoDoc("docs/independent-audit-plan.md") },
+      ],
     },
     {
       id: "treasury-timelock",

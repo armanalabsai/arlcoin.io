@@ -38,7 +38,7 @@ export const roadmap: Layer = {
       metric: { kind: "static", value: "Internal review complete" },
       detail: {
         summary:
-          "Security review of the contracts and the deployment process. The internal review is complete: tests, fuzzing, invariants, Slither with no findings, Halmos proofs and a reproducible build. No independent external audit has been performed; a bug bounty paid in ARL opens with the public test period.",
+          "Security review of the contracts and the deployment process. The internal review is complete: tests, fuzzing, invariants, Slither with no findings, Halmos proofs and a reproducible build. No independent external audit has been performed; audit requests were sent to independent firms on 5 October 2026, and a bug bounty paid in ARL is open.",
       },
     },
     {
