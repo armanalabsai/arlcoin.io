@@ -16,7 +16,23 @@ export const metadata: Metadata = {
   description: SITE.description,
   openGraph: { type: "website", siteName: SITE.name, locale: "en_US" },
   twitter: { card: "summary_large_image" },
-  robots: { index: true, follow: true },
+  keywords: [
+    "ARL",
+    "ARL token",
+    "ARL Protocol",
+    "Base",
+    "AI compute token",
+    "x402 payments",
+    "ERC-8004",
+    "ERC-8183",
+    "utility token",
+  ],
+  category: "technology",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
+  },
   referrer: "strict-origin-when-cross-origin",
 };
 

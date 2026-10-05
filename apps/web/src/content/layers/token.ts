@@ -6,7 +6,7 @@ import {
   shareOfSupply,
 } from "../../../../../packages/tokenomics/src/index.ts";
 import type { Allocation } from "../../../../../packages/tokenomics/src/index.ts";
-import { NOT_DEPLOYED, TOKEN_DISCLAIMER, repoDoc } from "../site.ts";
+import { NOT_DEPLOYED, SITE, TOKEN_DISCLAIMER, repoDoc } from "../site.ts";
 import type { Fact, Layer } from "../types.ts";
 
 // Every number on this layer comes from packages/tokenomics. Nothing that
@@ -123,13 +123,13 @@ export const token: Layer = {
       metric: { kind: "static", value: String(vesting.length), unit: "vesting wallets" },
       detail: {
         summary:
-          "These allocations are held by vesting wallets that release only to a dedicated Safe, only on their schedule: nothing at the start, a 12-month cliff, then 36 months of linear vesting. The start date is not confirmed yet; no vesting wallet can be deployed to a public network until it is.",
+          "These allocations are held by vesting wallets that release only to a dedicated Safe, only on their schedule: nothing at the start, a 12-month cliff, then 36 months of linear vesting. Every schedule starts at the TGE, the Base Mainnet token deployment, targeted for 2026-12-01.",
         facts: [
           ...vesting.map((a) => ({
             label: `${a.name} · ${formatArl(a.amount)}`,
             value:
               a.release.kind === "vesting"
-                ? `${String(a.release.schedule.cliffMonths)}-month cliff, then ${String(a.release.schedule.linearMonths)} months linear; start date TBD`
+                ? `${String(a.release.schedule.cliffMonths)}-month cliff, then ${String(a.release.schedule.linearMonths)} months linear from the TGE`
                 : "Schedule TBD",
           })),
           {
@@ -143,14 +143,15 @@ export const token: Layer = {
     {
       id: "contract-address",
       title: "Contract Address",
-      shortDescription: "No contract on any network",
+      shortDescription: "Base Sepolia testnet only",
       status: "PLANNED",
       weight: "secondary",
       metric: { kind: "unavailable", label: NOT_DEPLOYED, source: "chain.contractAddress" },
       detail: {
         summary:
-          "No ARL contract exists on any network. Any address presented as ARL today is not official. The official address will be published here and in the repository at deployment.",
+          "No ARL contract exists on Base Mainnet. The only official contract is the testnet token on Base Sepolia, source-verified on Basescan (link below); testnet tokens have no value. Any other address presented as ARL is not official. The Base Mainnet address will be published here and in the repository at deployment.",
       },
+      links: [{ label: "Testnet token on Basescan", href: SITE.testnet.explorer }],
     },
     {
       id: "staked",
