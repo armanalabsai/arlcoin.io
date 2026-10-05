@@ -8,9 +8,12 @@ import { SITE, SITE_PAGES } from "@/content/site.ts";
 export const dynamic = "force-static";
 
 // No lastModified: the site does not know when content last changed, and a
-// made-up date would be wrong.
+// made-up date would be wrong. Every URL ends in a slash, as served (trailingSlash) and as in
+// each page's canonical link, so search engines are never sent through a redirect.
+const withSlash = (path: string) => (path.endsWith("/") ? path : `${path}/`);
+
 export default function sitemap(): MetadataRoute.Sitemap {
   return ["/", ...allPaths(), ...SITE_PAGES, ...DOCS.map((d) => docPath(d.slug))].map((path) => ({
-    url: new URL(path, SITE.url).toString(),
+    url: new URL(withSlash(path), SITE.url).toString(),
   }));
 }

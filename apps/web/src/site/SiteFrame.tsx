@@ -69,6 +69,9 @@ export function FooterLinks() {
       <Link href="/whitelist" prefetch={false} className={link}>
         Whitelist
       </Link>
+      <Link href="/buy" prefetch={false} className={link}>
+        Get ARL
+      </Link>
       <Link href="/faq" prefetch={false} className={link}>
         FAQ
       </Link>

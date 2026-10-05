@@ -117,7 +117,8 @@ test("sitemap lists every route and robots points to it", async ({ request }) =>
   expect(sitemap.match(/<loc>/g)).toHaveLength(
     1 + allPaths().length + SITE_PAGES.length + DOCS.length,
   );
-  for (const path of SITE_PAGES) expect(sitemap).toContain(`<loc>https://arlcoin.io${path}</loc>`);
+  for (const path of SITE_PAGES) expect(sitemap).toContain(`<loc>https://arlcoin.io${path}/</loc>`);
+  expect(sitemap).not.toMatch(/[^/]<\/loc>/);
   const robots = await (await request.get("/robots.txt")).text();
   expect(robots).toContain("Sitemap: https://arlcoin.io/sitemap.xml");
   expect((await request.get("/core/unknown")).status()).toBe(404);

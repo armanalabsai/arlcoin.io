@@ -46,6 +46,7 @@ export const repoDoc = (path: string): `/${string}` => docPathFor(path);
 /** Pages outside the Core. */
 export const SITE_PAGES = [
   "/whitelist",
+  "/buy",
   "/faq",
   "/docs",
   "/contact",
