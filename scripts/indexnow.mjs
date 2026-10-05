@@ -23,6 +23,5 @@ const res = await fetch("https://api.indexnow.org/indexnow", {
     urlList,
   }),
 });
-process.stdout.write(`IndexNow: ${String(res.status)} for ${String(urlList.length)} URLs` + "
-");
+process.stdout.write(`IndexNow: ${String(res.status)} for ${String(urlList.length)} URLs\n`);
 if (!res.ok && res.status !== 202) process.exitCode = 1;
