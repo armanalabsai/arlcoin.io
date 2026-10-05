@@ -30,9 +30,7 @@ export function CoreNavigation({ current, onSelect, className = "" }: Props) {
                   onSelect(l.id);
                 }}
                 className={`inline-flex h-11 items-center rounded-full px-4 text-[13px] transition-colors ${
-                  active
-                    ? "bg-accent-soft text-accent"
-                    : "text-fg-muted hover:bg-surface-3 hover:text-fg"
+                  active ? "glass-tint-soft text-white" : "glass-pill text-fg-muted hover:text-fg"
                 }`}
               >
                 {l.title}

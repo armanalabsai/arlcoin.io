@@ -40,7 +40,7 @@ function useTween() {
 }
 
 const btn =
-  "press inline-flex h-12 items-center justify-center rounded-full bg-accent px-6 text-[17px] font-semibold text-page transition-colors hover:bg-accent-strong disabled:opacity-50";
+  "press inline-flex h-12 items-center justify-center glass-tint rounded-full px-6 text-[17px] font-semibold disabled:opacity-50";
 const ghost =
   "glass-pill inline-flex h-11 items-center justify-center rounded-full px-5 text-[15px] text-fg";
 
@@ -220,7 +220,7 @@ function ComputeDemo({ active }: { active: boolean }) {
             aria-checked={job === j}
             onClick={() => setJob(j)}
             className={`press inline-flex h-11 items-center rounded-full px-5 text-[15px] transition-colors ${
-              job === j ? "bg-accent text-page" : "glass-pill text-fg"
+              job === j ? "glass-tint" : "glass-pill text-fg"
             }`}
           >
             {j}
@@ -286,7 +286,7 @@ function PrivacyDemo({ active }: { active: boolean }) {
             disabled={phase !== "idle"}
             onClick={() => vote(o)}
             className={`press inline-flex h-12 items-center justify-between rounded-2xl px-5 text-[16px] transition-colors ${
-              choice === o ? "bg-accent text-page" : "glass-pill text-fg"
+              choice === o ? "glass-tint" : "glass-pill text-fg"
             }`}
           >
             {o}
@@ -343,13 +343,13 @@ function NetworkDemo({ active }: { active: boolean }) {
               onClick={() => setPicked(s.name)}
               aria-pressed={picked === s.name}
               className={`press flex min-h-16 w-full items-center justify-between gap-4 rounded-2xl px-5 py-3 text-left transition-colors ${
-                picked === s.name ? "bg-accent text-page" : "glass-pill text-fg"
+                picked === s.name ? "glass-tint" : "glass-pill text-fg"
               }`}
             >
               <span>
                 <span className="block text-[16px] font-semibold">{s.name}</span>
                 <span
-                  className={`block text-[13px] ${picked === s.name ? "text-page" : "text-fg-muted"}`}
+                  className={`block text-[13px] ${picked === s.name ? "text-[rgb(255_255_255/0.85)]" : "text-fg-muted"}`}
                 >
                   {s.kind} · paid {s.price}
                 </span>

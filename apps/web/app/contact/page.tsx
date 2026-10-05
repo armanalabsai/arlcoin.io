@@ -47,7 +47,7 @@ export default function ContactPage() {
             </a>
           </>,
           "The team will never ask for your private key, seed phrase or a payment, and does not offer token sales or presales.",
-          "ARL has no exchange listing and no partnership announced. Anyone claiming otherwise does not speak for ARL.",
+          "ARL has no exchange listing announced. Anyone claiming a listing does not speak for ARL.",
         ]}
       />
       <ContactForm />

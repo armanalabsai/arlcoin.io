@@ -722,6 +722,56 @@ a.glass:active {
 .glass-pill:hover {
   background: rgb(255 255 255 / 0.14);
 }
+/* Tinted glass for the primary action: ice blue you can see through, a bright rim on top, white
+   text. Every stop keeps white text at 4.5:1 or more over the night-blue page. */
+.glass-tint {
+  color: #fff;
+  text-shadow: 0 1px 2px rgb(4 17 43 / 0.45);
+  background: linear-gradient(
+    180deg,
+    rgb(150 205 245 / 0.58),
+    rgb(110 180 235 / 0.5) 50%,
+    rgb(80 150 215 / 0.6)
+  );
+  -webkit-backdrop-filter: blur(20px) saturate(1.9);
+  backdrop-filter: blur(20px) saturate(1.9);
+  border: 1px solid rgb(255 255 255 / 0.5);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.85),
+    inset 0 -1px 0 rgb(255 255 255 / 0.18),
+    inset 0 0 12px rgb(255 255 255 / 0.16),
+    0 10px 28px -10px rgb(111 185 232 / 0.7);
+  transition:
+    background 200ms,
+    transform 100ms,
+    box-shadow 200ms;
+}
+.glass-tint:hover,
+.group:hover .glass-tint {
+  background: linear-gradient(
+    180deg,
+    rgb(165 215 250 / 0.66),
+    rgb(120 190 240 / 0.58) 50%,
+    rgb(90 160 222 / 0.68)
+  );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.9),
+    inset 0 -1px 0 rgb(255 255 255 / 0.2),
+    inset 0 0 14px rgb(255 255 255 / 0.2),
+    0 14px 34px -10px rgb(111 185 232 / 0.85);
+}
+/* A lighter tint for the selected item in a group of glass pills. */
+.glass-tint-soft {
+  -webkit-backdrop-filter: blur(18px) saturate(1.8);
+  backdrop-filter: blur(18px) saturate(1.8);
+  background: linear-gradient(180deg, rgb(159 216 255 / 0.3), rgb(110 180 235 / 0.2));
+  border: 1px solid rgb(159 216 255 / 0.55);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.45),
+    0 6px 18px -8px rgb(111 185 232 / 0.6);
+}
+.glass-tint:active,
+.glass-tint-soft:active,
 .glass-pill:active,
 .press:active {
   transform: scale(0.96);
@@ -732,6 +782,16 @@ a.glass:active {
   backdrop-filter: blur(30px) saturate(1.9) !important;
 }
 @media (prefers-reduced-transparency: reduce) {
+  .glass-tint {
+    background: #2f6fa3;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .glass-tint-soft {
+    background: #1d3d63;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
   .glass,
   .glass-pill {
     background: rgb(12 22 50 / 0.97);

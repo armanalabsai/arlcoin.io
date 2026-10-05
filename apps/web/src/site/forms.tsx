@@ -169,7 +169,7 @@ function Submit({ status, label }: { status: Status; label: string }) {
       <button
         type="submit"
         disabled={status.kind === "sending"}
-        className="inline-flex h-12 items-center justify-center rounded-full bg-accent px-6 text-[17px] font-semibold text-page transition-colors hover:bg-accent-strong disabled:opacity-60 sm:self-start"
+        className="inline-flex h-12 items-center justify-center glass-tint rounded-full px-6 text-[17px] font-semibold disabled:opacity-60 sm:self-start"
       >
         {status.kind === "sending" ? "Sending…" : label}
       </button>

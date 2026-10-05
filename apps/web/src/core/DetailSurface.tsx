@@ -231,7 +231,7 @@ function Surface({ layer, card, originRect, onClose, onStep }: SurfaceProps) {
             <Dialog.Close asChild>
               <button
                 type="button"
-                className="-ml-2 inline-flex h-11 items-center gap-2 rounded-full px-3 text-[13px] text-fg-muted transition-colors hover:bg-surface-3 hover:text-fg"
+                className="glass-pill inline-flex h-11 items-center gap-2 rounded-full px-4 text-[13px] text-fg"
               >
                 <span aria-hidden="true">←</span>
                 <span>Back to {layer.title}</span>
@@ -349,7 +349,7 @@ function Surface({ layer, card, originRect, onClose, onStep }: SurfaceProps) {
                         <a
                           key={l.href}
                           href={withBase(l.href)}
-                          className="inline-flex h-11 items-center gap-2 rounded-full border border-line-strong px-4 text-[13px] transition-colors hover:border-accent-edge hover:text-accent"
+                          className="glass-pill inline-flex h-11 items-center gap-2 rounded-full px-4 text-[13px] text-fg"
                         >
                           {l.label}
                           <span aria-hidden="true" className="text-fg-subtle">
@@ -362,7 +362,7 @@ function Surface({ layer, card, originRect, onClose, onStep }: SurfaceProps) {
                           href={l.href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex h-11 items-center gap-2 rounded-full border border-line-strong px-4 text-[13px] transition-colors hover:border-accent-edge hover:text-accent"
+                          className="glass-pill inline-flex h-11 items-center gap-2 rounded-full px-4 text-[13px] text-fg"
                         >
                           {l.label}
                           <span aria-hidden="true" className="text-fg-subtle">
@@ -409,7 +409,7 @@ function StepButton({
     <button
       type="button"
       onClick={() => onStep(card.id)}
-      className={`inline-flex h-11 max-w-[48%] items-center gap-2 rounded-full px-3 text-[13px] text-fg-muted transition-colors hover:bg-surface-3 hover:text-fg ${isNext ? "-mr-2 ml-auto" : "-ml-2"}`}
+      className={`glass-pill inline-flex h-11 max-w-[48%] items-center gap-2 rounded-full px-4 text-[13px] text-fg ${isNext ? "-mr-2 ml-auto" : "-ml-2"}`}
     >
       {isNext ? null : <span aria-hidden="true">←</span>}
       <span className="truncate">

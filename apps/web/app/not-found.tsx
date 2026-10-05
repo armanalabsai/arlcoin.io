@@ -8,7 +8,7 @@ export default function NotFound() {
         <h1 className="text-[32px] font-extrabold tracking-[-0.03em]">Nothing here</h1>
         <Link
           href="/"
-          className="inline-flex h-12 items-center rounded-full bg-accent px-6 text-[17px] font-semibold text-page hover:bg-accent-strong"
+          className="inline-flex h-12 items-center glass-tint rounded-full px-6 text-[17px] font-semibold"
         >
           Back to the Core
         </Link>

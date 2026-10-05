@@ -29,7 +29,7 @@ export function SiteLinks({ current }: { current?: "whitelist" | "contact" | "fa
         aria-current={current === "whitelist" ? "page" : undefined}
         className={`${tap} group`}
       >
-        <span className="inline-flex h-8 items-center rounded-full bg-accent px-4 text-[13px] font-semibold text-page transition-colors group-hover:bg-accent-strong">
+        <span className="glass-tint inline-flex h-8 items-center rounded-full px-4 text-[13px] font-semibold">
           Join whitelist
         </span>
       </Link>

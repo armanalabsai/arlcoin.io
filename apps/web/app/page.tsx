@@ -56,7 +56,7 @@ const ROADMAP = cards("roadmap", [
 ]);
 
 const primary =
-  "press inline-flex h-12 items-center rounded-full bg-accent px-6 text-[17px] font-semibold text-page transition-colors hover:bg-accent-strong";
+  "press inline-flex h-12 items-center glass-tint rounded-full px-6 text-[17px] font-semibold";
 const secondary =
   "glass-pill inline-flex h-12 items-center rounded-full px-6 text-[17px] font-semibold text-fg";
 const more = "inline-flex min-h-11 items-center text-[17px] text-accent hover:underline";
