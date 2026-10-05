@@ -22,7 +22,7 @@ import {ARLDeployPlan, Plan} from "./ARLDeployPlan.sol";
 /// a separate Safe transaction.
 contract DeployDistributor is Script {
     /// @dev The launch parameters are approved (owner decision, 2026-10-05; economic
-    /// specification section 7 and `PUBLIC_LAUNCH` in `packages/tokenomics`): 1,000,000 ARL at TGE,
+    /// specification section 7 and `PUBLIC_LAUNCH` in `packages/tokenomics`): 500,000 ARL at TGE,
     /// at most 10,000 ARL per address (the `maxPerAddress` of the real claim list), a 60-day claim
     /// window, remainder to the Public Launch Safe. This opens no network: that is decided by
     /// `ARLDeployPlan.networkGate` (local Anvil and Base Sepolia; Base Mainnet only from the
@@ -30,7 +30,7 @@ contract DeployDistributor is Script {
     bool public constant LAUNCH_PARAMETERS_APPROVED = true;
 
     /// @notice Largest list total: the approved TGE tranche.
-    uint256 public constant TGE_TRANCHE = 1_000_000 * ARLAllocation.UNIT;
+    uint256 public constant TGE_TRANCHE = 500_000 * ARLAllocation.UNIT;
     /// @notice Longest claim window from deployment.
     uint256 public constant MAX_CLAIM_WINDOW = 60 days;
 

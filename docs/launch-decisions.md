@@ -1,6 +1,6 @@
 # Launch decisions
 
-**APPROVED by the owner on 2026-10-05:** TGE 2026-11-01; Public Launch 1,000,000 ARL at TGE,
+**APPROVED by the owner on 2026-10-05:** TGE 2026-11-01; Public Launch 500,000 ARL free at TGE (reduced from 1,000,000 by the owner on 2026-10-05),
 10,000 ARL per address, 60-day claim window, launchpad buyers and whitelist sign-ups; liquidity
 with no project cash (launch proceeds, or single-sided ARL at or above 0.20 USD), LP in the
 Liquidity Safe locked 12 months. The 50,000 USD example below is not used. The tables are kept

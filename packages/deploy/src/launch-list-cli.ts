@@ -1,7 +1,7 @@
 // Usage: node packages/deploy/src/launch-list-cli.ts <whitelist.csv> <input.json>
 //
 // Turns a whitelist CSV (`address,amount` in whole ARL) into a Public Launch claim-list input
-// with the approved budget (1,000,000 ARL) and per-address cap (10,000 ARL), and checks it by
+// with the approved budget (500,000 ARL) and per-address cap (10,000 ARL), and checks it by
 // building the Merkle tree. Writes nothing on any error. Feed the output to distribution-cli.ts.
 
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";

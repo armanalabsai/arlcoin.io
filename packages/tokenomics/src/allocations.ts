@@ -27,7 +27,7 @@ export const TGE_DATE = "2026-11-01T00:00:00Z";
  */
 export const PUBLIC_LAUNCH = {
   /** Distributed through the Merkle claim at TGE; the rest stays in the Public Launch Safe. */
-  tgeTranche: 1_000_000,
+  tgeTranche: 500_000,
   /** Largest single claim. */
   maxPerAddress: 10_000,
   /** Claim window; afterwards the remainder can only return to the Public Launch Safe. */
@@ -178,7 +178,7 @@ export const ALLOCATIONS: readonly Allocation[] = deepFreeze([
     release: {
       kind: "program",
       description:
-        "Distributed through a Merkle claim from a published list: 1,000,000 ARL at TGE to launchpad buyers and whitelist sign-ups, at most 10,000 ARL per address, claimable for 60 days. Unclaimed tokens and the remaining 4,000,000 ARL stay in the Public Launch Safe for later tranches.",
+        "Distributed through a Merkle claim from a published list: 500,000 ARL free at TGE to whitelist sign-ups, at most 10,000 ARL per address, claimable for 60 days. Unclaimed tokens and the remaining 4,500,000 ARL stay in the Public Launch Safe for a launchpad sale and later tranches.",
       status: "approved",
     },
     custody: { holder: "safe" },

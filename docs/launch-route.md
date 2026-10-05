@@ -20,7 +20,7 @@ Everything uses contracts and tooling already in this repository; only Base gas 
    batch is built. The position NFTs stay in the Liquidity Safe for at least 12 months. The ARL amount in the range is a Safe
    decision at the time (not set here).
 3. **Public Launch claim:** the Public Launch Safe funds `ARLMerkleDistributor` with at most
-   1,000,000 ARL for whitelist sign-ups and any launchpad buyers, at most 10,000 ARL each,
+   500,000 ARL for whitelist sign-ups, at most 10,000 ARL each,
    claimable for 60 days (`DeployDistributor` enforces the tranche and the window).
 4. **Monitoring:** `monitor-cli.ts` from the deployment block; the guardian reviews every
    timelock notice.

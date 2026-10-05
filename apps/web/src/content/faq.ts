@@ -25,7 +25,7 @@ export const FAQ: readonly FaqEntry[] = [
   {
     question: "Does registering on the whitelist guarantee an allocation?",
     answer:
-      "No. The Public Launch distributes up to 1,000,000 ARL at the TGE through a claim open for 60 days, at most 10,000 ARL per address; the exact list is published before the launch. Registration is free and no payment is requested.",
+      "No. The Public Launch gives away up to 500,000 ARL at the TGE through a free claim open for 60 days, at most 10,000 ARL per address; the exact list is published before the launch. Registration is free and no payment is requested.",
   },
   {
     question: "Has ARL been audited?",

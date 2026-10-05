@@ -26,7 +26,7 @@ the simulation are in [mainnet-plan.md](mainnet-plan.md); the testnet run of the
    address must match the plan.
 4. **Verify.** `VerifyARL`, `bytecode-cli.ts verify`, `supply-cli.ts` (total 21,000,000, circulating
    2,100,000), then `explorer-cli.ts --check-broadcast --run` with `ETHERSCAN_API_KEY` set.
-5. **Claim list.** `launch-list-cli.ts whitelist.csv input.json` (applies the 1,000,000 ARL tranche
+5. **Claim list.** `launch-list-cli.ts whitelist.csv input.json` (applies the 500,000 ARL tranche
    and the 10,000 ARL cap), then `distribution-cli.ts input.json distribution.json`.
 6. **Distributor.** `DeployDistributor` with a claim end at most 60 days ahead (enforced); the
    Public Launch Safe (2-of-3) funds it with exactly the list total.

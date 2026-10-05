@@ -1,7 +1,7 @@
 {
   "schema": "arl-distribution-input/1",
   "allocation": "publicLaunch",
-  "budget": "1000000000000000000000000",
+  "budget": "500000000000000000000000",
   "maxPerAddress": "500000000000000000000000",
   "claims": [
     {
@@ -22,7 +22,7 @@
     },
     {
       "account": "0x7eeae4c35335b96fcff53f98c60668b7e7fb38cc",
-      "amount": "500000000000000000000000"
+      "amount": "400000000000000000000000"
     }
   ]
 }

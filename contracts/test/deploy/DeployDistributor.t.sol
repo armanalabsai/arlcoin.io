@@ -19,17 +19,17 @@ contract DeployDistributorTest is Test {
     /// @dev Approved 2026-10-05; the flag records that and opens no network.
     function test_LaunchParametersAreApproved() public view {
         assertTrue(script.LAUNCH_PARAMETERS_APPROVED());
-        assertEq(script.TGE_TRANCHE(), 1_000_000 * ARLAllocation.UNIT);
+        assertEq(script.TGE_TRANCHE(), 500_000 * ARLAllocation.UNIT);
         assertEq(script.MAX_CLAIM_WINDOW(), 60 days);
     }
 
     function test_LaunchParametersAcceptTheApprovedBounds() public view {
-        script.checkLaunchParameters(1_000_000 * ARLAllocation.UNIT, uint64(1000 + 60 days), 1000);
+        script.checkLaunchParameters(500_000 * ARLAllocation.UNIT, uint64(1000 + 60 days), 1000);
         script.checkLaunchParameters(1, uint64(1001), 1000);
     }
 
     function test_RevertWhen_TotalExceedsTheTranche() public {
-        uint256 tranche = 1_000_000 * ARLAllocation.UNIT;
+        uint256 tranche = 500_000 * ARLAllocation.UNIT;
         vm.expectRevert(
             abi.encodeWithSelector(
                 DeployDistributor.DistributorTotalExceedsTranche.selector, tranche + 1, tranche

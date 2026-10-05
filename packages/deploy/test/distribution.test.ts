@@ -176,7 +176,7 @@ describe("Public Launch list from a whitelist CSV (approved parameters)", () => 
 
   it("applies the approved budget and per-address cap", () => {
     const i = publicLaunchInput(`address,amount\n${A},10000\n${B},250\n`);
-    assert.equal(i.budget, (1_000_000n * 10n ** 18n).toString());
+    assert.equal(i.budget, (500_000n * 10n ** 18n).toString());
     assert.equal(i.maxPerAddress, (10_000n * 10n ** 18n).toString());
     assert.equal(buildDistribution(i).total, (10_250n * 10n ** 18n).toString());
   });
@@ -185,8 +185,8 @@ describe("Public Launch list from a whitelist CSV (approved parameters)", () => 
     rejects(publicLaunchInput(`${A},10001`), /exceeds maxPerAddress/);
   });
 
-  it("rejects a list above the 1,000,000 ARL tranche", () => {
-    const lines = Array.from({ length: 101 }, (_, k) => {
+  it("rejects a list above the 500,000 ARL tranche", () => {
+    const lines = Array.from({ length: 51 }, (_, k) => {
       const addr = `0x${(k + 1).toString(16).padStart(40, "0")}`;
       return `${addr},10000`;
     });

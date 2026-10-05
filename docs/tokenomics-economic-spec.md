@@ -233,7 +233,7 @@ mechanisms distribute other tokens.
 
 ## 7. Public Launch Policy
 
-**Owner decision, 2026-10-05 (APPROVED):** 1,000,000 ARL distributed at TGE through the Merkle
+**Owner decision, 2026-10-05 (APPROVED; tranche reduced from 1,000,000 the same day):** 500,000 ARL distributed free at TGE through the Merkle
 claim to launchpad buyers and whitelist sign-ups; at most 10,000 ARL per address; 60-day claim
 window; unclaimed tokens and the remaining 4,000,000 ARL stay in the Public Launch Safe for later
 tranches; no participant vesting from this allocation. Enforced by `DeployDistributor`
