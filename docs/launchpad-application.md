@@ -1,35 +1,35 @@
 # Launchpad Application Pack
 
-Status: **draft; not submitted.** This collects what launchpads ask for, in one place, from the
+Status: **used for applications from 2026-10-05.** This collects what launchpads ask for, in one place, from the
 repository's own sources. Every value is either a fact from this repository or marked `TBD`.
 Nothing marked `TBD` may be filled in until it exists and can be verified
 (`docs/content-standard.md`). Launchpads differ; check each form and its terms when applying.
 
-ARL is not deployed on any public network, has not been externally audited and has no sale
-parameters yet. Most launchpads require at least an audit and a deployed (testnet or mainnet)
+ARL is deployed and source-verified on the Base Sepolia testnet, has not been externally audited
+(audit requests sent 2026-10-05; bug bounty open) and is not on Base Mainnet yet. Most launchpads require at least an audit and a deployed (testnet or mainnet)
 contract, so the readiness table below is the real starting point.
 
 ## Readiness
 
-| What launchpads usually ask for                 | ARL status                                                                                                                |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Project overview, website                       | Ready: https://arlcoin.io, overview below                                                                                 |
-| Token contract and standard                     | Written and tested: ERC-20 with EIP-2612 permit, fixed 21,000,000 supply, no mint function (`contracts/src/ARLToken.sol`) |
-| Tokenomics and vesting                          | Ready: allocation table below (`packages/tokenomics`); vesting 12-month cliff + 36 months linear from the TGE             |
-| Source code                                     | Ready: https://github.com/gokturkalazdaghan-dot/ARLCOIN                                                                   |
-| Tests and static analysis                       | Ready: see Security                                                                                                       |
-| Independent security audit                      | **Missing.** Scope prepared in `docs/audit-scope.md`; an audit firm has not been engaged                                  |
-| Deployed contract (testnet)                     | **Missing.** Base Sepolia deployment rehearsed on a fork; not yet broadcast (needs the owner's wallet)                    |
-| Deployed contract (mainnet)                     | **Missing.** Base Mainnet is locked in code until audit and release review                                                |
-| Sale parameters (allocation, price, raise, FDV) | **TBD** (owner decision; see Sale parameters)                                                                             |
-| TGE date                                        | 2026-12-01 (approved 2026-10-05). Every vesting schedule starts at the TGE                                                |
-| Liquidity plan                                  | **TBD.** 2,000,000 ARL Liquidity reserve exists; pool size, pair and LP custody not decided                               |
-| Team identity (KYC with the launchpad)          | Founder: Alaz Daghan Gokturk, Founder and CEO. KYC is done privately with each launchpad by the founder                   |
-| Legal opinion on the token                      | **TBD.** Not obtained                                                                                                     |
-| Whitepaper or litepaper                         | Partly: economic specification `docs/tokenomics-economic-spec.md`, architecture `docs/architecture.md`; no litepaper PDF  |
-| Pitch deck                                      | **TBD**                                                                                                                   |
-| Community and social accounts                   | **TBD**                                                                                                                   |
-| Product demo                                    | Ready locally: the ARL app (`apps/dapp`) runs on a local chain; not hosted publicly                                       |
+| What launchpads usually ask for                 | ARL status                                                                                                                 |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Project overview, website                       | Ready: https://arlcoin.io, overview below                                                                                  |
+| Token contract and standard                     | Written and tested: ERC-20 with EIP-2612 permit, fixed 21,000,000 supply, no mint function (`contracts/src/ARLToken.sol`)  |
+| Tokenomics and vesting                          | Ready: allocation table below (`packages/tokenomics`); vesting 12-month cliff + 36 months linear from the TGE              |
+| Source code                                     | Ready: https://gitlab.com/armanalabs-group/arlcoin                                                                         |
+| Tests and static analysis                       | Ready: see Security                                                                                                        |
+| Independent security audit                      | **Missing.** Requests sent to independent firms on 2026-10-05 (`docs/independent-audit-plan.md`); bug bounty open          |
+| Deployed contract (testnet)                     | Ready: Base Sepolia, token 0x244312b619127B6458154F3467eFD7c87CD28500, source-verified                                     |
+| Deployed contract (mainnet)                     | **Missing.** Base Mainnet is locked in code until audit and release review                                                 |
+| Sale parameters (allocation, price, raise, FDV) | Public Launch: up to 1,000,000 ARL at TGE, max 10,000 ARL per address; listing price 0.20 USD (`docs/launch-decisions.md`) |
+| TGE date                                        | 2026-12-01 (approved 2026-10-05). Every vesting schedule starts at the TGE                                                 |
+| Liquidity plan                                  | **TBD.** 2,000,000 ARL Liquidity reserve exists; pool size, pair and LP custody not decided                                |
+| Team identity (KYC with the launchpad)          | Founder: Alaz Daghan Gokturk, Founder and CEO. KYC is done privately with each launchpad by the founder                    |
+| Legal opinion on the token                      | **TBD.** Not obtained                                                                                                      |
+| Whitepaper or litepaper                         | Partly: economic specification `docs/tokenomics-economic-spec.md`, architecture `docs/architecture.md`; no litepaper PDF   |
+| Pitch deck                                      | **TBD**                                                                                                                    |
+| Community and social accounts                   | X https://x.com/armanalabsai, Instagram https://instagram.com/armanalabsai; no Telegram                                    |
+| Product demo                                    | Ready locally: the ARL app (`apps/dapp`) runs on a local chain; not hosted publicly                                        |
 
 ## Project overview
 
@@ -39,7 +39,7 @@ contract, so the readiness table below is the real starting point.
 | Category        | AI and compute services; payments; privacy; DeFi                                              |
 | Chain           | Base (Ethereum L2). Testnet: Base Sepolia (84532). Mainnet: Base (8453), locked until release |
 | Website         | https://arlcoin.io                                                                            |
-| Source code     | https://github.com/gokturkalazdaghan-dot/ARLCOIN (Apache-2.0)                                 |
+| Source code     | https://gitlab.com/armanalabs-group/arlcoin (Apache-2.0)                                      |
 | Contact         | armanalabsai@gmail.com                                                                        |
 | Founder         | Alaz Daghan Gokturk, Founder and CEO                                                          |
 | Logo            | `assets/brand/png/arl-token-icon-200.png` (200 × 200), SVG `assets/brand/arl-token-icon.svg`  |
