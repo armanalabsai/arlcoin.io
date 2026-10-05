@@ -317,8 +317,8 @@ export function WhitelistForm() {
         </Check>
         <Check name="transfer" error={errors.transfer}>
           I consent to my wallet address and email being stored with Supabase in the European Union
-          and sent to the team by email through Web3Forms, both outside Turkey, as described in the
-          privacy notice.
+          and sent to the team by email through Web3Forms, which may be outside my country, as
+          described in the privacy notice.
         </Check>
       </div>
       <Submit status={status} label="Register" />

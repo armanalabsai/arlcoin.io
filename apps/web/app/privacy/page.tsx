@@ -31,12 +31,11 @@ export default function PrivacyPage() {
     <PageShell
       eyebrow="Privacy notice"
       title="Privacy"
-      lead="This site collects personal data only when you submit a form. This notice explains who is responsible for it, what is collected, why, for how long and what your rights are. It is the information notice required by the Turkish Personal Data Protection Law No. 6698 (KVKK)."
+      lead="This site collects personal data only when you submit a form. This notice explains who is responsible for it, what is collected, why, for how long and what your rights are."
     >
       <Section heading="Data controller">
         <p>
-          {SITE.controller.name}, trading as {SITE.controller.business}, {SITE.controller.address}.
-          Contact:{" "}
+          {SITE.controller.name}, trading as {SITE.controller.business}. Contact:{" "}
           <a href={`mailto:${SITE.email}`} className={link}>
             {SITE.email}
           </a>
@@ -69,8 +68,8 @@ export default function PrivacyPage() {
         <p>
           The data is collected through the forms on this site, by automated means. It is processed
           because it is necessary to take the step you ask for, registering or getting an answer,
-          and for the legitimate interest of running the launch list (KVKK Article 5(2)(c) and (f)).
-          Server logs are kept for the security of the site on the same legitimate interest basis.
+          and for the legitimate interest of running the launch list. Server logs are kept for the
+          security of the site on the same legitimate interest basis.
         </p>
       </Section>
 
@@ -90,8 +89,8 @@ export default function PrivacyPage() {
           returns stored data to it; only the team can read the list.
         </p>
         <p>
-          Supabase and Web3Forms are located outside Turkey. Your data is transferred to them only
-          with the explicit consent you give on the whitelist form (KVKK Article 9), and a
+          Supabase and Web3Forms may be located outside the country where you live. Your data is
+          transferred to them only with the explicit consent you give on the whitelist form, and a
           registration is not possible without it. The data is not shared with anyone else unless a
           court or authority requires it by law.
         </p>
@@ -110,13 +109,13 @@ export default function PrivacyPage() {
       </Section>
 
       <Section heading="Your rights">
-        <p>Under KVKK Article 11 you can ask the data controller to:</p>
+        <p>You can ask the data controller to:</p>
         <ul className="flex list-disc flex-col gap-1 pl-5">
           <li>
             tell you whether your personal data is processed, and give you information about it;
           </li>
           <li>tell you the purpose of the processing and whether the data is used for it;</li>
-          <li>tell you who, in Turkey or abroad, the data is transferred to;</li>
+          <li>tell you who, in your country or abroad, the data is transferred to;</li>
           <li>correct data that is incomplete or wrong, and tell those it was transferred to;</li>
           <li>delete or destroy the data, and tell those it was transferred to;</li>
           <li>
@@ -126,7 +125,7 @@ export default function PrivacyPage() {
         </ul>
         <p>
           Requests are answered free of charge within 30 days. If you are not satisfied with the
-          answer, you can complain to the Personal Data Protection Authority (KVKK).
+          answer, you can complain to the data protection authority where you live.
         </p>
       </Section>
 
