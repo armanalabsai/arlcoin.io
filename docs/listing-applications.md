@@ -46,10 +46,9 @@ guaranteed listing.
 
 ## Gaps
 
-- **E-mail on the project domain.** CoinMarketCap asks for an e-mail address on the project's own
-  domain to verify the applicant; a Gmail address can be rejected. A free forwarding address
-  (for example `team@arlcoin.io` forwarded to the Gmail inbox) needs an account with an e-mail
-  forwarding service and an MX record on arlcoin.io; the owner creates the account.
+- **E-mail on the project domain:** done 2026-10-05. Every address at arlcoin.io (team@, info@ ...)
+  forwards to armanalabsai@gmail.com through ImprovMX (MX and SPF records on Vercel DNS); tested.
+  Receiving only: replying from the domain needs a paid plan, so replies come from Gmail.
 - **Trading history.** Both sites look for real trading on the pools before listing; apply a few
   days after the TGE.
 
