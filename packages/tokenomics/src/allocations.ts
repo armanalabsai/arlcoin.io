@@ -16,6 +16,25 @@
 export const MAX_SUPPLY = 21_000_000;
 
 /**
+ * The approved TGE date (owner decision, 2026-10-05). Every vesting schedule starts at the TGE
+ * (VESTING_START = TGE_TIMESTAMP). The TGE itself is the Base Mainnet token deployment.
+ */
+export const TGE_DATE = "2026-12-01T00:00:00Z";
+
+/**
+ * Approved Public Launch parameters (owner decision, 2026-10-05; economic specification
+ * section 7). Amounts in whole ARL.
+ */
+export const PUBLIC_LAUNCH = {
+  /** Distributed through the Merkle claim at TGE; the rest stays in the Public Launch Safe. */
+  tgeTranche: 1_000_000,
+  /** Largest single claim. */
+  maxPerAddress: 10_000,
+  /** Claim window; afterwards the remainder can only return to the Public Launch Safe. */
+  claimWindowDays: 60,
+} as const;
+
+/**
  * How settled a rule is.
  * - approved: confirmed by the project lead; may be implemented.
  * - proposal: documented recommendation awaiting approval; must not be
@@ -66,7 +85,7 @@ export interface VestingSchedule {
   readonly linearMonths: number;
   /**
    * Whether the start date is confirmed. Investors and partnerships start at the TGE
-   * (VESTING_START = TGE_TIMESTAMP, decided); this stays "tbd" until the TGE date is set.
+   * (VESTING_START = TGE_TIMESTAMP, decided); "approved" once the TGE date (`TGE_DATE`) is set.
    */
   readonly start: "tbd" | "approved";
 }
@@ -141,11 +160,11 @@ function deepFreeze<T>(value: T): T {
 /**
  * Approved schedule (economic specification section 4.1): 0% at TGE, a
  * 12-month cliff, then 36 months linear, starting at the TGE (VESTING_START =
- * TGE_TIMESTAMP). The TGE date is not confirmed.
+ * TGE_TIMESTAMP). The TGE date is `TGE_DATE` (approved 2026-10-05).
  */
 const VESTING_12_36: Release = {
   kind: "vesting",
-  schedule: { cliffMonths: 12, linearMonths: 36, start: "tbd" },
+  schedule: { cliffMonths: 12, linearMonths: 36, start: "approved" },
   status: "approved",
 };
 
@@ -159,8 +178,8 @@ export const ALLOCATIONS: readonly Allocation[] = deepFreeze([
     release: {
       kind: "program",
       description:
-        "Distributed through a Merkle claim from a published list (approved mechanism). The amount at TGE, per-address limits, the claim window and the remainder policy are not defined.",
-      status: "undecided",
+        "Distributed through a Merkle claim from a published list: 1,000,000 ARL at TGE to launchpad buyers and whitelist sign-ups, at most 10,000 ARL per address, claimable for 60 days. Unclaimed tokens and the remaining 4,000,000 ARL stay in the Public Launch Safe for later tranches.",
+      status: "approved",
     },
     custody: { holder: "safe" },
   },
@@ -209,7 +228,7 @@ export const ALLOCATIONS: readonly Allocation[] = deepFreeze([
     release: {
       kind: "custody",
       description:
-        "Held as a reserve. The amount used for any pool or listing is decided separately; control of LP positions is documented before any pool is created.",
+        "Held as a reserve. The first pool needs no project cash: it is paired with launch proceeds, or opened single-sided with ARL only above the 0.20 USD listing price. LP positions are held by the Liquidity Safe and locked for 12 months.",
       status: "approved",
     },
     custody: { holder: "safe" },
@@ -245,7 +264,7 @@ export const ALLOCATIONS: readonly Allocation[] = deepFreeze([
       description:
         "Held by a timelock controlled by the Treasury Safe, with a cancel-only guardian. Signer addresses are configured only when the production Safe is created.",
       status: "approved",
-      controls: { wallet: "Safe", threshold: 3, signers: 5, minDelayHours: 48 },
+      controls: { wallet: "Safe", threshold: 2, signers: 3, minDelayHours: 48 },
     },
     custody: { holder: "timelock" },
   },

@@ -64,7 +64,7 @@ in `packages/tokenomics`. Every Safe is dedicated to one allocation.
 
 - The deployment plan and verifier reject any address used for two roles.
 - Safe signer lists and thresholds are operational configuration and are not
-  stored in this repository. The treasury's approved 3-of-5 policy is the only
+  stored in this repository. The treasury's approved 2-of-3 policy is the only
   threshold recorded here.
 
 ## Release rules
@@ -78,7 +78,7 @@ in `packages/tokenomics`. Every Safe is dedicated to one allocation.
 | Liquidity                     | Held as a reserve; the amount used for any pool or listing is decided separately                                                                    | approved                            |
 | Founder                       | All 2,100,000 ARL unrestricted at TGE (no vesting)                                                                                                  | approved                            |
 | Investors / Strategic Capital | Vesting wallet: 0% at TGE, 12-month cliff, 36 months linear; start date TBD                                                                         | approved (start: undecided)         |
-| Treasury                      | Safe 3-of-5, minimum 48-hour timelock, cancel-only guardian                                                                                         | approved                            |
+| Treasury                      | Safe 2-of-3, minimum 48-hour timelock, cancel-only guardian                                                                                         | approved                            |
 | Team                          | Irrevocable per-member grants in tranches from the pool, each to the member's own Safe; each grant: 12-month cliff, 36 months linear                | approved (tranche sizes: undecided) |
 | Early Users                   | Rewards only for genuine, verifiable usage; connecting a wallet earns nothing. Amounts and schedule TBD                                             | undecided                           |
 | Grants / Bug Bounty           | Paid per grant or bounty award                                                                                                                      | undecided                           |
