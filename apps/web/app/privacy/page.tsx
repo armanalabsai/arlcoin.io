@@ -67,6 +67,17 @@ export default function PrivacyPage() {
           .
         </p>
         <p>
+          Whitelist registrations are also stored in a database run by Supabase in the European
+          Union (Ireland), together with the time you gave each confirmation and the version of this
+          notice you accepted. The database accepts new registrations from the site but never
+          returns stored data to it; only the team can read the list.
+        </p>
+        <p>
+          Supabase and Web3Forms are located outside Turkey. Your data is transferred to them only
+          with the explicit consent you give on the whitelist form, and a registration is not
+          possible without it.
+        </p>
+        <p>
           A wallet address is public on the blockchain by nature. It is linked to your email only in
           the team&rsquo;s records, and that link is not published.
         </p>

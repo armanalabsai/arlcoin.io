@@ -12,6 +12,19 @@ export const FORMS = {
 
 export const formsOpen = (): boolean => FORMS.accessKey.length > 0;
 
+// Whitelist registrations are also stored in a Supabase database (EU, Ireland), through one
+// database function that only inserts and never returns stored data. The publishable key is
+// designed to be public. An empty URL skips the database and keeps email delivery only.
+export const WHITELIST_DB = {
+  url: process.env.NEXT_PUBLIC_ARL_SUPABASE_URL ?? "https://ltqpitckngaytisjyjqi.supabase.co",
+  publishableKey:
+    process.env.NEXT_PUBLIC_ARL_SUPABASE_KEY ?? "sb_publishable_aaNjGRFubCYPcujTNKVMEQ_IJDt4_r8",
+  rpc: "/rest/v1/rpc/arlcoin_register",
+} as const;
+
+/** Version of the privacy notice a registration was accepted under. Change with the notice. */
+export const PRIVACY_NOTICE_VERSION = "2026-10-05";
+
 /** EIP-55 mixed-case checksum encoding of a 20-byte hex address. */
 export function toChecksumAddress(address: string): string {
   const lower = address.toLowerCase().replace(/^0x/, "");

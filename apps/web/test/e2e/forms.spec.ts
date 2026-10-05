@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { FORMS, formsOpen } from "../../src/content/forms.ts";
+import { FORMS, formsOpen, PRIVACY_NOTICE_VERSION, WHITELIST_DB } from "../../src/content/forms.ts";
 import { SITE } from "../../src/content/site.ts";
 
 // The whitelist, contact, privacy and terms pages. With no form access key the forms show a closed
@@ -60,11 +60,17 @@ test.describe("forms closed", () => {
 test.describe("forms open", () => {
   test.skip(!formsOpen(), "no form access key is configured");
 
-  test("whitelist validates, checksums the address and sends one request", async ({ page }) => {
+  test("whitelist validates, stores the registration and sends one email", async ({ page }) => {
     const bodies: Record<string, unknown>[] = [];
+    const stored: Record<string, unknown>[] = [];
     await page.route(FORMS.endpoint, async (route) => {
       bodies.push(route.request().postDataJSON() as Record<string, unknown>);
       await route.fulfill({ json: { success: true, body: { message: "ok" } } });
+    });
+    await page.route(WHITELIST_DB.url + WHITELIST_DB.rpc, async (route) => {
+      expect(route.request().headers().apikey).toBe(WHITELIST_DB.publishableKey);
+      stored.push(route.request().postDataJSON() as Record<string, unknown>);
+      await route.fulfill({ json: "ok" });
     });
     await page.goto("/whitelist");
     const form = page.getByRole("form", { name: "Whitelist registration" });
@@ -72,26 +78,69 @@ test.describe("forms open", () => {
     await form.getByRole("button", { name: "Register" }).click();
     await expect(form.getByRole("alert").first()).toBeVisible();
     expect(bodies).toHaveLength(0);
+    expect(stored).toHaveLength(0);
 
-    await form.getByLabel("Wallet address").fill("0x5aaeb6053f3e94c9b9a09f33669435e7ef1beaed");
-    await form.getByLabel("Email").fill("holder@example.com");
+    await form
+      .getByLabel("Wallet address", { exact: true })
+      .fill("0x5aaeb6053f3e94c9b9a09f33669435e7ef1beaed");
+    await form.getByLabel("Email", { exact: true }).fill("Holder@example.com");
     await form.getByRole("checkbox").nth(0).check();
     await form.getByRole("checkbox").nth(1).check();
     await form.getByRole("button", { name: "Register" }).click();
+    // Without consent to the transfer abroad nothing is sent.
+    await expect(form.getByRole("alert").first()).toBeVisible();
+    expect(stored).toHaveLength(0);
+
+    await form.getByRole("checkbox").nth(2).check();
+    await form.getByRole("button", { name: "Register" }).click();
 
     await expect(page.getByRole("status")).toContainText("You are registered");
+    expect(stored).toEqual([
+      {
+        p_wallet: "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+        p_email: "holder@example.com",
+        p_notice_version: PRIVACY_NOTICE_VERSION,
+        p_privacy_accepted: true,
+        p_transfer_consent: true,
+      },
+    ]);
     expect(bodies).toHaveLength(1);
     expect(bodies[0]).toMatchObject({
       wallet: "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
-      email: "holder@example.com",
+      email: "Holder@example.com",
       subject: "ARL whitelist registration",
     });
+  });
+
+  test("whitelist shows an error and sends no email when the database refuses", async ({
+    page,
+  }) => {
+    let emails = 0;
+    await page.route(FORMS.endpoint, async (route) => {
+      emails++;
+      await route.fulfill({ json: { success: true } });
+    });
+    await page.route(WHITELIST_DB.url + WHITELIST_DB.rpc, (route) =>
+      route.fulfill({ status: 500, json: { message: "error" } }),
+    );
+    await page.goto("/whitelist");
+    const form = page.getByRole("form", { name: "Whitelist registration" });
+    await form
+      .getByLabel("Wallet address", { exact: true })
+      .fill("0x5aaeb6053f3e94c9b9a09f33669435e7ef1beaed");
+    await form.getByLabel("Email", { exact: true }).fill("holder@example.com");
+    for (const i of [0, 1, 2]) await form.getByRole("checkbox").nth(i).check();
+    await form.getByRole("button", { name: "Register" }).click();
+    await expect(form.getByText("The registration could not be saved")).toBeVisible();
+    expect(emails).toBe(0);
   });
 
   test("whitelist rejects a mistyped checksummed address", async ({ page }) => {
     await page.goto("/whitelist");
     const form = page.getByRole("form", { name: "Whitelist registration" });
-    await form.getByLabel("Wallet address").fill("0x5AAeb6053F3E94C9b9A09f33669435E7Ef1BeAed");
+    await form
+      .getByLabel("Wallet address", { exact: true })
+      .fill("0x5AAeb6053F3E94C9b9A09f33669435E7Ef1BeAed");
     await form.getByRole("button", { name: "Register" }).click();
     await expect(form.getByText("Enter a valid EVM address")).toBeVisible();
   });
@@ -102,7 +151,7 @@ test.describe("forms open", () => {
     );
     await page.goto("/contact");
     const form = page.getByRole("form", { name: "Contact" });
-    await form.getByLabel("Email").fill("press@example.com");
+    await form.getByLabel("Email", { exact: true }).fill("press@example.com");
     await form.getByLabel("Topic").selectOption("Press");
     await form.getByLabel("Message").fill("A question about the ARL launch timeline.");
     await form.getByRole("checkbox").check();

@@ -10,7 +10,9 @@ import {
   isEmail,
   isEvmAddress,
   MESSAGE_MAX,
+  PRIVACY_NOTICE_VERSION,
   toChecksumAddress,
+  WHITELIST_DB,
 } from "@/content/forms.ts";
 import { SITE } from "@/content/site.ts";
 
@@ -40,6 +42,36 @@ async function send(subject: string, fields: Record<string, string>): Promise<St
     return {
       kind: "error",
       message: "The form could not be sent. Check your connection and try again.",
+    };
+  }
+}
+
+/** Stores a whitelist registration in the database. Existing entries answer the same as new ones. */
+async function store(wallet: string, email: string): Promise<Status> {
+  if (!WHITELIST_DB.url) return { kind: "sent" };
+  try {
+    const res = await fetch(WHITELIST_DB.url + WHITELIST_DB.rpc, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: WHITELIST_DB.publishableKey,
+      },
+      body: JSON.stringify({
+        p_wallet: wallet,
+        p_email: email,
+        p_notice_version: PRIVACY_NOTICE_VERSION,
+        p_privacy_accepted: true,
+        p_transfer_consent: true,
+      }),
+    });
+    if (res.ok) return { kind: "sent" };
+    if (res.status === 429 || res.status === 503)
+      return { kind: "error", message: "Too many requests. Try again in a few minutes." };
+    return { kind: "error", message: "The registration could not be saved. Try again later." };
+  } catch {
+    return {
+      kind: "error",
+      message: "The registration could not be saved. Check your connection and try again.",
     };
   }
 }
@@ -211,12 +243,19 @@ export function WhitelistForm() {
     if (!isEmail(email)) next.email = "Enter a valid email address.";
     if (!form.get("no_guarantee")) next.no_guarantee = "Confirm this to register.";
     if (!form.get("privacy")) next.privacy = "Confirm this to register.";
+    if (!form.get("transfer")) next.transfer = "Confirm this to register.";
     setErrors(next);
     if (Object.keys(next).length > 0) return;
     setStatus({ kind: "sending" });
-    setStatus(
-      await send("ARL whitelist registration", { wallet: toChecksumAddress(address), email }),
-    );
+    const wallet = toChecksumAddress(address);
+    const stored = await store(wallet, email.toLowerCase());
+    if (stored.kind !== "sent") {
+      setStatus(stored);
+      return;
+    }
+    // The database holds the registration; the email copy is a notification to the team.
+    await send("ARL whitelist registration", { wallet, email });
+    setStatus({ kind: "sent" });
   }
 
   return (
@@ -275,6 +314,11 @@ export function WhitelistForm() {
             privacy notice
           </Link>
           .
+        </Check>
+        <Check name="transfer" error={errors.transfer}>
+          I consent to my wallet address and email being stored with Supabase in the European Union
+          and sent to the team by email through Web3Forms, both outside Turkey, as described in the
+          privacy notice.
         </Check>
       </div>
       <Submit status={status} label="Register" />
