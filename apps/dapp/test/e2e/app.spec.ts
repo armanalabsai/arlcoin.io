@@ -399,3 +399,11 @@ test("jobs: post, fund, deliver, accept and pay; reject and refund; refund after
   await connect(page, "/network");
   await expect(page.getByTestId("rating-0")).toHaveText("Rated 50/100 from 2 paid jobs");
 });
+
+test("trade stays closed before the Base Mainnet launch", async ({ page }) => {
+  await page.goto("/trade");
+  await expect(page.getByTestId("trade-closed")).toContainText(
+    "Trading opens with the Base Mainnet launch",
+  );
+  await expect(page.getByTestId("trade-submit")).toHaveCount(0);
+});

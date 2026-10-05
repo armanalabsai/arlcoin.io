@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import {
   NetworkLocked,
   NetworkUnsupported,
+  TGE_DATE,
   assertAllowedChain,
   localChain,
 } from "../../lib/network.ts";
@@ -13,8 +14,10 @@ describe("network gate", () => {
     assert.doesNotThrow(() => assertAllowedChain(31_337));
     assert.doesNotThrow(() => assertAllowedChain(84_532));
   });
-  it("locks Base Mainnet", () => {
-    assert.throws(() => assertAllowedChain(8_453), NetworkLocked);
+  it("locks Base Mainnet until the TGE, then opens it", () => {
+    const tge = Date.parse(TGE_DATE);
+    assert.throws(() => assertAllowedChain(8_453, tge - 1), NetworkLocked);
+    assert.doesNotThrow(() => assertAllowedChain(8_453, tge));
   });
   it("refuses every other chain", () => {
     for (const id of [1, 10, 137, 42_161, 11_155_111])

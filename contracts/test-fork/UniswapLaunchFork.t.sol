@@ -171,6 +171,43 @@ contract UniswapLaunchForkTest is Test {
         }
     }
 
+    /// @dev The ARL app's Trade page (apps/dapp/lib/trade.ts) quotes with QuoterV2 and swaps with
+    /// SwapRouter02.exactInputSingle at the 1% pool with a 1% slippage minimum: the swap must
+    /// deliver exactly the quote, above the minimum, for a buy and for a sell.
+    function test_AppQuoteThenSwapDeliversTheQuote() public {
+        _runBatch();
+        address quoter = 0x3d4e44Eb1374240CE5F1B871ab261CD16335B76a;
+        for (uint256 s = 0; s < 2; s++) {
+            (address tokenIn, address tokenOut, uint256 amountIn) =
+                s == 0 ? (USDC, ARL, uint256(500e6)) : (ARL, USDC, IERC20(ARL).balanceOf(buyer));
+            if (s == 0) deal(USDC, buyer, amountIn);
+            (bool ok, bytes memory ret) = quoter.call(
+                abi.encodeWithSignature(
+                    "quoteExactInputSingle((address,address,uint256,uint24,uint160))",
+                    tokenIn,
+                    tokenOut,
+                    amountIn,
+                    FEE,
+                    uint160(0)
+                )
+            );
+            assertTrue(ok, "quote failed");
+            uint256 quoted = abi.decode(ret, (uint256));
+            uint256 minOut = quoted * 9_900 / 10_000;
+            vm.startPrank(buyer);
+            IERC20(tokenIn).approve(ROUTER, amountIn);
+            uint256 out = ISwapRouter02(ROUTER)
+                .exactInputSingle(
+                    ISwapRouter02.ExactInputSingleParams(
+                        tokenIn, tokenOut, FEE, buyer, amountIn, minOut, 0
+                    )
+                );
+            vm.stopPrank();
+            assertEq(out, quoted);
+            assertGe(out, minOut);
+        }
+    }
+
     function test_SellersCannotPushThePriceBelowTheFloor() public {
         _runBatch();
         uint256 arlOut = _buy(0, 1_000e6);

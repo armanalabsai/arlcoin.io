@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { describe, it } from "node:test";
+import { describe, it, mock } from "node:test";
 
 import { getContractAddress } from "viem";
 
@@ -12,7 +12,7 @@ import {
   parseRun,
   publishedPlanPath,
 } from "../../lib/deploySteps.ts";
-import { NetworkLocked } from "../../lib/network.ts";
+import { NetworkLocked, TGE_DATE } from "../../lib/network.ts";
 
 // Dry-run files from the local deployment rehearsal (Anvil development accounts, no keys).
 const load = (name: string) =>
@@ -69,7 +69,12 @@ describe("deployment run file", () => {
   });
 
   it("refuses Base Mainnet, other code, ETH transfers, nonce gaps and unknown contracts", () => {
-    assert.throws(() => parseRun({ ...load("DeployARL"), chain: 8453 }), NetworkLocked);
+    mock.timers.enable({ apis: ["Date"], now: Date.parse(TGE_DATE) - 1 });
+    try {
+      assert.throws(() => parseRun({ ...load("DeployARL"), chain: 8453 }), NetworkLocked);
+    } finally {
+      mock.timers.reset();
+    }
     const tamper = (f: (r: ReturnType<typeof load>) => void) => {
       const r = load("DeployARL");
       f(r);

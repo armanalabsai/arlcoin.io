@@ -8,6 +8,7 @@ import { RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
 const NAV = [
   { href: "/", label: "Wallet" },
   { href: "/vesting", label: "Vesting" },
+  { href: "/trade", label: "Trade" },
   { href: "/staking", label: "Staking" },
   { href: "/payments", label: "Payments" },
   { href: "/network", label: "Network" },

@@ -10,7 +10,7 @@
 // - a Safe creation through the canonical Safe v1.5.0 SafeProxyFactory with a canonical
 //   singleton (on Base Sepolia), with its owners and threshold decoded for display.
 // Anything else is refused. The chain must be Base Sepolia (or the local Anvil chain); Base
-// Mainnet is refused by `assertAllowedChain`.
+// Mainnet is refused by `assertAllowedChain` before the TGE.
 
 import {
   decodeAbiParameters,
@@ -26,7 +26,7 @@ import {
 } from "viem";
 
 import { DEPLOY_ARTIFACTS } from "./deployArtifacts.ts";
-import { BASE_SEPOLIA_CHAIN_ID, LOCAL_CHAIN_ID, assertAllowedChain } from "./network.ts";
+import { BASE_MAINNET_CHAIN_ID, LOCAL_CHAIN_ID, assertAllowedChain } from "./network.ts";
 
 /** Canonical Safe v1.5.0 contracts (safe-global/safe-deployments), as pinned in CreateSafes. */
 export const SAFE_FACTORY_V150: Address = "0x14F2982D601c9458F93bd70B218933A6f8165e7b";
@@ -172,7 +172,7 @@ export function parseRun(json: unknown): DeployRun {
       if (typeof tx.to !== "string" || !isAddress(tx.to))
         fail(`transaction ${String(index + 1)}: no target`);
       const factory = getAddress(tx.to);
-      if (chainId === BASE_SEPOLIA_CHAIN_ID && factory !== SAFE_FACTORY_V150) {
+      if (chainId !== LOCAL_CHAIN_ID && factory !== SAFE_FACTORY_V150) {
         fail(`transaction ${String(index + 1)}: calls a contract that is not the Safe factory`);
       }
       let singleton: Address;
@@ -183,10 +183,7 @@ export function parseRun(json: unknown): DeployRun {
       } catch {
         fail(`transaction ${String(index + 1)}: not a Safe creation`);
       }
-      if (
-        chainId === BASE_SEPOLIA_CHAIN_ID &&
-        !SAFE_SINGLETONS_V150.includes(getAddress(singleton))
-      ) {
+      if (chainId !== LOCAL_CHAIN_ID && !SAFE_SINGLETONS_V150.includes(getAddress(singleton))) {
         fail(`transaction ${String(index + 1)}: not a canonical Safe v1.5.0 singleton`);
       }
       let owners: readonly Address[];
@@ -265,7 +262,7 @@ export function checkBeforeSend(
   runChainId: number,
 ): string | undefined {
   if (wallet.chainId !== runChainId) {
-    return `switch the wallet to ${runChainId === LOCAL_CHAIN_ID ? "the local chain" : "Base Sepolia"}`;
+    return `switch the wallet to ${runChainId === LOCAL_CHAIN_ID ? "the local chain" : runChainId === BASE_MAINNET_CHAIN_ID ? "Base" : "Base Sepolia"}`;
   }
   if (getAddress(wallet.account) !== step.from) {
     return `connect ${short(step.from)}: this plan was prepared for that address`;

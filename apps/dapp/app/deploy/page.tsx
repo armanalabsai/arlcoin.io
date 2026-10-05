@@ -13,7 +13,7 @@ import {
   type Address,
   type EIP1193Provider,
 } from "viem";
-import { baseSepolia } from "viem/chains";
+import { base, baseSepolia } from "viem/chains";
 
 import { Facts, PageTitle, Stat } from "~~/components/arl/ui";
 import {
@@ -24,7 +24,7 @@ import {
   type DeployRun,
   type DeployStep,
 } from "~~/lib/deploySteps";
-import { BASE_SEPOLIA_CHAIN_ID, localChain } from "~~/lib/network";
+import { BASE_MAINNET_CHAIN_ID, BASE_SEPOLIA_CHAIN_ID, localChain } from "~~/lib/network";
 
 type Status =
   { kind: "waiting" } | { kind: "sent"; hash: string } | { kind: "failed"; error: string };
@@ -32,7 +32,11 @@ type Status =
 const noSubscription = () => () => undefined;
 
 const chainFor = (id: number) =>
-  id === BASE_SEPOLIA_CHAIN_ID ? baseSepolia : localChain(process.env.NEXT_PUBLIC_ARL_RPC_URL);
+  id === BASE_MAINNET_CHAIN_ID
+    ? base
+    : id === BASE_SEPOLIA_CHAIN_ID
+      ? baseSepolia
+      : localChain(process.env.NEXT_PUBLIC_ARL_RPC_URL);
 
 export default function DeployPage() {
   const [run, setRun] = useState<DeployRun>();
