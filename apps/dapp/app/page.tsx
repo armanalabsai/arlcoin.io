@@ -81,7 +81,7 @@ function Wallet() {
       ) : null}
 
       <section className="glass-strong flex flex-col gap-3 p-5">
-        <h2 className="font-semibold">Send ARL</h2>
+        <h2 className="font-extrabold">Send ARL</h2>
         <label className="text-sm text-muted" htmlFor="send-to">
           Recipient address
         </label>

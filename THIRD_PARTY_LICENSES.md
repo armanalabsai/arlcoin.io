@@ -90,7 +90,7 @@ Runtime (included in the built site):
 | react / react-dom                                                                                    | 19.3.0  | MIT     | UI runtime                                                                                                      |
 | motion                                                                                               | 13.4.4  | MIT     | Springs, presence and drag animations                                                                           |
 | @radix-ui/react-dialog                                                                               | 1.1.23  | MIT     | Accessible dialog (focus trap, Escape, ARIA)                                                                    |
-| @fontsource-variable/manrope, @fontsource-variable/fraunces, @fontsource/source-code-pro | 5.3.0   | OFL-1.1 | Manrope (text), Fraunces (headings), Source Code Pro (figures, addresses); self-hosted |
+| @fontsource-variable/manrope, @fontsource/source-code-pro | 5.3.0   | OFL-1.1 | Manrope (text and headings), Source Code Pro (figures, addresses); self-hosted |
 | @noble/hashes                                                                                        | 2.4.0   | MIT     | Keccak-256 for the EIP-55 address checksum in the whitelist form                                                |
 
 The ARL wordmark (`assets/brand/`) contains Geist SemiBold and Medium glyphs outlined to vector
@@ -169,7 +169,7 @@ Runtime packages (included in the built app), used as published:
 | usehooks-ts                                                                                          | 3.1.1   | MIT        | React hooks                                                         |
 | blo                                                                                                  | 2.0.0   | MIT        | Address avatars                                                     |
 | @x402/evm, @x402/core                                                                                | 2.27.0  | Apache-2.0 | x402 `upto` client and facilitator (Payments screen)                |
-| @fontsource-variable/manrope, @fontsource-variable/fraunces, @fontsource/source-code-pro | 5.3.0   | OFL-1.1    | Manrope, Fraunces, Source Code Pro (Adobe), self-hosted |
+| @fontsource-variable/manrope, @fontsource/source-code-pro | 5.3.0   | OFL-1.1    | Manrope, Source Code Pro (Adobe), self-hosted |
 | @heroicons/react                                                                                     | 2.2.0   | MIT        | Icons                                                               |
 
 Build and test: daisyui 5.7.46 (MIT; its generated CSS is in the built app), tailwindcss and @tailwindcss/postcss

@@ -121,7 +121,7 @@ export function RingCard({ entry, selected, onActivate }: Props) {
             <IdentityMark initials={entry.person.initials} size="card" />
             <span className="flex min-w-0 flex-col gap-1">
               <span
-                className={`leading-tight font-medium tracking-[-0.01em] ${primary ? "text-[17px]" : "text-[15px]"}`}
+                className={`leading-tight font-extrabold tracking-[-0.01em] text-heading ${primary ? "text-[17px]" : "text-[15px]"}`}
               >
                 {entry.title}
               </span>
@@ -143,7 +143,7 @@ export function RingCard({ entry, selected, onActivate }: Props) {
         <>
           <span className="flex flex-col gap-1.5">
             <span
-              className={`leading-tight font-medium tracking-[-0.01em] ${primary ? "text-[17px]" : "text-[15px]"}`}
+              className={`leading-tight font-extrabold tracking-[-0.01em] text-heading ${primary ? "text-[17px]" : "text-[15px]"}`}
             >
               {entry.title}
             </span>

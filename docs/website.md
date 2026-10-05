@@ -117,7 +117,7 @@ Rules:
 - Cards do not react to hover; they are links, and the pointer and focus ring show it. Only text
   links and buttons change on hover.
 - Radii: 8px controls, 12px cards, 16px surfaces, a circle for the Core. Spacing uses the 4px
-  scale. Type: Manrope for text, Fraunces for headings, Source Code Pro for numbers and
+  scale. Type: Manrope for text and for headings (extra bold, white), Source Code Pro for numbers and
   identifiers, self-hosted.
 - Copy: no em dashes, no "not X but Y" constructions, no emoji, no check-mark lists.
 

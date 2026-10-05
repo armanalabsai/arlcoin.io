@@ -1,5 +1,4 @@
 import "@fontsource-variable/manrope";
-import "@fontsource-variable/fraunces";
 import "@fontsource/source-code-pro/400.css";
 import "@fontsource/source-code-pro/500.css";
 import type { Metadata, Viewport } from "next";

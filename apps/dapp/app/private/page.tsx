@@ -197,7 +197,7 @@ function Private() {
   return (
     <div className="flex flex-col gap-6">
       <section className="glass-strong flex flex-col gap-3 p-5" aria-labelledby="identity-heading">
-        <h2 id="identity-heading" className="text-sm font-semibold">
+        <h2 id="identity-heading" className="text-sm font-extrabold">
           1 · Your private identity
         </h2>
         <p className="text-sm text-muted">
@@ -242,7 +242,7 @@ function Private() {
       </section>
 
       <section className="glass-strong flex flex-col gap-3 p-5" aria-labelledby="poll-heading">
-        <h2 id="poll-heading" className="text-sm font-semibold">
+        <h2 id="poll-heading" className="text-sm font-extrabold">
           2 · {POLL.question}
         </h2>
         <p className="text-sm text-muted">

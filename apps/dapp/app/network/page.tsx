@@ -45,7 +45,7 @@ function Network() {
   return (
     <div className="flex flex-col gap-6">
       <section className="glass-strong flex flex-col gap-3 p-5" aria-labelledby="services-heading">
-        <h2 id="services-heading" className="text-sm font-semibold">
+        <h2 id="services-heading" className="text-sm font-extrabold">
           Services
         </h2>
         {isLoading ? (
@@ -262,7 +262,7 @@ function RegisterForm() {
   return (
     <section className="glass-strong flex flex-col gap-3 p-5" aria-labelledby="register-heading">
       <div>
-        <h2 id="register-heading" className="text-sm font-semibold">
+        <h2 id="register-heading" className="text-sm font-extrabold">
           Offer a service
         </h2>
         <p className="mt-1 text-sm text-muted">

@@ -36,7 +36,7 @@ export function PageShell({ current, eyebrow, title, lead, children }: Props) {
         <div className="mx-auto flex max-w-[680px] flex-col gap-10">
           <div className="flex flex-col gap-4">
             <p className="text-[12px] text-accent">{eyebrow}</p>
-            <h1 className="text-[32px] leading-[1.15] font-semibold sm:text-[38px]">{title}</h1>
+            <h1 className="text-[32px] leading-[1.15] font-extrabold sm:text-[38px]">{title}</h1>
             <p className="text-[16px] leading-[1.6] text-fg-muted">{lead}</p>
           </div>
           {children}
@@ -82,7 +82,7 @@ export function FooterLinks() {
 export function FactList({ title, items }: { title: string; items: readonly React.ReactNode[] }) {
   return (
     <section className="flex flex-col gap-4 rounded-(--radius-card) border border-line bg-surface-1 p-6">
-      <h2 className="text-[15px] font-medium">{title}</h2>
+      <h2 className="text-[15px] font-extrabold">{title}</h2>
       <ul className="flex list-disc flex-col gap-2 pl-5 text-[14px] leading-[1.6] text-fg-muted marker:text-fg-subtle">
         {items.map((item, i) => (
           <li key={i}>{item}</li>

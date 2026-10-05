@@ -38,7 +38,6 @@
 
 @theme {
   --font-mono: "Source Code Pro", ui-monospace, monospace;
-  --font-serif: "Fraunces Variable", ui-serif, Georgia, serif;
   --color-muted: #f3e4b0;
   --color-subtle: #c4b483;
   --color-line: rgb(255 255 255 / 0.08);
@@ -238,7 +237,11 @@ body {
   }
 }
 
+/* Headings and titles: white, extra bold, in the text face. */
 h1,
-h2 {
-  font-family: var(--font-serif);
+h2,
+h3 {
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }

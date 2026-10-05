@@ -87,7 +87,7 @@ function Payments() {
     <div className="flex flex-col gap-6">
       <section className="glass-strong flex flex-col gap-4 p-5">
         <div>
-          <h2 className="text-sm font-semibold">1 · Payment limit</h2>
+          <h2 className="text-sm font-extrabold">1 · Payment limit</h2>
           <p className="mt-1 text-sm text-muted">
             x402 payments move ARL through Permit2. This sets the most Permit2 may ever move from
             your wallet; each payment still needs your signature.
@@ -288,7 +288,7 @@ function UsageDemo({
   return (
     <section className="glass-strong flex flex-col gap-4 p-5">
       <div>
-        <h2 className="text-sm font-semibold">2 · Pay a service for what you use</h2>
+        <h2 className="text-sm font-extrabold">2 · Pay a service for what you use</h2>
         <p className="mt-1 text-sm text-muted">
           Services come from the ERC-8004 registry (Network screen). On the local chain the
           service&rsquo;s facilitator settles from this page, as a local development account.

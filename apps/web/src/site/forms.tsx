@@ -188,7 +188,7 @@ function Done({ title, children }: { title: string; children: React.ReactNode })
       role="status"
       className="flex flex-col gap-2 rounded-(--radius-card) border border-accent-edge p-6"
     >
-      <h2 className="text-[17px] font-medium">{title}</h2>
+      <h2 className="text-[17px] font-extrabold">{title}</h2>
       <p className="text-[14px] leading-[1.6] text-fg-muted">{children}</p>
     </div>
   );

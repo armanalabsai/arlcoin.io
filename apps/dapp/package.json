@@ -22,7 +22,6 @@
   },
   "dependencies": {
     "@arl/zk": "file:../../packages/zk",
-    "@fontsource-variable/fraunces": "5.3.0",
     "@fontsource-variable/manrope": "5.3.0",
     "@fontsource/source-code-pro": "5.3.0",
     "@heroicons/react": "2.2.0",

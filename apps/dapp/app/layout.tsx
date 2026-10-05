@@ -1,5 +1,4 @@
 import "@fontsource-variable/manrope";
-import "@fontsource-variable/fraunces";
 import "@fontsource/source-code-pro/400.css";
 import "@rainbow-me/rainbowkit/styles.css";
 import "~~/styles/globals.css";

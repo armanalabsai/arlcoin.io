@@ -16,7 +16,7 @@ export function useChainTime(): bigint | undefined {
 export function PageTitle({ title, children }: { title: string; children?: ReactNode }) {
   return (
     <div className="mb-6">
-      <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
+      <h1 className="text-xl font-extrabold tracking-tight">{title}</h1>
       {children ? <p className="mt-1 text-sm text-muted">{children}</p> : null}
     </div>
   );

@@ -64,7 +64,7 @@ export default function DeployPage() {
           </p>
         </section>
         <section className="glass-strong flex flex-col gap-3 p-5" aria-labelledby="plan-heading">
-          <h2 id="plan-heading" className="text-sm font-semibold">
+          <h2 id="plan-heading" className="text-sm font-extrabold">
             1 · Prepared transactions
           </h2>
           <input
@@ -165,7 +165,7 @@ function Signer({ run }: { run: DeployRun }) {
 
   return (
     <section className="glass-strong flex flex-col gap-4 p-5" aria-labelledby="sign-heading">
-      <h2 id="sign-heading" className="text-sm font-semibold">
+      <h2 id="sign-heading" className="text-sm font-extrabold">
         2 · Sign
       </h2>
       <Facts inset>

@@ -257,7 +257,7 @@ function Surface({ layer, card, originRect, onClose, onStep }: SurfaceProps) {
                     {layer.title} · {String(index + 1).padStart(2, "0")} /{" "}
                     {String(layer.cards.length).padStart(2, "0")}
                   </p>
-                  <Dialog.Title className="text-[32px] leading-[1.05] font-semibold tracking-[-0.03em] text-balance md:text-[44px]">
+                  <Dialog.Title className="text-[32px] leading-[1.05] font-extrabold tracking-[-0.03em] text-heading text-balance md:text-[44px]">
                     {card.title}
                   </Dialog.Title>
                   {card.person ? (

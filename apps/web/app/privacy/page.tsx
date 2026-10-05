@@ -20,7 +20,7 @@ const link = "text-accent underline underline-offset-4";
 function Section({ heading, children }: { heading: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="text-[19px] font-medium tracking-[-0.01em]">{heading}</h2>
+      <h2 className="text-[19px] font-extrabold">{heading}</h2>
       <div className="flex flex-col gap-3 text-[15px] leading-[1.7] text-fg-muted">{children}</div>
     </section>
   );

@@ -149,7 +149,7 @@ function Jobs() {
     <div className="flex flex-col gap-6">
       <PostJob onStatus={setStatus} onPosted={() => void refetch()} busy={status.kind === "busy"} />
       <section className="flex flex-col gap-3" aria-labelledby="jobs-heading">
-        <h2 id="jobs-heading" className="text-sm font-semibold">
+        <h2 id="jobs-heading" className="text-sm font-extrabold">
           Your jobs
         </h2>
         {jobs === undefined ? (
@@ -270,7 +270,7 @@ function PostJob({
 
   return (
     <section className="glass-strong flex flex-col gap-4 p-5" aria-labelledby="post-heading">
-      <h2 id="post-heading" className="text-sm font-semibold">
+      <h2 id="post-heading" className="text-sm font-extrabold">
         Post a job
       </h2>
       <label className="flex flex-col gap-1 text-sm">
@@ -575,7 +575,7 @@ function JobCard({
   return (
     <article className="glass-strong flex flex-col gap-3 p-5" data-testid={`job-${id}`}>
       <div className="flex items-baseline justify-between gap-3">
-        <h3 className="text-sm font-semibold">
+        <h3 className="text-sm font-extrabold">
           Job {id} <span className="font-normal text-muted">· you are {mine.join(" and ")}</span>
         </h3>
         <span className="glass-chip px-2 py-0.5 text-xs" data-testid={`job-${id}-status`}>

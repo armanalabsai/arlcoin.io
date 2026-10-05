@@ -17,6 +17,8 @@
   --color-line-strong: rgb(255 255 255 / 0.14);
   /* Sun yellow: bright for headings and key text, paler for running text so long passages stay
      easy to read, and a soft khaki for notes. */
+  /* White for headings and titles, so the yellow text sits under a clean, bold line. */
+  --color-heading: #ffffff;
   --color-fg: #ffd84d;
   --color-fg-muted: #f3e4b0;
   --color-fg-subtle: #c4b483;
@@ -28,10 +30,9 @@
   --color-accent-soft: rgb(255 191 46 / 0.14);
   --color-accent-faint: rgb(255 191 46 / 0.06);
 
-  /* Manrope for text and buttons, Fraunces for headings, Source Code Pro for figures and
-     addresses (SIL Open Font License, self-hosted from @fontsource). */
+  /* Manrope for text, buttons and (extra bold, in white) headings, Source Code Pro for figures
+     and addresses (SIL Open Font License, self-hosted from @fontsource). */
   --font-sans: "Manrope Variable", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Fraunces Variable", ui-serif, Georgia, serif;
   --font-mono: "Source Code Pro", ui-monospace, "SFMono-Regular", monospace;
 
   --radius-control: 8px;
@@ -63,10 +64,10 @@
   }
 
   h1,
-  h2 {
-    font-family: var(--font-serif);
-    font-optical-sizing: auto;
-    letter-spacing: -0.01em;
+  h2,
+  h3 {
+    color: var(--color-heading);
+    letter-spacing: -0.02em;
   }
 
   :focus-visible {
