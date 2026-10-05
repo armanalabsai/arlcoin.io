@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>ARL Protocol · Pitch deck</title>
+    <style>
+      @page {
+        size: 1280px 720px;
+        margin: 0;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Segoe UI", Inter, Arial, sans-serif;
+        background: #050b1e;
+        color: #dbe7ff;
+      }
+      section {
+        width: 1280px;
+        height: 720px;
+        padding: 64px 80px;
+        position: relative;
+        page-break-after: always;
+        background: radial-gradient(120% 90% at 50% 0%, #10224a 0%, #050b1e 70%);
+        overflow: hidden;
+      }
+      section:last-child {
+        page-break-after: auto;
+      }
+      h1 {
+        font-size: 96px;
+        color: #fff;
+        letter-spacing: -2px;
+      }
+      h2 {
+        font-size: 46px;
+        color: #fff;
+        margin-bottom: 28px;
+        letter-spacing: -0.5px;
+      }
+      .eyebrow {
+        color: #7cc4ff;
+        font-weight: 600;
+        font-size: 20px;
+        margin-bottom: 14px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+      }
+      p,
+      li {
+        font-size: 24px;
+        line-height: 1.45;
+      }
+      ul {
+        list-style: none;
+      }
+      li {
+        padding-left: 28px;
+        position: relative;
+        margin-bottom: 12px;
+      }
+      li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 14px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #7cc4ff;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 28px;
+      }
+      .grid3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 22px;
+      }
+      .card {
+        background: rgba(124, 196, 255, 0.07);
+        border: 1px solid rgba(124, 196, 255, 0.25);
+        border-radius: 18px;
+        padding: 22px 24px;
+      }
+      .card b {
+        color: #fff;
+        display: block;
+        font-size: 24px;
+        margin-bottom: 6px;
+      }
+      .card span {
+        font-size: 19px;
+        color: #a9bbdc;
+        line-height: 1.4;
+        display: block;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 19px;
+      }
+      td,
+      th {
+        padding: 6px 10px;
+        border-bottom: 1px solid rgba(124, 196, 255, 0.18);
+        text-align: left;
+      }
+      th {
+        color: #7cc4ff;
+        font-weight: 600;
+      }
+      td.n {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+      .big {
+        font-size: 64px;
+        color: #7cc4ff;
+        font-weight: 700;
+      }
+      .foot {
+        position: absolute;
+        bottom: 30px;
+        left: 80px;
+        right: 80px;
+        font-size: 15px;
+        color: #7488ad;
+        display: flex;
+        justify-content: space-between;
+      }
+      .warn {
+        color: #ffd38a;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <div class="eyebrow">ARL Protocol</div>
+      <h1>ARL</h1>
+      <p style="font-size: 36px; color: #fff; margin-top: 18px; max-width: 900px">
+        The utility token for decentralized AI and compute services, on Base.
+      </p>
+      <p style="margin-top: 40px; color: #a9bbdc">
+        Fixed supply of 21,000,000 ARL · Live on Base Sepolia · Base Mainnet TGE 1 November 2026
+      </p>
+      <div class="foot">
+        <span>arlcoin.io · armanalabsai@gmail.com</span><span>October 2026</span>
+      </div>
+    </section>
+
+    <section>
+      <div class="eyebrow">Why</div>
+      <h2>AI services need open, per-use payments</h2>
+      <div class="grid">
+        <div class="card">
+          <b>The problem</b
+          ><span
+            >AI and GPU capacity are sold through closed accounts, monthly plans and card payments.
+            Agents and small providers cannot pay or be paid per request, and buyers cannot check
+            who they are paying.</span
+          >
+        </div>
+        <div class="card">
+          <b>ARL</b
+          ><span
+            >One token on Base for AI and compute: pay per request over x402, find services in an
+            open registry, hire them through an escrow, and rate them after paying.</span
+          >
+        </div>
+      </div>
+      <ul style="margin-top: 30px">
+        <li>Built on open standards, not a closed platform</li>
+        <li>Low fees and fast settlement on Base, an Ethereum L2</li>
+      </ul>
+      <div class="foot"><span>arlcoin.io</span><span>2</span></div>
+    </section>
+
+    <section>
+      <div class="eyebrow">Product</div>
+      <h2>Open standards around one token</h2>
+      <div class="grid3">
+        <div class="card">
+          <b>x402 payments</b
+          ><span
+            >AI services paid per use in ARL, settled with Permit2
+            (<code>@arl/payments</code>).</span
+          >
+        </div>
+        <div class="card">
+          <b>ERC-8004 registry</b
+          ><span>Service identity and reputation, rated by paying clients.</span>
+        </div>
+        <div class="card">
+          <b>ERC-8183 escrow</b
+          ><span>Jobs paid into escrow and released on delivery (<code>ARLJobs</code>).</span>
+        </div>
+        <div class="card"><b>Compute</b><span>GPU and CPU capacity paid per second.</span></div>
+        <div class="card">
+          <b>Staking</b
+          ><span>Synthetix-style staking rewards (<code>ARLStakingRewards</code>).</span>
+        </div>
+        <div class="card">
+          <b>ZK signals</b><span>Anonymous polls with Semaphore and Noir proofs.</span>
+        </div>
+      </div>
+      <p style="margin-top: 26px; font-size: 20px; color: #a9bbdc">
+        Status: contracts and packages written and tested; token system live on Base Sepolia.
+        Services are not live yet.
+      </p>
+      <div class="foot"><span>arlcoin.io</span><span>3</span></div>
+    </section>
+
+    <section>
+      <div class="eyebrow">Token</div>
+      <h2>21,000,000 ARL, minted once</h2>
+      <div class="grid">
+        <div>
+          <table>
+            <tr>
+              <th>Allocation</th>
+              <th class="n">ARL</th>
+            </tr>
+            <tr>
+              <td>Public Launch</td>
+              <td class="n">5,000,000</td>
+            </tr>
+            <tr>
+              <td>Community &amp; Staking</td>
+              <td class="n">3,000,000</td>
+            </tr>
+            <tr>
+              <td>Founder</td>
+              <td class="n">2,100,000</td>
+            </tr>
+            <tr>
+              <td>Ecosystem &amp; Growth</td>
+              <td class="n">2,000,000</td>
+            </tr>
+            <tr>
+              <td>Strategic Partnerships</td>
+              <td class="n">2,000,000</td>
+            </tr>
+            <tr>
+              <td>Liquidity</td>
+              <td class="n">2,000,000</td>
+            </tr>
+            <tr>
+              <td>Investors / Strategic Capital</td>
+              <td class="n">1,500,000</td>
+            </tr>
+            <tr>
+              <td>Early Users</td>
+              <td class="n">1,100,000</td>
+            </tr>
+            <tr>
+              <td>Treasury</td>
+              <td class="n">1,000,000</td>
+            </tr>
+            <tr>
+              <td>Team</td>
+              <td class="n">900,000</td>
+            </tr>
+            <tr>
+              <td>Grants / Bug Bounty</td>
+              <td class="n">400,000</td>
+            </tr>
+          </table>
+        </div>
+        <div>
+          <ul>
+            <li>ERC-20 with EIP-2612 permit, 18 decimals</li>
+            <li>No owner, no mint, no pause, no upgrade</li>
+            <li>Circulating at TGE: 2,100,000 ARL before Public Launch claims</li>
+            <li>Investors and partners: 12-month cliff, then 36 months linear</li>
+            <li>Treasury behind a 48-hour timelock with a cancel-only guardian</li>
+            <li>Allocations held by dedicated 2-of-3 Safes, vesting wallets and the timelock</li>
+          </ul>
+        </div>
+      </div>
+      <div class="foot">
+        <span>Source: packages/tokenomics, gitlab.com/armanalabs-group/arlcoin</span><span>4</span>
+      </div>
+    </section>
+
+    <section>
+      <div class="eyebrow">Security</div>
+      <h2>Checked in the open</h2>
+      <div class="grid">
+        <div class="card">
+          <b>Done</b
+          ><span
+            >254 contract tests with fuzzing and invariants · Slither with no findings · Halmos
+            symbolic proofs · Aderyn · reproducible bytecode · deployment rehearsals · contracts
+            source-verified on Basescan, Blockscout and Sourcify · public repository with CI.</span
+          >
+        </div>
+        <div class="card">
+          <b class="warn">Not done</b
+          ><span
+            >No independent audit has been performed. Requests for an audit went to Hacken,
+            Nethermind and Runtime Verification on 5 October 2026. A bug bounty paid in ARL (up to
+            40,000 ARL for a critical finding) is open.</span
+          >
+        </div>
+      </div>
+      <p style="margin-top: 28px">
+        OpenZeppelin v5.6.1 contracts, unmodified · Safe v1.5.0 canonical contracts · solc 0.8.36
+      </p>
+      <div class="foot"><span>docs/audit-evidence.md · docs/bug-bounty.md</span><span>5</span></div>
+    </section>
+
+    <section>
+      <div class="eyebrow">Status</div>
+      <h2>Where ARL is today</h2>
+      <table>
+        <tr>
+          <th>Phase</th>
+          <th>Status</th>
+        </tr>
+        <tr>
+          <td>Phase 0 · Foundation</td>
+          <td>Complete</td>
+        </tr>
+        <tr>
+          <td>Phase 1 · Token contracts</td>
+          <td>Complete</td>
+        </tr>
+        <tr>
+          <td>Phase 2 · Security review</td>
+          <td>Internal review complete; independent audit requested</td>
+        </tr>
+        <tr>
+          <td>Testnet</td>
+          <td>Live on Base Sepolia since 4 October 2026</td>
+        </tr>
+        <tr>
+          <td>Mainnet (TGE)</td>
+          <td>Target 1 November 2026</td>
+        </tr>
+        <tr>
+          <td>AI payments and compute</td>
+          <td>Next</td>
+        </tr>
+      </table>
+      <div class="foot"><span>arlcoin.io/core/roadmap</span><span>6</span></div>
+    </section>
+
+    <section>
+      <div class="eyebrow">Launch</div>
+      <h2>TGE on 1 November 2026</h2>
+      <div class="grid">
+        <div class="card">
+          <b>Liquidity from day one</b
+          ><span
+            >The Liquidity Safe opens ARL/USDC, ARL/USDT, ARL/ETH and ARL/BTC pools on Uniswap v3 on
+            Base. Each holds only ARL and starts at 0.20 USD per ARL, so nothing in them is sold
+            below that floor. Fork-tested on Base.</span
+          >
+        </div>
+        <div class="card">
+          <b>Public Launch</b
+          ><span
+            >Up to 1,000,000 ARL claimable for free by whitelist sign-ups at the TGE, at most 10,000
+            ARL per address, for 60 days. The rest of the Public Launch allocation is available for
+            a launchpad sale.</span
+          >
+        </div>
+      </div>
+      <p style="margin-top: 28px">
+        Listing price: <b style="color: #fff">0.20 USD</b> · Fully diluted value at that price:
+        <b style="color: #fff">4,200,000 USD</b>
+      </p>
+      <div class="foot">
+        <span>docs/launch-route.md · docs/mainnet-runbook.md</span><span>7</span>
+      </div>
+    </section>
+
+    <section>
+      <div class="eyebrow">Team &amp; contact</div>
+      <h2>Who builds ARL</h2>
+      <div class="grid">
+        <div class="card"><b>Alaz Dağhan Göktürk</b><span>Founder and CEO, Armanalabs</span></div>
+        <div class="card">
+          <b>Contact</b
+          ><span
+            >armanalabsai@gmail.com<br />arlcoin.io<br />x.com/armanalabsai ·
+            instagram.com/armanalabsai<br />gitlab.com/armanalabs-group/arlcoin</span
+          >
+        </div>
+      </div>
+      <p style="margin-top: 34px; font-size: 17px; color: #7488ad; max-width: 1100px">
+        This deck describes a planned token. It is not an offer to sell or a solicitation to buy,
+        not investment advice and not a promise of price or listing. No independent audit has been
+        performed. Tokens can lose all their value. Figures are from the public repository as of 5
+        October 2026.
+      </p>
+      <div class="foot"><span>arlcoin.io</span><span>8</span></div>
+    </section>
+  </body>
+</html>
