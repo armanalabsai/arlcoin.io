@@ -34,7 +34,7 @@ Listing is free on both sites. Ignore anyone who offers a paid or guaranteed lis
 | Launch date               | `TBD`                                                                                                     |
 | Trading venues and pairs  | `TBD`                                                                                                     |
 | Website                   | https://arlcoin.io                                                                                        |
-| Source code               | https://github.com/gokturkalazdaghan-dot/ARLCOIN                                                          |
+| Source code               | https://gitlab.com/armanalabs-group/arlcoin                                                               |
 | Block explorer            | `TBD` (Basescan token page after deployment)                                                              |
 | Audit report              | `TBD` (no audit yet; scope in `docs/audit-scope.md`)                                                      |
 | Logo                      | `assets/brand/png/arl-token-icon-200.png` (200 × 200, transparent); SVG `assets/brand/arl-token-icon.svg` |

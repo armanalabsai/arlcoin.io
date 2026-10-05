@@ -264,7 +264,7 @@ IMPLEMENTATION CONSTRAINT: `ARLMerkleDistributor` implements the mechanism. It
 has no owner, admin, pause or upgrade path; the list, the claim window and the
 return address are fixed at deployment. The launch parameters below are not
 approved (`LAUNCH_PARAMETERS_APPROVED = false`); `DeployDistributor` runs only on
-local Anvil and Base Sepolia, and Base Mainnet is hard-locked.
+local Anvil and Base Sepolia, and Base Mainnet opens only at the TGE (2026-11-01T00:00:00Z).
 
 TBD / REQUIRES CTO DECISION: the eligibility rules for the list, the operational
 split between public access, launch distribution and launch incentives, the
@@ -427,7 +427,7 @@ durations (12-month cliff, 36 months linear, calendar months) are enforced by
 the tokenomics package, the deployment planner, `ARLDeployPlan` and the
 verifier. Both schedules start at the TGE (section 4.3); the TGE date is not confirmed
 (`VESTING_SCHEDULES_APPROVED = false`). The tooling deploys only to local Anvil
-and Base Sepolia, which may use a placeholder start; Base Mainnet is hard-locked.
+and Base Sepolia, which may use a placeholder start; Base Mainnet opens only at the TGE (2026-11-01T00:00:00Z).
 
 Founder implementation status (not a decision): the whole Founder allocation
 (2,100,000 ARL) is minted at genesis to one dedicated Founder Safe, with no

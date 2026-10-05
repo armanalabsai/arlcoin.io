@@ -93,7 +93,7 @@ and `ARLDeployPlan` reject any schedule whose cliff is not 12 calendar months or
 whose linear period is not 36 calendar months. Every vesting schedule starts at
 the TGE (`VESTING_START = TGE_TIMESTAMP`, decided 2026-09-29): the config has a
 single `tge` date. The TGE date is not confirmed, so only local Anvil and Base
-Sepolia may use a placeholder TGE; Base Mainnet is hard-locked.
+Sepolia may use a placeholder TGE; Base Mainnet opens only at the TGE (2026-11-01T00:00:00Z).
 
 Future reward programs (staking, referral, onboarding, early users) must be
 compatible with eligibility rules, Sybil resistance, abuse prevention, rate

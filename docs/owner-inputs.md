@@ -15,7 +15,7 @@ contracts, tokenomics Source of Truth, deployment logic or vesting changes.
 
 | Decision                                                                                                               | Where it is enforced                                                                                  |
 | ---------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| TGE is the block in which the ARL token contract is deployed (`docs/tokenomics-economic-spec.md` section 6, unchanged) | The deployment tooling; Base Mainnet is hard-locked in every tool                                     |
+| TGE is the block in which the ARL token contract is deployed (`docs/tokenomics-economic-spec.md` section 6, unchanged) | The deployment tooling; Base Mainnet opens only at the TGE (2026-11-01T00:00:00Z) in every tool       |
 | A Base Sepolia deployment is a testnet deployment and is not the economic TGE                                          | Its `tge` config value is a test placeholder                                                          |
 | The Base Mainnet token deployment is the TGE                                                                           | The TGE date and block are TBD until a Mainnet launch is approved                                     |
 | `VESTING_START = TGE_TIMESTAMP`                                                                                        | `packages/deploy/src/plan.ts`, `ARLDeployPlan`, the verifier                                          |
@@ -27,7 +27,7 @@ contracts, tokenomics Source of Truth, deployment logic or vesting changes.
 | Decision                                                                                                                                                          | Status                                                                               |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
 | Listing price: 0.20 USD per ARL (FDV 4,200,000 USD at the 21,000,000 ARL supply)                                                                                  | Decided; raise, accepted currency and liquidity size still TBD                       |
-| Target TGE: 2026-11-01, if the public Base Sepolia test period (about 4 weeks) ends with no open Critical or High finding; otherwise moved                        | Target, not a lock: Base Mainnet stays locked in every tool until then               |
+| Target TGE: 2026-11-01, if the public Base Sepolia test period (about 4 weeks) ends with no open Critical or High finding; otherwise moved                        | The tooling opens Base Mainnet at 2026-11-01T00:00:00Z                               |
 | No paid audit (owner decision, 2026-10-04): free checks, a public test period and a bounty paid in ARL only for accepted reports ([bug-bounty.md](bug-bounty.md)) | Decided; listings and launchpads are told plainly that no independent audit was done |
 
 A split of the Founder allocation into 2,000,000 ARL unrestricted and 100,000 ARL reserved is

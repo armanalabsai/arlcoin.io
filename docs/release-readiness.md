@@ -1,7 +1,7 @@
 # Release readiness
 
 Prepared 2026-10-05. Nothing here has been sent, signed or submitted. **No independent audit has
-been performed.** Base Sepolia only; Base Mainnet is locked in the tooling.
+been performed.** Base Sepolia live; Base Mainnet opens only at the TGE (2026-11-01T00:00:00Z).
 
 ## 1. Current state (read-only checks, Base Sepolia block 47,690,188)
 
@@ -18,7 +18,7 @@ been performed.** Base Sepolia only; Base Mainnet is locked in the tooling.
 | Tokenomics / TGE               | Unchanged: 11 allocations, circulating at TGE 2,100,000 ARL, TGE target 2026-11-01    |
 
 The delegation is absent on Base Mainnet, Ethereum and Ethereum Sepolia (`code = 0x`, nonce 0),
-so the clean-up has not reached Base Sepolia. Procedure: [audit-evidence.md](audit-evidence.md#eip-7702-clean-up-f-2).
+and since 2026-10-05 on Base Sepolia too (`eth_getCode` returns `0x`): F-2 is resolved. Procedure: [audit-evidence.md](audit-evidence.md#eip-7702-clean-up-f-2).
 In MetaMask the smart-account switch is per network: select **Base Sepolia** before switching back.
 
 ## 2. Application drafts (not submitted)

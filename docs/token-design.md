@@ -90,7 +90,7 @@ deployment configuration supplies explicit UTC timestamps; the planner and
 months with `DateTime.addMonths` from solidity-datetime (MIT). Every schedule
 starts at the TGE (`VESTING_START = TGE_TIMESTAMP`); the TGE date is not confirmed
 (`VESTING_SCHEDULES_APPROVED = false`); local Anvil and Base Sepolia may use a
-placeholder TGE, and Base Mainnet is hard-locked by the
+placeholder TGE, and Base Mainnet opens only at the TGE by the
 network gate (see [`deployment.md`](deployment.md#network-gate)). The verifier asserts that each
 deployed wallet matches its planned beneficiary and timestamps, and that the
 planned schedule has the approved durations.

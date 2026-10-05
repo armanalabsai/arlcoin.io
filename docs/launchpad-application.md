@@ -20,7 +20,7 @@ contract, so the readiness table below is the real starting point.
 | Tests and static analysis                       | Ready: see Security                                                                                                        |
 | Independent security audit                      | **Missing.** Requests sent to independent firms on 2026-10-05 (`docs/independent-audit-plan.md`); bug bounty open          |
 | Deployed contract (testnet)                     | Ready: Base Sepolia, token 0x244312b619127B6458154F3467eFD7c87CD28500, source-verified                                     |
-| Deployed contract (mainnet)                     | **Missing.** Base Mainnet is locked in code until audit and release review                                                 |
+| Deployed contract (mainnet)                     | **Planned.** Base Mainnet deployment is the TGE, 2026-11-01; the tooling refuses it earlier                                |
 | Sale parameters (allocation, price, raise, FDV) | Public Launch: up to 1,000,000 ARL at TGE, max 10,000 ARL per address; listing price 0.20 USD (`docs/launch-decisions.md`) |
 | TGE date                                        | 2026-11-01 (approved 2026-10-05). Every vesting schedule starts at the TGE                                                 |
 | Liquidity plan                                  | **TBD.** 2,000,000 ARL Liquidity reserve exists; pool size, pair and LP custody not decided                                |

@@ -171,7 +171,7 @@ because it is too new to have a track record.
   depends on the beneficiary being a Safe and on its owners keeping a signing quorum.
 - The Safe's threshold is not enforced by ARL contracts.
 - Production deployment parameters (TGE date, holder Safe addresses, launch parameters) are
-  not decided; Base Mainnet is hard-locked in the deployment tooling until they are.
+  not decided; Base Mainnet opens only at the TGE (2026-11-01T00:00:00Z) in the deployment tooling.
 - `ERC20Permit` accepts EOA signatures only; smart-contract wallets use `approve` or Permit2.
 - Compiler warnings from `contracts/lib/` are silenced (`ignored_warnings_from`): upstream OpenZeppelin `ECDSA` uses `error` as an identifier, which solc 0.8.36 flags as a future keyword. ARL code still reports all warnings.
 - No external audit. Symbolic checks (Halmos) prove ten properties within bounded inputs; this
