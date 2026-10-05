@@ -52,6 +52,14 @@ spent, so the token reverted with `ERC20InsufficientBalance` and `fail_on_revert
 staking invariant. The staking contract behaved correctly. The handler now funds only what the
 distributor holds (`test/invariant/ARLStakingInvariant.t.sol`); the deep campaign then passes.
 
+### GitLab CI (Linux), 2026-10-05
+
+Pipeline 2912085364 on `armanalabs-group/arlcoin` (private), commit `cb7837b`: all 9 jobs passed
+(TypeScript, contracts, Slither, Halmos, rehearsal with the reproducible-build check, ZK circuit
+and verifier, dApp with end-to-end tests, website, Aderyn). Halmos 0.3.3: **11 passed, 0 failed**
+(`Symbolic test result: 11 passed; 0 failed`). The ZK job rebuilt the circuit and verifier byte
+for byte and passed 18 tests.
+
 ### Not reproduced on this machine
 
 Aderyn 0.6.8 publishes no Windows build, and Halmos 0.3.3 needs a native build of `safe-pysha3`
@@ -82,7 +90,7 @@ before a release.
 | F-1 | Medium   | All Safe roles on Base Sepolia are 1-of-1, owned by one EOA. One key controls 18.9M ARL held by the Safes and the timelock's proposer and executor. | Accepted for testnet. Mainnet must use ≥2-of-3 Safes.                                                                                                                   |
 | F-2 | Medium   | The deployer/owner EOA has an active EIP-7702 delegation to MetaMask's `EIP7702StatelessDeleGator` (`0x63c0c19a…e32b`), set during Safe creation.   | Open. Clean-up procedure below; must be done before mainnet.                                                                                                            |
 | F-3 | Low      | Documentation drift: `ARLTimelock` NatSpec and `audit-scope.md` describe a 3-of-5 treasury Safe and "nothing deployed".                             | `audit-scope.md` updated. The NatSpec is left unchanged so the repository source stays identical to the verified deployed source; fix it with the next contract change. |
-| F-4 | Info     | Aderyn, Halmos and Mythril results are from CI before the GitHub suspension and were not re-run here.                                               | Re-run on Linux before release.                                                                                                                                         |
+| F-4 | Info     | Mythril was not re-run after the GitHub suspension. Halmos and Aderyn were re-run in GitLab CI on 2026-10-05 (Halmos 11/11).                        | Mythril re-run optional.                                                                                                                                                |
 | F-5 | Info     | Staking invariant handler over-funded in long campaigns (test code only).                                                                           | Fixed.                                                                                                                                                                  |
 
 No vulnerability was found in the contract code.
