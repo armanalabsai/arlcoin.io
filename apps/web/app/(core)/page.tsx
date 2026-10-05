@@ -18,11 +18,26 @@ export const metadata: Metadata = {
 
 const jsonLd = {
   "@context": "https://schema.org",
-  "@type": "WebSite",
-  name: SITE.name,
-  url: SITE.url,
-  description: SITE.description,
-  inLanguage: "en",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": `${SITE.url}/#website`,
+      name: SITE.name,
+      url: SITE.url,
+      description: SITE.description,
+      inLanguage: "en",
+      publisher: { "@id": `${SITE.url}/#organization` },
+    },
+    {
+      "@type": "Organization",
+      "@id": `${SITE.url}/#organization`,
+      name: "ARL Protocol",
+      url: SITE.url,
+      logo: `${SITE.url}/icon.svg`,
+      email: SITE.email,
+      sameAs: [SITE.social.instagram, SITE.repository],
+    },
+  ],
 };
 
 export default function Home() {

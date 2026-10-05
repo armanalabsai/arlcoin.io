@@ -153,7 +153,7 @@ export const technology: Layer = {
           },
           {
             heading: "Not yet built",
-            items: ["Nothing is deployed on Base Sepolia or Base Mainnet", "No hosted app"],
+            items: ["Nothing is deployed on Base Mainnet", "No hosted app"],
           },
         ],
       },
@@ -165,17 +165,17 @@ export const technology: Layer = {
     {
       id: "token-contracts",
       title: "Token Contracts",
-      shortDescription: "Written and tested. Not deployed.",
+      shortDescription: "Tested; live on Base Sepolia testnet.",
       status: "IN DEVELOPMENT",
       weight: "tertiary",
       detail: {
         summary:
-          "The token, vesting, treasury, launch claim and staking contracts are written in Solidity 0.8.36 on OpenZeppelin Contracts v5.6.1 and are under security review. They are not deployed.",
+          "The token, vesting, treasury, launch claim and staking contracts are written in Solidity 0.8.36 on OpenZeppelin Contracts v5.6.1 and are under security review. The token, vesting and treasury contracts are deployed and source-verified on Base Sepolia (testnet); nothing is on Base Mainnet.",
         facts: [
           { label: "Language", value: "Solidity 0.8.36", mono: true },
           { label: "Library", value: "OpenZeppelin Contracts v5.6.1" },
           { label: "Toolchain", value: "Foundry" },
-          { label: "Deployment", value: "Not yet deployed" },
+          { label: "Deployment", value: "Base Sepolia testnet; Base Mainnet not yet" },
         ],
       },
       links: [
