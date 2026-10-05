@@ -42,7 +42,7 @@ function fail(message: string): never {
 
 /**
  * @param vestingStart Placeholder TGE, `YYYY-MM-DDT00:00:00Z` with day 1-28. Every vesting schedule
- *   starts at the TGE (VESTING_START = TGE_TIMESTAMP). The approved TGE is `TGE_DATE` (2026-12-01) in `@arl/tokenomics`; this value
+ *   starts at the TGE (VESTING_START = TGE_TIMESTAMP). The approved TGE is `TGE_DATE` (2026-11-01) in `@arl/tokenomics`; this value
  *   is accepted only on local Anvil and Base Sepolia.
  */
 export function configFromSafes(record: SafesRecord, vestingStart: string): DeployConfig {
@@ -68,7 +68,7 @@ export function configFromSafes(record: SafesRecord, vestingStart: string): Depl
     network: record.chainId === TESTNET_CHAIN_ID ? "base-sepolia" : "local",
     chainId: record.chainId,
     requireRecipientCode: true,
-    note: `Safes created by CreateSafes.s.sol. The TGE ${vestingStart} is a testnet placeholder; the approved TGE is 2026-12-01. Every vesting schedule starts at the TGE.`,
+    note: `Safes created by CreateSafes.s.sol. The TGE ${vestingStart} is a testnet placeholder; the approved TGE is 2026-11-01. Every vesting schedule starts at the TGE.`,
     tge: vestingStart,
     vesting: {
       investors: vesting(s.investors),

@@ -33,11 +33,11 @@ Checked 2026-10-05. Application fees are not published by either platform; the s
 free application and curated selection. Any fee or token allocation asked later is decided by
 the owner before accepting.
 
-| Platform     | How to apply                                                           | What the form asks                                                                                                 | Gaps for ARL                                   |
-| ------------ | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------- |
-| Seedify      | "Apply now" on seedify.fund; review and interview                      | Project name, website, social accounts, owner's full name, email, Telegram ID; docs, team, MVP or demo, tokenomics | Social accounts, Telegram ID, public code link |
-| Polkastarter | Governance Portal; analysts and a council vote (more than 60% to pass) | Project details for the council review                                                                             | Social accounts, public code link              |
-| TrustSwap    | Curated, "by arrangement"                                              | Not published                                                                                                      | Unknown terms                                  |
+| Platform     | How to apply                                                                                                        | What the form asks                                                                                       | Gaps for ARL                                                                    |
+| ------------ | ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Seedify      | Not available: on 2026-10-05 seedify.fund redirects to an unrelated token-creating testnet launchpad (vibevibe.fun) | -                                                                                                        | Excluded                                                                        |
+| Polkastarter | forms.polkastarter.com/apply, then research review and a council vote                                               | Telegram handle, pitch deck, tokenomics link, investors, public-sale raise amount and FDV (all required) | Telegram, pitch deck, a public-sale amount (owner decision; legal opinion open) |
+| TrustSwap    | Curated, "by arrangement"                                                                                           | Not published                                                                                            | Unknown terms                                                                   |
 
 Excluded: PinkSale (0.2 ETH upfront), and token-creating launchpads (Clanker, Zora, Flaunch, Mint
 Club, Virtuals), which deploy their own token instead of selling ARL.
@@ -52,7 +52,7 @@ Club, Virtuals), which deploy their own token instead of selling ARL.
 > Safes. Deployed and source-verified on Base Sepolia (token
 > 0x244312b619127B6458154F3467eFD7c87CD28500); 251 contract tests, fuzzing, invariants, Slither
 > with no findings and reproducible bytecode. No independent audit has been performed. TGE
-> target 2026-12-01 at 0.20 USD. Contact: armanalabsai@gmail.com.
+> target 2026-11-01 at 0.20 USD. Contact: armanalabsai@gmail.com.
 
 Shared on submission: the text above, the website, the Base Sepolia addresses, the docs listed in
 [launchpad-application.md](launchpad-application.md), the owner's name, email and Telegram ID.

@@ -40,7 +40,7 @@ export const FAQ: readonly FaqEntry[] = [
   {
     question: "When is the launch?",
     answer:
-      "The Base Mainnet launch (TGE) is targeted for 1 December 2026. The contracts are deployed and source-verified on the Base Sepolia testnet; Base Mainnet has not started.",
+      "The Base Mainnet launch (TGE) is targeted for 1 November 2026. The contracts are deployed and source-verified on the Base Sepolia testnet; Base Mainnet has not started.",
   },
   {
     question: "Will ARL ever ask for my private key or seed phrase?",

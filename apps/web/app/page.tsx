@@ -200,7 +200,7 @@ export default function Home() {
           </div>
         </Section>
 
-        <Section heading="Where ARL is today." sub="No dates are set for future phases.">
+        <Section heading="Where ARL is today." sub="Base Mainnet is targeted for 1 November 2026.">
           <Reveal delay={120} className="glass mt-14 rounded-[28px] p-6 sm:p-10">
             <ol className="landing-road text-left">
               {ROADMAP.map(({ layerId, card }) => (

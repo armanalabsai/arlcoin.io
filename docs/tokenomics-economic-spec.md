@@ -123,7 +123,7 @@ specification.
   deployment config has one `tge` field and no per-schedule start; the planner
   derives both starts from it and `ARLDeployPlan` refuses schedules that do
   not share their start.
-- **Decided (owner, 2026-10-05): TGE date 2026-12-01** (`TGE_DATE` in `packages/tokenomics`).
+- **Decided (owner, 2026-10-05): TGE date 2026-11-01** (`TGE_DATE` in `packages/tokenomics`).
 - Team schedules start at each grant's date (M-3 per-grant tracking).
 
 ### 4.4 Founder allocation

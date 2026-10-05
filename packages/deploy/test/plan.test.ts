@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { describe, it } from "node:test";
+import { describe, it, mock } from "node:test";
 
 import { ALLOCATIONS, MAX_SUPPLY, TGE_DATE } from "@arl/tokenomics";
 
@@ -291,28 +291,49 @@ describe("buildPlan: fails closed", () => {
     );
   });
 
-  it("refuses Base Mainnet whatever the rest of the config says", () => {
-    for (const requireRecipientCode of [true, false]) {
-      rejects(
-        config((c) => {
-          c.chainId = 8453;
-          c.network = "base";
-          c.requireRecipientCode = requireRecipientCode;
-        }),
-        /chainId: 8453 \(Base Mainnet\) is locked/,
-      );
+  it("refuses Base Mainnet before the TGE whatever the rest of the config says", () => {
+    mock.timers.enable({ apis: ["Date"], now: Date.parse(TGE_DATE) - 1 });
+    try {
+      for (const requireRecipientCode of [true, false]) {
+        rejects(
+          config((c) => {
+            c.chainId = 8453;
+            c.network = "base";
+            c.requireRecipientCode = requireRecipientCode;
+          }),
+          /chainId: 8453 \(Base Mainnet\) is locked until the TGE/,
+        );
+      }
+    } finally {
+      mock.timers.reset();
     }
     assert.throws(() => {
-      networkGate(8453);
+      networkGate(8453, Date.parse(TGE_DATE) - 1);
     }, /Base Mainnet\) is locked/);
   });
 
-  it("the network gate opens only local Anvil and Base Sepolia", () => {
-    networkGate(31337);
-    networkGate(84532);
+  it("the network gate opens Base Mainnet exactly at the TGE", () => {
+    const tge = Date.parse(TGE_DATE);
+    assert.equal(tge, Date.parse("2026-11-01T00:00:00Z"));
+    assert.throws(() => {
+      networkGate(8453, tge - 1);
+    }, PlanError);
+    networkGate(8453, tge);
+    networkGate(8453, tge + 86_400_000);
+  });
+
+  it("the network gate opens only local Anvil and Base Sepolia before the TGE", () => {
+    const before = Date.parse(TGE_DATE) - 1;
+    networkGate(31337, before);
+    networkGate(84532, before);
     for (const chainId of [0, 1, 10, 8453, 42161, 11155111]) {
       assert.throws(() => {
-        networkGate(chainId);
+        networkGate(chainId, before);
+      }, PlanError);
+    }
+    for (const chainId of [0, 1, 10, 42161, 11155111]) {
+      assert.throws(() => {
+        networkGate(chainId, Date.parse(TGE_DATE));
       }, PlanError);
     }
   });
@@ -405,7 +426,7 @@ describe("approved TGE (owner decision 2026-10-05)", () => {
     checkTge(8453, TGE_DATE);
     assert.throws(() => {
       checkTge(8453, "2027-01-01T00:00:00Z");
-    }, /must be the approved TGE 2026-12-01/);
+    }, /must be the approved TGE 2026-11-01/);
     assert.throws(() => {
       checkTge(8453, undefined);
     }, /must be the approved TGE/);

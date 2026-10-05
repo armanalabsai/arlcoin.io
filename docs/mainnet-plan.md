@@ -1,4 +1,4 @@
-# Base Mainnet plan (LOCKED, not deployed)
+# Base Mainnet plan (opens at the TGE 2026-11-01, not deployed)
 
 Locked 2026-10-05 by owner decision. **Nothing is deployed, created or funded on Base Mainnet.**
 The network gate still refuses chain 8453.
@@ -21,7 +21,7 @@ delegation), nonce 0. The guardian owner is not a role-Safe owner; the deployer 
 ## Simulation
 
 Run on a local fork of Base Mainnet (block 52,183,747) with the canonical Safe v1.5.0 contracts:
-`CreateSafes`, config and plan (TGE placeholder 2026-12-01), `DeployARL`, `VerifyARL`, manifest and
+`CreateSafes`, config and plan (TGE placeholder 2026-11-01), `DeployARL`, `VerifyARL`, manifest and
 supply. The fork ran with chain id 84532 because the network gate refuses 8453 by design;
 CREATE and CREATE2 addresses do not depend on the chain id, so they are the expected mainnet
 addresses if the deployer starts at nonce 0 and the default salt is used.
@@ -57,9 +57,9 @@ the approved TGE before the mainnet run. The TGE changes the vesting dates, not 
 
 ## Still required before a mainnet run
 
-1. Done 2026-10-05: TGE 2026-12-01 and the Public Launch and liquidity parameters are approved
+1. Done 2026-10-05: TGE 2026-11-01 and the Public Launch and liquidity parameters are approved
    (both flags set; see [launch-decisions.md](launch-decisions.md)).
 2. The real Public Launch claim list (launchpad buyers and whitelist sign-ups).
-3. A reviewed change to `networkGate` that opens 8453.
+3. Done 2026-10-05 (owner approval): `networkGate` opens 8453 at 2026-11-01T00:00:00Z.
 4. The deployer funded with Base ETH; any transaction from it before the run shifts the
    contract addresses above.

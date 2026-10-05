@@ -241,22 +241,23 @@ deployments must leave the deployer nonce unchanged. CI runs the rehearsal on ev
 
 ## Network gate
 
-Approved network decision: **Base Sepolia (84532) is the only deployable public network. Base
-Mainnet (8453) is hard-locked.**
+Approved network decision: **Base Sepolia (84532) is open. Base Mainnet (8453) opens at the
+approved TGE, 2026-11-01T00:00:00Z** (owner approval 2026-10-05).
 
-| Chain                | Gate       | Notes                                                                                                         |
-| -------------------- | ---------- | ------------------------------------------------------------------------------------------------------------- |
-| Local Anvil (31337)  | open       | Rehearsals; recipients may lack code                                                                          |
-| Base Sepolia (84532) | open       | `requireRecipientCode: true`; every Safe role must be a canonical Safe v1.5.0 proxy; placeholder TGE accepted |
-| Base Mainnet (8453)  | **locked** | Always refused (`PlanProductionLocked`)                                                                       |
-| Any other chain      | refused    | `PlanChainNotSupported`                                                                                       |
+| Chain                | Gate    | Notes                                                                                                                           |
+| -------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Local Anvil (31337)  | open    | Rehearsals; recipients may lack code                                                                                            |
+| Base Sepolia (84532) | open    | `requireRecipientCode: true`; every Safe role must be a canonical Safe v1.5.0 proxy; placeholder TGE accepted                   |
+| Base Mainnet (8453)  | **TGE** | Refused before 2026-11-01T00:00:00Z by the chain's block timestamp (`PlanProductionLocked`); then every production rule applies |
+| Any other chain      | refused | `PlanChainNotSupported`                                                                                                         |
 
 One gate, `ARLDeployPlan.networkGate`, is checked by `DeployARL` and `DeployDistributor` before they
 read any input, by `ARLDeployPlan.validate`, and by `ARLDeployer.deploy` itself, so a script that
 skips validation is refused too. The planner applies the same rule (`networkGate` in
 `packages/deploy/src/plan.ts`). The gate takes no flag, reads no environment variable and no
-config field, and has no override: `block.chainid` alone decides. Opening Base Mainnet requires
-changing `networkGate` in both places in a reviewed change. No CI workflow deploys or holds a
+config field, and has no override: `block.chainid` and, for Base Mainnet, the block timestamp
+against `PRODUCTION_OPENS_AT` decide (the planner uses the clock against `TGE_DATE`). Changing
+the opening time requires changing both places in a reviewed change. No CI workflow deploys or holds a
 deployment key.
 
 Before a Base Sepolia deployment: a config with `requireRecipientCode: true` and a dedicated test

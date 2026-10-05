@@ -1,6 +1,6 @@
 # Launch decisions
 
-**APPROVED by the owner on 2026-10-05:** TGE 2026-12-01; Public Launch 1,000,000 ARL at TGE,
+**APPROVED by the owner on 2026-10-05:** TGE 2026-11-01; Public Launch 1,000,000 ARL at TGE,
 10,000 ARL per address, 60-day claim window, launchpad buyers and whitelist sign-ups; liquidity
 with no project cash (launch proceeds, or single-sided ARL at or above 0.20 USD), LP in the
 Liquidity Safe locked 12 months. The 50,000 USD example below is not used. The tables are kept
@@ -14,10 +14,10 @@ These decisions close the two flags that keep mainnet shut:
 
 ## 1. TGE
 
-| Option     | Implication                                                                                       |
-| ---------- | ------------------------------------------------------------------------------------------------- |
-| 2026-12-01 | Current target. About 8 weeks for the remaining items (decisions below, legal, launchpad intake). |
-| Later date | More time for an audit or the public test period; vesting dates move with it.                     |
+| Option     | Implication                                                                                               |
+| ---------- | --------------------------------------------------------------------------------------------------------- |
+| 2026-11-01 | Current target (moved from 2026-12-01 by the owner on 2026-10-05). About 4 weeks for the remaining items. |
+| Later date | More time for an audit or the public test period; vesting dates move with it.                             |
 
 The TGE date sets the vesting start (cliff ends one year later, vesting ends four years later).
 
@@ -60,6 +60,6 @@ Public Launch allocation as liquidity.
 
 1. Record them in `docs/tokenomics-economic-spec.md` and `packages/tokenomics`.
 2. Set the two flags in a reviewed change, with tests.
-3. Prepare the `networkGate` change for 8453, reviewed separately.
+3. Done 2026-10-05: `networkGate` opens 8453 at the TGE, 2026-11-01T00:00:00Z.
 4. Rebuild the mainnet plan with the approved TGE and simulate again; addresses stay as in
    [mainnet-plan.md](mainnet-plan.md) if the deployer has not sent any transaction.

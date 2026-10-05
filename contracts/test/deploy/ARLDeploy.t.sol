@@ -49,7 +49,7 @@ contract ARLDeployHarness {
         ARLDeployPlan.validateSchedule(name, v);
     }
 
-    function networkGate(uint256 chainId) external pure {
+    function networkGate(uint256 chainId) external view {
         ARLDeployPlan.networkGate(chainId);
     }
 
@@ -415,7 +415,7 @@ contract ARLDeployTest is Test {
         assertEq(ARLDeployPlan.TIMELOCK_DELAY_FLOOR, tl.MIN_DELAY_FLOOR());
     }
 
-    /// @dev Approved 2026-10-05 (TGE 2026-12-01). The flag opens no network.
+    /// @dev Approved 2026-10-05 (TGE 2026-11-01). The flag opens no network.
     function test_VestingSchedulesAreApproved() public pure {
         assertTrue(ARLDeployPlan.VESTING_SCHEDULES_APPROVED);
     }
@@ -472,6 +472,45 @@ contract ARLDeployTest is Test {
         }
         vm.expectRevert();
         h.networkGate(chainId);
+    }
+
+    /// @dev Base Mainnet opens at the approved TGE (2026-11-01T00:00:00Z) by the chain's own
+    /// clock, and not one second earlier.
+    function test_NetworkGateOpensBaseMainnetAtTge() public {
+        vm.warp(1_793_491_200 - 1);
+        vm.expectRevert(abi.encodeWithSelector(ARLDeployPlan.PlanProductionLocked.selector, 8453));
+        h.networkGate(8453);
+        vm.warp(1_793_491_200);
+        h.networkGate(8453);
+        vm.expectRevert(abi.encodeWithSelector(ARLDeployPlan.PlanChainNotSupported.selector, 1));
+        h.networkGate(1);
+    }
+
+    function testFuzz_NetworkGateBaseMainnetFollowsTge(uint256 ts) public {
+        ts = bound(ts, 1, type(uint64).max);
+        vm.warp(ts);
+        if (ts < 1_793_491_200) {
+            vm.expectRevert(
+                abi.encodeWithSelector(ARLDeployPlan.PlanProductionLocked.selector, 8453)
+            );
+        }
+        h.networkGate(8453);
+    }
+
+    /// @dev From the TGE a Base Mainnet plan passes the gate and is then held to every production
+    /// rule: Safes that do not point to a canonical singleton are still refused.
+    function test_BaseMainnetAfterTgeStillNeedsCanonicalSafes() public {
+        vm.warp(1_793_491_200);
+        vm.chainId(8453);
+        Plan memory p = _plan();
+        p.requireRecipientCode = true;
+        _giveCode(p);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ARLDeployPlan.PlanSafeSingletonNotCanonical.selector, p.safeSingletons[0]
+            )
+        );
+        h.validate(p);
     }
 
     /// @dev Local Anvil may rehearse while the vesting start is still TBD.

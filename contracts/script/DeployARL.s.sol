@@ -18,7 +18,7 @@ import {ARLVerify} from "./ARLVerify.sol";
 /// addresses are written. Any failure reverts the script.
 contract DeployARL is Script {
     function run() external returns (Deployment memory d) {
-        // Refuse Base Mainnet and unsupported chains before reading any input.
+        // Refuse Base Mainnet before the TGE and unsupported chains before reading any input.
         ARLDeployPlan.networkGate(block.chainid);
         Plan memory plan = ARLDeployPlan.load(vm.readFile(vm.envString("ARL_PLAN")));
         ARLDeployPlan.validate(plan);

@@ -24,6 +24,8 @@ PLANS="deploy/plans"
 REHEARSAL="$PLANS/rehearsal"
 PLAN="$PLANS/local.json"
 DEPLOYMENT="deploy/deployments/31337.json"
+# Base Mainnet opens at the approved TGE, 2026-11-01T00:00:00Z (ARLDeployPlan.PRODUCTION_OPENS_AT).
+TGE_OPENS_AT=1793491200
 
 log() { printf '\n==> %s\n' "$*"; }
 die() {
@@ -247,7 +249,10 @@ must_fail "planner: ambiguous month arithmetic" "day of month must be 1-28" plan
 bad_config "$REHEARSAL/cfg-chain.json" "c.chainId = 84532"
 must_fail "planner: non-local chain without code checks" "requireRecipientCode: may be false only" planner "$REHEARSAL/cfg-chain.json"
 bad_config "$REHEARSAL/cfg-mainnet.json" "c.chainId = 8453; c.network = 'base'; c.requireRecipientCode = true"
-must_fail "planner: Base Mainnet config" "chainId: 8453 \\(Base Mainnet\\) is locked" planner "$REHEARSAL/cfg-mainnet.json"
+# The planner uses the machine clock: Base Mainnet opens at the TGE.
+if (($(date +%s) < TGE_OPENS_AT)); then
+  must_fail "planner: Base Mainnet config before the TGE" "chainId: 8453 \\(Base Mainnet\\) is locked" planner "$REHEARSAL/cfg-mainnet.json"
+fi
 bad_config "$REHEARSAL/cfg-unsupported.json" "c.chainId = 11155111; c.requireRecipientCode = true"
 must_fail "planner: unsupported chain" "chainId: 11155111 is not supported" planner "$REHEARSAL/cfg-unsupported.json"
 bad_config "$REHEARSAL/cfg-cliff.json" "c.vesting.investors.cliffMonths = 6"
@@ -393,8 +398,10 @@ forge_verify "$PIPE_PLAN" "$PIPE_DEPLOYMENT" || die "verifier rejected the deplo
 expect "created founder safe balance" "2100000000000000000000000" \
   "$(num "$(node -e "console.log(require('./$PIPE_DEPLOYMENT').token)")" 'balanceOf(address)(uint256)' "$(safeval founder)")"
 node -e "const s=require('./$PIPE_SAFES'); s.chainId=8453; require('fs').writeFileSync('$REHEARSAL/mainnet-safes.json', JSON.stringify(s));"
-must_fail "config builder: Base Mainnet Safes" "Base Mainnet\\) is locked" \
-  node "$ROOT/packages/deploy/src/safes-config-cli.ts" "$REHEARSAL/mainnet-safes.json" 2027-01-01T00:00:00Z "$REHEARSAL/x.json"
+if (($(date +%s) < TGE_OPENS_AT)); then
+  must_fail "config builder: Base Mainnet Safes before the TGE" "Base Mainnet\\) is locked" \
+    node "$ROOT/packages/deploy/src/safes-config-cli.ts" "$REHEARSAL/mainnet-safes.json" 2027-01-01T00:00:00Z "$REHEARSAL/x.json"
+fi
 
 log "Circulating supply moves only when tokens leave a locked address"
 # Runs last: it moves genesis tokens, after which the verifier's genesis checks no longer apply.
@@ -526,10 +533,11 @@ set -e
 expect "monitor exit code on a critical finding" "3" "$CODE"
 NEGATIVE=$((NEGATIVE + 1))
 
-log "Network gate on separate chains: Base Mainnet (8453) locked, Base Sepolia (84532) open"
-# Each chain is a fresh local Anvil with that chain ID; nothing touches a real network.
+log "Network gate on separate chains: Base Mainnet (8453) locked before the TGE, Base Sepolia (84532) open"
+# Each chain is a fresh local Anvil with that chain ID; nothing touches a real network. The Base
+# Mainnet chain starts one day before the TGE, so its own clock keeps the gate closed.
 gate_chain() {
-  anvil --port "$2" --chain-id "$1" --silent &
+  anvil --port "$2" --chain-id "$1" --silent ${3:+--timestamp "$3"} &
   GATE_PIDS+=($!)
   for _ in $(seq 1 50); do
     if cast chain-id --rpc-url "http://127.0.0.1:$2" >/dev/null 2>&1; then break; fi
@@ -543,7 +551,7 @@ gate_deploy() {
 }
 MAINNET_PORT=$((PORT + 1))
 TESTNET_PORT=$((PORT + 2))
-gate_chain 8453 "$MAINNET_PORT"
+gate_chain 8453 "$MAINNET_PORT" $((TGE_OPENS_AT - 86400))
 gate_chain 84532 "$TESTNET_PORT"
 # A Base Mainnet plan that sets every field a real one would (code checks, canonical singletons).
 mutate "$REHEARSAL/mainnet.json" "p.chainId = 8453; p.network = 'base'; p.requireRecipientCode = true; p.safe.singletons = ['0xFf51A5898e281Db6DfC7855790607438dF2ca44b', '0xEdd160fEBBD92E350D4D398fb636302fccd67C7e']"

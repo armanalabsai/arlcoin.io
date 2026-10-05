@@ -6,7 +6,7 @@ export const SITE = {
   name: "ARL",
   url: "https://arlcoin.io",
   description:
-    "ARL is the utility token for AI and compute services on Base: 21,000,000 ARL fixed supply, no owner, mint or upgrade. Live on Base Sepolia testnet; Base Mainnet launch targeted for 2026-12-01.",
+    "ARL is the utility token for AI and compute services on Base: 21,000,000 ARL fixed supply, no owner, mint or upgrade. Live on Base Sepolia testnet; Base Mainnet launch targeted for 2026-11-01.",
   /** Short line under the Core on the overview. */
   tagline: "The utility token for AI and compute services, live on Base Sepolia.",
   repository: "https://gitlab.com/armanalabs-group/arlcoin",
@@ -24,7 +24,7 @@ export const SITE = {
     explorer: "https://sepolia.basescan.org/token/0x244312b619127B6458154F3467eFD7c87CD28500",
   },
   /** Target date of the Base Mainnet token deployment (the TGE). */
-  tgeTarget: "2026-12-01",
+  tgeTarget: "2026-11-01",
   /** Data controller named in the privacy notice, as given by the owner. */
   controller: {
     name: "Alaz Daghan Gokturk",

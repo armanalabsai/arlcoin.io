@@ -22,7 +22,7 @@ contract, so the readiness table below is the real starting point.
 | Deployed contract (testnet)                     | Ready: Base Sepolia, token 0x244312b619127B6458154F3467eFD7c87CD28500, source-verified                                     |
 | Deployed contract (mainnet)                     | **Missing.** Base Mainnet is locked in code until audit and release review                                                 |
 | Sale parameters (allocation, price, raise, FDV) | Public Launch: up to 1,000,000 ARL at TGE, max 10,000 ARL per address; listing price 0.20 USD (`docs/launch-decisions.md`) |
-| TGE date                                        | 2026-12-01 (approved 2026-10-05). Every vesting schedule starts at the TGE                                                 |
+| TGE date                                        | 2026-11-01 (approved 2026-10-05). Every vesting schedule starts at the TGE                                                 |
 | Liquidity plan                                  | **TBD.** 2,000,000 ARL Liquidity reserve exists; pool size, pair and LP custody not decided                                |
 | Team identity (KYC with the launchpad)          | Founder: Alaz Daghan Gokturk, Founder and CEO. KYC is done privately with each launchpad by the founder                    |
 | Legal opinion on the token                      | **TBD.** Not obtained                                                                                                      |

@@ -7,20 +7,20 @@ the simulation are in [mainnet-plan.md](mainnet-plan.md); the testnet run of the
 
 ## Before the day
 
-| #   | Item                                                                             | Check                                |
-| --- | -------------------------------------------------------------------------------- | ------------------------------------ |
-| 1   | Reviewed change that lets `networkGate` accept 8453 (separate change, own tests) | merged, CI green                     |
-| 2   | Deployer has never sent a transaction and has no code                            | `cast nonce` = 0, `cast code` = `0x` |
-| 3   | Deployer funded with at least 0.001 ETH on Base                                  | `cast balance`                       |
-| 4   | Whitelist and launchpad buyers collected as `address,amount` (whole ARL)         | CSV ready                            |
-| 5   | Signer config `contracts/deploy/deployments/8453-signers.env` unchanged          | SHA-256 in mainnet-plan.md           |
+| #   | Item                                                                      | Check                                |
+| --- | ------------------------------------------------------------------------- | ------------------------------------ |
+| 1   | `networkGate` opens 8453 at 2026-11-01T00:00:00Z (done 2026-10-05, tests) | run on or after 2026-11-01 00:00 UTC |
+| 2   | Deployer has never sent a transaction and has no code                     | `cast nonce` = 0, `cast code` = `0x` |
+| 3   | Deployer funded with at least 0.001 ETH on Base                           | `cast balance`                       |
+| 4   | Whitelist and launchpad buyers collected as `address,amount` (whole ARL)  | CSV ready                            |
+| 5   | Signer config `contracts/deploy/deployments/8453-signers.env` unchanged   | SHA-256 in mainnet-plan.md           |
 
 ## Steps
 
 1. **Safes.** Dry-run `CreateSafes` against Base Mainnet with `--sender` = deployer, publish the
    plan to the deploy screen, sign the 12 transactions. Check each Safe address against
    [mainnet-plan.md](mainnet-plan.md) and its owners and threshold on chain.
-2. **Config and plan.** `safes-config-cli.ts` with `2026-12-01T00:00:00Z` (the planner refuses any
+2. **Config and plan.** `safes-config-cli.ts` with `2026-11-01T00:00:00Z` (the planner refuses any
    other TGE off testnet), then `cli.ts`.
 3. **Contracts.** Dry-run `DeployARL`, sign nonces 12-15 on the deploy screen; each created
    address must match the plan.

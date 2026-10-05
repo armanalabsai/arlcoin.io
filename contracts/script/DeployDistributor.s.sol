@@ -25,8 +25,8 @@ contract DeployDistributor is Script {
     /// specification section 7 and `PUBLIC_LAUNCH` in `packages/tokenomics`): 1,000,000 ARL at TGE,
     /// at most 10,000 ARL per address (the `maxPerAddress` of the real claim list), a 60-day claim
     /// window, remainder to the Public Launch Safe. This opens no network: that is decided by
-    /// `ARLDeployPlan.networkGate` (local Anvil and Base Sepolia only; Base Mainnet is
-    /// hard-locked).
+    /// `ARLDeployPlan.networkGate` (local Anvil and Base Sepolia; Base Mainnet only from the
+    /// TGE).
     bool public constant LAUNCH_PARAMETERS_APPROVED = true;
 
     /// @notice Largest list total: the approved TGE tranche.
@@ -91,7 +91,7 @@ contract DeployDistributor is Script {
     }
 
     /// @notice The shared network gate (`ARLDeployPlan.networkGate`), exposed for tests.
-    function networkGate(uint256 chainId) public pure {
+    function networkGate(uint256 chainId) public view {
         ARLDeployPlan.networkGate(chainId);
     }
 

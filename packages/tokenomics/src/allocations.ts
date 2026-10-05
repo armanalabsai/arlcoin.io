@@ -19,7 +19,7 @@ export const MAX_SUPPLY = 21_000_000;
  * The approved TGE date (owner decision, 2026-10-05). Every vesting schedule starts at the TGE
  * (VESTING_START = TGE_TIMESTAMP). The TGE itself is the Base Mainnet token deployment.
  */
-export const TGE_DATE = "2026-12-01T00:00:00Z";
+export const TGE_DATE = "2026-11-01T00:00:00Z";
 
 /**
  * Approved Public Launch parameters (owner decision, 2026-10-05; economic specification

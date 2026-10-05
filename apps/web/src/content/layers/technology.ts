@@ -14,8 +14,7 @@ const arlAmount = (id: string): string => {
 export const technology: Layer = {
   id: "technology",
   title: "Technology",
-  description:
-    "What ARL is for. The token runs on the Base Sepolia testnet; nothing is on Base Mainnet yet.",
+  description: "What ARL is for. Live on Base Sepolia; not on Base Mainnet yet.",
   cards: [
     {
       id: "ai-payments",

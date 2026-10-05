@@ -54,22 +54,22 @@ Rules:
 
 ## Approved decisions
 
-| Area         | Decision                                                                                                      | Detail                                       |
-| ------------ | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| Chain        | Base: Base Sepolia for testnet, Base Mainnet for production (hard-locked until unlocked by a reviewed change) | [`chain-evaluation.md`](chain-evaluation.md) |
-| License      | Apache-2.0                                                                                                    | `LICENSE`, `NOTICE`                          |
-| Token        | ERC-20, 18 decimals, 21,000,000 ARL minted once, no mint function, no owner, no pause                         | [`token-design.md`](token-design.md)         |
-| Allocation   | 11 allocations totalling 21,000,000 ARL (approved 2026-09-27)                                                 | [`tokenomics.md`](tokenomics.md)             |
-| Custody      | Vesting wallets, timelock or a dedicated Safe per allocation (approved 2026-09-27)                            | [`tokenomics.md`](tokenomics.md#custody)     |
-| Treasury     | Safe 2-of-3, minimum 48-hour timelock, guardian Safe that can only cancel (no sunset)                         | [`token-design.md`](token-design.md)         |
-| Dependencies | Open source first, provenance recorded                                                                        | [`open-source.md`](open-source.md)           |
-| Content      | English only; no unverified claims; no implied partnerships                                                   | [`content-standard.md`](content-standard.md) |
+| Area         | Decision                                                                                             | Detail                                       |
+| ------------ | ---------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| Chain        | Base: Base Sepolia for testnet, Base Mainnet for production (opens at the TGE, 2026-11-01T00:00:00Z) | [`chain-evaluation.md`](chain-evaluation.md) |
+| License      | Apache-2.0                                                                                           | `LICENSE`, `NOTICE`                          |
+| Token        | ERC-20, 18 decimals, 21,000,000 ARL minted once, no mint function, no owner, no pause                | [`token-design.md`](token-design.md)         |
+| Allocation   | 11 allocations totalling 21,000,000 ARL (approved 2026-09-27)                                        | [`tokenomics.md`](tokenomics.md)             |
+| Custody      | Vesting wallets, timelock or a dedicated Safe per allocation (approved 2026-09-27)                   | [`tokenomics.md`](tokenomics.md#custody)     |
+| Treasury     | Safe 2-of-3, minimum 48-hour timelock, guardian Safe that can only cancel (no sunset)                | [`token-design.md`](token-design.md)         |
+| Dependencies | Open source first, provenance recorded                                                               | [`open-source.md`](open-source.md)           |
+| Content      | English only; no unverified claims; no implied partnerships                                          | [`content-standard.md`](content-standard.md) |
 
 ## Decisions still open
 
 | Decision                                                               | Needed before                |
 | ---------------------------------------------------------------------- | ---------------------------- |
-| Unlocking Base Mainnet (a reviewed change to `networkGate`)            | Production deployment        |
+| Base Mainnet opening time (`networkGate`, 2026-11-01T00:00:00Z)        | Production deployment        |
 | TGE date (both vesting schedules start at it; the date is TBD)         | Base Mainnet                 |
 | Team grant schedule; program rules for staking, growth and early users | The programs                 |
 | Exact launch and grant dates (contracts take explicit timestamps)      | Deployment                   |

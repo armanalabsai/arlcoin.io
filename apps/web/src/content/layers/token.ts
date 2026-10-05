@@ -123,7 +123,7 @@ export const token: Layer = {
       metric: { kind: "static", value: String(vesting.length), unit: "vesting wallets" },
       detail: {
         summary:
-          "These allocations are held by vesting wallets that release only to a dedicated Safe, only on their schedule: nothing at the start, a 12-month cliff, then 36 months of linear vesting. Every schedule starts at the TGE, the Base Mainnet token deployment, targeted for 2026-12-01.",
+          "These allocations are held by vesting wallets that release only to a dedicated Safe, only on their schedule: nothing at the start, a 12-month cliff, then 36 months of linear vesting. Every schedule starts at the TGE, the Base Mainnet token deployment, targeted for 2026-11-01.",
         facts: [
           ...vesting.map((a) => ({
             label: `${a.name} · ${formatArl(a.amount)}`,

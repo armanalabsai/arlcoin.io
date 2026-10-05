@@ -75,17 +75,21 @@ library ARLDeployPlan {
 
     /// @dev Base Sepolia: the only public network deployments may target.
     uint256 internal constant TESTNET_CHAIN_ID = 84532;
-    /// @dev Base Mainnet: hard-locked. `networkGate` refuses it unconditionally; no constant,
-    /// flag, environment variable or plan field can open it. Unlocking requires changing
-    /// `networkGate` itself in a reviewed change.
+    /// @dev Base Mainnet: locked until the approved TGE. `networkGate` refuses it while the
+    /// block timestamp is before `PRODUCTION_OPENS_AT`; no flag, environment variable or plan
+    /// field can open it earlier. Changing the time requires changing this file.
     uint256 internal constant PRODUCTION_CHAIN_ID = 8453;
+
+    /// @dev 2026-11-01T00:00:00Z, the approved TGE (`TGE_DATE` in `packages/tokenomics`, owner
+    /// decision 2026-10-05). The Base Mainnet deployment is the TGE, so it cannot happen earlier.
+    uint256 internal constant PRODUCTION_OPENS_AT = 1_793_491_200;
 
     /// @dev Approved schedule (economic specification section 4.1): 0% at TGE, a 12-month
     /// cliff, then 36 months linear, in calendar months. Every plan must match it exactly.
     uint256 internal constant VESTING_CLIFF_MONTHS = 12;
     uint256 internal constant VESTING_LINEAR_MONTHS = 36;
 
-    /// @dev The durations and the TGE date (2026-12-01, owner decision 2026-10-05; `TGE_DATE` in
+    /// @dev The durations and the TGE date (2026-11-01, owner decision 2026-10-05; `TGE_DATE` in
     /// `packages/tokenomics`, required by the planner off local Anvil and Base Sepolia) are approved.
     /// Local Anvil and Base Sepolia may use a placeholder start. This records the status only:
     /// it opens no network.
@@ -230,11 +234,15 @@ library ARLDeployPlan {
     }
 
     /// @notice The network gate, shared by every deployment path. Local Anvil and Base Sepolia
-    /// pass. Base Mainnet always reverts. Every other chain reverts. It takes no flag: nothing
-    /// outside this function can change its result.
-    function networkGate(uint256 chainId) internal pure {
+    /// pass. Base Mainnet passes only from the approved TGE (`PRODUCTION_OPENS_AT`, checked
+    /// against the chain's own block timestamp). Every other chain reverts. It takes no flag:
+    /// nothing outside this function can change its result.
+    function networkGate(uint256 chainId) internal view {
         if (chainId == LOCAL_CHAIN_ID || chainId == TESTNET_CHAIN_ID) return;
-        if (chainId == PRODUCTION_CHAIN_ID) revert PlanProductionLocked(chainId);
+        if (chainId == PRODUCTION_CHAIN_ID) {
+            if (block.timestamp < PRODUCTION_OPENS_AT) revert PlanProductionLocked(chainId);
+            return;
+        }
         revert PlanChainNotSupported(chainId);
     }
 

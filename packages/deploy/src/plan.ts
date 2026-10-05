@@ -34,10 +34,14 @@ export const LOCAL_CHAIN_ID = 31337;
 /** Base Sepolia: the only public network a plan may target. It may use a placeholder vesting start. */
 export const TESTNET_CHAIN_ID = 84532;
 /**
- * Base Mainnet: hard-locked. `networkGate` refuses it unconditionally; no config field, flag or
- * environment variable can open it. Mirrors `ARLDeployPlan.networkGate`.
+ * Base Mainnet: locked until the approved TGE (`TGE_DATE`); no config field, flag or environment
+ * variable can open it earlier. Mirrors `ARLDeployPlan.networkGate` and its
+ * `PRODUCTION_OPENS_AT`.
  */
 export const PRODUCTION_CHAIN_ID = 8453;
+
+/** When Base Mainnet opens, in milliseconds: the approved TGE. */
+export const PRODUCTION_OPENS_AT_MS = Date.parse(TGE_DATE);
 
 /**
  * Local Anvil and the testnet may use a placeholder TGE; every other network must use the
@@ -52,11 +56,15 @@ export function checkTge(chainId: number, tge: unknown): void {
   }
 }
 
-/** Local Anvil and Base Sepolia pass; Base Mainnet and every other chain are refused. */
-export function networkGate(chainId: number): void {
+/**
+ * Local Anvil and Base Sepolia pass; Base Mainnet passes only from the approved TGE; every other
+ * chain is refused.
+ */
+export function networkGate(chainId: number, nowMs: number = Date.now()): void {
   if (chainId === LOCAL_CHAIN_ID || chainId === TESTNET_CHAIN_ID) return;
   if (chainId === PRODUCTION_CHAIN_ID) {
-    fail(`chainId: ${String(chainId)} (Base Mainnet) is locked; no plan may target it`);
+    if (nowMs >= PRODUCTION_OPENS_AT_MS) return;
+    fail(`chainId: ${String(chainId)} (Base Mainnet) is locked until the TGE ${TGE_DATE}`);
   }
   fail(
     `chainId: ${String(chainId)} is not supported; only ${String(LOCAL_CHAIN_ID)} (local Anvil) and ${String(TESTNET_CHAIN_ID)} (Base Sepolia)`,

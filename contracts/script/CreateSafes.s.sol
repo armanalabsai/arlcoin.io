@@ -30,7 +30,7 @@ interface ISafe {
 /// @title Create the dedicated Safe of every ARL role
 /// @notice Creates one Safe v1.5.0 proxy per Safe role (12) and writes their addresses to
 /// `ARL_SAFES_OUT` (under `contracts/deploy/deployments/`). It runs only where
-/// `ARLDeployPlan.networkGate` allows: local Anvil and Base Sepolia. Base Mainnet is refused.
+/// `ARLDeployPlan.networkGate` allows: local Anvil, Base Sepolia, and Base Mainnet from the TGE.
 ///
 /// On Base Sepolia it uses only the canonical Safe v1.5.0 contracts from safe-deployments
 /// 1.37.63 (`SafeProxyFactory`, `SafeL2`, `CompatibilityFallbackHandler`) and checks their code
@@ -97,7 +97,7 @@ contract CreateSafes is Script {
     }
 
     function run() external {
-        // Refuse Base Mainnet and unsupported chains before reading any input.
+        // Refuse Base Mainnet before the TGE and unsupported chains before reading any input.
         ARLDeployPlan.networkGate(block.chainid);
         SafeContracts memory c = safeContracts(block.chainid == ARLDeployPlan.LOCAL_CHAIN_ID);
         Signers memory s = _signers();

@@ -24,7 +24,7 @@ struct Deployment {
 library ARLDeployer {
     function deploy(Plan memory p, address deployer) internal returns (Deployment memory d) {
         // Checked here as well as in `validate`, so a script that skips validation still cannot
-        // deploy to Base Mainnet or an unsupported chain.
+        // deploy to Base Mainnet before the TGE or to an unsupported chain.
         ARLDeployPlan.networkGate(block.chainid);
         d.deployer = deployer;
 

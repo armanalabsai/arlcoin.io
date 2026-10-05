@@ -340,7 +340,7 @@ describe("validator rejects invalid tables", () => {
 
 describe("approved launch parameters (owner decision 2026-10-05)", () => {
   it("fixes the TGE date and the Public Launch tranche, cap and window", () => {
-    assert.equal(TGE_DATE, "2026-12-01T00:00:00Z");
+    assert.equal(TGE_DATE, "2026-11-01T00:00:00Z");
     assert.deepEqual(PUBLIC_LAUNCH, {
       tgeTranche: 1_000_000,
       maxPerAddress: 10_000,

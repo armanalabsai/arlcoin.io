@@ -15,7 +15,7 @@ been performed.** Base Sepolia only; Base Mainnet is locked in the tooling.
 | Strategic Partnerships vesting | `0x02c7692918C98EC710970D390b08f247A76D5A37` (unchanged)                              |
 | Treasury timelock              | `0x5B3fd9E574BC07309949CD39161a295E22FbBd3D` (unchanged)                              |
 | ARL token                      | `0x244312b619127B6458154F3467eFD7c87CD28500` (unchanged), total supply 21,000,000 ARL |
-| Tokenomics / TGE               | Unchanged: 11 allocations, circulating at TGE 2,100,000 ARL, TGE target 2026-12-01    |
+| Tokenomics / TGE               | Unchanged: 11 allocations, circulating at TGE 2,100,000 ARL, TGE target 2026-11-01    |
 
 The delegation is absent on Base Mainnet, Ethereum and Ethereum Sepolia (`code = 0x`, nonce 0),
 so the clean-up has not reached Base Sepolia. Procedure: [audit-evidence.md](audit-evidence.md#eip-7702-clean-up-f-2).
@@ -54,7 +54,7 @@ Description / email text:
 > 0x244312b619127B6458154F3467eFD7c87CD28500). No independent audit has been done. Existing
 > evidence: 247 Foundry tests with fuzzing and invariants, Slither with 0 results, Halmos symbolic
 > checks, reproducible bytecode and deployment rehearsals. We target a mainnet launch around
-> 2026-12-01, subject to the security work.
+> 2026-11-01, subject to the security work.
 
 Would be shared: the text above, project name and website, the Base Sepolia addresses, and (on
 request) the code. **Blockers:** a contact email; read access to the code (GitHub is suspended).
@@ -76,7 +76,7 @@ Likely request content (to confirm when the site loads):
 | Out of scope  | Deployment tooling, front ends, ARLJobs, ARLAnonymousSignal (not in the launch)                                              |
 | Code access   | Repository link at a fixed commit (needed; GitHub suspended)                                                                 |
 | Documentation | `docs/audit-scope.md`, `docs/token-design.md`, `docs/audit-evidence.md`                                                      |
-| Timeline      | Before 2026-11-20, for a 2026-12-01 TGE target                                                                               |
+| Timeline      | Before 2026-10-25, for a 2026-11-01 TGE target                                                                               |
 | Budget        | Owner decision; paid engagement                                                                                              |
 | Contact       | armanalabsai@gmail.com                                                                                                       |
 
