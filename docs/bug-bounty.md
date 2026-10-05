@@ -1,6 +1,6 @@
 # Bug bounty
 
-Status: **proposed, not yet live.** The program goes live with the public Base Sepolia test
+Status: **approved by the owner on 2026-10-05, not yet live.** The program goes live with the public Base Sepolia test
 period, before any Base Mainnet deployment. The amounts below are paid only when a valid report
 is accepted; nothing is paid up front.
 
@@ -18,7 +18,7 @@ Rewards are paid in ARL from the **Grants / Bug Bounty** allocation (400,000 ARL
 Safe. A reward is a transfer from that Safe after the owners sign it. No other allocation pays
 bounties.
 
-## Rewards (proposed)
+## Rewards (approved 2026-10-05)
 
 | Severity | Example                                                                                                                                        | Reward     |
 | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
@@ -43,4 +43,4 @@ Bounty allocation never exceed its 400,000 ARL.
 
 ## Open items (owner)
 
-- Approval of the reward table and the 200,000 ARL period cap.
+- None for the terms. The program is announced with the public Base Sepolia test period.
