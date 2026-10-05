@@ -57,8 +57,9 @@ the approved TGE before the mainnet run. The TGE changes the vesting dates, not 
 
 ## Still required before a mainnet run
 
-1. TGE approval (`VESTING_SCHEDULES_APPROVED = false`).
-2. Public Launch claim parameters (`LAUNCH_PARAMETERS_APPROVED = false`) and liquidity plan.
+1. Done 2026-10-05: TGE 2026-12-01 and the Public Launch and liquidity parameters are approved
+   (both flags set; see [launch-decisions.md](launch-decisions.md)).
+2. The real Public Launch claim list (launchpad buyers and whitelist sign-ups).
 3. A reviewed change to `networkGate` that opens 8453.
 4. The deployer funded with Base ETH; any transaction from it before the run shifts the
    contract addresses above.

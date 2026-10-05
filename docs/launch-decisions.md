@@ -1,7 +1,10 @@
-# Launch decisions (owner input needed)
+# Launch decisions
 
-Prepared 2026-10-05. **Nothing here is approved.** Each item lists options and what each implies;
-the owner decides. Fixed and unchanged: 21,000,000 ARL, the 11 allocations, listing price
+**APPROVED by the owner on 2026-10-05:** TGE 2026-12-01; Public Launch 1,000,000 ARL at TGE,
+10,000 ARL per address, 60-day claim window, launchpad buyers and whitelist sign-ups; liquidity
+with no project cash (launch proceeds, or single-sided ARL at or above 0.20 USD), LP in the
+Liquidity Safe locked 12 months. The 50,000 USD example below is not used. The tables are kept
+as the record of the options considered. Fixed and unchanged: 21,000,000 ARL, the 11 allocations, listing price
 0.20 USD per ARL (FDV 4,200,000 USD), TGE = the Base Mainnet token deployment block, vesting
 12 + 36 months from TGE, mainnet custody in [mainnet-plan.md](mainnet-plan.md).
 

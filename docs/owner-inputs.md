@@ -35,16 +35,16 @@ A split of the Founder allocation into 2,000,000 ARL unrestricted and 100,000 AR
 
 ## Decisions
 
-| Input                              | Plugs into                                                                                    | Status                                                          |
-| ---------------------------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| Presale parameters                 | `packages/tokenomics` (Source of Truth), then contracts, deploy plan, site and launchpad pack | Proposed values recorded; not applied until explicitly approved |
-| Founder recipient                  | The Founder Safe in the deployment config (receives the 2,100,000 ARL)                        | Address TBD                                                     |
-| TGE date                           | `tge` in the deployment config; every vesting schedule starts at it                           | Target 2026-12-01 (audit-conditional); local config placeholder |
-| Public Launch claim parameters     | `ARLMerkleDistributor` via `DeployDistributor` (`LAUNCH_PARAMETERS_APPROVED = false`)         | Eligibility, claim duration and per-address cap TBD             |
-| Liquidity size                     | Liquidity allocation use; launchpad pack "Sale parameters"                                    | Not locked (listing price decided: 0.20 USD)                    |
-| Staking reward amount and duration | Funding calls from the Community & Staking holder to `ARLStakingRewards`                      | Not decided                                                     |
-| Bug bounty terms                   | [bug-bounty.md](bug-bounty.md)                                                                | Proposed; reward table, period cap and a private contact needed |
-| Legal opinion, KYC provider        | Launchpad pack                                                                                | Not started                                                     |
+| Input                              | Plugs into                                                                                          | Status                                                                                                                                              |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Presale parameters                 | `packages/tokenomics` (Source of Truth), then contracts, deploy plan, site and launchpad pack       | Proposed values recorded; not applied until explicitly approved                                                                                     |
+| Founder recipient                  | The Founder Safe in the deployment config (receives the 2,100,000 ARL)                              | Address TBD                                                                                                                                         |
+| TGE date                           | `TGE_DATE` in `packages/tokenomics`; required by the planner off local Anvil and Base Sepolia       | **2026-12-01** (owner decision 2026-10-05)                                                                                                          |
+| Public Launch claim parameters     | `PUBLIC_LAUNCH` in `packages/tokenomics`; `DeployDistributor` (`LAUNCH_PARAMETERS_APPROVED = true`) | **1,000,000 ARL at TGE, 10,000 per address, 60 days** (owner decision 2026-10-05)                                                                   |
+| Liquidity                          | Liquidity Safe; spec section 13                                                                     | **No project cash:** launch proceeds, or single-sided ARL at or above 0.20 USD; LP in the Liquidity Safe, 12-month lock (owner decision 2026-10-05) |
+| Staking reward amount and duration | Funding calls from the Community & Staking holder to `ARLStakingRewards`                            | Not decided                                                                                                                                         |
+| Bug bounty terms                   | [bug-bounty.md](bug-bounty.md)                                                                      | Proposed; reward table, period cap and a private contact needed                                                                                     |
+| Legal opinion, KYC provider        | Launchpad pack                                                                                      | Not started                                                                                                                                         |
 
 ## Base Sepolia deployment checklist
 

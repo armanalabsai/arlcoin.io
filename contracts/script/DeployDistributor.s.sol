@@ -21,12 +21,18 @@ import {ARLDeployPlan, Plan} from "./ARLDeployPlan.sol";
 /// The distributor is deployed unfunded. The Public Launch Safe funds it with the list total in
 /// a separate Safe transaction.
 contract DeployDistributor is Script {
-    /// @dev The mechanism (Merkle claim) is approved, but the launch parameters are not: the
-    /// amount distributed at TGE, per-address limits, the claim window and the remainder policy
-    /// (economic specification section 7). This records the status only: it opens no network.
-    /// The network is decided by `ARLDeployPlan.networkGate` (local Anvil and Base Sepolia only;
-    /// Base Mainnet is hard-locked).
-    bool public constant LAUNCH_PARAMETERS_APPROVED = false;
+    /// @dev The launch parameters are approved (owner decision, 2026-10-05; economic
+    /// specification section 7 and `PUBLIC_LAUNCH` in `packages/tokenomics`): 1,000,000 ARL at TGE,
+    /// at most 10,000 ARL per address (the `maxPerAddress` of the real claim list), a 60-day claim
+    /// window, remainder to the Public Launch Safe. This opens no network: that is decided by
+    /// `ARLDeployPlan.networkGate` (local Anvil and Base Sepolia only; Base Mainnet is
+    /// hard-locked).
+    bool public constant LAUNCH_PARAMETERS_APPROVED = true;
+
+    /// @notice Largest list total: the approved TGE tranche.
+    uint256 public constant TGE_TRANCHE = 1_000_000 * ARLAllocation.UNIT;
+    /// @notice Longest claim window from deployment.
+    uint256 public constant MAX_CLAIM_WINDOW = 60 days;
 
     string internal constant DISTRIBUTION_SCHEMA = "arl-distribution/1";
 
@@ -36,6 +42,8 @@ contract DeployDistributor is Script {
     error DistributorChainMismatch(uint256 deploymentChainId, uint256 chainId);
     error DistributorTokenHasNoCode(address token);
     error DistributorNotBroadcasting();
+    error DistributorTotalExceedsTranche(uint256 total, uint256 tranche);
+    error DistributorClaimWindowTooLong(uint64 claimEnd, uint256 latest);
 
     function run() external returns (ARLMerkleDistributor distributor) {
         networkGate(block.chainid);
@@ -49,6 +57,7 @@ contract DeployDistributor is Script {
             revert DistributorChainMismatch(deploymentChainId, block.chainid);
         }
         (bytes32 root, uint256 total) = checkList(list);
+        checkLaunchParameters(total, claimEnd, block.timestamp);
         address token = vm.parseJsonAddress(deployment, ".token");
         if (token.code.length == 0) revert DistributorTokenHasNoCode(token);
 
@@ -88,6 +97,18 @@ contract DeployDistributor is Script {
 
     /// @notice Checks a claim list's schema, allocation and total; returns its root and total.
     /// The root itself is recomputed from the claims by `distribution-cli.ts`.
+    /// @notice The approved launch parameters: the list total fits the TGE tranche and the claim
+    /// window ends at most 60 days after `nowTs`. (`ARLMerkleDistributor` itself refuses a
+    /// claim end in the past.)
+    function checkLaunchParameters(uint256 total, uint64 claimEnd, uint256 nowTs) public pure {
+        if (total > TGE_TRANCHE) revert DistributorTotalExceedsTranche(total, TGE_TRANCHE);
+        // A deployment-time bound on an operator input, not an on-chain time comparison.
+        // slither-disable-next-line timestamp
+        if (claimEnd > nowTs + MAX_CLAIM_WINDOW) {
+            revert DistributorClaimWindowTooLong(claimEnd, nowTs + MAX_CLAIM_WINDOW);
+        }
+    }
+
     function checkList(string memory list) public pure returns (bytes32 root, uint256 total) {
         string memory schema = vm.parseJsonString(list, ".schema");
         if (keccak256(bytes(schema)) != keccak256(bytes(DISTRIBUTION_SCHEMA))) {

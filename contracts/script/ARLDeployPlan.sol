@@ -85,10 +85,11 @@ library ARLDeployPlan {
     uint256 internal constant VESTING_CLIFF_MONTHS = 12;
     uint256 internal constant VESTING_LINEAR_MONTHS = 36;
 
-    /// @dev The durations are approved and enforced, but the vesting start (TGE) of the
-    /// investor and strategic partnership wallets is not confirmed (TBD). Local Anvil and Base
-    /// Sepolia may use a placeholder start. This records the status only: it opens no network.
-    bool internal constant VESTING_SCHEDULES_APPROVED = false;
+    /// @dev The durations and the TGE date (2026-12-01, owner decision 2026-10-05; `TGE_DATE` in
+    /// `packages/tokenomics`, required by the planner off local Anvil and Base Sepolia) are approved.
+    /// Local Anvil and Base Sepolia may use a placeholder start. This records the status only:
+    /// it opens no network.
+    bool internal constant VESTING_SCHEDULES_APPROVED = true;
 
     /// @dev Plans of any other schema are rejected rather than reinterpreted: `/2` (founder
     /// vesting wallet), `/3` (no Safe singletons) and `/4` (Founder split into an unrestricted

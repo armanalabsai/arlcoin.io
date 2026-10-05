@@ -2,13 +2,14 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 
-import { ALLOCATIONS, MAX_SUPPLY } from "@arl/tokenomics";
+import { ALLOCATIONS, MAX_SUPPLY, TGE_DATE } from "@arl/tokenomics";
 
 import {
   PLAN_SCHEMA,
   PlanError,
   addCalendarMonths,
   buildPlan,
+  checkTge,
   canonicalSafeSingletons,
   networkGate,
   type DeployConfig,
@@ -391,5 +392,22 @@ describe("buildPlan: fails closed", () => {
       }),
       /vesting\.investors\.start: not allowed; every vesting schedule starts at tge/,
     );
+  });
+});
+
+describe("approved TGE (owner decision 2026-10-05)", () => {
+  it("lets local Anvil and the testnet use a placeholder TGE", () => {
+    checkTge(31337, "2027-01-01T00:00:00Z");
+    checkTge(84532, "2027-01-01T00:00:00Z");
+  });
+
+  it("requires the approved TGE on any other network", () => {
+    checkTge(8453, TGE_DATE);
+    assert.throws(() => {
+      checkTge(8453, "2027-01-01T00:00:00Z");
+    }, /must be the approved TGE 2026-12-01/);
+    assert.throws(() => {
+      checkTge(8453, undefined);
+    }, /must be the approved TGE/);
   });
 });

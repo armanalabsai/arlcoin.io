@@ -415,10 +415,9 @@ contract ARLDeployTest is Test {
         assertEq(ARLDeployPlan.TIMELOCK_DELAY_FLOOR, tl.MIN_DELAY_FLOOR());
     }
 
-    /// @dev Flipping this requires the approved investor and strategic partnership schedules to
-    /// be implemented.
-    function test_VestingSchedulesAreNotApprovedYet() public pure {
-        assertFalse(ARLDeployPlan.VESTING_SCHEDULES_APPROVED);
+    /// @dev Approved 2026-10-05 (TGE 2026-12-01). The flag opens no network.
+    function test_VestingSchedulesAreApproved() public pure {
+        assertTrue(ARLDeployPlan.VESTING_SCHEDULES_APPROVED);
     }
 
     // ------------------------------------------------------------------ validation (fail closed)

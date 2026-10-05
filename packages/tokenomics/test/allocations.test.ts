@@ -5,6 +5,8 @@ import * as tokenomics from "../src/index.ts";
 import {
   ALLOCATIONS,
   MAX_SUPPLY,
+  PUBLIC_LAUNCH,
+  TGE_DATE,
   formatBasisPoints,
   shareOfSupply,
   validateAllocations,
@@ -138,12 +140,16 @@ describe("supply concepts", () => {
 describe("custody and vesting readiness", () => {
   const vestingWallet = { holder: "vesting-wallet", beneficiary: "dedicated-safe" };
 
-  it("investors and strategic partnerships vest 12 + 36 months to dedicated Safes; start TBD", () => {
+  it("investors and strategic partnerships vest 12 + 36 months to dedicated Safes from the TGE", () => {
     for (const id of ["investors", "strategic-partnerships"]) {
       const a = byId(id);
       assert.deepEqual(a.custody, vestingWallet, id);
       assert.ok(a.release.kind === "vesting", id);
-      assert.deepEqual(a.release.schedule, { cliffMonths: 12, linearMonths: 36, start: "tbd" }, id);
+      assert.deepEqual(
+        a.release.schedule,
+        { cliffMonths: 12, linearMonths: 36, start: "approved" },
+        id,
+      );
       assert.equal(a.release.status, "approved", id);
     }
     assert.match(JSON.stringify(byId("strategic-partnerships")), /milestone/);
@@ -197,7 +203,7 @@ describe("custody and vesting readiness", () => {
     const r = byId("treasury").release;
     assert.deepEqual(byId("treasury").custody, { holder: "timelock" });
     assert.ok(r.kind === "custody");
-    assert.deepEqual(r.controls, { wallet: "Safe", threshold: 3, signers: 5, minDelayHours: 48 });
+    assert.deepEqual(r.controls, { wallet: "Safe", threshold: 2, signers: 3, minDelayHours: 48 });
   });
 
   it("the other allocations sit in dedicated Safes", () => {
@@ -329,5 +335,18 @@ describe("validator rejects invalid tables", () => {
       });
       assert.match(errorsOf(table), /founder: an unrestricted release needs a dedicated Safe/);
     });
+  });
+});
+
+describe("approved launch parameters (owner decision 2026-10-05)", () => {
+  it("fixes the TGE date and the Public Launch tranche, cap and window", () => {
+    assert.equal(TGE_DATE, "2026-12-01T00:00:00Z");
+    assert.deepEqual(PUBLIC_LAUNCH, {
+      tgeTranche: 1_000_000,
+      maxPerAddress: 10_000,
+      claimWindowDays: 60,
+    });
+    assert.ok(PUBLIC_LAUNCH.tgeTranche <= byId("public-launch").amount);
+    assert.equal(byId("public-launch").release.status, "approved");
   });
 });

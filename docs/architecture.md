@@ -61,7 +61,7 @@ Rules:
 | Token        | ERC-20, 18 decimals, 21,000,000 ARL minted once, no mint function, no owner, no pause                         | [`token-design.md`](token-design.md)         |
 | Allocation   | 11 allocations totalling 21,000,000 ARL (approved 2026-09-27)                                                 | [`tokenomics.md`](tokenomics.md)             |
 | Custody      | Vesting wallets, timelock or a dedicated Safe per allocation (approved 2026-09-27)                            | [`tokenomics.md`](tokenomics.md#custody)     |
-| Treasury     | Safe 3-of-5, minimum 48-hour timelock, guardian Safe that can only cancel (no sunset)                         | [`token-design.md`](token-design.md)         |
+| Treasury     | Safe 2-of-3, minimum 48-hour timelock, guardian Safe that can only cancel (no sunset)                         | [`token-design.md`](token-design.md)         |
 | Dependencies | Open source first, provenance recorded                                                                        | [`open-source.md`](open-source.md)           |
 | Content      | English only; no unverified claims; no implied partnerships                                                   | [`content-standard.md`](content-standard.md) |
 
