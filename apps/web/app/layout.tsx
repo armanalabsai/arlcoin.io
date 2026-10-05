@@ -10,6 +10,8 @@ import { InfrastructureStrip } from "@/site/InfrastructureStrip.tsx";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  // Google Search Console ownership of https://arlcoin.io/ (added 2026-10-05).
+  verification: { google: "LLHEGdS5Ee4XR_Cn93c2NcdIwcAG5zJM3IZtCFuxeJg" },
   metadataBase: new URL(SITE.url),
   applicationName: SITE.name,
   title: "ARL · Interactive Core",
