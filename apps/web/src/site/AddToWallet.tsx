@@ -34,7 +34,7 @@ export function AddToWallet({ className = "" }: { className?: string }) {
             address: token,
             symbol: "ARL",
             decimals: 18,
-            image: `${SITE.url}/arl-token.svg`,
+            image: `${SITE.url}/arl-token-200.png`,
           },
         },
       });

@@ -49,8 +49,11 @@ the simulation are in [mainnet-plan.md](mainnet-plan.md); the testnet run of the
 8. **Announce.** Publish the addresses on arlcoin.io and in the repository: set
    `SITE.mainnet.token` (shows "Add ARL to your wallet") and write the token list with
    `node packages/deploy/src/tokenlist-cli.ts apps/web/public/tokenlist.json 8453=<ARL token>`;
-   start `monitor-cli.ts` from the deployment block. After a few days of trading, apply to
-   CoinGecko and CoinMarketCap (free forms; they need the live pool and the verified contract).
+   write the supply API config with
+   `node packages/deploy/src/supply-config-cli.ts <manifest.json> apps/web/api/supply-config.json`
+   and redeploy (arlcoin.io/api/supply then reports the on-chain figures); start `monitor-cli.ts`
+   from the deployment block. After a few days of trading, apply to
+   CoinGecko and CoinMarketCap with [listing-applications.md](listing-applications.md).
 
 Stop at the first mismatch. A wrong Safe or contract address means the deployer's nonce or the
 salt changed; nothing is funded until every check passes.

@@ -6,7 +6,7 @@ import { getAddress, isAddress } from "viem";
 
 export class TokenListError extends Error {}
 
-export const TOKEN_LOGO = "https://arlcoin.io/arl-token.svg";
+export const TOKEN_LOGO = "https://arlcoin.io/arl-token-200.png";
 
 export interface TokenList {
   readonly name: string;
