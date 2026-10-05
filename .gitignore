@@ -31,3 +31,6 @@ keystores/
 UTC--*--*
 mnemonic*
 *.mnemonic
+
+# Vercel CLI project link (created by `vercel link`)
+.vercel/
