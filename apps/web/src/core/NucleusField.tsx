@@ -7,7 +7,9 @@ import { useEffect, useRef } from "react";
 // Two layers. Thousands of subatomic particles drift in ice blue at three depths. Over them,
 // atoms: nuclei glowing like small suns, each with one to three ice-blue electrons on tilted
 // orbits. Nuclei keep apart from each other, swirl around the pointer, and a press sends a
-// shock wave through both layers. Now and then a nucleus flares.
+// shock wave through both layers. Now and then a nucleus flares. Atoms stay on screen: a soft
+// wall turns them back at the edges, and a resize (such as a phone's address bar hiding)
+// rescales the scene instead of seeding a new one.
 //
 // Cost and accessibility: aria-hidden, no pointer capture, capped device pixel ratio, counts
 // scaled to the screen (far fewer on phones), sprites pre-rendered once, orbits stroked in one
@@ -26,6 +28,12 @@ interface Atom {
   y: number;
   vx: number;
   vy: number;
+  /** A slowly drifting home point the atom is gently pulled toward, so after a shock wave or a
+   * swirl the field spreads out evenly again instead of piling up at the edges. */
+  hx: number;
+  hy: number;
+  hvx: number;
+  hvy: number;
   r: number;
   phase: number;
   flare: number;
@@ -42,6 +50,13 @@ interface Particle {
 }
 
 const SEPARATION = 30;
+/** Distance an atom keeps from the screen edge, enough for its outer electron orbit. */
+const EDGE = 22;
+/** Band inside that distance where the soft wall starts easing an atom back. */
+const EDGE_SOFT = 40;
+/** Strength of the pull toward an atom's home point: weak enough that the pointer and shock
+ * waves still move atoms freely, strong enough to spread them again within a few seconds. */
+const HOME_PULL = 0.0006;
 // Ice blue far away to white up close; four twinkle levels each.
 const DUST_STYLES = [
   ["170, 205, 245", 0.18],
@@ -105,33 +120,64 @@ export function NucleusField() {
     let frame = 0;
     let tick = 0;
 
-    function seed() {
+    function size() {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       w = window.innerWidth;
       h = window.innerHeight;
       canvas!.width = Math.round(w * dpr);
       canvas!.height = Math.round(h * dpr);
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    /** Keeps the existing atoms and dust, moved to the same relative place on the new size. */
+    function rescale() {
+      const ow = w;
+      const oh = h;
+      size();
+      if (ow <= 0 || oh <= 0) return;
+      for (const p of [...atoms, ...dust]) {
+        p.x *= w / ow;
+        p.y *= h / oh;
+      }
+      for (const n of atoms) {
+        n.hx *= w / ow;
+        n.hy *= h / oh;
+      }
+      for (const n of atoms) contain(n);
+    }
+
+    function seed() {
+      size();
       const area = w * h;
       const small = w < 640;
       const atomCount = Math.round(Math.min(small ? 90 : 240, Math.max(50, area / 7000)));
       const dustCount = Math.round(Math.min(small ? 900 : 3200, Math.max(400, area / 450)));
-      atoms = Array.from({ length: atomCount }, () => ({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        r: 0.8 + Math.random() * 1.6,
-        phase: Math.random() * Math.PI * 2,
-        flare: 0,
-        electrons: Array.from({ length: 1 + Math.floor(Math.random() * 3) }, (_, k) => ({
-          a: Math.random() * Math.PI * 2,
-          speed: (0.015 + Math.random() * 0.035) * (Math.random() < 0.5 ? -1 : 1),
-          orbit: 6 + k * 3.5 + Math.random() * 4,
-          tilt: 0.3 + Math.random() * 0.6,
-          spin: Math.random() * Math.PI,
-        })),
-      }));
+      atoms = Array.from({ length: atomCount }, () => {
+        const x = EDGE + Math.random() * Math.max(1, w - 2 * EDGE);
+        const y = EDGE + Math.random() * Math.max(1, h - 2 * EDGE);
+        const heading = Math.random() * Math.PI * 2;
+        const drift = 0.06 + Math.random() * 0.12;
+        return {
+          x,
+          y,
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3,
+          hx: x,
+          hy: y,
+          hvx: Math.cos(heading) * drift,
+          hvy: Math.sin(heading) * drift,
+          r: 0.8 + Math.random() * 1.6,
+          phase: Math.random() * Math.PI * 2,
+          flare: 0,
+          electrons: Array.from({ length: 1 + Math.floor(Math.random() * 3) }, (_, k) => ({
+            a: Math.random() * Math.PI * 2,
+            speed: (0.015 + Math.random() * 0.035) * (Math.random() < 0.5 ? -1 : 1),
+            orbit: 6 + k * 3.5 + Math.random() * 4,
+            tilt: 0.3 + Math.random() * 0.6,
+            spin: Math.random() * Math.PI,
+          })),
+        };
+      });
       dust = Array.from({ length: dustCount }, () => {
         const depth = Math.random() < 0.6 ? 0 : Math.random() < 0.7 ? 1 : 2;
         const v = 0.05 + depth * 0.08;
@@ -151,6 +197,30 @@ export function NucleusField() {
       else if (p.x > w + 20) p.x = -20;
       if (p.y < -20) p.y = h + 20;
       else if (p.y > h + 20) p.y = -20;
+    }
+
+    /** Soft wall: near an edge an atom is eased back in; at the edge it bounces. */
+    function contain(n: Atom) {
+      const right = Math.max(EDGE, w - EDGE);
+      const bottom = Math.max(EDGE, h - EDGE);
+      if (n.x < EDGE + EDGE_SOFT) n.vx += (EDGE + EDGE_SOFT - n.x) * 0.002;
+      else if (n.x > right - EDGE_SOFT) n.vx -= (n.x - (right - EDGE_SOFT)) * 0.002;
+      if (n.y < EDGE + EDGE_SOFT) n.vy += (EDGE + EDGE_SOFT - n.y) * 0.002;
+      else if (n.y > bottom - EDGE_SOFT) n.vy -= (n.y - (bottom - EDGE_SOFT)) * 0.002;
+      if (n.x < EDGE) {
+        n.x = EDGE;
+        n.vx = Math.abs(n.vx) * 0.6;
+      } else if (n.x > right) {
+        n.x = right;
+        n.vx = -Math.abs(n.vx) * 0.6;
+      }
+      if (n.y < EDGE) {
+        n.y = EDGE;
+        n.vy = Math.abs(n.vy) * 0.6;
+      } else if (n.y > bottom) {
+        n.y = bottom;
+        n.vy = -Math.abs(n.vy) * 0.6;
+      }
     }
 
     function push(p: { x: number; y: number; vx: number; vy: number }, strength: number) {
@@ -211,6 +281,15 @@ export function NucleusField() {
       }
 
       for (const n of atoms) {
+        // The home point drifts and bounces inside the screen; the atom follows it loosely.
+        n.hx += n.hvx;
+        n.hy += n.hvy;
+        if (n.hx < EDGE + EDGE_SOFT || n.hx > w - EDGE - EDGE_SOFT) n.hvx = -n.hvx;
+        if (n.hy < EDGE + EDGE_SOFT || n.hy > h - EDGE - EDGE_SOFT) n.hvy = -n.hvy;
+        n.hx = Math.min(Math.max(n.hx, EDGE), Math.max(EDGE, w - EDGE));
+        n.hy = Math.min(Math.max(n.hy, EDGE), Math.max(EDGE, h - EDGE));
+        n.vx += (n.hx - n.x) * HOME_PULL;
+        n.vy += (n.hy - n.y) * HOME_PULL;
         push(n, 1);
         n.vx = n.vx * 0.97 + (Math.random() - 0.5) * 0.02;
         n.vy = n.vy * 0.97 + (Math.random() - 0.5) * 0.02;
@@ -221,7 +300,7 @@ export function NucleusField() {
         }
         n.x += n.vx;
         n.y += n.vy;
-        wrap(n);
+        contain(n);
         for (const e of n.electrons) e.a += e.speed;
         // A rare flare: the nucleus brightens and fades over about a second.
         if (n.flare > 0) n.flare = Math.max(0, n.flare - 0.02);
@@ -324,7 +403,7 @@ export function NucleusField() {
       if (waves.length < 4) waves.push({ x: e.clientX, y: e.clientY, t: 0 });
     };
     const onResize = () => {
-      seed();
+      rescale();
       if (reduced) draw();
     };
     const onVisibility = () => {
