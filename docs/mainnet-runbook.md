@@ -7,13 +7,13 @@ the simulation are in [mainnet-plan.md](mainnet-plan.md); the testnet run of the
 
 ## Before the day
 
-| #   | Item                                                                      | Check                                |
-| --- | ------------------------------------------------------------------------- | ------------------------------------ |
-| 1   | `networkGate` opens 8453 at 2026-11-01T00:00:00Z (done 2026-10-05, tests) | run on or after 2026-11-01 00:00 UTC |
-| 2   | Deployer has never sent a transaction and has no code                     | `cast nonce` = 0, `cast code` = `0x` |
-| 3   | Deployer funded with at least 0.001 ETH on Base                           | `cast balance`                       |
-| 4   | Whitelist and launchpad buyers collected as `address,amount` (whole ARL)  | CSV ready                            |
-| 5   | Signer config `contracts/deploy/deployments/8453-signers.env` unchanged   | SHA-256 in mainnet-plan.md           |
+| #   | Item                                                                                                                          | Check                                |
+| --- | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| 1   | `networkGate` opens 8453 at 2026-11-01T00:00:00Z (done 2026-10-05, tests)                                                     | run on or after 2026-11-01 00:00 UTC |
+| 2   | Deployer has never sent a transaction and has no code                                                                         | `cast nonce` = 0, `cast code` = `0x` |
+| 3   | Deployer `0x5a7F207B3764113c68c50219e31D2a7c22132F52` funded with at least 0.001 ETH on Base; it sends nothing before the run | `cast balance`                       |
+| 4   | Whitelist and launchpad buyers collected as `address,amount` (whole ARL)                                                      | CSV ready                            |
+| 5   | Signer config `contracts/deploy/deployments/8453-signers.env` unchanged                                                       | SHA-256 in mainnet-plan.md           |
 
 ## Steps
 
@@ -35,6 +35,8 @@ the simulation are in [mainnet-plan.md](mainnet-plan.md); the testnet run of the
    - Check that no ARL/USDC, ARL/USDT, ARL/WETH or ARL/cbBTC 1% pool exists yet (`getPool` on the Uniswap v3 factory
      `0x33128a8fC17869897dcE68Ed026d694621f6FDfD` returns zero). If one exists, its price must be
      at or below 0.20 USD; otherwise the batch reverts and nothing is deposited (fork-tested).
+   - Pool size (owner decision 2026-10-06): 1,000,000 ARL in total, split USDC 400,000, USDT
+     200,000, WETH 300,000, cbBTC 100,000 (as in the fork-tested fixture).
    - Write `pools.json` (example: `contracts/test-fork/fixtures/pools.json`) with the ARL amount
      per pool and the ETH and BTC prices in USD at that moment, then
      `node packages/deploy/src/pool-cli.ts pools.json pool.json`
