@@ -11,7 +11,7 @@ export const SITE = {
   tagline: "The utility token for AI and compute services, live on Base Sepolia.",
   repository: "https://gitlab.com/armanalabs-group/arlcoin",
   /** Public contact address of the team. */
-  email: "armanalabsai@gmail.com",
+  email: "team@arlcoin.io",
   /** Official social accounts. */
   social: {
     x: "https://x.com/armanalabsai",

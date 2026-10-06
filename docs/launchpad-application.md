@@ -40,7 +40,7 @@ contract, so the readiness table below is the real starting point.
 | Chain           | Base (Ethereum L2). Testnet: Base Sepolia (84532). Mainnet: Base (8453), locked until release |
 | Website         | https://arlcoin.io                                                                            |
 | Source code     | https://gitlab.com/armanalabs-group/arlcoin (Apache-2.0)                                      |
-| Contact         | armanalabsai@gmail.com                                                                        |
+| Contact         | team@arlcoin.io                                                                               |
 | Founder         | Alaz Daghan Gokturk, Founder and CEO                                                          |
 | Logo            | `assets/brand/png/arl-token-icon-200.png` (200 × 200), SVG `assets/brand/arl-token-icon.svg`  |
 

@@ -36,7 +36,7 @@ Bounty allocation never exceed its 400,000 ARL.
   deployed on Base Sepolia during the test period and on Base Mainnet afterwards.
 - Out of scope: third-party code (OpenZeppelin, Safe, forge-std; report those upstream), the
   website, the dApp front end, social engineering, and denial of service against RPC providers.
-- Report privately to armanalabsai@gmail.com (see `SECURITY.md`); do not disclose publicly before a fix is deployed or 90 days have passed.
+- Report privately to team@arlcoin.io (see `SECURITY.md`); do not disclose publicly before a fix is deployed or 90 days have passed.
 - Testing on Base Mainnet must not touch other users' funds. Use a local fork.
 - The first valid report of an issue is rewarded; duplicates are not.
 - Reporters must not be on a sanctions list, and must be able to receive ARL on Base.

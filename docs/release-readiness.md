@@ -41,7 +41,7 @@ Form at `runtimeverification.com/contact`, step 1 (steps 2 "Scope" and 3 "Contac
 | How soon                     | Planning ahead 1-3 months                                                  |
 | Project description          | See text below                                                             |
 | Scope (step 2)               | 6 contracts, 368 nSLOC (`docs/audit-scope.md`); 4 deployed on Base Sepolia |
-| Contact (step 3)             | armanalabsai@gmail.com                                                     |
+| Contact (step 3)             | team@arlcoin.io                                                            |
 
 Description / email text:
 
@@ -78,7 +78,7 @@ Likely request content (to confirm when the site loads):
 | Documentation | `docs/audit-scope.md`, `docs/token-design.md`, `docs/audit-evidence.md`                                                      |
 | Timeline      | Before 2026-10-25, for a 2026-11-01 TGE target                                                                               |
 | Budget        | Owner decision; paid engagement                                                                                              |
-| Contact       | armanalabsai@gmail.com                                                                                                       |
+| Contact       | team@arlcoin.io                                                                                                              |
 
 ## 3. Remaining items by type
 
@@ -91,7 +91,7 @@ Likely request content (to confirm when the site loads):
 | Public source repository (16)               | TECHNICAL BLOCKER    | Restore GitHub (ticket 4818868) or publish to another owned host                                             |
 | Liquidity plan (13)                         | ADMIN/LEGAL          | Pool size, pair, venue, LP custody                                                                           |
 | Sale parameters (14)                        | ADMIN/LEGAL          | Tokens offered, raise, currency, buyer unlock                                                                |
-| Security contact (18)                       | DONE                 | `armanalabsai@gmail.com` (owner decision 2026-10-05)                                                         |
+| Security contact (18)                       | DONE                 | `team@arlcoin.io` (owner decision 2026-10-05)                                                                |
 | Legal opinion, KYC (19)                     | ADMIN/LEGAL          | Counsel and provider, if the launchpad requires them                                                         |
 | Independent audit (3)                       | ADMIN/LEGAL          | Decide: paid audit, or disclose "not audited"                                                                |
 | Social channels (20)                        | OPTIONAL             | Required by most launchpads in practice                                                                      |
@@ -169,7 +169,7 @@ public one is needed for launchpads.
 | No private keys, seeds or API keys in tracked files     | PASS: pattern scan of every tracked file found none                                                                            |
 | Signer configuration not committed                      | PASS: `contracts/deploy/deployments/` and `deploy/plans/` are git-ignored                                                      |
 | Web3Forms access key in `apps/web/src/content/forms.ts` | Accepted: a Web3Forms access key is a public, client-side key by design; it only lets forms post to the team inbox             |
-| Contact email in the site and docs                      | `armanalabsai@gmail.com` is public by intent (contact form)                                                                    |
+| Contact email in the site and docs                      | `team@arlcoin.io` is public by intent (contact form)                                                                           |
 | Author emails in Git history                            | 4 author names, all with `gokturkalazdaghan@gmail.com`. Publishing shows this address. History is not rewritten; owner decides |
 | Licences                                                | PASS: `LICENSE` (Apache-2.0), `NOTICE`, `THIRD_PARTY_LICENSES.md`                                                              |
 | Security policy and contact                             | `SECURITY.md` present; the reporting link must be updated to the new host                                                      |

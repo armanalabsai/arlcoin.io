@@ -11,7 +11,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 STAGE="$(mktemp -d)"
-trap 'rm -rf "$STAGE"' EXIT
+trap 'cd "$ROOT"; rm -rf "$STAGE" 2>/dev/null || true' EXIT
 
 cd "$ROOT/apps/web"
 rm -rf out .next

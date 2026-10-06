@@ -54,7 +54,7 @@ Club, Virtuals), which deploy their own token instead of selling ARL.
 > Safes. Deployed and source-verified on Base Sepolia (token
 > 0x244312b619127B6458154F3467eFD7c87CD28500); 251 contract tests, fuzzing, invariants, Slither
 > with no findings and reproducible bytecode. No independent audit has been performed. TGE
-> target 2026-11-01 at 0.20 USD. Contact: armanalabsai@gmail.com.
+> target 2026-11-01 at 0.20 USD. Contact: team@arlcoin.io.
 
 Shared on submission: the text above, the website, the Base Sepolia addresses, the docs listed in
 [launchpad-application.md](launchpad-application.md), the owner's name, email and Telegram ID.

@@ -50,7 +50,7 @@ export const FAQ: readonly FaqEntry[] = [
   {
     question: "How do I contact the team?",
     answer:
-      "Use the contact form or write to armanalabsai@gmail.com. Report security vulnerabilities privately by email with “Security” in the subject.",
+      "Use the contact form or write to team@arlcoin.io. Report security vulnerabilities privately by email with “Security” in the subject.",
   },
 ];
 

@@ -176,7 +176,7 @@ CI runs all of these in the `web` job, plus `npm audit --audit-level=high`.
   and delivers to `armanalabsai@gmail.com`. It is public by design: it can only send to the inbox
   it was created for. With no key the
   forms send nothing: the whitelist shows a "not open yet" notice and the contact page shows the
-  team address, `armanalabsai@gmail.com` (`SITE.email` in `src/content/site.ts`).
+  team address, `team@arlcoin.io` (`SITE.email` in `src/content/site.ts`).
 - The whitelist form accepts an EVM address (EIP-55 checksum enforced for mixed case, using
   `@noble/hashes`), an email and two confirmations. It says plainly that registering does not
   guarantee an allocation and that no payment, key or seed phrase is ever requested.
