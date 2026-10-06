@@ -1,0 +1,11 @@
+{
+  "advisories": [
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "braces",
+      "scope": ["web", "dapp"],
+      "reason": "Stack exhaustion on deeply nested brace patterns. Reached only through eslint-config-next -> @next/eslint-plugin-next -> fast-glob -> micromatch at lint time, on glob patterns written in this repository; nothing untrusted is expanded and it is not in the built sites. No patched braces release exists (3.0.3 is the latest).",
+      "expires": "2026-11-02"
+    }
+  ]
+}

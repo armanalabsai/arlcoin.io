@@ -1,0 +1,94 @@
+name: Pages
+
+# Publishes the website (apps/web) as a static site to GitHub Pages, with a static copy of the app
+# (apps/dapp) under /app so a prepared Base Sepolia deployment can be signed from a phone wallet: at https://arlcoin.io when
+# the custom domain is set in the repository's Pages settings, otherwise at the project URL
+# https://gokturkalazdaghan-dot.github.io/ARLCOIN/ (configure-pages reports the sub-path).
+# Runs only on main; pull requests are built and tested by the CI workflow.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/web/**"
+      - "apps/dapp/**"
+      - "packages/tokenomics/**"
+      - "packages/zk/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+# Actions are pinned to full commit SHAs; the tag is noted for review.
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pages: read
+    defaults:
+      run:
+        working-directory: apps/web
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      ARL_STATIC_EXPORT: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: |
+            apps/web/package-lock.json
+            package-lock.json
+            apps/dapp/package-lock.json
+
+      - id: pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+        env:
+          ARL_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+
+      # The app: @arl/zk (packages/zk) is linked into it and its dependencies install at the root.
+      - run: npm ci
+        working-directory: .
+      - run: npm ci
+        working-directory: apps/dapp
+      - run: npm run build
+        working-directory: apps/dapp
+        env:
+          ARL_BASE_PATH: ${{ steps.pages.outputs.base_path }}/app
+      - run: cp -r ../dapp/out out/app
+
+      # No Jekyll processing (it would drop the _next directory). The custom domain comes from
+      # the Pages settings; a CNAME file is ignored for workflow deployments.
+      - run: touch out/.nojekyll
+
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: apps/web/out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

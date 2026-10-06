@@ -1,0 +1,52 @@
+{
+  "schema": "arl-distribution/1",
+  "allocation": "publicLaunch",
+  "merkleRoot": "0xe09632957dafecfa3599d3371379a0707e2c98b437e316573a644b94ebdb815f",
+  "leafEncoding": ["uint256", "address", "uint256"],
+  "total": "401485567890123456789015",
+  "count": 5,
+  "claims": {
+    "0xD18d96980742bc5fab940fC9078fa882cf85ECAd": {
+      "index": 0,
+      "amount": "1000000000000000000",
+      "proof": [
+        "0x69d99ecd1cfef24193ff11181cc150af3bd08e0b927db88db367160f2b2411bf",
+        "0x1092f9bef0d3fba165eb070382ff871ebd2619bd79b1db15b1fcda4b292bdf32"
+      ]
+    },
+    "0xFedb036a961Ad2d2224a293E4362665480963578": {
+      "index": 1,
+      "amount": "250000000000000000000",
+      "proof": [
+        "0x256747ff2b6314319b1b808492da1b2aa79f6c8188420bfb26f3ebdf4485abd1",
+        "0x76ce80325201d7037a82f486265cd0d1553341a64be999f189a4818d3e66258e",
+        "0xbf18d4bad78fa38854f2ad5b9667739d24794c718eadedbb2f1343bbb46f0ee3"
+      ]
+    },
+    "0x561eF1380e633b8D7c7f5c6E651D572975143b73": {
+      "index": 2,
+      "amount": "3",
+      "proof": [
+        "0xb004dfdc008da942ad19c0f236113adcd87c0a122070a1887af486e61e4291d1",
+        "0xbf18d4bad78fa38854f2ad5b9667739d24794c718eadedbb2f1343bbb46f0ee3"
+      ]
+    },
+    "0x2ab7AF468Fc627FbC906409324Be8F40548b0149": {
+      "index": 3,
+      "amount": "1234567890123456789012",
+      "proof": [
+        "0x2568e80af0a55e535622c96ebd5401808cd4e0e16fb873f8609b51aab5c4105c",
+        "0x76ce80325201d7037a82f486265cd0d1553341a64be999f189a4818d3e66258e",
+        "0xbf18d4bad78fa38854f2ad5b9667739d24794c718eadedbb2f1343bbb46f0ee3"
+      ]
+    },
+    "0x7eEAE4c35335B96FCfF53F98c60668B7e7Fb38CC": {
+      "index": 4,
+      "amount": "400000000000000000000000",
+      "proof": [
+        "0x6a4ac55a2cdfdd53a261a34bed53b33bdbb63f8fc44525f33dec7e336c4c2d8b",
+        "0x1092f9bef0d3fba165eb070382ff871ebd2619bd79b1db15b1fcda4b292bdf32"
+      ]
+    }
+  }
+}

@@ -1,0 +1,259 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Actions are pinned to full commit SHAs; the tag is noted for review.
+jobs:
+  typescript:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm test
+      - run: node scripts/audit.mjs
+
+  contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+
+      - uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09 # v1.9.1
+        with:
+          version: v1.8.3
+
+      - name: Verify pinned dependencies
+        run: |
+          test "$(git -C contracts/lib/openzeppelin-contracts rev-parse HEAD)" = 5fd1781b1454fd1ef8e722282f86f9293cacf256
+          test "$(git -C contracts/lib/forge-std rev-parse HEAD)" = bf647bd6046f2f7da30d0c2bf435e5c76a780c1b
+          test "$(git -C contracts/lib/solidity-datetime rev-parse HEAD)" = 294fc244973cc5f9ec374713affde12c1403927c
+          forge --version | grep -q cae51ad458f6abb64852b7709eb784352429825d
+
+      - run: forge fmt --check
+        working-directory: contracts
+      # Size limits apply to deployable contracts; tests and scripts are never deployed.
+      - run: forge build --sizes --skip test --skip script
+        working-directory: contracts
+      - run: forge test -vv
+        working-directory: contracts
+      # Gas snapshot of the unit tests (fuzz and invariant runs excluded: their gas varies by
+      # input). A change in gas must be reviewed with the regenerated contracts/.gas-snapshot.
+      - run: forge snapshot --no-match-test "testFuzz|invariant" --no-match-path "test/symbolic/*" --check
+        working-directory: contracts
+      - run: node scripts/check-token-abi.mjs
+
+  slither:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+
+      - uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09 # v1.9.1
+        with:
+          version: v1.8.3
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - run: pip install slither-analyzer==0.11.6
+
+      # --foundry-compile-all includes script/ (deployment tooling), which is skipped by default.
+      - name: Slither (ARL code and deployment scripts; fails on low severity or higher)
+        run: slither . --foundry-compile-all --filter-paths "lib/|test/" --exclude-dependencies --fail-low
+        working-directory: contracts
+
+  symbolic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+
+      - uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09 # v1.9.1
+        with:
+          version: v1.8.3
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - run: pip install halmos==0.3.3
+
+      - name: Halmos symbolic checks
+        run: halmos --match-contract ARLSymbolic --solver-timeout-assertion 120000
+        working-directory: contracts
+        env:
+          FOUNDRY_DYNAMIC_TEST_LINKING: "false"
+
+  rehearsal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09 # v1.9.1
+        with:
+          version: v1.8.3
+
+      - run: npm ci
+
+      # Reproducible build: a clean build must match the committed bytecode hashes.
+      - run: forge build --skip test --skip script
+        working-directory: contracts
+      - run: npm run check:bytecode
+
+      # Local Anvil chain only: deploys, verifies and runs the negative cases.
+      - run: npm run rehearse:local
+
+  zk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+
+      - uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09 # v1.9.1
+        with:
+          version: v1.8.3
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      # Installer scripts pinned by commit and checked by hash; tool versions pinned.
+      - name: Install nargo 1.0.0-rc.3 and bb 5.2.0
+        run: |
+          curl -sSfL -o noirup.sh https://raw.githubusercontent.com/noir-lang/noirup/bedac8fbe6a059177c35e565f9f76db54a795976/install
+          echo "89dde59d8ef9e7794d694abca097fa139fa7395b947cb7b0b7a8d1839c737d8b  noirup.sh" | sha256sum -c
+          bash noirup.sh
+          "$HOME/.nargo/bin/noirup" -v 1.0.0-rc.3
+          curl -sSfL -o bbup.sh https://raw.githubusercontent.com/AztecProtocol/aztec-packages/f7638fbe5a14c5a5711e9fad78302b121bece294/barretenberg/bbup/install
+          echo "3e4b7ce2d18e7680b897d23de0328ba6365616b2c7d592a5ebb74a368f364efd  bbup.sh" | sha256sum -c
+          bash bbup.sh
+          "$HOME/.bb/bbup" -v 5.2.0
+          echo "$HOME/.nargo/bin" >> "$GITHUB_PATH"
+          echo "$HOME/.bb" >> "$GITHUB_PATH"
+
+      # Circuit tests, and the committed circuit and verifier rebuild byte for byte.
+      - run: bash zk/check.sh
+
+      # The verifier and the contract, with real proofs.
+      - run: forge build --sizes --skip test
+        working-directory: contracts
+        env:
+          FOUNDRY_PROFILE: zk
+      - run: forge test
+        working-directory: contracts
+        env:
+          FOUNDRY_PROFILE: zk
+
+  dapp:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: apps/dapp
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            apps/dapp/package-lock.json
+
+      # Anvil and forge: the end-to-end tests deploy the local fixture on a fresh Anvil chain.
+      - uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09 # v1.9.1
+        with:
+          version: v1.8.3
+
+      # @arl/zk (packages/zk) is linked into the app; its dependencies install at the root.
+      - run: npm ci
+        working-directory: .
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      # Builds against the local chain, deploys the fixture, checks the committed contract
+      # addresses and drives the app in Chromium. Local Anvil only.
+      - run: npm run test:e2e
+      - run: node ../../scripts/audit.mjs
+
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: apps/web
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - run: node ../../scripts/audit.mjs

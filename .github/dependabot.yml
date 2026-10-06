@@ -1,0 +1,34 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    ignore:
+      # typescript-eslint supports TypeScript < 6.1 only; newer versions stop linting.
+      - dependency-name: typescript
+        versions: [">=6.1.0"]
+      # Runtime is Node 22 (.nvmrc); types must describe the Node version that runs the code.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: npm
+    directory: /apps/web
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    ignore:
+      - dependency-name: typescript
+        versions: [">=6.1.0"]
+      # eslint-config-next bundles plugins (eslint-plugin-react, -import, -jsx-a11y) that
+      # support ESLint 9 at most; ESLint 10 crashes the website lint.
+      - dependency-name: eslint
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

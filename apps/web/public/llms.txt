@@ -1,0 +1,39 @@
+# ARL
+
+> ARL is the native utility token planned for decentralized AI and compute services. It is not
+> yet deployed: no ARL contract exists on any network, nothing is for sale, and nothing on
+> arlcoin.io is an offer, investment advice or a promise of listing.
+
+Key facts:
+
+- Maximum supply: 21,000,000 ARL, minted once at deployment into 11 allocations. The token
+  contract has no owner, no mint function after deployment, no pause and no upgrade path.
+- Standard: ERC-20 with EIP-2612 permit, 18 decimals, for EVM-compatible chains. The
+  deployment chain has not been selected.
+- Planned uses: AI services paid per use in ARL, GPU and CPU compute paid per second,
+  zero-knowledge anonymous signals, and staking funded from existing allocations, never from
+  new issuance.
+- Security: internal review complete (unit, fuzz and invariant tests, static analysis,
+  symbolic checks). No external audit has been performed. Treasury actions pass a Safe
+  multisig and a 48-hour timelock.
+- Roadmap: foundation and token contracts complete, security review in progress, testnet and
+  mainnet not started. No dates are set.
+- ARL never asks for a private key, a seed phrase or a payment.
+
+## Pages
+
+- [Home](https://arlcoin.io/): overview and whitelist registration
+- [Interactive Core](https://arlcoin.io/core): every layer of the project, card by card
+- [FAQ](https://arlcoin.io/faq): short answers to common questions
+- [Documents](https://arlcoin.io/docs): architecture, tokenomics, token design, security analysis
+- [Whitelist](https://arlcoin.io/whitelist): free registration for launch updates
+- [Contact](https://arlcoin.io/contact)
+- [Privacy](https://arlcoin.io/privacy) and [Terms](https://arlcoin.io/terms)
+
+## Documents
+
+- [Tokenomics](https://arlcoin.io/docs/tokenomics)
+- [Token, vesting and treasury](https://arlcoin.io/docs/token-design)
+- [Architecture](https://arlcoin.io/docs/architecture)
+- [Security analysis](https://arlcoin.io/docs/security-analysis)
+- [Security policy](https://arlcoin.io/docs/security)

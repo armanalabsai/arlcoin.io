@@ -1,0 +1,40 @@
+{
+  "name": "arl-protocol",
+  "private": true,
+  "description": "ARL Protocol monorepo",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "typecheck": "tsc -p packages/tokenomics && tsc -p packages/deploy && tsc -p packages/monetary && tsc -p packages/payments && tsc -p packages/provider && tsc -p packages/zk",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm test --workspaces --if-present",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm test",
+    "check:contracts": "cd contracts && forge fmt --check && forge build --sizes --skip test --skip script && forge test && cd .. && node scripts/check-token-abi.mjs",
+    "coverage:contracts": "cd contracts && forge coverage --report summary --no-match-coverage \"test|lib|script\" && FOUNDRY_PROFILE=zk forge coverage --report summary --no-match-coverage \"test|lib|zk/\"",
+    "gas:snapshot": "cd contracts && forge snapshot --no-match-test \"testFuzz|invariant\" --no-match-path \"test/symbolic/*\"",
+    "check:bytecode": "node packages/deploy/src/bytecode-cli.ts check contracts contracts/deploy/bytecode.json",
+    "monitor": "node packages/deploy/src/monitor-cli.ts",
+    "verify:explorer": "node packages/deploy/src/explorer-cli.ts",
+    "rehearse:local": "bash scripts/rehearse-local.sh",
+    "rehearse:base-sepolia-fork": "bash scripts/rehearse-base-sepolia-fork.sh"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@safe-global/safe-smart-account": "1.5.0",
+    "@types/node": "22.20.4",
+    "eslint": "10.11.0",
+    "prettier": "3.9.9",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.70.1"
+  },
+  "license": "Apache-2.0",
+  "overrides": {
+    "uuid": "11.1.1"
+  }
+}

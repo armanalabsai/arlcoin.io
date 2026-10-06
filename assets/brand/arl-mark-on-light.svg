@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="ARL"><title>ARL</title>
+  <defs>
+    <linearGradient id="mlight-orbit" x1="128" y1="28" x2="214" y2="178" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E9A13A"/><stop offset="1" stop-color="#B06E16"/>
+    </linearGradient>
+    <radialGradient id="mlight-apex" cx="0.35" cy="0.35" r="0.75">
+      <stop offset="0" stop-color="#E9A13A"/><stop offset="1" stop-color="#B06E16"/>
+    </radialGradient>
+  </defs>
+  <circle cx="128" cy="128" r="100" fill="none" stroke="rgba(10,11,13,0.14)" stroke-width="9"/>
+  <path d="M128 28A100 100 0 0 1 214.6 178" fill="none" stroke="url(#mlight-orbit)" stroke-width="9" stroke-linecap="round"/>
+  <path d="M80 174L128 64L176 174" fill="none" stroke="#0A0B0D" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M95.7 138H160.3" stroke="rgba(10,11,13,0.62)" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="80" cy="174" r="11" fill="#0A0B0D"/>
+  <circle cx="176" cy="174" r="11" fill="#0A0B0D"/>
+  <circle cx="128" cy="64" r="22" fill="#D98E22" opacity="0.18"/>
+  <circle cx="128" cy="64" r="14" fill="url(#mlight-apex)"/>
+</svg>

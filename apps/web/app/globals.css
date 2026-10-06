@@ -1,0 +1,976 @@
+@import "tailwindcss";
+
+/*
+ * ARL colour
+ *
+ * Night blue behind everything and ice blue as the one accent: buttons, links, figures, the
+ * Core and focus. Headings are white, running text a cool off-white, notes a blue-grey. Every
+ * text tone keeps at least 4.5:1 contrast on the page colour.
+ */
+@theme {
+  --color-page: #050b1e;
+  --color-surface-1: #0a1430;
+  --color-surface-2: #0d1a38;
+  --color-surface-3: #13224a;
+  --color-line: rgb(255 255 255 / 0.1);
+  --color-line-strong: rgb(255 255 255 / 0.18);
+  --color-heading: #ffffff;
+  --color-fg: #f5f7fa;
+  --color-fg-muted: #a7b3c7;
+  --color-fg-subtle: #8290a8;
+
+  /* Ice blue: the single accent. Text on an ice-blue fill is night blue. */
+  --color-accent: #9fd8ff;
+  --color-accent-strong: #c8ebff;
+  --color-accent-edge: rgb(159 216 255 / 0.5);
+  --color-accent-soft: rgb(159 216 255 / 0.14);
+  --color-accent-faint: rgb(159 216 255 / 0.06);
+
+  /* Inter for text and headings, JetBrains Mono for figures, badges and addresses (SIL Open
+     Font License, self-hosted from @fontsource). */
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, "SFMono-Regular", monospace;
+
+  --radius-control: 8px;
+  --radius-card: 12px;
+  --radius-surface: 16px;
+
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    background: var(--color-page);
+    color: var(--color-fg);
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    min-height: 100dvh;
+    /* Transparent so the nucleus field behind the content shows; html paints the page color. */
+    background: transparent;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3 {
+    color: var(--color-heading);
+    letter-spacing: -0.03em;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background: var(--color-accent-soft);
+  }
+}
+
+@layer components {
+  /*
+   * Liquid glass. Surfaces are translucent over the nucleus field: they blur and saturate what
+   * is behind, catch light on their top edge and carry a faint sheen. The bar is the lightest,
+   * the detail surface the heaviest. Cards do not move on hover; the selected card gets an
+   * amber edge.
+   */
+  .material-bar {
+    background: rgb(8 16 40 / 0.55);
+    -webkit-backdrop-filter: blur(20px) saturate(1.6);
+    backdrop-filter: blur(20px) saturate(1.6);
+    box-shadow: inset 0 -1px 0 rgb(255 255 255 / 0.05);
+  }
+
+  .material-surface {
+    background: rgb(14 24 54 / 0.72);
+    -webkit-backdrop-filter: blur(36px) saturate(1.7);
+    backdrop-filter: blur(36px) saturate(1.7);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.14),
+      0 30px 70px rgb(0 0 0 / 0.55);
+  }
+
+  .material-card {
+    border-color: rgb(255 255 255 / 0.12);
+    background:
+      radial-gradient(120% 70% at 0% 0%, rgb(255 255 255 / 0.1), transparent 55%),
+      rgb(12 22 50 / 0.45);
+    -webkit-backdrop-filter: blur(14px) saturate(1.6);
+    backdrop-filter: blur(14px) saturate(1.6);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.2),
+      inset 0 -1px 0 rgb(255 255 255 / 0.04);
+  }
+
+  .material-card[data-weight="primary"] {
+    background:
+      radial-gradient(120% 70% at 0% 0%, rgb(255 255 255 / 0.13), transparent 55%),
+      rgb(16 28 62 / 0.52);
+    border-color: rgb(255 255 255 / 0.16);
+  }
+
+  .material-card[data-selected="true"] {
+    border-color: var(--color-accent-edge);
+  }
+
+  .core-surface {
+    background:
+      radial-gradient(120% 80% at 30% 0%, rgb(255 255 255 / 0.12), transparent 55%),
+      rgb(14 26 60 / 0.5);
+    -webkit-backdrop-filter: blur(18px) saturate(1.6);
+    backdrop-filter: blur(18px) saturate(1.6);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.22),
+      inset 0 0 0 1px rgb(159 216 255 / 0.16);
+  }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .material-bar,
+    .material-card,
+    .core-surface {
+      background: rgb(12 20 46 / 0.96);
+    }
+    .material-surface {
+      background: rgb(16 26 58 / 0.98);
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .material-bar,
+    .material-card,
+    .material-surface,
+    .core-surface {
+      background: #0c1634;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+
+  /*
+   * Orbit layout. Each item sits at the stage centre and is translated onto
+   * an ellipse by CSS alone (viewport units, no container queries): --cos/--sin come from its index, --t (0..1) is
+   * animated by Motion to expand from / collapse into the Core. No layout is
+   * measured in JavaScript.
+   */
+  .orbit-stage {
+    position: relative;
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    width: 100%;
+    padding: 24px 16px 64px;
+  }
+
+  .orbit-layer {
+    width: 100%;
+    max-width: 640px;
+  }
+
+  .orbit-list {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    width: 100%;
+  }
+
+  @media (min-width: 640px) {
+    .orbit-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .orbit-item {
+    --t: 1;
+    transform: translateY(calc((1 - var(--t)) * 12px));
+  }
+
+  .orbit-ring {
+    display: none;
+  }
+
+  /* Screens under 900px tall: tighter caption gap (the Core also shrinks). */
+  @media (max-height: 899px) {
+    .orbit-stage .orbit-caption {
+      top: calc(100% + 18px) !important;
+    }
+  }
+
+  /* Orbit on wide screens. Layers with 11 or more cards need more room and
+     switch to the orbit only from 1360 × 820. */
+  @media (min-width: 1100px) and (min-height: 760px) {
+    .orbit-stage:not([data-dense]) {
+      /* Header is 56px tall; the stage fills the rest of the first screen. */
+      --stage-h: max(700px, calc(100dvh - 57px));
+      --rx: min(calc(50vw - 150px), 620px);
+      --ry: calc(var(--stage-h) / 2 - 84px);
+      flex: none;
+      height: var(--stage-h);
+      padding: 0;
+    }
+    .orbit-stage:not([data-dense]) .orbit-layer {
+      position: absolute;
+      inset: 0;
+      max-width: none;
+      pointer-events: none;
+    }
+    .orbit-stage:not([data-dense]) .orbit-list {
+      position: absolute;
+      inset: 0;
+      display: block;
+    }
+    .orbit-stage:not([data-dense]) .orbit-item {
+      pointer-events: auto;
+    }
+    .orbit-stage:not([data-dense]) .orbit-ring {
+      display: block;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: calc(var(--rx) * 2);
+      height: calc(var(--ry) * 2);
+      translate: -50% -50%;
+      border: 1px solid var(--color-line);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .orbit-stage:not([data-dense]) .orbit-item {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(
+          calc(-50% + var(--cos) * var(--rx) * var(--t)),
+          calc(-50% + var(--sin) * var(--ry) * var(--t))
+        )
+        scale(calc(0.72 + 0.28 * var(--t)));
+    }
+    .orbit-stage:not([data-dense]) .orbit-core {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      translate: -50% -50%;
+    }
+    .orbit-stage:not([data-dense]) .orbit-caption {
+      position: absolute;
+      top: calc(100% + 28px);
+      left: 50%;
+      width: 300px;
+      translate: -50% 0;
+    }
+    .orbit-stage:not([data-dense]) .material-card[data-weight="primary"] {
+      width: 248px;
+      min-height: 132px;
+    }
+
+    .orbit-stage:not([data-dense]) .material-card[data-weight="secondary"] {
+      width: 212px;
+      min-height: 116px;
+    }
+
+    .orbit-stage:not([data-dense]) .material-card[data-weight="tertiary"] {
+      width: 188px;
+      min-height: 100px;
+    }
+  }
+
+  @media (min-width: 1360px) and (min-height: 820px) {
+    .orbit-stage[data-dense] {
+      /* Header is 56px tall; the stage fills the rest of the first screen. */
+      --stage-h: max(700px, calc(100dvh - 57px));
+      --rx: min(calc(50vw - 150px), 620px);
+      --ry: calc(var(--stage-h) / 2 - 84px);
+      flex: none;
+      height: var(--stage-h);
+      padding: 0;
+    }
+    .orbit-stage[data-dense] .orbit-layer {
+      position: absolute;
+      inset: 0;
+      max-width: none;
+      pointer-events: none;
+    }
+    .orbit-stage[data-dense] .orbit-list {
+      position: absolute;
+      inset: 0;
+      display: block;
+    }
+    .orbit-stage[data-dense] .orbit-item {
+      pointer-events: auto;
+    }
+    .orbit-stage[data-dense] .orbit-ring {
+      display: block;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: calc(var(--rx) * 2);
+      height: calc(var(--ry) * 2);
+      translate: -50% -50%;
+      border: 1px solid var(--color-line);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .orbit-stage[data-dense] .orbit-item {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(
+          calc(-50% + var(--cos) * var(--rx) * var(--t)),
+          calc(-50% + var(--sin) * var(--ry) * var(--t))
+        )
+        scale(calc(0.72 + 0.28 * var(--t)));
+    }
+    .orbit-stage[data-dense] .orbit-core {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      translate: -50% -50%;
+    }
+    .orbit-stage[data-dense] .orbit-caption {
+      position: absolute;
+      top: calc(100% + 28px);
+      left: 50%;
+      width: 300px;
+      translate: -50% 0;
+    }
+    .orbit-stage[data-dense] .material-card[data-weight="primary"] {
+      width: 248px;
+      min-height: 132px;
+    }
+
+    .orbit-stage[data-dense] .material-card[data-weight="secondary"] {
+      width: 212px;
+      min-height: 116px;
+    }
+
+    .orbit-stage[data-dense] .material-card[data-weight="tertiary"] {
+      width: 188px;
+      min-height: 100px;
+    }
+  }
+
+  .sr-only-focusable:not(:focus) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Unlayered so it overrides utility classes: in orbit mode the Overview
+   button is redundant with the wordmark, the Core cycle and Escape. */
+@media (min-width: 1100px) and (min-height: 760px) {
+  .orbit-stage:not([data-dense]) .orbit-hide {
+    display: none;
+  }
+}
+
+@media (min-width: 1360px) and (min-height: 820px) {
+  .orbit-stage[data-dense] .orbit-hide {
+    display: none;
+  }
+}
+
+/* Partnership band: black with a green dot grid, partners scrolling right to left. */
+.infra-strip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  overflow: hidden;
+  border-top: 1px solid rgb(62 207 142 / 0.25);
+  background-color: #000;
+  background-image: radial-gradient(rgb(62 207 142 / 0.35) 1px, transparent 1.2px);
+  background-size: 12px 12px;
+  padding: 14px 16px;
+}
+.infra-label {
+  flex-shrink: 0;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(62 207 142);
+}
+.infra-viewport {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
+.infra-track {
+  display: flex;
+  width: max-content;
+  animation: infra-scroll 40s linear infinite;
+}
+.infra-strip:hover .infra-track,
+.infra-strip:focus-within .infra-track {
+  animation-play-state: paused;
+}
+.infra-run {
+  display: flex;
+  flex-shrink: 0;
+}
+.infra-item {
+  padding: 0 28px;
+}
+.infra-link {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  color: var(--color-fg);
+}
+.infra-link:hover .infra-name {
+  color: rgb(62 207 142);
+}
+.infra-name {
+  font-size: 15px;
+  font-weight: 600;
+}
+.infra-role {
+  font-size: 12px;
+  color: rgb(255 255 255 / 0.5);
+}
+@keyframes infra-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .infra-track {
+    animation: none;
+  }
+  .infra-run[aria-hidden="true"] {
+    display: none;
+  }
+}
+
+/* The ARL name on the Core and in the header: bold white. */
+.arl-neon {
+  color: #fff;
+  font-weight: 700;
+}
+
+/* Published documents. */
+.doc-prose {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--color-fg-muted);
+}
+.doc-prose > * + * {
+  margin-top: 16px;
+}
+.doc-prose h2 {
+  margin-top: 48px;
+  font-size: 24px;
+  line-height: 1.25;
+  font-weight: 700;
+}
+.doc-prose h3 {
+  margin-top: 32px;
+  font-size: 19px;
+  font-weight: 700;
+}
+.doc-prose h4 {
+  margin-top: 24px;
+  font-weight: 600;
+  color: var(--color-fg);
+}
+.doc-prose a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.doc-prose strong {
+  color: var(--color-fg);
+  font-weight: 600;
+}
+.doc-prose ul,
+.doc-prose ol {
+  padding-left: 24px;
+}
+.doc-prose ul {
+  list-style: disc;
+}
+.doc-prose ol {
+  list-style: decimal;
+}
+.doc-prose li + li {
+  margin-top: 8px;
+}
+.doc-prose code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  color: var(--color-fg);
+}
+.doc-prose pre,
+.doc-code {
+  overflow-x: auto;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: var(--color-surface-1);
+  padding: 16px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.doc-code code {
+  font-family: var(--font-mono);
+}
+.doc-prose table {
+  display: block;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.doc-prose th,
+.doc-prose td {
+  border: 1px solid var(--color-line);
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+.doc-prose th {
+  color: var(--color-fg);
+  font-weight: 600;
+}
+.doc-prose blockquote {
+  border-left: 2px solid var(--color-accent-edge);
+  padding-left: 16px;
+}
+.doc-prose hr {
+  border: 0;
+  border-top: 1px solid var(--color-line);
+}
+
+/* FAQ rows: the + turns into a − when open. */
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+.faq-mark {
+  transition: transform 200ms var(--ease-out-quint);
+}
+.faq-item[open] .faq-mark {
+  transform: rotate(45deg);
+}
+
+/* Landing page. */
+.landing-hero {
+  background: radial-gradient(60% 50% at 50% 18%, rgb(111 185 232 / 0.16), transparent 70%);
+}
+.landing-core {
+  position: relative;
+  background: radial-gradient(circle at 50% 35%, #13264f 0%, rgb(8 18 41 / 0.92) 70%);
+  border: 1px solid rgb(159 216 255 / 0.25);
+  transition: border-color 200ms;
+}
+.landing-core::before {
+  content: "";
+  position: absolute;
+  inset: 16px;
+  border-radius: 50%;
+  border: 1px solid rgb(255 255 255 / 0.08);
+}
+.landing-core::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: var(--color-accent);
+  border-right-color: var(--color-accent);
+  transform: rotate(-20deg);
+}
+.landing-core:hover {
+  border-color: var(--color-accent-edge);
+}
+.landing-road {
+  display: grid;
+  grid-template-columns: 1fr;
+  border-left: 1px solid var(--color-line);
+  margin-left: 4px;
+}
+.landing-road li {
+  position: relative;
+  padding: 0 0 24px 24px;
+}
+.landing-road li::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: -5px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--color-fg-subtle);
+}
+.landing-road li[data-status="Complete"]::before {
+  background: var(--color-accent);
+}
+.landing-road li[data-status="In progress"]::before {
+  background: var(--color-page);
+  border: 2px solid var(--color-accent);
+}
+@media (min-width: 768px) {
+  .landing-road {
+    grid-template-columns: repeat(6, 1fr);
+    border-left: 0;
+    border-top: 1px solid var(--color-line);
+    margin-left: 0;
+  }
+  .landing-road li {
+    padding: 24px 16px 0 0;
+  }
+  .landing-road li::before {
+    top: -5px;
+    left: 0;
+  }
+}
+.landing-final {
+  background: linear-gradient(180deg, transparent 0%, rgb(11 29 68 / 0.9) 100%);
+}
+
+/*
+ * Liquid glass. Surfaces float over the nucleus field: a translucent tint, a strong blur that
+ * saturates what is behind, a bright specular rim on the top edge, a softer one at the bottom,
+ * and a sheen that catches light from the top left. Larger surfaces read as thicker: deeper
+ * shadow. Text on glass stays high contrast.
+ */
+.glass {
+  position: relative;
+  isolation: isolate;
+  background:
+    linear-gradient(
+      180deg,
+      rgb(255 255 255 / 0.09),
+      rgb(255 255 255 / 0.02) 40%,
+      rgb(255 255 255 / 0.01)
+    ),
+    rgb(12 24 54 / 0.42);
+  -webkit-backdrop-filter: blur(28px) saturate(1.8);
+  backdrop-filter: blur(28px) saturate(1.8);
+  border: 1px solid rgb(255 255 255 / 0.14);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.28),
+    inset 0 -1px 0 rgb(255 255 255 / 0.06),
+    inset 0 0 24px rgb(159 216 255 / 0.04),
+    0 24px 60px -20px rgb(0 0 0 / 0.6);
+  transition:
+    border-color 240ms var(--ease-out-quint),
+    transform 400ms var(--ease-out-quint),
+    box-shadow 400ms var(--ease-out-quint);
+}
+.glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(120% 80% at 0% 0%, rgb(255 255 255 / 0.12), transparent 50%);
+}
+a.glass:hover,
+.glass[data-hover]:hover {
+  border-color: rgb(159 216 255 / 0.4);
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.34),
+    inset 0 -1px 0 rgb(255 255 255 / 0.08),
+    inset 0 0 32px rgb(159 216 255 / 0.07),
+    0 32px 70px -20px rgb(0 0 0 / 0.65);
+}
+a.glass:active {
+  transform: scale(0.985);
+  transition-duration: 100ms;
+}
+/* A glass pill for secondary actions; the primary action stays a solid ice-blue fill. */
+.glass-pill {
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  backdrop-filter: blur(20px) saturate(1.8);
+  background: rgb(255 255 255 / 0.08);
+  border: 1px solid rgb(255 255 255 / 0.16);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.25);
+  transition:
+    background-color 200ms,
+    transform 100ms;
+}
+.glass-pill:hover {
+  background: rgb(255 255 255 / 0.14);
+}
+/* Tinted glass for the primary action: ice blue you can see through, a bright rim on top, white
+   text. Every stop keeps white text at 4.5:1 or more over the night-blue page. */
+.glass-tint {
+  color: #fff;
+  text-shadow: 0 1px 2px rgb(4 17 43 / 0.45);
+  background: linear-gradient(
+    180deg,
+    rgb(150 205 245 / 0.58),
+    rgb(110 180 235 / 0.5) 50%,
+    rgb(80 150 215 / 0.6)
+  );
+  -webkit-backdrop-filter: blur(20px) saturate(1.9);
+  backdrop-filter: blur(20px) saturate(1.9);
+  border: 1px solid rgb(255 255 255 / 0.5);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.85),
+    inset 0 -1px 0 rgb(255 255 255 / 0.18),
+    inset 0 0 12px rgb(255 255 255 / 0.16),
+    0 10px 28px -10px rgb(111 185 232 / 0.7);
+  transition:
+    background 200ms,
+    transform 100ms,
+    box-shadow 200ms;
+}
+.glass-tint:hover,
+.group:hover .glass-tint {
+  background: linear-gradient(
+    180deg,
+    rgb(165 215 250 / 0.66),
+    rgb(120 190 240 / 0.58) 50%,
+    rgb(90 160 222 / 0.68)
+  );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.9),
+    inset 0 -1px 0 rgb(255 255 255 / 0.2),
+    inset 0 0 14px rgb(255 255 255 / 0.2),
+    0 14px 34px -10px rgb(111 185 232 / 0.85);
+}
+/* A lighter tint for the selected item in a group of glass pills. */
+.glass-tint-soft {
+  -webkit-backdrop-filter: blur(18px) saturate(1.8);
+  backdrop-filter: blur(18px) saturate(1.8);
+  background: linear-gradient(180deg, rgb(159 216 255 / 0.3), rgb(110 180 235 / 0.2));
+  border: 1px solid rgb(159 216 255 / 0.55);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.45),
+    0 6px 18px -8px rgb(111 185 232 / 0.6);
+}
+.glass-tint:active,
+.glass-tint-soft:active,
+.glass-pill:active,
+.press:active {
+  transform: scale(0.96);
+}
+.material-bar {
+  background: rgb(5 11 30 / 0.5) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(1.9) !important;
+  backdrop-filter: blur(30px) saturate(1.9) !important;
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass-tint {
+    background: #2f6fa3;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .glass-tint-soft {
+    background: #1d3d63;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .glass,
+  .glass-pill {
+    background: rgb(12 22 50 / 0.97);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+@media (prefers-contrast: more) {
+  .glass,
+  .glass-pill {
+    background: rgb(8 16 38);
+    border-color: rgb(255 255 255 / 0.5);
+  }
+}
+
+/*
+ * Fluid motion. Pages arrive by gliding up out of a light blur; sections do the same as they
+ * scroll into view. Only transform, opacity and filter move. Under reduced motion everything
+ * cross-fades instead.
+ */
+@view-transition {
+  navigation: auto;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 360ms;
+  animation-timing-function: var(--ease-out-quint);
+}
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(6px);
+  }
+}
+.page-in {
+  animation: page-in 640ms var(--ease-out-quint) both;
+}
+html.js .reveal {
+  opacity: 0;
+  transform: translateY(28px) scale(0.985);
+  filter: blur(8px);
+  transition:
+    opacity 800ms var(--ease-out-quint),
+    transform 900ms var(--ease-out-quint),
+    filter 800ms var(--ease-out-quint);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+html.js .reveal.is-in {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-in {
+    animation: none;
+  }
+  html.js .reveal {
+    transform: none;
+    filter: none;
+    transition: opacity 300ms ease;
+  }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
+
+/* Swipe rail: native scroll snapping, so touch flicks keep the platform's momentum. */
+.rail {
+  position: relative;
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  /* Full bleed, with the first and last slide able to sit in the centre. */
+  margin-inline: calc(50% - 50vw);
+  padding: 8px max(16px, calc(50vw - min(44vw, 280px))) 32px;
+  scroll-padding-inline: max(16px, calc(50vw - min(44vw, 280px)));
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+.rail::-webkit-scrollbar {
+  display: none;
+}
+.rail > * {
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  flex: 0 0 min(88vw, 560px);
+}
+.rail-slide {
+  transition:
+    transform 500ms var(--ease-out-quint),
+    opacity 500ms var(--ease-out-quint);
+}
+.rail-slide:not([data-active="true"]) {
+  transform: scale(0.94);
+  opacity: 0.55;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rail {
+    scroll-behavior: auto;
+  }
+  .rail-slide:not([data-active="true"]) {
+    transform: none;
+  }
+}
+
+/* Short screens (laptops at 1366x768 with browser chrome and taskbar): the technology slides
+   shrink with the viewport height so a whole card fits on screen. Unlayered, so these win over
+   the Tailwind utilities on the slide. */
+@media (max-height: 860px) and (min-width: 640px) {
+  .rail > * {
+    flex-basis: min(88vw, 500px);
+  }
+  .rail {
+    padding-top: 4px;
+    padding-bottom: 16px;
+  }
+  .rail-slide {
+    gap: 14px;
+    padding: 20px 24px;
+    border-radius: 24px;
+  }
+  .rail-slide h3 {
+    margin-top: 6px;
+    font-size: 22px;
+  }
+  .rail-slide p,
+  .rail-slide label span {
+    font-size: 14px;
+  }
+  .rail-slide > div:nth-child(2) {
+    gap: 12px;
+  }
+  .rail-slide .h-12,
+  .rail-slide .h-11 {
+    height: 40px;
+    font-size: 15px;
+  }
+  .rail-slide .min-h-11 {
+    min-height: 36px;
+  }
+  .rail-slide .min-h-16 {
+    min-height: 52px;
+    padding-block: 8px;
+  }
+  .rail-slide .min-h-\[48px\] {
+    min-height: 40px;
+  }
+}
+@media (max-height: 700px) and (min-width: 640px) {
+  .rail > * {
+    flex-basis: min(88vw, 440px);
+  }
+  .rail-slide {
+    gap: 10px;
+    padding: 14px 20px;
+  }
+  .rail-slide h3 {
+    font-size: 19px;
+  }
+  .rail-slide p,
+  .rail-slide label span {
+    font-size: 13px;
+  }
+  .rail-slide .h-12,
+  .rail-slide .h-11 {
+    height: 34px;
+  }
+  .rail-slide .min-h-16 {
+    min-height: 44px;
+    padding-block: 6px;
+  }
+  .rail-slide input[type="range"] {
+    height: 28px;
+  }
+  .rail-slide .min-h-\[48px\] {
+    min-height: 34px;
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "schema": "arl-distribution-input/1",
+  "allocation": "publicLaunch",
+  "budget": "500000000000000000000000",
+  "maxPerAddress": "500000000000000000000000",
+  "claims": [
+    {
+      "account": "0xd18d96980742bc5fab940fc9078fa882cf85ecad",
+      "amount": "1000000000000000000"
+    },
+    {
+      "account": "0xfedb036a961ad2d2224a293e4362665480963578",
+      "amount": "250000000000000000000"
+    },
+    {
+      "account": "0x561ef1380e633b8d7c7f5c6e651d572975143b73",
+      "amount": "3"
+    },
+    {
+      "account": "0x2ab7af468fc627fbc906409324be8f40548b0149",
+      "amount": "1234567890123456789012"
+    },
+    {
+      "account": "0x7eeae4c35335b96fcff53f98c60668b7e7fb38cc",
+      "amount": "400000000000000000000000"
+    }
+  ]
+}
