@@ -206,13 +206,13 @@ export const token: Layer = {
     {
       id: "network",
       title: "Network",
-      shortDescription: "EVM. Chain not selected.",
-      status: "PLANNED",
+      shortDescription: "Base. Sepolia testnet live.",
+      status: "IN DEVELOPMENT",
       weight: "tertiary",
-      metric: { kind: "unavailable", label: "Not selected", source: "chain.network" },
+      metric: { kind: "static", value: "Base" },
       detail: {
         summary:
-          "ARL is built for EVM-compatible chains. The deployment chain has not been selected; the evaluation is documented in the repository.",
+          "ARL is an ERC-20 token on Base, an Ethereum layer 2. It is live on the Base Sepolia testnet (chain 84532); Base Mainnet (chain 8453) is targeted for 1 November 2026. The evaluation that selected Base is documented in the repository.",
       },
       links: [{ label: "Chain evaluation", href: repoDoc("docs/chain-evaluation.md") }],
     },

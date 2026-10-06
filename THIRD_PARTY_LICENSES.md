@@ -93,8 +93,9 @@ Runtime (included in the built site):
 | @fontsource-variable/inter, @fontsource-variable/jetbrains-mono | 5.3.0   | OFL-1.1 | Inter (text and headings), JetBrains Mono (figures, badges, addresses); self-hosted |
 | @noble/hashes                                                   | 2.4.0   | MIT     | Keccak-256 for the EIP-55 address checksum in the whitelist form                    |
 
-The ARL wordmark (`assets/brand/`) contains Geist SemiBold and Medium glyphs outlined to vector
-(Geist, OFL-1.1); the site no longer loads the Geist fonts.
+The ARL Network logo (`assets/brand/`, `apps/web/public/arl-logo.svg`, `arl-token.svg` and the
+icons) contains Orbitron ExtraBold glyphs outlined to vector (Orbitron, OFL-1.1); the site does
+not load the Orbitron font.
 
 Transitive runtime packages are MIT, ISC, Apache-2.0, BSD-3-Clause or 0BSD, with three
 exceptions:

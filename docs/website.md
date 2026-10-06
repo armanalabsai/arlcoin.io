@@ -204,8 +204,6 @@ CI runs all of these in the `web` job, plus `npm audit --audit-level=high`.
 
 ## Known gaps
 
-- No approved ARL brand asset exists yet. `app/icon.svg` is a placeholder derived from the Core
-  ring, and the wordmark is set in type.
 - The team layer lists the founder (unverified, so education and career details are withheld) and a note that new members are published only after verification.
 - No live data provider exists yet. The `Metric` model and `DataSourceId` are the extension
   point.

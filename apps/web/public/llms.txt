@@ -1,23 +1,31 @@
 # ARL
 
-> ARL is the native utility token planned for decentralized AI and compute services. It is not
-> yet deployed: no ARL contract exists on any network, nothing is for sale, and nothing on
-> arlcoin.io is an offer, investment advice or a promise of listing.
+> ARL is the native utility token planned for decentralized AI and compute services, an ERC-20
+> on Base. It is live on the Base Sepolia testnet only (testnet tokens have no value); no ARL
+> contract exists on Base Mainnet, nothing is for sale, and nothing on arlcoin.io is an offer,
+> investment advice or a promise of listing.
 
 Key facts:
 
 - Maximum supply: 21,000,000 ARL, minted once at deployment into 11 allocations. The token
   contract has no owner, no mint function after deployment, no pause and no upgrade path.
-- Standard: ERC-20 with EIP-2612 permit, 18 decimals, for EVM-compatible chains. The
-  deployment chain has not been selected.
+- Standard: ERC-20 with EIP-2612 permit, 18 decimals, on Base (Ethereum layer 2).
+- Testnet: Base Sepolia (chain 84532), token 0x244312b619127B6458154F3467eFD7c87CD28500,
+  source-verified on Basescan, Blockscout and Sourcify.
+- Mainnet: Base (chain 8453), targeted for 1 November 2026. The address will be published on
+  arlcoin.io at deployment; any earlier "ARL" on a main network is not official.
+- How a payment works: the wallet signs a spending ceiling (x402 upto scheme, Permit2), the AI
+  or compute service meters the work, a facilitator settles only the ARL used, never above the
+  ceiling, and the transfer is recorded on Base where anyone can verify it; ratings are kept on
+  the ERC-8004 registry.
 - Planned uses: AI services paid per use in ARL, GPU and CPU compute paid per second,
   zero-knowledge anonymous signals, and staking funded from existing allocations, never from
   new issuance.
 - Security: internal review complete (unit, fuzz and invariant tests, static analysis,
   symbolic checks). No external audit has been performed. Treasury actions pass a Safe
   multisig and a 48-hour timelock.
-- Roadmap: foundation and token contracts complete, security review in progress, testnet and
-  mainnet not started. No dates are set.
+- Roadmap: foundation and token contracts complete, internal security review complete, Base
+  Sepolia testnet live since 4 October 2026, Base Mainnet targeted for 1 November 2026.
 - ARL never asks for a private key, a seed phrase or a payment.
 
 ## Pages

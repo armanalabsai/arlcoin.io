@@ -4,16 +4,10 @@ name: Pages
 # (apps/dapp) under /app so a prepared Base Sepolia deployment can be signed from a phone wallet: at https://arlcoin.io when
 # the custom domain is set in the repository's Pages settings, otherwise at the project URL
 # https://gokturkalazdaghan-dot.github.io/ARLCOIN/ (configure-pages reports the sub-path).
-# Runs only on main; pull requests are built and tested by the CI workflow.
+# arlcoin.io is served by Vercel, so this runs only when started by hand (Actions → Pages → Run
+# workflow) after Pages is enabled in the repository settings; pull requests are built and
+# tested by the CI workflow.
 on:
-  push:
-    branches: [main]
-    paths:
-      - "apps/web/**"
-      - "apps/dapp/**"
-      - "packages/tokenomics/**"
-      - "packages/zk/**"
-      - ".github/workflows/pages.yml"
   workflow_dispatch:
 
 permissions:
