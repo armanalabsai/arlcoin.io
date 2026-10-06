@@ -4,9 +4,9 @@
   "priceUsd": "0.20",
   "deadline": 1796083200,
   "legs": [
-    { "quote": "USDC", "arlAmount": "200000", "quoteUsd": "1" },
-    { "quote": "USDT", "arlAmount": "100000", "quoteUsd": "1" },
-    { "quote": "WETH", "arlAmount": "150000", "quoteUsd": "4000" },
-    { "quote": "cbBTC", "arlAmount": "50000", "quoteUsd": "100000" }
+    { "quote": "USDC", "arlAmount": "400000", "quoteUsd": "1" },
+    { "quote": "USDT", "arlAmount": "200000", "quoteUsd": "1" },
+    { "quote": "WETH", "arlAmount": "300000", "quoteUsd": "4000" },
+    { "quote": "cbBTC", "arlAmount": "100000", "quoteUsd": "100000" }
   ]
 }
