@@ -166,7 +166,10 @@ test("reduced motion still opens and closes the detail", async ({ page }) => {
 test("the index opens cards without a page load", async ({ page }) => {
   await page.goto("/core");
   await mark(page);
-  await page.getByRole("contentinfo").getByRole("link", { name: "Bug Bounty" }).click();
+  await page
+    .getByRole("contentinfo")
+    .getByRole("link", { name: "Bug Bounty", exact: true })
+    .click();
   await expect(page).toHaveURL(/\/core\/security\/bug-bounty$/);
   await expect(surface(page)).toBeVisible();
   await expectSameDocument(page);
