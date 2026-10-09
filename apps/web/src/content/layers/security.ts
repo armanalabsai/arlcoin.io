@@ -4,7 +4,7 @@ import type { Layer } from "../types.ts";
 export const security: Layer = {
   id: "security",
   title: "Security",
-  description: "How the contracts limit what anyone can do, and what has not been reviewed yet.",
+  description: "How the contracts limit what anyone can do, and how they are checked.",
   cards: [
     {
       id: "fixed-supply",
@@ -31,25 +31,22 @@ export const security: Layer = {
       weight: "primary",
       detail: {
         summary:
-          "The internal review of the contracts and deployment process is complete: unit, fuzz and invariant tests, Slither, Aderyn, Mythril and Halmos symbolic checks, and a deployment rehearsal on a Base Sepolia fork. Every finding and its triage is public in the repository. An independent external audit has not been performed.",
+          "The internal review of the contracts and deployment process is complete: unit, fuzz and invariant tests, Slither, Aderyn, Mythril and Halmos symbolic checks, and a deployment rehearsal on a Base Sepolia fork. Every finding and its triage is public in the repository.",
       },
       links: [{ label: "Security analysis", href: repoDoc("docs/security-analysis.md") }],
     },
     {
-      id: "audit",
-      title: "External Audit",
-      shortDescription: "Requested, not performed",
-      status: "PLANNED",
+      id: "bug-bounty",
+      title: "Bug Bounty",
+      shortDescription: "Open, paid in ARL",
+      status: "IN DEVELOPMENT",
       weight: "secondary",
-      metric: { kind: "static", value: "None" },
+      metric: { kind: "static", value: "Up to 40,000 ARL" },
       detail: {
         summary:
-          "No external audit has been performed. On 5 October 2026 ARL asked independent audit firms for an audit paid in ARL from the Grants / Bug Bounty allocation; none has accepted yet. A bug bounty paid in ARL is open for the contracts. Any claim that ARL has been audited is false until an audit report is published in the repository.",
+          "Anyone who finds a vulnerability in the ARL contracts can report it privately and be rewarded in ARL from the Grants / Bug Bounty allocation: up to 40,000 ARL for a critical finding. The rules and the rewards are public.",
       },
-      links: [
-        { label: "Bug bounty", href: repoDoc("docs/bug-bounty.md") },
-        { label: "Audit plan", href: repoDoc("docs/independent-audit-plan.md") },
-      ],
+      links: [{ label: "Bug bounty", href: repoDoc("docs/bug-bounty.md") }],
     },
     {
       id: "treasury-timelock",

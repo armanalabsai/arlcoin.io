@@ -56,7 +56,7 @@ export default function BuyPage() {
           "The official pools are ARL/USDC, ARL/USDT, ARL/WETH and ARL/cbBTC (1% fee tier) on Uniswap v3 on Base, opened by the Liquidity Safe. Each starts at 0.20 USD per ARL and holds only ARL, so no ARL in them is sold below that floor. The ETH and BTC floors are fixed in ETH and BTC at launch, so their dollar value moves with those markets.",
           "Only the contract address published on this page and in the repository is ARL. Tokens with the same name on other networks or at other addresses are not ARL.",
           "ARL will never ask for your private key, your seed phrase or a payment to a personal address. Anyone who does is attempting theft.",
-          "No independent audit has been performed. Tokens can lose all their value. Nothing here is investment advice or a promise of price or listing.",
+          "Tokens can lose all their value. Nothing here is investment advice or a promise of price or listing.",
           <>
             Whitelist sign-ups can claim free ARL from the Public Launch for 60 days after the TGE;
             see the{" "}
