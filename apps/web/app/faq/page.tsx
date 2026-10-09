@@ -8,7 +8,7 @@ import { PageShell } from "@/site/PageShell.tsx";
 
 const title = "FAQ · ARL";
 const description =
-  "Answers to common questions about ARL: sale, supply, whitelist, audit, chain and launch.";
+  "Answers to common questions about ARL: sale, supply, whitelist, chain and launch.";
 
 export const metadata: Metadata = {
   title,

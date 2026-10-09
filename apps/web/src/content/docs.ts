@@ -48,12 +48,6 @@ export const DOCS: readonly DocEntry[] = [
     description: "Rewards in ARL for valid vulnerability reports, and the rules.",
   },
   {
-    slug: "independent-audit-plan",
-    source: "docs/independent-audit-plan.md",
-    title: "Independent audit plan",
-    description: "How ARL is seeking an independent audit without cash, and its status.",
-  },
-  {
     slug: "payments",
     source: "docs/payments.md",
     title: "AI payments",

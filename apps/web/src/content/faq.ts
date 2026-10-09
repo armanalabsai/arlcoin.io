@@ -28,11 +28,6 @@ export const FAQ: readonly FaqEntry[] = [
       "No. The Public Launch gives away up to 500,000 ARL at the TGE through a free claim open for 60 days, at most 10,000 ARL per address; the exact list is published before the launch. Registration is free and no payment is requested.",
   },
   {
-    question: "Has ARL been audited?",
-    answer:
-      "The internal review is complete: unit, fuzz and invariant tests, Slither with no findings, Halmos symbolic proofs and a reproducible build. No independent external audit has been performed; audit requests were sent to independent firms, and a bug bounty paid in ARL is open for the contracts. Any claim that ARL has been audited is false.",
-  },
-  {
     question: "Which blockchain will ARL use?",
     answer:
       "Base. ARL is an ERC-20 token on Base: Base Sepolia for the testnet (live) and Base Mainnet for production.",
