@@ -1,0 +1,17 @@
+{
+  "name": "@arl/sdk",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ARL developer SDK: per-second compute payment streams (ComputePayment), viem-based",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "viem": "2.56.9"
+  },
+  "scripts": {
+    "test": "node --test \"test/**/*.test.ts\"",
+    "test:anvil": "node --test \"test-anvil/**/*.test.ts\""
+  }
+}
