@@ -14,7 +14,7 @@ Key facts:
   zero-knowledge anonymous signals, and staking funded from existing allocations, never from
   new issuance.
 - Security: internal review complete (unit, fuzz and invariant tests, static analysis,
-  symbolic checks). No external audit has been performed. Treasury actions pass a Safe
+  symbolic checks). Treasury actions pass a Safe
   multisig and a 48-hour timelock.
 - Roadmap: foundation and token contracts complete, security review in progress, testnet and
   mainnet not started. No dates are set.

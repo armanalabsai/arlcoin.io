@@ -143,7 +143,7 @@ test("keyboard: Enter on the Core, Space on a card, arrows between cards", async
 });
 
 test("the detail surface traps focus while open", async ({ page }) => {
-  await page.goto("/core/security/audit");
+  await page.goto("/core/security/bug-bounty");
   await expect(surface(page)).toBeVisible();
   for (let i = 0; i < 8; i++) {
     await page.keyboard.press("Tab");
@@ -166,8 +166,8 @@ test("reduced motion still opens and closes the detail", async ({ page }) => {
 test("the index opens cards without a page load", async ({ page }) => {
   await page.goto("/core");
   await mark(page);
-  await page.getByRole("contentinfo").getByRole("link", { name: "External Audit" }).click();
-  await expect(page).toHaveURL(/\/core\/security\/audit$/);
+  await page.getByRole("contentinfo").getByRole("link", { name: "Bug Bounty" }).click();
+  await expect(page).toHaveURL(/\/core\/security\/bug-bounty$/);
   await expect(surface(page)).toBeVisible();
   await expectSameDocument(page);
 });

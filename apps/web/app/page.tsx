@@ -53,7 +53,7 @@ const SECURITY = cards("security", [
   "fixed-supply",
   "treasury-timelock",
   "vesting-contracts",
-  "audit",
+  "bug-bounty",
 ]);
 const ROADMAP = cards("roadmap", [
   "phase-0",
@@ -179,10 +179,10 @@ export default function Home() {
             <>
               Security first.
               <br />
-              Honest about the rest.
+              Open about the rest.
             </>
           }
-          sub="How the contracts limit what anyone can do, and what has not been reviewed yet."
+          sub="How the contracts limit what anyone can do, and how they are checked."
         >
           <div className="mt-14 grid grid-cols-1 gap-4 text-left min-[480px]:grid-cols-2 lg:grid-cols-4">
             {SECURITY.map(({ layerId, card }, i) => (
