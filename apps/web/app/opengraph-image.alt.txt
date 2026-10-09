@@ -1,1 +1,1 @@
-ARL · 21,000,000 ARL maximum supply
+ARL logo: an ERC-20 utility token on Base, 21,000,000 ARL fixed supply

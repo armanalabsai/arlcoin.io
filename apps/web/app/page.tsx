@@ -6,6 +6,7 @@ import { getCard, getLayer, pathFor } from "@/content/registry.ts";
 import { OG_IMAGE, SITE } from "@/content/site.ts";
 import type { Card } from "@/content/types.ts";
 import { AddToWallet } from "@/site/AddToWallet.tsx";
+import { ChainFlow } from "@/site/ChainFlow.tsx";
 import { FaqList } from "@/site/FaqList.tsx";
 import { JsonLd } from "@/site/JsonLd.tsx";
 import { Reveal } from "@/site/Reveal.tsx";
@@ -32,7 +33,7 @@ const websiteJsonLd = {
     "@type": "Organization",
     name: "ARL Protocol",
     url: SITE.url,
-    logo: `${SITE.url}/icon.svg`,
+    logo: `${SITE.url}/arl-token-512.png`,
     email: SITE.email,
     sameAs: [SITE.social.x, SITE.social.instagram, SITE.repository],
   },
@@ -63,6 +64,43 @@ const ROADMAP = cards("roadmap", [
   "mainnet",
   "services",
 ]);
+
+const CHIPS = [
+  "ERC-20 on Base",
+  "Source-verified on Basescan",
+  "Fixed supply · no mint",
+  "Live on Base Sepolia",
+];
+
+const tge = new Date(`${SITE.tgeTarget}T00:00:00Z`).toLocaleDateString("en-GB", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+const FACTS = [
+  {
+    label: "Chain",
+    value: "Base",
+    note: `Ethereum layer 2. Sepolia testnet live; Mainnet targeted for ${tge}.`,
+  },
+  {
+    label: "Standard",
+    value: "ERC-20 + Permit",
+    note: "18 decimals. Approvals by signature (EIP-2612).",
+  },
+  {
+    label: "Supply",
+    value: "21,000,000 ARL",
+    note: "Minted once. No owner, mint, pause or upgrade.",
+  },
+  {
+    label: "Verified",
+    value: "Basescan",
+    note: "Also Blockscout and Sourcify. The source is public.",
+  },
+];
 
 const primary =
   "press inline-flex h-12 items-center glass-tint rounded-full px-6 text-[17px] font-semibold";
@@ -110,12 +148,15 @@ export default function Home() {
 
       <main id="content" className="page-in flex-1">
         <section className="landing-hero px-4 pt-16 pb-16 text-center sm:px-6 sm:pt-24">
-          <p className="text-[17px] font-semibold text-accent">Native utility token</p>
+          <p className="glass-pill inline-flex h-8 items-center gap-2 rounded-full px-3.5 text-[14px] font-semibold text-accent">
+            <span className="live-dot" aria-hidden="true" />
+            Native utility token on Base
+          </p>
           <h1 className="mt-2 text-[64px] leading-none font-bold tracking-[-0.04em] sm:text-[96px]">
             ARL
           </h1>
           <p className="mx-auto mt-4 max-w-[720px] text-[22px] leading-[1.3] font-semibold tracking-[-0.02em] text-fg sm:text-[28px]">
-            The token planned for decentralized AI and compute services.
+            The onchain token planned for decentralized AI and compute services.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link href="/whitelist" prefetch={false} className={primary}>
@@ -126,21 +167,76 @@ export default function Home() {
             </Link>
           </div>
           <AddToWallet className="mt-4" />
+          <ul
+            aria-label="On the blockchain"
+            className="mx-auto mt-7 flex max-w-[760px] flex-wrap justify-center gap-2"
+          >
+            {CHIPS.map((c) => (
+              <li
+                key={c}
+                className="glass-pill inline-flex h-8 items-center rounded-full px-3 font-mono text-[12px] tracking-[0.04em] text-fg"
+              >
+                {c}
+              </li>
+            ))}
+          </ul>
           <Link
             href={pathFor()}
             prefetch={false}
             aria-label="Open the ARL Core"
-            className="landing-core glass mx-auto mt-14 flex size-[240px] flex-col items-center justify-center rounded-full sm:size-[320px]"
-          >
-            <span className="text-[48px] leading-none font-bold tracking-[-0.04em] text-heading sm:text-[64px]">
-              ARL
-            </span>
-            <span className="mt-2 text-[13px] text-accent">Overview</span>
-          </Link>
+            className="landing-logo mx-auto mt-12 block size-[260px] rounded-full sm:size-[340px]"
+          />
           <p className="mt-6 text-[12px] text-fg-subtle">
             ARL is live on the Base Sepolia testnet. Nothing is for sale. Registering is free.
           </p>
         </section>
+
+        <Section
+          alt
+          heading="How ARL works on Base."
+          sub="One paid AI job, start to finish. Every payment is an ARL transfer recorded on the Base blockchain, so anyone can check it."
+        >
+          <Reveal delay={120} className="glass mt-12 rounded-[28px] px-2 pt-6 pb-5 sm:px-6 sm:pt-8">
+            <ChainFlow />
+          </Reveal>
+        </Section>
+
+        <Section
+          heading="Onchain. Verifiable."
+          sub="The rules live in the contract, not on a server. Read them yourself."
+        >
+          <div className="mt-12 grid grid-cols-2 gap-3 text-left sm:gap-4 lg:grid-cols-4">
+            {FACTS.map((f, i) => (
+              <Reveal key={f.label} delay={i * 80} className="glass rounded-[22px] p-5 sm:p-6">
+                <span className="block font-mono text-[11px] font-semibold tracking-[0.1em] text-accent uppercase">
+                  {f.label}
+                </span>
+                <span className="mt-2.5 block text-[17px] font-bold text-heading sm:text-[20px]">
+                  {f.value}
+                </span>
+                <span className="mt-1.5 block text-[14px] leading-[1.45] text-fg-muted">
+                  {f.note}
+                </span>
+              </Reveal>
+            ))}
+          </div>
+          <Reveal
+            delay={160}
+            className="glass mt-4 flex flex-col items-start gap-1 rounded-[18px] px-5 py-3 text-left sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+          >
+            <span className="font-mono text-[12px] break-all text-fg sm:text-[14px]">
+              {SITE.testnet.chain} token · {SITE.testnet.token}
+            </span>
+            <a
+              href={SITE.testnet.explorer}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-11 shrink-0 items-center text-[15px] font-semibold text-accent hover:underline"
+            >
+              View on Basescan ›
+            </a>
+          </Reveal>
+        </Section>
 
         <Section
           alt

@@ -125,14 +125,13 @@ describe("content accuracy", () => {
     assert.deepEqual(card?.metric, { kind: "static", value: "18" });
   });
 
+  it("names Base as the network", () => {
+    const card = token?.cards.find((c) => c.id === "network");
+    assert.deepEqual(card?.metric, { kind: "static", value: "Base" });
+  });
+
   it("never gives deployment-dependent metrics a value", () => {
-    const deploymentDependent = [
-      "circulating-supply",
-      "contract-address",
-      "staked",
-      "liquidity",
-      "network",
-    ];
+    const deploymentDependent = ["circulating-supply", "contract-address", "staked", "liquidity"];
     for (const id of deploymentDependent) {
       const card = token?.cards.find((c) => c.id === id);
       assert.equal(card?.metric?.kind, "unavailable", id);

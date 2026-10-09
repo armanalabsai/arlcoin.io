@@ -25,7 +25,7 @@ guaranteed listing.
 | Audit                     | None. Audit requests sent 2026-10-05 ([independent-audit-plan.md](independent-audit-plan.md)); bug bounty open                                   |
 | Logo                      | https://arlcoin.io/arl-token-200.png (200 × 200 PNG), https://arlcoin.io/arl-token-512.png, https://arlcoin.io/arl-token.svg                     |
 | Social accounts           | https://x.com/armanalabsai, https://www.instagram.com/armanalabsai                                                                               |
-| Contact                   | team@arlcoin.io (forwards to armanalabsai@gmail.com); Alaz Dağhan Göktürk, Founder and CEO                                                       |
+| Contact                   | team@arlcoin.io; Alaz Dağhan Göktürk, Founder and CEO                                                                                            |
 
 ### Short description (English, for the form)
 
@@ -47,8 +47,8 @@ guaranteed listing.
 ## Gaps
 
 - **E-mail on the project domain:** done 2026-10-05. Every address at arlcoin.io (team@, info@ ...)
-  forwards to armanalabsai@gmail.com through ImprovMX (MX and SPF records on Vercel DNS); tested.
-  Receiving only: replying from the domain needs a paid plan, so replies come from Gmail.
+  forwards to the team inbox through ImprovMX (MX and SPF records on Vercel DNS); tested.
+  Receiving only: replying from the domain needs a paid plan, so replies come from the team inbox.
 - **Trading history.** Both sites look for real trading on the pools before listing; apply a few
   days after the TGE.
 

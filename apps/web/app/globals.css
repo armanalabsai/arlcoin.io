@@ -609,6 +609,194 @@
 .landing-core:hover {
   border-color: var(--color-accent-edge);
 }
+/* The ARL logo in the hero, linking to the Core. */
+.landing-logo {
+  background: url("/arl-logo.svg") center / cover no-repeat;
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.1),
+    0 30px 80px -20px rgb(0 0 0 / 0.7),
+    0 0 90px rgb(236 234 227 / 0.1);
+  transition: box-shadow 200ms;
+  animation: landing-float 6s ease-in-out infinite;
+}
+.landing-logo:hover {
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.3),
+    0 30px 80px -20px rgb(0 0 0 / 0.7),
+    0 0 110px rgb(236 234 227 / 0.18);
+}
+@keyframes landing-float {
+  50% {
+    transform: translateY(-8px);
+  }
+}
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #7ee0a6;
+  animation: live-ping 2s infinite;
+}
+@keyframes live-ping {
+  0% {
+    box-shadow: 0 0 0 0 rgb(126 224 166 / 0.6);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 8px rgb(126 224 166 / 0);
+  }
+}
+
+/* How ARL works on Base: the five-step flow and the sliding row of blocks. */
+.flow {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.flow-narrow {
+  display: none;
+}
+@media (max-width: 719px) {
+  .flow-wide {
+    display: none;
+  }
+  .flow-narrow {
+    display: block;
+  }
+}
+.flow text {
+  fill: #fff;
+  text-anchor: middle;
+  font-family: var(--font-sans);
+}
+.flow text.start {
+  text-anchor: start;
+}
+.flow .flow-num,
+.flow .flow-cap,
+.flow .flow-t3,
+.flow .flow-bn,
+.flow .flow-bt {
+  font-family: var(--font-mono);
+}
+.flow-num {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  fill: var(--color-accent) !important;
+}
+.flow-t1 {
+  font-size: 16px;
+  font-weight: 700;
+}
+.flow-t2 {
+  font-size: 13px;
+  fill: var(--color-fg-muted) !important;
+}
+.flow-t3 {
+  font-size: 11px;
+  fill: var(--color-fg-subtle) !important;
+}
+.flow-cap {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  fill: var(--color-fg-subtle) !important;
+}
+.flow-disc {
+  fill: var(--color-surface-2);
+  stroke: rgb(159 216 255 / 0.45);
+  stroke-width: 1.5;
+}
+.flow-halo {
+  fill: rgb(159 216 255 / 0.08);
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: flow-pulse 4.5s infinite;
+  animation-delay: var(--d);
+}
+@keyframes flow-pulse {
+  0%,
+  22%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.9);
+  }
+  8% {
+    opacity: 1;
+    transform: scale(1.12);
+    fill: rgb(159 216 255 / 0.22);
+  }
+}
+.flow-dash,
+.flow-drop {
+  animation: flow-dash 1.2s linear infinite;
+}
+@keyframes flow-dash {
+  to {
+    stroke-dashoffset: -12;
+  }
+}
+.flow-drop {
+  stroke: var(--color-accent);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 5;
+  opacity: 0.6;
+}
+.flow-chain {
+  transform: translate(0, 326px);
+  animation: flow-slide 4.5s linear infinite;
+}
+@keyframes flow-slide {
+  from {
+    transform: translate(0, 326px);
+  }
+  to {
+    transform: translate(-116px, 326px);
+  }
+}
+.flow-chain rect {
+  fill: var(--color-surface-1);
+  stroke: rgb(159 216 255 / 0.25);
+}
+.flow-chain .on rect {
+  fill: var(--color-surface-3);
+  stroke: var(--color-accent);
+  stroke-width: 1.5;
+}
+.flow-bn {
+  font-size: 11px;
+  font-weight: 600;
+  text-anchor: start !important;
+  fill: var(--color-accent) !important;
+}
+.flow-bt {
+  font-size: 11px;
+  text-anchor: start !important;
+  fill: var(--color-fg-muted) !important;
+}
+.flow-chain .on .flow-bt {
+  fill: #fff !important;
+}
+.flow-link {
+  stroke: rgb(159 216 255 / 0.35);
+  stroke-width: 1.5;
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing-logo,
+  .live-dot,
+  .flow-halo,
+  .flow-dash,
+  .flow-drop,
+  .flow-chain {
+    animation: none;
+  }
+  .flow-packet {
+    display: none;
+  }
+}
+
 .landing-road {
   display: grid;
   grid-template-columns: 1fr;
