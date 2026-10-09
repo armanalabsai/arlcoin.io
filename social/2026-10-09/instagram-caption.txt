@@ -16,7 +16,7 @@ Where we are, honestly:
 • The payment rail is IN DEVELOPMENT: tested on a local Base Sepolia fork, no facilitator running.
 • No audit of ARL's contracts yet.
 
-We build in public. The code is open source on GitHub (link in bio). Questions: t.me/arlcoinio
+We build in public. The code is open source on GitHub (link in bio). Join the community: t.me/+o3FSrrOrTGUwZDk0
 
 Question for builders: per second, per request or per token? How would you bill AI compute?
 

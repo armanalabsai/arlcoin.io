@@ -28,7 +28,7 @@ contract, so the readiness table below is the real starting point.
 | Legal opinion on the token                      | **TBD.** Not obtained                                                                                                                                             |
 | Whitepaper or litepaper                         | Partly: economic specification `docs/tokenomics-economic-spec.md`, architecture `docs/architecture.md`; no litepaper PDF                                          |
 | Pitch deck                                      | **TBD**                                                                                                                                                           |
-| Community and social accounts                   | X https://x.com/armanalabsai, Instagram https://instagram.com/armanalabsai, Telegram https://t.me/arlcoinio                                                       |
+| Community and social accounts                   | X https://x.com/armanalabsai, Instagram https://instagram.com/armanalabsai, Telegram group https://t.me/+o3FSrrOrTGUwZDk0, contact https://t.me/arlcoinio         |
 | Product demo                                    | Ready locally: the ARL app (`apps/dapp`) runs on a local chain; not hosted publicly                                                                               |
 
 ## Project overview

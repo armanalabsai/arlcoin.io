@@ -55,8 +55,8 @@ it and replies by e-mail.
 
 **Describe Current Community:**
 
-> Pre-launch. Official X (@armanalabsai), Instagram (@armanalabsai) and Telegram (@arlcoinio)
-> accounts and a whitelist on arlcoin.io.
+> Pre-launch. Official X (@armanalabsai), Instagram (@armanalabsai) and Telegram accounts
+> (group https://t.me/+o3FSrrOrTGUwZDk0, contact @arlcoinio) and a whitelist on arlcoin.io.
 
 **Size of Existing Users:**
 

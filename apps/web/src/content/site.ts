@@ -16,7 +16,8 @@ export const SITE = {
   social: {
     x: "https://x.com/armanalabsai",
     instagram: "https://www.instagram.com/armanalabsai",
-    telegram: "https://t.me/arlcoinio",
+    /** Community group (invite link). Direct contact: https://t.me/arlcoinio */
+    telegram: "https://t.me/+o3FSrrOrTGUwZDk0",
   },
   /** Base Sepolia (testnet) deployment, source-verified on Basescan, Blockscout and Sourcify. */
   testnet: {
