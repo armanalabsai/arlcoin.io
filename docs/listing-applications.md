@@ -24,7 +24,7 @@ guaranteed listing.
 | Whitepaper / deck         | https://arlcoin.io/arl-pitch-deck.pdf, https://arlcoin.io/docs/tokenomics/                                                                        |
 | Audit                     | None. Audit requests sent 2026-10-05 ([independent-audit-plan.md](independent-audit-plan.md)); bug bounty open                                    |
 | Logo                      | https://arlcoin.io/arl-token-200.png (200 × 200 PNG), https://arlcoin.io/arl-token-512.png, https://arlcoin.io/arl-token.svg                      |
-| Social accounts           | https://x.com/armanalabsai, https://www.instagram.com/armanalabsai, Telegram group https://t.me/+o3FSrrOrTGUwZDk0, contact https://t.me/arlcoinio |
+| Social accounts           | https://x.com/armanalabsai, https://www.instagram.com/armanalabsai, Telegram group https://t.me/arlcoin_community, contact https://t.me/arlcoinio |
 | Contact                   | team@arlcoin.io (forwards to armanalabsai@gmail.com); Alaz Dağhan Göktürk, Founder and CEO                                                        |
 
 ### Short description (English, for the form)
