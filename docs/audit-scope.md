@@ -19,15 +19,16 @@ tooling only).
 
 ### Contracts (deployed on-chain)
 
-| File                                     |   nSLOC | Purpose                                                                                                                                                                      |
-| ---------------------------------------- | ------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `contracts/src/ARLToken.sol`             |      35 | ERC-20 + ERC20Permit; mints the fixed 21,000,000 ARL to 11 holders in the constructor; no mint, burn, admin, pause                                                           |
-| `contracts/src/ARLAllocation.sol`        |      16 | The 11 allocation constants                                                                                                                                                  |
-| `contracts/src/ARLVestingWallet.sol`     |      34 | OpenZeppelin `VestingWallet` with a cliff and an immutable beneficiary                                                                                                       |
-| `contracts/src/ARLTimelock.sol`          |      36 | OpenZeppelin `TimelockController` with a 48-hour floor, no external admin and a cancel-only guardian                                                                         |
-| `contracts/src/ARLMerkleDistributor.sol` |      56 | Public Launch Merkle claim with a fixed root, claim window and return address; no owner                                                                                      |
-| `contracts/src/ARLStakingRewards.sol`    |     191 | Stake ARL, earn ARL from a funded pool (Synthetix `StakingRewards` via curvefi/unipool-fork, MIT); no owner, no minting, no upgrade; one limited role, `rewardsDistribution` |
-| **Total**                                | **368** |                                                                                                                                                                              |
+| File                                     |   nSLOC | Purpose                                                                                                                                                                                              |
+| ---------------------------------------- | ------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `contracts/src/ARLToken.sol`             |      36 | ERC-20 + ERC20Burnable + ERC20Permit; mints the capped 21,000,000 ARL to 11 holders in the constructor; holders can burn their own tokens; no mint, admin, pause                                     |
+| `contracts/src/ARLAllocation.sol`        |      16 | The 11 allocation constants                                                                                                                                                                          |
+| `contracts/src/ARLVestingWallet.sol`     |      34 | OpenZeppelin `VestingWallet` with a cliff and an immutable beneficiary                                                                                                                               |
+| `contracts/src/ARLTimelock.sol`          |      36 | OpenZeppelin `TimelockController` with a 48-hour floor, no external admin and a cancel-only guardian                                                                                                 |
+| `contracts/src/ARLMerkleDistributor.sol` |      56 | Public Launch Merkle claim with a fixed root, claim window and return address; no owner                                                                                                              |
+| `contracts/src/ARLStakingRewards.sol`    |     191 | Stake ARL, earn ARL from a funded pool (Synthetix `StakingRewards` via curvefi/unipool-fork, MIT); no owner, no minting, no upgrade; one limited role, `rewardsDistribution`                         |
+| `contracts/src/ComputeRewards.sol`       |     108 | Converts ARL to compute credits (5% burned, 5% reward pool, 90% credit treasury) and assigns Bronze / Silver / Gold / Diamond tiers from the amount staked; no owner. Not yet in the deployment plan |
+| **Total**                                | **368** |                                                                                                                                                                                                      |
 
 ### Deployment tooling (runs off-chain, decides what is deployed)
 
@@ -47,8 +48,9 @@ tooling only).
 
 ## Intended properties
 
-1. Total supply is exactly 21,000,000 ARL forever: minted once in the constructor, no mint or
-   burn path, no admin.
+1. Total supply is 21,000,000 ARL at genesis and never increases: minted once in the
+   constructor, no mint path, no admin. It decreases only when a holder burns its own tokens or
+   tokens it is approved to spend.
 2. The 11 allocations go to 11 distinct holders in the exact approved amounts.
 3. Vesting wallets release nothing before the cliff end, then linearly to the vesting end; the
    beneficiary can never change.
@@ -66,6 +68,9 @@ tooling only).
 8. The Deploy screen offers for signing only transactions that create the ARL build's own
    contracts or a Safe through the canonical Safe v1.5.0 factory, from the one prepared sender,
    in nonce order, sending no ETH; it never handles a key.
+9. `ComputeRewards` splits every conversion exactly into burned + pooled + credited; staked
+   ARL leaves the contract only through `unstake`, to the staker; the contract has no owner,
+   admin or recovery function.
 
 ## Existing verification
 
@@ -134,12 +139,13 @@ in its model. Findings:
 
 Every argument of a `check_` function is symbolic, so a pass holds for all values, within
 Halmos' bounds (loops unrolled twice; `bytes` calldata up to 1,024 bytes). CI runs every check;
-all 11 pass.
+all 12 pass.
 
 | Check                                      | Property                                                                                    | Result |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------- | ------ |
-| `check_NoCallChangesSupply`                | No call, from any caller with any calldata, changes total supply                            | pass   |
-| `check_TransferConservesSupplyAndBalances` | A transfer of any amount moves exactly that amount and keeps supply at 21,000,000 ARL       | pass   |
+| `check_NoCallIncreasesSupply`              | No call, from any caller with any calldata, increases total supply                          | pass   |
+| `check_BurnRemovesExactlyAmount`           | A burn of any amount removes exactly that amount from the burner and from the supply        | pass   |
+| `check_TransferConservesSupplyAndBalances` | A transfer of any amount moves exactly that amount and leaves the supply unchanged          | pass   |
 | `check_TransferFromNeverExceedsAllowance`  | `transferFrom` never moves more than the allowance                                          | pass   |
 | `check_NothingVestsBeforeCliffEnd`         | Nothing vests before the cliff end                                                          | pass   |
 | `check_VestedNeverExceedsAllocation`       | The vested amount never exceeds the allocation                                              | pass   |
@@ -171,7 +177,10 @@ See [`security-analysis.md`](security-analysis.md#known-limitations).
 
 ## Questions for the auditors
 
-1. Is any path able to change total supply or move a holder's tokens without its consent?
+1. Is any path able to increase total supply, burn or move a holder's tokens without its
+   consent?
 2. Can a Merkle claim be replayed, redirected or forged, including via second-preimage tricks?
 3. Can the treasury delay be bypassed or the guardian gain any power beyond cancelling?
 4. Can the deployment tooling be driven to deploy to Base Mainnet or to accept a fake Safe?
+5. Can `ComputeRewards` credit more than 90% of a conversion, or release staked ARL to anyone
+   but its staker?

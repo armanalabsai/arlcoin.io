@@ -9,45 +9,50 @@ EVM version `cancun`, optimizer 200 runs, no via-IR.
 
 ## Contracts
 
-| Contract           | Upstream base                             | ARL-specific code                                        |
-| ------------------ | ----------------------------------------- | -------------------------------------------------------- |
-| `ARLToken`         | `ERC20`, `ERC20Permit` (both unmodified)  | Constructor that mints the eleven allocations once       |
-| `ARLAllocation`    | —                                         | Library of allocation constants                          |
-| `ARLVestingWallet` | `VestingWallet` (unmodified vesting math) | Explicit cliff parameters; beneficiary cannot be changed |
-| `ARLTimelock`      | `TimelockController`                      | No external admin; 48-hour floor on the delay            |
+| Contract           | Upstream base                                                        | ARL-specific code                                        |
+| ------------------ | -------------------------------------------------------------------- | -------------------------------------------------------- |
+| `ARLToken`         | `ERC20`, `ERC20Burnable`, `ERC20Permit` (all unmodified)             | Constructor that mints the eleven allocations once       |
+| `ARLAllocation`    | —                                                                    | Library of allocation constants                          |
+| `ARLVestingWallet` | `VestingWallet` (unmodified vesting math)                            | Explicit cliff parameters; beneficiary cannot be changed |
+| `ARLTimelock`      | `TimelockController`                                                 | No external admin; 48-hour floor on the delay            |
+| `ComputeRewards`   | `ERC20Burnable`, `SafeERC20`, `ReentrancyGuardTransient`, `SafeCast` | 5 / 5 / 90 credit split; stake tiers                     |
 
 ## Token
 
-| Property                     | Value                                          |
-| ---------------------------- | ---------------------------------------------- |
-| Name / symbol                | ARL / ARL                                      |
-| Decimals                     | 18                                             |
-| Supply                       | 21,000,000 ARL, minted once in the constructor |
-| Public functions             | ERC-20, EIP-2612 permit, `MAX_SUPPLY`          |
-| Owner, admin, pause, upgrade | None                                           |
+| Property                     | Value                                                                  |
+| ---------------------------- | ---------------------------------------------------------------------- |
+| Name / symbol                | ARL / ARL                                                              |
+| Decimals                     | 18                                                                     |
+| Supply                       | 21,000,000 ARL maximum, minted once in the constructor; burns lower it |
+| Public functions             | ERC-20, `burn`, `burnFrom`, EIP-2612 permit, `MAX_SUPPLY`              |
+| Owner, admin, pause, upgrade | None                                                                   |
 
 ### Supply invariant
 
-`totalSupply() == MAX_SUPPLY == 21,000,000 × 10¹⁸` from the end of the
-constructor for the life of the contract.
+`totalSupply() == MAX_SUPPLY == 21,000,000 × 10¹⁸` at the end of the
+constructor. After that, `totalSupply() == MAX_SUPPLY − burned` and never increases.
 
 Why no code path can increase supply:
 
 1. OpenZeppelin's `_mint` is `internal`. `ARLToken` calls it only in its
    constructor, which runs once.
-2. There is no burn, so supply also cannot decrease.
+2. `burn` and `burnFrom` (OpenZeppelin `ERC20Burnable`, unmodified) call `_burn`, which only
+   lowers supply, and only from the caller's balance or an allowance it holds.
 3. The contract is not upgradeable and has no `delegatecall`, so the code cannot
    change after deployment.
 4. The constructor reverts unless the minted total equals `MAX_SUPPLY`.
 
 Enforced by:
 
-- `test_NoAdminOrMintFunctions` — calls mint, burn, owner, pause, role,
-  initializer and upgrade selectors with valid arguments; all fail.
+- `test_NoAdminOrMintFunctions` — calls mint, owner, pause, role, initializer
+  and upgrade selectors with valid arguments; all fail. Burn tests check that a
+  burn removes exactly the amount from the burner and from the supply.
 - `scripts/check-token-abi.mjs` — CI fails if the compiled ABI contains any
-  function beyond ERC-20, EIP-2612 permit (`permit`, `nonces`,
-  `DOMAIN_SEPARATOR`, `eip712Domain`) and `MAX_SUPPLY`.
-- Invariants `invariant_TotalSupplyIsExactlyMax` and
+  function beyond ERC-20, `burn`, `burnFrom`, EIP-2612 permit (`permit`,
+  `nonces`, `DOMAIN_SEPARATOR`, `eip712Domain`) and `MAX_SUPPLY`.
+- Halmos `check_NoCallIncreasesSupply`: no call from any caller with any
+  calldata raises the supply.
+- Invariants `invariant_TotalSupplyIsMaxMinusBurned` and
   `invariant_BalancesSumToSupply` over 262,144 random calls (extended run).
 - `contract-consistency.test.ts` — the Solidity constants must equal
   `packages/tokenomics` in amount and order, `ARLToken.Recipients` must have
@@ -225,3 +230,34 @@ Tests (`ARLTokenPermit.t.sol`): valid permit and `transferFrom`, nonce
 increment, supply unchanged, exact-deadline boundary, replay, expiry (fuzzed),
 wrong signer, altered value or spender, other chain ID, high-`s` malleable
 signature, zero signature, and fuzzed keys, values and deadlines.
+
+## Compute credits and tiers
+
+`ComputeRewards` (approved 2026-10-09) is the burn and staking-tier contract. It has no owner,
+admin, pause, upgrade or recovery function; the token, the reward pool and the credit treasury
+are immutables fixed at deployment, and the contract refuses itself as either recipient.
+
+| Function                            | Effect                                                                                                                                       |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `convertToCredits(arlAmount)`       | 5% burned (`burnFrom`, total supply goes down), 5% to `rewardPool`, 90% to `creditTreasury` and added to `userCredits`; remainder to credits |
+| `stake(amount)`                     | Locks ARL in the contract, then `_updateTier`                                                                                                |
+| `unstake(amount)`                   | `_updateTier`, then returns the ARL to the caller                                                                                            |
+| `userStakes`, `userTier`, `tierFor` | Views                                                                                                                                        |
+
+Tiers by amount staked: Bronze below 100 ARL, Silver from 100, Gold from 500, Diamond from
+2,000. A `TierChanged` event is emitted only when the tier changes.
+
+Converted ARL never sits in the contract, so its balance always covers every stake. Credits are
+a ledger that the compute provider reads; they cannot be withdrawn or transferred. The intended
+`rewardPool` is the Community & Staking allocation holder, which funds `ARLStakingRewards`
+through `notifyRewardAmount` (tokens sent to the staking contract directly are lost). The
+`creditTreasury` is the compute payment receiver; it is not yet named in the deployment plan.
+
+Gas per transaction, first-time (cold) case, `forge test --isolate --gas-report`:
+`convertToCredits` 117,111, `stake` 84,249, `unstake` 62,315. `test_GasBudgets` keeps
+conversion under 150,000 and staking under 100,000.
+
+The Synthetix `StakingRewards` stake / withdraw pattern (balance mapping,
+checks-effects-interactions, `nonReentrant`) is followed without copying its code; the reward
+stream already exists in `ARLStakingRewards`. Sablier was evaluated for streaming and is not
+used: nothing in this contract streams.

@@ -106,8 +106,9 @@ How these rules map to contracts is described in
 
 These are kept separate everywhere, including the website:
 
-- **Maximum supply** and **total supply**: 21,000,000 ARL, equal for the life of
-  the token.
+- **Maximum supply**: 21,000,000 ARL, minted once. **Total supply** starts
+  equal to it and goes down only by burns (holders' own burns and the 5% burn
+  of every compute-credit conversion).
 - **Allocation**: the genesis assignment above. Allocated is not circulating.
 - **Released supply**: tokens that have left a vesting wallet or custody Safe.
 - **Unlocked supply**: tokens that have vested and are releasable.

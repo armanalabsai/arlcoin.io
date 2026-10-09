@@ -167,27 +167,71 @@ contract ARLTokenTest is ARLTestBase {
 
     // ---------------------------------------------------------------- no admin surface
 
-    /// @dev The token exposes exactly ERC-20, EIP-2612 permit and MAX_SUPPLY. Any selector that
-    /// could be an admin or mint function must not exist.
+    /// @dev The token exposes exactly ERC-20, ERC20Burnable, EIP-2612 permit and MAX_SUPPLY.
+    /// Any selector that could be an admin or mint function must not exist.
     function test_NoAdminOrMintFunctions() public {
         address me = address(this);
-        bytes[] memory calls = new bytes[](11);
+        bytes[] memory calls = new bytes[](9);
         calls[0] = abi.encodeWithSignature("owner()");
         calls[1] = abi.encodeWithSignature("mint(address,uint256)", me, 1e18);
         calls[2] = abi.encodeWithSignature("mint(uint256)", 1e18);
-        calls[3] = abi.encodeWithSignature("burn(uint256)", 0);
-        calls[4] = abi.encodeWithSignature("burnFrom(address,uint256)", communitySafe, 0);
-        calls[5] = abi.encodeWithSignature("pause()");
-        calls[6] = abi.encodeWithSignature("transferOwnership(address)", me);
-        calls[7] = abi.encodeWithSignature("grantRole(bytes32,address)", bytes32(0), me);
-        calls[8] = abi.encodeWithSignature("initialize()");
-        calls[9] = abi.encodeWithSignature("upgradeToAndCall(address,bytes)", me, "");
-        calls[10] = abi.encodeWithSignature("issue(address,uint256)", me, 1e18);
+        calls[3] = abi.encodeWithSignature("pause()");
+        calls[4] = abi.encodeWithSignature("transferOwnership(address)", me);
+        calls[5] = abi.encodeWithSignature("grantRole(bytes32,address)", bytes32(0), me);
+        calls[6] = abi.encodeWithSignature("initialize()");
+        calls[7] = abi.encodeWithSignature("upgradeToAndCall(address,bytes)", me, "");
+        calls[8] = abi.encodeWithSignature("issue(address,uint256)", me, 1e18);
         for (uint256 i = 0; i < calls.length; i++) {
             (bool ok,) = address(token).call(calls[i]);
             assertFalse(ok);
         }
         assertEq(token.totalSupply(), ARLAllocation.MAX_SUPPLY);
+    }
+
+    // ---------------------------------------------------------------- burn
+
+    function test_BurnReducesSupply() public {
+        vm.prank(communitySafe);
+        token.burn(1_000e18);
+        assertEq(token.totalSupply(), ARLAllocation.MAX_SUPPLY - 1_000e18);
+        assertEq(token.balanceOf(communitySafe), ARLAllocation.COMMUNITY_STAKING - 1_000e18);
+    }
+
+    function test_BurnFromSpendsAllowance() public {
+        vm.prank(communitySafe);
+        token.approve(address(this), 5e18);
+        token.burnFrom(communitySafe, 2e18);
+        assertEq(token.allowance(communitySafe, address(this)), 3e18);
+        assertEq(token.totalSupply(), ARLAllocation.MAX_SUPPLY - 2e18);
+    }
+
+    function test_RevertWhen_BurnFromWithoutAllowance() public {
+        vm.prank(address(0xBAD));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IERC20Errors.ERC20InsufficientAllowance.selector, address(0xBAD), 0, 1
+            )
+        );
+        token.burnFrom(communitySafe, 1);
+    }
+
+    function test_RevertWhen_BurnExceedsBalance() public {
+        vm.prank(address(0xBEEF));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IERC20Errors.ERC20InsufficientBalance.selector, address(0xBEEF), 0, 1
+            )
+        );
+        token.burn(1);
+    }
+
+    /// @dev Burning never increases supply and always removes exactly the amount burned.
+    function testFuzz_BurnOnlyDecreasesSupply(uint256 amount) public {
+        amount = bound(amount, 0, ARLAllocation.COMMUNITY_STAKING);
+        vm.prank(communitySafe);
+        token.burn(amount);
+        assertEq(token.totalSupply(), ARLAllocation.MAX_SUPPLY - amount);
+        assertLe(token.totalSupply(), token.MAX_SUPPLY());
     }
 
     function test_RejectsEther() public {

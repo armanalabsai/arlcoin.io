@@ -108,12 +108,29 @@ contract ARLSymbolic is Test {
         assertEq(token.totalSupply(), ARLAllocation.MAX_SUPPLY);
     }
 
-    /// @dev No call from any caller with any calldata changes the total supply.
-    function check_NoCallChangesSupply(address caller, bytes calldata data) public {
+    /// @dev No call from any caller with any calldata increases the total supply.
+    function check_NoCallIncreasesSupply(address caller, bytes calldata data) public {
+        uint256 supplyBefore = token.totalSupply();
         vm.prank(caller);
         (bool ok,) = address(token).call(data);
-        ok; // success or failure, the supply must not move
-        assertEq(token.totalSupply(), ARLAllocation.MAX_SUPPLY);
+        ok; // success or failure, the supply must never go up
+        assertLe(token.totalSupply(), supplyBefore);
+        assertLe(token.totalSupply(), ARLAllocation.MAX_SUPPLY);
+    }
+
+    /// @dev A burn of any amount removes exactly that amount from the burner and from the
+    /// supply, or changes nothing.
+    function check_BurnRemovesExactlyAmount(uint256 amount) public {
+        uint256 balanceBefore = token.balanceOf(FOUNDER);
+        vm.prank(FOUNDER);
+        (bool ok,) = address(token).call(abi.encodeCall(token.burn, (amount)));
+        if (ok) {
+            assertEq(token.balanceOf(FOUNDER), balanceBefore - amount);
+            assertEq(token.totalSupply(), ARLAllocation.MAX_SUPPLY - amount);
+        } else {
+            assertEq(token.balanceOf(FOUNDER), balanceBefore);
+            assertEq(token.totalSupply(), ARLAllocation.MAX_SUPPLY);
+        }
     }
 
     // ------------------------------------------------------------------ vesting

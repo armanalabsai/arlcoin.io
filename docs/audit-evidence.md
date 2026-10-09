@@ -70,18 +70,18 @@ before a release.
 
 ## Manual review
 
-| Area                     | Observation                                                                                                                                                                         |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Mint and burn            | `_mint` is called only in the token constructor; no mint, burn, owner, pause or upgrade path. `totalSupply == 21,000,000` is checked in the constructor and by invariants.          |
-| Access control           | Token: none. Vesting wallets: beneficiary fixed (`transferOwnership`/`renounceOwnership` revert). Timelock: no external admin; only the timelock can change roles, after the delay. |
-| Timelock and guardian    | 48-hour floor on construction and on every `updateDelay`; zero-address and guardian-overlap roles rejected; guardian holds only `CANCELLER_ROLE`.                                   |
-| Vesting                  | `VestingWallet` with `start = cliffEnd`: nothing before the cliff end, linear after; schedule bounds checked; releases always go to the fixed beneficiary.                          |
-| Reentrancy               | Token and vesting use OpenZeppelin ERC-20 without hooks; distributor sets the claimed bit before transferring; staking is `nonReentrant`.                                           |
-| Arithmetic and precision | Solidity 0.8 checked math; vesting rounds down (OpenZeppelin); staking reward rate rounds down and the remainder stays unallocated (tested).                                        |
-| Initialization           | All contracts are constructor-initialized and immutable; no initializer, no proxy.                                                                                                  |
-| Upgradeability           | None.                                                                                                                                                                               |
-| Allocation               | Eleven constants sum to 21,000,000 ARL and match `packages/tokenomics` (consistency test); on-chain balances match (manifest).                                                      |
-| Deployment addresses     | CREATE addresses equal the simulation and the plan; the deploy screen checks each created address.                                                                                  |
+| Area                     | Observation                                                                                                                                                                                       |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Mint and burn            | `_mint` is called only in the token constructor; no mint, owner, pause or upgrade path. Burns (`ERC20Burnable`) only lower supply; `totalSupply == 21,000,000 − burned` is checked by invariants. |
+| Access control           | Token: none. Vesting wallets: beneficiary fixed (`transferOwnership`/`renounceOwnership` revert). Timelock: no external admin; only the timelock can change roles, after the delay.               |
+| Timelock and guardian    | 48-hour floor on construction and on every `updateDelay`; zero-address and guardian-overlap roles rejected; guardian holds only `CANCELLER_ROLE`.                                                 |
+| Vesting                  | `VestingWallet` with `start = cliffEnd`: nothing before the cliff end, linear after; schedule bounds checked; releases always go to the fixed beneficiary.                                        |
+| Reentrancy               | Token and vesting use OpenZeppelin ERC-20 without hooks; distributor sets the claimed bit before transferring; staking is `nonReentrant`.                                                         |
+| Arithmetic and precision | Solidity 0.8 checked math; vesting rounds down (OpenZeppelin); staking reward rate rounds down and the remainder stays unallocated (tested).                                                      |
+| Initialization           | All contracts are constructor-initialized and immutable; no initializer, no proxy.                                                                                                                |
+| Upgradeability           | None.                                                                                                                                                                                             |
+| Allocation               | Eleven constants sum to 21,000,000 ARL and match `packages/tokenomics` (consistency test); on-chain balances match (manifest).                                                                    |
+| Deployment addresses     | CREATE addresses equal the simulation and the plan; the deploy screen checks each created address.                                                                                                |
 
 ## Findings
 

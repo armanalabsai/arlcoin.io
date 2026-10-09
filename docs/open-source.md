@@ -62,6 +62,15 @@ v1.5.0 proxy of a canonical singleton.
 OpenZeppelin, forge-std, Foundry and Slither are now in use; the Safe is used
 as a deployed instance only. Exact provenance is in `THIRD_PARTY_LICENSES.md`.
 
+## Burn and compute credits (2026-10-09)
+
+| Component                                                        | Version / license                                                                               | Decision                                                                                                              |
+| ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| OpenZeppelin `ERC20Burnable`                                     | v5.6.1, MIT (already pinned)                                                                    | Adopted unmodified in `ARLToken` for `burn` / `burnFrom`                                                              |
+| OpenZeppelin `SafeERC20`, `ReentrancyGuardTransient`, `SafeCast` | v5.6.1, MIT (already pinned)                                                                    | Adopted unmodified in `ComputeRewards`                                                                                |
+| Synthetix `StakingRewards`                                       | MIT (already adopted via curvefi/unipool-fork)                                                  | Stake / withdraw pattern followed in `ComputeRewards`; no code copied. The reward stream stays in `ARLStakingRewards` |
+| Sablier Lockup (formerly v2-core)                                | BUSL-1.1 for the primary contracts (read from `sablier-labs/lockup` `LICENSE.md` on 2026-10-09) | Not used: BUSL-1.1 does not permit production use without a license, and the credit and tier logic needs no streaming |
+
 ## Later phases (evaluated, not selected)
 
 | Layer    | Candidate                           | Head evaluated   | License                                                      | Note                                                          |

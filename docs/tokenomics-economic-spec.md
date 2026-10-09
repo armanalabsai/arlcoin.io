@@ -49,9 +49,18 @@ accounted for when both representations exist is TBD (section 17.10).
 | --------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
 | Maximum supply is 21,000,000 ARL                                                                                                              | APPROVED / LOCKED |
 | The full supply is minted once, in the token contract's constructor                                                                           | APPROVED / LOCKED |
-| No mint, burn, owner, admin, pause or upgrade function                                                                                        | APPROVED / LOCKED |
-| Total supply equals maximum supply for the life of the token                                                                                  | APPROVED / LOCKED |
+| No mint, owner, admin, pause or upgrade function                                                                                              | APPROVED / LOCKED |
+| Holders can burn their own ARL (`burn`, `burnFrom`); burning only lowers total supply (CTO decision of 2026-10-09)                            | APPROVED / LOCKED |
+| Total supply never exceeds maximum supply; it goes down only by burns                                                                         | APPROVED / LOCKED |
 | Rewards, staking, grants and growth programs pay out existing allocations only; no inflation, emission beyond an allocation or hidden reserve | APPROVED / LOCKED |
+
+APPROVED / LOCKED (CTO decision of 2026-10-09): converting ARL to compute credits
+(`ComputeRewards.convertToCredits`) burns 5%, sends 5% to the reward pool and 90% to the
+credit treasury. Burn and pool shares round down; the rounding remainder goes to the converting
+account's credits.
+
+TBD / REQUIRES CTO DECISION: whether the 10,000,000 ARL floor of section 17.8 also bounds
+burns of the ERC-20 token (see the effective-supply question in section 17.10).
 
 ## 3. 11-Allocation Table
 
@@ -188,7 +197,7 @@ from an allocation.
 | #   | Term                         | Definition                                                                                        | Counts as circulating    |
 | --- | ---------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------ |
 | 1   | Maximum Supply               | The hard cap: 21,000,000 ARL                                                                      | —                        |
-| 2   | Total Supply                 | `totalSupply()`; equal to the maximum supply for the life of the token                            | —                        |
+| 2   | Total Supply                 | `totalSupply()`; the maximum supply less everything burned                                        | —                        |
 | 3   | Allocated Supply             | The genesis assignment in section 3                                                               | No, not by itself        |
 | 4   | Locked Supply                | Balances of vesting wallets, the treasury timelock and every protocol-controlled Safe or contract | No                       |
 | 5   | Vested but unreleased Supply | Vested and releasable, but still in a vesting wallet                                              | No, until released       |
@@ -246,8 +255,7 @@ APPROVED / LOCKED:
 - Circulating supply from this allocation at TGE depends entirely on the
   approved launch mechanism.
 - Any part of the allocation not used by an approved mechanism stays in its
-  controlled or locked holder. The token has no burn; unused tokens are not
-  destroyed.
+  controlled or locked holder. Unused tokens are not burned.
 - Public Launch and Liquidity are separate allocations. Neither may be used to
   fund or disguise the other.
 - Any launch mechanism needs separate legal approval and separate

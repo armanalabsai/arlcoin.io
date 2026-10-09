@@ -22,6 +22,7 @@ contract ARLHandler is Test {
     address[] internal actors;
 
     uint256 public ghostTreasuryPaid;
+    uint256 public ghostBurned;
     uint256 public ghostOwnershipChanges;
     uint256 internal nonce;
 
@@ -59,6 +60,25 @@ contract ARLHandler is Test {
         token.approve(spender, amount);
         vm.prank(spender);
         token.transferFrom(owner, spender, amount);
+    }
+
+    function burn(uint256 fromSeed, uint256 amount) external {
+        address from = _actor(fromSeed);
+        amount = bound(amount, 0, token.balanceOf(from));
+        vm.prank(from);
+        token.burn(amount);
+        ghostBurned += amount;
+    }
+
+    function approveAndBurnFrom(uint256 ownerSeed, uint256 spenderSeed, uint256 amount) external {
+        address owner = _actor(ownerSeed);
+        address spender = _actor(spenderSeed);
+        amount = bound(amount, 0, token.balanceOf(owner));
+        vm.prank(owner);
+        token.approve(spender, amount);
+        vm.prank(spender);
+        token.burnFrom(owner, amount);
+        ghostBurned += amount;
     }
 
     function releaseInvestors() external {
@@ -151,13 +171,14 @@ contract ARLInvariantTest is ARLTestBase {
         targetContract(address(handler));
     }
 
-    /// Supply is exactly the cap, forever.
-    function invariant_TotalSupplyIsExactlyMax() public view {
-        assertEq(token.totalSupply(), ARLAllocation.MAX_SUPPLY);
+    /// Supply is the cap minus everything burned: nothing is ever created after genesis.
+    function invariant_TotalSupplyIsMaxMinusBurned() public view {
+        assertEq(token.totalSupply(), ARLAllocation.MAX_SUPPLY - handler.ghostBurned());
         assertLe(token.totalSupply(), 21_000_000e18);
     }
 
-    /// Every token is accounted for: nothing is created, nothing leaves the tracked set.
+    /// Every token is accounted for: nothing is created, nothing leaves the tracked set except by
+    /// burning.
     function invariant_BalancesSumToSupply() public view {
         uint256 sum;
         for (uint256 i = 0; i < holders.length; i++) {

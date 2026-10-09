@@ -8,9 +8,9 @@
   },
   "contracts": {
     "ARLToken": {
-      "creationHash": "0xe45878e1c9fca3c5b5450898e5ebf53ee2574d19c80c0011ac8acbabd6fcb0b1",
-      "runtimeHash": "0xc9691c5eb919296743823c6ec63b0ed5c78bc518f08910b078ef733a1041943e",
-      "runtimeSize": 3775
+      "creationHash": "0xafd6a425d64e6c30f8f8d787cf2a1d3caf7877f7322072a098cd34d0ece7323d",
+      "runtimeHash": "0xc4bf6f47c4aa0fd4109415e81f88f43cbd9aeb126c920d1f821a774260d2978f",
+      "runtimeSize": 3944
     },
     "ARLVestingWallet": {
       "creationHash": "0xec33acfaaeb7a7eeec179484b0b7e26f649feca2ebe45ad2d7e56e53c809b1ca",
