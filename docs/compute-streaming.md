@@ -78,10 +78,44 @@ Tests: `npm test -w @arl/sdk` (offline) and `npm run test:anvil -w @arl/sdk` (ne
 `forge build` in `contracts/`; deploys ARLToken and ComputePayment on Anvil, runs the SDK end to
 end and fails if the SDK's ABI differs from the compiled contract).
 
+## Deployment
+
+`contracts/script/DeployComputePayment.s.sol` deploys ComputePayment against an ARL token that is
+already deployed. It runs on local Anvil (31337) and Base Sepolia (84532) only and refuses Base
+Mainnet and every other chain. Before deploying it requires the token to be ARL (code at the
+address, symbol `ARL`, 18 decimals, total supply exactly 21,000,000); after deploying it checks the
+contract's `paymentToken` and empty state, then writes
+`contracts/deploy/deployments/<chainId>-compute-payment.json` (git-ignored). The contract has no
+owner, so the deployer keeps no role. Its creation and runtime hashes are in
+`contracts/deploy/bytecode.json` (`npm run check:bytecode`).
+
+Local rehearsal (no key; Anvil development accounts):
+
+```sh
+anvil &
+cd contracts
+forge script script/DevDapp.s.sol:DevDapp --rpc-url http://127.0.0.1:8545 --broadcast \
+  --unlocked --sender 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+ARL_TOKEN=<token from deploy/deployments/31337-dapp.json> \
+  forge script script/DeployComputePayment.s.sol:DeployComputePayment \
+  --rpc-url http://127.0.0.1:8545 --broadcast --unlocked \
+  --sender 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+```
+
+Base Sepolia (after ARL is deployed there by the main runbook, [deployment.md](deployment.md)):
+
+```sh
+ARL_TOKEN=<ARL on Base Sepolia> forge script script/DeployComputePayment.s.sol:DeployComputePayment \
+  --rpc-url $BASE_SEPOLIA_RPC --broadcast --account <keystore> --sender <deployer> --verify
+```
+
+Prerequisites, in order: ARL deployed on Base Sepolia; a Base Sepolia RPC URL; a deployer
+keystore funded with Base Sepolia ETH (faucet); a Basescan API key for `--verify`.
+
 ## Limits
 
-- Not deployed. Deployment to Base Sepolia follows the deployment gate in
-  [deployment.md](deployment.md); Base Mainnet is locked in the SDK.
+- Not deployed. ARL itself is not yet deployed on Base Sepolia, and ComputePayment is deployed
+  after it. Base Mainnet is refused by the deploy script and by the SDK.
 - A stream pushes the provider's share to the provider at settlement. With ARL (a plain ERC-20,
   no hooks) that transfer cannot be blocked by the recipient.
 - Not in the scope of the first audit (see [audit-scope.md](audit-scope.md)).
