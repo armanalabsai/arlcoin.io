@@ -12,11 +12,11 @@ Under the hood: the x402 "upto" scheme and Permit2 on Base. The signature covers
 ARL itself: 21,000,000 fixed supply. No mint function, no owner, no upgrade path.
 
 Where we are, honestly:
-• Status: IN DEVELOPMENT
-• Tested on a local fork of Base Sepolia. Nothing is deployed.
+• The ARL token is live on Base Sepolia testnet. Not on mainnet yet.
+• The payment rail is IN DEVELOPMENT: tested on a local Base Sepolia fork, no facilitator running.
 • No audit of ARL's contracts yet.
 
-We build in public. The code is open source on GitHub (link in bio).
+We build in public. The code is open source on GitHub (link in bio). Questions: t.me/arlcoinio
 
 Question for builders: per second, per request or per token? How would you bill AI compute?
 

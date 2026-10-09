@@ -96,6 +96,9 @@ export function FooterLinks() {
       <a href={SITE.social.instagram} rel="me noopener noreferrer" target="_blank" className={link}>
         Instagram
       </a>
+      <a href={SITE.social.telegram} rel="me noopener noreferrer" target="_blank" className={link}>
+        Telegram
+      </a>
     </nav>
   );
 }
