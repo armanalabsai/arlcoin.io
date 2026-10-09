@@ -164,19 +164,19 @@ public one is needed for launchpads.
 
 ### Checklist before publishing (nothing published)
 
-| Check                                                   | Result (2026-10-05)                                                                                                            |
-| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| No private keys, seeds or API keys in tracked files     | PASS: pattern scan of every tracked file found none                                                                            |
-| Signer configuration not committed                      | PASS: `contracts/deploy/deployments/` and `deploy/plans/` are git-ignored                                                      |
-| Web3Forms access key in `apps/web/src/content/forms.ts` | Accepted: a Web3Forms access key is a public, client-side key by design; it only lets forms post to the team inbox             |
-| Contact email in the site and docs                      | `team@arlcoin.io` is public by intent (contact form)                                                                           |
-| Author emails in Git history                            | 4 author names, all with `gokturkalazdaghan@gmail.com`. Publishing shows this address. History is not rewritten; owner decides |
-| Licences                                                | PASS: `LICENSE` (Apache-2.0), `NOTICE`, `THIRD_PARTY_LICENSES.md`                                                              |
-| Security policy and contact                             | `SECURITY.md` present; the reporting link must be updated to the new host                                                      |
-| Submodules                                              | OpenZeppelin, forge-std, solidity-datetime from their public upstreams (pinned commits)                                        |
-| Branches                                                | 53 local branches; publish `main` (others are merged or superseded)                                                            |
-| README, docs, deployment addresses                      | Present; Base Sepolia addresses in `docs/audit-evidence.md`                                                                    |
-| Repository URL in docs                                  | `gokturkalazdaghan-dot/ARLCOIN` appears in docs; update if the host changes                                                    |
+| Check                                                   | Result (2026-10-05)                                                                                                |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| No private keys, seeds or API keys in tracked files     | PASS: pattern scan of every tracked file found none                                                                |
+| Signer configuration not committed                      | PASS: `contracts/deploy/deployments/` and `deploy/plans/` are git-ignored                                          |
+| Web3Forms access key in `apps/web/src/content/forms.ts` | Accepted: a Web3Forms access key is a public, client-side key by design; it only lets forms post to the team inbox |
+| Contact email in the site and docs                      | `team@arlcoin.io` is public by intent (contact form)                                                               |
+| Author emails in Git history                            | Every commit is authored as `Alazdg <team@arlcoin.io>` (history rewritten by owner decision on 2026-10-06)         |
+| Licences                                                | PASS: `LICENSE` (Apache-2.0), `NOTICE`, `THIRD_PARTY_LICENSES.md`                                                  |
+| Security policy and contact                             | `SECURITY.md` present; the reporting link must be updated to the new host                                          |
+| Submodules                                              | OpenZeppelin, forge-std, solidity-datetime from their public upstreams (pinned commits)                            |
+| Branches                                                | 53 local branches; publish `main` (others are merged or superseded)                                                |
+| README, docs, deployment addresses                      | Present; Base Sepolia addresses in `docs/audit-evidence.md`                                                        |
+| Repository URL in docs                                  | `gokturkalazdaghan-dot/ARLCOIN` appears in docs; update if the host changes                                        |
 
 To publish (owner action): restore the GitHub account (ticket 4818868) and push `main` from the
 local repository, or create a repository on another host the owner controls and push `main` there.

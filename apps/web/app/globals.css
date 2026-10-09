@@ -609,21 +609,21 @@
 .landing-core:hover {
   border-color: var(--color-accent-edge);
 }
-/* The ARL Network logo in the hero, linking to the Core. */
+/* The ARL logo in the hero, linking to the Core. */
 .landing-logo {
   background: url("/arl-logo.svg") center / cover no-repeat;
   box-shadow:
-    0 0 0 1px rgb(255 255 255 / 0.12),
+    0 0 0 1px rgb(255 255 255 / 0.1),
     0 30px 80px -20px rgb(0 0 0 / 0.7),
-    0 0 90px rgb(111 200 255 / 0.18);
+    0 0 90px rgb(236 234 227 / 0.1);
   transition: box-shadow 200ms;
   animation: landing-float 6s ease-in-out infinite;
 }
 .landing-logo:hover {
   box-shadow:
-    0 0 0 1px var(--color-accent-edge),
+    0 0 0 1px rgb(255 255 255 / 0.3),
     0 30px 80px -20px rgb(0 0 0 / 0.7),
-    0 0 110px rgb(111 200 255 / 0.3);
+    0 0 110px rgb(236 234 227 / 0.18);
 }
 @keyframes landing-float {
   50% {

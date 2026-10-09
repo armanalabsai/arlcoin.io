@@ -173,8 +173,8 @@ CI runs all of these in the `web` job, plus `npm audit --audit-level=high`.
   submissions a month), which emails each submission to the team. No server or database is
   involved, so the forms work on Vercel and on the static GitHub Pages build alike.
 - The access key lives in `src/content/forms.ts` (overridable with `NEXT_PUBLIC_WEB3FORMS_KEY`)
-  and delivers to `armanalabsai@gmail.com`. It is public by design: it can only send to the inbox
-  it was created for. With no key the
+  and delivers to the team inbox. It is public by design: it can only send to the inbox it was
+  created for. With no key the
   forms send nothing: the whitelist shows a "not open yet" notice and the contact page shows the
   team address, `team@arlcoin.io` (`SITE.email` in `src/content/site.ts`).
 - The whitelist form accepts an EVM address (EIP-55 checksum enforced for mixed case, using
