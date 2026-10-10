@@ -60,13 +60,15 @@ and verifier, dApp with end-to-end tests, website, Aderyn). Halmos 0.3.3: **11 p
 (`Symbolic test result: 11 passed; 0 failed`). The ZK job rebuilt the circuit and verifier byte
 for byte and passed 18 tests.
 
-### Not reproduced on this machine
+### Linux re-run, 2026-10-10
 
-Aderyn 0.6.8 publishes no Windows build, and Halmos 0.3.3 needs a native build of `safe-pysha3`
-that fails without a C compiler. Both ran in CI before the GitHub account was suspended (Aderyn:
-3 reported, all triaged as false positive or style; Halmos: 11 of 11 properties proven; Mythril:
-9 reported, none exploitable; see [audit-scope.md](audit-scope.md)). They must be re-run on Linux
-before a release.
+Run in a Linux container with the CI versions (Foundry 1.8.3 checked by SHA-256, submodules at the
+pinned commits): `forge fmt --check`, build, `forge test` **254 passed, 0 failed**, gas snapshot,
+token ABI check, `npm run check:bytecode` (6 contracts reproduce), `npm run rehearse:local`
+(59 negative cases rejected), Slither 0.11.6 **0 results**, Halmos 0.3.3 **11 passed, 0 failed**,
+Aderyn 0.6.8 **5 reported** (two new, in `ARLAnonymousSignal`, outside the launch scope) and
+Mythril 0.24.8 on the deployed runtime bytecode, 900 s each: **11 reported, none exploitable**.
+Triage of every Aderyn and Mythril finding: [audit-scope.md](audit-scope.md).
 
 ## Manual review
 
@@ -90,7 +92,7 @@ before a release.
 | F-1 | Medium   | All Safe roles on Base Sepolia are 1-of-1, owned by one EOA. One key controls 18.9M ARL held by the Safes and the timelock's proposer and executor. | Accepted for testnet. Mainnet must use ≥2-of-3 Safes.                                                                                                                   |
 | F-2 | Medium   | The deployer/owner EOA has an active EIP-7702 delegation to MetaMask's `EIP7702StatelessDeleGator` (`0x63c0c19a…e32b`), set during Safe creation.   | Resolved: on 2026-10-05 eth_getCode on Base Sepolia returns 0x. The mainnet deployer is a different, clean address.                                                     |
 | F-3 | Low      | Documentation drift: `ARLTimelock` NatSpec and `audit-scope.md` describe a 3-of-5 treasury Safe and "nothing deployed".                             | `audit-scope.md` updated. The NatSpec is left unchanged so the repository source stays identical to the verified deployed source; fix it with the next contract change. |
-| F-4 | Info     | Mythril was not re-run after the GitHub suspension. Halmos and Aderyn were re-run in GitLab CI on 2026-10-05 (Halmos 11/11).                        | Mythril re-run optional.                                                                                                                                                |
+| F-4 | Info     | Mythril was not re-run after the GitHub suspension. Halmos and Aderyn were re-run in GitLab CI on 2026-10-05 (Halmos 11/11).                        | Resolved: Mythril re-run on Linux on 2026-10-10, 11 reported, none exploitable.                                                                                         |
 | F-5 | Info     | Staking invariant handler over-funded in long campaigns (test code only).                                                                           | Fixed.                                                                                                                                                                  |
 
 No vulnerability was found in the contract code.
