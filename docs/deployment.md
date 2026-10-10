@@ -28,6 +28,29 @@ Values come from their single sources:
 | 48-hour timelock floor         | `packages/tokenomics` (planner); `ARLTimelock.MIN_DELAY_FLOOR` (constructor; a test pins the script's copy to it)                                                        |
 | Addresses, chain ID            | The deployment config                                                                                                                                                    |
 
+## Deployment record rules
+
+Owner decisions (2026-10-10). They hold until the gaps they describe are fixed and this section
+says so.
+
+1. **A deployment record is not proof on its own.** With `--broadcast`, `forge script` runs the
+   script, and so writes the record, before it sends the transactions. If sending fails part-way,
+   the record can name a contract that is not on the chain. A record counts only together with an
+   on-chain check of every address in it: `VerifyARL` and `bytecode-cli.ts verify` for the ARL
+   system, the signed receipts (`broadcast/.../run-latest.json`, or the Deploy screen's checks
+   after signing from a phone), and for ComputePayment `cast code <address>` and
+   `paymentToken()` against the record.
+2. **`DeployDistributor` and `CreateSafes` still write their record on a dry run.** `DeployARL`
+   and `DeployComputePayment` no longer do; these two must be fixed before they are used again.
+   Signing from a phone currently takes the Safe addresses from the `CreateSafes` dry-run record,
+   so the fix must also give that flow a confirmed source for them (see the open item below).
+3. **No Git history rewrite while others work.** No force-push to any branch while another Claude
+   session or the PC is working on the repository.
+
+Open item: write deployment records only after an on-chain confirmation (each created address has
+the expected code, read from the RPC), for all four scripts and for the phone flow. Until then the
+rules above apply.
+
 ## Configuration
 
 `contracts/deploy/config/local.json` is the only config. Its addresses are
