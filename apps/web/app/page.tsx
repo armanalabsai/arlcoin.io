@@ -159,12 +159,9 @@ export default function Home() {
             <span className="live-dot" aria-hidden="true" />
             Native utility token on Base
           </p>
-          <h1 className="mt-2 text-[64px] leading-none font-bold tracking-[-0.04em] sm:text-[96px]">
-            ARL
-          </h1>
-          <p className="mx-auto mt-4 max-w-[720px] text-[22px] leading-[1.3] font-semibold tracking-[-0.02em] text-fg sm:text-[28px]">
+          <h1 className="mx-auto mt-6 max-w-[720px] text-[28px] leading-[1.2] font-bold tracking-[-0.02em] text-heading sm:text-[40px]">
             The onchain token planned for decentralized AI and compute services.
-          </p>
+          </h1>
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link href="/whitelist" prefetch={false} className={primary}>
               Join the whitelist
@@ -310,12 +307,12 @@ export default function Home() {
           <Reveal delay={120} className="glass mt-14 rounded-[28px] p-6 sm:p-10">
             <ol className="landing-road text-left">
               {ROADMAP.map(({ layerId, card }) => (
-                <li key={card.id} data-status={status(card)}>
+                <li key={card.id} data-progress={card.progress ?? "next"}>
                   <Link href={pathFor(layerId, card.id)} prefetch={false} className="group block">
                     <span className="block text-[15px] font-bold text-heading group-hover:text-accent">
                       {card.title}
                     </span>
-                    <span className="mt-1 block font-mono text-[11px] tracking-[0.06em] text-fg-muted uppercase">
+                    <span className="road-state mt-1 block font-mono text-[11px] tracking-[0.06em] text-fg-muted uppercase">
                       {status(card)}
                     </span>
                   </Link>
