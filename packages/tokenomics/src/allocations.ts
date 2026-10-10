@@ -26,7 +26,10 @@ export const TGE_DATE = "2026-11-01T00:00:00Z";
  * section 7). Amounts in whole ARL.
  */
 export const PUBLIC_LAUNCH = {
-  /** Distributed through the Merkle claim at TGE; the rest stays in the Public Launch Safe. */
+  /**
+   * Distributed through the Merkle claim at TGE. The rest stays in the Public Launch Safe; selling
+   * it through Uniswap positions is an owner decision of 2026-10-10 awaiting legal approval.
+   */
   tgeTranche: 500_000,
   /** Largest single claim. */
   maxPerAddress: 10_000,

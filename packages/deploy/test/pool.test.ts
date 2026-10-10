@@ -5,6 +5,7 @@ import { decodeFunctionData, parseAbi } from "viem";
 
 import {
   FEE,
+  POOL_CAPS,
   PoolError,
   QUOTES,
   TICK_SPACING,
@@ -19,6 +20,7 @@ import {
 // Expected Base Mainnet addresses (docs/mainnet-plan.md).
 const ARL = "0x0e8A5434f12D3d839a0a7E88d3a66b11bd712b97";
 const LIQUIDITY_SAFE = "0x220D3a21366FD386CEEEF4ba36c7aE6582AB3C18";
+const PUBLIC_LAUNCH_SAFE = "0xb9829b9145581042776fa65bbF56972447aCdB38";
 const DEADLINE = 1_796_083_200;
 const Q192 = 2n ** 192n;
 const WEI = 10n ** 18n;
@@ -179,5 +181,33 @@ describe("launch liquidity plan", () => {
     ]) {
       assert.throws(() => buildPoolPlan({ ...input, ...bad }), PoolError);
     }
+  });
+
+  it("lets the Public Launch Safe pool everything but its claim tranche (4,500,000 ARL)", () => {
+    assert.equal(POOL_CAPS.publicLaunch, 4_500_000n);
+    const publicLaunch: PoolInput = {
+      ...input,
+      liquiditySafe: PUBLIC_LAUNCH_SAFE,
+      allocation: "publicLaunch",
+      legs: [
+        { quote: "USDT", arlAmount: "2000000", quoteUsd: "1" },
+        { quote: "USDC", arlAmount: "1600000", quoteUsd: "1" },
+        { quote: "WETH", arlAmount: "450000", quoteUsd: "4000" },
+        { quote: "cbBTC", arlAmount: "450000", quoteUsd: "100000" },
+      ],
+    };
+    const plan = buildPoolPlan(publicLaunch);
+    assert.equal(BigInt(plan.totalArlWei), 4_500_000n * WEI);
+    assert.throws(
+      () =>
+        buildPoolPlan({
+          ...publicLaunch,
+          legs: [{ quote: "USDT", arlAmount: "4500001", quoteUsd: "1" }],
+        }),
+      PoolError,
+    );
+    // The Liquidity cap is unchanged.
+    assert.throws(() => buildPoolPlan({ ...publicLaunch, allocation: "liquidity" }), PoolError);
+    assert.throws(() => buildPoolPlan({ ...publicLaunch, allocation: "team" as never }), PoolError);
   });
 });
