@@ -12,14 +12,16 @@
 #      testnet ARL
 #
 # Usage: scripts/rehearse-sepolia-ecosystem.sh [fork-rpc-url]
+# ARL_USE_FORK=<rpc> uses a fork that is already running (and leaves it running); ARL_OPERATOR
+# replaces the testnet operator; ARL_FORK_OUT changes the output directory under contracts/.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 FORK_URL="${1:-https://sepolia.base.org}"
 PORT="${ARL_FORK_PORT:-18760}"
 RPC="http://127.0.0.1:$PORT"
-OUT="deploy/deployments/fork-84532"
-OPERATOR=0x3b33Db294B9f52993728103215be1D86A7777093
+OUT="${ARL_FORK_OUT:-deploy/deployments/fork-84532}"
+OPERATOR="${ARL_OPERATOR:-0x3b33Db294B9f52993728103215be1D86A7777093}"
 TOKEN=0x244312b619127B6458154F3467eFD7c87CD28500
 COMMUNITY_SAFE=0x6e7bD80144ea10e5E1FcF95Fc4B044415CFE61d4
 
@@ -31,17 +33,22 @@ die() {
 cleanup() { if [[ -n "${ANVIL_PID:-}" ]]; then kill "$ANVIL_PID" 2>/dev/null || true; fi; }
 trap cleanup EXIT
 
-[[ "$(cast chain-id --rpc-url "$FORK_URL")" == "84532" ]] || die "$FORK_URL is not Base Sepolia"
-if cast chain-id --rpc-url "$RPC" >/dev/null 2>&1; then die "port $PORT is in use"; fi
-
-log "Forking Base Sepolia locally on port $PORT"
-anvil --port "$PORT" --fork-url "$FORK_URL" --auto-impersonate --silent &
-ANVIL_PID=$!
-for _ in $(seq 1 150); do
-  if cast chain-id --rpc-url "$RPC" >/dev/null 2>&1; then break; fi
-  sleep 0.2
-done
-[[ "$(cast chain-id --rpc-url "$RPC")" == "84532" ]] || die "fork did not start as chain 84532"
+if [[ -n "${ARL_USE_FORK:-}" ]]; then
+  RPC="$ARL_USE_FORK"
+  [[ "$(cast chain-id --rpc-url "$RPC")" == "84532" ]] || die "$RPC is not a Base Sepolia fork"
+  [[ "$(cast rpc anvil_nodeInfo --rpc-url "$RPC" 2>/dev/null)" != "" ]] || die "$RPC is not an Anvil fork"
+else
+  [[ "$(cast chain-id --rpc-url "$FORK_URL")" == "84532" ]] || die "$FORK_URL is not Base Sepolia"
+  if cast chain-id --rpc-url "$RPC" >/dev/null 2>&1; then die "port $PORT is in use"; fi
+  log "Forking Base Sepolia locally on port $PORT"
+  anvil --port "$PORT" --fork-url "$FORK_URL" --auto-impersonate --silent &
+  ANVIL_PID=$!
+  for _ in $(seq 1 150); do
+    if cast chain-id --rpc-url "$RPC" >/dev/null 2>&1; then break; fi
+    sleep 0.2
+  done
+  [[ "$(cast chain-id --rpc-url "$RPC")" == "84532" ]] || die "fork did not start as chain 84532"
+fi
 cast rpc anvil_setBalance "$OPERATOR" "$(cast to-hex 300000000000000)" --rpc-url "$RPC" >/dev/null
 
 cd "$ROOT/contracts"

@@ -10,11 +10,11 @@ import {
   useScaffoldReadContract,
   useTransactor,
 } from "~~/hooks/scaffold-eth";
-import deployedContracts from "~~/contracts/deployedContracts";
+import { ARL } from "~~/lib/contracts";
 import { formatDate, percent, timeLeft, vestingPhase } from "~~/lib/format";
 
-const VESTING_ABI = deployedContracts[31337].ARLVestingWallet.abi;
-const TOKEN_ABI = deployedContracts[31337].ARLToken.abi;
+const VESTING_ABI = ARL.ARLVestingWallet.abi;
+const TOKEN_ABI = ARL.ARLToken.abi;
 
 export default function VestingPage() {
   return (

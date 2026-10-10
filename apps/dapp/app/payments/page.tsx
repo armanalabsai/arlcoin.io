@@ -33,6 +33,8 @@ import { formatArl, timeLeft } from "~~/lib/format";
 import { PERMIT2, meter, nonceBitmap, permit2Abi, uptoRequirements } from "~~/lib/payments";
 import type { SignedCeiling } from "~~/lib/payments";
 import { notification } from "~~/utils/scaffold-eth";
+import { IS_LOCAL } from "~~/lib/contracts";
+import { callOperator } from "~~/lib/operatorClient";
 
 const WINDOW_SECONDS = 300;
 
@@ -225,33 +227,42 @@ function UsageDemo({
     }
   };
 
-  // The service side. On a public network this runs on the service's server with its own
-  // facilitator; here it is Anvil development account 4, which the local node unlocks.
+  // The service side. On the local chain the facilitator settles from this page as Anvil
+  // development account 4; on Base Sepolia the testnet operator settles for its demo service.
   const settle = async () => {
     if (!signed || !metered) return;
     setBusy(true);
     try {
-      const wallet = createWalletClient({
-        account: service.terms.facilitator,
-        chain: targetNetwork,
-        transport: http(targetNetwork.rpcUrls.default.http[0]),
-      }).extend(publicActions);
-      type SignerInput = Parameters<typeof toFacilitatorEvmSigner>[0];
-      const facilitator = new UptoFacilitator(
-        toFacilitatorEvmSigner({
-          ...wallet,
-          address: service.terms.facilitator,
-        } as unknown as SignerInput),
-      );
-      const verified = await facilitator.verify(signed.payload, signed.requirements);
-      if (!verified.isValid) {
-        setOutcome({ kind: "failed", reason: verified.invalidReason ?? "invalid authorization" });
-        return;
+      let result: SettleResponse;
+      if (IS_LOCAL) {
+        const wallet = createWalletClient({
+          account: service.terms.facilitator,
+          chain: targetNetwork,
+          transport: http(targetNetwork.rpcUrls.default.http[0]),
+        }).extend(publicActions);
+        type SignerInput = Parameters<typeof toFacilitatorEvmSigner>[0];
+        const facilitator = new UptoFacilitator(
+          toFacilitatorEvmSigner({
+            ...wallet,
+            address: service.terms.facilitator,
+          } as unknown as SignerInput),
+        );
+        const verified = await facilitator.verify(signed.payload, signed.requirements);
+        if (!verified.isValid) {
+          setOutcome({ kind: "failed", reason: verified.invalidReason ?? "invalid authorization" });
+          return;
+        }
+        result = await facilitator.settle(signed.payload, {
+          ...signed.requirements,
+          amount: metered.amount.toString(),
+        });
+      } else {
+        result = await callOperator<SettleResponse>("settle", {
+          payload: signed.payload,
+          requirements: signed.requirements,
+          amount: metered.amount,
+        });
       }
-      const result: SettleResponse = await facilitator.settle(signed.payload, {
-        ...signed.requirements,
-        amount: metered.amount.toString(),
-      });
       if (!result.success)
         setOutcome({ kind: "failed", reason: result.errorReason ?? "settlement failed" });
       else if (metered.amount === 0n || !result.transaction) setOutcome({ kind: "nothing" });
@@ -291,7 +302,8 @@ function UsageDemo({
         <h2 className="text-sm font-extrabold">2 · Pay a service for what you use</h2>
         <p className="mt-1 text-sm text-muted">
           Services come from the ERC-8004 registry (Network screen). On the local chain the
-          service&rsquo;s facilitator settles from this page, as a local development account.
+          service&rsquo;s facilitator settles from this page, as a local development account; on
+          Base Sepolia the ARL testnet operator settles for its demo service.
         </p>
       </div>
       <label className="flex flex-col gap-1 text-sm text-muted">

@@ -1,4 +1,4 @@
-// Writes contracts/deployedContracts.ts from the Foundry build and the local fixture deployment
+// Writes contracts/localContracts.ts from the Foundry build and the local fixture deployment
 // (contracts/script/DevDapp.s.sol). Same output shape as Scaffold-ETH 2's generator (MIT).
 //
 //   node scripts/generate-contracts.ts [--check] [deployment.json]
@@ -19,7 +19,7 @@ const check = args.includes("--check");
 const deploymentPath =
   args.find((a) => a !== "--check") ??
   join(contractsDir, "deploy", "deployments", "31337-dapp.json");
-const outPath = join(here, "..", "contracts", "deployedContracts.ts");
+const outPath = join(here, "..", "contracts", "localContracts.ts");
 
 interface Deployment {
   chainId: number;
@@ -66,11 +66,11 @@ const source = `/**
  */
 import type { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 
-const deployedContracts = {
+const localContracts = {
   ${String(deployment.chainId)}: ${JSON.stringify(contracts, null, 2).replace(/\n/g, "\n  ")},
 } as const;
 
-export default deployedContracts satisfies GenericContractsDeclaration;
+export default localContracts satisfies GenericContractsDeclaration;
 `;
 if (check) {
   const current = readFileSync(outPath, "utf8");
@@ -78,7 +78,7 @@ if (check) {
     console.error(`${outPath} is out of date: run npm run contracts after a local deployment`);
     process.exit(1);
   }
-  console.log("deployedContracts.ts matches the local deployment");
+  console.log("localContracts.ts matches the local deployment");
 } else {
   writeFileSync(outPath, source);
   console.log(`wrote ${outPath} (format it with prettier)`);

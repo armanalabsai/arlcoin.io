@@ -19,6 +19,9 @@ const basePath = staticExport ? (process.env.ARL_BASE_PATH ?? "") : "";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // Route handlers are named route.api.ts: server hosting includes them (the testnet operator,
+  // app/api), the static export, which cannot serve them, leaves them out.
+  pageExtensions: staticExport ? ["tsx", "ts"] : ["tsx", "ts", "api.ts"],
   poweredByHeader: false,
   devIndicators: false,
   outputFileTracingRoot: repoRoot,
