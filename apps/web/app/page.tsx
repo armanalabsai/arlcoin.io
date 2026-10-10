@@ -9,6 +9,7 @@ import { AddToWallet } from "@/site/AddToWallet.tsx";
 import { ChainFlow } from "@/site/ChainFlow.tsx";
 import { FaqList } from "@/site/FaqList.tsx";
 import { JsonLd } from "@/site/JsonLd.tsx";
+import { LaunchSteps } from "@/site/LaunchSteps.tsx";
 import { Reveal } from "@/site/Reveal.tsx";
 import { SiteFooter, SiteHeader } from "@/site/SiteFrame.tsx";
 import { TechShowcase } from "@/site/TechShowcase.tsx";
@@ -190,6 +191,13 @@ export default function Home() {
             ARL is live on the Base Sepolia testnet. Nothing is for sale. Registering is free.
           </p>
         </section>
+
+        <Section
+          heading="Launch on Base."
+          sub={`Base Mainnet launch targeted for ${tge}. Four steps, all from your own wallet. ARL never asks for your private key, your seed phrase or a payment to a personal address.`}
+        >
+          <LaunchSteps />
+        </Section>
 
         <Section
           alt

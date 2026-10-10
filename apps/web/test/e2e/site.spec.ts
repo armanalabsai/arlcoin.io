@@ -20,6 +20,27 @@ test("the landing page leads to the whitelist and the Core", async ({ page }) =>
   await expect(page.getByTestId("arl-core")).toBeVisible();
 });
 
+test("the landing page shows the launch route, closed until the Base Mainnet token exists", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const launch = page.locator("section", {
+    has: page.getByRole("heading", { name: "Launch on Base." }),
+  });
+  await launch.scrollIntoViewIfNeeded();
+  await expect(launch.getByTestId("launch-when-1")).toHaveText("Open now");
+  await expect(launch.getByTestId("launch-when-2")).toHaveText("From 1 November 2026");
+  await expect(launch.getByTestId("launch-when-3")).toHaveText("From 1 November 2026");
+  await expect(launch.getByTestId("launch-when-4")).toHaveText("After launch");
+  await expect(launch.getByRole("link", { name: "Open the claim ›" })).toHaveAttribute(
+    "href",
+    "/app/claim/",
+  );
+  await expect(launch.getByRole("button", { name: "Add ARL to your wallet" })).toHaveCount(0);
+  await launch.getByRole("link", { name: "How to get ARL ›" }).click();
+  await expect(page).toHaveURL(/\/buy\/?$/);
+});
+
 test("the FAQ page lists every question and carries FAQPage markup", async ({ page }) => {
   await page.goto("/faq");
   for (const f of FAQ) await expect(page.locator("summary", { hasText: f.question })).toBeVisible();

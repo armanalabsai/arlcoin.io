@@ -21,7 +21,12 @@ Everything uses contracts and tooling already in this repository; only Base gas 
    decision at the time (not set here).
 3. **Public Launch claim:** the Public Launch Safe funds `ARLMerkleDistributor` with at most
    500,000 ARL for whitelist sign-ups, at most 10,000 ARL each,
-   claimable for 60 days (`DeployDistributor` enforces the tranche and the window).
+   claimable for 60 days (`DeployDistributor` enforces the tranche and the window). Once the
+   distributor is funded, `claim-list-cli.ts` reads it on chain (code, root, token, open window,
+   balance covering the list total) and only then writes `apps/dapp/public/claims/<chainId>.json`;
+   the app's Claim screen (`/app/claim/`) serves that list, checks every proof and the
+   distributor's root again, and offers the claim. Until the file exists the screen says nothing
+   can be claimed.
 4. **Monitoring:** `monitor-cli.ts` from the deployment block; the guardian reviews every
    timelock notice.
 

@@ -40,6 +40,7 @@
     "zustand": "5.0.15"
   },
   "devDependencies": {
+    "@openzeppelin/merkle-tree": "1.0.8",
     "@playwright/test": "1.63.0",
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "22.20.4",
