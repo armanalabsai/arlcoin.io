@@ -1,0 +1,42 @@
+name: Bug report
+description: Something in this repository does not work as documented.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Security vulnerabilities go to team@arlcoin.io (see SECURITY.md), never to a public issue.
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - contracts
+        - zk (circuit, verifier, ARLAnonymousSignal)
+        - packages (tokenomics, deploy, payments, provider, monetary, zk)
+        - apps/dapp
+        - apps/web
+        - CI / tooling
+        - docs
+    validations:
+      required: true
+  - type: input
+    id: commit
+    attributes:
+      label: Commit
+      description: Output of `git rev-parse HEAD`.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Commands, inputs and network (local Anvil, Base Sepolia).
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual result
+    validations:
+      required: true

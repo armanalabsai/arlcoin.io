@@ -23,10 +23,10 @@ project.
 Two different things are called "deployment". They must never be confused on the site or in
 documentation.
 
-| Deployment           | Status           | Evidence                                                                                                                                                                                                          |
-| -------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Website              | `LIVE`           | Vercel serves `arlcoin.io` from `main`; a static mirror runs on GitHub Pages (`.github/workflows/pages.yml`) as a fallback. See [website.md](website.md)                                                          |
-| Blockchain contracts | **Not deployed** | No ARL contract exists on any network, test or production. Approved networks: Base Sepolia (testnet, not yet deployed) and Base Mainnet (locked). Only local Anvil rehearsals exist (`scripts/rehearse-local.sh`) |
+| Deployment           | Status                          | Evidence                                                                                                                                                 |
+| -------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Website              | `LIVE`                          | Vercel serves `arlcoin.io` from `main`; a static mirror runs on GitHub Pages (`.github/workflows/pages.yml`) as a fallback. See [website.md](website.md) |
+| Blockchain contracts | **Base Sepolia (testnet) only** | Token, two vesting wallets and the treasury timelock on Base Sepolia; addresses in [README.md](../README.md). Base Mainnet is locked until the TGE       |
 
 A live website is not a live token. Every on-chain value on the site stays `UNAVAILABLE` until a
 contract deployment exists and its addresses are published through the deployment manifest

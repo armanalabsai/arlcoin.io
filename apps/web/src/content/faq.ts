@@ -38,6 +38,11 @@ export const FAQ: readonly FaqEntry[] = [
       "The Base Mainnet launch (TGE) is targeted for 1 November 2026. The contracts are deployed and source-verified on the Base Sepolia testnet; Base Mainnet has not started.",
   },
   {
+    question: "After the launch, can I sell ARL on a DEX?",
+    answer:
+      "Yes, the token has no transfer tax, blacklist or pause. The launch pools on Uniswap start with ARL only, priced from 0.20 USD: buyers pay USDC, USDT, ETH or BTC into them, and a seller can sell back only as much as buyers have paid in, never below 0.20 USD. Right after the launch a pool may therefore have little to pay sellers until buying starts. The free claim opens a few hours after the pools for this reason.",
+  },
+  {
     question: "Will ARL ever ask for my private key or seed phrase?",
     answer:
       "Never. ARL will never ask for your private key, your seed phrase or a payment. Anyone who does is attempting theft.",

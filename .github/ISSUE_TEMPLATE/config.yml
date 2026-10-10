@@ -1,0 +1,6 @@
+# Security vulnerabilities are never reported in public issues; see SECURITY.md.
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability (private)
+    url: https://github.com/armanalabsai/arlcoin.io/blob/main/SECURITY.md
+    about: Email team@arlcoin.io with "Security" in the subject. Do not open a public issue.

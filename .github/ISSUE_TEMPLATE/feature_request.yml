@@ -1,0 +1,24 @@
+name: Feature request
+description: Propose a change. Substantial new code starts with an open-source evaluation.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What cannot be done today, and who needs it.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+    validations:
+      required: true
+  - type: textarea
+    id: prior-art
+    attributes:
+      label: Existing standards and open-source implementations
+      description: Which mature implementations or standards were evaluated (see docs/open-source.md).
+    validations:
+      required: true

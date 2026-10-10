@@ -12,6 +12,8 @@
 
 import { encodeFunctionData, getAddress, isAddress, parseUnits, type Hex } from "viem";
 
+import { ALLOCATIONS, PUBLIC_LAUNCH } from "@arl/tokenomics";
+
 import { PRODUCTION_CHAIN_ID } from "./plan.ts";
 
 export class PoolError extends Error {}
@@ -41,6 +43,26 @@ export type QuoteSymbol = keyof typeof QUOTES;
 export const USDC_BASE = QUOTES.USDC.address;
 export const ARL_DECIMALS = 18;
 export const LIQUIDITY_ALLOCATION = 2_000_000n;
+
+function allocationAmount(id: string): bigint {
+  const a = ALLOCATIONS.find((x) => x.id === id);
+  if (!a) throw new Error(`unknown allocation ${id}`);
+  return BigInt(a.amount);
+}
+
+/**
+ * Most ARL each Safe may place in pools (whole ARL). The Public Launch Safe keeps its TGE claim
+ * tranche and its launchpad reserve and sells the rest, 2,000,000 ARL, through the pools (owner
+ * decision 2026-10-10).
+ */
+export const POOL_CAPS = {
+  liquidity: LIQUIDITY_ALLOCATION,
+  publicLaunch:
+    allocationAmount("public-launch") -
+    BigInt(PUBLIC_LAUNCH.tgeTranche) -
+    BigInt(PUBLIC_LAUNCH.launchpadReserve),
+} as const;
+export type PoolAllocation = keyof typeof POOL_CAPS;
 
 /** The 1% fee tier, the usual tier for a new token, and its tick spacing. */
 export const FEE = 10_000;
@@ -126,8 +148,13 @@ export interface PoolLeg {
 export interface PoolInput {
   /** The ARL token address on Base Mainnet. */
   readonly token: string;
-  /** The Liquidity Safe: it signs the batch and receives every position NFT. */
+  /**
+   * The Safe that signs the batch and receives every position NFT: the Liquidity Safe, or the
+   * Public Launch Safe when `allocation` is "publicLaunch". (The key name predates the second Safe.)
+   */
   readonly liquiditySafe: string;
+  /** Which allocation funds the pools; sets the cap. Default "liquidity". */
+  readonly allocation?: PoolAllocation;
   /** Listing price in USD per ARL, as a decimal string (approved: "0.20"). */
   readonly priceUsd: string;
   /** Unix seconds after which the mint calls revert. */
@@ -294,8 +321,11 @@ export function buildPoolPlan(input: PoolInput): PoolPlan {
   }
   const legs = input.legs.map((leg) => buildLeg(token, leg, input.priceUsd));
   const total = legs.reduce((sum, l) => sum + BigInt(l.arlAmountWei), 0n);
-  if (total > LIQUIDITY_ALLOCATION * 10n ** BigInt(ARL_DECIMALS))
-    fail("legs: more than the 2,000,000 ARL Liquidity allocation in total");
+  const allocation = input.allocation ?? "liquidity";
+  if (!Object.hasOwn(POOL_CAPS, allocation)) fail(`allocation: unknown ${allocation}`);
+  const cap = POOL_CAPS[allocation];
+  if (total > cap * 10n ** BigInt(ARL_DECIMALS))
+    fail(`legs: more than the ${cap.toLocaleString("en-US")} ARL ${allocation} cap in total`);
 
   const pm = UNISWAP_V3_BASE.positionManager;
   const creates: SafeTx[] = legs.map((l) => ({

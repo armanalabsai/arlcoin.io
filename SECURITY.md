@@ -2,8 +2,10 @@
 
 ## Status
 
-ARL Protocol is under development. No contract is deployed on any network,
-and the code has **not** been audited. Do not use it to hold value.
+ARL Protocol is under development. The token, two vesting wallets and the treasury timelock are
+deployed on Base Sepolia (testnet) only; the addresses are in [README.md](README.md). Nothing is
+deployed on Base Mainnet. The code has **not** been independently audited. Do not use it to hold
+value.
 
 ## Reporting a vulnerability
 
@@ -14,15 +16,15 @@ Do not open a public issue.
 Include the affected file or component, the commit, steps to reproduce and
 the impact you expect. We aim to acknowledge reports within 3 business days.
 
-A bug bounty will be published separately, funded from the Grants / Bug
-Bounty allocation, before any mainnet deployment. Until then there is no
-bounty program.
+The bug bounty, funded from the Grants / Bug Bounty allocation, is described in
+[docs/bug-bounty.md](docs/bug-bounty.md).
 
 ## Scope
 
 - Code in this repository.
+- The Base Sepolia contracts listed in [README.md](README.md).
 - Out of scope: third-party components (report those upstream), and any
-  contract or token that claims to be ARL — none has been deployed.
+  contract or token that claims to be ARL at an address not listed in [README.md](README.md).
 
 ## Secrets
 

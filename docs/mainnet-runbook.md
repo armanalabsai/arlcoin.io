@@ -40,9 +40,7 @@ Safe. Run it again in the last days before the TGE.
    2,100,000), then `explorer-cli.ts --check-broadcast --run` with `ETHERSCAN_API_KEY` set.
 5. **Claim list.** `launch-list-cli.ts whitelist.csv input.json` (applies the 500,000 ARL tranche
    and the 10,000 ARL cap), then `distribution-cli.ts input.json distribution.json`.
-6. **Distributor.** `DeployDistributor` with a claim end at most 60 days ahead (enforced); the
-   Public Launch Safe (2-of-3) funds it with exactly the list total.
-7. **Pool.** The Liquidity Safe opens the single-sided ARL position at and above 0.20 USD
+6. **Pool.** The Liquidity Safe opens the single-sided ARL position at and above 0.20 USD
    ([launch-route.md](launch-route.md)); the position stays in the Safe for 12 months.
    - Check that no ARL/USDC, ARL/USDT, ARL/WETH or ARL/cbBTC 1% pool exists yet (`getPool` on the Uniswap v3 factory
      `0x33128a8fC17869897dcE68Ed026d694621f6FDfD` returns zero). If one exists, its price must be
@@ -60,7 +58,21 @@ Safe. Run it again in the last days before the TGE.
    - Import `pool.json` in the Safe app (Apps → Transaction Builder), check the three calls, and
      sign with two of three owners. Buyers then trade on Uniswap, and aggregators and
      DexScreener/GeckoTerminal pick the pool up from the chain; no listing application is needed.
-8. **Announce.** Publish the addresses on arlcoin.io and in the repository: set
+7. **Public Launch sale positions** (owner decision 2026-10-10; legal approval confirmed by the owner, see
+   [tokenomics-economic-spec.md](tokenomics-economic-spec.md) section 7). Right after step 6 and before any address is announced, the Public Launch
+   Safe adds ARL-only positions on the same four pools and ranges: USDT 600,000, USDC 500,000,
+   WETH 450,000, cbBTC 450,000 (2,000,000 ARL; its 500,000 ARL claim tranche and 2,500,000 ARL
+   launchpad reserve stay in the Safe). Write `pools-public-launch.json` (example:
+   `contracts/test-fork/fixtures/pools-public-launch.json`) with `"allocation": "publicLaunch"`,
+   the Public Launch Safe as `liquiditySafe` and the same ETH and BTC prices as step 6, run
+   `pool-cli.ts`, rehearse with
+   `FOUNDRY_PROFILE=fork ARL_BASE_RPC=<Base RPC> forge test --match-contract UniswapPublicLaunchFork`,
+   then sign with two of three owners. If anyone has traded since step 6 the batch reverts and
+   deposits nothing (fork-tested); rebuild it with `priceUsd` at or above the pool's current price.
+8. **Distributor** (a few hours after the pools, so that buyers have put quote tokens in
+   the pools before claimed ARL can be sold). `DeployDistributor` with a claim end at most 60 days ahead (enforced); the
+   Public Launch Safe (2-of-3) funds it with exactly the list total.
+9. **Announce.** Publish the addresses on arlcoin.io and in the repository: set
    `SITE.mainnet.token` (shows "Add ARL to your wallet") and write the token list with
    `node packages/deploy/src/tokenlist-cli.ts apps/web/public/tokenlist.json 8453=<ARL token>`;
    write the supply API config with
