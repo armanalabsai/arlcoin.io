@@ -95,7 +95,6 @@ removed. The rest need decisions or accounts held by the project owner.
 | ----------------------------------------------------------- | -------- |
 | Opening the Base Mainnet network gate (reviewed change) and the TGE run, with owner approval | BLOCKER  |
 | Independent audit, or a published "not audited" disclosure  | REQUIRED |
-| Basescan verification (`ETHERSCAN_API_KEY`)                 | REQUIRED |
 | Liquidity plan and sale parameters                          | REQUIRED |
 | Legal opinion publication, KYC/AML policy, jurisdiction     | REQUIRED |
 | Public team, contact and community channels                 | REQUIRED |
