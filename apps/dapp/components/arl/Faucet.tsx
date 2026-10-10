@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { Address } from "viem";
 
-import { IS_LOCAL } from "~~/lib/contracts";
+import { IS_TESTNET } from "~~/lib/contracts";
 import { callOperator } from "~~/lib/operatorClient";
 
 /** Public faucets that hand out Base Sepolia ETH for gas. */
@@ -14,7 +14,7 @@ const GAS_FAUCETS = [
 
 /**
  * Testnet only: asks the ARL testnet operator for 1,000 testnet ARL (once a day per account,
- * while the account holds less). Testnet ARL has no value. Hidden on the local chain.
+ * while the account holds less). Testnet ARL has no value. Shown on Base Sepolia only.
  */
 export function Faucet({ account, onPaid }: { account: Address; onPaid?: () => void }) {
   const [state, setState] = useState<
@@ -23,7 +23,7 @@ export function Faucet({ account, onPaid }: { account: Address; onPaid?: () => v
     | { kind: "done"; tx: string }
     | { kind: "error"; text: string }
   >({ kind: "idle" });
-  if (IS_LOCAL) return null;
+  if (!IS_TESTNET) return null;
 
   const ask = async () => {
     setState({ kind: "busy" });

@@ -25,5 +25,8 @@ export function deployBlock(contract: { address: string }): bigint {
 /** Whether this build runs on the local Anvil chain, where development accounts are unlocked. */
 export const IS_LOCAL = ARL_CHAIN_ID === 31_337;
 
+/** Whether this build runs on Base Sepolia, where the testnet operator (faucet, relayer) exists. */
+export const IS_TESTNET = ARL_CHAIN_ID === 84_532;
+
 /** How often screens re-read chain state: every few seconds locally, gently on public RPCs. */
 export const REFRESH_MS = IS_LOCAL ? 3_000 : 15_000;
