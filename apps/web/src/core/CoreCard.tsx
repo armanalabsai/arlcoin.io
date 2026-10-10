@@ -3,29 +3,17 @@
 import { LAYERS, nextLayer } from "@/content/registry.ts";
 import type { Layer } from "@/content/types.ts";
 
+import { withBase } from "./basePath.ts";
+
 interface Props {
   layer: Layer | null;
   onActivate: () => void;
 }
 
-const RING = 108; // radius of the layer ring, in SVG units (viewBox 240)
-const GAP = 0.05; // radians between segments
-
-function arc(index: number, count: number): string {
-  const span = (Math.PI * 2) / count;
-  const start = -Math.PI / 2 + index * span + GAP / 2;
-  const end = start + span - GAP;
-  const x1 = 120 + RING * Math.cos(start);
-  const y1 = 120 + RING * Math.sin(start);
-  const x2 = 120 + RING * Math.cos(end);
-  const y2 = 120 + RING * Math.sin(end);
-  return `M ${x1.toFixed(2)} ${y1.toFixed(2)} A ${RING} ${RING} 0 0 1 ${x2.toFixed(2)} ${y2.toFixed(2)}`;
-}
-
 /**
- * The anchor of every view. The ring shows where the current layer sits in
- * the cycle; activating the Core moves to the next layer (home follows the
- * last one).
+ * The anchor of every view: the ARL mark on a transparent ground. Activating
+ * the Core moves to the next layer (home follows the last one); the current
+ * layer and the next one are given in the accessible name.
  */
 export function CoreCard({ layer, onActivate }: Props) {
   const next = nextLayer(layer);
@@ -40,34 +28,15 @@ export function CoreCard({ layer, onActivate }: Props) {
       onClick={onActivate}
       aria-label={label}
       data-testid="arl-core"
-      className="core-surface group relative grid size-[184px] shrink-0 place-items-center rounded-full border border-line-strong min-[1100px]:size-[216px] min-[1100px]:[@media(max-height:899px)]:size-[184px]"
+      className="group relative grid size-[184px] shrink-0 place-items-center rounded-full min-[1100px]:size-[216px] min-[1100px]:[@media(max-height:899px)]:size-[184px]"
     >
-      <svg
-        viewBox="0 0 240 240"
+      {/* A background image, not an <img>: the mark is decoration (the button carries the
+          name), and pages keep no <img> so that no unverified photo can appear. */}
+      <span
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 size-full"
-      >
-        {LAYERS.map((l, i) => (
-          <path
-            key={l.id}
-            d={arc(i, LAYERS.length)}
-            fill="none"
-            strokeWidth={i === index ? 3 : 1.5}
-            strokeLinecap="round"
-            className={
-              i === index
-                ? "stroke-accent transition-[stroke] duration-300"
-                : "stroke-line-strong transition-[stroke] duration-300"
-            }
-          />
-        ))}
-      </svg>
-      <span className="flex flex-col items-center gap-2">
-        <span className="arl-neon text-[44px] leading-none tracking-[-0.04em] min-[1100px]:text-[52px] min-[1100px]:[@media(max-height:899px)]:text-[44px]">
-          ARL
-        </span>
-        <span className="text-[12px] text-accent">{layer ? layer.title : "Core"}</span>
-      </span>
+        className="pointer-events-none size-full bg-contain bg-center bg-no-repeat"
+        style={{ backgroundImage: `url("${withBase("/arl-core-mark.png")}")` }}
+      />
       <span
         aria-hidden="true"
         className="absolute -bottom-7 text-[12px] whitespace-nowrap text-fg-subtle opacity-0 group-focus-visible:opacity-100"
