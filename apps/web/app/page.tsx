@@ -155,6 +155,14 @@ export default function Home() {
             aria-label="Open the ARL Core"
             className="landing-logo mx-auto mb-8 block size-[200px] rounded-full sm:size-[260px]"
           />
+          {/* The paid-job flow sits right under the logo, so visitors see what ARL does first. */}
+          <div
+            aria-label="How ARL works on Base"
+            role="group"
+            className="glass mx-auto mb-10 max-w-[1100px] rounded-[28px] px-2 pt-6 pb-5 sm:px-6 sm:pt-8"
+          >
+            <ChainFlow />
+          </div>
           <p className="glass-pill inline-flex h-8 items-center gap-2 rounded-full px-3.5 text-[14px] font-semibold text-accent">
             <span className="live-dot" aria-hidden="true" />
             Native utility token on Base
@@ -198,15 +206,6 @@ export default function Home() {
 
         <Section
           alt
-          heading="How ARL works on Base."
-          sub="One paid AI job, start to finish. Every payment is an ARL transfer recorded on the Base blockchain, so anyone can check it."
-        >
-          <Reveal delay={120} className="glass mt-12 rounded-[28px] px-2 pt-6 pb-5 sm:px-6 sm:pt-8">
-            <ChainFlow />
-          </Reveal>
-        </Section>
-
-        <Section
           heading="Onchain. Verifiable."
           sub="The rules live in the contract, not on a server. Read them yourself."
         >
@@ -244,7 +243,6 @@ export default function Home() {
         </Section>
 
         <Section
-          alt
           heading="Fixed. Forever."
           sub="The whole supply is minted once at deployment. No owner, no mint function, no pause, no upgrade."
         >
@@ -266,6 +264,7 @@ export default function Home() {
         </Section>
 
         <Section
+          alt
           heading="Built for AI and compute."
           sub="Swipe through how each one is meant to work. The token runs on the Base Sepolia testnet; nothing is on Base Mainnet yet."
         >
@@ -275,7 +274,6 @@ export default function Home() {
         </Section>
 
         <Section
-          alt
           heading={
             <>
               Security first.
@@ -303,7 +301,11 @@ export default function Home() {
           </div>
         </Section>
 
-        <Section heading="Where ARL is today." sub="Base Mainnet is targeted for 1 November 2026.">
+        <Section
+          alt
+          heading="Where ARL is today."
+          sub="Base Mainnet is targeted for 1 November 2026."
+        >
           <Reveal delay={120} className="glass mt-14 rounded-[28px] p-6 sm:p-10">
             <ol className="landing-road text-left">
               {ROADMAP.map(({ layerId, card }) => (
@@ -322,7 +324,7 @@ export default function Home() {
           </Reveal>
         </Section>
 
-        <Section alt heading="Questions.">
+        <Section heading="Questions.">
           <Reveal
             delay={120}
             className="glass mx-auto mt-12 max-w-[760px] rounded-[28px] px-6 pt-2 pb-4 sm:px-10"
