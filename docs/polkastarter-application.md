@@ -6,13 +6,13 @@ it and replies by e-mail.
 
 ## Basic information
 
-| Field                   | Answer                            |
-| ----------------------- | --------------------------------- |
-| Project Name            | ARL Protocol                      |
-| Contact Name            | Alaz Dağhan Göktürk               |
-| Contact Telegram Handle | No Telegram yet; X: @armanalabsai |
-| Email                   | team@arlcoin.io                   |
-| Referred by             | (empty)                           |
+| Field                   | Answer              |
+| ----------------------- | ------------------- |
+| Project Name            | ARL Protocol        |
+| Contact Name            | Alaz Dağhan Göktürk |
+| Contact Telegram Handle | @arlcoinio          |
+| Email                   | team@arlcoin.io     |
+| Referred by             | (empty)             |
 
 ## Links
 
@@ -55,8 +55,8 @@ it and replies by e-mail.
 
 **Describe Current Community:**
 
-> Pre-launch. Official X (@armanalabsai) and Instagram (@armanalabsai) accounts and a whitelist on
-> arlcoin.io. No Telegram yet.
+> Pre-launch. Official X (@armanalabsai), Instagram (@armanalabsai) and Telegram accounts
+> (group https://t.me/arlcoin_community, contact @arlcoinio) and a whitelist on arlcoin.io.
 
 **Size of Existing Users:**
 

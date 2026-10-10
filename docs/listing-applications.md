@@ -8,24 +8,24 @@ guaranteed listing.
 
 ## Ready now
 
-| Field                     | Value                                                                                                                                            |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Project name / ticker     | ARL / ARL                                                                                                                                        |
-| Chain                     | Base (chain ID 8453)                                                                                                                             |
-| Decimals / standard       | 18 / ERC-20 with EIP-2612 permit                                                                                                                 |
-| Maximum and total supply  | 21,000,000 ARL (fixed; minted once in the constructor; no mint function)                                                                         |
-| Circulating supply at TGE | 2,100,000 ARL (the Founder allocation), before Public Launch claims and pool sales                                                               |
-| Circulating supply method | Total supply minus the balances of the protocol-controlled and locked addresses in the published manifest                                        |
-| Supply API                | `https://arlcoin.io/api/supply/?q=circulating` and `https://arlcoin.io/api/supply/?q=total` (plain number, read from the chain on every request) |
-| Launch date               | 2026-11-01 (TGE)                                                                                                                                 |
-| Trading venues and pairs  | Uniswap v3 on Base, 1%: ARL/USDC, ARL/USDT, ARL/WETH, ARL/cbBTC (pool addresses after the TGE)                                                   |
-| Website                   | https://arlcoin.io                                                                                                                               |
-| Source code               | https://gitlab.com/armanalabs-group/arlcoin                                                                                                      |
-| Whitepaper / deck         | https://arlcoin.io/arl-pitch-deck.pdf, https://arlcoin.io/docs/tokenomics/                                                                       |
-| Audit                     | None. Audit requests sent 2026-10-05 ([independent-audit-plan.md](independent-audit-plan.md)); bug bounty open                                   |
-| Logo                      | https://arlcoin.io/arl-token-200.png (200 × 200 PNG), https://arlcoin.io/arl-token-512.png, https://arlcoin.io/arl-token.svg                     |
-| Social accounts           | https://x.com/armanalabsai, https://www.instagram.com/armanalabsai                                                                               |
-| Contact                   | team@arlcoin.io; Alaz Dağhan Göktürk, Founder and CEO                                                                                            |
+| Field                     | Value                                                                                                                                             |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Project name / ticker     | ARL / ARL                                                                                                                                         |
+| Chain                     | Base (chain ID 8453)                                                                                                                              |
+| Decimals / standard       | 18 / ERC-20 with EIP-2612 permit                                                                                                                  |
+| Maximum and total supply  | 21,000,000 ARL (fixed; minted once in the constructor; no mint function)                                                                          |
+| Circulating supply at TGE | 2,100,000 ARL (the Founder allocation), before Public Launch claims and pool sales                                                                |
+| Circulating supply method | Total supply minus the balances of the protocol-controlled and locked addresses in the published manifest                                         |
+| Supply API                | `https://arlcoin.io/api/supply/?q=circulating` and `https://arlcoin.io/api/supply/?q=total` (plain number, read from the chain on every request)  |
+| Launch date               | 2026-11-01 (TGE)                                                                                                                                  |
+| Trading venues and pairs  | Uniswap v3 on Base, 1%: ARL/USDC, ARL/USDT, ARL/WETH, ARL/cbBTC (pool addresses after the TGE)                                                    |
+| Website                   | https://arlcoin.io                                                                                                                                |
+| Source code               | https://gitlab.com/armanalabs-group/arlcoin                                                                                                       |
+| Whitepaper / deck         | https://arlcoin.io/arl-pitch-deck.pdf, https://arlcoin.io/docs/tokenomics/                                                                        |
+| Audit                     | None. Audit requests sent 2026-10-05 ([independent-audit-plan.md](independent-audit-plan.md)); bug bounty open                                    |
+| Logo                      | https://arlcoin.io/arl-token-200.png (200 × 200 PNG), https://arlcoin.io/arl-token-512.png, https://arlcoin.io/arl-token.svg                      |
+| Social accounts           | https://x.com/armanalabsai, https://www.instagram.com/armanalabsai, Telegram group https://t.me/arlcoin_community, contact https://t.me/arlcoinio |
+| Contact                   | team@arlcoin.io; Alaz Dağhan Göktürk, Founder and CEO                                                                                             |
 
 ### Short description (English, for the form)
 
