@@ -1,7 +1,7 @@
 // Adapted from Scaffold-ETH 2 (MIT, BuidlGuidl): packages/nextjs/services/web3/wagmiConfig.tsx.
 // ARL: the target networks for the ARL contracts, plus Base Mainnet for the Trade page, which
 // only reads Uniswap and sends swaps from the user's wallet. Each chain uses its own RPC.
-import { createClient, http } from "viem";
+import { createClient, fallback, http } from "viem";
 import { base } from "viem/chains";
 import { createConfig } from "wagmi";
 
@@ -19,7 +19,11 @@ export const wagmiConfig = createConfig({
   client({ chain }) {
     return createClient({
       chain,
-      transport: http(chain.id === base.id ? BASE_RPC : chain.rpcUrls.default.http[0]),
+      // Several endpoints (Base Sepolia's public ones): try each in order.
+      transport:
+        chain.id === base.id
+          ? http(BASE_RPC)
+          : fallback(chain.rpcUrls.default.http.map((url) => http(url))),
       pollingInterval: scaffoldConfig.pollingInterval,
     });
   },

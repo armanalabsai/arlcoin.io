@@ -1,4 +1,4 @@
-// ARL usage-based payments over x402 `upto` (Permit2), for the app's local demo.
+// ARL usage-based payments over x402 `upto` (Permit2): the local demo and Base Sepolia.
 //
 // The payer signs a ceiling. The service meters usage and its facilitator settles the metered
 // amount, never more than the ceiling, through the canonical x402UptoPermit2Proxy. The proxy and
@@ -8,7 +8,7 @@ import type { PaymentPayload, PaymentRequirements } from "@x402/core/types";
 import { getAddress, isAddress } from "viem";
 import type { Address } from "viem";
 
-import { LOCAL_CHAIN_ID } from "./network.ts";
+import { BASE_SEPOLIA_CHAIN_ID, LOCAL_CHAIN_ID } from "./network.ts";
 
 export const PERMIT2 = "0x000000000022D473030F116dDEE9F6B43aC78BA3" as const;
 export const UPTO_PROXY = "0x4020A4f3b7b90ccA423B9fabCc0CE57C6C240002" as const;
@@ -34,7 +34,8 @@ export function uptoRequirements(args: {
   windowSeconds: number;
 }): PaymentRequirements {
   const { chainId, arl, ceiling, payTo, facilitator, windowSeconds } = args;
-  if (chainId !== LOCAL_CHAIN_ID) throw new Error("the payments demo runs on the local chain only");
+  if (chainId !== LOCAL_CHAIN_ID && chainId !== BASE_SEPOLIA_CHAIN_ID)
+    throw new Error("payments run on the local chain and Base Sepolia only");
   if (ceiling <= 0n) throw new Error("the ceiling must be above zero");
   if (
     !Number.isInteger(windowSeconds) ||

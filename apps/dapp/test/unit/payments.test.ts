@@ -30,8 +30,9 @@ describe("upto requirements", () => {
     assert.deepEqual(r.extra, { facilitatorAddress: DEMO_FACILITATOR });
   });
   it("refuses other chains, a zero ceiling and long windows", () => {
-    for (const chainId of [8453, 84_532, 1])
+    for (const chainId of [8453, 1, 11_155_111])
       assert.throws(() => uptoRequirements({ ...base, chainId }));
+    assert.equal(uptoRequirements({ ...base, chainId: 84_532 }).network, "eip155:84532");
     assert.throws(() => uptoRequirements({ ...base, ceiling: 0n }));
     assert.throws(() => uptoRequirements({ ...base, windowSeconds: 601 }));
     assert.throws(() => uptoRequirements({ ...base, windowSeconds: 10 }));

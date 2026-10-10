@@ -3,7 +3,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { usePublicClient } from "wagmi";
 
-import deployedContracts from "~~/contracts/deployedContracts";
 import type { ListedService } from "~~/hooks/arl/useArlServices";
 import { statusName } from "~~/lib/jobs";
 import {
@@ -13,8 +12,10 @@ import {
   verifiedRatings,
 } from "~~/lib/reputation";
 import type { FeedbackEvent, JobView, Rating } from "~~/lib/reputation";
+import { ARL, REFRESH_MS, deployBlock } from "~~/lib/contracts";
+import { eventsSince } from "~~/lib/logs";
 
-const JOBS = deployedContracts[31337].ARLJobs;
+const JOBS = ARL.ARLJobs;
 
 export interface ServiceRatings {
   ratings: Rating[];
@@ -35,29 +36,35 @@ export function useJobRatings(services: readonly ListedService[] | undefined) {
       services?.map((s) => `${s.agentId.toString()}:${s.terms.payTo}`).join(","),
     ],
     enabled: !!client && !!services,
-    refetchInterval: 4_000,
+    refetchInterval: REFRESH_MS,
     queryFn: async (): Promise<Map<bigint, ServiceRatings>> => {
       const out = new Map<bigint, ServiceRatings>();
       if (!client || !services?.length) return out;
       const [given, revokedLogs, funded] = await Promise.all([
-        client.getContractEvents({
-          address: REPUTATION_REGISTRY,
-          abi: reputationRegistryAbi,
-          eventName: "NewFeedback",
-          fromBlock: 0n,
-        }),
-        client.getContractEvents({
-          address: REPUTATION_REGISTRY,
-          abi: reputationRegistryAbi,
-          eventName: "FeedbackRevoked",
-          fromBlock: 0n,
-        }),
-        client.getContractEvents({
-          address: JOBS.address,
-          abi: JOBS.abi,
-          eventName: "JobFunded",
-          fromBlock: 0n,
-        }),
+        eventsSince(client, deployBlock(JOBS), (range) =>
+          client.getContractEvents({
+            address: REPUTATION_REGISTRY,
+            abi: reputationRegistryAbi,
+            eventName: "NewFeedback",
+            ...range,
+          }),
+        ),
+        eventsSince(client, deployBlock(JOBS), (range) =>
+          client.getContractEvents({
+            address: REPUTATION_REGISTRY,
+            abi: reputationRegistryAbi,
+            eventName: "FeedbackRevoked",
+            ...range,
+          }),
+        ),
+        eventsSince(client, deployBlock(JOBS), (range) =>
+          client.getContractEvents({
+            address: JOBS.address,
+            abi: JOBS.abi,
+            eventName: "JobFunded",
+            ...range,
+          }),
+        ),
       ]);
       const events: FeedbackEvent[] = given.flatMap((l) => {
         const a = l.args;
