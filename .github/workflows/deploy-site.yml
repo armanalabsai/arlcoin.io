@@ -1,8 +1,8 @@
 name: Deploy site
 
 # Deploys arlcoin.io to Vercel production after CI passes on main, with the same steps as
-# scripts/deploy-site.sh: a static export of apps/web, the supply API and apps/web/vercel.json,
-# uploaded prebuilt with the Vercel CLI. Vercel's own Git builds are turned off
+# scripts/deploy-site.sh: a static export of apps/web, the supply API, apps/web/vercel.json and a
+# static export of the app (apps/dapp) under /app, uploaded prebuilt with the Vercel CLI. Vercel's own Git builds are turned off
 # (apps/web/vercel.json, git.deploymentEnabled), so this workflow is the only automatic deploy.
 #
 # Needs three repository secrets (Settings → Secrets and variables → Actions):
@@ -64,11 +64,23 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-          cache-dependency-path: apps/web/package-lock.json
+          cache-dependency-path: |
+            apps/web/package-lock.json
+            package-lock.json
+            apps/dapp/package-lock.json
 
       - if: steps.secrets.outputs.ready == 'true'
         run: npm ci
         working-directory: apps/web
+
+      # The app under /app: @arl/zk (packages/zk) is linked into it and its dependencies install
+      # at the root.
+      - if: steps.secrets.outputs.ready == 'true'
+        run: npm ci
+
+      - if: steps.secrets.outputs.ready == 'true'
+        run: npm ci
+        working-directory: apps/dapp
 
       - name: Link the Vercel project
         if: steps.secrets.outputs.ready == 'true'

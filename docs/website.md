@@ -7,6 +7,13 @@ and uploads it prebuilt to Vercel production. It needs the repository secrets `V
 (`git.deploymentEnabled: false` in `apps/web/vercel.json`, and in `apps/dapp/vercel.json` for the
 Git-connected `arlcoin-io` project, whose root is the local-only dApp). The same script can be run
 by hand.
+The build is `scripts/build-site.sh`: the website, its supply API and, under `/app`, a static
+export of the app (`apps/dapp`, `ARL_STATIC_EXPORT=1`, `ARL_BASE_PATH=/app`), as the Pages
+workflow does. Until the Base Mainnet launch the app shows Claim and Trade as closed (no
+`apps/dapp/public/claims/8453.json`, no `NEXT_PUBLIC_ARL_MAINNET_TOKEN`). `apps/web/vercel.json`
+gives the website its strict content policy and the app under `/app` its own headers (no frames,
+no source lists, since it talks to RPC nodes and wallets; popups allowed for wallets).
+`npm run test:hosted` in `apps/dapp` builds the same output and tests it in a browser.
 Hosting: Vercel serves `arlcoin.io` from `main` (the shared
 Vercel team was paused on 2026-09-28 for exceeding Hobby fair-use limits and received its one-time
 courtesy unblock the same day, valid 30 days). A static mirror is published to GitHub Pages at
