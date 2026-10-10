@@ -257,8 +257,9 @@ skips validation is refused too. The planner applies the same rule (`networkGate
 `packages/deploy/src/plan.ts`). The gate takes no flag, reads no environment variable and no
 config field, and has no override: `block.chainid` and, for Base Mainnet, the block timestamp
 against `PRODUCTION_OPENS_AT` decide (the planner uses the clock against `TGE_DATE`). Changing
-the opening time requires changing both places in a reviewed change. No CI workflow deploys or holds a
-deployment key.
+the opening time requires changing both places in a reviewed change. No CI workflow deploys a
+contract or holds a contract deployment key (the website workflow `deploy-site.yml` holds only a
+Vercel token).
 
 Before a Base Sepolia deployment: a config with `requireRecipientCode: true` and a dedicated test
 Safe for every role, and a funded deployer key. Private keys are never placed in config files; use
