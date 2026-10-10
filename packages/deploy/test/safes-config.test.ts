@@ -24,10 +24,40 @@ const record = (chainId: number): SafesRecord => ({
     earlyUsers: address(11),
     grantsBugBounty: address(12),
   },
+  verified: {
+    schema: "arl-verified-record/1",
+    kind: "safes",
+    chainId,
+    block: "1",
+    runFile: "0".repeat(64),
+    checks: 148,
+    network: chainId === 84532 ? "base-sepolia" : "local-anvil-rehearsal",
+  },
 });
 const START = "2027-01-01T00:00:00Z";
 
 describe("config from created Safes", () => {
+  it("takes Safe addresses only from a verified Safes record", () => {
+    const unverified: Partial<SafesRecord> = record(84532);
+    delete unverified.verified;
+    assert.throws(
+      () => configFromSafes(unverified as SafesRecord, START),
+      /not a verified safes record/,
+    );
+    const otherKind = record(84532);
+    otherKind.verified = {
+      ...(otherKind.verified as NonNullable<SafesRecord["verified"]>),
+      kind: "arl",
+    };
+    assert.throws(() => configFromSafes(otherKind, START), /not a verified safes record/);
+    const otherChain = record(84532);
+    otherChain.verified = {
+      ...(otherChain.verified as NonNullable<SafesRecord["verified"]>),
+      chainId: 31337,
+    };
+    assert.throws(() => configFromSafes(otherChain, START), /not a verified safes record/);
+  });
+
   it("builds a Base Sepolia config the planner accepts, with code checks and canonical Safes", () => {
     const config = configFromSafes(record(84532), START);
     assert.equal(config.network, "base-sepolia");

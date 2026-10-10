@@ -255,6 +255,28 @@ export function publishedPlanPath(name: string, basePath = ""): string {
   return `${basePath}/plans/${name}.json`;
 }
 
+/**
+ * After every transaction is signed: the command that writes the verified deployment record
+ * from this run file (`packages/deploy/src/record-cli.ts`). Nothing counts as deployed until it
+ * passes, and the Safe addresses for the next plan come only from the Safes record it writes.
+ */
+export function recordCommand(
+  run: DeployRun,
+  runFile: string,
+): { kind: "safes" | "arl"; command: string } {
+  const kind = run.steps.every((s) => s.kind === "safe") ? "safes" : "arl";
+  if (kind === "arl" && run.steps.some((s) => s.kind !== "create")) {
+    fail("the run mixes Safe creations and contract creations");
+  }
+  const out = `contracts/deploy/deployments/${String(run.chainId)}${kind === "safes" ? "-safes" : ""}.json`;
+  const rpc =
+    run.chainId === LOCAL_CHAIN_ID ? "<local-rpc-url> --local-anvil" : "https://sepolia.base.org";
+  return {
+    kind,
+    command: `node packages/deploy/src/record-cli.ts ${kind} ${runFile} ${rpc} ${out}`,
+  };
+}
+
 /** Checks the connected wallet against a step just before it is sent. */
 export function checkBeforeSend(
   step: DeployStep,

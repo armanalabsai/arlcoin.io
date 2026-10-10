@@ -58,9 +58,9 @@ contract DeployComputePaymentTest is ARLTestBase {
         }
     }
 
-    /// Outside a real broadcast (here, a test; on the command line, a dry run) nothing is
-    /// deployed, so no deployment record may be written.
-    function test_writesNoRecordWithoutBroadcast() public {
+    /// The script never writes a deployment record (record-cli writes it after an on-chain
+    /// check), so a run that deploys nothing cannot leave one behind.
+    function test_writesNoRecord() public {
         string memory record = "deploy/deployments/84532-compute-payment.json";
         if (vm.exists(record)) vm.removeFile(record);
         vm.chainId(84_532);

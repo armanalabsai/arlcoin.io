@@ -34,7 +34,6 @@ function dryRun(): string {
       env: {
         ...process.env,
         ARL_PLAN: "deploy/deployments/e2e-plan.json",
-        ARL_DEPLOYMENT: "deploy/deployments/e2e-dry-run.json",
       },
       stdio: "pipe",
     },
@@ -102,7 +101,33 @@ test("deploy: explains and signs a prepared deployment, refuses a tampered file"
     await expect(page.getByTestId(`deploy-status-${String(n)}`)).toHaveText("Done");
   }
   await expect(page.getByTestId("deploy-done")).toBeVisible();
+  // Nothing counts as deployed until the verified record is written from the signed run file.
+  await expect(page.getByTestId("deploy-record-command")).toContainText(
+    "packages/deploy/src/record-cli.ts arl",
+  );
   await page.screenshot({ path: "test-results/deploy.png", fullPage: true });
+
+  // The phone-signed dry run becomes a record only through the verification tool, which checks
+  // every created contract on chain (local Anvil: rehearsal mode).
+  const record = testInfo.outputPath("31337.json");
+  execFileSync(
+    "node",
+    [
+      join(contracts, "..", "packages", "deploy", "src", "record-cli.ts"),
+      "arl",
+      file,
+      E2E_RPC,
+      record,
+      "--local-anvil",
+    ],
+    { stdio: "pipe" },
+  );
+  const written = JSON.parse(readFileSync(record, "utf8")) as {
+    deployer: string;
+    verified: { kind: string; network: string };
+  };
+  expect(written.deployer.toLowerCase()).toBe(DEPLOYER.toLowerCase());
+  expect(written.verified).toMatchObject({ kind: "arl", network: "local-anvil-rehearsal" });
 
   // The owner signs from a phone: no sideways scroll at 360 px with every step shown.
   await page.setViewportSize({ width: 360, height: 800 });

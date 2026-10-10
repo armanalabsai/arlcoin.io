@@ -21,6 +21,7 @@ import {
   describeStep,
   parseRun,
   publishedPlanPath,
+  recordCommand,
   type DeployRun,
   type DeployStep,
 } from "~~/lib/deploySteps";
@@ -40,6 +41,8 @@ const chainFor = (id: number) =>
 
 export default function DeployPage() {
   const [run, setRun] = useState<DeployRun>();
+  // Where the signed run file lives, for the record command shown when everything is signed.
+  const [source, setSource] = useState<string>("<the run file you signed>");
   const [error, setError] = useState<string>();
   // Static hosting cannot send X-Frame-Options, so the screen refuses to run inside a frame,
   // where another site could overlay it.
@@ -60,6 +63,7 @@ export default function DeployPage() {
         });
         if (!res.ok) throw new Error(`the prepared plan "${name}" was not found`);
         setRun(parseRun((await res.json()) as unknown));
+        setSource(`apps/dapp/public/plans/${name}.json`);
       } catch (e) {
         setError(e instanceof Error ? e.message : "unreadable plan");
       }
@@ -80,6 +84,7 @@ export default function DeployPage() {
     if (!file) return;
     try {
       setRun(parseRun(JSON.parse(await file.text()) as unknown));
+      setSource(`<path to ${file.name}>`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "unreadable file");
     }
@@ -119,13 +124,13 @@ export default function DeployPage() {
             </p>
           ) : null}
         </section>
-        {run ? <Signer run={run} /> : null}
+        {run ? <Signer run={run} source={source} /> : null}
       </div>
     </>
   );
 }
 
-function Signer({ run }: { run: DeployRun }) {
+function Signer({ run, source }: { run: DeployRun; source: string }) {
   const [account, setAccount] = useState<Address>();
   const [chainId, setChainId] = useState<number>();
   const [status, setStatus] = useState<Record<number, Status>>({});
@@ -295,10 +300,27 @@ function Signer({ run }: { run: DeployRun }) {
         })}
       </ol>
       {!next ? (
-        <p className="text-sm" data-testid="deploy-done">
-          All transactions are confirmed. Next: run the read-only verification (VerifyARL and the
-          deployment proof) before anything else.
-        </p>
+        <div className="flex flex-col gap-2 text-sm" data-testid="deploy-done">
+          <p>
+            All transactions are sent. Nothing counts as deployed yet: on a computer, write the
+            verified record from this run file. It checks every contract{" "}
+            {recordCommand(run, source).kind === "safes"
+              ? "and every Safe's owners and threshold "
+              : ""}
+            on chain and writes nothing unless all checks pass:
+          </p>
+          <code
+            className="break-all rounded bg-base-200 p-2 text-xs"
+            data-testid="deploy-record-command"
+          >
+            {recordCommand(run, source).command}
+          </code>
+          <p className="text-muted">
+            {recordCommand(run, source).kind === "safes"
+              ? "The next plan takes the Safe addresses only from that record."
+              : "Then run VerifyARL and the deployment proof on that record."}
+          </p>
+        </div>
       ) : null}
     </section>
   );

@@ -15,8 +15,9 @@ import {ARLDeployPlan, Plan} from "./ARLDeployPlan.sol";
 /// - `ARL_DEPLOYMENT`: the deployed ARL system (its token is distributed).
 /// - `ARL_DISTRIBUTION`: the claim list built by `packages/deploy` (`distribution-cli.ts`).
 /// - `ARL_CLAIM_END`: end of the claim window, Unix seconds.
-/// - `ARL_DISTRIBUTOR`: where to write the distributor address (under
-///   `contracts/deploy/deployments/`).
+///
+/// The script writes no deployment record; `packages/deploy/src/record-cli.ts distributor` writes
+/// it from Foundry's run file after checking the distributor on chain.
 ///
 /// The distributor is deployed unfunded. The Public Launch Safe funds it with the list total in
 /// a separate Safe transaction.
@@ -68,26 +69,6 @@ contract DeployDistributor is Script {
         distributor =
             new ARLMerkleDistributor(IERC20(token), root, claimEnd, plan.recipients.publicLaunch);
         vm.stopBroadcast();
-
-        vm.writeFile(vm.envString("ARL_DISTRIBUTOR"), _record(distributor, total));
-    }
-
-    function _record(ARLMerkleDistributor d, uint256 total) private view returns (string memory) {
-        return string.concat(
-            '{"chainId":',
-            vm.toString(block.chainid),
-            ',"distributor":"',
-            vm.toString(address(d)),
-            '","merkleRoot":"',
-            vm.toString(d.merkleRoot()),
-            '","total":"',
-            vm.toString(total),
-            '","claimEnd":',
-            vm.toString(uint256(d.claimEnd())),
-            ',"returnTo":"',
-            vm.toString(d.returnTo()),
-            '"}'
-        );
     }
 
     /// @notice The shared network gate (`ARLDeployPlan.networkGate`), exposed for tests.

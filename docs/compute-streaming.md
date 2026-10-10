@@ -84,8 +84,12 @@ end and fails if the SDK's ABI differs from the compiled contract).
 already deployed. It runs on local Anvil (31337) and Base Sepolia (84532) only and refuses Base
 Mainnet and every other chain. Before deploying it requires the token to be ARL (code at the
 address, symbol `ARL`, 18 decimals, total supply exactly 21,000,000); after deploying it checks the
-contract's `paymentToken` and empty state, then writes
-`contracts/deploy/deployments/<chainId>-compute-payment.json` (git-ignored). The contract has no
+contract's `paymentToken` and empty state. It writes no record: after the broadcast,
+`node packages/deploy/src/record-cli.ts compute-payment
+broadcast/DeployComputePayment.s.sol/84532/run-latest.json https://sepolia.base.org
+deploy/deployments/84532-compute-payment.json` checks the receipt, the code at the address
+(ComputePayment build) and `paymentToken()`, and only then writes the record
+([deployment.md](deployment.md#deployment-records)). The contract has no
 owner, so the deployer keeps no role. Its creation and runtime hashes are in
 `contracts/deploy/bytecode.json` (`npm run check:bytecode`).
 
@@ -103,8 +107,8 @@ ARL_TOKEN=<token from deploy/deployments/31337-dapp.json> \
 ```
 
 Base Sepolia. ARL is deployed there at `0x244312b619127B6458154F3467eFD7c87CD28500` (see
-[deployment.md](deployment.md#base-sepolia-deployment)). Simulate first (no `--broadcast`, no key;
-a dry run writes no deployment record), then broadcast with the deployer's own keystore:
+[deployment.md](deployment.md#base-sepolia-deployment)). Simulate first (no `--broadcast`, no key),
+then broadcast with the deployer's own keystore, then write the verified record (above):
 
 ```sh
 ARL_TOKEN=0x244312b619127B6458154F3467eFD7c87CD28500 \

@@ -28,8 +28,9 @@ interface ISafe {
 }
 
 /// @title Create the dedicated Safe of every ARL role
-/// @notice Creates one Safe v1.5.0 proxy per Safe role (12) and writes their addresses to
-/// `ARL_SAFES_OUT` (under `contracts/deploy/deployments/`). It runs only where
+/// @notice Creates one Safe v1.5.0 proxy per Safe role (12), in the order of `roles()`. It writes
+/// no record: `packages/deploy/src/record-cli.ts safes` writes the Safes record from Foundry's
+/// run file, only after checking each Safe's code, owners and threshold on chain. It runs only where
 /// `ARLDeployPlan.networkGate` allows: local Anvil, Base Sepolia, and Base Mainnet from the TGE.
 ///
 /// On Base Sepolia it uses only the canonical Safe v1.5.0 contracts from safe-deployments
@@ -44,7 +45,6 @@ interface ISafe {
 ///   signers, which must not overlap `ARL_SAFE_OWNERS` (M-1). Without them the guardian uses
 ///   `ARL_SAFE_OWNERS`, which is acceptable only for a testnet rehearsal.
 /// - `ARL_SALT` (optional, default `arl`): salt prefix, so a second run creates new Safes.
-/// - `ARL_SAFES_OUT`: output file.
 /// - Local Anvil only: `ARL_SAFE_FACTORY`, `ARL_SAFE_SINGLETON`, `ARL_SAFE_FALLBACK` (optional).
 ///
 /// Signer addresses are operational configuration and are never committed to the repository.
@@ -128,7 +128,6 @@ contract CreateSafes is Script {
                 i == GUARDIAN ? s.guardianThreshold : s.threshold
             );
         }
-        vm.writeFile(vm.envString("ARL_SAFES_OUT"), _record(safe, c.singleton));
     }
 
     /// @notice Owners must be non-zero and distinct, and the threshold between 1 and the number
@@ -240,27 +239,5 @@ contract CreateSafes is Script {
             // forge-lint: disable-next-line(require-revert-in-loop)
             if (!found) revert SafesSetupMismatch(role);
         }
-    }
-
-    function _record(address[] memory safe, address singleton)
-        private
-        view
-        returns (string memory json)
-    {
-        json = string.concat(
-            '{"chainId":',
-            vm.toString(block.chainid),
-            ',"singleton":"',
-            vm.toString(singleton),
-            '","safes":{'
-        );
-        string[12] memory role = roles();
-        for (uint256 i = 0; i < ROLE_COUNT; i++) {
-            // slither-disable-next-line calls-loop
-            json = string.concat(
-                json, i == 0 ? "" : ",", '"', role[i], '":"', vm.toString(safe[i]), '"'
-            );
-        }
-        json = string.concat(json, "}}");
     }
 }

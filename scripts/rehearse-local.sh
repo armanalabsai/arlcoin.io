@@ -66,9 +66,13 @@ mkdir -p "$REHEARSAL" deploy/deployments
 log "Building the deployment plan"
 node "$ROOT/packages/deploy/src/cli.ts" deploy/config/local.json "$PLAN"
 
+# No deploy script writes a record. The verified-record tool writes it from Foundry's run file,
+# after checking every created contract on chain (--local-anvil: a rehearsal record, stamped so).
+RECORD="$ROOT/packages/deploy/src/record-cli.ts"
 forge_deploy() {
-  ARL_PLAN="$1" ARL_DEPLOYMENT="$2" forge script script/DeployARL.s.sol:DeployARL \
-    --rpc-url "$RPC" --broadcast --unlocked --sender "$DEPLOYER" --slow
+  ARL_PLAN="$1" forge script script/DeployARL.s.sol:DeployARL \
+    --rpc-url "$RPC" --broadcast --unlocked --sender "$DEPLOYER" --slow &&
+    node "$RECORD" arl broadcast/DeployARL.s.sol/31337/run-latest.json "$RPC" "$2" --local-anvil
 }
 forge_verify() {
   ARL_PLAN="$1" ARL_DEPLOYMENT="$2" forge script script/VerifyARL.s.sol:VerifyARL \
@@ -159,6 +163,21 @@ must_fail() {
 nonce() { cast nonce "$DEPLOYER" --rpc-url "$RPC"; }
 DEAD=0x000000000000000000000000000000000000dEaD
 ZERO=0x0000000000000000000000000000000000000000
+
+log "Deployment records come only from the verified-record tool"
+RECORD_HASH="$(sha256sum "$DEPLOYMENT" | cut -d' ' -f1)"
+FILES_BEFORE="$(ls deploy/deployments)"
+ARL_PLAN="$PLAN" forge script script/DeployARL.s.sol:DeployARL \
+  --rpc-url "$RPC" --unlocked --sender "$DEPLOYER" >/dev/null || die "dry run failed"
+[[ "$(sha256sum "$DEPLOYMENT" | cut -d' ' -f1)" == "$RECORD_HASH" ]] || die "a dry run touched the record"
+[[ "$(ls deploy/deployments)" == "$FILES_BEFORE" ]] || die "a dry run wrote a file under deploy/deployments"
+printf '  ok  %-38s %s\n' "dry run wrote no record" "deploy/deployments unchanged"
+must_fail "record from a dry run that was never sent" "record not written: [0-9]+ check\\(s\\) failed" \
+  node "$RECORD" arl broadcast/DeployARL.s.sol/31337/dry-run/run-latest.json "$RPC" "$DEPLOYMENT" --local-anvil
+must_fail "record on local Anvil without the rehearsal flag" "accepted only for the rehearsal" \
+  node "$RECORD" arl broadcast/DeployARL.s.sol/31337/run-latest.json "$RPC" "$DEPLOYMENT"
+[[ "$(sha256sum "$DEPLOYMENT" | cut -d' ' -f1)" == "$RECORD_HASH" ]] || die "a refused record changed the existing one"
+expect "record stamp" "local-anvil-rehearsal" "$(node -e "console.log(require('./$DEPLOYMENT').verified.network)")"
 
 log "Negative rehearsals: the verifier must reject a deployment that differs from the plan"
 mutate "$REHEARSAL/wrong-recipient.json" "p.recipients.liquidity='$DEAD'"
@@ -373,9 +392,10 @@ PIPE_DEPLOYMENT="deploy/deployments/31337-created-safes-deployment.json"
 create_safes() {
   ARL_SAFE_FACTORY="$SAFE_FACTORY" ARL_SAFE_SINGLETON="$SAFE_SINGLETON" \
     ARL_SAFE_OWNERS="$(account 2),$(account 3),$(account 4)" ARL_SAFE_THRESHOLD=2 \
-    ARL_GUARDIAN_OWNERS="$1" ARL_GUARDIAN_THRESHOLD="$2" ARL_SALT="$3" ARL_SAFES_OUT="$4" \
+    ARL_GUARDIAN_OWNERS="$1" ARL_GUARDIAN_THRESHOLD="$2" ARL_SALT="$3" \
     forge script script/CreateSafes.s.sol:CreateSafes \
-    --rpc-url "$RPC" --broadcast --unlocked --sender "$SAFE_DEPLOYER" --slow
+    --rpc-url "$RPC" --broadcast --unlocked --sender "$SAFE_DEPLOYER" --slow &&
+    node "$RECORD" safes broadcast/CreateSafes.s.sol/31337/run-latest.json "$RPC" "$4" --local-anvil
 }
 BEFORE_SAFES="$(cast nonce "$SAFE_DEPLOYER" --rpc-url "$RPC")"
 must_fail "guardian signers overlap the other Safes" "guardian signers overlap" \
@@ -390,6 +410,9 @@ expect "created guardian safe owners" "[$(account 6), $(account 7)]" \
   "$(cast call "$(safeval guardian)" 'getOwners()(address[])' --rpc-url "$RPC" | tr 'A-F' 'a-f')"
 expect "created safes are distinct" "12" \
   "$(node -e "console.log(new Set(Object.values(require('./$PIPE_SAFES').safes).map(a=>a.toLowerCase())).size)")"
+node -e "const s=require('./$PIPE_SAFES'); delete s.verified; require('fs').writeFileSync('$REHEARSAL/unverified-safes.json', JSON.stringify(s));"
+must_fail "config builder: Safes record without the tool's stamp" "not a verified safes record" \
+  node "$ROOT/packages/deploy/src/safes-config-cli.ts" "$REHEARSAL/unverified-safes.json" 2027-01-01T00:00:00Z "$REHEARSAL/x.json"
 node "$ROOT/packages/deploy/src/safes-config-cli.ts" "$PIPE_SAFES" 2027-01-01T00:00:00Z "$PIPE_CONFIG" \
   || die "config from created Safes rejected"
 node "$ROOT/packages/deploy/src/cli.ts" "$PIPE_CONFIG" "$PIPE_PLAN" || die "planner rejected the created-Safes config"
@@ -432,8 +455,10 @@ NOW="$(cast block latest --field timestamp --rpc-url "$RPC")"
 CLAIM_END=$((NOW + 30 * 86400))
 forge_distributor() {
   ARL_PLAN="$PLAN" ARL_DEPLOYMENT="$DEPLOYMENT" ARL_DISTRIBUTION="$1" ARL_CLAIM_END="$CLAIM_END" \
-    ARL_DISTRIBUTOR="$2" forge script script/DeployDistributor.s.sol:DeployDistributor \
-    --rpc-url "$RPC" --broadcast --unlocked --sender "$DEPLOYER" --slow
+    forge script script/DeployDistributor.s.sol:DeployDistributor \
+    --rpc-url "$RPC" --broadcast --unlocked --sender "$DEPLOYER" --slow &&
+    node "$RECORD" distributor broadcast/DeployDistributor.s.sol/31337/run-latest.json "$RPC" "$2" \
+      --distribution "$1" --local-anvil
 }
 listval() { node -e "console.log(require('./$LIST').$1)"; }
 node -e "const l=require('./$LIST'); l.allocation='liquidity'; require('fs').writeFileSync('$REHEARSAL/list-liquidity.json', JSON.stringify(l));"
@@ -546,7 +571,7 @@ gate_chain() {
   [[ "$(cast chain-id --rpc-url "http://127.0.0.1:$2")" == "$1" ]] || die "gate chain $1 did not start"
 }
 gate_deploy() {
-  ARL_PLAN="$2" ARL_DEPLOYMENT="$REHEARSAL/x.json" forge script script/DeployARL.s.sol:DeployARL \
+  ARL_PLAN="$2" forge script script/DeployARL.s.sol:DeployARL \
     --rpc-url "http://127.0.0.1:$1" --broadcast --unlocked --sender "$DEPLOYER" --slow
 }
 MAINNET_PORT=$((PORT + 1))
@@ -559,7 +584,7 @@ must_fail "DeployARL on Base Mainnet" "PlanProductionLocked\\(8453\\)" gate_depl
 must_fail "DeployARL on Base Mainnet with the local plan" "PlanProductionLocked\\(8453\\)" gate_deploy "$MAINNET_PORT" "$PLAN"
 must_fail "DeployDistributor on Base Mainnet" "PlanProductionLocked\\(8453\\)" env \
   ARL_PLAN="$REHEARSAL/mainnet.json" ARL_DEPLOYMENT="$DEPLOYMENT" ARL_DISTRIBUTION="$LIST" \
-  ARL_CLAIM_END="$CLAIM_END" ARL_DISTRIBUTOR="$REHEARSAL/x.json" \
+  ARL_CLAIM_END="$CLAIM_END" \
   forge script script/DeployDistributor.s.sol:DeployDistributor \
   --rpc-url "http://127.0.0.1:$MAINNET_PORT" --broadcast --unlocked --sender "$DEPLOYER" --slow
 expect "no transaction on the Base Mainnet chain" "0" \
@@ -574,5 +599,10 @@ must_fail "Base Sepolia passes the gate, then needs Safes" "PlanRecipientHasNoCo
   gate_deploy "$TESTNET_PORT" "$REHEARSAL/testnet.json"
 expect "no transaction on the Base Sepolia chain" "0" \
   "$(cast nonce "$DEPLOYER" --rpc-url "http://127.0.0.1:$TESTNET_PORT")"
+
+# An Anvil node with Base Sepolia's chain id is not Base Sepolia: no record without the flag.
+node -e "const r=require('./broadcast/DeployARL.s.sol/31337/run-latest.json'); r.chain=84532; for (const t of r.transactions) t.transaction.chainId='0x14a34'; require('fs').writeFileSync('$REHEARSAL/run-84532.json', JSON.stringify(r));"
+must_fail "record from an Anvil chain posing as Base Sepolia" "local Anvil fork, not Base Sepolia" \
+  node "$RECORD" arl "$REHEARSAL/run-84532.json" "http://127.0.0.1:$TESTNET_PORT" "$REHEARSAL/x.json"
 
 log "REHEARSAL PASSED: deployed, verified, and $NEGATIVE negative cases rejected"

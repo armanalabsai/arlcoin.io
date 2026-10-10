@@ -11,9 +11,12 @@ contracts/deploy/config/<network>.json      public, source-controlled inputs
         │  node packages/deploy/src/cli.ts   validates, applies UTC calendar arithmetic
         ▼
 contracts/deploy/plans/<network>.json       generated plan (git-ignored)
-        │  forge script DeployARL            re-validates, deploys, verifies, records
+        │  forge script DeployARL            re-validates, deploys, verifies (writes nothing)
         ▼
-contracts/deploy/deployments/<chain>.json   deployed addresses (git-ignored)
+broadcast/DeployARL.s.sol/<chain>/run-latest.json   Foundry's run file (or the signed dry run)
+        │  node packages/deploy/src/record-cli.ts arl   checks every created contract on chain
+        ▼
+contracts/deploy/deployments/<chain>.json   verified record (git-ignored), written only if all pass
         │  forge script VerifyARL            read-only verification, any time after
         ▼
       pass / fail with the name of the failed check
@@ -28,28 +31,43 @@ Values come from their single sources:
 | 48-hour timelock floor         | `packages/tokenomics` (planner); `ARLTimelock.MIN_DELAY_FLOOR` (constructor; a test pins the script's copy to it)                                                        |
 | Addresses, chain ID            | The deployment config                                                                                                                                                    |
 
-## Deployment record rules
+## Deployment records
 
-Owner decisions (2026-10-10). They hold until the gaps they describe are fixed and this section
-says so.
+No deploy script writes a record. `DeployARL`, `DeployComputePayment`, `DeployDistributor` and
+`CreateSafes` only deploy: `forge script` runs a script before it sends anything, and a
+phone-signed dry run is sent outside Foundry, so a script cannot know what reached the chain.
 
-1. **A deployment record is not proof on its own.** With `--broadcast`, `forge script` runs the
-   script, and so writes the record, before it sends the transactions. If sending fails part-way,
-   the record can name a contract that is not on the chain. A record counts only together with an
-   on-chain check of every address in it: `VerifyARL` and `bytecode-cli.ts verify` for the ARL
-   system, the signed receipts (`broadcast/.../run-latest.json`, or the Deploy screen's checks
-   after signing from a phone), and for ComputePayment `cast code <address>` and
-   `paymentToken()` against the record.
-2. **`DeployDistributor` and `CreateSafes` still write their record on a dry run.** `DeployARL`
-   and `DeployComputePayment` no longer do; these two must be fixed before they are used again.
-   Signing from a phone currently takes the Safe addresses from the `CreateSafes` dry-run record,
-   so the fix must also give that flow a confirmed source for them (see the open item below).
-3. **No Git history rewrite while others work.** No force-push to any branch while another Claude
-   session or the PC is working on the repository.
+`packages/deploy/src/record-cli.ts <safes|arl|compute-payment|distributor> <run.json> <rpc-url>
+<record.json>` writes the record from Foundry's run file (the broadcast file, or the dry-run file
+the phone signed). It writes nothing unless every check passes:
 
-Open item: write deployment records only after an on-chain confirmation (each created address has
-the expected code, read from the RPC), for all four scripts and for the phone flow. Until then the
-rules above apply.
+- the chain is Base Sepolia (84532), read from the RPC and from the run file; Base Mainnet and
+  every other chain are refused. A local Anvil node (a plain 31337 chain or a fork of Base
+  Sepolia) is accepted only with `--local-anvil`, and the record is then stamped
+  `local-anvil-rehearsal` or `base-sepolia-fork-rehearsal`: a rehearsal record is never evidence of
+  anything on Base Sepolia;
+- every transaction is from one sender; in a broadcast file every transaction has a receipt with
+  status 1 (a missing receipt means the broadcast did not complete);
+- every created address is the one its sender and nonce (or CREATE2 salt) give, and holds the
+  expected code: the ARL build's runtime code with only immutables masked (the same comparison as
+  `bytecode-cli.ts verify`), or on Base Sepolia the canonical Safe v1.5.0 proxy code (pinned hash),
+  created by the canonical factory for a canonical singleton (pinned hashes);
+- each contract carries what its constructor was given (getters), and each Safe has exactly the
+  owners and threshold of its signed setup and points to its singleton.
+
+A record is replaced only by an atomic rename of a complete, verified one; a failed or interrupted
+run leaves an existing record byte for byte. Each record carries a `verified` stamp (kind, chain,
+block, SHA-256 of the run file, number of checks). The config builder (`safes-config-cli.ts`)
+accepts only a stamped Safes record, so the Safe addresses of a plan come only from Safes checked
+on chain. The stamp is a process guard, not a signature: anyone can edit a file, so `VerifyARL`
+and `bytecode-cli.ts verify` remain the proof of a deployment.
+
+The existing Base Sepolia deployment (2026-10-04) was re-checked with this tool from its two
+published phone-signed runs (`apps/dapp/public/plans/84532-safes.json`, 148 checks, and
+`84532-deploy.json`, 36 checks), read-only, on 2026-10-10.
+
+**No Git history rewrite while others work** (owner decision, 2026-10-10): no force-push to any
+branch while another Claude session or the PC is working on the repository.
 
 ## Configuration
 
@@ -130,12 +148,11 @@ The owner can sign every transaction from a phone wallet, without any key leavin
    the allocation holders) before the owner signs it. Before sending, the screen checks the
    connected address, the chain and the wallet's next nonce; after the receipt, that a created
    contract is at the address the plan expects.
-4. Afterwards, `VerifyARL` and `bytecode-cli.ts verify` run read-only from any machine. A dry
-   run writes no deployment record (`DeployARL` writes one only with `--broadcast` or
-   `--resume`), so after signing from a phone write the record from the signed file's
-   `returns.d` (deployer, token, investorsVesting, partnershipsVesting, timelock) in the
-   `DeployARL` record format; `VerifyARL` and `bytecode-cli.ts verify` then reject any address
-   that is not the planned, verified contract.
+4. When every transaction is signed, the screen shows the command that writes the verified
+   record from that same dry-run file (`record-cli.ts safes` or `record-cli.ts arl`, see
+   Deployment records). Nothing counts as deployed until it passes. The plan for the next run
+   takes the Safe addresses only from the Safes record it writes. Then `VerifyARL` and
+   `bytecode-cli.ts verify` run read-only from any machine.
 
 Run the Safe creation (`CreateSafes`) and the deployment (`DeployARL`) as two files: the
 deployment plan needs the Safe addresses.
@@ -222,8 +239,9 @@ The approved Public Launch mechanism is a Merkle claim (economic specification s
    budget and an optional per-address limit in base units, and the `{account, amount}` entries.
    The output (`arl-distribution/1`) holds the Merkle root, the total to fund, and every account's
    index, amount and proof; it is re-verified from its own claims before it is written.
-2. Deploy: `DeployDistributor` (`ARL_PLAN`, `ARL_DEPLOYMENT`, `ARL_DISTRIBUTION`, `ARL_CLAIM_END`,
-   `ARL_DISTRIBUTOR`). It checks the list's schema, allocation and total, and fixes `returnTo` to
+2. Deploy: `DeployDistributor` (`ARL_PLAN`, `ARL_DEPLOYMENT`, `ARL_DISTRIBUTION`, `ARL_CLAIM_END`),
+   then `record-cli.ts distributor <run.json> <rpc-url> <distributor.json> --distribution <list>`,
+   which checks the distributor on chain and the list's root. It checks the list's schema, allocation and total, and fixes `returnTo` to
    the plan's Public Launch Safe. Off local Anvil it refuses to run until the launch parameters
    are approved (`LAUNCH_PARAMETERS_APPROVED = false`); it runs only where the network gate allows.
 3. Fund: the Public Launch Safe transfers the list total to the distributor.
@@ -311,14 +329,17 @@ development accounts, no key); nothing is sent to Base Sepolia.
    cd contracts
    ARL_SAFE_OWNERS=<a>,<b>,<c> ARL_SAFE_THRESHOLD=2 \
    ARL_GUARDIAN_OWNERS=<d>,<e> ARL_GUARDIAN_THRESHOLD=2 \
-   ARL_SAFES_OUT=deploy/deployments/84532-safes.json \
    forge script script/CreateSafes.s.sol:CreateSafes --rpc-url https://sepolia.base.org \
      --broadcast --account <keystore-name> --slow
+   node ../packages/deploy/src/record-cli.ts safes \
+     broadcast/CreateSafes.s.sol/84532/run-latest.json https://sepolia.base.org \
+     deploy/deployments/84532-safes.json
    ```
 
 2. **Config and plan.** `safes-config-cli.ts <safes.json> <placeholder-vesting-start> <config.json>`
    writes the config (code checks on, 12 + 36 months, 48-hour delay); `cli.ts` builds the plan.
-3. **Deploy and verify.** `DeployARL` with `ARL_PLAN` and `ARL_DEPLOYMENT`, then `VerifyARL`.
+3. **Deploy and verify.** `DeployARL` with `ARL_PLAN`, then `record-cli.ts arl` on its run file
+   (writes `deploy/deployments/84532.json`), then `VerifyARL` with `ARL_PLAN` and that record.
    From a phone, use the app's **Deploy** screen instead of `--broadcast` (see Signing from a phone).
 4. **Manifest.** `manifest-cli.ts`, then `supply-cli.ts` (circulating supply at TGE is 2,100,000 ARL).
 5. **Explorer source.** `npm run verify:explorer -- … --check-broadcast … --run` with
