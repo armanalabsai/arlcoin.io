@@ -57,4 +57,14 @@ contract DeployComputePaymentTest is ARLTestBase {
             assertEq(payment.MAX_DURATION(), 365 days);
         }
     }
+
+    /// Outside a real broadcast (here, a test; on the command line, a dry run) nothing is
+    /// deployed, so no deployment record may be written.
+    function test_writesNoRecordWithoutBroadcast() public {
+        string memory record = "deploy/deployments/84532-compute-payment.json";
+        if (vm.exists(record)) vm.removeFile(record);
+        vm.chainId(84_532);
+        script.deploy(address(token));
+        assertFalse(vm.exists(record));
+    }
 }

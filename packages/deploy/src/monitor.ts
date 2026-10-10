@@ -274,8 +274,33 @@ const GOVERNANCE_EVENTS = [
 ] as const;
 const STATES: OperationState[] = ["Unset", "Waiting", "Ready", "Done"];
 
-/** Public RPCs cap `eth_getLogs` ranges; scan in chunks of this many blocks. */
-export const LOG_CHUNK = 9_000n;
+/**
+ * Public RPCs cap `eth_getLogs` ranges; scan in chunks of this many blocks (both ends included).
+ * The free Base Sepolia endpoint (`https://sepolia.base.org`) refuses `toBlock - fromBlock > 200`,
+ * so a chunk of 200 blocks (`toBlock - fromBlock = 199`) fits it with one block to spare.
+ */
+export const LOG_CHUNK = 200n;
+
+/**
+ * Splits `[fromBlock, toBlock]` (both included) into consecutive ranges of at most `size` blocks,
+ * covering every block exactly once, in order.
+ */
+export function logRanges(
+  fromBlock: bigint,
+  toBlock: bigint,
+  size: bigint = LOG_CHUNK,
+): { fromBlock: bigint; toBlock: bigint }[] {
+  if (size <= 0n) throw new MonitorError("log range size must be positive");
+  if (fromBlock < 0n || fromBlock > toBlock) {
+    throw new MonitorError("log range must satisfy 0 <= fromBlock <= toBlock");
+  }
+  const ranges: { fromBlock: bigint; toBlock: bigint }[] = [];
+  for (let start = fromBlock; start <= toBlock; start += size) {
+    const end = start + size - 1n;
+    ranges.push({ fromBlock: start, toBlock: end < toBlock ? end : toBlock });
+  }
+  return ranges;
+}
 
 const roleName = (role: Hex) => Object.entries(ROLES).find(([, v]) => v === role)?.[0] ?? role;
 
@@ -363,17 +388,22 @@ export async function readSnapshot(
 
   const scheduled = new Map<Hex, TimelockOperation>();
   const governanceEvents: Snapshot["governanceEvents"] = [];
-  for (let start = fromBlock; start <= blockNumber; start += LOG_CHUNK) {
-    const end = start + LOG_CHUNK - 1n < blockNumber ? start + LOG_CHUNK - 1n : blockNumber;
-    const range = { address: timelock, fromBlock: start, toBlock: end };
-    for (const log of await client.getLogs({ ...range, event: CALL_SCHEDULED })) {
-      const { id, target, value, data } = log.args;
-      if (!id || !target || value === undefined || !data) continue;
-      const op = scheduled.get(id) ?? { id, state: "Unset", readyAt: 0n, calls: [] };
-      op.calls.push({ target, value, data });
-      scheduled.set(id, op);
-    }
-    for (const log of await client.getLogs({ ...range, events: GOVERNANCE_EVENTS })) {
+  // One eth_getLogs call per range, for every event the monitor reads.
+  for (const range of logRanges(fromBlock, blockNumber)) {
+    const logs = await client.getLogs({
+      address: timelock,
+      ...range,
+      events: [CALL_SCHEDULED, ...GOVERNANCE_EVENTS],
+    });
+    for (const log of logs) {
+      if (log.eventName === "CallScheduled") {
+        const { id, target, value, data } = log.args;
+        if (!id || !target || value === undefined || !data) continue;
+        const op = scheduled.get(id) ?? { id, state: "Unset", readyAt: 0n, calls: [] };
+        op.calls.push({ target, value, data });
+        scheduled.set(id, op);
+        continue;
+      }
       // The constructor's grants (from the deploying account) and its initial delay (from 0)
       // are part of the deployment. Any later grant needs the admin role, which only the
       // timelock itself holds.

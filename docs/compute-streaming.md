@@ -102,20 +102,29 @@ ARL_TOKEN=<token from deploy/deployments/31337-dapp.json> \
   --sender 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
 ```
 
-Base Sepolia (after ARL is deployed there by the main runbook, [deployment.md](deployment.md)):
+Base Sepolia. ARL is deployed there at `0x244312b619127B6458154F3467eFD7c87CD28500` (see
+[deployment.md](deployment.md#base-sepolia-deployment)). Simulate first (no `--broadcast`, no key;
+a dry run writes no deployment record), then broadcast with the deployer's own keystore:
 
 ```sh
-ARL_TOKEN=<ARL on Base Sepolia> forge script script/DeployComputePayment.s.sol:DeployComputePayment \
-  --rpc-url $BASE_SEPOLIA_RPC --broadcast --account <keystore> --sender <deployer> --verify
+ARL_TOKEN=0x244312b619127B6458154F3467eFD7c87CD28500 \
+  forge script script/DeployComputePayment.s.sol:DeployComputePayment \
+  --rpc-url https://sepolia.base.org --sender <deployer>
+ARL_TOKEN=0x244312b619127B6458154F3467eFD7c87CD28500 \
+  forge script script/DeployComputePayment.s.sol:DeployComputePayment \
+  --rpc-url https://sepolia.base.org --broadcast --account <keystore> --sender <deployer>
 ```
 
-Prerequisites, in order: ARL deployed on Base Sepolia; a Base Sepolia RPC URL; a deployer
-keystore funded with Base Sepolia ETH (faucet); a Basescan API key for `--verify`.
+Prerequisites: a deployer keystore funded with Base Sepolia ETH (faucet; the simulation estimates
+about 0.000014 ETH); optionally a Basescan API key in `ETHERSCAN_API_KEY` for `--verify`
+(Blockscout verification needs no key). The phone **Deploy** screen accepts only the ARL system's
+own creations, so ComputePayment is broadcast from the command line.
 
 ## Limits
 
-- Not deployed. ARL itself is not yet deployed on Base Sepolia, and ComputePayment is deployed
-  after it. Base Mainnet is refused by the deploy script and by the SDK.
+- ComputePayment is not deployed on any public network. ARL is deployed on Base Sepolia;
+  ComputePayment is deployed after it. Base Mainnet is refused by the deploy script and by the
+  SDK.
 - A stream pushes the provider's share to the provider at settlement. With ARL (a plain ERC-20,
   no hooks) that transfer cannot be blocked by the recipient.
 - Not in the scope of the first audit (see [audit-scope.md](audit-scope.md)).

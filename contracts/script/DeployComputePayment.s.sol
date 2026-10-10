@@ -2,6 +2,8 @@
 pragma solidity 0.8.36;
 
 import {Script} from "forge-std/Script.sol";
+import {VmSafe} from "forge-std/Vm.sol";
+import {console2} from "forge-std/console2.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
@@ -13,7 +15,8 @@ import {ComputePayment} from "../src/ComputePayment.sol";
 /// are refused. Before deploying, the token must be ARL: code at the address, symbol "ARL",
 /// 18 decimals and a total supply of exactly 21,000,000. After deploying, the contract must
 /// point at that token and hold no stream. The address is written to
-/// deploy/deployments/<chainId>-compute-payment.json.
+/// deploy/deployments/<chainId>-compute-payment.json only when the transaction is actually sent
+/// (`--broadcast` or `--resume`); a dry run writes nothing.
 ///
 /// Run (the sender is the deployer; ComputePayment has no owner, so the deployer keeps no role):
 ///   ARL_TOKEN=<ARL address> forge script script/DeployComputePayment.s.sol:DeployComputePayment \
@@ -44,6 +47,11 @@ contract DeployComputePayment is Script {
             revert DeploymentCheckFailed();
         }
 
+        if (!_broadcasting()) {
+            console2.log("Dry run: nothing was deployed, so no deployment record is written.");
+            return payment;
+        }
+
         vm.createDir("deploy/deployments", true);
         string memory json = string.concat(
             '{"chainId":',
@@ -71,5 +79,11 @@ contract DeployComputePayment is Script {
             keccak256(bytes(t.symbol())) != keccak256("ARL") || t.decimals() != 18
                 || t.totalSupply() != ARLAllocation.MAX_SUPPLY
         ) revert NotARL(token);
+    }
+
+    /// @dev True only when forge sends the transaction; false in a dry run and in tests.
+    function _broadcasting() private view returns (bool) {
+        return vm.isContext(VmSafe.ForgeContext.ScriptBroadcast)
+            || vm.isContext(VmSafe.ForgeContext.ScriptResume);
     }
 }
