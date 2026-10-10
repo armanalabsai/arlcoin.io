@@ -86,13 +86,14 @@ and `npm run rehearse:local` (Foundry v1.8.3, `git submodule update --init`).
 
 ## Open items before Base Mainnet
 
-Tracked with owners in [docs/release-readiness.md](docs/release-readiness.md). These need decisions
-or accounts held by the project owner; none can be closed by code alone.
+Tracked with owners in [docs/release-readiness.md](docs/release-readiness.md). Done: mainnet signers
+(2-of-3 role Safes, separate guardian) and a never-delegated deployer, checked read-only on Base
+Mainnet ([mainnet-plan.md](docs/mainnet-plan.md)); the testnet deployer's EIP-7702 delegation is
+removed. The rest need decisions or accounts held by the project owner.
 
 | Item                                                        | Type     |
 | ----------------------------------------------------------- | -------- |
-| Mainnet Safe signers and thresholds (hardware wallets)      | BLOCKER  |
-| Clean (never EIP-7702-delegated) mainnet deployer           | BLOCKER  |
+| Opening the Base Mainnet network gate (reviewed change) and the TGE run, with owner approval | BLOCKER  |
 | Independent audit, or a published "not audited" disclosure  | REQUIRED |
 | Basescan verification (`ETHERSCAN_API_KEY`)                 | REQUIRED |
 | Liquidity plan and sale parameters                          | REQUIRED |
