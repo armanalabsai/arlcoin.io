@@ -26,8 +26,14 @@ export const TGE_DATE = "2026-11-01T00:00:00Z";
  * section 7). Amounts in whole ARL.
  */
 export const PUBLIC_LAUNCH = {
-  /** Distributed through the Merkle claim at TGE; the rest stays in the Public Launch Safe. */
+  /** Distributed through the Merkle claim at TGE. */
   tgeTranche: 500_000,
+  /**
+   * Kept in the Public Launch Safe for launchpad sales (owner decision 2026-10-10). The rest,
+   * 2,000,000 ARL, is sold through Uniswap positions; legal approval confirmed
+   * by the owner.
+   */
+  launchpadReserve: 2_500_000,
   /** Largest single claim. */
   maxPerAddress: 10_000,
   /** Claim window; afterwards the remainder can only return to the Public Launch Safe. */
