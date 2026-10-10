@@ -29,19 +29,27 @@ Safe. Run it again in the last days before the TGE.
 
 ## Steps
 
+No deploy script writes a record. After each signed run, write the record with the verified-record
+tool from the run file the deploy screen signed (`broadcast/<Script>/8453/dry-run/run-latest.json`,
+or `8453/run-latest.json` after a broadcast); it writes nothing unless every check passes (exit 0):
+`node packages/deploy/src/record-cli.ts <safes|arl|distributor> <run.json> https://mainnet.base.org <record.json>`.
+The records go to `contracts/deploy/deployments/8453-safes.json`, `8453.json` and
+`8453-distributor.json`; the record must be stamped `base-mainnet`.
+
 1. **Safes.** Dry-run `CreateSafes` against Base Mainnet with `--sender` = deployer, publish the
-   plan to the deploy screen, sign the 12 transactions. Check each Safe address against
+   plan to the deploy screen, sign the 12 transactions, then `record-cli.ts safes`. Check each Safe address against
    [mainnet-plan.md](mainnet-plan.md) and its owners and threshold on chain.
 2. **Config and plan.** `safes-config-cli.ts` with `2026-11-01T00:00:00Z` (the planner refuses any
    other TGE off testnet), then `cli.ts`.
-3. **Contracts.** Dry-run `DeployARL`, sign nonces 12-15 on the deploy screen; each created
-   address must match the plan.
+3. **Contracts.** Dry-run `DeployARL`, sign nonces 12-15 on the deploy screen, then
+   `record-cli.ts arl`; each created address must match the plan.
 4. **Verify.** `VerifyARL`, `bytecode-cli.ts verify`, `supply-cli.ts` (total 21,000,000, circulating
    2,100,000), then `explorer-cli.ts --check-broadcast --run` with `ETHERSCAN_API_KEY` set.
 5. **Claim list.** `launch-list-cli.ts whitelist.csv input.json` (applies the 500,000 ARL tranche
    and the 10,000 ARL cap), then `distribution-cli.ts input.json distribution.json`.
 6. **Distributor.** `DeployDistributor` with a claim end at most 60 days ahead (enforced); the
-   Public Launch Safe (2-of-3) funds it with exactly the list total.
+   `record-cli.ts distributor … --distribution distribution.json`; the Public Launch Safe (2-of-3)
+   funds it with exactly the list total.
 7. **Pool.** The Liquidity Safe opens the single-sided ARL position at and above 0.20 USD
    ([launch-route.md](launch-route.md)); the position stays in the Safe for 12 months.
    - Check that no ARL/USDC, ARL/USDT, ARL/WETH or ARL/cbBTC 1% pool exists yet (`getPool` on the Uniswap v3 factory

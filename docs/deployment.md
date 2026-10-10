@@ -41,16 +41,16 @@ phone-signed dry run is sent outside Foundry, so a script cannot know what reach
 <record.json>` writes the record from Foundry's run file (the broadcast file, or the dry-run file
 the phone signed). It writes nothing unless every check passes:
 
-- the chain is Base Sepolia (84532), read from the RPC and from the run file; Base Mainnet and
-  every other chain are refused. A local Anvil node (a plain 31337 chain or a fork of Base
-  Sepolia) is accepted only with `--local-anvil`, and the record is then stamped
-  `local-anvil-rehearsal` or `base-sepolia-fork-rehearsal`: a rehearsal record is never evidence of
-  anything on Base Sepolia;
+- the chain is Base Sepolia (84532) or Base Mainnet (8453), read from the RPC and from the run
+  file; every other chain is refused. A local Anvil node (a plain 31337 chain or a fork of either
+  network) is accepted only with `--local-anvil`, and the record is then stamped
+  `local-anvil-rehearsal`, `base-sepolia-fork-rehearsal` or `base-mainnet-fork-rehearsal`: a
+  rehearsal record is never evidence of anything on a public network;
 - every transaction is from one sender; in a broadcast file every transaction has a receipt with
   status 1 (a missing receipt means the broadcast did not complete);
 - every created address is the one its sender and nonce (or CREATE2 salt) give, and holds the
   expected code: the ARL build's runtime code with only immutables masked (the same comparison as
-  `bytecode-cli.ts verify`), or on Base Sepolia the canonical Safe v1.5.0 proxy code (pinned hash),
+  `bytecode-cli.ts verify`), or on Base Sepolia and Base Mainnet the canonical Safe v1.5.0 proxy code (pinned hash),
   created by the canonical factory for a canonical singleton (pinned hashes);
 - each contract carries what its constructor was given (getters), and each Safe has exactly the
   owners and threshold of its signed setup and points to its singleton.

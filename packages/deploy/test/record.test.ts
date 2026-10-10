@@ -491,12 +491,12 @@ describe("verified record: ARL contracts", () => {
 });
 
 describe("verified record: networks", () => {
-  it("Base Mainnet and every other chain are refused before any check", async () => {
-    for (const id of [8453, 1, 10, 11_155_111]) {
+  it("every chain except Base Sepolia, Base Mainnet and local Anvil is refused before any check", async () => {
+    for (const id of [1, 10, 137, 11_155_111]) {
       const { chain, tx } = computePaymentScenario(id);
       await assert.rejects(
         verify(runFile(id, [tx], ok(1)), chain, "compute-payment"),
-        /Base Sepolia \(84532\) only/,
+        /Base Sepolia \(84532\) and Base Mainnet \(8453\) only/,
       );
     }
   });
@@ -525,6 +525,22 @@ describe("verified record: networks", () => {
     chain.version = "reth/v2.5.2";
     const real = await verify(runFile(84532, [tx], ok(1)), chain, "compute-payment");
     assert.equal(real.record?.verified.network, "base-sepolia");
+  });
+
+  it("Base Mainnet is a record of the public network; an Anvil fork of it is a rehearsal", async () => {
+    const { chain, tx } = computePaymentScenario(8453);
+    const real = await verify(runFile(8453, [tx], ok(1)), chain, "compute-payment");
+    assert.equal(real.ok, true);
+    assert.equal(real.record?.verified.network, "base-mainnet");
+    chain.version = "anvil/v1.8.3";
+    await assert.rejects(
+      verify(runFile(8453, [tx], ok(1)), chain, "compute-payment"),
+      /local Anvil fork, not Base Mainnet/,
+    );
+    const fork = await verify(runFile(8453, [tx], ok(1)), chain, "compute-payment", {
+      localAnvil: true,
+    });
+    assert.equal(fork.record?.verified.network, "base-mainnet-fork-rehearsal");
   });
 
   it("the RPC must serve the run file's chain", async () => {

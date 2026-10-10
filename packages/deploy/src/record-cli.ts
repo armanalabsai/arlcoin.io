@@ -4,13 +4,15 @@
 //
 // Writes a verified deployment record from a Foundry run file (see record.ts): the broadcast
 // file (`broadcast/<Script>/84532/run-latest.json`) or, after signing from a phone, the dry-run
-// file the Deploy screen signed (`broadcast/<Script>/84532/dry-run/run-latest.json`). Every
+// file the Deploy screen signed (`broadcast/<Script>/84532/dry-run/run-latest.json`); on Base
+// Mainnet the same files under `8453/`. Every
 // contract the run created is checked on chain first; nothing is written unless all checks pass,
 // and an existing record is never left half-written.
 //
-// Base Sepolia (84532) only. `--local-anvil` accepts a local Anvil node for a rehearsal: a plain
-// chain (31337) or a fork of Base Sepolia. Such a record is stamped `local-anvil-rehearsal` or
-// `base-sepolia-fork-rehearsal` and is not evidence of anything on a public network.
+// Base Sepolia (84532) and Base Mainnet (8453) only. `--local-anvil` accepts a local Anvil node
+// for a rehearsal: a plain chain (31337) or a fork of either network. Such a record is stamped
+// `local-anvil-rehearsal`, `base-sepolia-fork-rehearsal` or `base-mainnet-fork-rehearsal` and is
+// not evidence of anything on a public network.
 // `--contracts` is the Foundry project with the build in out/ (default: contracts/).
 // Exit codes: 0 written, 3 a check failed (nothing written), 1 could not run, 2 wrong usage.
 

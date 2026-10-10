@@ -10,9 +10,10 @@
 //   masked, as in bytecode.ts), or the Safe v1.5.0 proxy code;
 // - each contract carries the values its constructor was given (read through its getters), and
 //   each Safe has exactly the owners and threshold of its signed setup.
-// Base Sepolia (84532) only. A local Anvil node (a plain 31337 chain or a fork of Base Sepolia) is
-// accepted only with `localAnvil` for the rehearsal, and such a record is stamped as one. Nothing is written unless every check passes, and an
-// existing record is replaced only by an atomic rename of a complete, verified one.
+// Base Sepolia (84532) and Base Mainnet (8453) only. A local Anvil node (a plain 31337 chain or a
+// fork of either network) is accepted only with `localAnvil` for the rehearsal, and such a record is
+// stamped as one. Nothing is written unless every check passes, and an existing record is replaced
+// only by an atomic rename of a complete, verified one.
 //
 // On-chain reads use viem (MIT). Nothing here signs or sends a transaction.
 
@@ -44,7 +45,31 @@ import { compareRuntime, type Artifact } from "./bytecode.ts";
 
 export const VERIFIED_SCHEMA = "arl-verified-record/1";
 export const TESTNET_CHAIN_ID = 84532;
+export const MAINNET_CHAIN_ID = 8453;
 export const LOCAL_CHAIN_ID = 31337;
+
+/** The public networks a record may be written for, and how such a record is stamped. */
+const PUBLIC_NETWORKS: Partial<
+  Record<
+    number,
+    {
+      label: string;
+      stamp: "base-sepolia" | "base-mainnet";
+      forkStamp: "base-sepolia-fork-rehearsal" | "base-mainnet-fork-rehearsal";
+    }
+  >
+> = {
+  [TESTNET_CHAIN_ID]: {
+    label: "Base Sepolia",
+    stamp: "base-sepolia",
+    forkStamp: "base-sepolia-fork-rehearsal",
+  },
+  [MAINNET_CHAIN_ID]: {
+    label: "Base Mainnet",
+    stamp: "base-mainnet",
+    forkStamp: "base-mainnet-fork-rehearsal",
+  },
+};
 
 export const RECORD_KINDS = ["safes", "arl", "compute-payment", "distributor"] as const;
 export type RecordKind = (typeof RECORD_KINDS)[number];
@@ -231,8 +256,13 @@ export interface VerifiedStamp {
   /** SHA-256 of the run file the record was built from. */
   runFile: string;
   checks: number;
-  /** Only "base-sepolia" is a record of the public network; the others are rehearsals. */
-  network: "base-sepolia" | "base-sepolia-fork-rehearsal" | "local-anvil-rehearsal";
+  /** Only "base-sepolia" and "base-mainnet" are records of a public network; the others are rehearsals. */
+  network:
+    | "base-sepolia"
+    | "base-mainnet"
+    | "base-sepolia-fork-rehearsal"
+    | "base-mainnet-fork-rehearsal"
+    | "local-anvil-rehearsal";
 }
 
 export interface VerifyOptions {
@@ -417,22 +447,24 @@ export async function verifyRun(
       `RPC chain ${String(chainId)} is not the run file's chain ${String(run.chain)}`,
     );
   }
-  // A local Anvil node, whether a plain chain (31337) or a fork of Base Sepolia (84532), is a
-  // rehearsal: accepted only with the flag, and stamped so it can never pass for the real network.
+  // A local Anvil node, whether a plain chain (31337) or a fork of Base Sepolia (84532) or Base
+  // Mainnet (8453), is a rehearsal: accepted only with the flag, and stamped so it can never pass
+  // for the real network.
   const anvil = /^anvil\//i.test(await reader.clientVersion());
+  const publicName = PUBLIC_NETWORKS[chainId];
   if (chainId === LOCAL_CHAIN_ID) {
     if (!opts.localAnvil)
       throw new RecordError(
         "chain 31337: local Anvil is accepted only for the rehearsal (--local-anvil)",
       );
     if (!anvil) throw new RecordError("chain 31337 is not served by Anvil");
-  } else if (chainId === TESTNET_CHAIN_ID && anvil && !opts.localAnvil) {
+  } else if (!publicName) {
     throw new RecordError(
-      "chain 84532 is served by a local Anvil fork, not Base Sepolia: pass --local-anvil for a rehearsal",
+      `chain ${String(chainId)} refused: verified records are written for Base Sepolia (84532) and Base Mainnet (8453) only`,
     );
-  } else if (chainId !== TESTNET_CHAIN_ID) {
+  } else if (anvil && !opts.localAnvil) {
     throw new RecordError(
-      `chain ${String(chainId)} refused: verified records are written for Base Sepolia (84532) only`,
+      `chain ${String(chainId)} is served by a local Anvil fork, not ${publicName.label}: pass --local-anvil for a rehearsal`,
     );
   }
   const block = await reader.blockNumber();
@@ -480,11 +512,11 @@ export async function verifyRun(
     runFile: opts.runFileHash,
     checks: c.findings.length,
     network:
-      chainId === LOCAL_CHAIN_ID
+      chainId === LOCAL_CHAIN_ID || !publicName
         ? "local-anvil-rehearsal"
         : anvil
-          ? "base-sepolia-fork-rehearsal"
-          : "base-sepolia",
+          ? publicName.forkStamp
+          : publicName.stamp,
   };
   return { ok: true, findings: c.findings, record: { chainId, ...fields, verified } };
 }
@@ -649,13 +681,14 @@ async function checkSafes(c: Checker, run: RunFile, chainId: number) {
     return undefined;
   }
   const factory = calls[0]?.transaction.to ?? null;
-  const testnet = chainId === TESTNET_CHAIN_ID;
+  // Both public networks carry the canonical Safe v1.5.0 contracts at the same addresses.
+  const canonical = chainId !== LOCAL_CHAIN_ID;
   if (!factory) {
     c.add("Safe factory", false, "no target");
     return undefined;
   }
   const factoryCode = await c.reader.code(factory, c.block);
-  if (testnet) {
+  if (canonical) {
     c.add(
       "Safe factory is canonical v1.5.0",
       same(factory, SAFE_V150.factory) && keccak256(factoryCode) === SAFE_V150.factoryCodeHash,
@@ -746,7 +779,7 @@ async function checkSafes(c: Checker, run: RunFile, chainId: number) {
       )
     )
       continue;
-    if (testnet) {
+    if (canonical) {
       c.add(
         `${label} runs the Safe v1.5.0 proxy code`,
         keccak256(code) === SAFE_V150.proxyCodeHash,
@@ -784,7 +817,7 @@ async function checkSafes(c: Checker, run: RunFile, chainId: number) {
   }
   if (!singleton) return undefined;
   const singletonCode = await c.reader.code(singleton, c.block);
-  if (testnet) {
+  if (canonical) {
     const want = Object.entries(SAFE_V150.singletons).find(([a]) => same(a, singleton))?.[1];
     c.add(
       "Safe singleton is canonical v1.5.0",
