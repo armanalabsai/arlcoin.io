@@ -9,6 +9,7 @@ import { AddToWallet } from "@/site/AddToWallet.tsx";
 import { ChainFlow } from "@/site/ChainFlow.tsx";
 import { FaqList } from "@/site/FaqList.tsx";
 import { JsonLd } from "@/site/JsonLd.tsx";
+import { LaunchSteps } from "@/site/LaunchSteps.tsx";
 import { Reveal } from "@/site/Reveal.tsx";
 import { SiteFooter, SiteHeader } from "@/site/SiteFrame.tsx";
 import { TechShowcase } from "@/site/TechShowcase.tsx";
@@ -54,7 +55,7 @@ const SECURITY = cards("security", [
   "fixed-supply",
   "treasury-timelock",
   "vesting-contracts",
-  "audit",
+  "bug-bounty",
 ]);
 const ROADMAP = cards("roadmap", [
   "phase-0",
@@ -148,6 +149,12 @@ export default function Home() {
 
       <main id="content" className="page-in flex-1">
         <section className="landing-hero px-4 pt-16 pb-16 text-center sm:px-6 sm:pt-24">
+          <Link
+            href={pathFor()}
+            prefetch={false}
+            aria-label="Open the ARL Core"
+            className="landing-logo mx-auto mb-8 block size-[200px] rounded-full sm:size-[260px]"
+          />
           <p className="glass-pill inline-flex h-8 items-center gap-2 rounded-full px-3.5 text-[14px] font-semibold text-accent">
             <span className="live-dot" aria-hidden="true" />
             Native utility token on Base
@@ -180,16 +187,17 @@ export default function Home() {
               </li>
             ))}
           </ul>
-          <Link
-            href={pathFor()}
-            prefetch={false}
-            aria-label="Open the ARL Core"
-            className="landing-logo mx-auto mt-12 block size-[260px] rounded-full sm:size-[340px]"
-          />
-          <p className="mt-6 text-[12px] text-fg-subtle">
+          <p className="mt-10 text-[12px] text-fg-subtle">
             ARL is live on the Base Sepolia testnet. Nothing is for sale. Registering is free.
           </p>
         </section>
+
+        <Section
+          heading="Launch on Base."
+          sub={`Base Mainnet launch targeted for ${tge}. Four steps, all from your own wallet. ARL never asks for your private key, your seed phrase or a payment to a personal address.`}
+        >
+          <LaunchSteps />
+        </Section>
 
         <Section
           alt
@@ -275,10 +283,10 @@ export default function Home() {
             <>
               Security first.
               <br />
-              Honest about the rest.
+              Open about the rest.
             </>
           }
-          sub="How the contracts limit what anyone can do, and what has not been reviewed yet."
+          sub="How the contracts limit what anyone can do, and how they are checked."
         >
           <div className="mt-14 grid grid-cols-1 gap-4 text-left min-[480px]:grid-cols-2 lg:grid-cols-4">
             {SECURITY.map(({ layerId, card }, i) => (

@@ -5,10 +5,11 @@
 //
 // Every value except the Safe addresses is fixed here: code checks on, the approved 12 + 36 month
 // vesting durations, and the 48-hour timelock floor. The vesting start is a placeholder, which
-// the network gate accepts only on local Anvil and Base Sepolia.
+// the network gate accepts on local Anvil and Base Sepolia, and on Base Mainnet from the TGE.
 
 import {
   LOCAL_CHAIN_ID,
+  PRODUCTION_CHAIN_ID,
   TESTNET_CHAIN_ID,
   PlanError,
   networkGate,
@@ -76,7 +77,12 @@ export function configFromSafes(record: SafesRecord, vestingStart: string): Depl
     vestingMonths: 36,
   });
   const config: DeployConfig = {
-    network: record.chainId === TESTNET_CHAIN_ID ? "base-sepolia" : "local",
+    network:
+      record.chainId === TESTNET_CHAIN_ID
+        ? "base-sepolia"
+        : record.chainId === PRODUCTION_CHAIN_ID
+          ? "base"
+          : "local",
     chainId: record.chainId,
     requireRecipientCode: true,
     note: `Safes created by CreateSafes.s.sol. The TGE ${vestingStart} is a testnet placeholder; the approved TGE is 2026-11-01. Every vesting schedule starts at the TGE.`,

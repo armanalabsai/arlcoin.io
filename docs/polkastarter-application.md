@@ -11,7 +11,7 @@ it and replies by e-mail.
 | Project Name            | ARL Protocol                      |
 | Contact Name            | Alaz Dağhan Göktürk               |
 | Contact Telegram Handle | No Telegram yet; X: @armanalabsai |
-| Email                   | armanalabsai@gmail.com            |
+| Email                   | team@arlcoin.io                   |
 | Referred by             | (empty)                           |
 
 ## Links

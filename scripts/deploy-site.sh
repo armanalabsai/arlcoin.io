@@ -3,7 +3,8 @@
 # (apps/web/api) and the headers in apps/web/vercel.json. Run from the repository root by someone
 # logged in to the Vercel CLI for the `alazdg` scope, after linking the repository once with
 # `npx vercel link --scope alazdg --project arlcoin` (writes the gitignored .vercel/). Nothing
-# from .env files is uploaded.
+# from .env files is uploaded. In CI (.github/workflows/deploy-site.yml) the CLI authenticates
+# with VERCEL_TOKEN instead of a login.
 #
 #   bash scripts/deploy-site.sh            # build and deploy
 #   node scripts/indexnow.mjs              # then tell IndexNow search engines
@@ -29,4 +30,6 @@ fi
 cp -r "$ROOT/.vercel" "$STAGE/.vercel" 2>/dev/null || true
 
 cd "$STAGE"
-npx --yes vercel@latest deploy --prod --yes --scope alazdg
+TOKEN_ARGS=()
+if [ -n "${VERCEL_TOKEN:-}" ]; then TOKEN_ARGS=(--token "$VERCEL_TOKEN"); fi
+npx --yes vercel@latest deploy --prod --yes --scope alazdg ${TOKEN_ARGS[@]+"${TOKEN_ARGS[@]}"}

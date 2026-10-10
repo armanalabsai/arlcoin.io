@@ -122,21 +122,9 @@
     border-color: var(--color-accent-edge);
   }
 
-  .core-surface {
-    background:
-      radial-gradient(120% 80% at 30% 0%, rgb(255 255 255 / 0.12), transparent 55%),
-      rgb(14 26 60 / 0.5);
-    -webkit-backdrop-filter: blur(18px) saturate(1.6);
-    backdrop-filter: blur(18px) saturate(1.6);
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.22),
-      inset 0 0 0 1px rgb(159 216 255 / 0.16);
-  }
-
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .material-bar,
-    .material-card,
-    .core-surface {
+    .material-card {
       background: rgb(12 20 46 / 0.96);
     }
     .material-surface {
@@ -147,8 +135,7 @@
   @media (prefers-reduced-transparency: reduce) {
     .material-bar,
     .material-card,
-    .material-surface,
-    .core-surface {
+    .material-surface {
       background: #0c1634;
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
@@ -609,21 +596,15 @@
 .landing-core:hover {
   border-color: var(--color-accent-edge);
 }
-/* The ARL Network logo in the hero, linking to the Core. */
+/* The ARL logo in the hero, linking to the Core: line art on the page itself, no disc. */
 .landing-logo {
-  background: url("/arl-logo.svg") center / cover no-repeat;
-  box-shadow:
-    0 0 0 1px rgb(255 255 255 / 0.12),
-    0 30px 80px -20px rgb(0 0 0 / 0.7),
-    0 0 90px rgb(111 200 255 / 0.18);
-  transition: box-shadow 200ms;
+  background: url("/arl-logo.svg") center / contain no-repeat;
+  filter: drop-shadow(0 0 18px rgb(236 234 227 / 0.18));
+  transition: filter 200ms;
   animation: landing-float 6s ease-in-out infinite;
 }
 .landing-logo:hover {
-  box-shadow:
-    0 0 0 1px var(--color-accent-edge),
-    0 30px 80px -20px rgb(0 0 0 / 0.7),
-    0 0 110px rgb(111 200 255 / 0.3);
+  filter: drop-shadow(0 0 26px rgb(236 234 227 / 0.3));
 }
 @keyframes landing-float {
   50% {
