@@ -148,6 +148,12 @@ export default function Home() {
 
       <main id="content" className="page-in flex-1">
         <section className="landing-hero px-4 pt-16 pb-16 text-center sm:px-6 sm:pt-24">
+          <Link
+            href={pathFor()}
+            prefetch={false}
+            aria-label="Open the ARL Core"
+            className="landing-logo mx-auto mb-8 block size-[200px] rounded-full sm:size-[260px]"
+          />
           <p className="glass-pill inline-flex h-8 items-center gap-2 rounded-full px-3.5 text-[14px] font-semibold text-accent">
             <span className="live-dot" aria-hidden="true" />
             Native utility token on Base
@@ -180,13 +186,7 @@ export default function Home() {
               </li>
             ))}
           </ul>
-          <Link
-            href={pathFor()}
-            prefetch={false}
-            aria-label="Open the ARL Core"
-            className="landing-logo mx-auto mt-12 block size-[260px] rounded-full sm:size-[340px]"
-          />
-          <p className="mt-6 text-[12px] text-fg-subtle">
+          <p className="mt-10 text-[12px] text-fg-subtle">
             ARL is live on the Base Sepolia testnet. Nothing is for sale. Registering is free.
           </p>
         </section>

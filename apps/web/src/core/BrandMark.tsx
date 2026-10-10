@@ -1,5 +1,5 @@
 // The ARL mark (small-size variant from assets/brand, served as /arl-icon-small.svg): the
-// eight-armed swirl with the A at its centre, light line art on the page itself. Decorative;
+// eight-armed swirl with a large A at its centre, light line art on the page itself. Decorative;
 // the link around it carries the label.
 
 export function BrandMark({ size = 28 }: { size?: number }) {
