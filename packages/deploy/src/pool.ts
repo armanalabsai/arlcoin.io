@@ -52,12 +52,15 @@ function allocationAmount(id: string): bigint {
 
 /**
  * Most ARL each Safe may place in pools (whole ARL). The Public Launch Safe keeps its TGE claim
- * tranche for the Merkle distributor and sells the rest through the pools (owner decision
- * 2026-10-10).
+ * tranche and its launchpad reserve and sells the rest, 2,000,000 ARL, through the pools (owner
+ * decision 2026-10-10).
  */
 export const POOL_CAPS = {
   liquidity: LIQUIDITY_ALLOCATION,
-  publicLaunch: allocationAmount("public-launch") - BigInt(PUBLIC_LAUNCH.tgeTranche),
+  publicLaunch:
+    allocationAmount("public-launch") -
+    BigInt(PUBLIC_LAUNCH.tgeTranche) -
+    BigInt(PUBLIC_LAUNCH.launchpadReserve),
 } as const;
 export type PoolAllocation = keyof typeof POOL_CAPS;
 

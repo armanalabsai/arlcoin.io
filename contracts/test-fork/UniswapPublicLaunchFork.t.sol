@@ -14,9 +14,9 @@ import {
 
 /// @notice The launch-day order with both pool batches on a Base Mainnet fork: the Liquidity
 /// Safe's batch (1,000,000 ARL, `fixtures/pool-batch.json`) creates the four pools, then the
-/// Public Launch Safe's batch (4,500,000 ARL, `fixtures/pool-batch-public-launch.json`, owner
+/// Public Launch Safe's batch (2,000,000 ARL, `fixtures/pool-batch-public-launch.json`, owner
 /// decision 2026-10-10) adds its ARL-only positions on the same ranges. The Public Launch Safe
-/// keeps its 500,000 ARL claim tranche. Nothing is broadcast. Run:
+/// keeps its 500,000 ARL claim tranche and its 2,500,000 ARL launchpad reserve. Nothing is broadcast. Run:
 /// FOUNDRY_PROFILE=fork ARL_BASE_RPC=<Base Mainnet RPC> forge test --match-contract UniswapPublicLaunchFork
 contract UniswapPublicLaunchForkTest is Test {
     address constant ARL = 0x0e8A5434f12D3d839a0a7E88d3a66b11bd712b97;
@@ -103,7 +103,7 @@ contract UniswapPublicLaunchForkTest is Test {
         vm.stopPrank();
     }
 
-    function test_BothBatchesPlace5_5MillionArlAndThePublicLaunchSafeKeepsItsTranche() public {
+    function test_BothBatchesPlace3MillionArlAndThePublicLaunchSafeKeepsItsReserves() public {
         assertEq(legs, 4);
         _run(liquidityBatch, LIQUIDITY_SAFE);
         _run(publicBatch, PUBLIC_LAUNCH_SAFE);
@@ -113,11 +113,11 @@ contract UniswapPublicLaunchForkTest is Test {
             inPools += IERC20(ARL).balanceOf(_pool(i));
         }
         // Full-range liquidity rounding leaves dust (about 1e-12 ARL per position) in the Safes.
-        assertApproxEqAbs(inPools, 5_500_000e18, 1e10);
+        assertApproxEqAbs(inPools, 3_000_000e18, 1e10);
         assertEq(IPositionManager(POSITION_MANAGER).balanceOf(PUBLIC_LAUNCH_SAFE), legs);
         assertEq(IPositionManager(POSITION_MANAGER).balanceOf(LIQUIDITY_SAFE), legs);
-        assertApproxEqAbs(IERC20(ARL).balanceOf(PUBLIC_LAUNCH_SAFE), 500_000e18, 1e10);
-        assertGe(IERC20(ARL).balanceOf(PUBLIC_LAUNCH_SAFE), 500_000e18);
+        assertApproxEqAbs(IERC20(ARL).balanceOf(PUBLIC_LAUNCH_SAFE), 3_000_000e18, 1e10);
+        assertGe(IERC20(ARL).balanceOf(PUBLIC_LAUNCH_SAFE), 3_000_000e18);
     }
 
     function test_BuyersCanBuyAndSellBackAboveTheFloor() public {

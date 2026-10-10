@@ -11,25 +11,25 @@ contract, so the readiness table below is the real starting point.
 
 ## Readiness
 
-| What launchpads usually ask for                 | ARL status                                                                                                                                                        |
-| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Project overview, website                       | Ready: https://arlcoin.io, overview below                                                                                                                         |
-| Token contract and standard                     | Written and tested: ERC-20 with EIP-2612 permit, fixed 21,000,000 supply, no mint function (`contracts/src/ARLToken.sol`)                                         |
-| Tokenomics and vesting                          | Ready: allocation table below (`packages/tokenomics`); vesting 12-month cliff + 36 months linear from the TGE                                                     |
-| Source code                                     | Ready: https://gitlab.com/armanalabs-group/arlcoin                                                                                                                |
-| Tests and static analysis                       | Ready: see Security                                                                                                                                               |
-| Independent security audit                      | **Missing.** Requests sent to independent firms on 2026-10-05 (`docs/independent-audit-plan.md`); bug bounty open                                                 |
-| Deployed contract (testnet)                     | Ready: Base Sepolia, token 0x244312b619127B6458154F3467eFD7c87CD28500, source-verified                                                                            |
-| Deployed contract (mainnet)                     | **Planned.** Base Mainnet deployment is the TGE, 2026-11-01; the tooling refuses it earlier                                                                       |
-| Sale parameters (allocation, price, raise, FDV) | Public Launch: up to 500,000 ARL free at TGE, max 10,000 ARL per address; 4,500,000 ARL for a launchpad sale; listing price 0.20 USD (`docs/launch-decisions.md`) |
-| TGE date                                        | 2026-11-01 (approved 2026-10-05). Every vesting schedule starts at the TGE                                                                                        |
-| Liquidity plan                                  | **TBD.** 2,000,000 ARL Liquidity reserve exists; pool size, pair and LP custody not decided                                                                       |
-| Team identity (KYC with the launchpad)          | Founder: Alaz Daghan Gokturk, Founder and CEO. KYC is done privately with each launchpad by the founder                                                           |
-| Legal opinion on the token                      | Obtained by the owner                                                                                                                                             |
-| Whitepaper or litepaper                         | Partly: economic specification `docs/tokenomics-economic-spec.md`, architecture `docs/architecture.md`; no litepaper PDF                                          |
-| Pitch deck                                      | **TBD**                                                                                                                                                           |
-| Community and social accounts                   | X https://x.com/armanalabsai, Instagram https://instagram.com/armanalabsai, Telegram group https://t.me/arlcoin_community, contact https://t.me/arlcoinio         |
-| Product demo                                    | Ready locally: the ARL app (`apps/dapp`) runs on a local chain; not hosted publicly                                                                               |
+| What launchpads usually ask for                 | ARL status                                                                                                                                                                                                                                                                 |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Project overview, website                       | Ready: https://arlcoin.io, overview below                                                                                                                                                                                                                                  |
+| Token contract and standard                     | Written and tested: ERC-20 with EIP-2612 permit, fixed 21,000,000 supply, no mint function (`contracts/src/ARLToken.sol`)                                                                                                                                                  |
+| Tokenomics and vesting                          | Ready: allocation table below (`packages/tokenomics`); vesting 12-month cliff + 36 months linear from the TGE                                                                                                                                                              |
+| Source code                                     | Ready: https://gitlab.com/armanalabs-group/arlcoin                                                                                                                                                                                                                         |
+| Tests and static analysis                       | Ready: see Security                                                                                                                                                                                                                                                        |
+| Independent security audit                      | **Missing.** Requests sent to independent firms on 2026-10-05 (`docs/independent-audit-plan.md`); bug bounty open                                                                                                                                                          |
+| Deployed contract (testnet)                     | Ready: Base Sepolia, token 0x244312b619127B6458154F3467eFD7c87CD28500, source-verified                                                                                                                                                                                     |
+| Deployed contract (mainnet)                     | **Planned.** Base Mainnet deployment is the TGE, 2026-11-01; the tooling refuses it earlier                                                                                                                                                                                |
+| Sale parameters (allocation, price, raise, FDV) | Public Launch: up to 500,000 ARL free at TGE, max 10,000 ARL per address; up to 2,500,000 ARL for launchpad sales and 2,000,000 ARL sold on Uniswap from the listing price (owner 2026-10-10, legal approval pending); listing price 0.20 USD (`docs/launch-decisions.md`) |
+| TGE date                                        | 2026-11-01 (approved 2026-10-05). Every vesting schedule starts at the TGE                                                                                                                                                                                                 |
+| Liquidity plan                                  | **TBD.** 2,000,000 ARL Liquidity reserve exists; pool size, pair and LP custody not decided                                                                                                                                                                                |
+| Team identity (KYC with the launchpad)          | Founder: Alaz Daghan Gokturk, Founder and CEO. KYC is done privately with each launchpad by the founder                                                                                                                                                                    |
+| Legal opinion on the token                      | Obtained by the owner                                                                                                                                                                                                                                                      |
+| Whitepaper or litepaper                         | Partly: economic specification `docs/tokenomics-economic-spec.md`, architecture `docs/architecture.md`; no litepaper PDF                                                                                                                                                   |
+| Pitch deck                                      | **TBD**                                                                                                                                                                                                                                                                    |
+| Community and social accounts                   | X https://x.com/armanalabsai, Instagram https://instagram.com/armanalabsai, Telegram group https://t.me/arlcoin_community, contact https://t.me/arlcoinio                                                                                                                  |
+| Product demo                                    | Ready locally: the ARL app (`apps/dapp`) runs on a local chain; not hosted publicly                                                                                                                                                                                        |
 
 ## Project overview
 
@@ -102,14 +102,14 @@ needs a reviewed change to the token, deployment plan and verifier.
 
 ## Sale parameters (all TBD; owner decisions)
 
-| Parameter                         | Value                                                                                                                         |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Tokens offered on the launchpad   | From the 4,500,000 ARL Public Launch remainder (size and price decided by the owner); the free claim is separate              |
-| Price per ARL, raise, FDV         | 0.20 USD per ARL; FDV 4,200,000 USD; raise `TBD`                                                                              |
-| Accepted currency                 | `TBD`                                                                                                                         |
-| TGE unlock for buyers and vesting | `TBD`                                                                                                                         |
-| Listing and initial liquidity     | 0.20 USD; pool paired with launch proceeds, or single-sided ARL at or above 0.20 USD; LP in the Liquidity Safe, 12-month lock |
-| Jurisdictions excluded            | `TBD` (with legal advice)                                                                                                     |
+| Parameter                         | Value                                                                                                                                                   |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tokens offered on the launchpad   | Up to 2,500,000 ARL reserved in the Public Launch Safe (owner 2026-10-10); price at or above 0.20 USD; the free claim and the Uniswap sale are separate |
+| Price per ARL, raise, FDV         | 0.20 USD per ARL; FDV 4,200,000 USD; raise `TBD`                                                                                                        |
+| Accepted currency                 | `TBD`                                                                                                                                                   |
+| TGE unlock for buyers and vesting | `TBD`                                                                                                                                                   |
+| Listing and initial liquidity     | 0.20 USD; pool paired with launch proceeds, or single-sided ARL at or above 0.20 USD; LP in the Liquidity Safe, 12-month lock                           |
+| Jurisdictions excluded            | `TBD` (with legal advice)                                                                                                                               |
 
 ## Security
 

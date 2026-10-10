@@ -61,9 +61,9 @@ Safe. Run it again in the last days before the TGE.
 7. **Public Launch sale positions** (owner decision 2026-10-10; run only once the legal approval
    is recorded in [tokenomics-economic-spec.md](tokenomics-economic-spec.md) section 7, otherwise
    skip this step). Right after step 6 and before any address is announced, the Public Launch
-   Safe adds ARL-only positions on the same four pools and ranges: USDT 2,000,000, USDC
-   1,600,000, WETH 450,000, cbBTC 450,000 (4,500,000 ARL; its 500,000 ARL claim tranche stays in
-   the Safe). Write `pools-public-launch.json` (example:
+   Safe adds ARL-only positions on the same four pools and ranges: USDT 600,000, USDC 500,000,
+   WETH 450,000, cbBTC 450,000 (2,000,000 ARL; its 500,000 ARL claim tranche and 2,500,000 ARL
+   launchpad reserve stay in the Safe). Write `pools-public-launch.json` (example:
    `contracts/test-fork/fixtures/pools-public-launch.json`) with `"allocation": "publicLaunch"`,
    the Public Launch Safe as `liquiditySafe` and the same ETH and BTC prices as step 6, run
    `pool-cli.ts`, rehearse with
