@@ -76,7 +76,7 @@ tooling only).
 | Invariant tests      | Supply, allocations, vesting, timelock roles, distributor funds (256 runs × depth 128)            | pass                                            |
 | Deployment rehearsal | Real Safe v1.5.0 on Anvil; 59 negative cases; Base Sepolia fork with the canonical Safe contracts | pass                                            |
 | Slither 0.11.6       | `src/` and `script/`, 102 detectors, CI fails on Low or higher                                    | 0 findings                                      |
-| Aderyn 0.6.8         | `src/`                                                                                            | 3 reported; triage below                        |
+| Aderyn 0.6.8         | `src/`                                                                                            | 5 reported (Linux, 2026-10-10); triage below    |
 | Halmos 0.3.3         | Symbolic checks in `contracts/test/symbolic/ARLSymbolic.t.sol`, run in CI                         | 11 of 11 proven                                 |
 | Mythril 0.24.8       | Runtime bytecode of the four deployed contracts, 900 s each                                       | 9 reported, all triaged below; none exploitable |
 
@@ -111,11 +111,13 @@ profile, the others under the default profile). Branch coverage is below 100% fo
 
 ### Aderyn triage
 
-| Finding                                              | Location              | Assessment                                                                                                                                                                              |
-| ---------------------------------------------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| H-1 Contract locks Ether without a withdraw function | `ARLVestingWallet`    | False positive. The inherited OpenZeppelin `VestingWallet.release()` releases ETH to the beneficiary on the same schedule; nothing is locked.                                           |
-| L-1 Large numeric literal                            | `ARLAllocation` (12×) | Style. Underscore-grouped whole-token amounts are intentional and are parsed by a consistency test against `packages/tokenomics`. No change.                                            |
-| L-2 Unchecked return                                 | `ARLTimelock` line 43 | Informational. `_grantRole(CANCELLER_ROLE, guardian)` always returns true there: the constructor rejects a guardian that is a proposer or executor, so the role cannot already be held. |
+| Finding                                              | Location                      | Assessment                                                                                                                                                                                                                                          |
+| ---------------------------------------------------- | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| H-1 Contract locks Ether without a withdraw function | `ARLVestingWallet`            | False positive. The inherited OpenZeppelin `VestingWallet.release()` releases ETH to the beneficiary on the same schedule; nothing is locked.                                                                                                       |
+| L-1 Large numeric literal                            | `ARLAllocation` (12×)         | Style. Underscore-grouped whole-token amounts are intentional and are parsed by a consistency test against `packages/tokenomics`. No change.                                                                                                        |
+| L-3 Unchecked return                                 | `ARLTimelock` line 43         | Informational. `_grantRole(CANCELLER_ROLE, guardian)` always returns true there: the constructor rejects a guardian that is a proposer or executor, so the role cannot already be held.                                                             |
+| H-2 Reentrancy: state change after external call     | `ARLAnonymousSignal` line 175 | False positive. The only external call is `verifier.verify`, declared `view` in `IARLSignalVerifier`, so Solidity issues a STATICCALL and the verifier cannot re-enter or change state; the verifier address is immutable. Not in the launch scope. |
+| L-2 Loop contains `require`/`revert`                 | `ARLAnonymousSignal` line 201 | By design. `_checkCommitments` rejects the whole batch if any commitment is zero or outside the field, so a group is never updated with an invalid member. Not in the launch scope.                                                                 |
 
 ### Mythril triage
 
