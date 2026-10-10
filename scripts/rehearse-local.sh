@@ -60,7 +60,9 @@ done
 DEPLOYER="$(cast rpc eth_accounts --rpc-url "$RPC" | tr -d '[]" ' | cut -d, -f1)"
 
 cd "$CONTRACTS"
-rm -rf "$PLANS" deploy/deployments
+# Only the local chain's records are cleared: deploy/deployments also holds the owner's git-ignored
+# launch files (8453-signers.env, the whitelist and claim lists), which the rehearsal must not touch.
+rm -rf "$PLANS" deploy/deployments/31337*
 mkdir -p "$REHEARSAL" deploy/deployments
 
 log "Building the deployment plan"

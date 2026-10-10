@@ -4,6 +4,7 @@ import { existsSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } fro
 import { createServer, type Server } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { after, before, describe, it } from "node:test";
 import { promisify } from "node:util";
 
@@ -624,7 +625,7 @@ function serve(chain: FakeChain): Promise<{ server: Server; url: string }> {
 }
 
 describe("record-cli: writes only a fully verified record", () => {
-  const cli = new URL("../src/record-cli.ts", import.meta.url).pathname;
+  const cli = fileURLToPath(new URL("../src/record-cli.ts", import.meta.url));
   const run = promisify(execFile);
   const dir = mkdtempSync(join(tmpdir(), "arl-record-"));
   const good = safesScenario();
