@@ -257,3 +257,85 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
       - run: node ../../scripts/audit.mjs
+
+  # Contract coverage of both Foundry profiles (test/ and the real-proof test-zk/). Fails unless
+  # every contract in contracts/src has 100% line and function coverage and branches >= 90%
+  # (scripts/coverage-gate.mjs). The lcov reports are kept as a build artifact.
+  coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+
+      - uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09 # v1.9.1
+        with:
+          version: v1.8.3
+
+      - run: forge coverage --report lcov --report-file lcov-default.info --no-match-coverage "test|lib|script"
+        working-directory: contracts
+      - run: forge coverage --report lcov --report-file lcov-zk.info --no-match-coverage "test|lib|zk/"
+        working-directory: contracts
+        env:
+          FOUNDRY_PROFILE: zk
+      - run: node scripts/coverage-gate.mjs contracts/lcov-default.info contracts/lcov-zk.info
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: contracts-coverage
+          path: contracts/lcov-*.info
+          retention-days: 90
+
+  # Secret scanning of the full git history with gitleaks (release archive pinned by SHA-256).
+  # Reviewed allowlist: .gitleaks.toml.
+  secrets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Gitleaks v8.28.0
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/gitleaks.tar.gz" https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_linux_x64.tar.gz
+          echo "a65b5253807a68ac0cafa4414031fd740aeb55f54fb7e55f386acb52e6a840eb  $RUNNER_TEMP/gitleaks.tar.gz" | sha256sum -c
+          tar xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP" gitleaks
+          "$RUNNER_TEMP/gitleaks" git --redact --no-banner --config .gitleaks.toml .
+
+  # CycloneDX SBOMs of the three npm dependency trees, from the lockfiles. Solidity dependencies
+  # are pinned submodules, checked in the contracts job and listed in THIRD_PARTY_LICENSES.md.
+  sbom:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: CycloneDX (cyclonedx-npm 6.0.1)
+        run: |
+          mkdir -p sbom
+          for dir in . apps/web apps/dapp; do
+            name=$([ "$dir" = . ] && echo root || basename "$dir")
+            (cd "$dir" && npx --yes @cyclonedx/cyclonedx-npm@6.0.1 --package-lock-only \
+              --ignore-npm-errors --output-format JSON --output-file "$GITHUB_WORKSPACE/sbom/$name.cdx.json")
+            test -s "sbom/$name.cdx.json"
+          done
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: sbom-cyclonedx
+          path: sbom/
+          retention-days: 90

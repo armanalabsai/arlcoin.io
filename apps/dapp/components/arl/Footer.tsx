@@ -2,8 +2,8 @@ export function Footer() {
   return (
     <footer className="border-t border-line px-4 py-6 text-center text-xs text-subtle">
       <p>
-        Local test chain only. ARL is not deployed on any public network. Amounts and schedules on
-        this chain are development values.
+        Local test chain only. ARL is deployed on Base Sepolia (testnet) only, not on Base Mainnet.
+        Amounts and schedules on this chain are development values.
       </p>
       <p className="mt-2">
         <a className="link" href="https://arlcoin.io">
