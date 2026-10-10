@@ -1,0 +1,81 @@
+name: Deploy app
+
+# Deploys the ARL app (apps/dapp, Base Sepolia) to Vercel production after CI passes on main,
+# with scripts/deploy-app.sh. Separate from the website (deploy-site.yml).
+#
+# Repository secrets (Settings → Secrets and variables → Actions):
+#   VERCEL_TOKEN           the alazdg team token the website already uses
+#   VERCEL_ORG_ID          the team ID (shared with the website)
+#   VERCEL_APP_PROJECT_ID  optional: the arl-app project ID; without it the project is linked by
+#                          name and created on the first run
+#   ARL_OPERATOR_KEY       the Base Sepolia testnet operator key (testnet only, holds testnet ARL
+#                          and a little Base Sepolia ETH); passed to the runtime, never printed
+# Without VERCEL_TOKEN the job skips, and does not fail. It never touches a mainnet key.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-app
+  cancel-in-progress: false
+
+# Actions are pinned to full commit SHAs; the tag is noted for review.
+jobs:
+  deploy:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: production
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
+      ARL_OPERATOR_KEY: ${{ secrets.ARL_OPERATOR_KEY }}
+    steps:
+      - name: Skip unless the Vercel token is set
+        id: secrets
+        run: |
+          if [ -n "$VERCEL_TOKEN" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::VERCEL_TOKEN is not set; nothing deployed."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+          if [ -z "$ARL_OPERATOR_KEY" ]; then
+            echo "::warning::ARL_OPERATOR_KEY is not set; the testnet operator API will answer 503."
+          fi
+
+      - if: steps.secrets.outputs.ready == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - if: steps.secrets.outputs.ready == 'true'
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            apps/dapp/package-lock.json
+
+      - if: steps.secrets.outputs.ready == 'true'
+        run: npm ci
+      - if: steps.secrets.outputs.ready == 'true'
+        run: npm ci
+        working-directory: apps/dapp
+
+      - name: Build for Base Sepolia and deploy to production
+        if: steps.secrets.outputs.ready == 'true'
+        run: bash scripts/deploy-app.sh

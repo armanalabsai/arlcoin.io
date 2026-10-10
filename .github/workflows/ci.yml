@@ -228,6 +228,12 @@ jobs:
       # Builds against the local chain, deploys the fixture, checks the committed contract
       # addresses and drives the app in Chromium. Local Anvil only.
       - run: npm run test:e2e
+      # The committed Base Sepolia contracts match the record, and the app builds for Base Sepolia.
+      - run: node scripts/generate-sepolia-contracts.ts --check
+      - run: |
+          if grep -q 84532 contracts/baseSepoliaContracts.ts; then
+            NEXT_PUBLIC_ARL_CHAIN=84532 npm run build
+          fi
       - run: node ../../scripts/audit.mjs
 
   web:

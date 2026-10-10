@@ -91,6 +91,8 @@ dapp:
     - npm run build
     - npx playwright install --with-deps chromium
     - npm run test:e2e
+    - node scripts/generate-sepolia-contracts.ts --check
+    - if grep -q 84532 contracts/baseSepoliaContracts.ts; then NEXT_PUBLIC_ARL_CHAIN=84532 npm run build; fi
     - node ../../scripts/audit.mjs
 
 web:
