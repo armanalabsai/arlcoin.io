@@ -1,6 +1,11 @@
 # Website: the Interactive Core
 
-Source: [`apps/web`](../apps/web). Hosting: Vercel serves `arlcoin.io` from `main` (the shared
+Source: [`apps/web`](../apps/web). Deploy: after CI passes on `main`,
+`.github/workflows/deploy-site.yml` runs `scripts/deploy-site.sh`, which builds the static export
+and uploads it prebuilt to Vercel production. It needs the repository secrets `VERCEL_TOKEN`,
+`VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` and skips without them; Vercel's own Git builds are off
+(`git.deploymentEnabled: false` in `apps/web/vercel.json`). The same script can be run by hand.
+Hosting: Vercel serves `arlcoin.io` from `main` (the shared
 Vercel team was paused on 2026-09-28 for exceeding Hobby fair-use limits and received its one-time
 courtesy unblock the same day, valid 30 days). A static mirror is published to GitHub Pages at
 `https://gokturkalazdaghan-dot.github.io/ARLCOIN/` by `.github/workflows/pages.yml`, as a fallback
