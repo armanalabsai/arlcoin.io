@@ -14,45 +14,47 @@ The network gate still refuses chain 8453.
 
 Signer addresses are operational configuration and stay out of the repository
 (`contracts/deploy/deployments/8453-signers.env`, git-ignored, SHA-256
-`1a3fe635c32e9be733f7b4a495e9b514be77d19a7a599057d408b1979c8712f8`). Read-only checks on Base
-Mainnet (block 52,183,747): all five addresses checksum-valid, distinct, no code (no EIP-7702
-delegation), nonce 0. The guardian owner is not a role-Safe owner; the deployer is neither.
+`cac589cc37d0d718bd6285e8bb74e831363a5b4b969bbe903678cc9e1656e31f`; signers replaced by owner on 2026-10-10). Read-only checks on Base
+Mainnet (block 52,433,848): all five addresses checksum-valid, distinct, no code (no EIP-7702
+delegation), nonce 0, balance 0. The guardian owner is not a role-Safe owner; the deployer is neither.
 
 ## Simulation
 
-Run on a local fork of Base Mainnet (block 52,183,747) with the canonical Safe v1.5.0 contracts:
-`CreateSafes`, config and plan (TGE placeholder 2026-11-01), `DeployARL`, `VerifyARL`, manifest and
-supply. The fork ran with chain id 84532 because the network gate refuses 8453 by design;
-CREATE and CREATE2 addresses do not depend on the chain id, so they are the expected mainnet
-addresses if the deployer starts at nonce 0 and the default salt is used.
+Run with `scripts/rehearse-base-mainnet-fork.sh` on a local fork of Base Mainnet (chain 8453,
+block 52,433,848; re-run 2026-10-10 with the new signers) and the canonical Safe v1.5.0
+contracts. Anvil impersonates the real addresses, so no key is used and nothing is sent. Before
+the TGE every path is refused (`PlanProductionLocked(8453)`); with the fork clock moved to the TGE:
+`CreateSafes`, config and plan (TGE 2026-11-01), `DeployARL`, `VerifyARL`, manifest, supply, the
+four Uniswap v3 pools from the Liquidity Safe and the claim distributor. The addresses below are
+the expected mainnet addresses if the deployer starts at nonce 0 and the default salt is used.
 
 Result: all steps pass; total supply 21,000,000 ARL; circulating at TGE 2,100,000 ARL; role Safes
-2-of-3; guardian 1-of-1; timelock delay 172,800 s. Gas used 7,554,078 (about 0.00005 ETH at
-0.006 gwei; fund the deployer with at least 0.001 ETH).
+2-of-3; guardian 1-of-1; timelock delay 172,800 s. The deployer, given 0.001 ETH, had 0.000958 ETH left after the Safes,
+the contracts and the distributor; fund it with at least 0.001 ETH.
 
 | Contract                       | Expected address                             |
 | ------------------------------ | -------------------------------------------- |
-| Founder Safe                   | `0x54E1dcA7fce1CB3d9A22cE021BA83a65CEFB1BAC` |
-| Investors Safe                 | `0xF7b5c707b394a6F654BCf1Fa01Be5499e6F35A46` |
-| Strategic Partnerships Safe    | `0x9fBA4cba76e018a30a8716CCCF02D08A34ee172f` |
-| Treasury Safe                  | `0xf3DeA34A781002D30E24c1480d44fF811D5C0dca` |
-| Guardian Safe                  | `0xdF97b71F45dcbD3a713EF8eD8e106F0e19E95BcD` |
-| Public Launch Safe             | `0xb9829b9145581042776fa65bbF56972447aCdB38` |
-| Community & Staking Safe       | `0x5Cfe39d281D008eF359c979f2DB9096739044738` |
-| Ecosystem & Growth Safe        | `0x7D3e1037c2F99BDfb7D3d4c5a3Ec158198eBEdBC` |
-| Liquidity Safe                 | `0x220D3a21366FD386CEEEF4ba36c7aE6582AB3C18` |
-| Team Safe                      | `0x5c6cBdFa6747F1D0974e84F27AAD52263cA3A1bf` |
-| Early Users Safe               | `0xbCb6A2860E0390eD3aeAde46cc7d248be0Ff9b5A` |
-| Grants & Bug Bounty Safe       | `0x85D6f4702Cd88486A0AE644FF6A8825253dB7B9B` |
-| Investors vesting              | `0xa56d7c78F0ca7795c2A6789DBb485A3Faa6453fD` |
-| Strategic Partnerships vesting | `0x8297f965ECD2B9279Dd3FeCa9ef1a0B1dD7b2736` |
-| Treasury timelock              | `0xB2A6565325B7f1886376f5F5FAC9c617c4854111` |
-| ARL token                      | `0x0e8A5434f12D3d839a0a7E88d3a66b11bd712b97` |
+| Founder Safe                   | `0x7816Ee6349AeA591B351772eB951A6CF8b223E5c` |
+| Investors Safe                 | `0x183A501A6dEb7D575F870a12c36a2266666F8e8a` |
+| Strategic Partnerships Safe    | `0x31b8662Bfe4F2c9F9B400D407524356FADc8cC75` |
+| Treasury Safe                  | `0x4d9be214f71b391574a3A8dbE145AeF142eB0c13` |
+| Guardian Safe                  | `0xB521d1E4eF0dA060e3B6C5d8667DE711abc4D120` |
+| Public Launch Safe             | `0x42A0E39399aAd8e088f9561ceC1512EA93D18E05` |
+| Community & Staking Safe       | `0xfF12597A671ebAF0cAe37999EE659e03c4f444B5` |
+| Ecosystem & Growth Safe        | `0x90D8c082e9AdABE96804Ae9c6117Fd5b245F4cb1` |
+| Liquidity Safe                 | `0x8894C0bc9A83Aa497Cf35618b72100dCa459C1AC` |
+| Team Safe                      | `0xe5C7F7BDd59286C9baE7FfE85F3CF99382F8989D` |
+| Early Users Safe               | `0xdBa5CfeD6E6076DabAbb4a6D851605cC5C8bb47D` |
+| Grants & Bug Bounty Safe       | `0xA1B52BA110A2738E5769dE3F9d0BE70E1b0604A3` |
+| Investors vesting              | `0x8E2CC3a5F39038836475650f63A91d107BabA643` |
+| Strategic Partnerships vesting | `0x36C94925c2BAB7897A000c57CE5536F5Bc60a95B` |
+| Treasury timelock              | `0xF3820BC1510a9A1B9aa2b318Dd997127f198B1c2` |
+| ARL token                      | `0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4` |
 
-The guardian Safe has the same address as on Base Sepolia (same owner, salt and factory).
+The guardian Safe has a new owner, so its mainnet address differs from the Base Sepolia guardian Safe.
 
 Simulated plan SHA-256 (with the placeholder TGE):
-`2b3eaa4c15e5b2aa79147d7741214a1ab0b396ac0f7b1e96ed8137c97855f022`. The real plan is rebuilt with
+`0efdcdfc45352b197425a6902f7ef0bcd1e07fcee2f93c2d22e5a9fe843e01b4`. The real plan is rebuilt with
 the approved TGE before the mainnet run. The TGE changes the vesting dates, not the addresses.
 
 ## Still required before a mainnet run

@@ -183,16 +183,16 @@ local repository, or create a repository on another host the owner controls and 
 
 ## 7. Remaining release checklist (CTO decision 2026-10-05: no mainnet yet)
 
-| #   | Item                                                                              | Owner action                        | Status                                    |
-| --- | --------------------------------------------------------------------------------- | ----------------------------------- | ----------------------------------------- |
-| 1   | EIP-7702 delegation removed on Base Sepolia                                       | MetaMask clean-up on Base Sepolia   | Done; `cast code` = `0x` (2026-10-10)     |
-| 2   | GitLab repository `armanalabs-group/arlcoin`                                      | Push `main` (owner runs the push)   | Done; public, `main` (checked 2026-10-10) |
-| 3   | Basescan verification                                                             | Set `ETHERSCAN_API_KEY` (section 5) | Done 2026-10-10 (Base Sepolia, 4/4)       |
-| 4   | Runtime Verification readiness assessment                                         | Approve sending                     | Draft only (section 2)                    |
-| 5   | Mainnet signers: 3 Ledger role signers, guardian signer(s), clean Ledger deployer | Provide public addresses            | Open                                      |
-| 6   | Liquidity plan and sale parameters                                                | Decide                              | Legal opinion done; rest open             |
-| 7   | Legal opinion / KYC, social channels                                              | Decide                              | Open                                      |
-| 8   | Audit position: paid audit or "not audited" disclosure                            | Decide (no spending now)            | Open                                      |
-| 9   | Mainnet network gate                                                              | Separate reviewed change after 1-8  | Locked                                    |
+| #   | Item                                                                              | Owner action                        | Status                                                          |
+| --- | --------------------------------------------------------------------------------- | ----------------------------------- | --------------------------------------------------------------- |
+| 1   | EIP-7702 delegation removed on Base Sepolia                                       | MetaMask clean-up on Base Sepolia   | Done; `cast code` = `0x` (2026-10-10)                           |
+| 2   | GitLab repository `armanalabs-group/arlcoin`                                      | Push `main` (owner runs the push)   | Done; public, `main` (checked 2026-10-10)                       |
+| 3   | Basescan verification                                                             | Set `ETHERSCAN_API_KEY` (section 5) | Done 2026-10-10 (Base Sepolia, 4/4)                             |
+| 4   | Runtime Verification readiness assessment                                         | Approve sending                     | Draft only (section 2)                                          |
+| 5   | Mainnet signers: 3 Ledger role signers, guardian signer(s), clean Ledger deployer | Provide public addresses            | Done 2026-10-10; fork rehearsal passes (`docs/mainnet-plan.md`) |
+| 6   | Liquidity plan and sale parameters                                                | Decide                              | Legal opinion done; rest open                                   |
+| 7   | Legal opinion / KYC, social channels                                              | Decide                              | Open                                                            |
+| 8   | Audit position: paid audit or "not audited" disclosure                            | Decide (no spending now)            | Open                                                            |
+| 9   | Mainnet network gate                                                              | Separate reviewed change after 1-8  | Locked                                                          |
 
 Supplementary: Aderyn, Halmos and Mythril re-run on Linux on 2026-10-10 (done).
