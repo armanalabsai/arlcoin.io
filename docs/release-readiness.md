@@ -87,7 +87,7 @@ Likely request content (to confirm when the site loads):
 | EIP-7702 delegation on the deployer (8)     | TECHNICAL BLOCKER    | Switch back to a standard account on Base Sepolia; or use a fresh Ledger for mainnet                         |
 | Mainnet Safe signers and threshold (7)      | TECHNICAL BLOCKER    | Provide signer addresses (section 4)                                                                         |
 | Aderyn, Halmos, Mythril re-run on Linux (5) | OPTIONAL             | Supplementary (owner decision 2026-10-05); tests, fuzz, invariants, Slither and reproducibility already pass |
-| Basescan verification (2)                   | TECHNICAL BLOCKER    | Set `ETHERSCAN_API_KEY` (section 5)                                                                          |
+| Basescan verification (2)                   | DONE                 | All four Base Sepolia contracts verified on Basescan (2026-10-10)                                            |
 | Public source repository (16)               | TECHNICAL BLOCKER    | Restore GitHub (ticket 4818868) or publish to another owned host                                             |
 | Liquidity plan (13)                         | ADMIN/LEGAL          | Pool size, pair, venue, LP custody                                                                           |
 | Sale parameters (14)                        | ADMIN/LEGAL          | Tokens offered, raise, currency, buyer unlock                                                                |
@@ -187,7 +187,7 @@ local repository, or create a repository on another host the owner controls and 
 | --- | --------------------------------------------------------------------------------- | ----------------------------------- | ------------------------------------------- |
 | 1   | EIP-7702 delegation removed on Base Sepolia                                       | MetaMask clean-up on Base Sepolia   | Open; `cast code` still `0xef0100…e32b`     |
 | 2   | Private GitLab repository `armanalabs-group/arlcoin`                              | Push `main` (owner runs the push)   | Not created yet; stays private when created |
-| 3   | Basescan verification                                                             | Set `ETHERSCAN_API_KEY` (section 5) | Ready; variable not set                     |
+| 3   | Basescan verification                                                             | Set `ETHERSCAN_API_KEY` (section 5) | Done 2026-10-10 (Base Sepolia, 4/4)         |
 | 4   | Runtime Verification readiness assessment                                         | Approve sending                     | Draft only (section 2)                      |
 | 5   | Mainnet signers: 3 Ledger role signers, guardian signer(s), clean Ledger deployer | Provide public addresses            | Open                                        |
 | 6   | Liquidity plan and sale parameters                                                | Decide                              | Legal opinion done; rest open               |
