@@ -1,6 +1,13 @@
 # Website: the Interactive Core
 
-Source: [`apps/web`](../apps/web). Hosting: Vercel serves `arlcoin.io` from `main` (the shared
+Source: [`apps/web`](../apps/web). Deploy: after CI passes on `main`,
+`.github/workflows/deploy-site.yml` runs `scripts/deploy-site.sh`, which builds the static export
+and uploads it prebuilt to Vercel production. It needs the repository secrets `VERCEL_TOKEN`,
+`VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` and skips without them. Vercel's own Git builds are off
+(`git.deploymentEnabled: false` in `apps/web/vercel.json`, and in `apps/dapp/vercel.json` for the
+Git-connected `arlcoin-io` project, whose root is the local-only dApp). The same script can be run
+by hand.
+Hosting: Vercel serves `arlcoin.io` from `main` (the shared
 Vercel team was paused on 2026-09-28 for exceeding Hobby fair-use limits and received its one-time
 courtesy unblock the same day, valid 30 days). A static mirror is published to GitHub Pages at
 `https://gokturkalazdaghan-dot.github.io/ARLCOIN/` by `.github/workflows/pages.yml`, as a fallback
@@ -173,8 +180,8 @@ CI runs all of these in the `web` job, plus `npm audit --audit-level=high`.
   submissions a month), which emails each submission to the team. No server or database is
   involved, so the forms work on Vercel and on the static GitHub Pages build alike.
 - The access key lives in `src/content/forms.ts` (overridable with `NEXT_PUBLIC_WEB3FORMS_KEY`)
-  and delivers to `armanalabsai@gmail.com`. It is public by design: it can only send to the inbox
-  it was created for. With no key the
+  and delivers to the team inbox. It is public by design: it can only send to the inbox it was
+  created for. With no key the
   forms send nothing: the whitelist shows a "not open yet" notice and the contact page shows the
   team address, `team@arlcoin.io` (`SITE.email` in `src/content/site.ts`).
 - The whitelist form accepts an EVM address (EIP-55 checksum enforced for mixed case, using

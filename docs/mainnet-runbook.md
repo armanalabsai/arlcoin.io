@@ -14,6 +14,18 @@ the simulation are in [mainnet-plan.md](mainnet-plan.md); the testnet run of the
 | 3   | Deployer `0x5a7F207B3764113c68c50219e31D2a7c22132F52` funded with at least 0.001 ETH on Base; it sends nothing before the run | `cast balance`                       |
 | 4   | Whitelist and launchpad buyers collected as `address,amount` (whole ARL)                                                      | CSV ready                            |
 | 5   | Signer config `contracts/deploy/deployments/8453-signers.env` unchanged                                                       | SHA-256 in mainnet-plan.md           |
+| 6   | Full rehearsal on a Base Mainnet fork passes: `bash scripts/rehearse-base-mainnet-fork.sh`                                    | "MAINNET FORK REHEARSAL PASSED"      |
+
+## Rehearsal (2026-10-10, passed)
+
+`scripts/rehearse-base-mainnet-fork.sh` runs the whole day on a local fork of Base Mainnet with the
+real signer configuration, the fork clock set to just after the TGE and the deployer holding exactly
+0.001 ETH. Result on 2026-10-10: Base Mainnet refused before the TGE; the 12 Safes and the token at
+the addresses in [mainnet-plan.md](mainnet-plan.md) (token `0x0e8A5434f12D3d839a0a7E88d3a66b11bd712b97`);
+`VerifyARL` passed; total 21,000,000 and circulating 2,100,000 ARL; the deployer spent about
+0.00004 ETH of its 0.001 ETH; the four pools held 1,000,000 ARL with ETH and BTC floors from the
+Chainlink prices on the fork; the claim distributor was deployed and funded by the Public Launch
+Safe. Run it again in the last days before the TGE.
 
 ## Steps
 

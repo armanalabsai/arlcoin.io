@@ -6,13 +6,13 @@ it and replies by e-mail.
 
 ## Basic information
 
-| Field                   | Answer                 |
-| ----------------------- | ---------------------- |
-| Project Name            | ARL Protocol           |
-| Contact Name            | Alaz Dağhan Göktürk    |
-| Contact Telegram Handle | @arlcoinio             |
-| Email                   | armanalabsai@gmail.com |
-| Referred by             | (empty)                |
+| Field                   | Answer              |
+| ----------------------- | ------------------- |
+| Project Name            | ARL Protocol        |
+| Contact Name            | Alaz Dağhan Göktürk |
+| Contact Telegram Handle | @arlcoinio          |
+| Email                   | team@arlcoin.io     |
+| Referred by             | (empty)             |
 
 ## Links
 

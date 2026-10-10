@@ -2,7 +2,7 @@
 
 ARL has **no independent audit**. The owner pays no cash, so a classic paid audit is out. This page
 lists the routes checked on 2026-10-05 that need no cash from the project, and the drafts for each.
-Route C (with A) was sent on 2026-10-05 by email from gokturkalazdaghan@gmail.com, cc armanalabsai@gmail.com, to hello@nethermind.io, support@hacken.io and Runtime Verification (its Base Services Hub contact); no answer yet. Until a report from an independent party is published, every public
+Route C (with A) was sent on 2026-10-05 by email from the founder's mailbox to hello@nethermind.io, support@hacken.io and Runtime Verification (its Base Services Hub contact); no answer yet. Until a report from an independent party is published, every public
 text keeps saying "not audited" ([audit-evidence.md](audit-evidence.md)).
 
 ## Routes checked
@@ -51,7 +51,7 @@ Recipients (whitelisted ASPs seen publicly): Hacken, Nethermind. Contact through
 > bytecode, deployment rehearsals.
 >
 > Could you apply for the grant on our behalf in the next open window, or tell us what is missing?
-> Website: https://arlcoin.io - Contact: armanalabsai@gmail.com
+> Website: https://arlcoin.io - Contact: team@arlcoin.io
 >
 > Alaz Dağhan Göktürk, ARL Protocol
 
@@ -77,7 +77,7 @@ or email). No firm has said it accepts token payment; each must answer for itsel
 > bytecode, deployment rehearsals.
 >
 > Would you take this on, and what amount and timeline would you propose?
-> Website: https://arlcoin.io - Contact: armanalabsai@gmail.com
+> Website: https://arlcoin.io - Contact: team@arlcoin.io
 >
 > Alaz Dağhan Göktürk, ARL Protocol
 

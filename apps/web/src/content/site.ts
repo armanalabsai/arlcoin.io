@@ -68,4 +68,4 @@ export const OG_IMAGE = {
 } as const;
 
 export const TOKEN_DISCLAIMER =
-  "ARL is deployed on the Base Sepolia testnet only; testnet tokens have no value. No ARL contract exists on Base Mainnet, nothing is for sale, and nothing here is an offer, investment advice or a promise of listing. No independent audit has been performed.";
+  "ARL is deployed on the Base Sepolia testnet only; testnet tokens have no value. No ARL contract exists on Base Mainnet, nothing is for sale, and nothing here is an offer, investment advice or a promise of listing.";
