@@ -46,11 +46,12 @@ const STEPS: Step[] = [
     title: "Claim free ARL",
     when: fromTge,
     body: `Whitelisted addresses claim up to ${PUBLIC_LAUNCH.maxPerAddress.toLocaleString("en-US")} ARL each, ${PUBLIC_LAUNCH.tgeTranche.toLocaleString("en-US")} ARL in total, for ${String(PUBLIC_LAUNCH.claimWindowDays)} days. You pay only network gas.`,
-    action: (
+    // The app is hosted next to the site only from the launch; until then there is no link.
+    action: live ? (
       <a href={CLAIM_APP_PATH} className={link}>
         Open the claim ›
       </a>
-    ),
+    ) : null,
   },
   {
     n: "3",

@@ -32,10 +32,8 @@ test("the landing page shows the launch route, closed until the Base Mainnet tok
   await expect(launch.getByTestId("launch-when-2")).toHaveText("From 1 November 2026");
   await expect(launch.getByTestId("launch-when-3")).toHaveText("From 1 November 2026");
   await expect(launch.getByTestId("launch-when-4")).toHaveText("After launch");
-  await expect(launch.getByRole("link", { name: "Open the claim ›" })).toHaveAttribute(
-    "href",
-    "/app/claim/",
-  );
+  // No link to the claim before the launch: the app is not hosted at arlcoin.io until then.
+  await expect(launch.getByRole("link", { name: "Open the claim ›" })).toHaveCount(0);
   await expect(launch.getByRole("button", { name: "Add ARL to your wallet" })).toHaveCount(0);
   await launch.getByRole("link", { name: "How to get ARL ›" }).click();
   await expect(page).toHaveURL(/\/buy\/?$/);
