@@ -32,7 +32,7 @@ Everything uses contracts and tooling already in this repository; only Base gas 
 
 Each Safe transaction is prepared as a file, simulated on a fork and signed by two of the three
 owners in the Safe app. Legal compliance of selling to the public in the owner's jurisdiction is
-the owner's responsibility (legal opinion still open).
+the owner's responsibility.
 
 ## 2. Launchpad applications (secondary, free only)
 

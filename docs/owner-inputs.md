@@ -44,7 +44,7 @@ A split of the Founder allocation into 2,000,000 ARL unrestricted and 100,000 AR
 | Liquidity                          | Liquidity Safe; spec section 13                                                                     | **No project cash:** launch proceeds, or single-sided ARL at or above 0.20 USD; LP in the Liquidity Safe, 12-month lock (owner decision 2026-10-05) |
 | Staking reward amount and duration | Funding calls from the Community & Staking holder to `ARLStakingRewards`                            | Not decided                                                                                                                                         |
 | Bug bounty terms                   | [bug-bounty.md](bug-bounty.md)                                                                      | **Approved 2026-10-05:** 40,000 / 15,000 / 4,000 / 500 ARL, 200,000 ARL per period, paid in ARL only for accepted reports                           |
-| Legal opinion, KYC provider        | Launchpad pack                                                                                      | Not started                                                                                                                                         |
+| Legal opinion, KYC provider        | Launchpad pack                                                                                      | Legal opinion done; KYC if required                                                                                                                 |
 
 ## Base Sepolia deployment checklist
 

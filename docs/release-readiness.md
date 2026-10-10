@@ -92,7 +92,7 @@ Likely request content (to confirm when the site loads):
 | Liquidity plan (13)                         | ADMIN/LEGAL          | Pool size, pair, venue, LP custody                                                                           |
 | Sale parameters (14)                        | ADMIN/LEGAL          | Tokens offered, raise, currency, buyer unlock                                                                |
 | Security contact (18)                       | DONE                 | `team@arlcoin.io` (owner decision 2026-10-05)                                                                |
-| Legal opinion, KYC (19)                     | ADMIN/LEGAL          | Counsel and provider, if the launchpad requires them                                                         |
+| Legal opinion, KYC (19)                     | ADMIN/LEGAL          | Legal opinion done; KYC provider if the launchpad requires one                                               |
 | Independent audit (3)                       | ADMIN/LEGAL          | Decide: paid audit, or disclose "not audited"                                                                |
 | Social channels (20)                        | OPTIONAL             | Required by most launchpads in practice                                                                      |
 | Public test period and bug bounty (21)      | OPTIONAL             | Needs items 16 and 18                                                                                        |
@@ -190,7 +190,7 @@ local repository, or create a repository on another host the owner controls and 
 | 3   | Basescan verification                                                             | Set `ETHERSCAN_API_KEY` (section 5) | Ready; variable not set                     |
 | 4   | Runtime Verification readiness assessment                                         | Approve sending                     | Draft only (section 2)                      |
 | 5   | Mainnet signers: 3 Ledger role signers, guardian signer(s), clean Ledger deployer | Provide public addresses            | Open                                        |
-| 6   | Liquidity plan and sale parameters                                                | Decide                              | Open                                        |
+| 6   | Liquidity plan and sale parameters                                                | Decide                              | Legal opinion done; rest open               |
 | 7   | Legal opinion / KYC, social channels                                              | Decide                              | Open                                        |
 | 8   | Audit position: paid audit or "not audited" disclosure                            | Decide (no spending now)            | Open                                        |
 | 9   | Mainnet network gate                                                              | Separate reviewed change after 1-8  | Locked                                      |

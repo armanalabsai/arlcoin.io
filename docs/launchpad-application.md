@@ -25,7 +25,7 @@ contract, so the readiness table below is the real starting point.
 | TGE date                                        | 2026-11-01 (approved 2026-10-05). Every vesting schedule starts at the TGE                                                                                        |
 | Liquidity plan                                  | **TBD.** 2,000,000 ARL Liquidity reserve exists; pool size, pair and LP custody not decided                                                                       |
 | Team identity (KYC with the launchpad)          | Founder: Alaz Daghan Gokturk, Founder and CEO. KYC is done privately with each launchpad by the founder                                                           |
-| Legal opinion on the token                      | **TBD.** Not obtained                                                                                                                                             |
+| Legal opinion on the token                      | Obtained by the owner                                                                                                                                             |
 | Whitepaper or litepaper                         | Partly: economic specification `docs/tokenomics-economic-spec.md`, architecture `docs/architecture.md`; no litepaper PDF                                          |
 | Pitch deck                                      | **TBD**                                                                                                                                                           |
 | Community and social accounts                   | X https://x.com/armanalabsai, Instagram https://instagram.com/armanalabsai; no Telegram                                                                           |
@@ -141,7 +141,7 @@ needs a reviewed change to the token, deployment plan and verifier.
 - [ ] Sale parameters decided and written into this document
 - [ ] TGE date set
 - [ ] Liquidity plan and LP custody documented
-- [ ] Legal opinion obtained
+- [x] Legal opinion obtained
 - [ ] Litepaper and pitch deck prepared from this document and the economic specification
 - [ ] Social accounts created and linked from https://arlcoin.io
 - [ ] Every `TBD` replaced with a verified value
