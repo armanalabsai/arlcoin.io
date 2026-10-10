@@ -798,12 +798,23 @@
   border-radius: 50%;
   background: var(--color-fg-subtle);
 }
-.landing-road li[data-status="Complete"]::before {
-  background: var(--color-accent);
+/* Done phases light green (the hero's live dot); phases under way show a pulsing green ring. */
+.landing-road li[data-progress="done"]::before {
+  background: #7ee0a6;
+  box-shadow: 0 0 8px rgb(126 224 166 / 0.7);
 }
-.landing-road li[data-status="In progress"]::before {
+.landing-road li[data-progress="done"] .road-state {
+  color: #7ee0a6;
+}
+.landing-road li[data-progress="active"]::before {
   background: var(--color-page);
-  border: 2px solid var(--color-accent);
+  border: 2px solid #7ee0a6;
+  animation: live-ping 2s infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing-road li[data-progress="active"]::before {
+    animation: none;
+  }
 }
 @media (min-width: 768px) {
   .landing-road {
