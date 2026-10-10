@@ -37,6 +37,13 @@ export function CoreCard({ layer, onActivate }: Props) {
         className="pointer-events-none size-full bg-contain bg-center bg-no-repeat"
         style={{ backgroundImage: `url("${withBase("/arl-core-mark.png")}")` }}
       />
+      {/* The A of ARL in the mark's empty centre, in the wordmark's type. */}
+      <span
+        aria-hidden="true"
+        className="arl-neon pointer-events-none absolute inset-0 grid place-items-center text-[30px] leading-none tracking-[-0.04em] min-[1100px]:text-[36px] min-[1100px]:[@media(max-height:899px)]:text-[30px]"
+      >
+        A
+      </span>
       <span
         aria-hidden="true"
         className="absolute -bottom-7 text-[12px] whitespace-nowrap text-fg-subtle opacity-0 group-focus-visible:opacity-100"
