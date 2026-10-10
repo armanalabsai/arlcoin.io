@@ -5,17 +5,17 @@ been performed.** Base Sepolia live; Base Mainnet opens only at the TGE (2026-11
 
 ## 1. Current state (read-only checks, Base Sepolia block 47,690,188)
 
-| Item                           | Value                                                                                 |
-| ------------------------------ | ------------------------------------------------------------------------------------- |
-| Deployer                       | `0x3c3f71d694f709cBe60f015717c54A795636b165`                                          |
-| Deployer code (EIP-7702)       | `0xef0100` + `63c0c19a282a1b52b07dd5a65b58948a07dae32b`: **delegation still active**  |
-| Deployer nonce / pending       | 16 / 16 (no pending transaction)                                                      |
-| Deployer balance               | 0.000958686738489671 ETH                                                              |
-| Investors vesting              | `0x830e35CdF48F8F30F83d1DBE8431f02a7BE9dCcE` (unchanged)                              |
-| Strategic Partnerships vesting | `0x02c7692918C98EC710970D390b08f247A76D5A37` (unchanged)                              |
-| Treasury timelock              | `0x5B3fd9E574BC07309949CD39161a295E22FbBd3D` (unchanged)                              |
-| ARL token                      | `0x244312b619127B6458154F3467eFD7c87CD28500` (unchanged), total supply 21,000,000 ARL |
-| Tokenomics / TGE               | Unchanged: 11 allocations, circulating at TGE 2,100,000 ARL, TGE target 2026-11-01    |
+| Item                           | Value                                                                                            |
+| ------------------------------ | ------------------------------------------------------------------------------------------------ |
+| Deployer                       | `0x3c3f71d694f709cBe60f015717c54A795636b165`                                                     |
+| Deployer code (EIP-7702)       | None: delegation removed 2026-10-05; `eth_getCode` = `0x` again at block 47,937,338 (2026-10-10) |
+| Deployer nonce / pending       | 16 / 16 (no pending transaction)                                                                 |
+| Deployer balance               | 0.000958686738489671 ETH                                                                         |
+| Investors vesting              | `0x830e35CdF48F8F30F83d1DBE8431f02a7BE9dCcE` (unchanged)                                         |
+| Strategic Partnerships vesting | `0x02c7692918C98EC710970D390b08f247A76D5A37` (unchanged)                                         |
+| Treasury timelock              | `0x5B3fd9E574BC07309949CD39161a295E22FbBd3D` (unchanged)                                         |
+| ARL token                      | `0x244312b619127B6458154F3467eFD7c87CD28500` (unchanged), total supply 21,000,000 ARL            |
+| Tokenomics / TGE               | Unchanged: 11 allocations, circulating at TGE 2,100,000 ARL, TGE target 2026-11-01               |
 
 The delegation is absent on Base Mainnet, Ethereum and Ethereum Sepolia (`code = 0x`, nonce 0),
 and since 2026-10-05 on Base Sepolia too (`eth_getCode` returns `0x`): F-2 is resolved. Procedure: [audit-evidence.md](audit-evidence.md#eip-7702-clean-up-f-2).
