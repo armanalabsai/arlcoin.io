@@ -4,14 +4,16 @@ The ARL logo, as chosen by the owner: an eight-armed swirl in light line art (ei
 with flowing strands turning around the centre) with a white high-contrast "A" for ARLCOIN in the
 middle, drawn on a transparent background so the page itself shows through. The swirl is traced
 from the owner's artwork; the A is drawn to stay at least 32 units (of 1200) clear of the lines.
-Below 48 px the A is left out, because it cannot be read. The lockups add the "ARL NETWORK"
+Every logo and icon carries the A (owner decision 2026-10-10). The `-small` variants, for 48 px
+and below, use heavier lines and a larger, bolder A; to make room for it the inner ends of the
+strands are cut back in a circle around the centre, and the background stays transparent. The lockups add the "ARL NETWORK"
 wordmark in Orbitron ExtraBold, outlined to vector paths.
 
 | File | Use |
 | --- | --- |
 | `arl-token-icon.svg`, `png/arl-token-icon-{1024,512,256,200}.png` | Token icon on dark backgrounds: wallets, explorers, token lists (transparent PNG) |
 | `arl-token-icon-on-light.svg`, `png/arl-token-icon-on-light-{512,200}.png` | The same in dark ink, for white backgrounds (CoinGecko, CoinMarketCap and light-mode wallets) |
-| `arl-token-icon-small.svg`, `png/arl-token-icon-small-{64,32}.png` | Token icon at 48 px and below: heavier lines, no A |
+| `arl-token-icon-small.svg`, `png/arl-token-icon-small-{64,32}.png` | Token icon at 48 px and below: heavier lines, larger A |
 | `arl-app-icon.svg` | App icon, transparent |
 | `png/arl-app-icon-512.png`, `png/arl-app-icon-180.png` | Social avatar and Apple touch icon: these must be opaque, so the logo sits on the site's night blue `#050B1E` |
 | `arl-app-icon-small.svg`, `png/arl-app-icon-small-32.png` | Favicon (the website uses the SVG as `app/icon.svg`): dark ink on light browser tabs, light ink on dark ones |
