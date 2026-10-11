@@ -4,10 +4,12 @@ import { describe, it } from "node:test";
 
 import type { DeploymentRecord } from "../src/manifest.ts";
 import {
+  LOG_CHUNK,
   MonitorError,
   assess,
   expectedRoles,
   expectedVested,
+  logRanges,
   roleKey,
   type Snapshot,
   type VestingState,
@@ -168,5 +170,56 @@ describe("deployment monitor", () => {
 
   it("refuses a deployment record from another chain", () => {
     assert.throws(() => assess(plan, { ...deployment, chainId: 1 }, healthy()), MonitorError);
+  });
+});
+
+describe("logRanges", () => {
+  /** Every block exactly once, in order, and no range wider than `size` blocks. */
+  function assertCovers(from: bigint, to: bigint, size: bigint) {
+    const ranges = logRanges(from, to, size);
+    assert.equal(ranges[0]?.fromBlock, from);
+    assert.equal(ranges.at(-1)?.toBlock, to);
+    let next = from;
+    for (const r of ranges) {
+      assert.equal(r.fromBlock, next);
+      assert.ok(r.toBlock >= r.fromBlock);
+      assert.ok(r.toBlock - r.fromBlock + 1n <= size);
+      next = r.toBlock + 1n;
+    }
+    assert.equal(next, to + 1n);
+    assert.equal(BigInt(ranges.length), (to - from + size) / size);
+  }
+
+  it("fits the free Base Sepolia RPC (toBlock - fromBlock <= 200)", () => {
+    assert.equal(LOG_CHUNK, 200n);
+    for (const r of logRanges(47_688_312n, 47_900_051n)) {
+      assert.ok(r.toBlock - r.fromBlock <= 199n);
+    }
+  });
+
+  it("covers every block exactly once at the chunk boundaries", () => {
+    for (const span of [0n, 1n, 198n, 199n, 200n, 201n, 399n, 400n, 401n, 10_000n]) {
+      assertCovers(1_000n, 1_000n + span, LOG_CHUNK);
+    }
+    assertCovers(0n, 0n, LOG_CHUNK);
+  });
+
+  it("uses the fewest calls: one range for up to 200 blocks", () => {
+    assert.deepEqual(logRanges(5n, 204n), [{ fromBlock: 5n, toBlock: 204n }]);
+    assert.deepEqual(logRanges(5n, 205n), [
+      { fromBlock: 5n, toBlock: 204n },
+      { fromBlock: 205n, toBlock: 205n },
+    ]);
+  });
+
+  it("accepts any smaller limit", () => {
+    for (const size of [1n, 2n, 7n, 100n]) assertCovers(10n, 1_234n, size);
+  });
+
+  it("refuses an empty or inverted range and a non-positive size", () => {
+    assert.throws(() => logRanges(10n, 9n), MonitorError);
+    assert.throws(() => logRanges(-1n, 9n), MonitorError);
+    assert.throws(() => logRanges(0n, 9n, 0n), MonitorError);
+    assert.throws(() => logRanges(0n, 9n, -5n), MonitorError);
   });
 });

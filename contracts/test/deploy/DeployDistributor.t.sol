@@ -82,7 +82,6 @@ contract DeployDistributorTest is Test {
         vm.setEnv("ARL_DEPLOYMENT", "test/fixtures/distribution.json");
         vm.setEnv("ARL_DISTRIBUTION", "test/fixtures/distribution.json");
         vm.setEnv("ARL_CLAIM_END", "4102444800");
-        vm.setEnv("ARL_DISTRIBUTOR", "deploy/deployments/never.json");
         vm.expectRevert(abi.encodeWithSelector(ARLDeployPlan.PlanProductionLocked.selector, 8453));
         script.run();
     }

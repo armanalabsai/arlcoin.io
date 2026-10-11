@@ -1,7 +1,8 @@
 # Deployment Tooling
 
-Status: **local rehearsal only.** Nothing has been deployed to any public network. No production
-address, key or RPC endpoint exists in this repository.
+Status: **Base Sepolia testnet deployed** (2026-10-04, see
+[Base Sepolia deployment](#base-sepolia-deployment)). Nothing is deployed on Base Mainnet. No
+production address, no key and no private RPC endpoint exists in this repository.
 
 ## Pipeline
 
@@ -10,9 +11,12 @@ contracts/deploy/config/<network>.json      public, source-controlled inputs
         │  node packages/deploy/src/cli.ts   validates, applies UTC calendar arithmetic
         ▼
 contracts/deploy/plans/<network>.json       generated plan (git-ignored)
-        │  forge script DeployARL            re-validates, deploys, verifies, records
+        │  forge script DeployARL            re-validates, deploys, verifies (writes nothing)
         ▼
-contracts/deploy/deployments/<chain>.json   deployed addresses (git-ignored)
+broadcast/DeployARL.s.sol/<chain>/run-latest.json   Foundry's run file (or the signed dry run)
+        │  node packages/deploy/src/record-cli.ts arl   checks every created contract on chain
+        ▼
+contracts/deploy/deployments/<chain>.json   verified record (git-ignored), written only if all pass
         │  forge script VerifyARL            read-only verification, any time after
         ▼
       pass / fail with the name of the failed check
@@ -26,6 +30,44 @@ Values come from their single sources:
 | TGE date (TBD)                 | The deployment config (`tge`); every vesting schedule starts at it; durations must be 12 + 36 months; a placeholder TGE is accepted on local Anvil and Base Sepolia only |
 | 48-hour timelock floor         | `packages/tokenomics` (planner); `ARLTimelock.MIN_DELAY_FLOOR` (constructor; a test pins the script's copy to it)                                                        |
 | Addresses, chain ID            | The deployment config                                                                                                                                                    |
+
+## Deployment records
+
+No deploy script writes a record. `DeployARL`, `DeployComputePayment`, `DeployDistributor` and
+`CreateSafes` only deploy: `forge script` runs a script before it sends anything, and a
+phone-signed dry run is sent outside Foundry, so a script cannot know what reached the chain.
+
+`packages/deploy/src/record-cli.ts <safes|arl|compute-payment|distributor> <run.json> <rpc-url>
+<record.json>` writes the record from Foundry's run file (the broadcast file, or the dry-run file
+the phone signed). It writes nothing unless every check passes:
+
+- the chain is Base Sepolia (84532) or Base Mainnet (8453), read from the RPC and from the run
+  file; every other chain is refused. A local Anvil node (a plain 31337 chain or a fork of either
+  network) is accepted only with `--local-anvil`, and the record is then stamped
+  `local-anvil-rehearsal`, `base-sepolia-fork-rehearsal` or `base-mainnet-fork-rehearsal`: a
+  rehearsal record is never evidence of anything on a public network;
+- every transaction is from one sender; in a broadcast file every transaction has a receipt with
+  status 1 (a missing receipt means the broadcast did not complete);
+- every created address is the one its sender and nonce (or CREATE2 salt) give, and holds the
+  expected code: the ARL build's runtime code with only immutables masked (the same comparison as
+  `bytecode-cli.ts verify`), or on Base Sepolia and Base Mainnet the canonical Safe v1.5.0 proxy code (pinned hash),
+  created by the canonical factory for a canonical singleton (pinned hashes);
+- each contract carries what its constructor was given (getters), and each Safe has exactly the
+  owners and threshold of its signed setup and points to its singleton.
+
+A record is replaced only by an atomic rename of a complete, verified one; a failed or interrupted
+run leaves an existing record byte for byte. Each record carries a `verified` stamp (kind, chain,
+block, SHA-256 of the run file, number of checks). The config builder (`safes-config-cli.ts`)
+accepts only a stamped Safes record, so the Safe addresses of a plan come only from Safes checked
+on chain. The stamp is a process guard, not a signature: anyone can edit a file, so `VerifyARL`
+and `bytecode-cli.ts verify` remain the proof of a deployment.
+
+The existing Base Sepolia deployment (2026-10-04) was re-checked with this tool from its two
+published phone-signed runs (`apps/dapp/public/plans/84532-safes.json`, 148 checks, and
+`84532-deploy.json`, 36 checks), read-only, on 2026-10-10.
+
+**No Git history rewrite while others work** (owner decision, 2026-10-10): no force-push to any
+branch while another Claude session or the PC is working on the repository.
 
 ## Configuration
 
@@ -106,7 +148,11 @@ The owner can sign every transaction from a phone wallet, without any key leavin
    the allocation holders) before the owner signs it. Before sending, the screen checks the
    connected address, the chain and the wallet's next nonce; after the receipt, that a created
    contract is at the address the plan expects.
-4. Afterwards, `VerifyARL` and `bytecode-cli.ts verify` run read-only from any machine.
+4. When every transaction is signed, the screen shows the command that writes the verified
+   record from that same dry-run file (`record-cli.ts safes` or `record-cli.ts arl`, see
+   Deployment records). Nothing counts as deployed until it passes. The plan for the next run
+   takes the Safe addresses only from the Safes record it writes. Then `VerifyARL` and
+   `bytecode-cli.ts verify` run read-only from any machine.
 
 Run the Safe creation (`CreateSafes`) and the deployment (`DeployARL`) as two files: the
 deployment plan needs the Safe addresses.
@@ -175,13 +221,14 @@ anything, and prints a JSON report.
 | notice   | a timelock operation is waiting for its delay or is ready to execute (id, ready time, target, value, selector); a role was granted by the timelock, a role was revoked, or the delay changed after deployment                                                                                                                                                       |
 
 Exit codes: `0` healthy (notices may still need review), `3` a critical finding, `1` the check
-could not run, `2` wrong usage. Timelock events are read from `<from-block>` in ranges of 9,000
-blocks, so public RPC limits are respected; pass the deployment block on the first run and the
-previous report's `blockNumber` afterwards. Tokens sent to a vesting wallet by anyone are accepted
-(they vest with the rest). The local rehearsal runs the monitor on a deployment after tokens have
-moved, schedules a treasury transfer through the timelock, and checks that it is reported while
-waiting, again when it is ready after 48 hours, and that a plan which disagrees with the chain
-exits with code 3.
+could not run, `2` wrong usage. Timelock events are read from `<from-block>` in ranges of 200
+blocks (`LOG_CHUNK`), one `eth_getLogs` call per range, which fits the free Base Sepolia
+endpoint (`https://sepolia.base.org` refuses `toBlock - fromBlock > 200`); pass the deployment
+block on the first run and the previous report's `blockNumber` afterwards. Tokens sent to a
+vesting wallet by anyone are accepted (they vest with the rest). The local rehearsal runs the
+monitor on a deployment after tokens have moved, schedules a treasury transfer through the
+timelock, and checks that it is reported while waiting, again when it is ready after 48 hours,
+and that a plan which disagrees with the chain exits with code 3.
 
 ## Public Launch claim distributor
 
@@ -192,8 +239,9 @@ The approved Public Launch mechanism is a Merkle claim (economic specification s
    budget and an optional per-address limit in base units, and the `{account, amount}` entries.
    The output (`arl-distribution/1`) holds the Merkle root, the total to fund, and every account's
    index, amount and proof; it is re-verified from its own claims before it is written.
-2. Deploy: `DeployDistributor` (`ARL_PLAN`, `ARL_DEPLOYMENT`, `ARL_DISTRIBUTION`, `ARL_CLAIM_END`,
-   `ARL_DISTRIBUTOR`). It checks the list's schema, allocation and total, and fixes `returnTo` to
+2. Deploy: `DeployDistributor` (`ARL_PLAN`, `ARL_DEPLOYMENT`, `ARL_DISTRIBUTION`, `ARL_CLAIM_END`),
+   then `record-cli.ts distributor <run.json> <rpc-url> <distributor.json> --distribution <list>`,
+   which checks the distributor on chain and the list's root. It checks the list's schema, allocation and total, and fixes `returnTo` to
    the plan's Public Launch Safe. Off local Anvil it refuses to run until the launch parameters
    are approved (`LAUNCH_PARAMETERS_APPROVED = false`); it runs only where the network gate allows.
 3. Fund: the Public Launch Safe transfers the list total to the distributor.
@@ -267,9 +315,10 @@ a hardware wallet or Foundry keystore outside the repository.
 
 ## Base Sepolia runbook
 
-Status: **not deployed.** Dry run: `npm run rehearse:base-sepolia-fork` runs every step below on a
-local Anvil fork of Base Sepolia (real canonical Safe contracts, Anvil development accounts, no
-key); nothing is sent to Base Sepolia.
+Status: **deployed** (steps 1 to 3 done on 2026-10-04; see
+[Base Sepolia deployment](#base-sepolia-deployment)). Dry run: `npm run rehearse:base-sepolia-fork`
+runs every step below on a local Anvil fork of Base Sepolia (real canonical Safe contracts, Anvil
+development accounts, no key); nothing is sent to Base Sepolia.
 
 1. **Safes.** `CreateSafes` creates the 12 role Safes with the canonical Safe v1.5.0
    `SafeProxyFactory`, `SafeL2` singleton and `CompatibilityFallbackHandler`, after checking their
@@ -281,14 +330,17 @@ key); nothing is sent to Base Sepolia.
    cd contracts
    ARL_SAFE_OWNERS=<a>,<b>,<c> ARL_SAFE_THRESHOLD=2 \
    ARL_GUARDIAN_OWNERS=<d>,<e> ARL_GUARDIAN_THRESHOLD=2 \
-   ARL_SAFES_OUT=deploy/deployments/84532-safes.json \
    forge script script/CreateSafes.s.sol:CreateSafes --rpc-url https://sepolia.base.org \
      --broadcast --account <keystore-name> --slow
+   node ../packages/deploy/src/record-cli.ts safes \
+     broadcast/CreateSafes.s.sol/84532/run-latest.json https://sepolia.base.org \
+     deploy/deployments/84532-safes.json
    ```
 
 2. **Config and plan.** `safes-config-cli.ts <safes.json> <placeholder-vesting-start> <config.json>`
    writes the config (code checks on, 12 + 36 months, 48-hour delay); `cli.ts` builds the plan.
-3. **Deploy and verify.** `DeployARL` with `ARL_PLAN` and `ARL_DEPLOYMENT`, then `VerifyARL`.
+3. **Deploy and verify.** `DeployARL` with `ARL_PLAN`, then `record-cli.ts arl` on its run file
+   (writes `deploy/deployments/84532.json`), then `VerifyARL` with `ARL_PLAN` and that record.
    From a phone, use the app's **Deploy** screen instead of `--broadcast` (see Signing from a phone).
 4. **Manifest.** `manifest-cli.ts`, then `supply-cli.ts` (circulating supply at TGE is 2,100,000 ARL).
 5. **Explorer source.** `npm run verify:explorer -- … --check-broadcast … --run` with
@@ -297,3 +349,44 @@ key); nothing is sent to Base Sepolia.
    output with the addresses.
 7. **Monitoring.** Run `monitor-cli.ts` on a schedule from the deployment block (see Monitoring)
    and have the guardian's signers review every notice.
+
+## Base Sepolia deployment
+
+Deployed 2026-10-04 on Base Sepolia (84532) by `0x3c3f71d694f709cBe60f015717c54A795636b165`
+from the published runs `apps/dapp/public/plans/84532-safes.json` (nonces 0-11, the 12 Safes) and
+`apps/dapp/public/plans/84532-deploy.json` (nonces 12-15). Placeholder TGE `2026-12-01T00:00:00Z`
+(testnet only; the approved TGE is 2026-11-01).
+
+| Contract                       | Address                                      | Block    |
+| ------------------------------ | -------------------------------------------- | -------- |
+| ARLToken                       | `0x244312b619127B6458154F3467eFD7c87CD28500` | 47688347 |
+| Investors vesting wallet       | `0x830e35CdF48F8F30F83d1DBE8431f02a7BE9dCcE` | 47688312 |
+| Strategic Partnerships vesting | `0x02c7692918C98EC710970D390b08f247A76D5A37` | 47688324 |
+| Treasury timelock (48 h)       | `0x5B3fd9E574BC07309949CD39161a295E22FbBd3D` | 47688336 |
+
+| Role                   | Safe (v1.5.0)                                | Owners, threshold     |
+| ---------------------- | -------------------------------------------- | --------------------- |
+| Public Launch          | `0xA65f4B7802a11431A9741f8C091b8118F964f9CF` | deployer, 1 of 1      |
+| Community & Staking    | `0x6e7bD80144ea10e5E1FcF95Fc4B044415CFE61d4` | deployer, 1 of 1      |
+| Ecosystem Growth       | `0xd1c0ABd6D9C149b66A1c27C694c5a9bDaaF1b229` | deployer, 1 of 1      |
+| Strategic Partnerships | `0xc4f58F0a1a2f0e1b17C7480E723572A4F94050Ff` | deployer, 1 of 1      |
+| Liquidity              | `0x29dd921B30c08e107574F83dA6064aac491D0179` | deployer, 1 of 1      |
+| Founder                | `0xf9325E269d3B9DaC59CF80f5DEe7c5BFb490465d` | deployer, 1 of 1      |
+| Investors              | `0xDB4E07C7a27cAB9b04daaed819bC0354E13306bb` | deployer, 1 of 1      |
+| Treasury               | `0xff9a49A4fcEDd7163636C22d18638741e9F05908` | deployer, 1 of 1      |
+| Treasury guardian      | `0xdF97b71F45dcbD3a713EF8eD8e106F0e19E95BcD` | `0x72F7…4144`, 1 of 1 |
+| Team pool              | `0x0218f6DA7781Ff4a3102C4c735DcE02dEc9B9feB` | deployer, 1 of 1      |
+| Early Users            | `0xBdF1e8B5Ce02417C14C08c6A5411E97f111fd3cb` | deployer, 1 of 1      |
+| Grants & Bug Bounty    | `0xbe5EC5512ec379B4B61D6cef5B75836B935aa040` | deployer, 1 of 1      |
+
+Checked read-only on 2026-10-09 against `https://sepolia.base.org`, with the plan and record
+rebuilt from the published runs' constructor arguments (`safes-config-cli.ts`, `cli.ts`):
+`VerifyARL` passes (all eleven genesis balances, 21,000,000 supply, zero deployer balance,
+canonical Safe proxies, vesting schedules, timelock roles); `bytecode-cli.ts verify` reports the
+deployment matches the build and the plan; `monitor-cli.ts` from block 47688312 is healthy (31
+checks, no finding). The four contracts are source-verified on Blockscout
+(`base-sepolia.blockscout.com`).
+
+These Safes are 1-of-1 test Safes owned by one account. A Base Mainnet deployment needs M-of-N
+Safes with distinct signers and a guardian whose signers are disjoint from them (see step 1 of
+the runbook).

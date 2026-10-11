@@ -10,6 +10,7 @@ import {
   checkBeforeSend,
   describeStep,
   parseRun,
+  recordCommand,
   publishedPlanPath,
 } from "../../lib/deploySteps.ts";
 import { NetworkLocked, TGE_DATE } from "../../lib/network.ts";
@@ -158,5 +159,31 @@ describe("published plans", () => {
       assert.equal(step.kind, "safe");
       if (step.kind === "safe") assert.equal(step.threshold, 1n);
     }
+  });
+});
+
+describe("after signing", () => {
+  it("points to the verified-record tool; Safe addresses come only from its record", () => {
+    const safes = parseRun(
+      JSON.parse(
+        readFileSync(new URL("../../public/plans/84532-safes.json", import.meta.url), "utf8"),
+      ),
+    );
+    assert.deepEqual(recordCommand(safes, "apps/dapp/public/plans/84532-safes.json"), {
+      kind: "safes",
+      command:
+        "node packages/deploy/src/record-cli.ts safes apps/dapp/public/plans/84532-safes.json https://sepolia.base.org contracts/deploy/deployments/84532-safes.json",
+    });
+    const deploy = parseRun(
+      JSON.parse(
+        readFileSync(new URL("../../public/plans/84532-deploy.json", import.meta.url), "utf8"),
+      ),
+    );
+    assert.equal(
+      recordCommand(deploy, "run.json").command,
+      "node packages/deploy/src/record-cli.ts arl run.json https://sepolia.base.org contracts/deploy/deployments/84532.json",
+    );
+    const local = parseRun(load("DeployARL"));
+    assert.match(recordCommand(local, "x.json").command, /--local-anvil/);
   });
 });

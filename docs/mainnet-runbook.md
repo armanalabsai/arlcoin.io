@@ -29,13 +29,20 @@ Safe. Run it again in the last days before the TGE.
 
 ## Steps
 
+No deploy script writes a record. After each signed run, write the record with the verified-record
+tool from the run file the deploy screen signed (`broadcast/<Script>/8453/dry-run/run-latest.json`,
+or `8453/run-latest.json` after a broadcast); it writes nothing unless every check passes (exit 0):
+`node packages/deploy/src/record-cli.ts <safes|arl|distributor> <run.json> https://mainnet.base.org <record.json>`.
+The records go to `contracts/deploy/deployments/8453-safes.json`, `8453.json` and
+`8453-distributor.json`; the record must be stamped `base-mainnet`.
+
 1. **Safes.** Dry-run `CreateSafes` against Base Mainnet with `--sender` = deployer, publish the
-   plan to the deploy screen, sign the 12 transactions. Check each Safe address against
+   plan to the deploy screen, sign the 12 transactions, then `record-cli.ts safes`. Check each Safe address against
    [mainnet-plan.md](mainnet-plan.md) and its owners and threshold on chain.
 2. **Config and plan.** `safes-config-cli.ts` with `2026-11-01T00:00:00Z` (the planner refuses any
    other TGE off testnet), then `cli.ts`.
-3. **Contracts.** Dry-run `DeployARL`, sign nonces 12-15 on the deploy screen; each created
-   address must match the plan.
+3. **Contracts.** Dry-run `DeployARL`, sign nonces 12-15 on the deploy screen, then
+   `record-cli.ts arl`; each created address must match the plan.
 4. **Verify.** `VerifyARL`, `bytecode-cli.ts verify`, `supply-cli.ts` (total 21,000,000, circulating
    2,100,000), then `explorer-cli.ts --check-broadcast --run` with `ETHERSCAN_API_KEY` set.
 5. **Claim list.** `launch-list-cli.ts whitelist.csv input.json` (applies the 500,000 ARL tranche
@@ -70,8 +77,9 @@ Safe. Run it again in the last days before the TGE.
    then sign with two of three owners. If anyone has traded since step 6 the batch reverts and
    deposits nothing (fork-tested); rebuild it with `priceUsd` at or above the pool's current price.
 8. **Distributor** (a few hours after the pools, so that buyers have put quote tokens in
-   the pools before claimed ARL can be sold). `DeployDistributor` with a claim end at most 60 days ahead (enforced); the
-   Public Launch Safe (2-of-3) funds it with exactly the list total.
+   the pools before claimed ARL can be sold). `DeployDistributor` with a claim end at most 60 days ahead (enforced), then
+   `record-cli.ts distributor … --distribution distribution.json`; the Public Launch Safe (2-of-3)
+   funds it with exactly the list total.
 9. **Announce.** Publish the addresses on arlcoin.io and in the repository: set
    `SITE.mainnet.token` (shows "Add ARL to your wallet") and write the token list with
    `node packages/deploy/src/tokenlist-cli.ts apps/web/public/tokenlist.json 8453=<ARL token>`;

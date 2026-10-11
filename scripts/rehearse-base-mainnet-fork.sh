@@ -55,10 +55,19 @@ cast rpc anvil_setBalance "$ARL_DEPLOYER" "$(cast to-hex 1000000000000000)" --rp
 cd "$ROOT/contracts"
 rm -rf "$OUT"
 mkdir -p "$OUT"
+# No deploy script writes a record. Every record comes from the verified-record tool, which
+# checks each created contract on chain first; on a fork it needs --local-anvil and stamps the
+# record base-mainnet-fork-rehearsal, so it can never pass for a Base Mainnet record.
+RECORD="$ROOT/packages/deploy/src/record-cli.ts"
+record() {
+  node "$RECORD" "$1" "broadcast/$2/8453/run-latest.json" "$RPC" "$3" --local-anvil "${@:4}" \
+    >"$OUT/record-$1.log" 2>&1 || die "$1 record not verified (see contracts/$OUT/record-$1.log)"
+  [[ "$(node -e "console.log(require('./$3').verified.network)")" == "base-mainnet-fork-rehearsal" ]] ||
+    die "$1 record is not stamped as a fork rehearsal"
+}
 safes() {
   ARL_SAFE_OWNERS="$ARL_SAFE_OWNERS" ARL_SAFE_THRESHOLD="$ARL_SAFE_THRESHOLD" \
     ARL_GUARDIAN_OWNERS="$ARL_GUARDIAN_OWNERS" ARL_GUARDIAN_THRESHOLD="$ARL_GUARDIAN_THRESHOLD" \
-    ARL_SAFES_OUT="$OUT/safes.json" \
     forge script script/CreateSafes.s.sol:CreateSafes \
     --rpc-url "$RPC" --broadcast --unlocked --sender "$ARL_DEPLOYER" --slow
 }
@@ -79,6 +88,10 @@ echo "block time $(cast block latest --field timestamp --rpc-url "$RPC") (TGE $T
 
 log "1. CreateSafes with the real owners"
 safes >"$OUT/safes.log" 2>&1 || die "CreateSafes failed (see contracts/$OUT/safes.log)"
+if node "$RECORD" safes broadcast/CreateSafes.s.sol/8453/run-latest.json "$RPC" "$OUT/x.json" >/dev/null 2>&1; then
+  die "the record tool accepted an Anvil fork as Base Mainnet"
+fi
+record safes CreateSafes.s.sol "$OUT/safes.json"
 node - "$OUT/safes.json" "$ROOT/docs/mainnet-plan.md" <<'EOF' || die "Safe addresses differ from docs/mainnet-plan.md"
 const fs = require("fs");
 const safes = JSON.parse(fs.readFileSync(process.argv[2], "utf8")).safes;
@@ -103,10 +116,11 @@ CLOCK=(env ARL_REHEARSAL_CLOCK="$((TGE + 60))" node --import "$CLOCK_URL")
 "${CLOCK[@]}" "$ROOT/packages/deploy/src/safes-config-cli.ts" "$OUT/safes.json" 2026-11-01T00:00:00Z \
   "$OUT/config.json" || die "config rejected"
 "${CLOCK[@]}" "$ROOT/packages/deploy/src/cli.ts" "$OUT/config.json" "$OUT/plan.json" || die "plan rejected"
-ARL_PLAN="$OUT/plan.json" ARL_DEPLOYMENT="$OUT/deployment.json" \
+ARL_PLAN="$OUT/plan.json" \
   forge script script/DeployARL.s.sol:DeployARL \
   --rpc-url "$RPC" --broadcast --unlocked --sender "$ARL_DEPLOYER" --slow >"$OUT/deploy.log" 2>&1 ||
   die "DeployARL failed (see contracts/$OUT/deploy.log)"
+record arl DeployARL.s.sol "$OUT/deployment.json"
 ARL_PLAN="$OUT/plan.json" ARL_DEPLOYMENT="$OUT/deployment.json" \
   forge script script/VerifyARL.s.sol:VerifyARL --rpc-url "$RPC" -q || die "VerifyARL failed"
 node "$ROOT/packages/deploy/src/manifest-cli.ts" "$OUT/plan.json" "$OUT/deployment.json" \
@@ -163,10 +177,10 @@ log "4. Public Launch claim distributor (placeholder list), funded by the Public
 CLAIM_END=$((TGE + 60 + 59 * 86400))
 ARL_PLAN="$OUT/plan.json" ARL_DEPLOYMENT="$OUT/deployment.json" \
   ARL_DISTRIBUTION=test/fixtures/distribution.json ARL_CLAIM_END="$CLAIM_END" \
-  ARL_DISTRIBUTOR="$OUT/distributor.json" \
   forge script script/DeployDistributor.s.sol:DeployDistributor \
   --rpc-url "$RPC" --broadcast --unlocked --sender "$ARL_DEPLOYER" --slow >"$OUT/distributor.log" 2>&1 ||
   die "DeployDistributor failed (see contracts/$OUT/distributor.log)"
+record distributor DeployDistributor.s.sol "$OUT/distributor.json" --distribution test/fixtures/distribution.json
 DISTRIBUTOR="$(node -e "console.log(require('./$OUT/distributor.json').distributor)")"
 TOTAL="$(node -e "console.log(require('./test/fixtures/distribution.json').total)")"
 PUBLIC="$(node -e "console.log(require('./$OUT/safes.json').safes.publicLaunch)")"
