@@ -30,6 +30,7 @@ import {
   OperatorRequestError,
   faucetDecision,
   joinMessage,
+  operatorKey,
   type RelayRequest,
   type SettleRequest,
 } from "~~/lib/operatorRules";
@@ -49,10 +50,7 @@ const TOKEN = ARL.ARLToken;
 function operator() {
   if (ARL_CHAIN_ID !== BASE_SEPOLIA_CHAIN_ID)
     throw new OperatorRequestError("the operator runs on Base Sepolia only", 503);
-  const key = process.env.ARL_OPERATOR_KEY;
-  if (!key || !/^0x[0-9a-fA-F]{64}$/.test(key))
-    throw new OperatorRequestError("the operator is not configured", 503);
-  const account = privateKeyToAccount(key as Hex, { nonceManager });
+  const account = privateKeyToAccount(operatorKey(process.env.ARL_OPERATOR_KEY), { nonceManager });
   const transport = fallback(chain.rpcUrls.default.http.map((url) => http(url)));
   const wallet = createWalletClient({ account, chain, transport }).extend(publicActions);
   const reader = createPublicClient({ chain, transport });

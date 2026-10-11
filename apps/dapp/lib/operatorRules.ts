@@ -22,6 +22,19 @@ const fail = (message: string, status = 400): never => {
   throw new OperatorRequestError(message, status);
 };
 
+/**
+ * The operator's private key from the host environment. Wallets such as MetaMask export it as 64
+ * hex digits without `0x`; both forms are accepted. The errors name what is wrong, never the value.
+ */
+export function operatorKey(raw: string | undefined): Hex {
+  const key = raw?.trim();
+  if (!key) return fail("the operator is not configured: ARL_OPERATOR_KEY is not set", 503);
+  const hex = key.startsWith("0x") || key.startsWith("0X") ? key.slice(2) : key;
+  if (!/^[0-9a-fA-F]{64}$/.test(hex))
+    return fail("the operator is not configured: ARL_OPERATOR_KEY is not a 32-byte hex key", 503);
+  return `0x${hex.toLowerCase()}`;
+}
+
 export const OPERATOR_ACTIONS = ["status", "faucet", "join", "relay", "settle"] as const;
 export type OperatorAction = (typeof OPERATOR_ACTIONS)[number];
 
