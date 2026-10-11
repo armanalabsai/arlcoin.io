@@ -57,5 +57,23 @@ if [ -n "${ARL_OPERATOR_KEY:-}" ]; then ENV_ARGS+=(--env "ARL_OPERATOR_KEY=$ARL_
 URL="$("${VERCEL[@]}" deploy --prebuilt --prod --yes "${ENV_ARGS[@]}" "${SCOPE[@]}" ${TOKEN_ARGS[@]+"${TOKEN_ARGS[@]}"})"
 echo "deployed: $URL"
 # app.arlcoin.io serves the operator API that the static app on arlcoin.io/app calls. The
-# arlcoin.io domain belongs to the same Vercel team, so the alias needs no DNS change.
-"${VERCEL[@]}" alias set "$URL" "${ARL_APP_DOMAIN:-app.arlcoin.io}" "${SCOPE[@]}" ${TOKEN_ARGS[@]+"${TOKEN_ARGS[@]}"}
+# arlcoin.io domain belongs to the same Vercel team, so it needs no DNS change. It is added to the
+# project as a domain, not only aliased: Vercel Authentication (the project's default deployment
+# protection) exempts the project's own custom domains, while a bare alias stays behind the login.
+DOMAIN="${ARL_APP_DOMAIN:-app.arlcoin.io}"
+if ! ADD_OUT="$("${VERCEL[@]}" domains add "$DOMAIN" arl-app "${SCOPE[@]}" ${TOKEN_ARGS[@]+"${TOKEN_ARGS[@]}"} 2>&1)"; then
+  if ! grep -qi "already" <<<"$ADD_OUT"; then
+    echo "$ADD_OUT" >&2
+    exit 1
+  fi
+fi
+"${VERCEL[@]}" alias set "$URL" "$DOMAIN" "${SCOPE[@]}" ${TOKEN_ARGS[@]+"${TOKEN_ARGS[@]}"}
+
+# The deployment is only done when the public operator API answers without a login.
+for _ in $(seq 1 ${ARL_APP_CHECKS:-12}); do
+  CODE="$(curl -s -o /dev/null -w '%{http_code}' "https://$DOMAIN/api/operator/status" || true)"
+  [ "$CODE" = "200" ] && { echo "https://$DOMAIN/api/operator/status answers 200"; exit 0; }
+  sleep 5
+done
+echo "https://$DOMAIN/api/operator/status answers $CODE, not 200 (deployment protection on the domain?)" >&2
+exit 1
