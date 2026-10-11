@@ -57,6 +57,19 @@ export const roadmap: Layer = {
       },
     },
     {
+      id: "ecosystem",
+      title: "Testnet Ecosystem",
+      shortDescription: "Staking, jobs, anonymous polls and the app",
+      progress: "active",
+      weight: "tertiary",
+      metric: { kind: "static", value: "Live on Base Sepolia" },
+      detail: {
+        summary:
+          "Deployed on Base Sepolia on 11 October 2026 and source-verified on Basescan: the staking contract, the ERC-8183 jobs escrow, the zero-knowledge verifier and the anonymous-poll contract. The ARL app at arlcoin.io/app runs against them, with a testnet ARL faucet, a relayer for anonymous votes and x402 per-use payments to a demo AI service registered on ERC-8004. The testnet reward period starts once the Community & Staking Safe funds it. Testnet tokens have no value.",
+      },
+      links: [{ label: "Open the app (testnet)", href: "https://arlcoin.io/app/" }],
+    },
+    {
       id: "mainnet",
       title: "Mainnet",
       shortDescription: "Production deployment",
@@ -74,10 +87,10 @@ export const roadmap: Layer = {
       shortDescription: "The first services on ARL",
       progress: "active",
       weight: "tertiary",
-      metric: { kind: "static", value: "In development" },
+      metric: { kind: "static", value: "Testnet live" },
       detail: {
         summary:
-          'The first services that settle in ARL: AI service payments and the compute marketplace. Per-use payments (x402 "upto"), job escrow (ERC-8183) and a reference compute provider are written and tested on a local chain and a Base Sepolia fork. None of them is deployed.',
+          'The first services that settle in ARL: AI service payments and the compute marketplace. Per-use payments (x402 "upto"), job escrow (ERC-8183) and a reference compute provider run on the Base Sepolia testnet in the ARL app. They go to Base Mainnet with the TGE.',
       },
     },
   ],

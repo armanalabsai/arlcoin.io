@@ -156,12 +156,12 @@ export const token: Layer = {
     {
       id: "staked",
       title: "Staked",
-      shortDescription: "No staking contract exists.",
+      shortDescription: "Staking live on Base Sepolia testnet",
       status: "PLANNED",
       weight: "tertiary",
       metric: { kind: "unavailable", label: NOT_DEPLOYED, source: "chain.stakedSupply" },
       detail: {
-        summary: `No staking contract exists. Rewards are planned to come from the Community & Staking allocation (${formatArl(allocation("community-staking").amount)}) or from protocol revenue. Staking never creates new ARL.`,
+        summary: `The staking contract is deployed on Base Sepolia (testnet), where staked tokens have no value; there is no staking on Base Mainnet yet. Rewards are planned to come from the Community & Staking allocation (${formatArl(allocation("community-staking").amount)}) or from protocol revenue. Staking never creates new ARL.`,
       },
     },
     {
