@@ -131,3 +131,36 @@ had listed only as a similar match of the Investors vesting).
 
 Constructor arguments were checked against the signed transactions with
 `node packages/deploy/src/explorer-cli.ts <plan> <deployment> --check-broadcast <run.json>`.
+
+### Base Sepolia ecosystem (2026-10-11)
+
+Deployed by the testnet operator `0x3b33Db294B9f52993728103215be1D86A7777093` with
+`DeploySepoliaEcosystem` and `DeploySepoliaSignal` (rehearsed first with
+`scripts/rehearse-sepolia-ecosystem.sh`). None of these contracts has an owner or admin; the
+operator keeps no role. Source verified on Basescan (full match), constructor arguments as
+recorded in `contracts/deploy/base-sepolia.json`.
+
+| Contract                     | Address                                      | Block      | Basescan |
+| ---------------------------- | -------------------------------------------- | ---------- | -------- |
+| `ARLStakingRewards`          | `0xA78480c1802F5c17B1007c59b7c2CF849549724e` | 47,962,102 | verified |
+| `ARLJobs`                    | `0xec79a897105aEd6daFBbB2a904E5bcFF71455644` | 47,962,103 | verified |
+| `HonkVerifier` (zk verifier) | `0x86DEB322fe7E9d5e5296f8Ee4B90A643F886a012` | 47,962,115 | verified |
+| `RelationsLib` (linked)      | `0xA7c9Dcd8dad85022f3F3ddA21a470C9c7765F368` | 47,962,113 | verified |
+| `ZKTranscriptLib` (linked)   | `0xb3d028c39A88bBFbB56973FBB44638345749E96b` | 47,962,114 | verified |
+| `ARLAnonymousSignal`         | `0xFa5901E9dfD813b910061F29ef1f65a1faA0b268` | 47,962,116 | verified |
+
+Staking: the reward distributor is the Community & Staking Safe
+`0x6e7bD80144ea10e5E1FcF95Fc4B044415CFE61d4`, period 30 days; its 30,000 testnet ARL reward is
+funded by that Safe with `apps/dapp/public/plans/84532-ecosystem-safe-community.json`. The
+operator's testnet ARL comes from the Ecosystem & Growth Safe with
+`84532-ecosystem-safe-ecosystem.json`. Both batches were executed on a fork of the live chain
+before signing: staking then held 30,000 ARL with a running period, the operator 200,000 ARL. The
+operator's demo AI service is registered on the ERC-8004 IdentityRegistry as agent 9621
+(transaction `0x353d59377423ea7f023933c76daa227a9ecc23982db770702decf894758d7025`).
+
+The deploying account then handed the operator role to `0x26DEAaCAa112cA495bD7CC8Cb92c91cD85e1A2a0`,
+an account whose key only the owner holds (it is the host's `ARL_OPERATOR_KEY`, never written in
+the repository or this session) with `apps/dapp/scripts/move-sepolia-operator.ts`, rehearsed on a
+fork first: agent 9621 now pays and is settled by the new operator and belongs to it, and the
+deployer's remaining Base Sepolia ETH was sent to it. The Ecosystem & Growth Safe batch pays the new
+operator. The deploying account keeps no role.

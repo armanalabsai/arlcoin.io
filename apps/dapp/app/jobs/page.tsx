@@ -15,7 +15,6 @@ import type { Address, Hex } from "viem";
 import { useAccount, usePublicClient, useWriteContract } from "wagmi";
 
 import { Arl, Facts, PageTitle, RequireWallet, Stat, useChainTime } from "~~/components/arl/ui";
-import deployedContracts from "~~/contracts/deployedContracts";
 import { useArlServices } from "~~/hooks/arl/useArlServices";
 import type { ListedService } from "~~/hooks/arl/useArlServices";
 import { useJobRatings } from "~~/hooks/arl/useJobRatings";
@@ -41,9 +40,11 @@ import {
   reputationRegistryAbi,
   starsToValue,
 } from "~~/lib/reputation";
+import { ARL, REFRESH_MS, deployBlock } from "~~/lib/contracts";
+import { eventsSince } from "~~/lib/logs";
 
-const JOBS = deployedContracts[31337].ARLJobs;
-const TOKEN = deployedContracts[31337].ARLToken;
+const JOBS = ARL.ARLJobs;
+const TOKEN = ARL.ARLToken;
 
 type Status =
   | { kind: "idle" }
@@ -78,28 +79,34 @@ function useJobs(account: Address | undefined) {
   return useQuery({
     queryKey: ["arl-jobs", client?.chain.id, account],
     enabled: !!client && !!account,
-    refetchInterval: 3_000,
+    refetchInterval: REFRESH_MS,
     queryFn: async (): Promise<Job[]> => {
       if (!client || !account) return [];
       const [created, submitted, fundedLogs] = await Promise.all([
-        client.getContractEvents({
-          address: JOBS.address,
-          abi: JOBS.abi,
-          eventName: "JobCreated",
-          fromBlock: 0n,
-        }),
-        client.getContractEvents({
-          address: JOBS.address,
-          abi: JOBS.abi,
-          eventName: "JobSubmitted",
-          fromBlock: 0n,
-        }),
-        client.getContractEvents({
-          address: JOBS.address,
-          abi: JOBS.abi,
-          eventName: "JobFunded",
-          fromBlock: 0n,
-        }),
+        eventsSince(client, deployBlock(JOBS), (range) =>
+          client.getContractEvents({
+            address: JOBS.address,
+            abi: JOBS.abi,
+            eventName: "JobCreated",
+            ...range,
+          }),
+        ),
+        eventsSince(client, deployBlock(JOBS), (range) =>
+          client.getContractEvents({
+            address: JOBS.address,
+            abi: JOBS.abi,
+            eventName: "JobSubmitted",
+            ...range,
+          }),
+        ),
+        eventsSince(client, deployBlock(JOBS), (range) =>
+          client.getContractEvents({
+            address: JOBS.address,
+            abi: JOBS.abi,
+            eventName: "JobFunded",
+            ...range,
+          }),
+        ),
       ]);
       const funded = new Set(
         fundedLogs.flatMap((l) => (l.args.jobId === undefined ? [] : [l.args.jobId])),

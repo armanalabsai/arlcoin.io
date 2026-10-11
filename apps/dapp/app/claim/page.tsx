@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAccount, useReadContracts, useWriteContract } from "wagmi";
 
 import { Arl, Facts, PageTitle, RequireWallet, Stat, useChainTime } from "~~/components/arl/ui";
-import deployedContracts from "~~/contracts/deployedContracts";
+import { ARL, ARL_CHAIN_ID } from "~~/lib/contracts";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import {
   ClaimError,
@@ -17,9 +17,9 @@ import {
 } from "~~/lib/claim";
 import { formatDate } from "~~/lib/format";
 
-/** ARL on the networks where the app knows its address: only the local fixture today. */
+/** ARL on the network this build targets; claims on any other network are refused. */
 function knownArl(chainId: number) {
-  return chainId === 31337 ? deployedContracts[31337].ARLToken.address : undefined;
+  return chainId === ARL_CHAIN_ID ? ARL.ARLToken.address : undefined;
 }
 
 export default function ClaimPage() {

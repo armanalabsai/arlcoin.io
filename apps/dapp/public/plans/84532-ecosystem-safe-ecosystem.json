@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "chainId": "84532",
+  "createdAt": 1791694075448,
+  "meta": {
+    "name": "ARL testnet operator float (200,000 ARL)",
+    "description": "1. Send 200,000 testnet ARL to the testnet operator 0x26DEAaCAa112cA495bD7CC8Cb92c91cD85e1A2a0 (faucet and demo services).",
+    "txBuilderVersion": "1.18.0",
+    "createdFromSafeAddress": "0xd1c0ABd6D9C149b66A1c27C694c5a9bDaaF1b229",
+    "createdFromOwnerAddress": ""
+  },
+  "transactions": [
+    {
+      "to": "0x244312b619127B6458154F3467eFD7c87CD28500",
+      "value": "0",
+      "data": "0xa9059cbb00000000000000000000000026deaacaa112ca495bd7cc8cb92c91cd85e1a2a0000000000000000000000000000000000000000000002a5a058fc295ed000000",
+      "contractMethod": null,
+      "contractInputsValues": null
+    }
+  ]
+}

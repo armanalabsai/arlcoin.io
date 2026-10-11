@@ -8,6 +8,8 @@ import { usePublicClient } from "wagmi";
 import { useDeployedContractInfo } from "~~/hooks/scaffold-eth";
 import { IDENTITY_REGISTRY, identityRegistryAbi, parseRegistration } from "~~/lib/registry";
 import type { ArlService } from "~~/lib/registry";
+import { ARL, REFRESH_MS, deployBlock } from "~~/lib/contracts";
+import { eventsSince } from "~~/lib/logs";
 
 export interface ListedService extends ArlService {
   agentId: bigint;
@@ -24,22 +26,26 @@ export function useArlServices() {
   return useQuery({
     queryKey: ["arl-services", client?.chain.id, token?.address],
     enabled: !!client && !!token,
-    refetchInterval: 4_000,
+    refetchInterval: REFRESH_MS,
     queryFn: async (): Promise<ListedService[]> => {
       if (!client || !token) return [];
       const [registered, updated] = await Promise.all([
-        client.getContractEvents({
-          address: IDENTITY_REGISTRY,
-          abi: identityRegistryAbi,
-          eventName: "Registered",
-          fromBlock: 0n,
-        }),
-        client.getContractEvents({
-          address: IDENTITY_REGISTRY,
-          abi: identityRegistryAbi,
-          eventName: "URIUpdated",
-          fromBlock: 0n,
-        }),
+        eventsSince(client, deployBlock(ARL.ARLToken), (range) =>
+          client.getContractEvents({
+            address: IDENTITY_REGISTRY,
+            abi: identityRegistryAbi,
+            eventName: "Registered",
+            ...range,
+          }),
+        ),
+        eventsSince(client, deployBlock(ARL.ARLToken), (range) =>
+          client.getContractEvents({
+            address: IDENTITY_REGISTRY,
+            abi: identityRegistryAbi,
+            eventName: "URIUpdated",
+            ...range,
+          }),
+        ),
       ]);
       // The latest URI per agent, in log order.
       const uris = new Map<bigint, string>();

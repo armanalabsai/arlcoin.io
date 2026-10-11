@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Deploys the app's local fixture (contracts/script/DevDapp.s.sol) to the Anvil chain at
-# $ARL_RPC_URL and regenerates contracts/deployedContracts.ts (with --check: verifies that the
+# $ARL_RPC_URL and regenerates contracts/localContracts.ts (with --check: verifies that the
 # committed file matches the deployment instead). Local Anvil only: the script
 # itself refuses any other chain. Anvil unlocks its development accounts; no key is used.
 set -euo pipefail
@@ -33,5 +33,5 @@ if [[ "${1:-}" == "--check" ]]; then
 else
   node "$APP/scripts/generate-contracts.ts"
   node "$APP/scripts/generate-deploy-artifacts.ts"
-  (cd "$APP/../.." && npx prettier --write apps/dapp/contracts/deployedContracts.ts apps/dapp/lib/deployArtifacts.ts >/dev/null)
+  (cd "$APP/../.." && npx prettier --write apps/dapp/contracts/localContracts.ts apps/dapp/lib/deployArtifacts.ts >/dev/null)
 fi

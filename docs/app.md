@@ -1,7 +1,8 @@
 # ARL App (`apps/dapp`)
 
-Status: **IN DEVELOPMENT.** Runs on a local Anvil chain only. ARL is not deployed on any public
-network, and the app has no setting that targets Base Mainnet.
+Status: **IN DEVELOPMENT.** Built for one chain at a time (`NEXT_PUBLIC_ARL_CHAIN`): the local
+Anvil chain (default) or Base Sepolia (84532), the public testnet. Base Mainnet opens only at the
+TGE and is not a build target yet. Testnet ARL has no value.
 
 The app is where ARL holders use the contracts: see their balance and send ARL, follow and release
 a vesting schedule, and stake ARL for rewards. It is built on
@@ -151,7 +152,35 @@ Anvil and refuses every other chain. Its values are development placeholders, no
 | Private               | `contracts/zk-script/DevZk.s.sol`: verifier and `ARLAnonymousSignal`; demo group 0 (3 members), admin account 0, relayer account 6 |
 
 The fixture is deployed by account 0 on a fresh chain, so contract addresses never change.
-`contracts/deployedContracts.ts` is generated from it and checked on every end-to-end run.
+`contracts/localContracts.ts` is generated from it and checked on every end-to-end run.
+
+## Base Sepolia
+
+Building with `NEXT_PUBLIC_ARL_CHAIN=84532` targets the testnet ecosystem recorded in
+`contracts/deploy/base-sepolia.json`: the deployed testnet ARL token and Investors vesting wallet,
+and `ARLStakingRewards`, `ARLJobs` and `ARLAnonymousSignal` deployed by
+`contracts/script/DeploySepoliaEcosystem.s.sol` and `contracts/zk-script/DeploySepoliaSignal.s.sol`
+(no owner or admin; the deployer keeps no role). `scripts/generate-sepolia-contracts.ts` writes
+`contracts/baseSepoliaContracts.ts` from the record; CI checks it.
+
+| Item          | On Base Sepolia                                                                                                                                                  |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RPC           | Public endpoints in order (Tenderly gateway, publicnode, `sepolia.base.org`); a local fork URL is used alone                                                     |
+| History reads | From each contract's deployment block; ranges an endpoint refuses are split (`lib/logs.ts`; Base's own endpoint caps `eth_getLogs` at 200 blocks)                |
+| Staking       | Rewards funded by the Community & Staking Safe: 30,000 testnet ARL over 30 days (`packages/deploy/src/sepolia-ecosystem.ts` builds the Safe batch)               |
+| Faucet        | 1,000 testnet ARL per account, once a day, only while it holds less (checked on chain); paid by the testnet operator                                             |
+| Private       | The operator administers demo group 0: a wallet asks to join with a signed message and must hold testnet ARL; votes are relayed by the operator, simulated first |
+| Payments      | The operator's demo service is on the ERC-8004 registry (`scripts/seed-sepolia.ts`); the operator settles it through `ArlUptoFacilitator` (`@arl/payments`)      |
+| Jobs, Network | Directly from the user's wallet                                                                                                                                  |
+
+The testnet operator is the API in `app/api/operator` (server hosting only; `route.api.ts` files
+are left out of the static export). Its key is `ARL_OPERATOR_KEY` in the host's environment, never
+in the browser; it holds testnet ARL from the Ecosystem & Growth Safe and a little Base Sepolia ETH,
+and no contract gives it a role. The rules of every request are in `lib/operatorRules.ts`.
+
+Deployment: `scripts/rehearse-sepolia-ecosystem.sh` rehearses the contracts and Safe batches on a
+local fork; `.github/workflows/deploy-app.yml` (`scripts/deploy-app.sh`) builds the app for Base
+Sepolia and deploys it to Vercel after CI passes on `main`.
 
 ## Run it
 
@@ -168,15 +197,17 @@ To use MetaMask instead, add the network `http://127.0.0.1:8545`, chain id 31337
 
 ## Tests
 
-| Suite      | Command            | Covers                                                                                                                                                                                                                                                                                                                                    |
-| ---------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unit       | `npm test`         | Amount parsing and formatting, vesting phase, reward share, network gate (Base Mainnet refused), poll options                                                                                                                                                                                                                             |
-| End to end | `npm run test:e2e` | Production build in Chromium against a fresh Anvil chain: connect, send, stake / earn / claim / withdraw / exit, payment limit / signed ceiling / metered charge / cap / zero usage / cancel, anonymous vote proven in the browser and a second vote refused, jobs (pay, refund, expiry), vesting before and after the cliff, phone width |
-| Contracts  | `forge test`       | `DevDappTest`: the fixture refuses non-local chains and deploys the expected state                                                                                                                                                                                                                                                        |
+| Suite             | Command                                | Covers                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ----------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit              | `npm test`                             | Amount parsing and formatting, vesting phase, reward share, network gate (Base Mainnet refused), poll options                                                                                                                                                                                                                                                                                                     |
+| End to end        | `npm run test:e2e`                     | Production build in Chromium against a fresh Anvil chain: connect, send, stake / earn / claim / withdraw / exit, payment limit / signed ceiling / metered charge / cap / zero usage / cancel, anonymous vote proven in the browser and a second vote refused, jobs (pay, refund, expiry), vesting before and after the cliff, phone width                                                                         |
+| Base Sepolia fork | `bash scripts/rehearse-sepolia-app.sh` | Forks Base Sepolia, deploys and funds the ecosystem, builds the app for Base Sepolia and starts it with a fresh operator key; through the app's own server: faucet (once a day), staking, a job paid through escrow, a signed group join, an anonymous vote proved in Node and relayed (and a second vote refused), an x402 settlement capped at the ceiling; every page renders. Nothing is sent to Base Sepolia |
+| Contracts         | `forge test`                           | `DevDappTest`: the fixture refuses non-local chains and deploys the expected state                                                                                                                                                                                                                                                                                                                                |
 
 ## Not yet
 
-- Base Sepolia: needs the contracts deployed there (owner approval) and their addresses.
+- Base Sepolia live app: the ecosystem contracts are deployed and verified (2026-10-11,
+  [audit-evidence.md](audit-evidence.md)); the app is published by `deploy-app.yml` once merged.
 - Mobile wallets over WalletConnect: needs a WalletConnect project id (a free account; owner
   decision).
-- A real (server-side) facilitator for services.
+- Base Mainnet as a build target: added with the mainnet deployment record at the TGE.
