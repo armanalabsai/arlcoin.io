@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { LiveStatus } from "./LiveStatus.tsx";
+import { MusicToggle } from "./MusicToggle.tsx";
 
 // Header actions shared by the Core and the standalone pages. Each link is at least 44px tall
 // for touch; the visible pill inside it can be smaller.
@@ -8,7 +9,7 @@ const tap = "inline-flex min-h-11 items-center";
 
 export function SiteLinks({ current }: { current?: "whitelist" | "contact" | "faq" }) {
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-2 sm:gap-4">
       <Link
         href="/faq"
         prefetch={false}
@@ -35,6 +36,7 @@ export function SiteLinks({ current }: { current?: "whitelist" | "contact" | "fa
           Join whitelist
         </span>
       </Link>
+      <MusicToggle />
       <LiveStatus />
     </div>
   );

@@ -5,6 +5,7 @@ import type { Metadata, Viewport } from "next";
 
 import { SITE } from "@/content/site.ts";
 import { NucleusField } from "@/core/NucleusField.tsx";
+import { BackgroundMusic } from "@/site/BackgroundMusic.tsx";
 import { InfrastructureStrip } from "@/site/InfrastructureStrip.tsx";
 
 import "./globals.css";
@@ -52,6 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <NucleusField />
         {children}
         <InfrastructureStrip />
+        <BackgroundMusic />
         {/* Cookieless page counts; on only for the Vercel deployment, where the script is served. */}
         {process.env.NEXT_PUBLIC_ARL_ANALYTICS === "1" ? <Analytics /> : null}
       </body>

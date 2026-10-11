@@ -150,3 +150,19 @@ test("the header shows the testnet as live only while Base Sepolia answers", asy
   await page.reload();
   await expect(status).toHaveAttribute("data-state", "down");
 });
+
+test("the background music starts on the first interaction and can be turned off", async ({
+  page,
+}) => {
+  await page.goto("/faq");
+  const toggle = page.getByRole("button", { name: /Turn the music (on|off)/ });
+  await expect(toggle).toBeVisible();
+  await page.mouse.click(8, 300);
+  await expect(toggle).toHaveAttribute("aria-pressed", "true");
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-pressed", "false");
+  // The choice is remembered: a reload does not start the music again.
+  await page.reload();
+  await page.mouse.click(8, 300);
+  await expect(toggle).toHaveAttribute("aria-pressed", "false");
+});

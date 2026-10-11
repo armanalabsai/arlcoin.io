@@ -3,9 +3,15 @@
 ARL is a fixed-supply ERC-20 token (21,000,000 ARL) on Base, with vesting, a timelocked treasury,
 staking, escrowed jobs, usage-based payments and anonymous signals built around it.
 
-**Status: Base Sepolia testnet only. Not on Base Mainnet. Not independently audited.** Every claim
-below links to the code, the tests and the document that back it. Anything without that evidence
-is listed as not built.
+**Status: Base Sepolia testnet only. Not on Base Mainnet (targeted for 2026-11-01). Not
+independently audited.** Every claim below links to the code, the tests and the document that back
+it. Anything without that evidence is listed as not built.
+
+| Live                 | URL                                                         | What it is                                                                 |
+| -------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Website              | [arlcoin.io](https://arlcoin.io)                             | [`apps/web`](apps/web): the Interactive Core, roadmap, docs, whitelist     |
+| App (Base Sepolia)   | [arlcoin.io/app](https://arlcoin.io/app/)                    | [`apps/dapp`](apps/dapp): faucet, claim, vesting, staking, jobs, payments, anonymous polls |
+| Testnet operator API | [app.arlcoin.io/api/operator](https://app.arlcoin.io/api/operator/status) | Faucet, group joins, vote relay and x402 settlement for the app ([`route.api.ts`](apps/dapp/app/api/operator/%5Baction%5D/route.api.ts)) |
 
 ## Network and deployed contracts
 
@@ -16,8 +22,12 @@ is listed as not built.
 
 Base Sepolia contracts. The runtime bytecode of each address matches a clean build of `main`
 (`compareRuntime` in [`packages/deploy/src/bytecode.ts`](packages/deploy/src/bytecode.ts), checked
-2026-10-10 at block 47,939,236); source verification is listed in
-[`docs/audit-evidence.md`](docs/audit-evidence.md#explorer-verification-base-sepolia).
+2026-10-10 at block 47,939,236). The staking, jobs, signal and verifier contracts (and the
+verifier's two linked libraries) were deployed on 2026-10-11 from blocks 47,962,102 to 47,962,116.
+Source verification of every address is listed in
+[`docs/audit-evidence.md`](docs/audit-evidence.md#explorer-verification-base-sepolia); all
+addresses with their deploy blocks are recorded in
+[`contracts/deploy/base-sepolia.json`](contracts/deploy/base-sepolia.json).
 
 | Contract                       | Address                                                                                                                                  | Source                                                         |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
@@ -25,6 +35,10 @@ Base Sepolia contracts. The runtime bytecode of each address matches a clean bui
 | Investors vesting              | [`0x830e35CdF48F8F30F83d1DBE8431f02a7BE9dCcE`](https://base-sepolia.blockscout.com/address/0x830e35CdF48F8F30F83d1DBE8431f02a7BE9dCcE) | [`ARLVestingWallet.sol`](contracts/src/ARLVestingWallet.sol)   |
 | Strategic Partnerships vesting | [`0x02c7692918C98EC710970D390b08f247A76D5A37`](https://base-sepolia.blockscout.com/address/0x02c7692918C98EC710970D390b08f247A76D5A37) | [`ARLVestingWallet.sol`](contracts/src/ARLVestingWallet.sol)   |
 | Treasury timelock              | [`0x5B3fd9E574BC07309949CD39161a295E22FbBd3D`](https://base-sepolia.blockscout.com/address/0x5B3fd9E574BC07309949CD39161a295E22FbBd3D) | [`ARLTimelock.sol`](contracts/src/ARLTimelock.sol)             |
+| Staking rewards                | [`0xA78480c1802F5c17B1007c59b7c2CF849549724e`](https://base-sepolia.blockscout.com/address/0xA78480c1802F5c17B1007c59b7c2CF849549724e) | [`ARLStakingRewards.sol`](contracts/src/ARLStakingRewards.sol) |
+| Jobs escrow (ERC-8183)         | [`0xec79a897105aEd6daFBbB2a904E5bcFF71455644`](https://base-sepolia.blockscout.com/address/0xec79a897105aEd6daFBbB2a904E5bcFF71455644) | [`ARLJobs.sol`](contracts/src/ARLJobs.sol)                     |
+| Anonymous signals              | [`0xFa5901E9dfD813b910061F29ef1f65a1faA0b268`](https://base-sepolia.blockscout.com/address/0xFa5901E9dfD813b910061F29ef1f65a1faA0b268) | [`ARLAnonymousSignal.sol`](contracts/src/ARLAnonymousSignal.sol) |
+| ZK verifier (UltraHonk)        | [`0x86DEB322fe7E9d5e5296f8Ee4B90A643F886a012`](https://base-sepolia.blockscout.com/address/0x86DEB322fe7E9d5e5296f8Ee4B90A643F886a012) | [`ARLSemaphoreVerifier.sol`](contracts/zk/ARLSemaphoreVerifier.sol) |
 
 Reproduce: `npm run check:bytecode` proves a clean build matches
 [`contracts/deploy/bytecode.json`](contracts/deploy/bytecode.json);
@@ -44,7 +58,8 @@ compares that build with the code at each deployed address.
 | Usage-based payments in ARL (x402 `upto`) | [`packages/payments`](packages/payments/src)                                                            | [unit](packages/payments/test), [Base Sepolia fork](packages/payments/test-fork/upto.fork.test.ts)                                          | [payments.md](docs/payments.md)                                  | Base Sepolia; settled by the app's testnet operator |
 | Compute provider reference node          | [`packages/provider`](packages/provider/src)                                                             | [unit](packages/provider/test/provider.test.ts), [fork](packages/provider/test-fork/provider.fork.test.ts)                                  | [compute-provider.md](docs/compute-provider.md)                  | Reference software, no provider runs it |
 | ZK anonymous signals (Semaphore, Noir/UltraHonk) | [`zk/semaphore`](zk/semaphore/src/main.nr), [`ARLAnonymousSignal.sol`](contracts/src/ARLAnonymousSignal.sol) | [circuit](zk/check.sh), [real proofs](contracts/test-zk/ARLAnonymousSignal.t.sol), [`@arl/zk`](packages/zk/test/zk.test.ts)               | [zk-privacy.md](docs/zk-privacy.md)                              | Base Sepolia (deployed and verified) |
-| Web app (claim, vesting, staking, jobs, payments, private signals) | [`apps/dapp`](apps/dapp)                                                          | [unit](apps/dapp/test/unit), [end-to-end on Anvil](apps/dapp/test/e2e)                                                                      | [app.md](docs/app.md)                                            | Builds for the local chain and Base Sepolia |
+| Web app (claim, vesting, staking, jobs, payments, private signals) | [`apps/dapp`](apps/dapp)                                                          | [unit](apps/dapp/test/unit), [end-to-end on Anvil](apps/dapp/test/e2e)                                                                      | [app.md](docs/app.md)                                            | Live on Base Sepolia ([arlcoin.io/app](https://arlcoin.io/app/)) |
+| Website: live testnet indicator, background music | [`apps/web`](apps/web), [`LiveStatus.tsx`](apps/web/src/site/LiveStatus.tsx), [`music.ts`](apps/web/src/site/music.ts) | [unit](apps/web/test/unit), [end-to-end](apps/web/test/e2e/site.spec.ts) | [content-standard.md](docs/content-standard.md) | Live at [arlcoin.io](https://arlcoin.io) |
 | DEX liquidity (Uniswap)                  | [`packages/deploy/src/pool.ts`](packages/deploy/src/pool.ts)                                             | [unit](packages/deploy/test/pool.test.ts), [fork](contracts/test-fork/UniswapLaunchFork.t.sol)                                              | [launch-route.md](docs/launch-route.md)                          | Planned, no pool exists        |
 
 Not built: private payments and verifiable computation (no circuits exist), an ARL-operated
@@ -68,12 +83,40 @@ Every tool and action is pinned by version, commit or SHA-256.
 | `sbom`                   | CycloneDX SBOMs of the npm dependency trees, kept as an artifact                                                 |
 | CodeQL                   | Security findings in TypeScript/JavaScript ([codeql.yml](.github/workflows/codeql.yml))                          |
 
-Measured on 2026-10-10 (commit of this README): 272 Foundry tests (254 default profile, 18 with
-real proofs), 230 TypeScript package tests, all passing; every contract at 100% line and function
-coverage, 91% of branches.
+Measured on 2026-10-11 (commit of this README): 289 Foundry tests (271 default profile, 18 with
+real proofs), 276 TypeScript package tests, 34 website unit tests and 109 website end-to-end
+tests, all passing; every contract at 100% line and function coverage, 91% of branches.
 
-Run locally: `npm ci && npm run check`, then `npm run check:contracts`, `npm run coverage:contracts`
-and `npm run rehearse:local` (Foundry v1.8.3, `git submodule update --init`).
+## Requirements
+
+| Tool                     | Version                          | Needed for                                              |
+| ------------------------ | -------------------------------- | ------------------------------------------------------- |
+| Node.js and npm          | 22 ([`.nvmrc`](.nvmrc)), ≥ 22.18 | Packages, the website and the app                       |
+| Foundry                  | v1.8.3                           | Contracts: build, tests, scripts, local rehearsals      |
+| git submodules           | `git submodule update --init`    | OpenZeppelin, forge-std and the other contract libraries |
+| Python 3.12              | Slither 0.11.6, Halmos 0.3.3     | The `slither` and `symbolic` gates (optional locally)   |
+| Noir `nargo`, Barretenberg `bb` | 1.0.0-rc.3, 5.2.0         | Rebuilding the ZK circuit and verifier (`zk/check.sh`)  |
+| Chromium for Playwright  | the version `@playwright/test` pins | End-to-end tests (`PW_CHROMIUM_PATH` uses a preinstalled one) |
+| ffmpeg, numpy            | any recent                       | Only to regenerate the website music ([`generate-ambient.py`](scripts/generate-ambient.py)) |
+
+Run locally:
+
+```sh
+git submodule update --init
+npm ci && npm run check          # packages: typecheck, lint, format, unit tests
+(cd apps/web && npm ci && npm run check)    # website: typecheck, lint, tests, build, end-to-end
+(cd apps/dapp && npm ci && npm run check)   # app: typecheck, lint, tests, build, end-to-end on Anvil
+npm run check:contracts          # forge fmt, size limits, unit, fuzz and invariant tests
+npm run coverage:contracts       # coverage gate
+npm run rehearse:local           # full deploy-and-verify rehearsal on a local chain
+```
+
+Deployment needs these repository secrets (never committed): `VERCEL_TOKEN`, `VERCEL_ORG_ID` and
+`VERCEL_PROJECT_ID` for the website; `VERCEL_APP_PROJECT_ID` (optional, the app project is linked
+by name otherwise) and `ARL_OPERATOR_KEY` (the testnet operator, Base Sepolia only) for the app;
+`ETHERSCAN_API_KEY` locally for Basescan verification. The website and the app deploy from `main`
+only after CI passes ([deploy-site.yml](.github/workflows/deploy-site.yml),
+[deploy-app.yml](.github/workflows/deploy-app.yml)).
 
 ## Security
 
