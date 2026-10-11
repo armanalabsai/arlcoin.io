@@ -2,7 +2,10 @@
 // `end` (seconds) without a gap, for the whole visit. Web Audio loops a decoded buffer sample-exact;
 // an <audio> element would jump audibly at the loop point. Browsers allow sound only after the
 // visitor interacts with the page, so playback starts on the first click, tap or key press,
-// unless the visitor turned the music off, which is remembered in this browser.
+// unless the visitor turned the music off, which is remembered in this browser. Moving between
+// pages keeps the same player (SoftNavigation.tsx); when the document itself is replaced (a
+// reload, or a return from the app under /app) the position is saved for this tab and the music
+// resumes from it.
 
 import { withBase } from "@/core/basePath.ts";
 
@@ -16,12 +19,16 @@ export const MUSIC = {
 } as const;
 
 const STORAGE_KEY = "arl-music";
+const POSITION_KEY = "arl-music-position";
 
 type Listener = () => void;
 
 let ctx: AudioContext | null = null;
 let gain: GainNode | null = null;
 let source: AudioBufferSourceNode | null = null;
+/** Where `source` started: context time and file offset (seconds). */
+let startedAt = 0;
+let startOffset: number = MUSIC.start;
 let bytes: Promise<ArrayBuffer> | null = null;
 let buffer: Promise<AudioBuffer> | null = null;
 const listeners = new Set<Listener>();
@@ -54,6 +61,33 @@ function decoded(c: AudioContext): Promise<AudioBuffer> {
   preload();
   buffer ??= (bytes as Promise<ArrayBuffer>).then((b) => c.decodeAudioData(b));
   return buffer;
+}
+
+/** The current position in the file, folded into the loop. */
+export function position(): number {
+  if (!ctx || !source) return startOffset;
+  const p = startOffset + (ctx.currentTime - startedAt);
+  const length = MUSIC.end - MUSIC.start;
+  return p < MUSIC.end ? p : MUSIC.start + ((p - MUSIC.start) % length);
+}
+
+function savedPosition(): number {
+  try {
+    const p = Number(window.sessionStorage.getItem(POSITION_KEY));
+    return Number.isFinite(p) && p >= MUSIC.start && p < MUSIC.end ? p : MUSIC.start;
+  } catch {
+    return MUSIC.start;
+  }
+}
+
+/** Keeps the position for this tab when the document goes away (reload, leaving for /app). */
+export function savePosition(): void {
+  if (!source) return;
+  try {
+    window.sessionStorage.setItem(POSITION_KEY, position().toFixed(3));
+  } catch {
+    // Storage blocked: the next page starts the loop from its beginning.
+  }
 }
 
 export function isPlaying(): boolean {
@@ -102,7 +136,9 @@ export async function play(): Promise<boolean> {
       s.loopStart = MUSIC.start;
       s.loopEnd = Math.min(MUSIC.end, b.duration);
       s.connect(gain as GainNode);
-      s.start(0, MUSIC.start);
+      startOffset = savedPosition();
+      startedAt = c.currentTime;
+      s.start(0, startOffset);
       source = s;
       notify();
     }

@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-import { musicOff, play, preload } from "./music.ts";
+import { musicOff, play, preload, savePosition } from "./music.ts";
 
 // Mounted once in the root layout. Downloads the music right away and starts it on the visitor's
 // first interaction: browsers (Safari above all) unlock sound only inside a click, tap or key
@@ -11,6 +11,11 @@ import { musicOff, play, preload } from "./music.ts";
 const EVENTS = ["pointerdown", "touchend", "click", "keydown"] as const;
 
 export function BackgroundMusic() {
+  useEffect(() => {
+    window.addEventListener("pagehide", savePosition);
+    return () => window.removeEventListener("pagehide", savePosition);
+  }, []);
+
   useEffect(() => {
     if (musicOff()) return;
     preload();

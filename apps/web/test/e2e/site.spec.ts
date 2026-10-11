@@ -121,19 +121,13 @@ test("the technology previews swipe and run, and say they are simulated", async 
   await expect(zk).toContainText("Proof verified", { timeout: 5000 });
 });
 
-test("the brand link reloads the home page and starts it at the top", async ({ page }) => {
-  await page.goto("/");
+test("the brand link goes home, reloads its content and starts it at the top", async ({ page }) => {
+  await page.goto("/faq");
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
-  await page.evaluate(() => {
-    (window as unknown as { beforeReload?: boolean }).beforeReload = true;
-  });
   await page.getByRole("link", { name: "ARL home" }).click();
-  await page.waitForLoadState("load");
-  // A fresh document: the marker set before the click is gone.
-  expect(await page.evaluate(() => "beforeReload" in window)).toBe(false);
   await expect(page).toHaveURL(/\/$/);
-  expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
 });
 
 test("the header shows the testnet as live only while Base Sepolia answers", async ({ page }) => {
@@ -165,4 +159,32 @@ test("the background music starts on the first interaction and can be turned off
   await page.reload();
   await page.mouse.click(8, 300);
   await expect(toggle).toHaveAttribute("aria-pressed", "false");
+});
+
+test("the music keeps playing across pages, through header links and plain links", async ({
+  page,
+}) => {
+  await page.goto("/faq");
+  const toggle = page.getByRole("button", { name: /Turn the music (on|off)/ });
+  await page.mouse.click(8, 300);
+  await expect(toggle).toHaveAttribute("aria-pressed", "true");
+  await page.evaluate(() => {
+    (window as unknown as { sameDocument?: boolean }).sameDocument = true;
+  });
+
+  await page.locator("header").getByRole("link", { name: "Contact" }).click();
+  await expect(page).toHaveURL(/\/contact\/?$/);
+  // A plain anchor, as in documents, is navigated inside the app too.
+  await page.evaluate(() => {
+    const a = document.createElement("a");
+    a.href = `${window.location.origin}/faq/`;
+    a.textContent = "plain link";
+    a.id = "plain-link";
+    document.querySelector("main")?.prepend(a);
+  });
+  await page.locator("#plain-link").click();
+  await expect(page).toHaveURL(/\/faq\/?$/);
+
+  expect(await page.evaluate(() => "sameDocument" in window)).toBe(true);
+  await expect(toggle).toHaveAttribute("aria-pressed", "true");
 });
