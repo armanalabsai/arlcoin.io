@@ -1,4 +1,7 @@
-// Builds a deployment config from the Safes written by `CreateSafes.s.sol`.
+// Builds a deployment config from the Safes created by `CreateSafes.s.sol`.
+//
+// The Safe addresses come only from a verified Safes record (`record-cli.ts safes`), never from
+// what a script simulated: a record without the tool's stamp is refused.
 //
 // Every value except the Safe addresses is fixed here: code checks on, the approved 12 + 36 month
 // vesting durations, and the 48-hour timelock floor. The vesting start is a placeholder, which
@@ -12,6 +15,7 @@ import {
   networkGate,
   type DeployConfig,
 } from "./plan.ts";
+import { RecordError, requireVerified, type VerifiedStamp } from "./record.ts";
 
 const ROLES = [
   "founder",
@@ -33,6 +37,8 @@ export interface SafesRecord {
   chainId: number;
   singleton: string;
   safes: Record<Role, string>;
+  /** Written by `record-cli.ts safes` after checking every Safe on chain. */
+  verified?: VerifiedStamp;
 }
 
 const UTC_DAY = /^\d{4}-\d{2}-(0[1-9]|1\d|2[0-8])T00:00:00Z$/;
@@ -48,6 +54,11 @@ function fail(message: string): never {
  */
 export function configFromSafes(record: SafesRecord, vestingStart: string): DeployConfig {
   networkGate(record.chainId);
+  try {
+    requireVerified(record, "safes");
+  } catch (error) {
+    fail(error instanceof RecordError ? error.message : String(error));
+  }
   if (!UTC_DAY.test(vestingStart)) {
     fail("vestingStart: must be YYYY-MM-DDT00:00:00Z with a day of month from 1 to 28");
   }

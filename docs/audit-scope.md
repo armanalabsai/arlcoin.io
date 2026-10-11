@@ -160,7 +160,8 @@ of two symbolic values and does not finish in the solver. Fuzz tests and the
 - OpenZeppelin Contracts v5.6.1 and Safe v1.5.0 themselves (audited upstream; used unmodified).
 - The website (`apps/web`) and documentation.
 - Contracts not planned for the first deployment, reviewed separately later: `ARLJobs`
-  (ERC-8183 job escrow, [jobs.md](jobs.md)) and `ARLAnonymousSignal` ([zk-privacy.md](zk-privacy.md)).
+  (ERC-8183 job escrow, [jobs.md](jobs.md)), `ComputePayment` (per-second compute streams,
+  [compute-streaming.md](compute-streaming.md)) and `ARLAnonymousSignal` ([zk-privacy.md](zk-privacy.md)).
 - Third-party launchpad sale and vesting contracts, if a launchpad sale is used.
 - Economic parameters that are not yet decided: the TGE date (every vesting schedule starts at it), launch amount, claim window,
   per-address limits, liquidity parameters.

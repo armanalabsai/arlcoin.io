@@ -210,6 +210,7 @@ jobs:
           cache-dependency-path: |
             package-lock.json
             apps/dapp/package-lock.json
+            apps/web/package-lock.json
 
       # Anvil and forge: the end-to-end tests deploy the local fixture on a fresh Anvil chain.
       - uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09 # v1.9.1
@@ -228,6 +229,11 @@ jobs:
       # Builds against the local chain, deploys the fixture, checks the committed contract
       # addresses and drives the app in Chromium. Local Anvil only.
       - run: npm run test:e2e
+      # The site as arlcoin.io serves it (scripts/build-site.sh): the website with the app under
+      # /app, Claim and Trade closed before the launch, the deploy screen working.
+      - run: npm ci
+        working-directory: apps/web
+      - run: npm run test:hosted
       - run: node ../../scripts/audit.mjs
 
   web:

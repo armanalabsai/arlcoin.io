@@ -99,7 +99,6 @@ contract CreateSafesTest is Test {
     function test_RevertWhen_RunOnBaseMainnetOrUnsupportedChain() public {
         vm.setEnv("ARL_SAFE_OWNERS", vm.toString(address(0x1000)));
         vm.setEnv("ARL_SAFE_THRESHOLD", "1");
-        vm.setEnv("ARL_SAFES_OUT", "deploy/deployments/never.json");
         vm.chainId(8453);
         vm.expectRevert(abi.encodeWithSelector(ARLDeployPlan.PlanProductionLocked.selector, 8453));
         script.run();

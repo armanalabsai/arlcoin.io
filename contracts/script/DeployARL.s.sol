@@ -11,11 +11,12 @@ import {ARLVerify} from "./ARLVerify.sol";
 /// @title Deploy the ARL system
 /// @notice Inputs (environment):
 /// - `ARL_PLAN`: plan produced by `packages/deploy` (under `contracts/deploy/`).
-/// - `ARL_DEPLOYMENT`: where to write the deployed addresses (under
-///   `contracts/deploy/deployments/`, which is git-ignored).
 ///
-/// The plan is validated before anything is broadcast, and the result is verified before the
-/// addresses are written. Any failure reverts the script.
+/// The plan is validated before anything is broadcast and the simulated result is verified.
+/// Any failure reverts the script. The script writes no deployment record: forge runs it before
+/// it sends anything, so it cannot know what reached the chain. The record is written afterwards
+/// by `packages/deploy/src/record-cli.ts arl`, from Foundry's run file and only after every
+/// created contract is checked on chain.
 contract DeployARL is Script {
     function run() external returns (Deployment memory d) {
         // Refuse Base Mainnet before the TGE and unsupported chains before reading any input.
@@ -31,22 +32,5 @@ contract DeployARL is Script {
         vm.stopBroadcast();
 
         ARLVerify.verify(plan, d);
-
-        string memory json = string.concat(
-            '{"chainId":',
-            vm.toString(block.chainid),
-            ',"deployer":"',
-            vm.toString(d.deployer),
-            '","token":"',
-            vm.toString(address(d.token)),
-            '","investorsVesting":"',
-            vm.toString(address(d.investorsVesting)),
-            '","partnershipsVesting":"',
-            vm.toString(address(d.partnershipsVesting)),
-            '","timelock":"',
-            vm.toString(address(d.timelock)),
-            '"}'
-        );
-        vm.writeFile(vm.envString("ARL_DEPLOYMENT"), json);
     }
 }

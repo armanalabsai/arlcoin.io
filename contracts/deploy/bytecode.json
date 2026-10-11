@@ -36,6 +36,11 @@
       "creationHash": "0xdb31fe27bf1443a256da4e52fa9fa243ce9e86d7f43863e7ef014449e17df327",
       "runtimeHash": "0x38ed405a3a6802286f84f37059d5ca307f91a45aeeab5bd4fee3dea3a7261d31",
       "runtimeSize": 4952
+    },
+    "ComputePayment": {
+      "creationHash": "0xe8592167ebc78efa94507d6a3a6348f6dda75d027edba3e416737d3b89402461",
+      "runtimeHash": "0xb8ddfa486b5d4d05cffb3d7198b1a5eeb3b6bf7830cad8feb7878f142424d100",
+      "runtimeSize": 4120
     }
   }
 }

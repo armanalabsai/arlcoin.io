@@ -27,5 +27,11 @@ export default defineConfig([
     },
   },
   { files: ["scripts/**"], rules: { "no-console": "off" } },
-  globalIgnores([".next/**", "next-env.d.ts", "playwright-report/**", "test-results/**"]),
+  globalIgnores([
+    ".next/**",
+    "next-env.d.ts",
+    "playwright-report/**",
+    "test-results/**",
+    ".hosted-stage/**",
+  ]),
 ]);
