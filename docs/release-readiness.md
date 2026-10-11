@@ -82,22 +82,22 @@ Likely request content (to confirm when the site loads):
 
 ## 3. Remaining items by type
 
-| Item (launchpad-readiness #)                | Type                 | Minimum action                                                                                                       |
-| ------------------------------------------- | -------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| EIP-7702 delegation on the deployer (8)     | DONE                 | Removed on Base Sepolia (`eth_getCode` = `0x`, rechecked 2026-10-10); mainnet uses a fresh, never-delegated deployer |
-| Mainnet Safe signers and threshold (7)      | TECHNICAL BLOCKER    | Provide signer addresses (section 4)                                                                                 |
-| Aderyn, Halmos, Mythril re-run on Linux (5) | OPTIONAL             | Supplementary (owner decision 2026-10-05); tests, fuzz, invariants, Slither and reproducibility already pass         |
-| Basescan verification (2)                   | DONE                 | All four Base Sepolia contracts verified on Basescan (owner check 2026-10-10)                                        |
-| Public source repository (16)               | TECHNICAL BLOCKER    | Restore GitHub (ticket 4818868) or publish to another owned host                                                     |
-| Liquidity plan (13)                         | ADMIN/LEGAL          | Pool size, pair, venue, LP custody                                                                                   |
-| Sale parameters (14)                        | ADMIN/LEGAL          | Tokens offered, raise, currency, buyer unlock                                                                        |
-| Security contact (18)                       | DONE                 | `team@arlcoin.io` (owner decision 2026-10-05)                                                                        |
-| Legal opinion, KYC (19)                     | ADMIN/LEGAL          | Legal opinion done; KYC provider if the launchpad requires one                                                       |
-| Independent audit (3)                       | ADMIN/LEGAL          | Decide: paid audit, or disclose "not audited"                                                                        |
-| Social channels (20)                        | OPTIONAL             | Required by most launchpads in practice                                                                              |
-| Public test period and bug bounty (21)      | OPTIONAL             | Needs items 16 and 18                                                                                                |
-| Runtime Verification readiness assessment   | OPTIONAL             | Free; needs items 16 and 18                                                                                          |
-| Mainnet deployment (22)                     | Follows the blockers | After all technical blockers and an approved TGE                                                                     |
+| Item (launchpad-readiness #)                | Type        | Minimum action                                                                                                       |
+| ------------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------- |
+| EIP-7702 delegation on the deployer (8)     | DONE        | Removed on Base Sepolia (`eth_getCode` = `0x`, rechecked 2026-10-10); mainnet uses a fresh, never-delegated deployer |
+| Mainnet Safe signers and threshold (7)      | DONE        | Signers provided and locked 2026-10-05: role Safes 2-of-3, guardian 1-of-1 (`docs/mainnet-plan.md`)                  |
+| Aderyn, Halmos, Mythril re-run on Linux (5) | OPTIONAL    | Supplementary (owner decision 2026-10-05); tests, fuzz, invariants, Slither and reproducibility already pass         |
+| Basescan verification (2)                   | DONE        | All four Base Sepolia contracts verified on Basescan (owner check 2026-10-10)                                        |
+| Public source repository (16)               | DONE        | Public at https://github.com/armanalabsai/arlcoin.io (checked 2026-10-11)                                            |
+| Liquidity plan (13)                         | ADMIN/LEGAL | Pool size, pair, venue, LP custody                                                                                   |
+| Sale parameters (14)                        | ADMIN/LEGAL | Tokens offered, raise, currency, buyer unlock                                                                        |
+| Security contact (18)                       | DONE        | `team@arlcoin.io` (owner decision 2026-10-05)                                                                        |
+| Legal opinion, KYC (19)                     | ADMIN/LEGAL | Legal opinion done; KYC provider if the launchpad requires one                                                       |
+| Independent audit (3)                       | ADMIN/LEGAL | Decide: paid audit, or disclose "not audited"                                                                        |
+| Social channels (20)                        | OPTIONAL    | Required by most launchpads in practice                                                                              |
+| Public test period and bug bounty (21)      | OPTIONAL    | Needs items 16 and 18                                                                                                |
+| Runtime Verification readiness assessment   | OPTIONAL    | Free; needs items 16 and 18                                                                                          |
+| Mainnet deployment (22)                     | PLANNED     | No technical blocker left; TGE 2026-11-01, the network gate opens then                                               |
 
 ## 4. Base Mainnet security architecture (proposal; nothing created)
 
@@ -162,7 +162,7 @@ Foundry 1.8.3 uses the Etherscan V2 API, so one free Etherscan key covers Base S
 A private repository with read access for one reviewer is enough for Runtime Verification. A
 public one is needed for launchpads.
 
-### Checklist before publishing (nothing published)
+### Checklist before publishing (published 2026-10-11 check: public on GitHub)
 
 | Check                                                   | Result (2026-10-05)                                                                                                |
 | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
@@ -178,8 +178,8 @@ public one is needed for launchpads.
 | README, docs, deployment addresses                      | Present; Base Sepolia addresses in `docs/audit-evidence.md`                                                        |
 | Repository URL in docs                                  | `gokturkalazdaghan-dot/ARLCOIN` appears in docs; update if the host changes                                        |
 
-To publish (owner action): restore the GitHub account (ticket 4818868) and push `main` from the
-local repository, or create a repository on another host the owner controls and push `main` there.
+Published: the repository is public at https://github.com/armanalabsai/arlcoin.io (checked
+2026-10-11). `SECURITY.md` and any remaining `gokturkalazdaghan-dot/ARLCOIN` links should point there.
 
 ## 7. Remaining release checklist (CTO decision 2026-10-05: no mainnet yet)
 
@@ -189,10 +189,10 @@ local repository, or create a repository on another host the owner controls and 
 | 2   | Private GitLab repository `armanalabs-group/arlcoin`                              | Push `main` (owner runs the push)   | Not created yet; stays private when created |
 | 3   | Basescan verification                                                             | Set `ETHERSCAN_API_KEY` (section 5) | Done: all four verified (2026-10-10)        |
 | 4   | Runtime Verification readiness assessment                                         | Approve sending                     | Draft only (section 2)                      |
-| 5   | Mainnet signers: 3 Ledger role signers, guardian signer(s), clean Ledger deployer | Provide public addresses            | Open                                        |
+| 5   | Mainnet signers: 3 Ledger role signers, guardian signer(s), clean Ledger deployer | Provide public addresses            | Done: provided and locked (2026-10-05)      |
 | 6   | Liquidity plan and sale parameters                                                | Decide                              | Legal opinion done; rest open               |
 | 7   | Legal opinion / KYC, social channels                                              | Decide                              | Open                                        |
 | 8   | Audit position: paid audit or "not audited" disclosure                            | Decide (no spending now)            | Open                                        |
-| 9   | Mainnet network gate                                                              | Separate reviewed change after 1-8  | Locked                                      |
+| 9   | Mainnet network gate                                                              | Opens at the TGE (2026-11-01)       | Set; refuses chain 8453 before the TGE      |
 
 Supplementary (not blockers): Aderyn, Halmos and Mythril re-run on Linux.
