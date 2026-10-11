@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-"""Renders the website's background music: an original 65-second ambient organ piece.
+"""Renders the website's background music: an original ambient organ piece, 1:55 long.
 
 Written for ARL, no samples or third-party recordings, so it carries no license beyond the
-repository's. The piece loops seamlessly (its last seconds are folded into its first), and it is
-deterministic: the same numpy version renders the same samples.
+repository's. The site plays it from 0:45 and loops 0:45-1:50 (apps/web/src/site/music.ts): that
+section is a seamless 65-second loop (its last seconds are folded into its first), the 45 seconds
+before it are the end of the same loop and the 5 seconds after it its beginning, so the samples at
+1:50 continue exactly as those at 0:45. Deterministic: the same numpy version renders the same
+samples.
 
   python3 scripts/generate-ambient.py apps/web/public/audio/arl-ambient.mp3
 
@@ -108,6 +111,10 @@ fade = np.sin(np.linspace(0, np.pi / 2, fold))
 out = mix[:, :loop].copy()
 out[:, :fold] = mix[:, :fold] * fade + mix[:, loop:] * np.cos(np.linspace(0, np.pi / 2, fold))
 
+# The file: 45 s lead-in (the loop's end), the loop from 0:45 to 1:50, then 5 s of its start.
+LEAD, AFTER = 45, 5
+out = np.concatenate([out[:, -LEAD * SR :], out, out[:, : AFTER * SR]], axis=1)
+
 out /= np.max(np.abs(out))
 out *= 0.6
 pcm = (out.T * 32767).astype("<i2").tobytes()
@@ -119,4 +126,4 @@ subprocess.run(
     input=pcm,
     check=True,
 )
-print(f"wrote {dest}: {LENGTH:.0f} s loop")
+print(f"wrote {dest}: loop {LEAD} s to {LEAD + LENGTH:.0f} s of {out.shape[1] / SR:.0f} s")
