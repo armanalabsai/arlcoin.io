@@ -150,23 +150,26 @@ test("the header shows the testnet as live only while Base Sepolia answers", asy
 async function startMusic(page: Page, toggle: Locator) {
   await expect(async () => {
     await page.mouse.click(8, 300);
-    await expect(toggle).toHaveAttribute("aria-pressed", "true", { timeout: 2_000 });
+    await expect(toggle).toHaveAttribute("data-state", "playing", { timeout: 2_000 });
   }).toPass({ timeout: 20_000 });
 }
 
-test("the background music starts on the first interaction and can be turned off", async ({
+test("the music is on by default, plays from the first interaction and can be turned off", async ({
   page,
 }) => {
   await page.goto("/faq");
   const toggle = page.getByRole("button", { name: /Turn the music (on|off)/ });
-  await expect(toggle).toBeVisible();
+  // On before any interaction: the button shows the setting, the sound waits for the browser.
+  await expect(toggle).toHaveAttribute("aria-pressed", "true");
   await startMusic(page, toggle);
   await toggle.click();
   await expect(toggle).toHaveAttribute("aria-pressed", "false");
-  // The choice is remembered: a reload does not start the music again.
+  await expect(toggle).toHaveAttribute("data-state", "off");
+  // The choice is remembered: a reload keeps it off, even after a click.
   await page.reload();
-  await page.mouse.click(8, 300);
   await expect(toggle).toHaveAttribute("aria-pressed", "false");
+  await page.mouse.click(8, 300);
+  await expect(toggle).toHaveAttribute("data-state", "off");
 });
 
 test("the music keeps playing across pages, through header links and plain links", async ({
@@ -193,5 +196,5 @@ test("the music keeps playing across pages, through header links and plain links
   await expect(page).toHaveURL(/\/faq\/?$/);
 
   expect(await page.evaluate(() => "sameDocument" in window)).toBe(true);
-  await expect(toggle).toHaveAttribute("aria-pressed", "true");
+  await expect(toggle).toHaveAttribute("data-state", "playing");
 });

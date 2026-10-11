@@ -32,7 +32,14 @@ export function BackgroundMusic() {
       });
     }
     for (const e of EVENTS) window.addEventListener(e, start, { capture: true, passive: true });
-    return disarm;
+    // The inline script in app/layout.tsx may have unlocked audio on a gesture made before this
+    // component mounted; and some browsers allow sound right away (autoplay permitted).
+    window.addEventListener("arl-audio-unlocked", start);
+    start();
+    return () => {
+      disarm();
+      window.removeEventListener("arl-audio-unlocked", start);
+    };
   }, []);
   return null;
 }

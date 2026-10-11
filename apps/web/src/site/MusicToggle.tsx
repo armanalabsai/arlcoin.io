@@ -2,12 +2,16 @@
 
 import { useSyncExternalStore } from "react";
 
-import { isPlaying, setMusic, subscribe } from "./music.ts";
+import { isPlaying, musicOn, setMusic, subscribe } from "./music.ts";
 
 // Header button that turns the background music on or off (WCAG 1.4.2: sound that plays on its
-// own can be stopped). The choice is remembered in this browser.
+// own can be stopped). The music is on by default; the button shows that setting, and turning it
+// off is remembered in this browser.
 export function MusicToggle() {
-  const playing = useSyncExternalStore(subscribe, isPlaying, () => false);
+  const playing = useSyncExternalStore(subscribe, musicOn, () => true);
+  // "waiting": switched on, but the browser has not allowed sound yet (no interaction so far).
+  const sounding = useSyncExternalStore(subscribe, isPlaying, () => false);
+  const state = !playing ? "off" : sounding ? "playing" : "waiting";
 
   const label = playing ? "Turn the music off" : "Turn the music on";
   return (
@@ -15,9 +19,10 @@ export function MusicToggle() {
       type="button"
       onClick={() => setMusic(!playing)}
       aria-pressed={playing}
+      data-state={state}
       aria-label={label}
       title={label}
-      className="inline-flex min-h-11 min-w-11 items-center justify-center text-fg-muted transition-colors hover:text-fg"
+      className="inline-flex min-h-11 min-w-11 items-center justify-center text-fg-muted transition-colors hover:text-fg data-[state=waiting]:animate-pulse data-[state=waiting]:text-fg motion-reduce:animate-none"
     >
       <svg
         aria-hidden="true"

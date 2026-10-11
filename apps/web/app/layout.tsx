@@ -11,6 +11,12 @@ import { SoftNavigation } from "@/site/SoftNavigation.tsx";
 
 import "./globals.css";
 
+const AUDIO_UNLOCK = `(function(){try{if(localStorage.getItem("arl-music")==="off")return}catch(e){}
+var E=["pointerdown","touchend","click","keydown"];function go(){var C=window.AudioContext||window.webkitAudioContext;if(!C)return;
+var c=window.__arlAudio||(window.__arlAudio=new C());c.resume().then(function(){if(c.state!=="running")return;
+E.forEach(function(e){removeEventListener(e,go,true)});dispatchEvent(new Event("arl-audio-unlocked"))})}
+E.forEach(function(e){addEventListener(e,go,true)})})();`;
+
 export const metadata: Metadata = {
   // Google Search Console ownership of https://arlcoin.io/ (added 2026-10-05).
   verification: { google: "LLHEGdS5Ee4XR_Cn93c2NcdIwcAG5zJM3IZtCFuxeJg" },
@@ -50,6 +56,11 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        {/* Unlocks audio on the very first click, tap or key press, before the page has
+            hydrated, so that gesture is never lost; music.ts then plays through this context. */}
+        <script dangerouslySetInnerHTML={{ __html: AUDIO_UNLOCK }} />
+      </head>
       <body>
         <NucleusField />
         {children}
