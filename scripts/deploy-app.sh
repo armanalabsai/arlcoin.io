@@ -46,6 +46,15 @@ mkdir -p .vercel
 printf '{"orgId":"%s","projectId":"%s","settings":{"framework":"nextjs","installCommand":null,"buildCommand":null,"outputDirectory":null,"rootDirectory":"apps/dapp","nodeVersion":"22.x"}}\n' \
   "$ORG" "$PROJECT" >.vercel/project.json
 
+# The project is also linked to the GitHub repository, so every push to main makes Vercel build a
+# production deployment of its own. With the project's root directory unset, that build ignores
+# apps/dapp/vercel.json (which turns Git deployments off), serves nothing, and takes over
+# app.arlcoin.io. Setting the root directory on the project makes Vercel read that file.
+printf '{"rootDirectory":"apps/dapp"}' >.vercel/project-patch.json
+"${VERCEL[@]}" api "/v9/projects/$PROJECT?teamId=$ORG" -X PATCH --input .vercel/project-patch.json \
+  --silent "${SCOPE[@]}" ${TOKEN_ARGS[@]+"${TOKEN_ARGS[@]}"}
+rm -f .vercel/project-patch.json
+
 NEXT_PUBLIC_ARL_CHAIN=84532 "${VERCEL[@]}" build --prod --yes "${SCOPE[@]}" ${TOKEN_ARGS[@]+"${TOKEN_ARGS[@]}"}
 if find .vercel/output -name '.env*' | grep -q .; then
   echo "refusing to deploy: an .env file is in the output" >&2
