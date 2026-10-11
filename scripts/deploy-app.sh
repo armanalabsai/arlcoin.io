@@ -27,9 +27,15 @@ grep -q "84532" apps/dapp/contracts/baseSepoliaContracts.ts ||
 # Linked at the repository root, with apps/dapp as the root directory: the app imports
 # packages/ from outside its folder, and Next traces files from the repository root.
 rm -rf .vercel
-if [ -n "${VERCEL_ORG_ID:-}" ] && [ -n "${VERCEL_PROJECT_ID:-}" ]; then
-  ORG="$VERCEL_ORG_ID"
-  PROJECT="$VERCEL_PROJECT_ID"
+# The CLI refuses VERCEL_ORG_ID without VERCEL_PROJECT_ID (CI passes the site's org id and an
+# empty app project id until VERCEL_APP_PROJECT_ID is set). Take both from the environment here
+# and hand them to the CLI only through .vercel/project.json.
+ORG_IN="${VERCEL_ORG_ID:-}"
+PROJECT_IN="${VERCEL_PROJECT_ID:-}"
+unset VERCEL_ORG_ID VERCEL_PROJECT_ID
+if [ -n "$ORG_IN" ] && [ -n "$PROJECT_IN" ]; then
+  ORG="$ORG_IN"
+  PROJECT="$PROJECT_IN"
 else
   "${VERCEL[@]}" link --yes --project arl-app "${SCOPE[@]}" ${TOKEN_ARGS[@]+"${TOKEN_ARGS[@]}"}
   ORG="$(node -e "console.log(require('./.vercel/project.json').orgId)")"
