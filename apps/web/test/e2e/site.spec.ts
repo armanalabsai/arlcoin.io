@@ -120,3 +120,33 @@ test("the technology previews swipe and run, and say they are simulated", async 
   await zk.getByRole("button", { name: "AI payments first" }).click();
   await expect(zk).toContainText("Proof verified", { timeout: 5000 });
 });
+
+test("the brand link reloads the home page and starts it at the top", async ({ page }) => {
+  await page.goto("/");
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+  await page.evaluate(() => {
+    (window as unknown as { beforeReload?: boolean }).beforeReload = true;
+  });
+  await page.getByRole("link", { name: "ARL home" }).click();
+  await page.waitForLoadState("load");
+  // A fresh document: the marker set before the click is gone.
+  expect(await page.evaluate(() => "beforeReload" in window)).toBe(false);
+  await expect(page).toHaveURL(/\/$/);
+  expect(await page.evaluate(() => window.scrollY)).toBe(0);
+});
+
+test("the header shows the testnet as live only while Base Sepolia answers", async ({ page }) => {
+  await page.route("https://sepolia.base.org/**", (route) =>
+    route.fulfill({ json: { jsonrpc: "2.0", id: 1, result: "0x2dbfe85" } }),
+  );
+  await page.goto("/faq");
+  const status = page.locator('header a[href="https://arlcoin.io/app/"]');
+  await expect(status).toHaveAttribute("data-state", "live");
+  await expect(status).toHaveAttribute("title", /block 47971973/);
+
+  await page.unroute("https://sepolia.base.org/**");
+  await page.route("https://sepolia.base.org/**", (route) => route.abort());
+  await page.reload();
+  await expect(status).toHaveAttribute("data-state", "down");
+});

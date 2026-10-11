@@ -1,17 +1,16 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { LAYERS, nextLayer, pathFor } from "@/content/registry.ts";
 import { SITE } from "@/content/site.ts";
 
-import { BrandMark } from "./BrandMark.tsx";
 import { CoreCard } from "./CoreCard.tsx";
 import { CoreNavigation } from "./CoreNavigation.tsx";
 import { DetailSurface } from "./DetailSurface.tsx";
 import { Orbit } from "./Orbit.tsx";
 import { ProtocolIndex } from "./ProtocolIndex.tsx";
+import { HomeLink } from "@/site/HomeLink.tsx";
 import { SiteLinks } from "@/site/SiteLinks.tsx";
 import type { RingEntry } from "./RingCard.tsx";
 import { useCoreRoute } from "./useCoreRoute.ts";
@@ -112,15 +111,7 @@ export function InteractiveCore() {
 
       <header className="material-bar sticky top-0 z-30 border-b border-line">
         <div className="mx-auto flex h-14 max-w-[1440px] items-center justify-between gap-6 px-4 sm:px-8">
-          <Link
-            href="/"
-            prefetch={false}
-            className="arl-neon inline-flex min-h-11 items-center gap-2 text-[17px] tracking-[-0.03em]"
-            aria-label="ARL home"
-          >
-            <BrandMark />
-            ARL
-          </Link>
+          <HomeLink />
           <CoreNavigation
             current={layer}
             onSelect={(id) => navigate(pathFor(id))}

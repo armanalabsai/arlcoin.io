@@ -29,15 +29,16 @@ export const technology: Layer = {
           {
             heading: "Built",
             items: [
-              "Payment integration on the open x402 protocol (upto scheme, Permit2), tested against the deployed contracts on a Base Sepolia fork. Not running on any network",
+              "Payment integration on the open x402 protocol (upto scheme, Permit2), running on Base Sepolia in the ARL app: the testnet operator verifies the signed ceiling and settles the metered amount",
               "Settlement rules: one settlement per authorization, never above the signed ceiling, Base Sepolia only",
-              "Facilitator service on the standard x402 facilitator API, with its settlement record kept on disk. Tested on a Base Sepolia fork, not running anywhere",
+              "Facilitator service on the standard x402 facilitator API, with its settlement record kept on disk. Tested end to end on a Base Sepolia fork",
+              "A demo AI service is registered on the canonical ERC-8004 registry on Base Sepolia and can be paid per use in testnet ARL",
             ],
           },
           {
             heading: "Not yet built",
             items: [
-              "No facilitator is running: running one needs an operator with a funded settlement account",
+              "Payments run on the Base Sepolia testnet only; nothing settles on Base Mainnet",
               "No agreement with any AI provider exists; third-party models would be used as a regular customer through their public APIs",
             ],
           },
@@ -58,9 +59,9 @@ export const technology: Layer = {
           {
             heading: "Built",
             items: [
-              "Provider registration and capacity listing in the ARL app: GPU model and count, GPU memory, vCPUs, memory and the longest job, priced per GPU or CPU second. Tested on a local chain",
+              "Provider registration and capacity listing in the ARL app: GPU model and count, GPU memory, vCPUs, memory and the longest job, priced per GPU or CPU second. Live in the ARL app on Base Sepolia",
               "Per-second metering settled in ARL over x402 upto: seconds rounded up, never above the signed ceiling",
-              "Escrowed jobs with a deadline and refunds (ERC-8183) and ratings from paid jobs (ERC-8004)",
+              "Escrowed jobs with a deadline and refunds (ERC-8183), deployed and source-verified on Base Sepolia, and ratings from paid jobs (ERC-8004)",
               "Reference provider software: runs the provider's own jobs for the paid time, bills the seconds used and settles them over x402. Tested locally, not running anywhere",
             ],
           },
@@ -69,7 +70,7 @@ export const technology: Layer = {
             items: [
               "Capacity is the provider's own statement; nothing on-chain checks the hardware",
               "One payment covers a run of up to 9 minutes; longer jobs go through escrowed jobs, and streaming payment is not built",
-              "No provider has joined and nothing runs on a public network",
+              "No third-party provider has joined yet; nothing runs on Base Mainnet",
             ],
           },
         ],
@@ -89,14 +90,14 @@ export const technology: Layer = {
           {
             heading: "Built",
             items: [
-              "Anonymous polls on the Semaphore protocol, with proofs written in Noir (UltraHonk) and generated in the browser. Tested on a local chain",
+              "Anonymous polls on the Semaphore protocol, with proofs written in Noir (UltraHonk) and generated in the browser. The verifier and the poll contract are deployed and source-verified on Base Sepolia; a testnet relayer submits votes so the voter's wallet never appears",
             ],
           },
           {
             heading: "Not yet built",
             items: [
               "Private payments and verifiable computation are research topics; no circuits exist for them",
-              "Not deployed on any public network",
+              "Not deployed on Base Mainnet",
             ],
           },
         ],
@@ -121,13 +122,13 @@ export const technology: Layer = {
           {
             heading: "Built",
             items: [
-              "Staking contract: stake ARL, earn ARL from a funded pool over fixed periods. Adapted from the Synthetix staking rewards contract (MIT). No owner, minting or upgrade; one funding role, the Community & Staking holder, which cannot touch staked tokens. Written and tested, not deployed",
+              "Staking contract: stake ARL, earn ARL from a funded pool over fixed periods. Adapted from the Synthetix staking rewards contract (MIT). No owner, minting or upgrade; one funding role, the Community & Staking holder, which cannot touch staked tokens. Deployed and source-verified on Base Sepolia with a 30-day testnet reward period",
             ],
           },
           {
             heading: "Not yet built",
             items: [
-              "Reward amounts and period lengths are not decided",
+              "Base Mainnet reward amounts and period lengths are not decided",
               "No liquidity has been provided on any exchange",
             ],
           },
@@ -148,16 +149,17 @@ export const technology: Layer = {
           {
             heading: "Built",
             items: [
-              "ARL app screens to register, list, pay, hire and rate services, against the canonical ERC-8004 registry code. Tested on a local chain",
+              "ARL app screens to register, list, pay, hire and rate services, against the canonical ERC-8004 registry. Live on Base Sepolia at arlcoin.io/app, with a testnet ARL faucet",
             ],
           },
           {
             heading: "Not yet built",
-            items: ["Nothing is deployed on Base Mainnet", "No hosted app"],
+            items: ["Nothing is deployed on Base Mainnet"],
           },
         ],
       },
       links: [
+        { label: "Open the app (testnet)", href: "https://arlcoin.io/app/" },
         { label: "App design", href: repoDoc("docs/app.md") },
         { label: "Chain evaluation", href: repoDoc("docs/chain-evaluation.md") },
       ],
@@ -170,7 +172,7 @@ export const technology: Layer = {
       weight: "tertiary",
       detail: {
         summary:
-          "The token, vesting, treasury, launch claim and staking contracts are written in Solidity 0.8.36 on OpenZeppelin Contracts v5.6.1 and are under security review. The token, vesting and treasury contracts are deployed and source-verified on Base Sepolia (testnet); nothing is on Base Mainnet.",
+          "The token, vesting, treasury, launch claim and staking contracts are written in Solidity 0.8.36 on OpenZeppelin Contracts v5.6.1 and are under security review. The token, vesting, treasury, staking, jobs escrow and anonymous-poll contracts are deployed and source-verified on Base Sepolia (testnet); nothing is on Base Mainnet.",
         facts: [
           { label: "Language", value: "Solidity 0.8.36", mono: true },
           { label: "Library", value: "OpenZeppelin Contracts v5.6.1" },

@@ -3,8 +3,8 @@ import Link from "next/link";
 import { docPath } from "@/content/docs.ts";
 import { LAYERS, pathFor } from "@/content/registry.ts";
 import { SITE, TOKEN_DISCLAIMER } from "@/content/site.ts";
-import { BrandMark } from "@/core/BrandMark.tsx";
 
+import { HomeLink } from "./HomeLink.tsx";
 import { SiteLinks } from "./SiteLinks.tsx";
 
 /** Header of the landing page and the standalone pages: brand, the layers, and the actions. */
@@ -12,15 +12,7 @@ export function SiteHeader({ current }: { current?: "whitelist" | "contact" | "f
   return (
     <header className="material-bar sticky top-0 z-30 border-b border-line">
       <div className="mx-auto flex h-14 max-w-[1100px] items-center justify-between gap-6 px-4 sm:px-6">
-        <Link
-          href="/"
-          prefetch={false}
-          className="arl-neon inline-flex min-h-11 items-center gap-2 text-[17px] tracking-[-0.03em]"
-          aria-label="ARL home"
-        >
-          <BrandMark />
-          ARL
-        </Link>
+        <HomeLink />
         <nav aria-label="Layers" className="hidden lg:block">
           <ul className="flex items-center gap-7 text-[13px] text-fg-muted">
             {LAYERS.map((l) => (
