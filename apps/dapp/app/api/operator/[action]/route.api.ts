@@ -26,11 +26,42 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-const json = (body: unknown, status = 200) =>
+/**
+ * Origins whose pages may call this API from the browser: the static copy of the app on the
+ * website (arlcoin.io/app). ARL_OPERATOR_ORIGINS (comma-separated) replaces the default.
+ */
+const ORIGINS = (process.env.ARL_OPERATOR_ORIGINS ?? "https://arlcoin.io,https://www.arlcoin.io")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+function cors(origin: string | null): Record<string, string> {
+  if (!origin || !ORIGINS.includes(origin)) return {};
+  return {
+    "access-control-allow-origin": origin,
+    "access-control-allow-methods": "GET, POST, OPTIONS",
+    "access-control-allow-headers": "content-type",
+    "access-control-max-age": "600",
+    vary: "Origin",
+  };
+}
+
+const json = (origin: string | null, body: unknown, status = 200) =>
   new NextResponse(
     JSON.stringify(body, (_k, v: unknown) => (typeof v === "bigint" ? v.toString() : v)),
-    { status, headers: { "content-type": "application/json", "cache-control": "no-store" } },
+    {
+      status,
+      headers: {
+        "content-type": "application/json",
+        "cache-control": "no-store",
+        ...cors(origin),
+      },
+    },
   );
+
+export function OPTIONS(req: Request) {
+  return new NextResponse(null, { status: 204, headers: cors(req.headers.get("origin")) });
+}
 
 function actionOf(value: string): OperatorAction {
   if (!(OPERATOR_ACTIONS as readonly string[]).includes(value))
@@ -38,33 +69,37 @@ function actionOf(value: string): OperatorAction {
   return value as OperatorAction;
 }
 
-function failure(error: unknown) {
-  if (error instanceof OperatorRequestError) return json({ error: error.message }, error.status);
+function failure(origin: string | null, error: unknown) {
+  if (error instanceof OperatorRequestError)
+    return json(origin, { error: error.message }, error.status);
   process.stderr.write(
     `operator error: ${error instanceof Error ? (error.stack ?? error.message) : String(error)}\n`,
   );
   const text = error instanceof Error ? error.message : String(error);
   // Two requests can race for the operator's next nonce; the caller may simply retry.
   if (/nonce|replacement|underpriced/i.test(text))
-    return json({ error: "the operator is busy; try again in a few seconds" }, 503);
-  return json({ error: "the operator could not complete the request" }, 500);
+    return json(origin, { error: "the operator is busy; try again in a few seconds" }, 503);
+  return json(origin, { error: "the operator could not complete the request" }, 500);
 }
 
 type Context = { params: Promise<{ action: string }> };
 
-export async function GET(_req: Request, { params }: Context) {
+export async function GET(req: Request, { params }: Context) {
+  const origin = req.headers.get("origin");
   try {
-    if (actionOf((await params).action) !== "status") return json({ error: "use POST" }, 405);
-    return json(await status());
+    if (actionOf((await params).action) !== "status")
+      return json(origin, { error: "use POST" }, 405);
+    return json(origin, await status());
   } catch (e) {
-    return failure(e);
+    return failure(origin, e);
   }
 }
 
 export async function POST(req: Request, { params }: Context) {
+  const origin = req.headers.get("origin");
   try {
     const action = actionOf((await params).action);
-    if (action === "status") return json({ error: "use GET" }, 405);
+    if (action === "status") return json(origin, { error: "use GET" }, 405);
     const length = Number(req.headers.get("content-length") ?? "0");
     if (length > MAX_BODY_BYTES) throw new OperatorRequestError("body too large", 413);
     const text = await req.text();
@@ -77,13 +112,14 @@ export async function POST(req: Request, { params }: Context) {
     }
     switch (action) {
       case "faucet":
-        return json(await faucet(parseFaucet(body).account));
+        return json(origin, await faucet(parseFaucet(body).account));
       case "join":
-        return json(await join(parseJoin(body)));
+        return json(origin, await join(parseJoin(body)));
       case "relay":
-        return json(await relay(parseRelay(body)));
+        return json(origin, await relay(parseRelay(body)));
       case "settle":
         return json(
+          origin,
           await settle(
             parseSettle(body, {
               payTo: operatorAddress(),
@@ -94,6 +130,6 @@ export async function POST(req: Request, { params }: Context) {
         );
     }
   } catch (e) {
-    return failure(e);
+    return failure(origin, e);
   }
 }

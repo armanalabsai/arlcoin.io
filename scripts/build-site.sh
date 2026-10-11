@@ -27,7 +27,14 @@ ARL_STATIC_EXPORT=1 NEXT_PUBLIC_ARL_ANALYTICS=1 npm run build
 cd "$ROOT/apps/dapp"
 rm -rf out .next
 # Git Bash on Windows would rewrite "/app" into a Windows path; the exclusion keeps it as is.
-MSYS2_ENV_CONV_EXCL=ARL_BASE_PATH ARL_STATIC_EXPORT=1 ARL_BASE_PATH=/app npm run build
+# The public app targets Base Sepolia once the ecosystem is recorded (contracts/deploy/
+# base-sepolia.json); its testnet operator API is served by the server-hosted app
+# (app.arlcoin.io, scripts/deploy-app.sh), which a static export cannot serve itself.
+CHAIN_ENV=()
+if grep -q 84532 contracts/baseSepoliaContracts.ts; then
+  CHAIN_ENV=(NEXT_PUBLIC_ARL_CHAIN=84532 "NEXT_PUBLIC_ARL_OPERATOR_URL=${ARL_OPERATOR_URL:-https://app.arlcoin.io}")
+fi
+env ${CHAIN_ENV[@]+"${CHAIN_ENV[@]}"} MSYS2_ENV_CONV_EXCL=ARL_BASE_PATH ARL_STATIC_EXPORT=1 ARL_BASE_PATH=/app npm run build
 
 # Vercel's project root directory is apps/web.
 mkdir -p "$STAGE/apps/web"

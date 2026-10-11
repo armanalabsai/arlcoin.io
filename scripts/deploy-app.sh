@@ -48,4 +48,8 @@ fi
 
 ENV_ARGS=(--env NEXT_PUBLIC_ARL_CHAIN=84532)
 if [ -n "${ARL_OPERATOR_KEY:-}" ]; then ENV_ARGS+=(--env "ARL_OPERATOR_KEY=$ARL_OPERATOR_KEY"); fi
-"${VERCEL[@]}" deploy --prebuilt --prod --yes "${ENV_ARGS[@]}" "${SCOPE[@]}" ${TOKEN_ARGS[@]+"${TOKEN_ARGS[@]}"}
+URL="$("${VERCEL[@]}" deploy --prebuilt --prod --yes "${ENV_ARGS[@]}" "${SCOPE[@]}" ${TOKEN_ARGS[@]+"${TOKEN_ARGS[@]}"})"
+echo "deployed: $URL"
+# app.arlcoin.io serves the operator API that the static app on arlcoin.io/app calls. The
+# arlcoin.io domain belongs to the same Vercel team, so the alias needs no DNS change.
+"${VERCEL[@]}" alias set "$URL" "${ARL_APP_DOMAIN:-app.arlcoin.io}" "${SCOPE[@]}" ${TOKEN_ARGS[@]+"${TOKEN_ARGS[@]}"}
