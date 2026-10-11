@@ -1,3 +1,4 @@
 # Foundry build output. Deployment artifacts are ignored in the root .gitignore.
 out/
 cache/
+lcov-*.info

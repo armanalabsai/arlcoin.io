@@ -1,0 +1,24 @@
+# Render Blueprint for the ARL community bot (free web service).
+# Secrets are declared with sync: false, so Render asks for them in the dashboard and they are
+# never stored in this repository.
+services:
+  - type: web
+    name: arl-telegram-bot
+    runtime: python
+    plan: free
+    rootDir: apps/telegram-bot
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m arlbot.bot
+    autoDeploy: false
+    envVars:
+      - key: BOT_MODE
+        value: webhook
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      # Not generateValue: Render generates base64, and Telegram allows only A-Z a-z 0-9 _ -.
+      - key: WEBHOOK_SECRET
+        sync: false
+      - key: PUBLIC_URL
+        sync: false
+      - key: ALLOWED_CHAT_IDS
+        sync: false

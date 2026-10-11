@@ -343,10 +343,13 @@ describe("approved launch parameters (owner decision 2026-10-05)", () => {
     assert.equal(TGE_DATE, "2026-11-01T00:00:00Z");
     assert.deepEqual(PUBLIC_LAUNCH, {
       tgeTranche: 500_000,
+      launchpadReserve: 2_500_000,
       maxPerAddress: 10_000,
       claimWindowDays: 60,
     });
-    assert.ok(PUBLIC_LAUNCH.tgeTranche <= byId("public-launch").amount);
+    assert.ok(
+      PUBLIC_LAUNCH.tgeTranche + PUBLIC_LAUNCH.launchpadReserve <= byId("public-launch").amount,
+    );
     assert.equal(byId("public-launch").release.status, "approved");
   });
 });

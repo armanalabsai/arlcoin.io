@@ -1,0 +1,23 @@
+An AI job's cost isn't known until it runs. So why pay a fixed price?
+
+This is the idea behind ARL's "Payment Rail First" strategy: build the way compute gets paid before anything else.
+
+How it works:
+→ The payer signs a ceiling: the maximum the job may cost.
+→ The service meters actual usage, for example seconds of GPU time.
+→ A facilitator settles the metered amount on-chain. Never more than the ceiling.
+
+Under the hood: the x402 "upto" scheme and Permit2 on Base. The signature covers the payee, the facilitator, the token, the ceiling, a one-time nonce and a deadline. A replayed or tampered payment is refused.
+
+ARL itself: 21,000,000 fixed supply. No mint function, no owner, no upgrade path.
+
+Where we are, honestly:
+• The ARL token is live on Base Sepolia testnet. Not on mainnet yet.
+• The payment rail is IN DEVELOPMENT: tested on a local Base Sepolia fork, no facilitator running.
+• No audit of ARL's contracts yet.
+
+We build in public. The code is open source on GitHub (link in bio). Join the community: t.me/arlcoin_community
+
+Question for builders: per second, per request or per token? How would you bill AI compute?
+
+#blockchain #crypto #web3 #ai #artificialintelligence #ethereum #opensource #developer #coding #tech #base #defi #depin #smartcontracts #solidity #web3developer #cryptotech #machinelearning #buildinpublic #layer2 #x402 #permit2 #foundry #basechain #onchain #aicompute #gpucompute #micropayments #decentralizedcompute #arlcoin

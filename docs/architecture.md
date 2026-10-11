@@ -2,7 +2,8 @@
 
 Status: Phase 1 (token, vesting, treasury contracts), the Public Launch
 Merkle claim distributor and the staking rewards contract are implemented and
-tested. Nothing is deployed.
+tested. The Phase 1 contracts are deployed on Base Sepolia (testnet) only; see
+[`README.md`](../README.md). Nothing is deployed on Base Mainnet.
 
 ## Repository
 

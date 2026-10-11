@@ -16,8 +16,9 @@ replacement). It supersedes the 10-allocation Phase 1 table. The former
 - No mechanism may create supply above this cap. Staking and reward programs
   pay out existing allocations; they never issue new tokens. There is no
   inflation, emission or hidden reserve.
-- No token has been deployed. There is no contract address, chain, explorer or
-  circulating supply yet.
+- The token is deployed on Base Sepolia (testnet) at
+  `0x244312b619127B6458154F3467eFD7c87CD28500`. It is not on Base Mainnet: there is no
+  mainnet address, explorer page or circulating supply yet.
 
 ## Allocation
 

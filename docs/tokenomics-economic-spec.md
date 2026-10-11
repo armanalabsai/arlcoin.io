@@ -239,6 +239,19 @@ window; unclaimed tokens and the remaining 4,000,000 ARL stay in the Public Laun
 tranches; no participant vesting from this allocation. Enforced by `DeployDistributor`
 (`TGE_TRANCHE`, `MAX_CLAIM_WINDOW`) and by the claim list's `maxPerAddress`.
 
+**Owner decisions, 2026-10-10 (APPROVED by the owner; LEGAL APPROVAL CONFIRMED by the owner on 2026-10-10, who obtained a
+legal opinion covering these sales; the opinion is kept by the owner, not in this repository):**
+of the 5,000,000 ARL, 500,000 ARL is the free claim tranche above; 2,500,000 ARL is reserved in
+the Public Launch Safe for launchpad sales (`PUBLIC_LAUNCH.launchpadReserve`); the remaining
+2,000,000 ARL is sold through ARL-only Uniswap v3 positions opened by the Public Launch Safe on
+the same four pools and ranges as the Liquidity Safe, from 0.20 USD: ARL/USDT 600,000, ARL/USDC
+500,000, ARL/WETH 450,000, ARL/cbBTC 450,000. No funds are added by the project: every position
+is single-sided. These are sale orders, not two-sided liquidity: the Safe supplies only ARL and
+buyers pay the quote token, so the rule below that Public Launch may not fund or disguise
+liquidity still holds. Both sales collect funds, so the rule "Any launch mechanism needs separate legal approval" applies; that approval is the
+owner's confirmation above. Tooling: `pool-cli.ts` with `"allocation": "publicLaunch"` (cap 2,000,000 ARL);
+fork test `contracts/test-fork/UniswapPublicLaunchFork.t.sol`.
+
 APPROVED / LOCKED:
 
 - 5,000,000 ARL is the **ceiling** for the Public Launch allocation, not an

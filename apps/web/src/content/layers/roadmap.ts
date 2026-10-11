@@ -12,6 +12,7 @@ export const roadmap: Layer = {
       id: "phase-0",
       title: "Phase 0 · Foundation",
       shortDescription: "Repository, licensing, standards",
+      progress: "done",
       weight: "secondary",
       metric: { kind: "static", value: "Complete" },
       detail: {
@@ -23,6 +24,7 @@ export const roadmap: Layer = {
       id: "phase-1",
       title: "Phase 1 · Token Contracts",
       shortDescription: "Token, vesting and treasury",
+      progress: "done",
       weight: "secondary",
       metric: { kind: "static", value: "Complete" },
       detail: {
@@ -34,6 +36,7 @@ export const roadmap: Layer = {
       id: "phase-2",
       title: "Phase 2 · Security Review",
       shortDescription: "Review and remediation",
+      progress: "done",
       weight: "primary",
       metric: { kind: "static", value: "Internal review complete" },
       detail: {
@@ -45,6 +48,7 @@ export const roadmap: Layer = {
       id: "testnet",
       title: "Testnet",
       shortDescription: "Public test deployment",
+      progress: "done",
       weight: "tertiary",
       metric: { kind: "static", value: "Live on Base Sepolia" },
       detail: {
@@ -56,6 +60,7 @@ export const roadmap: Layer = {
       id: "mainnet",
       title: "Mainnet",
       shortDescription: "Production deployment",
+      progress: "active",
       weight: "tertiary",
       metric: { kind: "static", value: "Target 2026-11-01" },
       detail: {
@@ -67,11 +72,12 @@ export const roadmap: Layer = {
       id: "services",
       title: "AI Payments and Compute",
       shortDescription: "The first services on ARL",
+      progress: "active",
       weight: "tertiary",
-      metric: { kind: "static", value: "Not started" },
+      metric: { kind: "static", value: "In development" },
       detail: {
         summary:
-          "The first services that settle in ARL: AI service payments and the compute marketplace.",
+          'The first services that settle in ARL: AI service payments and the compute marketplace. Per-use payments (x402 "upto"), job escrow (ERC-8183) and a reference compute provider are written and tested on a local chain and a Base Sepolia fork. None of them is deployed.',
       },
     },
   ],

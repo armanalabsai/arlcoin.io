@@ -10,6 +10,8 @@
  */
 export type Status = "PLANNED" | "IN DEVELOPMENT" | "LIVE";
 
+export type Progress = "done" | "active" | "next";
+
 /**
  * Where a deployment-dependent value will come from once it exists. The site
  * never renders a guessed value for these: until a provider is implemented
@@ -77,6 +79,8 @@ export interface Card {
   readonly shortDescription: string;
   /** Delivery status. Omitted where it does not apply (roadmap phases). */
   readonly status?: Status;
+  /** Roadmap phases only: whether the phase is done, under way or not begun. */
+  readonly progress?: Progress;
   readonly weight: Weight;
   readonly metric?: Metric;
   readonly person?: Person;

@@ -15,19 +15,19 @@ No setting has been changed. Every item below is applied by the repository owner
 Create one ruleset under **Settings → Rules → Rulesets → New branch ruleset**, target `main`,
 enforcement **Active**, with no bypass actors unless stated.
 
-| Rule                                   | Setting                                                  | Why                                                                                                   |
-| -------------------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| Restrict deletions                     | On                                                       | `main` cannot be deleted                                                                              |
-| Block force pushes                     | On                                                       | History cannot be rewritten                                                                           |
-| Require a pull request before merging  | On                                                       | No direct pushes; every change is reviewable                                                          |
-| Required approvals                     | See "Single maintainer" below                            | —                                                                                                     |
-| Dismiss stale approvals on new commits | On                                                       | An approval covers the exact code merged                                                              |
-| Require review from Code Owners        | See "Single maintainer" below                            | —                                                                                                     |
-| Require conversation resolution        | On                                                       | Review threads cannot be ignored                                                                      |
-| Require status checks to pass          | `typescript`, `contracts`, `slither`, `rehearsal`, `web` | CI must be green                                                                                      |
-| Require branches to be up to date      | On                                                       | Checks run against the code that will land                                                            |
-| Require signed commits                 | On                                                       | Commits are attributable (GitHub verifies SSH, GPG and S/MIME signatures and signs web merges itself) |
-| Require linear history                 | Optional                                                 | Not required; merge commits are the current convention                                                |
+| Rule                                   | Setting                                                                                                   | Why                                                                                                   |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Restrict deletions                     | On                                                                                                        | `main` cannot be deleted                                                                              |
+| Block force pushes                     | On                                                                                                        | History cannot be rewritten                                                                           |
+| Require a pull request before merging  | On                                                                                                        | No direct pushes; every change is reviewable                                                          |
+| Required approvals                     | See "Single maintainer" below                                                                             | —                                                                                                     |
+| Dismiss stale approvals on new commits | On                                                                                                        | An approval covers the exact code merged                                                              |
+| Require review from Code Owners        | See "Single maintainer" below                                                                             | —                                                                                                     |
+| Require conversation resolution        | On                                                                                                        | Review threads cannot be ignored                                                                      |
+| Require status checks to pass          | `typescript`, `contracts`, `coverage`, `slither`, `symbolic`, `zk`, `rehearsal`, `secrets`, `dapp`, `web` | CI must be green                                                                                      |
+| Require branches to be up to date      | On                                                                                                        | Checks run against the code that will land                                                            |
+| Require signed commits                 | On                                                                                                        | Commits are attributable (GitHub verifies SSH, GPG and S/MIME signatures and signs web merges itself) |
+| Require linear history                 | Optional                                                                                                  | Not required; merge commits are the current convention                                                |
 
 ## Single maintainer: the review problem
 
@@ -42,7 +42,7 @@ not allow an author to approve their own pull request. Therefore:
 
 Recommended until a second reviewer exists:
 
-1. Require a pull request and all five status checks, with **no bypass actors**.
+1. Require a pull request and all ten status checks, with **no bypass actors**.
 2. Set required approvals to **0** and leave Code Owner review **off**, so every enforced rule is
    real rather than routinely bypassed.
 3. Before any mainnet deployment, add at least one independent reviewer with write access, then

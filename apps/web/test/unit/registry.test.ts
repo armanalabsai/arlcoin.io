@@ -144,6 +144,20 @@ describe("content accuracy", () => {
     }
   });
 
+  it("gives every roadmap phase a progress state and no other card one", () => {
+    for (const layer of LAYERS) {
+      for (const card of layer.cards) {
+        if (layer.id === "roadmap") assert.ok(card.progress, card.id);
+        else assert.equal(card.progress, undefined, card.id);
+      }
+    }
+    const roadmap = LAYERS.find((l) => l.id === "roadmap");
+    const progress = Object.fromEntries((roadmap?.cards ?? []).map((c) => [c.id, c.progress]));
+    // Only phases with evidence are done; Base Mainnet is not deployed.
+    assert.equal(progress.testnet, "done");
+    assert.equal(progress.mainnet, "active");
+  });
+
   it("contains no addresses, prices or market data", () => {
     for (const layer of LAYERS) {
       for (const text of texts(layer)) {

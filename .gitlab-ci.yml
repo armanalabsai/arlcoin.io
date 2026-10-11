@@ -125,6 +125,47 @@ zk:
     - FOUNDRY_PROFILE=zk forge build --sizes --skip test
     - FOUNDRY_PROFILE=zk forge test
 
+coverage:
+  timeout: 30m
+  script:
+    - *foundry
+    - cd contracts
+    - forge coverage --report lcov --report-file lcov-default.info --no-match-coverage "test|lib|script"
+    - FOUNDRY_PROFILE=zk forge coverage --report lcov --report-file lcov-zk.info --no-match-coverage "test|lib|zk/"
+    - cd ..
+    - node scripts/coverage-gate.mjs contracts/lcov-default.info contracts/lcov-zk.info
+  artifacts:
+    paths: [contracts/lcov-default.info, contracts/lcov-zk.info]
+    expire_in: 90 days
+
+secrets:
+  timeout: 10m
+  variables:
+    GIT_DEPTH: 0
+    GIT_SUBMODULE_STRATEGY: none
+  script:
+    - curl -sSfL -o /tmp/gitleaks.tar.gz https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_linux_x64.tar.gz
+    - echo "a65b5253807a68ac0cafa4414031fd740aeb55f54fb7e55f386acb52e6a840eb  /tmp/gitleaks.tar.gz" | sha256sum -c
+    - tar xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks
+    - /tmp/gitleaks git --redact --no-banner --config .gitleaks.toml .
+
+sbom:
+  timeout: 10m
+  variables:
+    GIT_SUBMODULE_STRATEGY: none
+  script:
+    - mkdir -p sbom
+    - |
+      for dir in . apps/web apps/dapp; do
+        name=$([ "$dir" = . ] && echo root || basename "$dir")
+        (cd "$dir" && npx --yes @cyclonedx/cyclonedx-npm@6.0.1 --package-lock-only \
+          --ignore-npm-errors --output-format JSON --output-file "$CI_PROJECT_DIR/sbom/$name.cdx.json")
+        test -s "sbom/$name.cdx.json"
+      done
+  artifacts:
+    paths: [sbom/]
+    expire_in: 90 days
+
 # Supplementary analysers (not blockers): results are kept as artifacts and triaged in
 # docs/audit-scope.md. Aderyn reports triaged findings, so the job does not fail the pipeline.
 aderyn:

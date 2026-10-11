@@ -1,7 +1,8 @@
 # ARL Payments (x402 `upto`)
 
-Status: **IN DEVELOPMENT.** Integration code and tests only. Nothing is deployed, no facilitator
-runs, and ARL itself is not deployed. Base Mainnet is refused by the code.
+Status: **IN DEVELOPMENT.** Integration code and tests only. No payment component is deployed and no facilitator
+runs. The ARL token is deployed on Base Sepolia (`0x244312b619127B6458154F3467eFD7c87CD28500`);
+it is not on Base Mainnet, and Base Mainnet is refused by the code.
 
 ARL payments let an AI or compute service charge per use in ARL. They use the `upto` scheme of
 the x402 protocol: the payer signs a **ceiling**, the service meters actual usage, and the
@@ -104,7 +105,7 @@ below).
   compare-and-set semantics, for example a database row with a unique key.
 - **Facilitator key and gas.** Running a facilitator needs a signing key with ETH for gas on Base
   Sepolia. Not created; an owner decision.
-- ARL is not deployed; `arlToken` must come from the deployment manifest.
+- `arlToken` must come from the deployment manifest (Base Sepolia: `0x244312b619127B6458154F3467eFD7c87CD28500`).
 
 ## Tests
 

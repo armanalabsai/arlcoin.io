@@ -6,13 +6,13 @@ it and replies by e-mail.
 
 ## Basic information
 
-| Field                   | Answer                            |
-| ----------------------- | --------------------------------- |
-| Project Name            | ARL Protocol                      |
-| Contact Name            | Alaz Dağhan Göktürk               |
-| Contact Telegram Handle | No Telegram yet; X: @armanalabsai |
-| Email                   | team@arlcoin.io                   |
-| Referred by             | (empty)                           |
+| Field                   | Answer              |
+| ----------------------- | ------------------- |
+| Project Name            | ARL Protocol        |
+| Contact Name            | Alaz Dağhan Göktürk |
+| Contact Telegram Handle | @arlcoinio          |
+| Email                   | team@arlcoin.io     |
+| Referred by             | (empty)             |
 
 ## Links
 
@@ -55,8 +55,8 @@ it and replies by e-mail.
 
 **Describe Current Community:**
 
-> Pre-launch. Official X (@armanalabsai) and Instagram (@armanalabsai) accounts and a whitelist on
-> arlcoin.io. No Telegram yet.
+> Pre-launch. Official X (@armanalabsai), Instagram (@armanalabsai) and Telegram accounts
+> (group https://t.me/arlcoin_community, contact @arlcoinio) and a whitelist on arlcoin.io.
 
 **Size of Existing Users:**
 
@@ -73,12 +73,12 @@ it and replies by e-mail.
 
 ## Public token sale
 
-| Field                                          | Answer                                  |
-| ---------------------------------------------- | --------------------------------------- |
-| Total amount to be raised from public sales    | Up to $900,000 (4,500,000 ARL at $0.20) |
-| Preferred amount to be raised via Polkastarter | $900,000                                |
-| Flexible with the amounts                      | Yes                                     |
-| Planned FDV at launch                          | $4,200,000 (21,000,000 ARL at $0.20)    |
+| Field                                          | Answer                                                                                                                                |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Total amount to be raised from public sales    | Up to $900,000 (4,500,000 ARL at $0.20); sent 2026-10-05                                                                              |
+| Preferred amount to be raised via Polkastarter | $900,000 as sent; since 2026-10-10 the launchpad reserve is 2,500,000 ARL (up to $500,000 at $0.20): send this update to Polkastarter |
+| Flexible with the amounts                      | Yes                                                                                                                                   |
+| Planned FDV at launch                          | $4,200,000 (21,000,000 ARL at $0.20)                                                                                                  |
 
 ## Other information
 

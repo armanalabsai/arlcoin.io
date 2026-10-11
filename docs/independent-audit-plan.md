@@ -81,6 +81,10 @@ or email). No firm has said it accepts token payment; each must answer for itsel
 >
 > Alaz Dağhan Göktürk, ARL Protocol
 
+Correction (2026-10-10): the messages above, as sent on 2026-10-05, give the old mainnet target
+2026-12-01. The target is 2026-11-01 ([launch-decisions.md](launch-decisions.md)). A correction
+reply to each of the three threads is drafted for the owner to send.
+
 Limits: the amount is agreed by the owners and signed from the Grants / Bug Bounty Safe; nothing is
 transferred before the TGE; ARL is not sold and no price is quoted to the firm. The report is
 published as delivered, with its findings and fixes.

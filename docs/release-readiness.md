@@ -5,17 +5,17 @@ been performed.** Base Sepolia live; Base Mainnet opens only at the TGE (2026-11
 
 ## 1. Current state (read-only checks, Base Sepolia block 47,690,188)
 
-| Item                           | Value                                                                                 |
-| ------------------------------ | ------------------------------------------------------------------------------------- |
-| Deployer                       | `0x3c3f71d694f709cBe60f015717c54A795636b165`                                          |
-| Deployer code (EIP-7702)       | `0xef0100` + `63c0c19a282a1b52b07dd5a65b58948a07dae32b`: **delegation still active**  |
-| Deployer nonce / pending       | 16 / 16 (no pending transaction)                                                      |
-| Deployer balance               | 0.000958686738489671 ETH                                                              |
-| Investors vesting              | `0x830e35CdF48F8F30F83d1DBE8431f02a7BE9dCcE` (unchanged)                              |
-| Strategic Partnerships vesting | `0x02c7692918C98EC710970D390b08f247A76D5A37` (unchanged)                              |
-| Treasury timelock              | `0x5B3fd9E574BC07309949CD39161a295E22FbBd3D` (unchanged)                              |
-| ARL token                      | `0x244312b619127B6458154F3467eFD7c87CD28500` (unchanged), total supply 21,000,000 ARL |
-| Tokenomics / TGE               | Unchanged: 11 allocations, circulating at TGE 2,100,000 ARL, TGE target 2026-11-01    |
+| Item                           | Value                                                                                            |
+| ------------------------------ | ------------------------------------------------------------------------------------------------ |
+| Deployer                       | `0x3c3f71d694f709cBe60f015717c54A795636b165`                                                     |
+| Deployer code (EIP-7702)       | None: delegation removed 2026-10-05; `eth_getCode` = `0x` again at block 47,937,338 (2026-10-10) |
+| Deployer nonce / pending       | 16 / 16 (no pending transaction)                                                                 |
+| Deployer balance               | 0.000958686738489671 ETH                                                                         |
+| Investors vesting              | `0x830e35CdF48F8F30F83d1DBE8431f02a7BE9dCcE` (unchanged)                                         |
+| Strategic Partnerships vesting | `0x02c7692918C98EC710970D390b08f247A76D5A37` (unchanged)                                         |
+| Treasury timelock              | `0x5B3fd9E574BC07309949CD39161a295E22FbBd3D` (unchanged)                                         |
+| ARL token                      | `0x244312b619127B6458154F3467eFD7c87CD28500` (unchanged), total supply 21,000,000 ARL            |
+| Tokenomics / TGE               | Unchanged: 11 allocations, circulating at TGE 2,100,000 ARL, TGE target 2026-11-01               |
 
 The delegation is absent on Base Mainnet, Ethereum and Ethereum Sepolia (`code = 0x`, nonce 0),
 and since 2026-10-05 on Base Sepolia too (`eth_getCode` returns `0x`): F-2 is resolved. Procedure: [audit-evidence.md](audit-evidence.md#eip-7702-clean-up-f-2).
@@ -82,22 +82,22 @@ Likely request content (to confirm when the site loads):
 
 ## 3. Remaining items by type
 
-| Item (launchpad-readiness #)                | Type                 | Minimum action                                                                                               |
-| ------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------ |
-| EIP-7702 delegation on the deployer (8)     | TECHNICAL BLOCKER    | Switch back to a standard account on Base Sepolia; or use a fresh Ledger for mainnet                         |
-| Mainnet Safe signers and threshold (7)      | TECHNICAL BLOCKER    | Provide signer addresses (section 4)                                                                         |
-| Aderyn, Halmos, Mythril re-run on Linux (5) | OPTIONAL             | Supplementary (owner decision 2026-10-05); tests, fuzz, invariants, Slither and reproducibility already pass |
-| Basescan verification (2)                   | TECHNICAL BLOCKER    | Set `ETHERSCAN_API_KEY` (section 5)                                                                          |
-| Public source repository (16)               | TECHNICAL BLOCKER    | Restore GitHub (ticket 4818868) or publish to another owned host                                             |
-| Liquidity plan (13)                         | ADMIN/LEGAL          | Pool size, pair, venue, LP custody                                                                           |
-| Sale parameters (14)                        | ADMIN/LEGAL          | Tokens offered, raise, currency, buyer unlock                                                                |
-| Security contact (18)                       | DONE                 | `team@arlcoin.io` (owner decision 2026-10-05)                                                                |
-| Legal opinion, KYC (19)                     | ADMIN/LEGAL          | Legal opinion done; KYC provider if the launchpad requires one                                               |
-| Independent audit (3)                       | ADMIN/LEGAL          | Decide: paid audit, or disclose "not audited"                                                                |
-| Social channels (20)                        | OPTIONAL             | Required by most launchpads in practice                                                                      |
-| Public test period and bug bounty (21)      | OPTIONAL             | Needs items 16 and 18                                                                                        |
-| Runtime Verification readiness assessment   | OPTIONAL             | Free; needs items 16 and 18                                                                                  |
-| Mainnet deployment (22)                     | Follows the blockers | After all technical blockers and an approved TGE                                                             |
+| Item (launchpad-readiness #)                | Type                 | Minimum action                                                                                                       |
+| ------------------------------------------- | -------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| EIP-7702 delegation on the deployer (8)     | DONE                 | Removed on Base Sepolia (`eth_getCode` = `0x`, rechecked 2026-10-10); mainnet uses a fresh, never-delegated deployer |
+| Mainnet Safe signers and threshold (7)      | TECHNICAL BLOCKER    | Provide signer addresses (section 4)                                                                                 |
+| Aderyn, Halmos, Mythril re-run on Linux (5) | OPTIONAL             | Supplementary (owner decision 2026-10-05); tests, fuzz, invariants, Slither and reproducibility already pass         |
+| Basescan verification (2)                   | DONE                 | All four Base Sepolia contracts verified on Basescan (owner check 2026-10-10)                                        |
+| Public source repository (16)               | TECHNICAL BLOCKER    | Restore GitHub (ticket 4818868) or publish to another owned host                                                     |
+| Liquidity plan (13)                         | ADMIN/LEGAL          | Pool size, pair, venue, LP custody                                                                                   |
+| Sale parameters (14)                        | ADMIN/LEGAL          | Tokens offered, raise, currency, buyer unlock                                                                        |
+| Security contact (18)                       | DONE                 | `team@arlcoin.io` (owner decision 2026-10-05)                                                                        |
+| Legal opinion, KYC (19)                     | ADMIN/LEGAL          | Legal opinion done; KYC provider if the launchpad requires one                                                       |
+| Independent audit (3)                       | ADMIN/LEGAL          | Decide: paid audit, or disclose "not audited"                                                                        |
+| Social channels (20)                        | OPTIONAL             | Required by most launchpads in practice                                                                              |
+| Public test period and bug bounty (21)      | OPTIONAL             | Needs items 16 and 18                                                                                                |
+| Runtime Verification readiness assessment   | OPTIONAL             | Free; needs items 16 and 18                                                                                          |
+| Mainnet deployment (22)                     | Follows the blockers | After all technical blockers and an approved TGE                                                                     |
 
 ## 4. Base Mainnet security architecture (proposal; nothing created)
 
@@ -185,9 +185,9 @@ local repository, or create a repository on another host the owner controls and 
 
 | #   | Item                                                                              | Owner action                        | Status                                      |
 | --- | --------------------------------------------------------------------------------- | ----------------------------------- | ------------------------------------------- |
-| 1   | EIP-7702 delegation removed on Base Sepolia                                       | MetaMask clean-up on Base Sepolia   | Open; `cast code` still `0xef0100…e32b`     |
+| 1   | EIP-7702 delegation removed on Base Sepolia                                       | MetaMask clean-up on Base Sepolia   | Done; `eth_getCode` = `0x` (2026-10-10)     |
 | 2   | Private GitLab repository `armanalabs-group/arlcoin`                              | Push `main` (owner runs the push)   | Not created yet; stays private when created |
-| 3   | Basescan verification                                                             | Set `ETHERSCAN_API_KEY` (section 5) | Ready; variable not set                     |
+| 3   | Basescan verification                                                             | Set `ETHERSCAN_API_KEY` (section 5) | Done: all four verified (2026-10-10)        |
 | 4   | Runtime Verification readiness assessment                                         | Approve sending                     | Draft only (section 2)                      |
 | 5   | Mainnet signers: 3 Ledger role signers, guardian signer(s), clean Ledger deployer | Provide public addresses            | Open                                        |
 | 6   | Liquidity plan and sale parameters                                                | Decide                              | Legal opinion done; rest open               |

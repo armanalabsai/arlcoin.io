@@ -1,0 +1,13 @@
+{
+  "token": "0x0e8A5434f12D3d839a0a7E88d3a66b11bd712b97",
+  "liquiditySafe": "0xb9829b9145581042776fa65bbF56972447aCdB38",
+  "allocation": "publicLaunch",
+  "priceUsd": "0.20",
+  "deadline": 1796083200,
+  "legs": [
+    { "quote": "USDC", "arlAmount": "500000", "quoteUsd": "1" },
+    { "quote": "USDT", "arlAmount": "600000", "quoteUsd": "1" },
+    { "quote": "WETH", "arlAmount": "450000", "quoteUsd": "4000" },
+    { "quote": "cbBTC", "arlAmount": "450000", "quoteUsd": "100000" }
+  ]
+}

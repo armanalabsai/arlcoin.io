@@ -116,12 +116,12 @@ behaviour depends on that contract and MetaMask may relay its transactions.
 
 Source verified on Sourcify (`forge verify-contract --verifier sourcify`), which Blockscout reads:
 
-| Contract                       | Address                                      | Sourcify | Blockscout | Basescan                  |
-| ------------------------------ | -------------------------------------------- | -------- | ---------- | ------------------------- |
-| Investors vesting              | `0x830e35CdF48F8F30F83d1DBE8431f02a7BE9dCcE` | verified | verified   | needs `ETHERSCAN_API_KEY` |
-| Strategic Partnerships vesting | `0x02c7692918C98EC710970D390b08f247A76D5A37` | verified | verified   | needs `ETHERSCAN_API_KEY` |
-| Treasury timelock              | `0x5B3fd9E574BC07309949CD39161a295E22FbBd3D` | match    | verified   | needs `ETHERSCAN_API_KEY` |
-| ARL token                      | `0x244312b619127B6458154F3467eFD7c87CD28500` | match    | verified   | needs `ETHERSCAN_API_KEY` |
+| Contract                       | Address                                      | Sourcify | Blockscout | Basescan                          |
+| ------------------------------ | -------------------------------------------- | -------- | ---------- | --------------------------------- |
+| Investors vesting              | `0x830e35CdF48F8F30F83d1DBE8431f02a7BE9dCcE` | verified | verified   | verified (owner check 2026-10-10) |
+| Strategic Partnerships vesting | `0x02c7692918C98EC710970D390b08f247A76D5A37` | verified | verified   | verified (owner check 2026-10-10) |
+| Treasury timelock              | `0x5B3fd9E574BC07309949CD39161a295E22FbBd3D` | match    | verified   | verified (owner check 2026-10-10) |
+| ARL token                      | `0x244312b619127B6458154F3467eFD7c87CD28500` | match    | verified   | verified (owner check 2026-10-10) |
 
 Constructor arguments were checked against the signed transactions with
 `node packages/deploy/src/explorer-cli.ts <plan> <deployment> --check-broadcast <run.json>`.
