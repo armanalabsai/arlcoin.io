@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 
 import { DOCS, docPath } from "../../src/content/docs.ts";
 import { FAQ } from "../../src/content/faq.ts";
@@ -145,14 +145,22 @@ test("the header shows the testnet as live only while Base Sepolia answers", asy
   await expect(status).toHaveAttribute("data-state", "down");
 });
 
+// The first click may land before the page has hydrated and attached its listeners, and the file
+// is decoded after it: click again until the music runs.
+async function startMusic(page: Page, toggle: Locator) {
+  await expect(async () => {
+    await page.mouse.click(8, 300);
+    await expect(toggle).toHaveAttribute("aria-pressed", "true", { timeout: 2_000 });
+  }).toPass({ timeout: 20_000 });
+}
+
 test("the background music starts on the first interaction and can be turned off", async ({
   page,
 }) => {
   await page.goto("/faq");
   const toggle = page.getByRole("button", { name: /Turn the music (on|off)/ });
   await expect(toggle).toBeVisible();
-  await page.mouse.click(8, 300);
-  await expect(toggle).toHaveAttribute("aria-pressed", "true");
+  await startMusic(page, toggle);
   await toggle.click();
   await expect(toggle).toHaveAttribute("aria-pressed", "false");
   // The choice is remembered: a reload does not start the music again.
@@ -166,8 +174,7 @@ test("the music keeps playing across pages, through header links and plain links
 }) => {
   await page.goto("/faq");
   const toggle = page.getByRole("button", { name: /Turn the music (on|off)/ });
-  await page.mouse.click(8, 300);
-  await expect(toggle).toHaveAttribute("aria-pressed", "true");
+  await startMusic(page, toggle);
   await page.evaluate(() => {
     (window as unknown as { sameDocument?: boolean }).sameDocument = true;
   });
