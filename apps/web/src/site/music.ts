@@ -23,6 +23,13 @@ const POSITION_KEY = "arl-music-position";
 
 type Listener = () => void;
 
+declare global {
+  interface Window {
+    /** Created and resumed by the inline unlock script in app/layout.tsx on the first gesture. */
+    __arlAudio?: AudioContext;
+  }
+}
+
 let ctx: AudioContext | null = null;
 let gain: GainNode | null = null;
 let source: AudioBufferSourceNode | null = null;
@@ -47,7 +54,8 @@ export function preload(): void {
 
 function context(): AudioContext {
   if (ctx) return ctx;
-  const c = new AudioContext();
+  const c = window.__arlAudio ?? new AudioContext();
+  window.__arlAudio = c;
   const g = c.createGain();
   g.gain.value = MUSIC.volume;
   g.connect(c.destination);
@@ -99,6 +107,11 @@ export function subscribe(listener: Listener): () => void {
   return () => listeners.delete(listener);
 }
 
+/** Whether the music is switched on: the default, until the visitor turns it off. */
+export function musicOn(): boolean {
+  return !musicOff();
+}
+
 export function musicOff(): boolean {
   try {
     return window.localStorage.getItem(STORAGE_KEY) === "off";
@@ -122,10 +135,12 @@ function remember(on: boolean) {
  * sound blocked (no interaction yet) or the file cannot be played.
  */
 export async function play(): Promise<boolean> {
+  if (musicOff()) return false;
   const c = context();
   const resumed = c.resume();
   try {
-    await resumed;
+    // Without a gesture some browsers leave resume() pending instead of rejecting it.
+    await Promise.race([resumed, new Promise((r) => setTimeout(r, 400))]);
     if (c.state !== "running") return false;
     if (!source) {
       const b = await decoded(c);
@@ -150,6 +165,7 @@ export async function play(): Promise<boolean> {
 
 export function setMusic(on: boolean): void {
   remember(on);
+  notify();
   if (on) void play();
   else void ctx?.suspend();
 }
