@@ -149,5 +149,12 @@ funded by that Safe with `apps/dapp/public/plans/84532-ecosystem-safe-community.
 operator's testnet ARL comes from the Ecosystem & Growth Safe with
 `84532-ecosystem-safe-ecosystem.json`. Both batches were executed on a fork of the live chain
 before signing: staking then held 30,000 ARL with a running period, the operator 200,000 ARL. The
-operator's demo AI service is registered on the ERC-8004 IdentityRegistry (transaction
-`0x353d59377423ea7f023933c76daa227a9ecc23982db770702decf894758d7025`).
+operator's demo AI service is registered on the ERC-8004 IdentityRegistry as agent 9621
+(transaction `0x353d59377423ea7f023933c76daa227a9ecc23982db770702decf894758d7025`).
+
+The deploying account then handed the operator role to `0x26DEAaCAa112cA495bD7CC8Cb92c91cD85e1A2a0`,
+an account whose key only the owner holds (it is the host's `ARL_OPERATOR_KEY`, never written in
+the repository or this session) with `apps/dapp/scripts/move-sepolia-operator.ts`, rehearsed on a
+fork first: agent 9621 now pays and is settled by the new operator and belongs to it, and the
+deployer's remaining Base Sepolia ETH was sent to it. The Ecosystem & Growth Safe batch pays the new
+operator. The deploying account keeps no role.

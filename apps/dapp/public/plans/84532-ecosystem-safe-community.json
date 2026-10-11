@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "chainId": "84532",
-  "createdAt": 1791692664295,
+  "createdAt": 1791694075448,
   "meta": {
     "name": "ARL testnet staking rewards (30,000 ARL over 30 days)",
     "description": "1. Approve the staking contract 0xA78480c1802F5c17B1007c59b7c2CF849549724e for exactly 30,000 ARL. 2. Start a 30-day reward period of 30,000 ARL (the contract pulls the approved amount).",

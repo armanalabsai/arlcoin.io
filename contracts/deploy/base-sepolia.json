@@ -1,6 +1,6 @@
 {
   "chainId": 84532,
-  "operator": "0x3b33Db294B9f52993728103215be1D86A7777093",
+  "operator": "0x26DEAaCAa112cA495bD7CC8Cb92c91cD85e1A2a0",
   "contracts": {
     "ARLToken": {
       "address": "0x244312b619127B6458154F3467eFD7c87CD28500",
