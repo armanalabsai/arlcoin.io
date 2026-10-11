@@ -8,6 +8,7 @@ import {
   OperatorRequestError,
   faucetDecision,
   joinMessage,
+  operatorKey,
   parseFaucet,
   parseJoin,
   parseRelay,
@@ -148,5 +149,27 @@ describe("settle", () => {
       status(() => parseSettle({ ...body, payload: { ...body.payload, x402Version: 1 } }, expect)),
       400,
     );
+  });
+});
+
+describe("operatorKey", () => {
+  const hex = "ab".repeat(32);
+  it("accepts the key with or without 0x, as wallets export it", () => {
+    assert.equal(operatorKey(`0x${hex}`), `0x${hex}`);
+    assert.equal(operatorKey(hex), `0x${hex}`);
+    assert.equal(operatorKey(` ${hex.toUpperCase()}\n`), `0x${hex}`);
+  });
+  it("answers 503 and never echoes the value when it is missing or malformed", () => {
+    for (const raw of [undefined, "", "   ", "0x1234", `${hex}00`, `0x${"zz".repeat(32)}`]) {
+      try {
+        operatorKey(raw);
+        assert.fail(`accepted ${String(raw)}`);
+      } catch (e) {
+        assert.ok(e instanceof OperatorRequestError);
+        assert.equal(e.status, 503);
+        assert.match(e.message, /^the operator is not configured/);
+        if (raw && raw.trim()) assert.ok(!e.message.includes(raw.trim()));
+      }
+    }
   });
 });
