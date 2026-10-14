@@ -13,7 +13,7 @@
     "fixture": "node src/fixture-cli.ts"
   },
   "dependencies": {
-    "@aztec/bb.js": "5.2.0",
+    "@aztec/bb.js": "5.2.1",
     "@noir-lang/noir_js": "1.0.0-rc.3",
     "@zk-kit/lean-imt": "2.2.3",
     "poseidon-lite": "0.3.0",
