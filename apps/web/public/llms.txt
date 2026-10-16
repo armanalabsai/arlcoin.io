@@ -45,3 +45,11 @@ Key facts:
 - [Architecture](https://arlcoin.io/docs/architecture)
 - [Security analysis](https://arlcoin.io/docs/security-analysis)
 - [Security policy](https://arlcoin.io/docs/security)
+
+## Official channels
+
+- Website: https://arlcoin.io
+- X: https://x.com/arlprotocol (@arlprotocol)
+- Telegram community: https://t.me/arlcoin_community
+- Email: team@arlcoin.io
+- Source code: https://github.com/armanalabsai/arlcoin.io (Apache-2.0)

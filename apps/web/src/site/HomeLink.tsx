@@ -7,8 +7,8 @@ import { withBase } from "@/core/basePath.ts";
 import { BrandMark } from "@/core/BrandMark.tsx";
 
 // The brand link in the header. A click goes to the home page, reloads its content and starts it
-// at the top. It navigates inside the app instead of reloading the document, so the background
-// music keeps playing. Modified clicks (new tab, new window) keep the browser's own behaviour.
+// at the top. It navigates inside the app instead of reloading the whole document. Modified clicks
+// (new tab, new window) keep the browser's own behaviour.
 export function HomeLink() {
   const router = useRouter();
   const onClick = (e: MouseEvent<HTMLAnchorElement>) => {

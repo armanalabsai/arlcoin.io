@@ -36,7 +36,19 @@ const websiteJsonLd = {
     url: SITE.url,
     logo: `${SITE.url}/arl-token-512.png`,
     email: SITE.email,
-    sameAs: [SITE.social.x, SITE.social.instagram, SITE.repository],
+    sameAs: [
+      SITE.social.x,
+      SITE.social.telegram,
+      SITE.social.github,
+      SITE.social.instagram,
+      SITE.repository,
+    ],
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "customer support",
+      email: SITE.email,
+      availableLanguage: ["en", "tr"],
+    },
   },
 };
 

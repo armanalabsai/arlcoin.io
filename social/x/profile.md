@@ -1,4 +1,4 @@
-# X profile (@armanalabsai)
+# X profile (@arlprotocol)
 
 Status: DRAFT. Not published. Apply by hand in X → Edit profile.
 

@@ -1,7 +1,10 @@
 # Phase 1 Security Analysis
 
 Status: internal review and automated testing only. **ARL has not been
-audited.** No contract is deployed.
+audited.** The contracts are deployed and source-verified on the Base Sepolia
+testnet only (addresses in [`contracts/deploy/base-sepolia.json`](../contracts/deploy/base-sepolia.json)
+and [audit-evidence.md](audit-evidence.md#explorer-verification-base-sepolia)); nothing is
+deployed on Base Mainnet.
 
 The allocation model changed on 2026-09-27 (11 allocations; the Ecosystem
 Reserve was removed). `ARLAllocation`, `ARLToken`, the deployment planner,

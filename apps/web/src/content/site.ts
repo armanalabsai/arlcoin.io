@@ -14,10 +14,11 @@ export const SITE = {
   email: "team@arlcoin.io",
   /** Official social accounts. */
   social: {
-    x: "https://x.com/armanalabsai",
+    x: "https://x.com/arlprotocol",
     instagram: "https://www.instagram.com/armanalabsai",
-    /** Community group. Direct contact: https://t.me/arlcoinio */
+    /** Community group. */
     telegram: "https://t.me/arlcoin_community",
+    github: "https://github.com/armanalabsai/arlcoin.io",
   },
   /** Base Sepolia (testnet) deployment, source-verified on Basescan, Blockscout and Sourcify. */
   testnet: {

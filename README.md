@@ -59,7 +59,7 @@ compares that build with the code at each deployed address.
 | Compute provider reference node          | [`packages/provider`](packages/provider/src)                                                             | [unit](packages/provider/test/provider.test.ts), [fork](packages/provider/test-fork/provider.fork.test.ts)                                  | [compute-provider.md](docs/compute-provider.md)                  | Reference software, no provider runs it |
 | ZK anonymous signals (Semaphore, Noir/UltraHonk) | [`zk/semaphore`](zk/semaphore/src/main.nr), [`ARLAnonymousSignal.sol`](contracts/src/ARLAnonymousSignal.sol) | [circuit](zk/check.sh), [real proofs](contracts/test-zk/ARLAnonymousSignal.t.sol), [`@arl/zk`](packages/zk/test/zk.test.ts)               | [zk-privacy.md](docs/zk-privacy.md)                              | Base Sepolia (deployed and verified) |
 | Web app (claim, vesting, staking, jobs, payments, private signals) | [`apps/dapp`](apps/dapp)                                                          | [unit](apps/dapp/test/unit), [end-to-end on Anvil](apps/dapp/test/e2e)                                                                      | [app.md](docs/app.md)                                            | Live on Base Sepolia ([arlcoin.io/app](https://arlcoin.io/app/)) |
-| Website: live testnet indicator, background music | [`apps/web`](apps/web), [`LiveStatus.tsx`](apps/web/src/site/LiveStatus.tsx), [`music.ts`](apps/web/src/site/music.ts) | [unit](apps/web/test/unit), [end-to-end](apps/web/test/e2e/site.spec.ts) | [content-standard.md](docs/content-standard.md) | Live at [arlcoin.io](https://arlcoin.io) |
+| Website: live testnet indicator, structured data, sitemap | [`apps/web`](apps/web), [`LiveStatus.tsx`](apps/web/src/site/LiveStatus.tsx) | [unit](apps/web/test/unit), [end-to-end](apps/web/test/e2e/site.spec.ts) | [content-standard.md](docs/content-standard.md) | Live at [arlcoin.io](https://arlcoin.io) |
 | DEX liquidity (Uniswap)                  | [`packages/deploy/src/pool.ts`](packages/deploy/src/pool.ts)                                             | [unit](packages/deploy/test/pool.test.ts), [fork](contracts/test-fork/UniswapLaunchFork.t.sol)                                              | [launch-route.md](docs/launch-route.md)                          | Planned, no pool exists        |
 
 Not built: private payments and verifiable computation (no circuits exist), an ARL-operated
@@ -97,7 +97,6 @@ tests, all passing; every contract at 100% line and function coverage, 91% of br
 | Python 3.12              | Slither 0.11.6, Halmos 0.3.3     | The `slither` and `symbolic` gates (optional locally)   |
 | Noir `nargo`, Barretenberg `bb` | 1.0.0-rc.3, 5.2.0         | Rebuilding the ZK circuit and verifier (`zk/check.sh`)  |
 | Chromium for Playwright  | the version `@playwright/test` pins | End-to-end tests (`PW_CHROMIUM_PATH` uses a preinstalled one) |
-| ffmpeg, numpy            | any recent                       | Only to regenerate the website music ([`generate-ambient.py`](scripts/generate-ambient.py)) |
 
 Run locally:
 
@@ -150,8 +149,20 @@ removed. The rest need decisions or accounts held by the project owner.
 | Architecture          | [architecture.md](docs/architecture.md), [token-design.md](docs/token-design.md), [chain-evaluation.md](docs/chain-evaluation.md) |
 | Tokenomics            | [tokenomics.md](docs/tokenomics.md), [tokenomics-economic-spec.md](docs/tokenomics-economic-spec.md)                              |
 | Deployment            | [deployment.md](docs/deployment.md), [mainnet-plan.md](docs/mainnet-plan.md), [mainnet-runbook.md](docs/mainnet-runbook.md)      |
-| Products              | [app.md](docs/app.md), [jobs.md](docs/jobs.md), [payments.md](docs/payments.md), [compute-provider.md](docs/compute-provider.md), [zk-privacy.md](docs/zk-privacy.md) |
+| Products              | [app.md](docs/app.md), [jobs.md](docs/jobs.md), [payments.md](docs/payments.md), [compute-provider.md](docs/compute-provider.md), [zk-privacy.md](docs/zk-privacy.md), [operator-api.md](docs/operator-api.md) |
 | Process               | [CONTRIBUTING.md](CONTRIBUTING.md), [branch-protection.md](docs/branch-protection.md), [open-source.md](docs/open-source.md), [content-standard.md](docs/content-standard.md) |
+
+## Community and contact
+
+| Channel   | Link                                                             |
+| --------- | ---------------------------------------------------------------- |
+| Website   | [arlcoin.io](https://arlcoin.io)                                 |
+| X         | [@arlprotocol](https://x.com/arlprotocol)                        |
+| Telegram  | [t.me/arlcoin_community](https://t.me/arlcoin_community)         |
+| Email     | [team@arlcoin.io](mailto:team@arlcoin.io)                        |
+| Security  | private reports per [SECURITY.md](SECURITY.md)                   |
+
+ARL never asks for a private key, a seed phrase or a payment in any channel.
 
 ## Disclaimer
 

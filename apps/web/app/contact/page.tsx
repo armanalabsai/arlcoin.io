@@ -46,6 +46,21 @@ export default function ContactPage() {
               {SITE.email}
             </a>
           </>,
+          <>
+            Community:{" "}
+            <a
+              href={SITE.social.telegram}
+              rel="me noopener noreferrer"
+              target="_blank"
+              className={link}
+            >
+              Telegram
+            </a>{" "}
+            and{" "}
+            <a href={SITE.social.x} rel="me noopener noreferrer" target="_blank" className={link}>
+              X @arlprotocol
+            </a>
+          </>,
           "The team will never ask for your private key, seed phrase or a payment, and does not offer token sales or presales.",
           "ARL has no exchange listing announced. Anyone claiming a listing does not speak for ARL.",
         ]}

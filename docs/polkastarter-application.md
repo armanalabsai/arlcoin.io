@@ -6,20 +6,20 @@ it and replies by e-mail.
 
 ## Basic information
 
-| Field                   | Answer              |
-| ----------------------- | ------------------- |
-| Project Name            | ARL Protocol        |
-| Contact Name            | Alaz Dağhan Göktürk |
-| Contact Telegram Handle | @arlcoinio          |
-| Email                   | team@arlcoin.io     |
-| Referred by             | (empty)             |
+| Field                  | Answer                         |
+| ---------------------- | ------------------------------ |
+| Project Name           | ARL Protocol                   |
+| Contact Name           | Alaz Dağhan Göktürk            |
+| Contact Telegram Group | https://t.me/arlcoin_community |
+| Email                  | team@arlcoin.io                |
+| Referred by            | (empty)                        |
 
 ## Links
 
 | Field                       | Answer                                                                              |
 | --------------------------- | ----------------------------------------------------------------------------------- |
 | Website                     | https://arlcoin.io                                                                  |
-| Project Twitter             | https://x.com/armanalabsai                                                          |
+| Project Twitter             | https://x.com/arlprotocol                                                           |
 | Pitchdeck                   | https://arlcoin.io/arl-pitch-deck.pdf                                               |
 | Token Schedule (Tokenomics) | https://arlcoin.io/docs/tokenomics/                                                 |
 | Other links                 | https://gitlab.com/armanalabs-group/arlcoin, https://www.instagram.com/armanalabsai |
@@ -55,8 +55,8 @@ it and replies by e-mail.
 
 **Describe Current Community:**
 
-> Pre-launch. Official X (@armanalabsai), Instagram (@armanalabsai) and Telegram accounts
-> (group https://t.me/arlcoin_community, contact @arlcoinio) and a whitelist on arlcoin.io.
+> Pre-launch. Official X (@arlprotocol), Instagram (@armanalabsai) and Telegram accounts
+> (group https://t.me/arlcoin_community, email team@arlcoin.io) and a whitelist on arlcoin.io.
 
 **Size of Existing Users:**
 
