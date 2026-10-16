@@ -1,7 +1,7 @@
 # Bug bounty
 
 Status: **live since 2026-10-05**, with the public Base Sepolia test period and the public
-repository (https://gitlab.com/armanalabs-group/arlcoin). Scope commit: `00d9056`. The amounts below are paid only when a valid report
+repository (https://github.com/armanalabsai/arlcoin.io). Scope commit: `00d9056`. The amounts below are paid only when a valid report
 is accepted; nothing is paid up front.
 
 ## Why a bounty instead of a paid audit

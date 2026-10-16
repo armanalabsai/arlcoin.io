@@ -2,8 +2,9 @@
 
 ## Status
 
-ARL Protocol is under development. The token, two vesting wallets and the treasury timelock are
-deployed on Base Sepolia (testnet) only; the addresses are in [README.md](README.md). Nothing is
+ARL Protocol is under development. The token, two vesting wallets, the treasury timelock,
+staking, the jobs escrow and the anonymous-signal contracts are deployed on Base Sepolia (testnet)
+only; the addresses are in [README.md](README.md). Nothing is
 deployed on Base Mainnet. The code has **not** been independently audited. Do not use it to hold
 value.
 

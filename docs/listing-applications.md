@@ -20,7 +20,7 @@ guaranteed listing.
 | Launch date               | 2026-11-01 (TGE)                                                                                                                                 |
 | Trading venues and pairs  | Uniswap v3 on Base, 1%: ARL/USDC, ARL/USDT, ARL/WETH, ARL/cbBTC (pool addresses after the TGE)                                                   |
 | Website                   | https://arlcoin.io                                                                                                                               |
-| Source code               | https://gitlab.com/armanalabs-group/arlcoin                                                                                                      |
+| Source code               | https://github.com/armanalabsai/arlcoin.io                                                                                                       |
 | Whitepaper / deck         | https://arlcoin.io/arl-pitch-deck.pdf, https://arlcoin.io/docs/tokenomics/                                                                       |
 | Audit                     | None. Audit requests sent 2026-10-05 ([independent-audit-plan.md](independent-audit-plan.md)); bug bounty open                                   |
 | Logo                      | https://arlcoin.io/arl-token-200.png (200 × 200 PNG), https://arlcoin.io/arl-token-512.png, https://arlcoin.io/arl-token.svg                     |

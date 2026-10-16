@@ -15,8 +15,8 @@ Last run: 2026-10-04/05, on commit `9b9952f` plus the changes in this document's
 | `src/ARLVestingWallet.sol`                      | `0x830e35CdF48F8F30F83d1DBE8431f02a7BE9dCcE` (Investors), `0x02c7692918C98EC710970D390b08f247A76D5A37` (Strategic Partnerships) | tests, fuzz, invariants, Slither, manual review |
 | `src/ARLTimelock.sol`                           | `0x5B3fd9E574BC07309949CD39161a295E22FbBd3D`                                                                                    | tests, fuzz, invariants, Slither, manual review |
 | `src/ARLMerkleDistributor.sol`                  | not deployed                                                                                                                    | tests, fuzz, invariants, Slither, manual review |
-| `src/ARLStakingRewards.sol`                     | not deployed                                                                                                                    | tests, deep invariant campaign, Slither         |
-| `src/ARLJobs.sol`, `src/ARLAnonymousSignal.sol` | not deployed                                                                                                                    | tests, Slither                                  |
+| `src/ARLStakingRewards.sol`                     | `0xA78480c1802F5c17B1007c59b7c2CF849549724e` (Base Sepolia)                                                                     | tests, deep invariant campaign, Slither         |
+| `src/ARLJobs.sol`, `src/ARLAnonymousSignal.sol` | `0xec79a897105aEd6daFBbB2a904E5bcFF71455644`, `0xFa5901E9dfD813b910061F29ef1f65a1faA0b268` (Base Sepolia)                       | tests, Slither                                  |
 
 Dependencies: OpenZeppelin Contracts v5.6.1 (unmodified), forge-std, solidity-datetime v2.2.0
 (deployment tooling only).

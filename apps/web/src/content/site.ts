@@ -9,7 +9,7 @@ export const SITE = {
     "ARL is the utility token for AI and compute services on Base: 21,000,000 ARL fixed supply, no owner, mint or upgrade. Live on Base Sepolia testnet; Base Mainnet launch targeted for 2026-11-01.",
   /** Short line under the Core on the overview. */
   tagline: "The utility token for AI and compute services, live on Base Sepolia.",
-  repository: "https://gitlab.com/armanalabs-group/arlcoin",
+  repository: "https://github.com/armanalabsai/arlcoin.io",
   /** Public contact address of the team. */
   email: "team@arlcoin.io",
   /** Official social accounts. */

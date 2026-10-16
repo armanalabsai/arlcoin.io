@@ -16,13 +16,13 @@ it and replies by e-mail.
 
 ## Links
 
-| Field                       | Answer                                                                              |
-| --------------------------- | ----------------------------------------------------------------------------------- |
-| Website                     | https://arlcoin.io                                                                  |
-| Project Twitter             | https://x.com/arlprotocol                                                           |
-| Pitchdeck                   | https://arlcoin.io/arl-pitch-deck.pdf                                               |
-| Token Schedule (Tokenomics) | https://arlcoin.io/docs/tokenomics/                                                 |
-| Other links                 | https://gitlab.com/armanalabs-group/arlcoin, https://www.instagram.com/armanalabsai |
+| Field                       | Answer                                                                             |
+| --------------------------- | ---------------------------------------------------------------------------------- |
+| Website                     | https://arlcoin.io                                                                 |
+| Project Twitter             | https://x.com/arlprotocol                                                          |
+| Pitchdeck                   | https://arlcoin.io/arl-pitch-deck.pdf                                              |
+| Token Schedule (Tokenomics) | https://arlcoin.io/docs/tokenomics/                                                |
+| Other links                 | https://github.com/armanalabsai/arlcoin.io, https://www.instagram.com/armanalabsai |
 
 ## Project details
 

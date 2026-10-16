@@ -88,7 +88,7 @@ Likely request content (to confirm when the site loads):
 | Mainnet Safe signers and threshold (7)      | DONE                 | Provided 2026-10-10; mainnet fork rehearsal passes ([mainnet-plan.md](mainnet-plan.md))                              |
 | Aderyn, Halmos, Mythril re-run on Linux (5) | DONE                 | Re-run on Linux 2026-10-10 ([audit-evidence.md](audit-evidence.md))                                                  |
 | Basescan verification (2)                   | DONE                 | All four Base Sepolia contracts verified on Basescan (owner check 2026-10-10)                                        |
-| Public source repository (16)               | DONE                 | https://gitlab.com/armanalabs-group/arlcoin                                                                          |
+| Public source repository (16)               | DONE                 | https://github.com/armanalabsai/arlcoin.io                                                                           |
 | Liquidity plan (13)                         | ADMIN/LEGAL          | Pool size, pair, venue, LP custody                                                                                   |
 | Sale parameters (14)                        | DONE                 | Decided (launchpad-readiness #14)                                                                                    |
 | Security contact (18)                       | DONE                 | `team@arlcoin.io` (owner decision 2026-10-05)                                                                        |
