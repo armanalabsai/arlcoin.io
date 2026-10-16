@@ -13,7 +13,8 @@ export const dynamic = "force-static";
 const withSlash = (path: string) => (path.endsWith("/") ? path : `${path}/`);
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return ["/", ...allPaths(), ...SITE_PAGES, ...DOCS.map((d) => docPath(d.slug))].map((path) => ({
-    url: new URL(withSlash(path), SITE.url).toString(),
-  }));
+  // "/app/" is the testnet app, served next to the site from the same domain.
+  return ["/", ...allPaths(), ...SITE_PAGES, ...DOCS.map((d) => docPath(d.slug)), "/app/"].map(
+    (path) => ({ url: new URL(withSlash(path), SITE.url).toString() }),
+  );
 }

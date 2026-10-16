@@ -43,10 +43,10 @@ describe("service registration file", () => {
   });
 
   it("keeps non-ASCII text", () => {
-    const s = validateService({ ...input, name: "Görüntü işleme" });
+    const s = validateService({ ...input, name: "Análisis de imágenes" });
     const parsed = parseRegistration(encodeRegistration(s));
     assert.ok(parsed.ok);
-    assert.equal(parsed.value.name, "Görüntü işleme");
+    assert.equal(parsed.value.name, "Análisis de imágenes");
   });
 
   it("rejects bad input", () => {

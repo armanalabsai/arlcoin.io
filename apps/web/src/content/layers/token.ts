@@ -84,13 +84,13 @@ export const token: Layer = {
     {
       id: "circulating-supply",
       title: "Circulating Supply",
-      shortDescription: "No ARL exists yet.",
+      shortDescription: "Nothing circulates before the mainnet launch.",
       status: "PLANNED",
       weight: "secondary",
       metric: { kind: "unavailable", label: NOT_DEPLOYED, source: "chain.circulatingSupply" },
       detail: {
         summary:
-          "No ARL exists yet, so nothing circulates. Allocated supply is not circulating supply. After deployment, circulating supply will be computed from on-chain state and published together with its methodology: what counts as locked, vested, released and held in custody.",
+          "ARL exists only on the Base Sepolia testnet, where tokens have no value, so nothing circulates. Allocated supply is not circulating supply. After deployment, circulating supply will be computed from on-chain state and published together with its methodology: what counts as locked, vested, released and held in custody.",
       },
     },
     {

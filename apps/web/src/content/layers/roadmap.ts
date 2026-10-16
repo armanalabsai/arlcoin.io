@@ -53,7 +53,7 @@ export const roadmap: Layer = {
       metric: { kind: "static", value: "Live on Base Sepolia" },
       detail: {
         summary:
-          "Deployed on the Base Sepolia testnet on 4 October 2026: 12 Safes, the token, two vesting wallets and the treasury timelock, source-verified on Basescan, Blockscout and Sourcify. Testnet tokens have no value.",
+          "Deployed on the Base Sepolia testnet on 4 October 2026: 12 Safes, the token, two vesting wallets and the treasury timelock, source-verified on Basescan, Blockscout and Sourcify. Staking, the jobs escrow and the anonymous-poll contracts followed on 11 October 2026 (see Testnet Ecosystem). Testnet tokens have no value.",
       },
     },
     {
@@ -78,7 +78,7 @@ export const roadmap: Layer = {
       metric: { kind: "static", value: "Target 2026-11-01" },
       detail: {
         summary:
-          "The production deployment of ARL on Base Mainnet, which is the TGE. Targeted for 1 November 2026; it is not deployed yet.",
+          "The production deployment of ARL on Base Mainnet, which is the TGE. Targeted for 1 November 2026; it is not deployed yet. Before it: the reviewed change that opens the Base Mainnet network gate and the launch run, with the owner's approval. No independent audit has been performed.",
       },
     },
     {

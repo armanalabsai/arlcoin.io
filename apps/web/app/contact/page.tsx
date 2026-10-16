@@ -61,6 +61,7 @@ export default function ContactPage() {
               X @arlprotocol
             </a>
           </>,
+          "These are the only official channels: arlcoin.io, X @arlprotocol, the Telegram group t.me/arlcoin_community and team@arlcoin.io.",
           "The team will never ask for your private key, seed phrase or a payment, and does not offer token sales or presales.",
           "ARL has no exchange listing announced. Anyone claiming a listing does not speak for ARL.",
         ]}

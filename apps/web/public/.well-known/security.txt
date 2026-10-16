@@ -1,5 +1,5 @@
 Contact: mailto:team@arlcoin.io
 Expires: 2027-10-16T00:00:00.000Z
-Preferred-Languages: en, tr
+Preferred-Languages: en
 Canonical: https://arlcoin.io/.well-known/security.txt
 Policy: https://github.com/armanalabsai/arlcoin.io/blob/main/SECURITY.md

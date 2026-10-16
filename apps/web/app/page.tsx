@@ -41,7 +41,7 @@ const websiteJsonLd = {
       "@type": "ContactPoint",
       contactType: "customer support",
       email: SITE.email,
-      availableLanguage: ["en", "tr"],
+      availableLanguage: ["en"],
     },
   },
 };
