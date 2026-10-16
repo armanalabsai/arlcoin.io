@@ -89,7 +89,7 @@ export const security: Layer = {
     {
       id: "open-source",
       title: "Open Source Foundation",
-      shortDescription: "Audited libraries, pinned",
+      shortDescription: "OpenZeppelin libraries, pinned",
       status: "IN DEVELOPMENT",
       weight: "tertiary",
       detail: {

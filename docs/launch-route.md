@@ -19,14 +19,13 @@ Everything uses contracts and tooling already in this repository; only Base gas 
    open it. The WETH and cbBTC floors are fixed in ETH and BTC at the ETH and BTC prices when the
    batch is built. The position NFTs stay in the Liquidity Safe for at least 12 months. The ARL amount in the range is a Safe
    decision at the time (not set here).
-3. **Public Launch claim:** the Public Launch Safe funds `ARLMerkleDistributor` with at most
-   500,000 ARL for whitelist sign-ups, at most 10,000 ARL each,
-   claimable for 60 days (`DeployDistributor` enforces the tranche and the window). Once the
-   distributor is funded, `claim-list-cli.ts` reads it on chain (code, root, token, open window,
-   balance covering the list total) and only then writes `apps/dapp/public/claims/<chainId>.json`;
-   the app's Claim screen (`/app/claim/`) serves that list, checks every proof and the
-   distributor's root again, and offers the claim. Until the file exists the screen says nothing
-   can be claimed.
+3. **No airdrop at TGE** (owner decision 2026-10-16): an airdrop of 500,000 ARL from the Public
+   Launch allocation will take place at a much later date; its date, eligibility and rules will
+   be announced later. Until then the 500,000 ARL stays in the Public Launch Safe.
+   `ARLMerkleDistributor` stays as built and is not deployed at TGE. When the airdrop happens,
+   the distributor is funded and `claim-list-cli.ts` reads it on chain (code, root, token, open
+   window, balance covering the list total) before it writes `apps/dapp/public/claims/<chainId>.json`;
+   until that file exists the app's Claim screen (`/app/claim/`) says nothing can be claimed.
 4. **Monitoring:** `monitor-cli.ts` from the deployment block; the guardian reviews every
    timelock notice.
 
@@ -58,8 +57,9 @@ Club, Virtuals), which deploy their own token instead of selling ARL.
 > treasury sits behind a 48-hour timelock with a cancel-only guardian; the allocations are held in 2-of-3
 > Safes. Deployed and source-verified on Base Sepolia (token
 > 0x244312b619127B6458154F3467eFD7c87CD28500); 251 contract tests, fuzzing, invariants, Slither
-> with no findings and reproducible bytecode. No independent audit has been performed. TGE
-> target 2026-11-01 at 0.20 USD. Contact: team@arlcoin.io.
+> with no findings and reproducible bytecode. TGE
+> target 2026-10-23 at 0.20 USD. Contact: team@arlcoin.io.
 
 Shared on submission: the text above, the website, the Base Sepolia addresses, the docs listed in
-[launchpad-application.md](launchpad-application.md), the owner's name, email and Telegram ID.
+[launchpad-application.md](launchpad-application.md), the ARL Protocol team contact (team@arlcoin.io) and the official Telegram
+https://t.me/arlcoin_community.

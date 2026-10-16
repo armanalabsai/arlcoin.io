@@ -1,7 +1,6 @@
 # ZK Privacy: anonymous signals
 
-Status: **IN DEVELOPMENT.** Written and tested; not deployed; the circuit and contract have not been
-externally audited.
+Status: **IN DEVELOPMENT.** Written and tested; not deployed.
 
 Members of a group can **signal** (vote in a poll, attest, give feedback) without revealing which
 member they are, and each member signals **once per scope**. This follows the Semaphore protocol.

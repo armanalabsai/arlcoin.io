@@ -163,7 +163,7 @@ website (for example `https://arlcoin.io/app/deploy/`). A prepared run committed
 copied to the phone. Only plain names are accepted, the file is still checked by `parseRun` like
 an uploaded one, and the screen refuses to run inside a frame (static hosting cannot send
 `X-Frame-Options`). The first published plan is `84532-safes`: the twelve role Safes on Base
-Sepolia from the deployer `0x3c3f…b165`: eleven 1-of-1 Safes owned by that address and the guardian
+Sepolia from the deployer account: eleven 1-of-1 Safes owned by that account and the guardian
 Safe 1-of-1 owned by its own signer `0x72F7…4144`, for a testnet run only.
 
 ## Reproducible build and deployment proof
@@ -232,7 +232,9 @@ and that a plan which disagrees with the chain exits with code 3.
 
 ## Public Launch claim distributor
 
-The approved Public Launch mechanism is a Merkle claim (economic specification section 7).
+The approved Public Launch mechanism is a Merkle claim (economic specification section 7). It is
+not part of the TGE: there is no airdrop at TGE, and these steps run only for the 500,000 ARL
+airdrop at a later date, whose date, eligibility and rules will be announced later.
 
 1. Build the list: `node packages/deploy/src/distribution-cli.ts <input.json> <distribution.json>`.
    The input (`arl-distribution-input/1`) names the funding allocation (`publicLaunch` only), a
@@ -290,13 +292,13 @@ deployments must leave the deployer nonce unchanged. CI runs the rehearsal on ev
 ## Network gate
 
 Approved network decision: **Base Sepolia (84532) is open. Base Mainnet (8453) opens at the
-approved TGE, 2026-11-01T00:00:00Z** (owner approval 2026-10-05).
+approved TGE, 2026-10-23T00:00:00Z** (owner decision 2026-10-16).
 
 | Chain                | Gate    | Notes                                                                                                                           |
 | -------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | Local Anvil (31337)  | open    | Rehearsals; recipients may lack code                                                                                            |
 | Base Sepolia (84532) | open    | `requireRecipientCode: true`; every Safe role must be a canonical Safe v1.5.0 proxy; placeholder TGE accepted                   |
-| Base Mainnet (8453)  | **TGE** | Refused before 2026-11-01T00:00:00Z by the chain's block timestamp (`PlanProductionLocked`); then every production rule applies |
+| Base Mainnet (8453)  | **TGE** | Refused before 2026-10-23T00:00:00Z by the chain's block timestamp (`PlanProductionLocked`); then every production rule applies |
 | Any other chain      | refused | `PlanChainNotSupported`                                                                                                         |
 
 One gate, `ARLDeployPlan.networkGate`, is checked by `DeployARL` and `DeployDistributor` before they
@@ -352,10 +354,9 @@ development accounts, no key); nothing is sent to Base Sepolia.
 
 ## Base Sepolia deployment
 
-Deployed 2026-10-04 on Base Sepolia (84532) by `0x3c3f71d694f709cBe60f015717c54A795636b165`
-from the published runs `apps/dapp/public/plans/84532-safes.json` (nonces 0-11, the 12 Safes) and
+Deployed 2026-10-04 on Base Sepolia (84532) by the deployer account from the published runs `apps/dapp/public/plans/84532-safes.json` (nonces 0-11, the 12 Safes) and
 `apps/dapp/public/plans/84532-deploy.json` (nonces 12-15). Placeholder TGE `2026-12-01T00:00:00Z`
-(testnet only; the approved TGE is 2026-11-01).
+(testnet only; the approved TGE is 2026-10-23).
 
 | Contract                       | Address                                      | Block    |
 | ------------------------------ | -------------------------------------------- | -------- |

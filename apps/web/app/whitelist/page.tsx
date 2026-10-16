@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
+
+import { breadcrumbJsonLd } from "@/content/seo.ts";
+import { JsonLd } from "@/site/JsonLd.tsx";
 import Link from "next/link";
 
 import { OG_IMAGE } from "@/content/site.ts";
 import { FactList, PageShell } from "@/site/PageShell.tsx";
 import { WhitelistForm } from "@/site/forms.tsx";
 
-const title = "Whitelist · ARL";
+const title = "ARL Whitelist: Launch Updates · ARL Protocol";
 const description =
-  "Register an EVM wallet address for the ARL launch list and launch updates. Registration is free and does not guarantee an allocation.";
+  "Register an EVM wallet address for ARL launch updates and the later airdrop list. Registration is free and does not guarantee an allocation.";
 
 export const metadata: Metadata = {
   title,
@@ -22,14 +25,15 @@ export default function WhitelistPage() {
       current="whitelist"
       eyebrow="Launch list"
       title="Whitelist"
-      lead="Register a wallet address to be considered for the ARL launch claim list and to receive launch updates by email."
+      lead="Register a wallet address to receive ARL launch updates by email and to be considered for the later airdrop."
     >
+      <JsonLd data={breadcrumbJsonLd([["Whitelist", "/whitelist"]])} />
       <FactList
         title="Before you register"
         items={[
           "ARL is live on the Base Sepolia testnet only; testnet tokens have no value. No ARL contract exists on Base Mainnet yet, so any token that claims to be ARL there today is not.",
           "Registration is free. No payment is requested, and nothing is for sale.",
-          "Registering does not guarantee an allocation. The free Public Launch claim is up to 500,000 ARL in total, at most 10,000 ARL per address, open for 60 days; the list is published before the launch.",
+          "Registering does not guarantee an allocation. There is no airdrop at the launch; an airdrop of 500,000 ARL is planned for a later date, with its rules announced before it opens.",
           "ARL will never ask for your private key or seed phrase. Anyone who does is attempting theft.",
           <>
             Your address and email are handled as described in the{" "}

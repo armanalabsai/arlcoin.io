@@ -2,7 +2,7 @@
 # Full TGE-day rehearsal on a LOCAL fork of Base Mainnet, with the real signer configuration.
 #
 # Anvil forks Base Mainnet (chain 8453) on this machine; nothing is sent to Base Mainnet. The
-# fork's clock is moved to just after the TGE (2026-11-01T00:00:00Z), when the network gate opens.
+# fork's clock is moved to just after the TGE (2026-10-23T00:00:00Z), when the network gate opens.
 # The real deployer, Safe owners and guardian come from contracts/deploy/deployments/
 # 8453-signers.env (public addresses, git-ignored); Anvil impersonates them, so no key is used.
 # The deployer is given exactly 0.001 ETH, the amount the runbook asks for.
@@ -10,7 +10,7 @@
 # Steps, as in docs/mainnet-runbook.md:
 #   0. before the TGE every deployment path is refused (PlanProductionLocked)
 #   1. CreateSafes: the 12 Safes, compared with docs/mainnet-plan.md
-#   2. config (TGE 2026-11-01), plan, DeployARL, VerifyARL, manifest, supply (2,100,000 circulating)
+#   2. config (TGE 2026-10-23), plan, DeployARL, VerifyARL, manifest, supply (2,100,000 circulating)
 #   3. the four ARL-only Uniswap v3 pools from the Liquidity Safe (1,000,000 ARL)
 #   3b. right after, the Public Launch sale: ARL-only positions in the same pools from the Public
 #       Launch Safe (2,000,000 ARL); the Safe keeps the 500,000 claim tranche and the 2,500,000
@@ -27,7 +27,7 @@ PORT="${ARL_FORK_PORT:-18745}"
 RPC="http://127.0.0.1:$PORT"
 OUT="deploy/deployments/fork-8453"
 SIGNERS="$ROOT/contracts/deploy/deployments/8453-signers.env"
-TGE=1793491200
+TGE=1792713600
 
 log() { printf '\n==> %s\n' "$*"; }
 die() {
@@ -112,11 +112,11 @@ for (const [name, addr] of Object.entries(expected)) {
 if (Object.keys(expected).length !== 12 || bad) process.exit(1);
 EOF
 
-log "2. Config (TGE 2026-11-01), plan, DeployARL, VerifyARL, manifest, supply"
+log "2. Config (TGE 2026-10-23), plan, DeployARL, VerifyARL, manifest, supply"
 # The planner checks the machine clock against the TGE; set it to the fork's time for the rehearsal.
 CLOCK_URL="file://$(command -v cygpath >/dev/null && echo "/$(cygpath -m "$ROOT")" || echo "$ROOT")/scripts/rehearsal-clock.mjs"
 CLOCK=(env ARL_REHEARSAL_CLOCK="$((TGE + 60))" node --import "$CLOCK_URL")
-"${CLOCK[@]}" "$ROOT/packages/deploy/src/safes-config-cli.ts" "$OUT/safes.json" 2026-11-01T00:00:00Z \
+"${CLOCK[@]}" "$ROOT/packages/deploy/src/safes-config-cli.ts" "$OUT/safes.json" 2026-10-23T00:00:00Z \
   "$OUT/config.json" || die "config rejected"
 "${CLOCK[@]}" "$ROOT/packages/deploy/src/cli.ts" "$OUT/config.json" "$OUT/plan.json" || die "plan rejected"
 ARL_PLAN="$OUT/plan.json" \
@@ -146,7 +146,7 @@ node - "$OUT/pools.json" "$TOKEN" "$LIQUIDITY" "$ETH_USD" "$BTC_USD" <<'EOF'
 const [out, token, liquiditySafe, eth, btc] = process.argv.slice(2);
 const usd = (x) => (Number(x) / 1e8).toFixed(2); // Chainlink feeds: 8 decimals
 require("fs").writeFileSync(out, JSON.stringify({
-  token, liquiditySafe, priceUsd: "0.20", deadline: 1793491200 + 30 * 86400,
+  token, liquiditySafe, priceUsd: "0.20", deadline: 1792713600 + 30 * 86400,
   legs: [
     { quote: "USDC", arlAmount: "400000", quoteUsd: "1" },
     { quote: "USDT", arlAmount: "200000", quoteUsd: "1" },
@@ -184,7 +184,7 @@ const usd = (x) => (Number(x) / 1e8).toFixed(2); // Chainlink feeds: 8 decimals
 // The batch format names the funding Safe "liquiditySafe"; allocation picks the cap.
 require("fs").writeFileSync(out, JSON.stringify({
   token, liquiditySafe: publicLaunchSafe, allocation: "publicLaunch", priceUsd: "0.20",
-  deadline: 1793491200 + 30 * 86400,
+  deadline: 1792713600 + 30 * 86400,
   legs: [
     { quote: "USDC", arlAmount: "500000", quoteUsd: "1" },
     { quote: "USDT", arlAmount: "600000", quoteUsd: "1" },

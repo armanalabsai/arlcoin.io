@@ -6,7 +6,7 @@ import type { Layer } from "../types.ts";
 export const roadmap: Layer = {
   id: "roadmap",
   title: "Roadmap",
-  description: "Where ARL is today. Base Mainnet is targeted for 1 November 2026.",
+  description: "Where ARL is today. Base Mainnet is targeted for 23 October 2026.",
   cards: [
     {
       id: "phase-0",
@@ -75,10 +75,10 @@ export const roadmap: Layer = {
       shortDescription: "Production deployment",
       progress: "active",
       weight: "tertiary",
-      metric: { kind: "static", value: "Target 2026-11-01" },
+      metric: { kind: "static", value: "Target 2026-10-23" },
       detail: {
         summary:
-          "The production deployment of ARL on Base Mainnet, which is the TGE. Targeted for 1 November 2026; it is not deployed yet.",
+          "The production deployment of ARL on Base Mainnet, which is the TGE. Targeted for 23 October 2026; it is not deployed yet.",
       },
     },
     {

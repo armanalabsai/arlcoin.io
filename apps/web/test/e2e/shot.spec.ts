@@ -13,9 +13,6 @@ test("capture", async ({ page }, info) => {
   await page.goto("/core/token");
   await page.waitForTimeout(600);
   await page.screenshot({ path: `${dir}/${p}-token.png` });
-  await page.goto("/core/team");
-  await page.waitForTimeout(600);
-  await page.screenshot({ path: `${dir}/${p}-team.png` });
   await page.goto("/core/technology");
   await page.waitForTimeout(600);
   await page.screenshot({ path: `${dir}/${p}-technology.png` });

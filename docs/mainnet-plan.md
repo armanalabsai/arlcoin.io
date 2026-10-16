@@ -1,4 +1,4 @@
-# Base Mainnet plan (opens at the TGE 2026-11-01, not deployed)
+# Base Mainnet plan (opens at the TGE 2026-10-23, not deployed)
 
 Locked 2026-10-05 by owner decision. **Nothing is deployed, created or funded on Base Mainnet.**
 The network gate still refuses chain 8453.
@@ -24,8 +24,9 @@ Run with `scripts/rehearse-base-mainnet-fork.sh` on a local fork of Base Mainnet
 block 52,433,848; re-run 2026-10-10 with the new signers) and the canonical Safe v1.5.0
 contracts. Anvil impersonates the real addresses, so no key is used and nothing is sent. Before
 the TGE every path is refused (`PlanProductionLocked(8453)`); with the fork clock moved to the TGE:
-`CreateSafes`, config and plan (TGE 2026-11-01), `DeployARL`, `VerifyARL`, manifest, supply, the
-four Uniswap v3 pools from the Liquidity Safe and the claim distributor. The addresses below are
+`CreateSafes`, config and plan (TGE 2026-10-23), `DeployARL`, `VerifyARL`, manifest, supply, the
+four Uniswap v3 pools from the Liquidity Safe and the claim distributor (rehearsed only; the
+distributor is not deployed at TGE). The addresses below are
 the expected mainnet addresses if the deployer starts at nonce 0 and the default salt is used.
 
 Result: all steps pass; total supply 21,000,000 ARL; circulating at TGE 2,100,000 ARL; role Safes
@@ -59,9 +60,11 @@ the approved TGE before the mainnet run. The TGE changes the vesting dates, not 
 
 ## Still required before a mainnet run
 
-1. Done 2026-10-05: TGE 2026-11-01 and the Public Launch and liquidity parameters are approved
-   (both flags set; see [launch-decisions.md](launch-decisions.md)).
-2. The real Public Launch claim list (launchpad buyers and whitelist sign-ups).
-3. Done 2026-10-05 (owner approval): `networkGate` opens 8453 at 2026-11-01T00:00:00Z.
+1. Done 2026-10-05, updated 2026-10-16: TGE 2026-10-23 and the Public Launch and liquidity
+   parameters are approved (both flags set; see [launch-decisions.md](launch-decisions.md)).
+2. Not needed at TGE: the Public Launch claim list belongs to the later 500,000 ARL airdrop
+   (no airdrop at TGE; date, eligibility and rules announced later).
+3. Done 2026-10-05, updated 2026-10-16 (owner approval): `networkGate` opens 8453 at
+   2026-10-23T00:00:00Z.
 4. The deployer funded with Base ETH; any transaction from it before the run shifts the
    contract addresses above.

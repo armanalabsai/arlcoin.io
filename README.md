@@ -3,9 +3,8 @@
 ARL is a fixed-supply ERC-20 token (21,000,000 ARL) on Base, with vesting, a timelocked treasury,
 staking, escrowed jobs, usage-based payments and anonymous signals built around it.
 
-**Status: Base Sepolia testnet only. Not on Base Mainnet (targeted for 2026-11-01). Not
-independently audited.** Every claim below links to the code, the tests and the document that back
-it. Anything without that evidence is listed as not built.
+**Status: Base Sepolia testnet only. Not on Base Mainnet (targeted for 2026-10-23).** Every
+claim below links to the code, the tests and the document that back it. Anything without that evidence is listed as not built.
 
 | Live                 | URL                                                         | What it is                                                                 |
 | -------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------- |
@@ -25,7 +24,7 @@ Base Sepolia contracts. The runtime bytecode of each address matches a clean bui
 2026-10-10 at block 47,939,236). The staking, jobs, signal and verifier contracts (and the
 verifier's two linked libraries) were deployed on 2026-10-11 from blocks 47,962,102 to 47,962,116.
 Source verification of every address is listed in
-[`docs/audit-evidence.md`](docs/audit-evidence.md#explorer-verification-base-sepolia); all
+[`docs/verification-evidence.md`](docs/verification-evidence.md#explorer-verification-base-sepolia); all
 addresses with their deploy blocks are recorded in
 [`contracts/deploy/base-sepolia.json`](contracts/deploy/base-sepolia.json).
 
@@ -52,7 +51,7 @@ compares that build with the code at each deployed address.
 | 21,000,000 ARL, minted once, no mint/burn/admin | [`ARLToken.sol`](contracts/src/ARLToken.sol), [`ARLAllocation.sol`](contracts/src/ARLAllocation.sol) | [unit](contracts/test/ARLToken.t.sol), [invariant](contracts/test/invariant/ARLInvariant.t.sol), [Halmos](contracts/test/symbolic/ARLSymbolic.t.sol), [ABI guard](scripts/check-token-abi.mjs) | [token-design.md](docs/token-design.md)                          | Base Sepolia                   |
 | 11 allocations, vesting 12-month cliff + 36 months linear | [`packages/tokenomics`](packages/tokenomics/src/allocations.ts), [`ARLVestingWallet.sol`](contracts/src/ARLVestingWallet.sol) | [allocations](packages/tokenomics/test/allocations.test.ts), [contract consistency](packages/tokenomics/test/contract-consistency.test.ts), [vesting](contracts/test/ARLVestingWallet.t.sol) | [tokenomics.md](docs/tokenomics.md)                              | Base Sepolia                   |
 | Treasury: Safe 2-of-3, ≥ 48 h timelock, cancel-only guardian | [`ARLTimelock.sol`](contracts/src/ARLTimelock.sol)                                          | [unit](contracts/test/ARLTimelock.t.sol)                                                                                                    | [token-design.md](docs/token-design.md)                          | Base Sepolia                   |
-| Public Launch Merkle claim               | [`ARLMerkleDistributor.sol`](contracts/src/ARLMerkleDistributor.sol)                                     | [unit](contracts/test/ARLMerkleDistributor.t.sol), [invariant](contracts/test/invariant/ARLDistributorInvariant.t.sol)                      | [deployment.md](docs/deployment.md)                              | Built, not deployed            |
+| Public Launch Merkle claim               | [`ARLMerkleDistributor.sol`](contracts/src/ARLMerkleDistributor.sol)                                     | [unit](contracts/test/ARLMerkleDistributor.t.sol), [invariant](contracts/test/invariant/ARLDistributorInvariant.t.sol)                      | [deployment.md](docs/deployment.md)                              | Built, not deployed; reserved for a later airdrop |
 | Staking (no new issuance)                | [`ARLStakingRewards.sol`](contracts/src/ARLStakingRewards.sol)                                           | [unit](contracts/test/ARLStakingRewards.t.sol), [invariant](contracts/test/invariant/ARLStakingInvariant.t.sol)                             | [app.md](docs/app.md)                                            | Base Sepolia (deployed and verified) |
 | AI / compute jobs paid in ARL (ERC-8183 escrow) | [`ARLJobs.sol`](contracts/src/ARLJobs.sol)                                                        | [unit](contracts/test/ARLJobs.t.sol), [invariant](contracts/test/invariant/ARLJobsInvariant.t.sol)                                          | [jobs.md](docs/jobs.md)                                          | Base Sepolia (deployed and verified) |
 | Usage-based payments in ARL (x402 `upto`) | [`packages/payments`](packages/payments/src)                                                            | [unit](packages/payments/test), [Base Sepolia fork](packages/payments/test-fork/upto.fork.test.ts)                                          | [payments.md](docs/payments.md)                                  | Base Sepolia; settled by the app's testnet operator |
@@ -78,7 +77,7 @@ Every tool and action is pinned by version, commit or SHA-256.
 | `symbolic`               | A Halmos property that does not hold                                                                             |
 | `zk`                     | Circuit tests; the committed circuit and verifier must rebuild byte for byte; contract tests with real proofs    |
 | `rehearsal`              | A clean build that differs from the committed bytecode hashes; a failed local deploy-verify rehearsal            |
-| `typescript`, `dapp`, `web` | Typecheck, lint, format, unit and end-to-end tests, `npm audit` (high/critical, reviewed allowlist)          |
+| `typescript`, `dapp`, `web` | Typecheck, lint, format, unit and end-to-end tests, npm dependency vulnerability scan (high/critical, reviewed allowlist)          |
 | `secrets`                | Any secret in the full git history ([gitleaks](.gitleaks.toml))                                                  |
 | `sbom`                   | CycloneDX SBOMs of the npm dependency trees, kept as an artifact                                                 |
 | CodeQL                   | Security findings in TypeScript/JavaScript ([codeql.yml](.github/workflows/codeql.yml))                          |
@@ -121,9 +120,9 @@ only after CI passes ([deploy-site.yml](.github/workflows/deploy-site.yml),
 ## Security
 
 - Report vulnerabilities privately: [SECURITY.md](SECURITY.md). Bug bounty: [docs/bug-bounty.md](docs/bug-bounty.md).
-- **No independent audit has been performed.** Internal evidence and scope:
-  [audit-evidence.md](docs/audit-evidence.md), [audit-scope.md](docs/audit-scope.md),
-  [security-analysis.md](docs/security-analysis.md); audit plan: [independent-audit-plan.md](docs/independent-audit-plan.md).
+- Verification evidence and review scope:
+  [verification-evidence.md](docs/verification-evidence.md), [review-scope.md](docs/review-scope.md),
+  [security-analysis.md](docs/security-analysis.md).
 - Mainnet custody (Safes, timelock, guardian) and the launch procedure:
   [mainnet-plan.md](docs/mainnet-plan.md), [mainnet-runbook.md](docs/mainnet-runbook.md).
 
@@ -137,7 +136,6 @@ removed. The rest need decisions or accounts held by the project owner.
 | Item                                                        | Type     |
 | ----------------------------------------------------------- | -------- |
 | Opening the Base Mainnet network gate (reviewed change) and the TGE run, with owner approval | BLOCKER  |
-| Independent audit, or a published "not audited" disclosure  | REQUIRED |
 | Liquidity plan and sale parameters                          | REQUIRED |
 | Legal opinion publication, KYC/AML policy, jurisdiction     | REQUIRED |
 | Public team, contact and community channels                 | REQUIRED |

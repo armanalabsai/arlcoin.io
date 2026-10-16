@@ -24,8 +24,8 @@ PLANS="deploy/plans"
 REHEARSAL="$PLANS/rehearsal"
 PLAN="$PLANS/local.json"
 DEPLOYMENT="deploy/deployments/31337.json"
-# Base Mainnet opens at the approved TGE, 2026-11-01T00:00:00Z (ARLDeployPlan.PRODUCTION_OPENS_AT).
-TGE_OPENS_AT=1793491200
+# Base Mainnet opens at the approved TGE, 2026-10-23T00:00:00Z (ARLDeployPlan.PRODUCTION_OPENS_AT).
+TGE_OPENS_AT=1792713600
 
 log() { printf '\n==> %s\n' "$*"; }
 die() {

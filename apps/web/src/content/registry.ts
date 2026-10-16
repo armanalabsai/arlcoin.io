@@ -1,20 +1,12 @@
 import { ecosystem } from "./layers/ecosystem.ts";
 import { roadmap } from "./layers/roadmap.ts";
 import { security } from "./layers/security.ts";
-import { teamLayer } from "./layers/team.ts";
 import { technology } from "./layers/technology.ts";
 import { token } from "./layers/token.ts";
 import type { Card, Layer } from "./types.ts";
 
 /** Layer order is the order the Core cycles through. */
-export const LAYERS: readonly Layer[] = [
-  teamLayer,
-  token,
-  technology,
-  security,
-  roadmap,
-  ecosystem,
-];
+export const LAYERS: readonly Layer[] = [token, technology, security, roadmap, ecosystem];
 
 export interface CoreRoute {
   readonly layer: Layer | null;

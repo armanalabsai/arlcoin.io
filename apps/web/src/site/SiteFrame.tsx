@@ -83,13 +83,13 @@ export function FooterLinks() {
         Docs · Apache-2.0
       </Link>
       <a href={SITE.social.x} rel="me noopener noreferrer" target="_blank" className={link}>
-        X
-      </a>
-      <a href={SITE.social.instagram} rel="me noopener noreferrer" target="_blank" className={link}>
-        Instagram
+        X @arlprotocol
       </a>
       <a href={SITE.social.telegram} rel="me noopener noreferrer" target="_blank" className={link}>
         Telegram
+      </a>
+      <a href={SITE.repository} rel="me noopener noreferrer" target="_blank" className={link}>
+        GitHub
       </a>
     </nav>
   );

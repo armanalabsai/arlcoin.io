@@ -5,7 +5,7 @@ import { FORMS } from "@/content/forms.ts";
 import { OG_IMAGE, SITE } from "@/content/site.ts";
 import { PageShell } from "@/site/PageShell.tsx";
 
-const title = "Privacy · ARL";
+const title = "Privacy Notice · ARL Protocol";
 const description = "What arlcoin.io collects through its forms, why, and how to have it deleted.";
 
 export const metadata: Metadata = {
@@ -35,7 +35,7 @@ export default function PrivacyPage() {
     >
       <Section heading="Data controller">
         <p>
-          {SITE.controller.name}, trading as {SITE.controller.business}. Contact:{" "}
+          {SITE.controller.name}. Contact:{" "}
           <a href={`mailto:${SITE.email}`} className={link}>
             {SITE.email}
           </a>
@@ -63,8 +63,8 @@ export default function PrivacyPage() {
 
       <Section heading="Why, and on what legal basis">
         <p>
-          Whitelist data is used to prepare the launch claim list and to send launch updates.
-          Contact data is used to answer your message. Neither is sold, rented or used for
+          Whitelist data is used to send launch updates and to prepare the list for the later
+          airdrop. Contact data is used to answer your message. Neither is sold, rented or used for
           advertising.
         </p>
         <p>
@@ -104,9 +104,8 @@ export default function PrivacyPage() {
 
       <Section heading="How long it is kept">
         <p>
-          Whitelist data is kept until the launch claim list is final and launch updates end.
-          Contact messages are kept for as long as the conversation needs. After that the data is
-          deleted.
+          Whitelist data is kept until the airdrop list is final and launch updates end. Contact
+          messages are kept for as long as the conversation needs. After that the data is deleted.
         </p>
       </Section>
 

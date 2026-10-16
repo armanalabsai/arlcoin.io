@@ -6,7 +6,7 @@
 // The ecosystem and signal records are written by contracts/script/DeploySepoliaEcosystem.s.sol
 // and contracts/zk-script/DeploySepoliaSignal.s.sol; their deployment blocks are read from the
 // Foundry broadcast receipts. The token and vesting wallets were deployed on 2026-10-04
-// (docs/audit-evidence.md); their blocks are fixed here.
+// (docs/verification-evidence.md); their blocks are fixed here.
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";

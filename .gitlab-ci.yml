@@ -169,7 +169,7 @@ sbom:
     expire_in: 90 days
 
 # Supplementary analysers (not blockers): results are kept as artifacts and triaged in
-# docs/audit-scope.md. Aderyn reports triaged findings, so the job does not fail the pipeline.
+# docs/review-scope.md. Aderyn reports triaged findings, so the job does not fail the pipeline.
 aderyn:
   timeout: 20m
   allow_failure: true

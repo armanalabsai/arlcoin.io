@@ -25,7 +25,7 @@ export const FAQ: readonly FaqEntry[] = [
   {
     question: "Does registering on the whitelist guarantee an allocation?",
     answer:
-      "No. The Public Launch gives away up to 500,000 ARL at the TGE through a free claim open for 60 days, at most 10,000 ARL per address; the exact list is published before the launch. Registration is free and no payment is requested.",
+      "No. There is no airdrop at the launch. An airdrop of 500,000 ARL is planned for a later date; its date, eligibility and rules will be announced on arlcoin.io, X @arlprotocol and the Telegram community. Registration is free and no payment is requested.",
   },
   {
     question: "Which blockchain will ARL use?",
@@ -35,7 +35,7 @@ export const FAQ: readonly FaqEntry[] = [
   {
     question: "When is the launch?",
     answer:
-      "The Base Mainnet launch (TGE) is targeted for 1 November 2026. The contracts are deployed and source-verified on the Base Sepolia testnet; Base Mainnet has not started.",
+      "The Base Mainnet launch (TGE) is targeted for 23 October 2026. The contracts are deployed and source-verified on the Base Sepolia testnet; Base Mainnet has not started.",
   },
   {
     question: "After the launch, can I sell ARL on a DEX?",

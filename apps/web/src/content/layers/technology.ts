@@ -172,7 +172,7 @@ export const technology: Layer = {
       weight: "tertiary",
       detail: {
         summary:
-          "The token, vesting, treasury, launch claim and staking contracts are written in Solidity 0.8.36 on OpenZeppelin Contracts v5.6.1 and are under security review. The token, vesting, treasury, staking, jobs escrow and anonymous-poll contracts are deployed and source-verified on Base Sepolia (testnet); nothing is on Base Mainnet.",
+          "The token, vesting, treasury, launch claim and staking contracts are written in Solidity 0.8.36 on OpenZeppelin Contracts v5.6.1 and covered by unit, fuzz and invariant tests. The token, vesting, treasury, staking, jobs escrow and anonymous-poll contracts are deployed and source-verified on Base Sepolia (testnet); nothing is on Base Mainnet.",
         facts: [
           { label: "Language", value: "Solidity 0.8.36", mono: true },
           { label: "Library", value: "OpenZeppelin Contracts v5.6.1" },

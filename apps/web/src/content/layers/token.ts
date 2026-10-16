@@ -123,7 +123,7 @@ export const token: Layer = {
       metric: { kind: "static", value: String(vesting.length), unit: "vesting wallets" },
       detail: {
         summary:
-          "These allocations are held by vesting wallets that release only to a dedicated Safe, only on their schedule: nothing at the start, a 12-month cliff, then 36 months of linear vesting. Every schedule starts at the TGE, the Base Mainnet token deployment, targeted for 2026-11-01.",
+          "These allocations are held by vesting wallets that release only to a dedicated Safe, only on their schedule: nothing at the start, a 12-month cliff, then 36 months of linear vesting. Every schedule starts at the TGE, the Base Mainnet token deployment, targeted for 2026-10-23.",
         facts: [
           ...vesting.map((a) => ({
             label: `${a.name} · ${formatArl(a.amount)}`,
@@ -212,7 +212,7 @@ export const token: Layer = {
       metric: { kind: "static", value: "Base" },
       detail: {
         summary:
-          "ARL is an ERC-20 token on Base, an Ethereum layer 2. It is live on the Base Sepolia testnet (chain 84532); Base Mainnet (chain 8453) is targeted for 1 November 2026. The evaluation that selected Base is documented in the repository.",
+          "ARL is an ERC-20 token on Base, an Ethereum layer 2. It is live on the Base Sepolia testnet (chain 84532); Base Mainnet (chain 8453) is targeted for 23 October 2026. The evaluation that selected Base is documented in the repository.",
       },
       links: [{ label: "Chain evaluation", href: repoDoc("docs/chain-evaluation.md") }],
     },
