@@ -7,9 +7,9 @@ describe("token list", () => {
   it("lists ARL with checksummed address, 18 decimals and the logo", () => {
     const list = buildTokenList(
       { 8453: "0x0e8a5434f12d3d839a0a7e88d3a66b11bd712b97" },
-      new Date("2026-11-01T00:00:00Z"),
+      new Date("2026-10-23T00:00:00Z"),
     );
-    assert.equal(list.timestamp, "2026-11-01T00:00:00.000Z");
+    assert.equal(list.timestamp, "2026-10-23T00:00:00.000Z");
     assert.deepEqual(list.tokens, [
       {
         chainId: 8453,

@@ -415,7 +415,7 @@ contract ARLDeployTest is Test {
         assertEq(ARLDeployPlan.TIMELOCK_DELAY_FLOOR, tl.MIN_DELAY_FLOOR());
     }
 
-    /// @dev Approved 2026-10-05 (TGE 2026-11-01). The flag opens no network.
+    /// @dev Approved 2026-10-05 (TGE 2026-10-23). The flag opens no network.
     function test_VestingSchedulesAreApproved() public pure {
         assertTrue(ARLDeployPlan.VESTING_SCHEDULES_APPROVED);
     }
@@ -474,13 +474,13 @@ contract ARLDeployTest is Test {
         h.networkGate(chainId);
     }
 
-    /// @dev Base Mainnet opens at the approved TGE (2026-11-01T00:00:00Z) by the chain's own
+    /// @dev Base Mainnet opens at the approved TGE (2026-10-23T00:00:00Z) by the chain's own
     /// clock, and not one second earlier.
     function test_NetworkGateOpensBaseMainnetAtTge() public {
-        vm.warp(1_793_491_200 - 1);
+        vm.warp(1_792_713_600 - 1);
         vm.expectRevert(abi.encodeWithSelector(ARLDeployPlan.PlanProductionLocked.selector, 8453));
         h.networkGate(8453);
-        vm.warp(1_793_491_200);
+        vm.warp(1_792_713_600);
         h.networkGate(8453);
         vm.expectRevert(abi.encodeWithSelector(ARLDeployPlan.PlanChainNotSupported.selector, 1));
         h.networkGate(1);
@@ -489,7 +489,7 @@ contract ARLDeployTest is Test {
     function testFuzz_NetworkGateBaseMainnetFollowsTge(uint256 ts) public {
         ts = bound(ts, 1, type(uint64).max);
         vm.warp(ts);
-        if (ts < 1_793_491_200) {
+        if (ts < 1_792_713_600) {
             vm.expectRevert(
                 abi.encodeWithSelector(ARLDeployPlan.PlanProductionLocked.selector, 8453)
             );
@@ -500,7 +500,7 @@ contract ARLDeployTest is Test {
     /// @dev From the TGE a Base Mainnet plan passes the gate and is then held to every production
     /// rule: Safes that do not point to a canonical singleton are still refused.
     function test_BaseMainnetAfterTgeStillNeedsCanonicalSafes() public {
-        vm.warp(1_793_491_200);
+        vm.warp(1_792_713_600);
         vm.chainId(8453);
         Plan memory p = _plan();
         p.requireRecipientCode = true;

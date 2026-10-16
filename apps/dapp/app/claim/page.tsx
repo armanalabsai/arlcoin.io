@@ -26,9 +26,10 @@ export default function ClaimPage() {
   return (
     <>
       <PageTitle title="Claim">
-        Whitelist sign-ups claim their Public Launch ARL here, free, during the 60-day claim window.
-        The list is published before the window opens; a claim always pays the listed address and
-        never asks for a payment.
+        There is no airdrop at launch. An airdrop of 500,000 ARL is planned for a later date; this
+        page opens for claims only when that airdrop is announced, with its date, eligibility and
+        rules, on the official channels. A claim always pays the listed address and never asks for a
+        payment.
       </PageTitle>
       <RequireWallet>
         <ClaimLoader />
@@ -78,9 +79,9 @@ function ClaimLoader() {
   if (loaded.kind === "none") {
     return (
       <div className="glass-strong p-8 text-center text-muted" data-testid="claim-none">
-        No claim list is published for this network yet. The Public Launch claim opens after the
-        Base Mainnet launch; until then nothing can be claimed, and anyone offering an ARL claim
-        elsewhere is not ARL.
+        No claim list is published for this network. There is no airdrop at launch; claims open here
+        only when the later airdrop is announced on the official channels. Until then nothing can be
+        claimed, and anyone offering an ARL claim elsewhere is not ARL.
       </div>
     );
   }

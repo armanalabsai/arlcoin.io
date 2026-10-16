@@ -16,17 +16,21 @@
 export const MAX_SUPPLY = 21_000_000;
 
 /**
- * The approved TGE date (owner decision, 2026-10-05). Every vesting schedule starts at the TGE
+ * The approved TGE date (owner decision 2026-10-05, moved to 2026-10-23 by the owner on 2026-10-16). Every vesting schedule starts at the TGE
  * (VESTING_START = TGE_TIMESTAMP). The TGE itself is the Base Mainnet token deployment.
  */
-export const TGE_DATE = "2026-11-01T00:00:00Z";
+export const TGE_DATE = "2026-10-23T00:00:00Z";
 
 /**
  * Approved Public Launch parameters (owner decision, 2026-10-05; economic specification
  * section 7). Amounts in whole ARL.
  */
 export const PUBLIC_LAUNCH = {
-  /** Distributed through the Merkle claim at TGE. */
+  /**
+   * The airdrop amount, distributed through the Merkle claim. Not distributed at TGE: the owner
+   * cancelled the TGE airdrop on 2026-10-16 and deferred it to a later date; until then it stays
+   * in the Public Launch Safe.
+   */
   tgeTranche: 500_000,
   /**
    * Kept in the Public Launch Safe for launchpad sales (owner decision 2026-10-10). The rest,
@@ -184,7 +188,7 @@ export const ALLOCATIONS: readonly Allocation[] = deepFreeze([
     release: {
       kind: "program",
       description:
-        "Distributed through a Merkle claim from a published list: 500,000 ARL free at TGE to whitelist sign-ups, at most 10,000 ARL per address, claimable for 60 days. Unclaimed tokens and the remaining 4,500,000 ARL stay in the Public Launch Safe for a launchpad sale and later tranches.",
+        "No airdrop at TGE. An airdrop of 500,000 ARL is planned for a later date through a Merkle claim from a published list, at most 10,000 ARL per address, claimable for 60 days. Until then it stays in the Public Launch Safe with the remaining 4,500,000 ARL for a launchpad sale and later tranches.",
       status: "approved",
     },
     custody: { holder: "safe" },

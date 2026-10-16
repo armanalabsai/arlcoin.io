@@ -18,7 +18,7 @@ Never state as fact anything that has not happened. In particular:
 
 - contract addresses, chain, explorer links, circulating supply
 - deployments, mainnet or testnet status
-- audits, exchange listings, partnerships, users or transaction volume
+- exchange listings, partnerships, users or transaction volume
 
 Use a status label instead: `PLANNED`, `IN DEVELOPMENT`, `LIVE`. `LIVE` requires
 verifiable evidence.

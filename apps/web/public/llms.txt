@@ -1,4 +1,4 @@
-# ARL
+# ARL Protocol (ARL)
 
 > ARL is the native utility token planned for decentralized AI and compute services, an ERC-20
 > on Base. It is live on the Base Sepolia testnet only (testnet tokens have no value); no ARL
@@ -12,7 +12,7 @@ Key facts:
 - Standard: ERC-20 with EIP-2612 permit, 18 decimals, on Base (Ethereum layer 2).
 - Testnet: Base Sepolia (chain 84532), token 0x244312b619127B6458154F3467eFD7c87CD28500,
   source-verified on Basescan, Blockscout and Sourcify.
-- Mainnet: Base (chain 8453), targeted for 1 November 2026. The address will be published on
+- Mainnet: Base (chain 8453), targeted for 23 October 2026. The address will be published on
   arlcoin.io at deployment; any earlier "ARL" on a main network is not official.
 - How a payment works: the wallet signs a spending ceiling (x402 upto scheme, Permit2), the AI
   or compute service meters the work, a facilitator settles only the ARL used, never above the
@@ -25,12 +25,23 @@ Key facts:
   symbolic checks). Treasury actions pass a Safe
   multisig and a 48-hour timelock.
 - Roadmap: foundation and token contracts complete, internal security review complete, Base
-  Sepolia testnet live since 4 October 2026, Base Mainnet targeted for 1 November 2026.
+  Sepolia testnet live since 4 October 2026, Base Mainnet targeted for 23 October 2026.
+- Launch: trading opens on Uniswap on Base at the Base Mainnet launch, from 0.20 USD per ARL.
+  There is no airdrop at the launch; an airdrop of 500,000 ARL is planned for a later date.
 - ARL never asks for a private key, a seed phrase or a payment.
+
+## Official channels
+
+- Website: https://arlcoin.io
+- X: https://x.com/arlprotocol (@arlprotocol)
+- Telegram: https://t.me/arlcoin_community
+- Email: team@arlcoin.io
+- Source code: https://github.com/armanalabsai/arlcoin.io
 
 ## Pages
 
 - [Home](https://arlcoin.io/): overview and whitelist registration
+- [How to get ARL](https://arlcoin.io/buy): official Uniswap pools on Base and how to check the address
 - [Interactive Core](https://arlcoin.io/core): every layer of the project, card by card
 - [FAQ](https://arlcoin.io/faq): short answers to common questions
 - [Documents](https://arlcoin.io/docs): architecture, tokenomics, token design, security analysis

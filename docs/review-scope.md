@@ -1,17 +1,17 @@
-# External Audit Scope
+# Review scope
 
-Status: **prepared for an external audit; no audit has been performed.** Deployed on Base Sepolia only (testnet, 2026-10-04); addresses and the free security evidence are in [`audit-evidence.md`](audit-evidence.md). Nothing is on Base Mainnet.
-Base Mainnet opens only at the TGE (2026-11-01T00:00:00Z) in the deployment tooling (see
+Status: deployed on Base Sepolia only (testnet, 2026-10-04); addresses and the free verification evidence are in [`verification-evidence.md`](verification-evidence.md). Nothing is on Base Mainnet.
+Base Mainnet opens only at the TGE (2026-10-23T00:00:00Z) in the deployment tooling (see
 [`deployment.md`](deployment.md#network-gate)).
 
-This document is the hand-over for the audit firm. It lists what is in scope, what the
+This document is the hand-over for code reviewers. It lists what is in scope, what the
 contracts are meant to guarantee, how that is already tested, and what is deliberately out of
 scope.
 
 ## Code under review
 
-Repository: `gokturkalazdaghan-dot/ARLCOIN`, branch `main`. The audited commit is fixed when the
-engagement starts.
+Repository: https://github.com/armanalabsai/arlcoin.io, branch `main`. The reviewed commit is
+fixed when a review starts.
 
 Compiler: solc 0.8.36, optimizer on (200 runs), EVM `cancun`, no via-IR. Dependencies (pinned
 submodules): OpenZeppelin Contracts v5.6.1 (unmodified), solidity-datetime v2.2.0 (deployment
@@ -25,7 +25,7 @@ tooling only).
 | `contracts/src/ARLAllocation.sol`        |      16 | The 11 allocation constants                                                                                                                                                  |
 | `contracts/src/ARLVestingWallet.sol`     |      34 | OpenZeppelin `VestingWallet` with a cliff and an immutable beneficiary                                                                                                       |
 | `contracts/src/ARLTimelock.sol`          |      36 | OpenZeppelin `TimelockController` with a 48-hour floor, no external admin and a cancel-only guardian                                                                         |
-| `contracts/src/ARLMerkleDistributor.sol` |      56 | Public Launch Merkle claim with a fixed root, claim window and return address; no owner                                                                                      |
+| `contracts/src/ARLMerkleDistributor.sol` |      56 | Public Launch Merkle claim with a fixed root, claim window and return address; no owner; not deployed at TGE (kept for the later airdrop)                                    |
 | `contracts/src/ARLStakingRewards.sol`    |     191 | Stake ARL, earn ARL from a funded pool (Synthetix `StakingRewards` via curvefi/unipool-fork, MIT); no owner, no minting, no upgrade; one limited role, `rewardsDistribution` |
 | **Total**                                | **368** |                                                                                                                                                                              |
 
@@ -164,7 +164,7 @@ of two symbolic values and does not finish in the solver. Fuzz tests and the
 
 ## Out of scope
 
-- OpenZeppelin Contracts v5.6.1 and Safe v1.5.0 themselves (audited upstream; used unmodified).
+- OpenZeppelin Contracts v5.6.1 and Safe v1.5.0 themselves (upstream libraries; used unmodified).
 - The website (`apps/web`) and documentation.
 - Contracts not planned for the first deployment, reviewed separately later: `ARLJobs`
   (ERC-8183 job escrow, [jobs.md](jobs.md)), `ComputePayment` (per-second compute streams,
@@ -177,7 +177,7 @@ of two symbolic values and does not finish in the solver. Fuzz tests and the
 
 See [`security-analysis.md`](security-analysis.md#known-limitations).
 
-## Questions for the auditors
+## Review questions
 
 1. Is any path able to change total supply or move a holder's tokens without its consent?
 2. Can a Merkle claim be replayed, redirected or forged, including via second-preimage tricks?

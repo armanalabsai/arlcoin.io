@@ -10,7 +10,6 @@ import {
   parsePath,
   pathFor,
 } from "../../src/content/registry.ts";
-import { TEAM } from "../../src/content/team/registry.ts";
 import { DOCS, docPath } from "../../src/content/docs.ts";
 import type { Card, Layer } from "../../src/content/types.ts";
 
@@ -33,10 +32,10 @@ function cardTexts(c: Card): string[] {
 }
 
 describe("registry structure", () => {
-  it("has the six approved layers in order", () => {
+  it("has the five approved layers in order", () => {
     assert.deepEqual(
       LAYERS.map((l) => l.id),
-      ["team", "token", "technology", "security", "roadmap", "ecosystem"],
+      ["token", "technology", "security", "roadmap", "ecosystem"],
     );
   });
 
@@ -83,16 +82,23 @@ describe("routing", () => {
     }
   });
 
-  it("serves home, 6 layers and every card", () => {
+  it("serves home, 5 layers and every card", () => {
     const cards = LAYERS.reduce((n, l) => n + l.cards.length, 0);
     assert.equal(allPaths().length, 1 + LAYERS.length + cards);
   });
 
   it("rejects unknown and malformed paths", () => {
-    for (const p of ["/", "/core/nope", "/core/team/nope", "/core/team/founder/x", "/team"]) {
+    for (const p of [
+      "/",
+      "/core/nope",
+      "/core/token/nope",
+      "/core/token/max-supply/x",
+      "/team",
+      "/core/team",
+    ]) {
       assert.equal(parsePath(p), null, p);
     }
-    assert.deepEqual(parsePath("/core/team/"), parsePath("/core/team"));
+    assert.deepEqual(parsePath("/core/token/"), parsePath("/core/token"));
     assert.deepEqual(parsePath("/core"), HOME);
     assert.deepEqual(parsePath("/core/"), HOME);
   });
@@ -180,89 +186,6 @@ describe("content accuracy", () => {
       /revolution|cutting-edge|next-generation|seamless|unlock the|to the moon|limitless|game-chang|future of/i;
     for (const layer of LAYERS) {
       for (const text of texts(layer)) assert.doesNotMatch(text, hype, text);
-    }
-  });
-});
-
-describe("team publishing rule", () => {
-  const teamLayer = LAYERS.find((l) => l.id === "team");
-  const INSTITUTIONS =
-    /Bitcoin Core|MIT\b|Stanford|KAIST|Harvard|Yale|Carnegie|Berkeley|Columbia|Barcelona|Madrid|Valencia|AGI Core|University|School|Laboratory|B\.S\.|M\.S\.|Doctorate/;
-
-  it("lists only the founder, then the team-growing note and the open roles", () => {
-    assert.deepEqual(
-      TEAM.map((p) => p.id),
-      ["alaz-daghan-gokturk"],
-    );
-    assert.deepEqual(
-      teamLayer?.cards.map((c) => c.id),
-      ["alaz-daghan-gokturk", "team-growing", "open-roles"],
-    );
-    const growing = teamLayer?.cards.find((c) => c.id === "team-growing");
-    assert.equal(growing?.person, undefined);
-    assert.match(growing?.detail.summary ?? "", /only once .* verified/);
-  });
-
-  it("describes open roles without people, employers or credentials", () => {
-    const roles = teamLayer?.cards.find((c) => c.id === "open-roles");
-    assert.equal(roles?.person, undefined);
-    assert.equal(roles?.links, undefined);
-    for (const text of cardTexts(roles!)) assert.doesNotMatch(text, INSTITUTIONS, text);
-    assert.ok((roles?.detail.sections?.[0]?.items?.length ?? 0) >= 10);
-  });
-
-  it("does not show an empty focus line for a profile without expertise", () => {
-    for (const card of teamLayer?.cards ?? [])
-      assert.doesNotMatch(card.detail.summary, /^Focus: \.$/);
-  });
-
-  it("gives every profile a verification status", () => {
-    for (const p of TEAM) {
-      assert.ok(["verified", "unverified", "placeholder"].includes(p.verificationStatus), p.id);
-    }
-  });
-
-  it("shows no education or career claims for profiles that are not verified", () => {
-    for (const card of teamLayer?.cards ?? []) {
-      if (card.person?.verificationStatus === "verified") continue;
-      for (const text of cardTexts(card))
-        assert.doesNotMatch(text, INSTITUTIONS, `${card.id}: ${text}`);
-      assert.equal(card.links, undefined, `${card.id} must not show links`);
-    }
-  });
-
-  it("marks unverified profiles as such in the detail", () => {
-    for (const card of teamLayer?.cards ?? []) {
-      if (card.person?.verificationStatus !== "unverified") continue;
-      const facts = card.detail.facts ?? [];
-      assert.ok(
-        facts.some((f) => f.label === "Profile" && f.value === "Not yet verified"),
-        card.id,
-      );
-    }
-  });
-
-  it("keeps expertise free of institution names", () => {
-    for (const p of TEAM) {
-      for (const e of p.expertise) assert.doesNotMatch(e, INSTITUTIONS, `${p.id}: ${e}`);
-    }
-  });
-
-  it("records no nationality or ethnicity and no invented portraits or links", () => {
-    for (const p of TEAM) {
-      const keys = Object.keys(p);
-      assert.ok(!keys.some((k) => /national|ethnic|race/i.test(k)), p.id);
-      if (p.verificationStatus !== "verified") {
-        assert.equal(p.portrait, undefined, p.id);
-        assert.equal(p.links, undefined, p.id);
-      }
-    }
-  });
-
-  it("never displays birth years", () => {
-    for (const card of teamLayer?.cards ?? []) {
-      for (const text of cardTexts(card))
-        assert.doesNotMatch(text, /\b(19|20)\d\d\b/, `${card.id}: ${text}`);
     }
   });
 });

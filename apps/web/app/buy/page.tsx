@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
+
+import { breadcrumbJsonLd } from "@/content/seo.ts";
+import { JsonLd } from "@/site/JsonLd.tsx";
 import Link from "next/link";
 
 import { OG_IMAGE, SITE } from "@/content/site.ts";
 import { AddToWallet } from "@/site/AddToWallet.tsx";
 import { FactList, PageShell } from "@/site/PageShell.tsx";
 
-const title = "How to get ARL · ARL";
+const title = "How to Buy ARL on Uniswap on Base · ARL Protocol";
 const description =
-  "Where ARL becomes available: the official ARL/USDC, ARL/USDT, ARL/ETH and ARL/BTC pools on Uniswap on Base, from 0.20 USD per ARL, opened at the TGE on 1 November 2026. Only the official contract address is ARL.";
+  "How to buy ARL: the official ARL/USDC, ARL/USDT, ARL/ETH and ARL/BTC pools on Uniswap on Base, from 0.20 USD, opening 23 October 2026.";
 
 const USDC_BASE = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const token = SITE.mainnet.token;
@@ -33,6 +36,7 @@ export default function BuyPage() {
           : `ARL is not available yet. It becomes available at the TGE, targeted for ${SITE.tgeTarget}, in the official ARL/USDC, ARL/USDT, ARL/ETH and ARL/BTC pools on Uniswap on Base.`
       }
     >
+      <JsonLd data={breadcrumbJsonLd([["How to get ARL", "/buy"]])} />
       {swapUrl && token ? (
         <div className="glass rounded-[22px] p-6">
           <p className="text-[15px] text-fg-muted">Official ARL contract on Base</p>
@@ -58,8 +62,8 @@ export default function BuyPage() {
           "ARL will never ask for your private key, your seed phrase or a payment to a personal address. Anyone who does is attempting theft.",
           "Tokens can lose all their value. Nothing here is investment advice or a promise of price or listing.",
           <>
-            Whitelist sign-ups can claim free ARL from the Public Launch for 60 days after the TGE;
-            see the{" "}
+            There is no airdrop at the launch; an airdrop of 500,000 ARL is planned for a later
+            date. Registered addresses hear about it first; see the{" "}
             <Link
               href="/whitelist"
               prefetch={false}

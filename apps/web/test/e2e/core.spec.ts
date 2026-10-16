@@ -37,7 +37,7 @@ test("overview renders the Core and every layer without errors", async ({ page }
   await page.goto("/core");
   await expect(core(page)).toBeVisible();
   const layers = page.getByRole("list", { name: "Layers" }).getByRole("link");
-  await expect(layers).toHaveCount(6);
+  await expect(layers).toHaveCount(5);
   await page.waitForTimeout(300);
   expect(errors).toEqual([]);
 });
@@ -47,11 +47,8 @@ test("the Core cycles through the layers in place", async ({ page }) => {
   await page.goto("/core");
   await mark(page);
   await core(page).click();
-  await expect(page).toHaveURL(/\/core\/team$/);
-  await expect(page.getByRole("link", { name: /Alaz Daghan Gokturk/ }).first()).toBeVisible();
-  await core(page).click();
   await expect(page).toHaveURL(/\/core\/token$/);
-  await expect(page).toHaveTitle("Token · ARL");
+  await expect(page).toHaveTitle("Token · ARL Protocol");
   await expectSameDocument(page);
   expect(errors).toEqual([]);
 });
@@ -96,7 +93,7 @@ test("deep links render the detail and survive a refresh", async ({ page }) => {
   await expect(surface(page)).toContainText("Not yet on Base Mainnet");
   await page.reload();
   await expect(surface(page)).toBeVisible();
-  await expect(page).toHaveTitle("Circulating Supply · Token · ARL");
+  await expect(page).toHaveTitle("Circulating Supply · Token · ARL Protocol");
   await page.getByRole("button", { name: "Back to Token" }).click();
   await expect(page).toHaveURL(/\/core\/token$/);
   await expect(surface(page)).toBeHidden();
@@ -105,11 +102,11 @@ test("deep links render the detail and survive a refresh", async ({ page }) => {
 
 test("detail content is in the server-rendered HTML", async ({ request }) => {
   const html = await (await request.get("/core/token/max-supply")).text();
-  expect(html).toContain("<title>Maximum Supply · Token · ARL</title>");
+  expect(html).toContain("<title>Maximum Supply · Token · ARL Protocol</title>");
   expect(html).toContain('role="dialog"');
   expect(html).toContain("21,000,000");
   expect(html).toMatch(/rel="canonical" href="https:\/\/arlcoin\.io\/core\/token\/max-supply"/);
-  expect(html).toMatch(/property="og:title" content="Maximum Supply · Token · ARL"/);
+  expect(html).toMatch(/property="og:title" content="Maximum Supply · Token · ARL Protocol"/);
 });
 
 test("sitemap lists every route and robots points to it", async ({ request }) => {
@@ -128,16 +125,16 @@ test("keyboard: Enter on the Core, Space on a card, arrows between cards", async
   await page.goto("/core");
   await core(page).focus();
   await page.keyboard.press("Enter");
-  await expect(page).toHaveURL(/\/core\/team$/);
-  const first = page.locator('[data-ring-card="alaz-daghan-gokturk"]');
+  await expect(page).toHaveURL(/\/core\/token$/);
+  const first = page.locator('[data-ring-card="max-supply"]');
   await first.focus();
   await page.keyboard.press("ArrowRight");
-  await expect(page.locator('[data-ring-card="team-growing"]')).toBeFocused();
+  await expect(page.locator('[data-ring-card="allocation"]')).toBeFocused();
   await page.keyboard.press(" ");
-  await expect(page).toHaveURL(/\/core\/team\/team-growing$/);
+  await expect(page).toHaveURL(/\/core\/token\/allocation$/);
   await expect(surface(page)).toBeVisible();
   await page.keyboard.press("Escape");
-  await expect(page.locator('[data-ring-card="team-growing"]')).toBeFocused();
+  await expect(page.locator('[data-ring-card="allocation"]')).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(page).toHaveURL(/\/core$/);
 });
@@ -178,7 +175,6 @@ test("the index opens cards without a page load", async ({ page }) => {
 test("no horizontal overflow on any layer", async ({ page }) => {
   for (const path of [
     "/",
-    "/core/team",
     "/core/token",
     "/core/technology",
     "/core/security",
@@ -198,31 +194,4 @@ test("deployment-dependent token values are never given a number", async ({ page
     await page.goto(`/core/token/${id}`);
     await expect(surface(page)).toContainText("Not yet on Base Mainnet");
   }
-});
-
-test("team layer: the founder and the team-growing note, unverified details withheld", async ({
-  page,
-}) => {
-  await page.goto("/core");
-  await core(page).click();
-  await expect(page).toHaveURL(/\/core\/team$/);
-  await expect(core(page)).toBeVisible();
-  await expect(page.locator("[data-ring-card]")).toHaveCount(3);
-  await expect(page.locator("img")).toHaveCount(0);
-
-  await page.locator('[data-ring-card="alaz-daghan-gokturk"]').click();
-  await expect(page).toHaveURL(/\/core\/team\/alaz-daghan-gokturk$/);
-  await expect(surface(page).getByRole("heading", { name: "Alaz Daghan Gokturk" })).toBeVisible();
-  await expect(surface(page)).toContainText("Founder and CEO");
-  await expect(surface(page).getByRole("link")).toHaveCount(0);
-
-  await page.getByRole("button", { name: "Back to Team" }).click();
-  await expect(page).toHaveURL(/\/core\/team$/);
-  await expect(page.locator('[data-ring-card="alaz-daghan-gokturk"]')).toBeFocused();
-
-  await page.locator('[data-ring-card="open-roles"]').click();
-  await expect(page).toHaveURL(/\/core\/team\/open-roles$/);
-  await expect(surface(page).getByRole("heading", { name: "Open roles" })).toBeVisible();
-  await expect(surface(page)).toContainText("Security engineer");
-  await expect(surface(page)).toContainText("never asks applicants for a payment");
 });

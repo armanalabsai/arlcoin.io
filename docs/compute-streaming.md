@@ -1,7 +1,7 @@
 # Compute streaming: per-second payments in ARL
 
 Status: **IN DEVELOPMENT.** Tested on a local chain (Foundry unit, fuzz and invariant tests, and
-an Anvil end-to-end test of the SDK). Not deployed; not externally audited.
+an Anvil end-to-end test of the SDK). Not deployed.
 
 A client pays a compute provider by the second. The client opens a stream at a fixed rate for at
 most a fixed duration and escrows `rate × duration` ARL. The provider earns the rate every second
@@ -131,4 +131,4 @@ own creations, so ComputePayment is broadcast from the command line.
   SDK.
 - A stream pushes the provider's share to the provider at settlement. With ARL (a plain ERC-20,
   no hooks) that transfer cannot be blocked by the recipient.
-- Not in the scope of the first audit (see [audit-scope.md](audit-scope.md)).
+- Outside the first review scope (see [review-scope.md](review-scope.md)).

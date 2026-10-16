@@ -1,7 +1,7 @@
 # Chain Evaluation
 
 Status: **network decision approved.** Testnet: **Base Sepolia (84532)**, the only
-deployable public network. Production: **Base Mainnet (8453)**, opening at the TGE (2026-11-01T00:00:00Z); no
+deployable public network. Production: **Base Mainnet (8453)**, opening at the TGE (2026-10-23T00:00:00Z); no
 deployment tooling path permits it (see
 [`deployment.md`](deployment.md#network-gate)). Nothing is deployed. Contracts must stay chain-agnostic: no chain IDs, addresses or
 chain-specific precompiles in contract code.
@@ -14,7 +14,7 @@ chain-specific precompiles in contract code.
 | DEX                  | Existing DEX liquidity and routing; reliable price oracles; block times short enough for swaps without excessive MEV exposure                               |
 | AI payments          | Low and predictable fees for frequent small payments; fast finality; account abstraction (ERC-4337) or native equivalent; stablecoin availability           |
 | Compute marketplace  | Cheap escrow and settlement transactions; event throughput for job lifecycle updates; reliable indexing                                                     |
-| DeFi                 | Oracle coverage (for example Chainlink); established lending and liquidity venues; audited bridges for collateral                                           |
+| DeFi                 | Oracle coverage (for example Chainlink); established lending and liquidity venues; established bridges for collateral                                       |
 | ZK / privacy         | Cheap on-chain proof verification (BN254 pairing precompiles, EIP-4844 blobs where relevant); support for verifier contracts from the chosen proving system |
 | ARL Network (future) | A credible migration or interoperability path: canonical bridge, message passing, or the option to launch a rollup settling to the chosen chain             |
 

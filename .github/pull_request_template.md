@@ -15,5 +15,5 @@
 
 - [ ] No private key, seed phrase, API key or `.env` file
 - [ ] New dependencies are pinned and justified; new third-party code is recorded in `THIRD_PARTY_LICENSES.md`
-- [ ] No deployment, audit, listing, partnership or metric is claimed that does not exist
+- [ ] No deployment, listing, partnership or metric is claimed that does not exist
 - [ ] Tokenomics numbers come from `packages/tokenomics` only

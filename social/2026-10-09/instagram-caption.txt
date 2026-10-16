@@ -14,7 +14,6 @@ ARL itself: 21,000,000 fixed supply. No mint function, no owner, no upgrade path
 Where we are, honestly:
 • The ARL token is live on Base Sepolia testnet. Not on mainnet yet.
 • The payment rail is IN DEVELOPMENT: tested on a local Base Sepolia fork, no facilitator running.
-• No audit of ARL's contracts yet.
 
 We build in public. The code is open source on GitHub (link in bio). Join the community: t.me/arlcoin_community
 

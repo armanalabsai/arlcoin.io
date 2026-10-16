@@ -1,7 +1,6 @@
 # Phase 1 Security Analysis
 
-Status: internal review and automated testing only. **ARL has not been
-audited.** No contract is deployed.
+Status: internal review and automated testing. No contract is deployed.
 
 The allocation model changed on 2026-09-27 (11 allocations; the Ecosystem
 Reserve was removed). `ARLAllocation`, `ARLToken`, the deployment planner,
@@ -17,7 +16,7 @@ carry over and must be re-reviewed for this one.
 ## Assumptions
 
 - OpenZeppelin v5.6.1 `ERC20`, `VestingWallet`, `TimelockController` and their
-  dependencies are correct (audited upstream; see `open-source.md`).
+  dependencies are correct (see `open-source.md`).
 - The Safe contract used for the treasury is a correctly configured 2-of-3 Safe.
 - The treasury guardian is a separate, correctly configured Safe whose signers
   are disjoint from the treasury Safe's.
@@ -53,7 +52,7 @@ carry over and must be re-reviewed for this one.
 | Claim drained or repeated                         | Merkle proof over `(index, account, amount)` with double-hashed leaves; one `BitMaps` flag per index; tokens go only to the listed account; no owner, admin, pause, upgrade or root change                                                                                                                                   | `ARLMerkleDistributor.t.sol` (tampered amount, account, index and proof, double claim, fuzzed two-entry tree); invariants `FundsReconcile`, `EachEntryPaysExactlyOnce`; rehearsal                                                                                                                                                                                                                                                                          |
 | Unclaimed launch tokens stuck or diverted         | After `claimEnd`, `sweep` sends the whole balance to the fixed `returnTo` (the Public Launch Safe); callable by anyone                                                                                                                                                                                                       | `test_SweepReturnsTheRemainderToTheAllocationSafe`; rehearsal                                                                                                                                                                                                                                                                                                                                                                                              |
 | Launch deployed before its terms are approved     | `DeployDistributor` runs only on local Anvil and Base Sepolia (shared network gate); the list must be a Public Launch list within 5,000,000 ARL                                                                                                                                                                              | `DeployDistributor.t.sol`; rehearsal                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| Deployment to Base Mainnet or an unapproved chain | `networkGate` (Solidity and planner) refuses Base Mainnet before the approved TGE (2026-11-01T00:00:00Z, by block timestamp) and every chain except local Anvil, Base Sepolia and Base Mainnet; checked at script entry, in `validate` and in `ARLDeployer.deploy`; no flag, environment variable or config field affects it | `test_NetworkGate`, `testFuzz_NetworkGateOpensOnlyLocalAndBaseSepolia`, `test_NetworkGateOpensBaseMainnetAtTge`, `testFuzz_NetworkGateBaseMainnetFollowsTge`, `test_BaseMainnetAfterTgeStillNeedsCanonicalSafes`, `test_RevertWhen_BaseMainnetFullyConfigured`, `test_RevertWhen_BaseMainnetPlanFile`, `test_RevertWhen_DeployerCalledWithoutValidation`, `test_RevertWhen_RunOnBaseMainnet`; planner tests; rehearsal on chain-8453 and chain-84532 Anvil |
+| Deployment to Base Mainnet or an unapproved chain | `networkGate` (Solidity and planner) refuses Base Mainnet before the approved TGE (2026-10-23T00:00:00Z, by block timestamp) and every chain except local Anvil, Base Sepolia and Base Mainnet; checked at script entry, in `validate` and in `ARLDeployer.deploy`; no flag, environment variable or config field affects it | `test_NetworkGate`, `testFuzz_NetworkGateOpensOnlyLocalAndBaseSepolia`, `test_NetworkGateOpensBaseMainnetAtTge`, `testFuzz_NetworkGateBaseMainnetFollowsTge`, `test_BaseMainnetAfterTgeStillNeedsCanonicalSafes`, `test_RevertWhen_BaseMainnetFullyConfigured`, `test_RevertWhen_BaseMainnetPlanFile`, `test_RevertWhen_DeployerCalledWithoutValidation`, `test_RevertWhen_RunOnBaseMainnet`; planner tests; rehearsal on chain-8453 and chain-84532 Anvil |
 | Double initialization                             | No initializers; constructors only                                                                                                                                                                                                                                                                                           | Design                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 
 ## Mutation checks
@@ -106,7 +105,7 @@ Symbolic execution of the runtime bytecode of `ARLToken`, `ARLTimelock`,
 `ARLMerkleDistributor` and `ARLVestingWallet`: 9 findings, none exploitable. The one rated High
 (SWC-101 in the inherited `onERC1155BatchReceived`) is a decoder false positive, now covered by a
 test replaying Mythril's transaction and a fuzz test over arbitrary calldata. Full triage:
-`docs/audit-scope.md`.
+`docs/review-scope.md`.
 
 ## Staking rewards (`ARLStakingRewards`)
 
@@ -145,7 +144,7 @@ nobody can claim them. Both stay in the contract; `test_DirectTransferIsRetained
 `test_RoundingDustIsRetained` and the `BalanceFullyExplained` invariant show that principal and
 every claimable reward remain payable.
 
-## Dependency audit
+## Dependency scan
 
 CI runs `scripts/audit.mjs` at the root and in each app instead of a bare
 `npm audit --audit-level=high`. Any high or critical advisory fails the build unless
@@ -171,8 +170,8 @@ because it is too new to have a track record.
   depends on the beneficiary being a Safe and on its owners keeping a signing quorum.
 - The Safe's threshold is not enforced by ARL contracts.
 - Production deployment parameters (TGE date, holder Safe addresses, launch parameters) are
-  not decided; Base Mainnet opens only at the TGE (2026-11-01T00:00:00Z) in the deployment tooling.
+  not decided; Base Mainnet opens only at the TGE (2026-10-23T00:00:00Z) in the deployment tooling.
 - `ERC20Permit` accepts EOA signatures only; smart-contract wallets use `approve` or Permit2.
 - Compiler warnings from `contracts/lib/` are silenced (`ignored_warnings_from`): upstream OpenZeppelin `ECDSA` uses `error` as an identifier, which solc 0.8.36 flags as a future keyword. ARL code still reports all warnings.
-- No external audit. Symbolic checks (Halmos) prove ten properties within bounded inputs; this
-  is not full formal verification. Scope for the audit: `docs/audit-scope.md`.
+- Symbolic checks (Halmos) prove ten properties within bounded inputs; this is not full formal
+  verification. Review scope: `docs/review-scope.md`.

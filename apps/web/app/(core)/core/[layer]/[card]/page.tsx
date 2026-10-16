@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 
 import { descriptionFor, titleFor } from "@/content/meta.ts";
 import { LAYERS, getCard, getLayer, pathFor } from "@/content/registry.ts";
+import { breadcrumbJsonLd } from "@/content/seo.ts";
 import { OG_IMAGE } from "@/content/site.ts";
+import { JsonLd } from "@/site/JsonLd.tsx";
 
 export const dynamicParams = false;
 
@@ -38,6 +40,14 @@ export async function generateMetadata({
 }
 
 export default async function CardPage({ params }: PageProps<"/core/[layer]/[card]">) {
-  await resolve(params);
-  return null;
+  const { layer, card } = await resolve(params);
+  return (
+    <JsonLd
+      data={breadcrumbJsonLd([
+        ["Core", pathFor()],
+        [layer.title, pathFor(layer.id)],
+        [card.title, pathFor(layer.id, card.id)],
+      ])}
+    />
+  );
 }

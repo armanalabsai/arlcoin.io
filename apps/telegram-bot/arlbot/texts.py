@@ -1,9 +1,9 @@
 """User-facing text. English only; every factual claim matches docs/ in this repository."""
 
 WEBSITE = "https://arlcoin.io"
-WHITELIST = "https://arlcoin.io/whitelist/"
 SOURCE = "https://github.com/armanalabsai/arlcoin.io"
-X_ACCOUNT = "https://x.com/armanalabsai"
+X_ACCOUNT = "https://x.com/arlprotocol"
+EMAIL = "team@arlcoin.io"
 COMMUNITY = "https://t.me/arlcoin_community"
 TESTNET_TOKEN = "0x244312b619127B6458154F3467eFD7c87CD28500"
 
@@ -13,6 +13,7 @@ SCAM_WARNING = (
     "- We never ask for a seed phrase, a private key or a payment.\n"
     "- There is no \"support\" account that fixes wallets.\n"
     f"- Official links are only on {WEBSITE}.\n"
+    f"- There is no airdrop at launch. Any airdrop or claim link posted before the official announcement on {WEBSITE} is a scam.\n"
     "- Base Mainnet contract addresses will be published there only after deployment is verified. "
     "Any mainnet address posted before that is fake."
 )
@@ -22,7 +23,7 @@ RULES = (
     "1. English only.\n"
     "2. No price talk, no promises of returns, no shilling other tokens.\n"
     "3. No links or forwarded posts during your first 24 hours in the group.\n"
-    "4. No direct-message offers: promotion, listing, audit or \"support\" offers are removed.\n"
+    "4. No direct-message offers: promotion, listing or \"support\" offers are removed.\n"
     "5. Be respectful. Repeated flooding mutes you automatically.\n\n"
     f"{SCAM_WARNING}"
 )
@@ -31,11 +32,15 @@ START = (
     "ARL Network: a payment rail for AI and compute services on Base.\n\n"
     "- ARL token: 21,000,000 fixed supply, no mint function, no owner, no upgrade proxy.\n"
     f"- Live on Base Sepolia testnet: {TESTNET_TOKEN}\n"
-    "- Base Mainnet: targeted for 2026-11-01, not deployed yet.\n"
+    "- Base Mainnet: targeted for 2026-10-23, not deployed yet.\n"
     "- Per-use payments (x402 \"upto\"): in development, not deployed.\n"
-    "- No independent audit. A bug bounty paid in ARL is open.\n\n"
+    "- No airdrop at launch. An airdrop of 500,000 ARL is planned for a later date; "
+    "date, eligibility and rules will be announced later on the official channels.\n"
+    "- A bug bounty paid in ARL is open.\n\n"
     f"Website: {WEBSITE}\n"
-    f"Whitelist: {WHITELIST}\n"
+    f"X: {X_ACCOUNT}\n"
+    f"Telegram: {COMMUNITY}\n"
+    f"Contact: {EMAIL}\n"
     f"Source code: {SOURCE}\n\n"
     "Type /help for commands."
 )

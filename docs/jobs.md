@@ -1,7 +1,6 @@
 # Jobs: escrowed work paid in ARL (ERC-8183)
 
-Status: **IN DEVELOPMENT.** Written and tested on a local chain; not deployed; not externally
-audited.
+Status: **IN DEVELOPMENT.** Written and tested on a local chain; not deployed.
 
 A client hires a provider (for example an AI or compute service listed on
 [ARL Network](app.md#network-erc-8004)) for a piece of work and pays in ARL through escrow. This is

@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
+
+import { breadcrumbJsonLd } from "@/content/seo.ts";
+import { JsonLd } from "@/site/JsonLd.tsx";
 import Link from "next/link";
 
 import { OG_IMAGE, repoDoc, SITE } from "@/content/site.ts";
 import { FactList, PageShell } from "@/site/PageShell.tsx";
 import { ContactForm } from "@/site/forms.tsx";
 
-const title = "Contact · ARL";
+const title = "Contact · ARL Protocol";
 const description =
-  "Contact the ARL team about partnerships, press, listings or general questions.";
+  "Contact ARL Protocol: email team@arlcoin.io, X @arlprotocol or the Telegram community for partnerships, press and listings.";
 
 export const metadata: Metadata = {
   title,
@@ -26,6 +29,7 @@ export default function ContactPage() {
       title="Contact the team"
       lead="Questions about ARL, partnerships, press or listings. Messages are read by the team and answered by email."
     >
+      <JsonLd data={breadcrumbJsonLd([["Contact", "/contact"]])} />
       <FactList
         title="Before you write"
         items={[

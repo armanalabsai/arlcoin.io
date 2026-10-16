@@ -1,8 +1,8 @@
-# Security evidence
+# Verification evidence
 
-**No independent audit has been performed.** This document records the free, reproducible
-checks that were run, with commands, tool versions and results, so that anyone can repeat them.
-It is not an audit report. Scope and intended properties are in [audit-scope.md](audit-scope.md).
+This document records the free, reproducible checks that were run, with commands, tool versions
+and results, so that anyone can repeat them. Scope and intended properties are in
+[review-scope.md](review-scope.md).
 
 Last run: 2026-10-04/05, on commit `9b9952f` plus the changes in this document's commit.
 
@@ -54,7 +54,7 @@ distributor holds (`test/invariant/ARLStakingInvariant.t.sol`); the deep campaig
 
 ### GitLab CI (Linux), 2026-10-05
 
-Pipeline 2912085364 on `armanalabs-group/arlcoin` (private), commit `cb7837b`: all 9 jobs passed
+Pipeline 2912085364 on the private GitLab CI mirror, commit `cb7837b`: all 9 jobs passed
 (TypeScript, contracts, Slither, Halmos, rehearsal with the reproducible-build check, ZK circuit
 and verifier, dApp with end-to-end tests, website, Aderyn). Halmos 0.3.3: **11 passed, 0 failed**
 (`Symbolic test result: 11 passed; 0 failed`). The ZK job rebuilt the circuit and verifier byte
@@ -68,7 +68,7 @@ token ABI check, `npm run check:bytecode` (6 contracts reproduce), `npm run rehe
 (59 negative cases rejected), Slither 0.11.6 **0 results**, Halmos 0.3.3 **11 passed, 0 failed**,
 Aderyn 0.6.8 **5 reported** (two new, in `ARLAnonymousSignal`, outside the launch scope) and
 Mythril 0.24.8 on the deployed runtime bytecode, 900 s each: **11 reported, none exploitable**.
-Triage of every Aderyn and Mythril finding: [audit-scope.md](audit-scope.md).
+Triage of every Aderyn and Mythril finding: [review-scope.md](review-scope.md).
 
 ## Manual review
 
@@ -87,13 +87,13 @@ Triage of every Aderyn and Mythril finding: [audit-scope.md](audit-scope.md).
 
 ## Findings
 
-| ID  | Severity | Finding                                                                                                                                             | Status                                                                                                                                                                  |
-| --- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| F-1 | Medium   | All Safe roles on Base Sepolia are 1-of-1, owned by one EOA. One key controls 18.9M ARL held by the Safes and the timelock's proposer and executor. | Accepted for testnet. Mainnet must use ≥2-of-3 Safes.                                                                                                                   |
-| F-2 | Medium   | The deployer/owner EOA has an active EIP-7702 delegation to MetaMask's `EIP7702StatelessDeleGator` (`0x63c0c19a…e32b`), set during Safe creation.   | Resolved: on 2026-10-05 eth_getCode on Base Sepolia returns 0x. The mainnet deployer is a different, clean address.                                                     |
-| F-3 | Low      | Documentation drift: `ARLTimelock` NatSpec and `audit-scope.md` describe a 3-of-5 treasury Safe and "nothing deployed".                             | `audit-scope.md` updated. The NatSpec is left unchanged so the repository source stays identical to the verified deployed source; fix it with the next contract change. |
-| F-4 | Info     | Mythril was not re-run after the GitHub suspension. Halmos and Aderyn were re-run in GitLab CI on 2026-10-05 (Halmos 11/11).                        | Resolved: Mythril re-run on Linux on 2026-10-10, 11 reported, none exploitable.                                                                                         |
-| F-5 | Info     | Staking invariant handler over-funded in long campaigns (test code only).                                                                           | Fixed.                                                                                                                                                                  |
+| ID  | Severity | Finding                                                                                                                                             | Status                                                                                                                                                                   |
+| --- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| F-1 | Medium   | All Safe roles on Base Sepolia are 1-of-1, owned by one EOA. One key controls 18.9M ARL held by the Safes and the timelock's proposer and executor. | Accepted for testnet. Mainnet must use ≥2-of-3 Safes.                                                                                                                    |
+| F-2 | Medium   | The deployer/owner EOA has an active EIP-7702 delegation to MetaMask's `EIP7702StatelessDeleGator` (`0x63c0c19a…e32b`), set during Safe creation.   | Resolved: on 2026-10-05 eth_getCode on Base Sepolia returns 0x. The mainnet deployer is a different, clean address.                                                      |
+| F-3 | Low      | Documentation drift: `ARLTimelock` NatSpec and `review-scope.md` describe a 3-of-5 treasury Safe and "nothing deployed".                            | `review-scope.md` updated. The NatSpec is left unchanged so the repository source stays identical to the verified deployed source; fix it with the next contract change. |
+| F-4 | Info     | Mythril was not re-run after the GitHub suspension. Halmos and Aderyn were re-run in GitLab CI on 2026-10-05 (Halmos 11/11).                        | Resolved: Mythril re-run on Linux on 2026-10-10, 11 reported, none exploitable.                                                                                          |
+| F-5 | Info     | Staking invariant handler over-funded in long campaigns (test code only).                                                                           | Fixed.                                                                                                                                                                   |
 
 No vulnerability was found in the contract code.
 
@@ -109,8 +109,7 @@ behaviour depends on that contract and MetaMask may relay its transactions.
    back to a standard account on Base Sepolia. MetaMask sends one transaction from the EOA that
    authorizes `0x0000000000000000000000000000000000000000` (EIP-7702 delegation reset). It needs a
    little Base Sepolia ETH.
-2. Check: `cast code 0x3c3f71d694f709cBe60f015717c54A795636b165 --rpc-url https://sepolia.base.org`
-   must print `0x`.
+2. Check: `cast code <deployer account> --rpc-url https://sepolia.base.org` must print `0x`.
 3. For Base Mainnet, deploy from an address that has never been delegated, preferably a hardware
    wallet, and keep MetaMask's smart-account and gas-sponsorship features off for it.
 

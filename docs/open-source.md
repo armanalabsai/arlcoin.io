@@ -23,16 +23,16 @@ can change between releases.
 
 | Component              | Repository                          | Version / commit                                     | License           | Security record                                                                                                                                 | Use                                                                  |
 | ---------------------- | ----------------------------------- | ---------------------------------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| OpenZeppelin Contracts | OpenZeppelin/openzeppelin-contracts | v5.6.1 / `5fd1781b1454fd1ef8e722282f86f9293cacf256`  | MIT               | Audit reports for every 5.x minor release in `audits/` (latest: v5.5 and v5.6 changes, Feb 2026); Immunefi bug bounty; patches the latest minor | ERC-20, VestingWallet, TimelockController                            |
-| Safe smart account     | safe-global/safe-smart-account      | v1.5.0 / `dc437e8fba8b4805d76bcbd1c668c9fd3d1e83be`  | LGPL-3.0          | Audit reports for each release in `docs/` (v1.5.0: Ackee, Certora)                                                                              | Treasury multisig — deployed instance, not vendored                  |
+| OpenZeppelin Contracts | OpenZeppelin/openzeppelin-contracts | v5.6.1 / `5fd1781b1454fd1ef8e722282f86f9293cacf256`  | MIT               | Published security reports for every 5.x minor release (latest: v5.5 and v5.6 changes, Feb 2026); Immunefi bug bounty; patches the latest minor | ERC-20, VestingWallet, TimelockController                            |
+| Safe smart account     | safe-global/safe-smart-account      | v1.5.0 / `dc437e8fba8b4805d76bcbd1c668c9fd3d1e83be`  | LGPL-3.0          | Published security reports for each release (v1.5.0: Ackee, Certora)                                                                            | Treasury multisig — deployed instance, not vendored                  |
 | Foundry                | foundry-rs/foundry                  | v1.8.3 / `cae51ad458f6abb64852b7709eb784352429825d`  | MIT or Apache-2.0 | Published security policy                                                                                                                       | Build, unit, fuzz and invariant tests                                |
 | forge-std              | foundry-rs/forge-std                | v1.16.2 / `bf647bd6046f2f7da30d0c2bf435e5c76a780c1b` | MIT or Apache-2.0 | —                                                                                                                                               | Test helpers                                                         |
 | solidity-datetime      | RollaProject/solidity-datetime      | v2.2.0 / `294fc244973cc5f9ec374713affde12c1403927c`  | MIT               | 0.8 port of BokkyPooBah's DateTime library                                                                                                      | Calendar-month checks of vesting schedules (deployment tooling only) |
 | Slither                | crytic/slither                      | 0.11.6 / `050cc0a094e77bfd58e8228ae3bb6aa15c65edb4`  | AGPL-3.0          | Maintained by Trail of Bits                                                                                                                     | Static analysis in CI (not distributed)                              |
 
-OpenZeppelin v5.7.0 (released 2026-07-29) is newer, but its `audits/`
-directory has no v5.7 report and npm's `latest` tag still points to 5.6.1.
-Pin v5.6.1 and re-evaluate when a v5.7 audit is published.
+OpenZeppelin v5.7.0 (released 2026-07-29) is newer, but no v5.7 security report is published
+yet and npm's `latest` tag still points to 5.6.1. Pin v5.6.1 and re-evaluate when that report is
+published.
 
 `wevm/viem` (MIT, npm 2.56.9) is adopted to read on-chain balances for the circulating-supply
 report.
@@ -51,7 +51,7 @@ curvefi fork.
 
 `x402-foundation/x402` (npm `@x402/core` and `@x402/evm` 2.27.0, Apache-2.0; source commit
 `71eb9a55e081e7b81ba3046d0bd17c3eb9c7bf81`) is adopted for ARL payments: the `upto` scheme client
-and facilitator, used as published. ARL calls the deployed `x402UptoPermit2Proxy` (MIT, audited by
+and facilitator, used as published. ARL calls the deployed `x402UptoPermit2Proxy` (MIT, reviewed by
 Cantina in February and March 2026) and Permit2 (MIT); both are pinned by address and code hash.
 See `docs/payments.md`.
 
