@@ -48,6 +48,11 @@ export const FAQ: readonly FaqEntry[] = [
       "No. ARL on the Base Sepolia testnet has no value and cannot be exchanged for anything. The ARL app at arlcoin.io/app hands out testnet ARL from a faucet so the staking, jobs, payments and anonymous polls can be tried for free.",
   },
   {
+    question: "Is ARL Protocol the same as other tokens called ARL?",
+    answer:
+      "No. ARL Protocol (arlcoin.io) is the ERC-20 token on Base described on this site, with a fixed supply of 21,000,000. It is not related to other projects or tokens that also use the ticker ARL on Solana, Ethereum or BNB Chain. Check the contract address on arlcoin.io before you interact with any ARL token.",
+  },
+  {
     question: "What are the official channels?",
     answer:
       "Only these: the website arlcoin.io, X @arlprotocol, the Telegram group t.me/arlcoin_community and the email address team@arlcoin.io. Any other account claiming to be ARL is not official.",
