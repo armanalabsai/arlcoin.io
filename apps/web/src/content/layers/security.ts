@@ -25,13 +25,13 @@ export const security: Layer = {
     },
     {
       id: "review-status",
-      title: "Security Review",
+      title: "Security Audit",
       shortDescription: "Completed 17 Oct 2026, findings closed",
       status: "IN DEVELOPMENT",
       weight: "primary",
       detail: {
         summary:
-          "A comprehensive, multi-layer security review of the ARL contracts, built on open-source tools, was completed on 17 October 2026 at commit ab7595b: Slither and Aderyn static analysis, 271 Foundry tests with 29 fuzz tests at 10,000 runs and 5 invariant suites, Halmos symbolic proofs, Mythril symbolic execution and manual triage. It found no critical issue and no exploitable vulnerability in the contract code. Every finding is closed: fixed in the launch procedure, or accepted with a documented mitigation. The review was carried out by the ARL team with open-source and AI-assisted tooling; it is not a third-party audit. The scope, raw tool outputs, triage and report are public, and a CI workflow reproduces them on every change.",
+          "A comprehensive, multi-layer security audit of the ARL contracts, built on open-source tools, was completed on 17 October 2026 at commit ab7595b: Slither and Aderyn static analysis, 271 Foundry tests with 29 fuzz tests at 10,000 runs and 5 invariant suites, Halmos symbolic proofs, Mythril symbolic execution and manual triage. It found no critical issue and no exploitable vulnerability in the contract code. Every finding is closed: fixed in the launch procedure, or accepted with a documented mitigation. The audit was carried out internally by the ARL team with open-source tooling; it is not an independent third-party audit. The scope, raw tool outputs, triage and report are public, and a CI workflow reproduces them on every change.",
         facts: [
           { label: "Critical findings", value: "None" },
           { label: "Open findings", value: "None" },
@@ -39,7 +39,7 @@ export const security: Layer = {
         ],
       },
       links: [
-        { label: "Security review report", href: repoDoc("security/2026-10-17/report.md") },
+        { label: "Security audit report", href: repoDoc("security/2026-10-17/report.md") },
         { label: "Security analysis", href: repoDoc("docs/security-analysis.md") },
       ],
     },

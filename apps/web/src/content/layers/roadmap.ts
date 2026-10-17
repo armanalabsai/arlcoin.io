@@ -34,14 +34,14 @@ export const roadmap: Layer = {
     },
     {
       id: "phase-2",
-      title: "Phase 2 · Security Review",
-      shortDescription: "Review and remediation",
+      title: "Phase 2 · Security Audit",
+      shortDescription: "Audit and remediation",
       progress: "done",
       weight: "primary",
-      metric: { kind: "static", value: "Review complete, findings closed" },
+      metric: { kind: "static", value: "Audit complete, findings closed" },
       detail: {
         summary:
-          "Security review of the contracts and the deployment process. The multi-layer review was completed on 17 October 2026: tests, fuzzing, invariants, Slither and Aderyn, Halmos proofs, Mythril and a reproducible build, with every finding closed. A bug bounty paid in ARL is open.",
+          "Security audit of the contracts and the deployment process. The multi-layer internal audit was completed on 17 October 2026: tests, fuzzing, invariants, Slither and Aderyn, Halmos proofs, Mythril and a reproducible build, with every finding closed. A bug bounty paid in ARL is open.",
       },
     },
     {

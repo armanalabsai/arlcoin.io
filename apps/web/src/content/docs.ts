@@ -42,10 +42,10 @@ export const DOCS: readonly DocEntry[] = [
     description: "The internal review: tests, static analysis and symbolic checks.",
   },
   {
-    slug: "security-review",
+    slug: "security-audit",
     source: "security/2026-10-17/report.md",
-    title: "Security review report",
-    description: "The 17 October 2026 review: scope, tool results, findings and their status.",
+    title: "Security audit report",
+    description: "The 17 October 2026 audit: scope, tool results, findings and their status.",
   },
   {
     slug: "bug-bounty",

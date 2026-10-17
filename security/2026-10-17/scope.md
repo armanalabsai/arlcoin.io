@@ -1,6 +1,6 @@
 # Scope
 
-Security review of 2026-10-17. Reviewed commit:
+Security audit of 2026-10-17. Reviewed commit:
 `ab7595bc39c9256641fffc70103575c03a1cce9d` (`main`, after PR #54).
 
 ## Contracts

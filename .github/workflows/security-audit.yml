@@ -1,4 +1,4 @@
-name: Security review
+name: Security audit
 
 # Reproduces the evidence in security/2026-10-17/ on every change: static analysis (Slither and
 # Aderyn, JSON and SARIF), Foundry fuzz and invariant tests, and Halmos symbolic checks. SARIF
@@ -16,7 +16,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: security-review-${{ github.ref }}
+  group: security-audit-${{ github.ref }}
   cancel-in-progress: true
 
 # Actions are pinned to full commit SHAs; the tag is noted for review.

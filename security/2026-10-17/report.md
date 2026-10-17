@@ -1,4 +1,4 @@
-# ARL Protocol security review report
+# ARL Protocol security audit report
 
 |                 |                                              |
 | --------------- | -------------------------------------------- |
@@ -12,7 +12,7 @@
 All evidence (raw tool outputs, triage, findings) is public at
 [github.com/armanalabsai/arlcoin.io/tree/main/security/2026-10-17](https://github.com/armanalabsai/arlcoin.io/tree/main/security/2026-10-17).
 
-This review was multi-layer and built on open-source tools. It covered the nine ARL contracts,
+This audit was multi-layer and built on open-source tools. It covered the nine ARL contracts,
 the deployment scripts and the signed Base Mainnet run for the launch on 23 October 2026.
 
 - **No critical finding, and no exploitable vulnerability in contract code.**
@@ -62,7 +62,7 @@ forge test --json > forge-test.json
 FOUNDRY_DYNAMIC_TEST_LINKING=false halmos --match-contract ARLSymbolic --solver-timeout-assertion 120000
 ```
 
-`.github/workflows/security-review.yml` runs the same checks on every change and on `main`:
+`.github/workflows/security-audit.yml` runs the same checks on every change and on `main`:
 
 - Slither must report nothing.
 - Every Aderyn result must be in the triaged baseline (`security/aderyn-baseline.json`).
@@ -72,7 +72,7 @@ FOUNDRY_DYNAMIC_TEST_LINKING=false halmos --match-contract ARLSymbolic --solver-
 
 ## Limits
 
-- This is a review by the project team, not an independent audit.
+- This is an internal audit by the project team, not an independent third-party audit.
 - The Halmos proofs are bounded, not full formal verification.
 - The internals of OpenZeppelin, Safe and Uniswap v3 are trusted as published.
 - Off-chain components and market risk are out of scope (`scope.md`).
