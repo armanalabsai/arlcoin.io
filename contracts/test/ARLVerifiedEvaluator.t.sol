@@ -85,7 +85,9 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
     address internal v3 = makeAddr("v3");
 
     address internal constant SINK = 0x000000000000000000000000000000000000dEaD;
+    uint64 internal constant MIN_WINDOW = 1 hours;
     uint64 internal constant WINDOW = 1 days;
+    uint64 internal constant VOTE_WINDOW = 6 hours;
     uint96 internal constant MIN_BOND = 10 ether;
     uint96 internal constant BOND = 50 ether;
     uint256 internal constant STAKE = 1_000 ether;
@@ -100,19 +102,11 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         jobs = new ARLJobs(IERC20(address(token)));
         identity = new MockIdentity();
         reputation = new MockReputation();
-        ev = new ARLVerifiedEvaluator(
-            jobs,
-            IERC20(address(token)),
-            arbiter,
-            WINDOW,
-            MIN_BOND,
-            identity,
-            IERC8004Reputation(address(reputation))
-        );
         rep = IERC8004Reputation(address(reputation));
+        ev = new ARLVerifiedEvaluator(jobs, arbiter, MIN_WINDOW, MIN_BOND, identity, rep);
         identity.setOwner(AGENT, provider);
 
-        address[5] memory funded = [client, challenger, v1, v2, v3];
+        address[6] memory funded = [client, challenger, provider, v1, v2, v3];
         for (uint256 i; i < funded.length; ++i) {
             vm.prank(launchSafe);
             token.transfer(funded[i], 10_000 ether);
@@ -137,6 +131,11 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         c[2] = v3;
     }
 
+    function _one() internal view returns (address[] memory c) {
+        c = new address[](1);
+        c[0] = v1;
+    }
+
     function _cfg(ARLVerifiedEvaluator.Tier tier, address[] memory committee, uint8 threshold)
         internal
         pure
@@ -145,11 +144,17 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         return ARLVerifiedEvaluator.Config({
             tier: tier,
             threshold: threshold,
+            voteWindow: VOTE_WINDOW,
+            challengeWindow: WINDOW,
             bond: BOND,
             providerAgentId: AGENT,
             specHash: SPEC,
             committee: committee
         });
+    }
+
+    function _reexec() internal view returns (ARLVerifiedEvaluator.Config memory) {
+        return _cfg(ARLVerifiedEvaluator.Tier.Reexecution, _committee3(), 2);
     }
 
     function _create(address evaluator, uint256 duration) internal returns (uint256 id) {
@@ -163,19 +168,42 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         ev.configure(id, cfg);
     }
 
-    function _submit(uint256 id) internal {
+    function _fund(uint256 id, uint256 budget) internal {
         vm.prank(provider);
-        jobs.setBudget(id, BUDGET, "");
+        jobs.setBudget(id, budget, "");
         vm.prank(client);
-        jobs.fund(id, BUDGET, "");
+        jobs.fund(id, budget, "");
+    }
+
+    function _approveCommittee(uint256 id) internal {
+        vm.prank(provider);
+        ev.approveCommittee(id);
+    }
+
+    function _acceptAll(uint256 id) internal {
+        address[] memory c = ev.getConfig(id).committee;
+        for (uint256 i; i < c.length; ++i) {
+            vm.prank(c[i]);
+            ev.accept(id);
+        }
+    }
+
+    function _submit(uint256 id) internal {
         vm.prank(provider);
         jobs.submit(id, WORK, "");
     }
 
-    /// A 2-of-3 Reexecution job, submitted.
-    function _submitted() internal returns (uint256 id) {
-        id = _configured(_cfg(ARLVerifiedEvaluator.Tier.Reexecution, _committee3(), 2));
+    /// Configured, approved, funded, accepted by all, submitted.
+    function _ready(ARLVerifiedEvaluator.Config memory cfg) internal returns (uint256 id) {
+        id = _configured(cfg);
+        _approveCommittee(id);
+        _fund(id, BUDGET);
+        _acceptAll(id);
         _submit(id);
+    }
+
+    function _submitted() internal returns (uint256) {
+        return _ready(_reexec());
     }
 
     function _vote(uint256 id, address v, bool approve) internal {
@@ -203,8 +231,8 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         return jobs.getJob(id).status;
     }
 
-    function _free(address v) internal view returns (uint256) {
-        return ev.stakeOf(v) - ev.lockedOf(v);
+    function _lockedTotal() internal view returns (uint256) {
+        return ev.lockedOf(v1) + ev.lockedOf(v2) + ev.lockedOf(v3);
     }
 
     // ---------------------------------------------------------------- constructor
@@ -213,26 +241,34 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         assertEq(address(ev.jobs()), address(jobs));
         assertEq(address(ev.stakeToken()), address(token));
         assertEq(ev.arbiter(), arbiter);
-        assertEq(ev.challengeWindow(), WINDOW);
+        assertEq(ev.minChallengeWindow(), MIN_WINDOW);
         assertEq(ev.minBond(), MIN_BOND);
         assertEq(address(ev.identity()), address(identity));
         assertEq(address(ev.reputation()), address(reputation));
         assertEq(ev.SLASH_SINK(), SINK);
         assertEq(ev.MAX_COMMITTEE(), 7);
+        assertEq(ev.BOND_BPS(), 1_000);
     }
 
-    function test_RevertWhen_ConstructorZeroAddress() public {
-        IERC20 t = IERC20(address(token));
+    /// Stakes and bonds are in the escrow's own token, whatever it is.
+    function test_stakeTokenIsTheEscrowToken() public {
+        ARLJobs other = new ARLJobs(IERC20(address(investorsVesting)));
+        ARLVerifiedEvaluator e =
+            new ARLVerifiedEvaluator(other, arbiter, MIN_WINDOW, MIN_BOND, identity, rep);
+        assertEq(address(e.stakeToken()), address(investorsVesting));
+    }
+
+    function test_RevertWhen_ConstructorInvalid() public {
         vm.expectRevert(ARLVerifiedEvaluator.ZeroAddress.selector);
-        new ARLVerifiedEvaluator(ARLJobs(address(0)), t, arbiter, WINDOW, MIN_BOND, identity, rep);
+        new ARLVerifiedEvaluator(ARLJobs(address(0)), arbiter, MIN_WINDOW, MIN_BOND, identity, rep);
         vm.expectRevert(ARLVerifiedEvaluator.ZeroAddress.selector);
-        new ARLVerifiedEvaluator(jobs, IERC20(address(0)), arbiter, WINDOW, MIN_BOND, identity, rep);
-        vm.expectRevert(ARLVerifiedEvaluator.ZeroAddress.selector);
-        new ARLVerifiedEvaluator(jobs, t, address(0), WINDOW, MIN_BOND, identity, rep);
+        new ARLVerifiedEvaluator(jobs, address(0), MIN_WINDOW, MIN_BOND, identity, rep);
         vm.expectRevert(ARLVerifiedEvaluator.BadWindow.selector);
-        new ARLVerifiedEvaluator(jobs, t, arbiter, 0, MIN_BOND, identity, rep);
+        new ARLVerifiedEvaluator(jobs, arbiter, 0, MIN_BOND, identity, rep);
+        vm.expectRevert(ARLVerifiedEvaluator.BadWindow.selector);
+        new ARLVerifiedEvaluator(jobs, arbiter, 30 days + 1, MIN_BOND, identity, rep);
         vm.expectRevert(ARLVerifiedEvaluator.BondTooLow.selector);
-        new ARLVerifiedEvaluator(jobs, t, arbiter, WINDOW, 0, identity, rep);
+        new ARLVerifiedEvaluator(jobs, arbiter, MIN_WINDOW, 0, identity, rep);
     }
 
     // ---------------------------------------------------------------- stake
@@ -257,8 +293,7 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
     }
 
     function test_RevertWhen_UnstakeLocked() public {
-        uint256 id = _submitted();
-        _vote(id, v1, true);
+        _submitted();
         assertEq(ev.lockedOf(v1), BOND);
         vm.prank(v1);
         vm.expectRevert(ARLVerifiedEvaluator.InsufficientStake.selector);
@@ -272,17 +307,26 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
 
     function test_configure() public {
         uint256 id = _create(address(ev), 7 days);
-        ARLVerifiedEvaluator.Config memory cfg =
-            _cfg(ARLVerifiedEvaluator.Tier.Reexecution, _committee3(), 2);
+        ARLVerifiedEvaluator.Config memory cfg = _reexec();
         vm.expectEmit(address(ev));
         emit ARLVerifiedEvaluator.Configured(
-            id, ARLVerifiedEvaluator.Tier.Reexecution, 2, BOND, AGENT, SPEC, _committee3()
+            id,
+            ARLVerifiedEvaluator.Tier.Reexecution,
+            2,
+            VOTE_WINDOW,
+            WINDOW,
+            BOND,
+            AGENT,
+            SPEC,
+            _committee3()
         );
         vm.prank(client);
         ev.configure(id, cfg);
 
         ARLVerifiedEvaluator.Config memory got = ev.getConfig(id);
         assertEq(got.threshold, 2);
+        assertEq(got.voteWindow, VOTE_WINDOW);
+        assertEq(got.challengeWindow, WINDOW);
         assertEq(got.bond, BOND);
         assertEq(got.specHash, SPEC);
         assertEq(got.committee.length, 3);
@@ -292,52 +336,74 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
     }
 
     function test_configureFallback() public {
-        address[] memory one = new address[](1);
-        one[0] = v1;
-        uint256 id = _configured(_cfg(ARLVerifiedEvaluator.Tier.Fallback, one, 1));
+        uint256 id = _configured(_cfg(ARLVerifiedEvaluator.Tier.Fallback, _one(), 1));
         assertEq(uint256(ev.getConfig(id).tier), uint256(ARLVerifiedEvaluator.Tier.Fallback));
     }
 
     function test_RevertWhen_ConfigureNotClient() public {
         uint256 id = _create(address(ev), 7 days);
-        ARLVerifiedEvaluator.Config memory cfg =
-            _cfg(ARLVerifiedEvaluator.Tier.Reexecution, _committee3(), 2);
+        ARLVerifiedEvaluator.Config memory cfg = _reexec();
         vm.prank(stranger);
         vm.expectRevert(ARLVerifiedEvaluator.Unauthorized.selector);
         ev.configure(id, cfg);
     }
 
     function test_RevertWhen_ConfigureOtherEvaluatorOrNotOpen() public {
-        ARLVerifiedEvaluator.Config memory cfg =
-            _cfg(ARLVerifiedEvaluator.Tier.Reexecution, _committee3(), 2);
+        ARLVerifiedEvaluator.Config memory cfg = _reexec();
         uint256 other = _create(stranger, 7 days);
         vm.prank(client);
         vm.expectRevert(ARLVerifiedEvaluator.WrongJobStatus.selector);
         ev.configure(other, cfg);
 
         uint256 id = _create(address(ev), 7 days);
-        vm.prank(provider);
-        jobs.setBudget(id, BUDGET, "");
-        vm.prank(client);
-        jobs.fund(id, BUDGET, "");
+        _fund(id, BUDGET);
         vm.prank(client);
         vm.expectRevert(ARLVerifiedEvaluator.WrongJobStatus.selector);
         ev.configure(id, cfg);
     }
 
     function test_RevertWhen_ConfigureTwice() public {
-        ARLVerifiedEvaluator.Config memory cfg =
-            _cfg(ARLVerifiedEvaluator.Tier.Reexecution, _committee3(), 2);
+        ARLVerifiedEvaluator.Config memory cfg = _reexec();
         uint256 id = _configured(cfg);
         vm.prank(client);
         vm.expectRevert(ARLVerifiedEvaluator.WrongPhase.selector);
         ev.configure(id, cfg);
     }
 
+    function test_RevertWhen_ConfigureBadWindows() public {
+        uint256 id = _create(address(ev), 7 days);
+        ARLVerifiedEvaluator.Config memory cfg = _reexec();
+        vm.startPrank(client);
+        cfg.voteWindow = 10 minutes - 1;
+        vm.expectRevert(ARLVerifiedEvaluator.BadWindow.selector);
+        ev.configure(id, cfg);
+        cfg.voteWindow = 7 days + 1;
+        vm.expectRevert(ARLVerifiedEvaluator.BadWindow.selector);
+        ev.configure(id, cfg);
+        cfg.voteWindow = VOTE_WINDOW;
+        cfg.challengeWindow = MIN_WINDOW - 1;
+        vm.expectRevert(ARLVerifiedEvaluator.BadWindow.selector);
+        ev.configure(id, cfg);
+        cfg.challengeWindow = 30 days + 1;
+        vm.expectRevert(ARLVerifiedEvaluator.BadWindow.selector);
+        ev.configure(id, cfg);
+        vm.stopPrank();
+    }
+
+    /// Per-job windows: a high-value job can take a longer challenge window than the minimum.
+    function test_configurePerJobWindows() public {
+        uint256 id = _create(address(ev), 10 days);
+        ARLVerifiedEvaluator.Config memory cfg = _reexec();
+        cfg.challengeWindow = 72 hours;
+        cfg.voteWindow = 1 days;
+        vm.prank(client);
+        ev.configure(id, cfg);
+        assertEq(ev.getConfig(id).challengeWindow, 72 hours);
+    }
+
     function test_RevertWhen_ConfigureExpiryTooSoon() public {
-        uint256 id = _create(address(ev), 2 * WINDOW - 1);
-        ARLVerifiedEvaluator.Config memory cfg =
-            _cfg(ARLVerifiedEvaluator.Tier.Reexecution, _committee3(), 2);
+        uint256 id = _create(address(ev), VOTE_WINDOW + 2 * WINDOW - 1);
+        ARLVerifiedEvaluator.Config memory cfg = _reexec();
         vm.prank(client);
         vm.expectRevert(ARLVerifiedEvaluator.ExpiryTooSoon.selector);
         ev.configure(id, cfg);
@@ -345,8 +411,7 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
 
     function test_RevertWhen_ConfigureBondTooLow() public {
         uint256 id = _create(address(ev), 7 days);
-        ARLVerifiedEvaluator.Config memory cfg =
-            _cfg(ARLVerifiedEvaluator.Tier.Reexecution, _committee3(), 2);
+        ARLVerifiedEvaluator.Config memory cfg = _reexec();
         cfg.bond = MIN_BOND - 1;
         vm.prank(client);
         vm.expectRevert(ARLVerifiedEvaluator.BondTooLow.selector);
@@ -388,13 +453,11 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         // Fallback: exactly one validator, threshold one.
         vm.expectRevert(ARLVerifiedEvaluator.BadThreshold.selector);
         ev.configure(id, _cfg(ARLVerifiedEvaluator.Tier.Fallback, _committee3(), 1));
-        address[] memory one = new address[](1);
-        one[0] = v1;
         vm.expectRevert(ARLVerifiedEvaluator.BadThreshold.selector);
-        ev.configure(id, _cfg(ARLVerifiedEvaluator.Tier.Fallback, one, 2));
-        // Checked tiers: threshold at least two and a strict majority.
+        ev.configure(id, _cfg(ARLVerifiedEvaluator.Tier.Fallback, _one(), 2));
+        // Checked tiers: threshold at least two, a strict majority, at most the committee.
         vm.expectRevert(ARLVerifiedEvaluator.BadThreshold.selector);
-        ev.configure(id, _cfg(ARLVerifiedEvaluator.Tier.Reexecution, one, 1));
+        ev.configure(id, _cfg(ARLVerifiedEvaluator.Tier.Reexecution, _one(), 1));
         address[] memory four = new address[](4);
         four[0] = v1;
         four[1] = v2;
@@ -407,13 +470,152 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         vm.stopPrank();
     }
 
-    // ---------------------------------------------------------------- vote
+    // ---------------------------------------------------------------- committee approval
 
-    function test_voteApprovesAtThreshold() public {
+    function test_approveCommittee() public {
+        uint256 id = _configured(_reexec());
+        vm.expectEmit(address(ev));
+        emit ARLVerifiedEvaluator.CommitteeApproved(id, provider);
+        _approveCommittee(id);
+        assertTrue(ev.getVerdict(id).providerApproved);
+        vm.prank(provider);
+        vm.expectRevert(ARLVerifiedEvaluator.WrongPhase.selector);
+        ev.approveCommittee(id);
+    }
+
+    function test_RevertWhen_ApproveCommitteeNotProvider() public {
+        uint256 id = _configured(_reexec());
+        vm.prank(client);
+        vm.expectRevert(ARLVerifiedEvaluator.Unauthorized.selector);
+        ev.approveCommittee(id);
+        vm.prank(provider);
+        vm.expectRevert(ARLVerifiedEvaluator.WrongPhase.selector);
+        ev.approveCommittee(99);
+    }
+
+    function test_RevertWhen_ProviderOnItsOwnCommittee() public {
+        address[] memory c = _committee3();
+        c[2] = provider;
+        uint256 id = _configured(_cfg(ARLVerifiedEvaluator.Tier.Reexecution, c, 2));
+        vm.prank(provider);
+        vm.expectRevert(ARLVerifiedEvaluator.ConflictOfInterest.selector);
+        ev.approveCommittee(id);
+    }
+
+    // ---------------------------------------------------------------- accept
+
+    function test_acceptLocksTheLargerOfFloorAndTenthOfBudget() public {
+        // Budget 250: a tenth is 25 < floor 50, so the bond is the floor.
+        uint256 id = _configured(_reexec());
+        _approveCommittee(id);
+        _fund(id, BUDGET);
+        vm.expectEmit(address(ev));
+        emit ARLVerifiedEvaluator.Accepted(id, v1, BOND);
+        vm.prank(v1);
+        ev.accept(id);
+        assertEq(ev.getVerdict(id).bond, BOND);
+        assertEq(ev.lockedOf(v1), BOND);
+        assertEq(ev.voteOf(id, v1), 2);
+
+        // Budget 2,000: a tenth is 200 > floor.
+        uint256 big = _configured(_reexec());
+        _approveCommittee(big);
+        _fund(big, 2_000 ether);
+        vm.prank(v2);
+        ev.accept(big);
+        assertEq(ev.getVerdict(big).bond, 200 ether);
+        vm.prank(v3);
+        ev.accept(big);
+        assertEq(ev.lockedOf(v3), 200 ether);
+    }
+
+    function test_acceptAfterSubmission() public {
+        uint256 id = _configured(_reexec());
+        _approveCommittee(id);
+        _fund(id, BUDGET);
+        _submit(id);
+        vm.prank(v1);
+        ev.accept(id);
+        assertEq(ev.voteOf(id, v1), 2);
+    }
+
+    function test_RevertWhen_AcceptWithoutApprovalOrFunding() public {
+        uint256 id = _configured(_reexec());
+        vm.prank(v1);
+        vm.expectRevert(ARLVerifiedEvaluator.NotApprovedByProvider.selector);
+        ev.accept(id);
+        _approveCommittee(id);
+        vm.prank(v1);
+        vm.expectRevert(ARLVerifiedEvaluator.WrongJobStatus.selector);
+        ev.accept(id);
+        vm.prank(v1);
+        vm.expectRevert(ARLVerifiedEvaluator.WrongPhase.selector);
+        ev.accept(99);
+    }
+
+    function test_RevertWhen_AcceptByNonMemberOrTwice() public {
+        uint256 id = _configured(_reexec());
+        _approveCommittee(id);
+        _fund(id, BUDGET);
+        vm.prank(stranger);
+        vm.expectRevert(ARLVerifiedEvaluator.Unauthorized.selector);
+        ev.accept(id);
+        vm.prank(v1);
+        ev.accept(id);
+        vm.prank(v1);
+        vm.expectRevert(ARLVerifiedEvaluator.Unauthorized.selector);
+        ev.accept(id);
+    }
+
+    function test_RevertWhen_AcceptWithoutFreeStake() public {
+        uint256 id = _configured(_reexec());
+        _approveCommittee(id);
+        _fund(id, BUDGET);
+        vm.prank(v1);
+        ev.unstake(STAKE - BOND + 1);
+        vm.prank(v1);
+        vm.expectRevert(ARLVerifiedEvaluator.InsufficientStake.selector);
+        ev.accept(id);
+    }
+
+    function test_RevertWhen_AcceptAfterVotingStarted() public {
+        uint256 id = _configured(_reexec());
+        _approveCommittee(id);
+        _fund(id, BUDGET);
+        vm.prank(v1);
+        ev.accept(id);
+        _submit(id);
+        _vote(id, v1, true);
+        vm.prank(v2);
+        vm.expectRevert(ARLVerifiedEvaluator.WrongPhase.selector);
+        ev.accept(id);
+    }
+
+    // ---------------------------------------------------------------- voting
+
+    function test_startVoting() public {
+        uint256 id = _submitted();
+        vm.expectEmit(address(ev));
+        emit ARLVerifiedEvaluator.VotingStarted(id, uint64(block.timestamp) + VOTE_WINDOW);
+        vm.prank(provider);
+        ev.startVoting(id);
+        assertEq(ev.getVerdict(id).voteEnds, block.timestamp + VOTE_WINDOW);
+        vm.expectRevert(ARLVerifiedEvaluator.WrongPhase.selector);
+        ev.startVoting(id);
+    }
+
+    function test_RevertWhen_StartVotingBeforeSubmission() public {
+        uint256 id = _configured(_reexec());
+        vm.expectRevert(ARLVerifiedEvaluator.WrongJobStatus.selector);
+        ev.startVoting(id);
+    }
+
+    function test_voteStartsWindowAndApprovesAtThreshold() public {
         uint256 id = _submitted();
         _vote(id, v1, true);
+        assertEq(ev.getVerdict(id).voteEnds, block.timestamp + VOTE_WINDOW);
         assertEq(uint256(_phase(id)), uint256(ARLVerifiedEvaluator.Phase.Configured));
-        assertEq(ev.voteOf(id, v1), 2);
+        assertEq(ev.voteOf(id, v1), 3);
 
         vm.expectEmit(address(ev));
         emit ARLVerifiedEvaluator.Decided(id, true, uint64(block.timestamp) + WINDOW);
@@ -424,11 +626,7 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         assertEq(v.approvals, 2);
         assertEq(v.deliverable, WORK);
         assertEq(v.challengeEnds, block.timestamp + WINDOW);
-        assertEq(ev.lockedOf(v1), BOND);
-        assertEq(ev.lockedOf(v2), BOND);
-        assertEq(ev.lockedOf(v3), 0);
 
-        // A late vote is refused once decided.
         vm.prank(v3);
         vm.expectRevert(ARLVerifiedEvaluator.WrongPhase.selector);
         ev.vote(id, false, WORK, EVIDENCE);
@@ -443,7 +641,7 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         ARLVerifiedEvaluator.Verdict memory v = ev.getVerdict(id);
         assertEq(uint256(v.phase), uint256(ARLVerifiedEvaluator.Phase.Rejected));
         assertEq(v.rejections, 2);
-        assertEq(ev.voteOf(id, v3), 3);
+        assertEq(ev.voteOf(id, v3), 4);
     }
 
     function test_RevertWhen_VoteBadCaller() public {
@@ -457,6 +655,16 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         ev.vote(id, true, WORK, EVIDENCE);
     }
 
+    function test_RevertWhen_VoteWithoutAccepting() public {
+        uint256 id = _configured(_reexec());
+        _approveCommittee(id);
+        _fund(id, BUDGET);
+        _submit(id);
+        vm.prank(v1);
+        vm.expectRevert(ARLVerifiedEvaluator.Unauthorized.selector);
+        ev.vote(id, true, WORK, EVIDENCE);
+    }
+
     function test_RevertWhen_VoteUnconfigured() public {
         vm.prank(v1);
         vm.expectRevert(ARLVerifiedEvaluator.WrongPhase.selector);
@@ -464,30 +672,22 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
     }
 
     function test_RevertWhen_VoteBeforeSubmission() public {
-        uint256 id = _configured(_cfg(ARLVerifiedEvaluator.Tier.Reexecution, _committee3(), 2));
+        uint256 id = _configured(_reexec());
+        _approveCommittee(id);
+        _fund(id, BUDGET);
+        vm.prank(v1);
+        ev.accept(id);
         vm.prank(v1);
         vm.expectRevert(ARLVerifiedEvaluator.WrongJobStatus.selector);
         ev.vote(id, true, WORK, EVIDENCE);
     }
 
-    function test_RevertWhen_VoteByProvider() public {
-        address[] memory c = _committee3();
-        c[2] = provider;
-        vm.prank(provider);
-        token.approve(address(ev), type(uint256).max);
-        uint256 id = _configured(_cfg(ARLVerifiedEvaluator.Tier.Reexecution, c, 2));
-        _submit(id);
-        vm.prank(provider);
-        vm.expectRevert(ARLVerifiedEvaluator.ConflictOfInterest.selector);
-        ev.vote(id, true, WORK, EVIDENCE);
-    }
-
-    function test_RevertWhen_VoteWithoutFreeStake() public {
+    function test_RevertWhen_VoteAfterWindow() public {
         uint256 id = _submitted();
-        vm.prank(v1);
-        ev.unstake(STAKE - BOND + 1);
-        vm.prank(v1);
-        vm.expectRevert(ARLVerifiedEvaluator.InsufficientStake.selector);
+        _vote(id, v1, true);
+        vm.warp(block.timestamp + VOTE_WINDOW);
+        vm.prank(v2);
+        vm.expectRevert(ARLVerifiedEvaluator.VoteWindowClosed.selector);
         ev.vote(id, true, WORK, EVIDENCE);
     }
 
@@ -499,11 +699,59 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         ev.vote(id, true, keccak256("other"), EVIDENCE);
     }
 
+    // ---------------------------------------------------------------- non-vote penalty
+
+    function test_closeUndecidedBurnsAbsenteesAndRefunds() public {
+        uint256 id = _submitted();
+        _vote(id, v1, true); // v2 and v3 accepted but never vote
+        vm.expectRevert(ARLVerifiedEvaluator.VoteWindowOpen.selector);
+        ev.closeUndecided(id);
+
+        vm.warp(block.timestamp + VOTE_WINDOW);
+        uint256 clientBefore = token.balanceOf(client);
+        vm.expectEmit(address(ev));
+        emit ARLVerifiedEvaluator.Failed(id);
+        ev.closeUndecided(id);
+
+        assertEq(token.balanceOf(client), clientBefore + BUDGET);
+        assertEq(uint256(_status(id)), uint256(ARLJobs.JobStatus.Rejected));
+        assertEq(uint256(_phase(id)), uint256(ARLVerifiedEvaluator.Phase.Failed));
+        assertEq(ev.stakeOf(v1), STAKE);
+        assertEq(ev.stakeOf(v2), STAKE - BOND);
+        assertEq(ev.stakeOf(v3), STAKE - BOND);
+        assertEq(ev.voteOf(id, v2), 5);
+        assertEq(_lockedTotal(), 0);
+        assertEq(token.balanceOf(SINK), 2 * uint256(BOND));
+
+        vm.expectRevert(ARLVerifiedEvaluator.WrongPhase.selector);
+        ev.closeUndecided(id);
+        vm.expectRevert(ARLVerifiedEvaluator.WrongPhase.selector);
+        ev.release(id);
+    }
+
+    function test_closeUndecidedWithoutAbsentees() public {
+        // Members that never accepted lock nothing and lose nothing.
+        uint256 id = _configured(_reexec());
+        _approveCommittee(id);
+        _fund(id, BUDGET);
+        _submit(id);
+        ev.startVoting(id);
+        vm.warp(block.timestamp + VOTE_WINDOW);
+        ev.closeUndecided(id);
+        assertEq(uint256(_status(id)), uint256(ARLJobs.JobStatus.Rejected));
+        assertEq(token.balanceOf(SINK), 0);
+    }
+
+    function test_RevertWhen_CloseUndecidedBeforeVoting() public {
+        uint256 id = _submitted();
+        vm.expectRevert(ARLVerifiedEvaluator.WrongPhase.selector);
+        ev.closeUndecided(id);
+    }
+
     // ---------------------------------------------------------------- finalize
 
     function test_finalizeApprovedPaysProviderAndWritesReputation() public {
         uint256 id = _approved();
-        vm.prank(stranger);
         vm.expectRevert(ARLVerifiedEvaluator.ChallengeWindowOpen.selector);
         ev.finalize(id);
 
@@ -518,9 +766,9 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         assertEq(token.balanceOf(provider), before + BUDGET);
         assertEq(uint256(_status(id)), uint256(ARLJobs.JobStatus.Completed));
         assertEq(uint256(_phase(id)), uint256(ARLVerifiedEvaluator.Phase.Finalized));
-        assertEq(ev.lockedOf(v1), 0);
-        assertEq(ev.lockedOf(v2), 0);
-        assertEq(ev.stakeOf(v1), STAKE);
+        // The accepted member that did not vote is unlocked without penalty: it was not needed.
+        assertEq(_lockedTotal(), 0);
+        assertEq(ev.stakeOf(v3), STAKE);
 
         assertEq(reputation.count(), 1);
         assertEq(reputation.lastAgent(), AGENT);
@@ -545,10 +793,7 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
     }
 
     function test_finalizeFallbackTag() public {
-        address[] memory one = new address[](1);
-        one[0] = v1;
-        uint256 id = _configured(_cfg(ARLVerifiedEvaluator.Tier.Fallback, one, 1));
-        _submit(id);
+        uint256 id = _ready(_cfg(ARLVerifiedEvaluator.Tier.Fallback, _one(), 1));
         _vote(id, v1, true);
         vm.warp(block.timestamp + WINDOW);
         ev.finalize(id);
@@ -556,8 +801,7 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
     }
 
     function test_finalizeAttestedTag() public {
-        uint256 id = _configured(_cfg(ARLVerifiedEvaluator.Tier.Attested, _committee3(), 2));
-        _submit(id);
+        uint256 id = _ready(_cfg(ARLVerifiedEvaluator.Tier.Attested, _committee3(), 2));
         _vote(id, v1, true);
         _vote(id, v2, true);
         vm.warp(block.timestamp + WINDOW);
@@ -583,11 +827,9 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
     }
 
     function test_feedbackSkippedWithoutAgentId() public {
-        ARLVerifiedEvaluator.Config memory cfg =
-            _cfg(ARLVerifiedEvaluator.Tier.Reexecution, _committee3(), 2);
+        ARLVerifiedEvaluator.Config memory cfg = _reexec();
         cfg.providerAgentId = 0;
-        uint256 id = _configured(cfg);
-        _submit(id);
+        uint256 id = _ready(cfg);
         _vote(id, v1, true);
         _vote(id, v2, true);
         vm.warp(block.timestamp + WINDOW);
@@ -595,54 +837,43 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         assertEq(reputation.count(), 0);
     }
 
-    function test_feedbackSkippedWithoutRegistries() public {
-        ARLVerifiedEvaluator bare = new ARLVerifiedEvaluator(
-            jobs,
-            IERC20(address(token)),
-            arbiter,
-            WINDOW,
-            MIN_BOND,
-            IERC8004Identity(address(0)),
-            IERC8004Reputation(address(0))
-        );
+    function _finalizeOn(ARLVerifiedEvaluator e) internal {
         vm.prank(v1);
-        token.approve(address(bare), type(uint256).max);
+        token.approve(address(e), type(uint256).max);
         vm.prank(v1);
-        bare.stake(BOND);
-        address[] memory one = new address[](1);
-        one[0] = v1;
-        uint256 id = _create(address(bare), 7 days);
+        e.stake(BOND);
+        uint256 id = _create(address(e), 7 days);
         vm.prank(client);
-        bare.configure(id, _cfg(ARLVerifiedEvaluator.Tier.Fallback, one, 1));
+        e.configure(id, _cfg(ARLVerifiedEvaluator.Tier.Fallback, _one(), 1));
+        vm.prank(provider);
+        e.approveCommittee(id);
+        _fund(id, BUDGET);
+        vm.prank(v1);
+        e.accept(id);
         _submit(id);
         vm.prank(v1);
-        bare.vote(id, true, WORK, EVIDENCE);
+        e.vote(id, true, WORK, EVIDENCE);
         vm.warp(block.timestamp + WINDOW);
-        bare.finalize(id);
+        e.finalize(id);
         assertEq(uint256(_status(id)), uint256(ARLJobs.JobStatus.Completed));
-        assertEq(reputation.count(), 0);
+    }
 
-        ARLVerifiedEvaluator noIdentity = new ARLVerifiedEvaluator(
-            jobs,
-            IERC20(address(token)),
-            arbiter,
-            WINDOW,
-            MIN_BOND,
-            IERC8004Identity(address(0)),
-            rep
+    function test_feedbackSkippedWithoutRegistries() public {
+        _finalizeOn(
+            new ARLVerifiedEvaluator(
+                jobs,
+                arbiter,
+                MIN_WINDOW,
+                MIN_BOND,
+                IERC8004Identity(address(0)),
+                IERC8004Reputation(address(0))
+            )
         );
-        vm.prank(v1);
-        token.approve(address(noIdentity), type(uint256).max);
-        vm.prank(v1);
-        noIdentity.stake(BOND);
-        id = _create(address(noIdentity), 7 days);
-        vm.prank(client);
-        noIdentity.configure(id, _cfg(ARLVerifiedEvaluator.Tier.Fallback, one, 1));
-        _submit(id);
-        vm.prank(v1);
-        noIdentity.vote(id, true, WORK, EVIDENCE);
-        vm.warp(block.timestamp + WINDOW);
-        noIdentity.finalize(id);
+        _finalizeOn(
+            new ARLVerifiedEvaluator(
+                jobs, arbiter, MIN_WINDOW, MIN_BOND, IERC8004Identity(address(0)), rep
+            )
+        );
         assertEq(reputation.count(), 0);
     }
 
@@ -683,7 +914,6 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         assertEq(uint256(v.phase), uint256(ARLVerifiedEvaluator.Phase.Disputed));
         assertEq(v.challenger, challenger);
 
-        // A disputed job cannot be finalized or disputed again.
         vm.warp(block.timestamp + WINDOW);
         vm.expectRevert(ARLVerifiedEvaluator.WrongPhase.selector);
         ev.finalize(id);
@@ -718,13 +948,12 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         vm.prank(arbiter);
         ev.resolve(id, false, keccak256("re-ran: output differs"));
 
-        // Escrow back to the client; approvers slashed; the dissenting validator is untouched.
         assertEq(token.balanceOf(client), clientBefore + BUDGET);
         assertEq(uint256(_status(id)), uint256(ARLJobs.JobStatus.Rejected));
         assertEq(ev.stakeOf(v1), STAKE - BOND);
         assertEq(ev.stakeOf(v2), STAKE - BOND);
         assertEq(ev.stakeOf(v3), STAKE);
-        assertEq(ev.lockedOf(v1) + ev.lockedOf(v2) + ev.lockedOf(v3), 0);
+        assertEq(_lockedTotal(), 0);
         assertEq(token.balanceOf(SINK), 2 * uint256(BOND));
         assertEq(token.balanceOf(challenger), challengerBefore + BOND);
         assertEq(uint256(_phase(id)), uint256(ARLVerifiedEvaluator.Phase.Finalized));
@@ -733,19 +962,16 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
 
     function test_resolveOverturnsWrongRejection() public {
         uint256 id = _rejected();
-        vm.prank(provider);
-        token.approve(address(ev), type(uint256).max);
-        vm.prank(launchSafe);
-        token.transfer(provider, BOND);
+        uint256 before = token.balanceOf(provider);
         vm.prank(provider);
         ev.dispute(id, EVIDENCE);
-
         vm.prank(arbiter);
         ev.resolve(id, true, bytes32(0));
         assertEq(uint256(_status(id)), uint256(ARLJobs.JobStatus.Completed));
-        assertEq(token.balanceOf(provider), BUDGET + BOND);
+        assertEq(token.balanceOf(provider), before + BUDGET);
         assertEq(ev.stakeOf(v1), STAKE - BOND);
         assertEq(ev.stakeOf(v2), STAKE - BOND);
+        assertEq(ev.stakeOf(v3), STAKE);
         assertEq(token.balanceOf(SINK), 2 * uint256(BOND));
     }
 
@@ -761,7 +987,7 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         assertEq(token.balanceOf(provider), providerBefore + BUDGET);
         assertEq(token.balanceOf(SINK), BOND);
         assertEq(ev.stakeOf(v1), STAKE);
-        assertEq(ev.lockedOf(v1), 0);
+        assertEq(_lockedTotal(), 0);
     }
 
     function test_RevertWhen_ResolveNotArbiterOrNotDisputed() public {
@@ -782,11 +1008,9 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         ev.dispute(id, EVIDENCE);
         uint256 challengerBefore = token.balanceOf(challenger);
 
-        vm.prank(stranger);
         vm.expectRevert(ARLVerifiedEvaluator.WrongJobStatus.selector);
         ev.release(id);
 
-        // The arbiter never rules; the deadline passes and anyone refunds the client.
         vm.warp(jobs.getJob(id).expiredAt);
         jobs.claimRefund(id);
         vm.expectEmit(address(ev));
@@ -794,7 +1018,7 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         ev.release(id);
 
         assertEq(token.balanceOf(challenger), challengerBefore + BOND);
-        assertEq(ev.lockedOf(v1) + ev.lockedOf(v2), 0);
+        assertEq(_lockedTotal(), 0);
         assertEq(ev.stakeOf(v1), STAKE);
         assertEq(uint256(_phase(id)), uint256(ARLVerifiedEvaluator.Phase.Released));
 
@@ -806,20 +1030,23 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
     }
 
     function test_releaseAfterClientCancelsOpenJob() public {
-        uint256 id = _configured(_cfg(ARLVerifiedEvaluator.Tier.Reexecution, _committee3(), 2));
+        uint256 id = _configured(_reexec());
         vm.prank(client);
         jobs.reject(id, bytes32(0), "");
         ev.release(id);
         assertEq(uint256(_phase(id)), uint256(ARLVerifiedEvaluator.Phase.Released));
     }
 
-    function test_releaseUndecidedAfterExpiry() public {
-        uint256 id = _submitted();
-        _vote(id, v1, true);
+    function test_releaseAcceptedButNeverSubmitted() public {
+        uint256 id = _configured(_reexec());
+        _approveCommittee(id);
+        _fund(id, BUDGET);
+        _acceptAll(id);
         vm.warp(jobs.getJob(id).expiredAt);
         jobs.claimRefund(id);
         ev.release(id);
-        assertEq(ev.lockedOf(v1), 0);
+        assertEq(_lockedTotal(), 0);
+        assertEq(ev.stakeOf(v2), STAKE);
     }
 
     function test_RevertWhen_ReleaseUnknownOrFinalized() public {
@@ -834,17 +1061,22 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
 
     // ---------------------------------------------------------------- fuzz
 
-    /// Whatever the votes and ruling, the escrow goes to exactly one side, and the evaluator
-    /// holds exactly the validators' stake.
-    function testFuzz_escrowToExactlyOneSide(uint8 votes, bool doDispute, bool ruling) public {
+    /// Whatever the votes, absences and ruling, the escrow goes to exactly one side, the
+    /// evaluator holds exactly the validators' stake, and nothing stays locked.
+    function testFuzz_escrowToExactlyOneSide(uint8 votes, uint8 path, bool ruling) public {
         uint256 id = _submitted();
         address[3] memory vs = [v1, v2, v3];
         for (uint256 i; i < 3 && _phase(id) == ARLVerifiedEvaluator.Phase.Configured; ++i) {
-            _vote(id, vs[i], (votes >> i) & 1 == 1);
+            // Bits 0-2: vote or stay absent; bits 3-5: approve or reject.
+            if ((votes >> i) & 1 == 1) _vote(id, vs[i], (votes >> (i + 3)) & 1 == 1);
         }
         uint256 clientBefore = token.balanceOf(client);
         uint256 providerBefore = token.balanceOf(provider);
-        if (doDispute) {
+        if (_phase(id) == ARLVerifiedEvaluator.Phase.Configured) {
+            if (ev.getVerdict(id).voteEnds == 0) ev.startVoting(id);
+            vm.warp(block.timestamp + VOTE_WINDOW);
+            ev.closeUndecided(id);
+        } else if (path % 2 == 0) {
             vm.prank(challenger);
             ev.dispute(id, EVIDENCE);
             vm.prank(arbiter);
@@ -858,6 +1090,6 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         assertEq(paid + refunded, BUDGET);
         assertTrue(paid == 0 || refunded == 0);
         assertEq(token.balanceOf(address(ev)), ev.stakeOf(v1) + ev.stakeOf(v2) + ev.stakeOf(v3));
-        assertEq(ev.lockedOf(v1) + ev.lockedOf(v2) + ev.lockedOf(v3), 0);
+        assertEq(_lockedTotal(), 0);
     }
 }

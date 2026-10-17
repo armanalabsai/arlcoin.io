@@ -68,10 +68,6 @@ contract ARLVerifiedEvaluatorHandler is Test {
         return n == 0 ? 0 : ids[seed % n];
     }
 
-    function _bondOf(uint256 id) internal view returns (uint256) {
-        return ev.getConfig(id).bond;
-    }
-
     /// At most a few jobs per run, so that each moves through its phases.
     function open(uint256 seed, uint256 budget) external {
         if (ids.length >= 4) return;
@@ -96,12 +92,14 @@ contract ARLVerifiedEvaluatorHandler is Test {
         }
         vm.startPrank(client);
         uint256 id =
-            jobs.createJob(provider, address(ev), block.timestamp + 5 days, "j", address(0));
+            jobs.createJob(provider, address(ev), block.timestamp + 6 days, "j", address(0));
         ev.configure(
             id,
             ARLVerifiedEvaluator.Config({
                 tier: tier,
                 threshold: threshold,
+                voteWindow: 6 hours,
+                challengeWindow: 1 days,
                 bond: uint96(bound(seed, 10 ether, 200 ether)),
                 providerAgentId: 0,
                 specHash: bytes32(seed),
@@ -109,6 +107,8 @@ contract ARLVerifiedEvaluatorHandler is Test {
             })
         );
         vm.stopPrank();
+        vm.prank(provider);
+        ev.approveCommittee(id);
         vm.prank(provider);
         jobs.setBudget(id, budget, "");
         vm.prank(client);
@@ -138,10 +138,27 @@ contract ARLVerifiedEvaluatorHandler is Test {
         try ev.vote(id, approve, deliverable, bytes32(0)) {} catch {}
     }
 
+    function accept(uint256 j, uint256 who) external {
+        uint256 id = _id(j);
+        if (id == 0) return;
+        address[] memory committee = ev.getConfig(id).committee;
+        vm.prank(committee[who % committee.length]);
+        try ev.accept(id) {} catch {}
+    }
+
+    function closeUndecided(uint256 j) external {
+        uint256 id = _id(j);
+        if (id == 0) return;
+        uint256 budget = jobs.getJob(id).budget;
+        try ev.closeUndecided(id) {
+            ghostSettled += budget;
+        } catch {}
+    }
+
     function dispute(uint256 j) external {
         uint256 id = _id(j);
         if (id == 0) return;
-        uint256 bond = _bondOf(id);
+        uint256 bond = ev.getVerdict(id).bond;
         vm.prank(challenger);
         try ev.dispute(id, bytes32(0)) {
             ghostOpenChallengeBonds += bond;
@@ -151,7 +168,7 @@ contract ARLVerifiedEvaluatorHandler is Test {
     function resolve(uint256 j, bool approve) external {
         uint256 id = _id(j);
         if (id == 0) return;
-        uint256 bond = _bondOf(id);
+        uint256 bond = ev.getVerdict(id).bond;
         uint256 budget = jobs.getJob(id).budget;
         vm.prank(arbiter);
         try ev.resolve(id, approve, bytes32(0)) {
@@ -182,7 +199,7 @@ contract ARLVerifiedEvaluatorHandler is Test {
         uint256 id = _id(j);
         if (id == 0) return;
         bool disputed = ev.getVerdict(id).phase == ARLVerifiedEvaluator.Phase.Disputed;
-        uint256 bond = _bondOf(id);
+        uint256 bond = ev.getVerdict(id).bond;
         try ev.release(id) {
             if (disputed) ghostOpenChallengeBonds -= bond;
         } catch {}
@@ -196,9 +213,15 @@ contract ARLVerifiedEvaluatorHandler is Test {
         ARLJobs.JobStatus status = jobs.getJob(id).status;
         ARLVerifiedEvaluator.Phase phase = ev.getVerdict(id).phase;
         if (status == ARLJobs.JobStatus.Funded) {
-            this.submit(j);
+            if (choice % 3 == 0) this.submit(j);
+            else this.accept(j, choice);
         } else if (phase == ARLVerifiedEvaluator.Phase.Configured) {
-            this.vote(j, (choice % 1024) * 4 + 1, choice % 3 != 0);
+            if (choice % 5 == 0) {
+                this.warp(6 hours);
+                this.closeUndecided(j);
+            } else {
+                this.vote(j, (choice % 1024) * 4 + 1, choice % 3 != 0);
+            }
         } else if (
             phase == ARLVerifiedEvaluator.Phase.Approved
                 || phase == ARLVerifiedEvaluator.Phase.Rejected
@@ -246,9 +269,8 @@ contract ARLVerifiedEvaluatorInvariant is ARLTestBase {
         jobs = new ARLJobs(IERC20(address(token)));
         ev = new ARLVerifiedEvaluator(
             jobs,
-            IERC20(address(token)),
             arbiter,
-            1 days,
+            1 hours,
             10 ether,
             IERC8004Identity(address(0)),
             IERC8004Reputation(address(0))
@@ -304,8 +326,8 @@ contract ARLVerifiedEvaluatorInvariant is ARLTestBase {
         assertEq(token.balanceOf(address(jobs)), handler.ghostFunded() - handler.ghostSettled());
     }
 
-    /// A job this contract settled or released never keeps a bond locked: summing the bonds of
-    /// the voters of every live (not finalized, not released) job gives the total locked stake.
+    /// A job this contract settled, released or closed never keeps a bond locked: summing the
+    /// bonds of the members that accepted every live job gives the total locked stake.
     function invariant_locksMatchLiveVotes() public view {
         uint256 expected;
         for (uint256 k; k < handler.idCount(); ++k) {
@@ -314,10 +336,12 @@ contract ARLVerifiedEvaluatorInvariant is ARLTestBase {
             if (
                 phase == ARLVerifiedEvaluator.Phase.Finalized
                     || phase == ARLVerifiedEvaluator.Phase.Released
+                    || phase == ARLVerifiedEvaluator.Phase.Failed
             ) continue;
-            ARLVerifiedEvaluator.Config memory cfg = ev.getConfig(id);
-            for (uint256 i; i < cfg.committee.length; ++i) {
-                if (ev.voteOf(id, cfg.committee[i]) >= 2) expected += cfg.bond;
+            address[] memory committee = ev.getConfig(id).committee;
+            for (uint256 i; i < committee.length; ++i) {
+                uint8 state = ev.voteOf(id, committee[i]);
+                if (state >= 2 && state <= 4) expected += ev.getVerdict(id).bond;
             }
         }
         uint256 locked;

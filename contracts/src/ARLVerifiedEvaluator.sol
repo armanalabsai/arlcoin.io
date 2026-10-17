@@ -28,17 +28,21 @@ interface IERC8004Reputation {
 
 /// @title ARL verified evaluator: a staked validator committee as the ERC-8183 evaluator
 /// @notice An `ARLJobs` client names this contract as the job's evaluator and, while the job is
-/// Open, picks a committee of staked validators, a threshold and a bond. After the provider
-/// submits, each committee member checks the work (re-executes it, or checks a TEE or proof
-/// attestation, as the job's spec says) and votes, locking its bond. Once the threshold approves,
-/// or approval can no longer be reached, the decision waits out a challenge window. Without a
-/// dispute anyone finalizes it: the escrow goes to the provider (approved) or back to the client
-/// (rejected), and the outcome is written to the provider's ERC-8004 reputation. With a dispute,
-/// the arbiter rules; the bonds of the validators who voted for the overturned decision, or the
-/// challenger's bond if the decision stands, are sent to an unspendable address.
+/// Open, proposes a committee of staked validators, a threshold, a bond floor and the job's vote
+/// and challenge windows. The provider approves the committee, so neither side picks it alone.
+/// Once the job is funded, each member accepts, locking a bond in the job's payment token: the
+/// larger of the floor and a tenth of the budget. After the provider submits, members check the
+/// work (re-execute it, or check a TEE or proof attestation, as the job's spec says) and vote
+/// within the vote window. Once the threshold approves, or approval can no longer be reached, the
+/// decision waits out the challenge window; without a dispute anyone finalizes it: the escrow goes
+/// to the provider (approved) or back to the client (rejected), and the outcome is written to the
+/// provider's ERC-8004 reputation. With a dispute, the arbiter rules; the bonds of the validators
+/// who voted for the overturned decision, or the challenger's bond if the decision stands, are
+/// burned. If the vote window ends undecided, the bonds of members who accepted but did not vote
+/// are burned and the client is refunded.
 ///
 /// Trust bounds:
-/// - no owner and no upgrade; every parameter is fixed at deployment;
+/// - no owner and no upgrade; every parameter is fixed at deployment or per job within bounds;
 /// - the arbiter only rules on disputed jobs, can only pay the escrow to the client or the
 ///   provider, and never receives slashed bonds (they are burned), so it cannot profit from a
 ///   ruling;
@@ -62,12 +66,15 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         Rejected,
         Disputed,
         Finalized,
-        Released
+        Released,
+        Failed
     }
 
     struct Config {
         Tier tier;
         uint8 threshold;
+        uint64 voteWindow;
+        uint64 challengeWindow;
         uint96 bond;
         uint256 providerAgentId;
         bytes32 specHash;
@@ -76,16 +83,26 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
 
     struct Verdict {
         Phase phase;
+        bool providerApproved;
         uint8 approvals;
         uint8 rejections;
+        uint64 voteEnds;
         uint64 challengeEnds;
         address challenger;
+        uint256 bond;
         bytes32 deliverable;
         bytes32 voteHash;
     }
 
     /// @notice Largest committee a job can name.
     uint256 public constant MAX_COMMITTEE = 7;
+    /// @notice The bond is at least this share of the job's budget, in basis points (10%).
+    uint256 public constant BOND_BPS = 1_000;
+    /// @notice Bounds of the per-job vote window.
+    uint64 public constant MIN_VOTE_WINDOW = 10 minutes;
+    uint64 public constant MAX_VOTE_WINDOW = 7 days;
+    /// @notice Upper bound of the per-job challenge window.
+    uint64 public constant MAX_CHALLENGE_WINDOW = 30 days;
     /// @notice Where slashed bonds go: an address nobody controls.
     address public constant SLASH_SINK = 0x000000000000000000000000000000000000dEaD;
     /// @notice ERC-8004 feedback tag written for every finalized job.
@@ -93,10 +110,22 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
     /// @notice Gas forwarded to each ERC-8004 registry call.
     uint256 public constant REGISTRY_GAS = 300_000;
 
+    /// Committee member states in `_votes`.
+    uint8 private constant MEMBER = 1;
+    uint8 private constant ACCEPTED = 2;
+    uint8 private constant APPROVED = 3;
+    uint8 private constant REJECTED = 4;
+    uint8 private constant ABSENT = 5;
+
     ARLJobs public immutable jobs;
+    /// @notice The jobs contract's payment token: stakes and bonds are in the escrow's token.
     IERC20 public immutable stakeToken;
     address public immutable arbiter;
-    uint64 public immutable challengeWindow;
+    /// @notice Shortest challenge window a job may set (for example 1 hour on Base Sepolia,
+    /// 24 hours on Base Mainnet).
+    uint64 public immutable minChallengeWindow;
+    /// @notice Smallest bond floor a job may set. A technical gate against zero-cost votes; the
+    /// economic bond is the larger of the floor and a tenth of the budget.
     uint96 public immutable minBond;
     IERC8004Identity public immutable identity;
     IERC8004Reputation public immutable reputation;
@@ -106,7 +135,6 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
 
     mapping(uint256 jobId => Config) private _configs;
     mapping(uint256 jobId => Verdict) private _verdicts;
-    /// 0: not on the committee, 1: on it and not voted, 2: approved, 3: rejected.
     mapping(uint256 jobId => mapping(address validator => uint8)) private _votes;
 
     event Staked(address indexed validator, uint256 amount);
@@ -115,11 +143,16 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         uint256 indexed jobId,
         Tier tier,
         uint8 threshold,
+        uint64 voteWindow,
+        uint64 challengeWindow,
         uint96 bond,
         uint256 providerAgentId,
         bytes32 specHash,
         address[] committee
     );
+    event CommitteeApproved(uint256 indexed jobId, address indexed provider);
+    event Accepted(uint256 indexed jobId, address indexed validator, uint256 bond);
+    event VotingStarted(uint256 indexed jobId, uint64 voteEnds);
     event Voted(
         uint256 indexed jobId,
         address indexed validator,
@@ -131,6 +164,7 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
     event Disputed(uint256 indexed jobId, address indexed challenger, bytes32 evidence);
     event Resolved(uint256 indexed jobId, bool approved, bool overturned, bytes32 reason);
     event Slashed(uint256 indexed jobId, address indexed account, uint256 amount);
+    event Failed(uint256 indexed jobId);
     event Finalized(uint256 indexed jobId, bool approved, bytes32 voteHash);
     event Released(uint256 indexed jobId);
     event FeedbackFailed(uint256 indexed jobId, uint256 agentId);
@@ -141,35 +175,38 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
     error WrongJobStatus();
     error BadCommittee();
     error BadThreshold();
+    error BadWindow();
     error BondTooLow();
     error ExpiryTooSoon();
     error InsufficientStake();
     error DeliverableMismatch();
     error ConflictOfInterest();
+    error NotApprovedByProvider();
+    error VoteWindowOpen();
+    error VoteWindowClosed();
     error ChallengeWindowOpen();
     error ChallengeWindowClosed();
     error ZeroAmount();
-    error BadWindow();
 
     constructor(
         ARLJobs jobs_,
-        IERC20 stakeToken_,
         address arbiter_,
-        uint64 challengeWindow_,
+        uint64 minChallengeWindow_,
         uint96 minBond_,
         IERC8004Identity identity_,
         IERC8004Reputation reputation_
     ) {
-        if (
-            address(jobs_) == address(0) || address(stakeToken_) == address(0)
-                || arbiter_ == address(0)
-        ) revert ZeroAddress();
-        if (challengeWindow_ == 0) revert BadWindow();
+        if (address(jobs_) == address(0) || arbiter_ == address(0)) {
+            revert ZeroAddress();
+        }
+        if (minChallengeWindow_ == 0 || minChallengeWindow_ > MAX_CHALLENGE_WINDOW) {
+            revert BadWindow();
+        }
         if (minBond_ == 0) revert BondTooLow();
         jobs = jobs_;
-        stakeToken = stakeToken_;
+        stakeToken = jobs_.paymentToken();
         arbiter = arbiter_;
-        challengeWindow = challengeWindow_;
+        minChallengeWindow = minChallengeWindow_;
         minBond = minBond_;
         identity = identity_;
         reputation = reputation_;
@@ -177,7 +214,8 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
 
     // ---------------------------------------------------------------- validator stake
 
-    /// @notice Adds stake. Any account can be a validator; a client picks who checks its job.
+    /// @notice Adds stake. Any account can be a validator; the client proposes and the provider
+    /// approves who checks a job.
     function stake(uint256 amount) external nonReentrant {
         if (amount == 0) revert ZeroAmount();
         stakeOf[msg.sender] += amount;
@@ -185,7 +223,7 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         stakeToken.safeTransferFrom(msg.sender, address(this), amount);
     }
 
-    /// @notice Withdraws stake that no vote has locked.
+    /// @notice Withdraws stake that no accepted job has locked.
     function unstake(uint256 amount) external nonReentrant {
         if (amount == 0) revert ZeroAmount();
         if (amount > stakeOf[msg.sender] - lockedOf[msg.sender]) revert InsufficientStake();
@@ -198,8 +236,8 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
 
     /// @notice Job client only, while the job is Open and names this contract as evaluator.
     /// Fallback takes exactly one validator; Reexecution and Attested take a strict majority
-    /// threshold of at least two. The job's deadline must leave room for two challenge windows
-    /// (votes and the challenge itself, then a ruling).
+    /// threshold of at least two. The windows must be within bounds and the job's deadline must
+    /// leave room for the vote window and two challenge windows (the challenge, then a ruling).
     function configure(uint256 jobId, Config calldata cfg) external {
         ARLJobs.Job memory job = jobs.getJob(jobId);
         if (msg.sender != job.client) revert Unauthorized();
@@ -207,15 +245,13 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
             revert WrongJobStatus();
         }
         if (_verdicts[jobId].phase != Phase.None) revert WrongPhase();
-        // slither-disable-next-line timestamp
-        if (job.expiredAt < block.timestamp + 2 * uint256(challengeWindow)) revert ExpiryTooSoon();
+        _checkWindows(cfg.voteWindow, cfg.challengeWindow, job.expiredAt);
         if (cfg.bond < minBond) revert BondTooLow();
-
         _checkThreshold(cfg.tier, cfg.threshold, cfg.committee.length);
         for (uint256 i; i < cfg.committee.length; ++i) {
             address v = cfg.committee[i];
             if (v == address(0) || v == job.client || _votes[jobId][v] != 0) revert BadCommittee();
-            _votes[jobId][v] = 1;
+            _votes[jobId][v] = MEMBER;
         }
 
         _configs[jobId] = cfg;
@@ -224,6 +260,8 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
             jobId,
             cfg.tier,
             cfg.threshold,
+            cfg.voteWindow,
+            cfg.challengeWindow,
             cfg.bond,
             cfg.providerAgentId,
             cfg.specHash,
@@ -231,43 +269,103 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         );
     }
 
-    /// @notice Committee member only, once the job is Submitted and before a decision: votes and
-    /// locks the job's bond from the caller's stake. Every approval must name the same
-    /// deliverable (the hash the provider submitted, which the voter checked).
+    /// @notice Job provider only, while configured: approves the committee and the terms. No
+    /// member can accept before this, so the client cannot fill the committee alone. A provider
+    /// cannot sit on the committee of its own job.
+    function approveCommittee(uint256 jobId) external {
+        Verdict storage v = _verdicts[jobId];
+        if (v.phase != Phase.Configured || v.providerApproved) revert WrongPhase();
+        if (msg.sender != jobs.getJob(jobId).provider) revert Unauthorized();
+        if (_votes[jobId][msg.sender] != 0) revert ConflictOfInterest();
+        v.providerApproved = true;
+        emit CommitteeApproved(jobId, msg.sender);
+    }
+
+    /// @notice Committee member only, once the committee is approved and the job is funded,
+    /// before voting starts: commits to vote and locks the job's bond from the caller's stake.
+    /// The bond is fixed by the first acceptance (the budget cannot change once funded).
+    function accept(uint256 jobId) external {
+        Verdict storage v = _verdicts[jobId];
+        if (v.phase != Phase.Configured || v.voteEnds != 0) revert WrongPhase();
+        if (!v.providerApproved) revert NotApprovedByProvider();
+        if (_votes[jobId][msg.sender] != MEMBER) revert Unauthorized();
+        ARLJobs.Job memory job = jobs.getJob(jobId);
+        if (job.status != ARLJobs.JobStatus.Funded && job.status != ARLJobs.JobStatus.Submitted) {
+            revert WrongJobStatus();
+        }
+        uint256 bond = v.bond;
+        if (bond == 0) {
+            bond = job.budget * BOND_BPS / 10_000;
+            uint256 floor = _configs[jobId].bond;
+            if (bond < floor) bond = floor;
+            v.bond = bond;
+        }
+        if (stakeOf[msg.sender] - lockedOf[msg.sender] < bond) revert InsufficientStake();
+        lockedOf[msg.sender] += bond;
+        _votes[jobId][msg.sender] = ACCEPTED;
+        emit Accepted(jobId, msg.sender, bond);
+    }
+
+    /// @notice Anyone, once the job is Submitted: starts the vote window (the first vote also
+    /// starts it). The provider calls it right after submitting.
+    function startVoting(uint256 jobId) external {
+        Verdict storage v = _verdicts[jobId];
+        if (v.phase != Phase.Configured || v.voteEnds != 0) revert WrongPhase();
+        if (jobs.getJob(jobId).status != ARLJobs.JobStatus.Submitted) revert WrongJobStatus();
+        _startVoting(jobId, v);
+    }
+
+    /// @notice Member that accepted only, once the job is Submitted, within the vote window and
+    /// before a decision. Every approval must name the same deliverable (the hash the provider
+    /// submitted, which the voter checked).
     function vote(uint256 jobId, bool approve, bytes32 deliverable, bytes32 evidence)
         external
         nonReentrant
     {
         Verdict storage v = _verdicts[jobId];
         if (v.phase != Phase.Configured) revert WrongPhase();
-        if (_votes[jobId][msg.sender] != 1) revert Unauthorized();
-        ARLJobs.Job memory job = jobs.getJob(jobId);
-        if (job.status != ARLJobs.JobStatus.Submitted) revert WrongJobStatus();
-        if (msg.sender == job.provider) revert ConflictOfInterest();
-
-        Config storage cfg = _configs[jobId];
-        uint256 bond = cfg.bond;
-        if (stakeOf[msg.sender] - lockedOf[msg.sender] < bond) revert InsufficientStake();
-        lockedOf[msg.sender] += bond;
+        if (_votes[jobId][msg.sender] != ACCEPTED) revert Unauthorized();
+        if (jobs.getJob(jobId).status != ARLJobs.JobStatus.Submitted) revert WrongJobStatus();
+        if (v.voteEnds == 0) {
+            _startVoting(jobId, v);
+            // slither-disable-next-line timestamp
+        } else if (block.timestamp >= v.voteEnds) {
+            revert VoteWindowClosed();
+        }
 
         if (approve) {
             if (v.approvals == 0) v.deliverable = deliverable;
             else if (v.deliverable != deliverable) revert DeliverableMismatch();
             ++v.approvals;
-            _votes[jobId][msg.sender] = 2;
+            _votes[jobId][msg.sender] = APPROVED;
         } else {
             ++v.rejections;
-            _votes[jobId][msg.sender] = 3;
+            _votes[jobId][msg.sender] = REJECTED;
         }
         v.voteHash = keccak256(abi.encode(v.voteHash, msg.sender, approve, deliverable, evidence));
         emit Voted(jobId, msg.sender, approve, deliverable, evidence);
 
+        Config storage cfg = _configs[jobId];
         uint256 threshold = cfg.threshold;
         if (v.approvals == threshold) {
-            _decide(jobId, v, Phase.Approved);
+            _decide(jobId, v, Phase.Approved, cfg.challengeWindow);
         } else if (v.rejections > cfg.committee.length - threshold) {
-            _decide(jobId, v, Phase.Rejected);
+            _decide(jobId, v, Phase.Rejected, cfg.challengeWindow);
         }
+    }
+
+    /// @notice Anyone, once the vote window has ended without a decision: burns the bonds of the
+    /// members who accepted but did not vote, unlocks those who voted, and refunds the client.
+    function closeUndecided(uint256 jobId) external nonReentrant {
+        Verdict storage v = _verdicts[jobId];
+        if (v.phase != Phase.Configured || v.voteEnds == 0) revert WrongPhase();
+        // slither-disable-next-line timestamp
+        if (block.timestamp < v.voteEnds) revert VoteWindowOpen();
+        v.phase = Phase.Failed;
+        emit Failed(jobId);
+        uint256 burned = _unlock(jobId, ABSENT, true);
+        jobs.reject(jobId, v.voteHash, "");
+        if (burned != 0) stakeToken.safeTransfer(SLASH_SINK, burned);
     }
 
     /// @notice Anyone, within the challenge window: disputes the decision, escrowing a bond equal
@@ -281,7 +379,7 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         // The phase before the dispute stays readable from `approvals` versus the threshold.
         v.phase = Phase.Disputed;
         emit Disputed(jobId, msg.sender, evidence);
-        stakeToken.safeTransferFrom(msg.sender, address(this), _configs[jobId].bond);
+        stakeToken.safeTransferFrom(msg.sender, address(this), v.bond);
     }
 
     /// @notice Anyone, once the challenge window has passed without a dispute: pays the escrow to
@@ -292,7 +390,7 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         if (phase != Phase.Approved && phase != Phase.Rejected) revert WrongPhase();
         // slither-disable-next-line timestamp
         if (block.timestamp < v.challengeEnds) revert ChallengeWindowOpen();
-        _unlockVoters(jobId, false, false);
+        _unlock(jobId, 0, false);
         _settle(jobId, v, phase == Phase.Approved);
     }
 
@@ -308,9 +406,9 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         bool overturned = approve != decidedApproved;
         emit Resolved(jobId, approve, overturned, reason);
 
-        uint256 bond = _configs[jobId].bond;
+        uint256 bond = v.bond;
         address challenger = v.challenger;
-        uint256 burned = _unlockVoters(jobId, overturned, decidedApproved);
+        uint256 burned = _unlock(jobId, decidedApproved ? APPROVED : REJECTED, overturned);
         if (!overturned) {
             emit Slashed(jobId, challenger, bond);
             burned += bond;
@@ -326,17 +424,18 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
     function release(uint256 jobId) external nonReentrant {
         Verdict storage v = _verdicts[jobId];
         Phase phase = v.phase;
-        if (phase == Phase.None || phase == Phase.Finalized || phase == Phase.Released) {
-            revert WrongPhase();
-        }
+        if (
+            phase == Phase.None || phase == Phase.Finalized || phase == Phase.Released
+                || phase == Phase.Failed
+        ) revert WrongPhase();
         ARLJobs.JobStatus status = jobs.getJob(jobId).status;
         if (status != ARLJobs.JobStatus.Expired && status != ARLJobs.JobStatus.Rejected) {
             revert WrongJobStatus();
         }
         v.phase = Phase.Released;
         emit Released(jobId);
-        _unlockVoters(jobId, false, false);
-        if (phase == Phase.Disputed) stakeToken.safeTransfer(v.challenger, _configs[jobId].bond);
+        _unlock(jobId, 0, false);
+        if (phase == Phase.Disputed) stakeToken.safeTransfer(v.challenger, v.bond);
     }
 
     // ---------------------------------------------------------------- views
@@ -349,12 +448,29 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         return _verdicts[jobId];
     }
 
-    /// @notice 0: not on the committee, 1: not voted, 2: approved, 3: rejected.
+    /// @notice 0: not on the committee, 1: not accepted, 2: accepted, 3: approved, 4: rejected,
+    /// 5: accepted but did not vote (bond burned).
     function voteOf(uint256 jobId, address validator) external view returns (uint8) {
         return _votes[jobId][validator];
     }
 
     // ---------------------------------------------------------------- internal
+
+    function _checkWindows(uint64 voteWindow, uint64 challengeWindow, uint256 expiredAt)
+        private
+        view
+    {
+        if (voteWindow < MIN_VOTE_WINDOW || voteWindow > MAX_VOTE_WINDOW) {
+            revert BadWindow();
+        }
+        if (challengeWindow < minChallengeWindow || challengeWindow > MAX_CHALLENGE_WINDOW) {
+            revert BadWindow();
+        }
+        // slither-disable-next-line timestamp
+        if (expiredAt < block.timestamp + voteWindow + 2 * uint256(challengeWindow)) {
+            revert ExpiryTooSoon();
+        }
+    }
 
     /// Fallback: one validator, threshold one. Reexecution and Attested: a strict majority of at
     /// least two, at most the committee.
@@ -367,33 +483,38 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         }
     }
 
-    function _decide(uint256 jobId, Verdict storage v, Phase phase) private {
+    function _startVoting(uint256 jobId, Verdict storage v) private {
+        // slither-disable-next-line timestamp
+        uint64 ends = uint64(block.timestamp) + _configs[jobId].voteWindow;
+        v.voteEnds = ends;
+        emit VotingStarted(jobId, ends);
+    }
+
+    function _decide(uint256 jobId, Verdict storage v, Phase phase, uint64 window) private {
         v.phase = phase;
         // slither-disable-next-line timestamp
-        uint64 ends = uint64(block.timestamp) + challengeWindow;
+        uint64 ends = uint64(block.timestamp) + window;
         v.challengeEnds = ends;
         emit Decided(jobId, phase == Phase.Approved, ends);
     }
 
-    /// Unlocks the bond of every committee member that voted. With `slash`, the bonds of those
-    /// who voted for the overturned decision (`slashApprovers`: the approvers, else the
-    /// rejecters) are taken from their stake; the caller burns the returned total.
-    function _unlockVoters(uint256 jobId, bool slash, bool slashApprovers)
-        private
-        returns (uint256 burned)
-    {
+    /// Unlocks the bond of every member that accepted. With `slash`, the bonds of members whose
+    /// state is `slashState` are also taken from their stake (an ABSENT slash applies to members
+    /// that accepted and did not vote); the caller burns the returned total.
+    function _unlock(uint256 jobId, uint8 slashState, bool slash) private returns (uint256 burned) {
         Config storage cfg = _configs[jobId];
-        uint256 bond = cfg.bond;
-        uint8 losing = slashApprovers ? 2 : 3;
+        uint256 bond = _verdicts[jobId].bond;
         uint256 n = cfg.committee.length;
         for (uint256 i; i < n; ++i) {
             address member = cfg.committee[i];
-            uint8 cast = _votes[jobId][member];
-            if (cast < 2) continue;
+            uint8 state = _votes[jobId][member];
+            if (state < ACCEPTED || state == ABSENT) continue;
             lockedOf[member] -= bond;
-            if (slash && cast == losing) {
+            bool absent = state == ACCEPTED && slashState == ABSENT;
+            if (slash && (state == slashState || absent)) {
                 stakeOf[member] -= bond;
                 burned += bond;
+                if (absent) _votes[jobId][member] = ABSENT;
                 emit Slashed(jobId, member, bond);
             }
         }

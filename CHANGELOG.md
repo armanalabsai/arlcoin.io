@@ -10,6 +10,11 @@ documents that back it; nothing here is deployed on Base Mainnet.
   arbiter limited to disputed jobs, burn slashing and outcomes written to ERC-8004 reputation.
   Built and tested (unit, fuzz, invariant; 100% coverage), not deployed
   ([verifiable-execution.md](docs/verifiable-execution.md)).
+- Verified evaluator: per-job vote and challenge windows, bond in the escrow token
+  (max(budget / 10, floor)), provider approval of the committee, `accept` with a penalty for
+  members that do not vote, and a Safe arbiter of at least 2-of-3 created by
+  `CreateArbiterSafe` ([arbiter-safe.md](docs/arbiter-safe.md)). Tested on a Base Sepolia fork
+  with a real Safe ruling and an allowlisted ERC-8004 read.
 
 ## 2026-10-16
 
