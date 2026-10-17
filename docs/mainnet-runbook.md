@@ -7,14 +7,14 @@ the simulation are in [mainnet-plan.md](mainnet-plan.md); the testnet run of the
 
 ## Before the day
 
-| #   | Item                                                                                                                          | Check                                |
-| --- | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
-| 1   | `networkGate` opens 8453 at 2026-10-23T00:00:00Z (done 2026-10-05, updated 2026-10-16, tests)                                 | run on or after 2026-10-23 00:00 UTC |
-| 2   | Deployer has never sent a transaction and has no code                                                                         | `cast nonce` = 0, `cast code` = `0x` |
-| 3   | Deployer `0x5a7F207B3764113c68c50219e31D2a7c22132F52` funded with at least 0.001 ETH on Base; it sends nothing before the run | `cast balance`                       |
-| 4   | Deferred to the later airdrop (no airdrop at TGE): claim list collected as `address,amount` (whole ARL)                       | not needed at TGE                    |
-| 5   | Signer config `contracts/deploy/deployments/8453-signers.env` unchanged                                                       | SHA-256 in mainnet-plan.md           |
-| 6   | Full rehearsal on a Base Mainnet fork passes: `bash scripts/rehearse-base-mainnet-fork.sh`                                    | "MAINNET FORK REHEARSAL PASSED"      |
+| #   | Item                                                                                                                                                     | Check                                |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| 1   | `networkGate` opens 8453 at 2026-10-23T00:00:00Z (done 2026-10-05, updated 2026-10-16, tests)                                                            | run on or after 2026-10-23 00:00 UTC |
+| 2   | Deployer has never sent a transaction and has no code                                                                                                    | `cast nonce` = 0, `cast code` = `0x` |
+| 3   | Deployer `0xe033104AE32fc7e13263B7AED577Ab20d6E47eAA` (signers file `cac589cc…`) funded with at least 0.001 ETH on Base; it sends nothing before the run | `cast balance`                       |
+| 4   | Deferred to the later airdrop (no airdrop at TGE): claim list collected as `address,amount` (whole ARL)                                                  | not needed at TGE                    |
+| 5   | Signer config `contracts/deploy/deployments/8453-signers.env` unchanged                                                                                  | SHA-256 in mainnet-plan.md           |
+| 6   | Full rehearsal on a Base Mainnet fork passes: `bash scripts/rehearse-base-mainnet-fork.sh`                                                               | "MAINNET FORK REHEARSAL PASSED"      |
 
 ## Rehearsal (2026-10-10, passed)
 
