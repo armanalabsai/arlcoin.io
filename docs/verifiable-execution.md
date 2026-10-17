@@ -1,10 +1,16 @@
 # Verifiable execution and evaluation layer
 
-Status: **Phase 1 built and tested on a local chain; not deployed.** Contract:
-[`ARLVerifiedEvaluator.sol`](../contracts/src/ARLVerifiedEvaluator.sol). Tests:
-[unit and fuzz](../contracts/test/ARLVerifiedEvaluator.t.sol),
-[invariant](../contracts/test/invariant/ARLVerifiedEvaluatorInvariant.t.sol). Phases 2 and 3 are
-designs only.
+Status: **Phase 1 contract built and tested; not deployed.** Contract:
+[`ARLVerifiedEvaluator.sol`](../contracts/src/ARLVerifiedEvaluator.sol). Deployment script:
+[`DeploySepoliaEvaluator.s.sol`](../contracts/script/DeploySepoliaEvaluator.s.sol). Phases 2 and 3
+are designs only.
+
+| Suite      | Command                                                                                                  | Covers                                                                                                                                                                                                      |
+| ---------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit, fuzz | `forge test --match-contract ARLVerifiedEvaluatorTest`                                                   | Every transition and who may make it; refused inputs; slashing on overturn and on a failed dispute; release after expiry; failing, malformed and gas-burning registries; escrow to one side (fuzz)          |
+| Invariant  | `forge test --match-contract ARLVerifiedEvaluatorInvariant`                                              | Solvency (balance = stake + open challenger bonds), locked within stake, locks = votes of live jobs, escrow conserved                                                                                       |
+| Deployment | `forge test --match-contract DeploySepoliaEvaluatorTest`                                                 | Base Sepolia and local only; inputs must have code; canonical ERC-8004 registries on Base Sepolia                                                                                                           |
+| Fork       | `FOUNDRY_PROFILE=fork ARL_FORK_RPC=<Base Sepolia RPC> forge test --match-contract VerifiedEvaluatorFork` | Against the deployed ARL, `ARLJobs` and ERC-8004 registries: an approved job pays the provider and the real ReputationRegistry records the evaluator's feedback; an overturned approval refunds and slashes |
 
 ## Problem
 
@@ -234,7 +240,8 @@ to client or provider, nothing to the arbiter); a validator that refuses to vote
 | Phase | Time      | Deliverables                                                                                                                                                                                                                                                                                                                                    | State     |
 | ----- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
 | 1     | 1–2 weeks | `ARLVerifiedEvaluator` with stake, committee votes, challenge window, dispute, arbiter ruling, burn slashing, release, ERC-8004 feedback; unit, fuzz and invariant tests; 100% line/function/branch coverage; Slither clean; this document                                                                                                      | **Built** |
-| 1     |           | Base Sepolia deployment script against the deployed `ARLJobs` and the canonical ERC-8004 registries; the operator stakes as the first `Fallback` validator; reference validator in `packages/provider` that re-executes a container job and votes                                                                                               | Next      |
+| 1     |           | Base Sepolia deployment script against the deployed `ARLJobs` and the canonical ERC-8004 registries, rehearsed on a fork                                                                                                                                                                                                                        | **Built** |
+| 1     |           | Deployment (needs the open questions 1–2 answered and the operator key); the operator stakes as the first `Fallback` validator; reference validator in `packages/provider` that re-executes a container job and votes                                                                                                                           | Next      |
 | 2     | 2–4 weeks | `ARLX402JobGateway` (EIP-3009 USDC, Permit2 ARL); a USDC `ARLJobs` instance; x402 `extra.escrowTerms` in `@arl/payments`; validator fee paid at `configure` and split among voters on the winning side; SDK tier policy (`threshold × bond ≥ budget`); TEE quote checking in the reference validator; dapp screens for configure, vote, dispute | Design    |
 | 3     | 4–8 weeks | `IExecutionVerifier` adapters (Noir/UltraHonk, a zkVM verifier, TEE quote verifier); `approveWithProof`, `resolveWithProof`; challenger reward from slashed bonds once disputes are proof-resolved; arbiter retired for provable specs                                                                                                          | Design    |
 
