@@ -46,7 +46,13 @@ stamped `base-mainnet`.
    other TGE off testnet), then `cli.ts`.
 3. **Contracts.** Open `https://arlcoin.io/app/deploy/?plan=8453-deploy` (prepared the same way),
    sign nonces 12-15, then
-   `record-cli.ts arl`; each created address must match the plan.
+   `record-cli.ts arl`; each created address must match the plan. A created address follows
+   from the deployer and nonce alone, so a matching address does not prove the constructor
+   arguments. Before signing, check that the file's SHA-256 is
+   `4e7acae253947d3343daeed8a56b893459d1b7797c2e7045bb2204ebfd6d909a` and that the arguments
+   the screen shows match [mainnet-plan.md](mainnet-plan.md): vesting beneficiaries and dates,
+   timelock delay, proposer, executor and guardian, and the eleven token recipients in order
+   (security review 2026-10-17, finding D-01).
 4. **Verify.** `VerifyARL`, `bytecode-cli.ts verify`, `supply-cli.ts` (total 21,000,000, circulating
    2,100,000), then `explorer-cli.ts --check-broadcast --run` with `ETHERSCAN_API_KEY` set.
 5. **Claim list — deferred to the later airdrop; not part of TGE day.** There is no airdrop at
@@ -87,6 +93,8 @@ stamped `base-mainnet`.
    `FOUNDRY_PROFILE=fork ARL_BASE_RPC=<Base RPC> forge test --match-contract UniswapPublicLaunchFork`,
    then sign with two of three owners. If anyone has traded since step 6 the batch reverts and
    deposits nothing (fork-tested); rebuild it with `priceUsd` at or above the pool's current price.
+   To avoid that, collect both owner signatures for this batch before step 6 is executed, and
+   execute it within seconds of step 6 (security review 2026-10-17, finding O-03).
 8. **Distributor — deferred to the later airdrop; not part of TGE day.** `ARLMerkleDistributor`
    is not deployed at TGE. For the later airdrop: `DeployDistributor` with the announced claim
    end (the script currently enforces at most 60 days), then `record-cli.ts distributor … --distribution distribution.json`; the Public Launch Safe
