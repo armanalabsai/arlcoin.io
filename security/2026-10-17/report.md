@@ -1,12 +1,11 @@
 # ARL Protocol security review report
 
-|                 |                                                                                               |
-| --------------- | --------------------------------------------------------------------------------------------- |
-| Version         | 1.0                                                                                           |
-| Date            | 17 October 2026                                                                               |
-| Reviewed commit | `ab7595bc39c9256641fffc70103575c03a1cce9d`                                                    |
-| Fixes           | PR #55 (runbook procedure for M-03 and L-01)                                                  |
-| Carried out by  | The ARL team, with open-source tools and AI-assisted review. This is not a third-party audit. |
+|                 |                                              |
+| --------------- | -------------------------------------------- |
+| Version         | 1.0                                          |
+| Date            | 17 October 2026                              |
+| Reviewed commit | `ab7595bc39c9256641fffc70103575c03a1cce9d`   |
+| Fixes           | PR #55 (runbook procedure for M-03 and L-01) |
 
 ## Summary
 
