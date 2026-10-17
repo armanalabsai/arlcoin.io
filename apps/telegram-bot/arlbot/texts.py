@@ -5,6 +5,7 @@ SOURCE = "https://github.com/armanalabsai/arlcoin.io"
 X_ACCOUNT = "https://x.com/arlprotocol"
 EMAIL = "team@arlcoin.io"
 COMMUNITY = "https://t.me/arlcoin_community"
+APP = "https://arlcoin.io/app/"
 TESTNET_TOKEN = "0x244312b619127B6458154F3467eFD7c87CD28500"
 
 SCAM_WARNING = (
@@ -29,11 +30,12 @@ RULES = (
 )
 
 START = (
-    "ARL Network: a payment rail for AI and compute services on Base.\n\n"
+    "ARL Protocol: a payment rail for AI and compute services on Base.\n\n"
     "- ARL token: 21,000,000 fixed supply, no mint function, no owner, no upgrade proxy.\n"
     f"- Live on Base Sepolia testnet: {TESTNET_TOKEN}\n"
+    f"- Try the testnet app (faucet, staking, jobs, x402 per-use payments, anonymous polls): {APP}\n"
+    "  Testnet ARL has no value.\n"
     "- Base Mainnet: targeted for 2026-10-23, not deployed yet.\n"
-    "- Per-use payments (x402 \"upto\"): in development, not deployed.\n"
     "- No airdrop at launch. An airdrop of 500,000 ARL is planned for a later date; "
     "date, eligibility and rules will be announced later on the official channels.\n"
     "- A bug bounty paid in ARL is open.\n\n"
@@ -50,6 +52,7 @@ HELP = (
     "/start - what ARL is and where things stand\n"
     "/rules - group rules and the security notice\n"
     "/help - this list\n\n"
+    f"App (testnet): {APP}\n"
     f"Community: {COMMUNITY}\n"
     f"Updates: {X_ACCOUNT}"
 )
