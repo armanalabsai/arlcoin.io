@@ -1,0 +1,21 @@
+{
+  "reviewed": "security/2026-10-17/triage.md",
+  "results": [
+    "contract-locks-ether src/ARLVestingWallet.sol:22",
+    "large-numeric-literal src/ARLAllocation.sol:12",
+    "large-numeric-literal src/ARLAllocation.sol:14",
+    "large-numeric-literal src/ARLAllocation.sol:15",
+    "large-numeric-literal src/ARLAllocation.sol:16",
+    "large-numeric-literal src/ARLAllocation.sol:17",
+    "large-numeric-literal src/ARLAllocation.sol:18",
+    "large-numeric-literal src/ARLAllocation.sol:20",
+    "large-numeric-literal src/ARLAllocation.sol:21",
+    "large-numeric-literal src/ARLAllocation.sol:22",
+    "large-numeric-literal src/ARLAllocation.sol:23",
+    "large-numeric-literal src/ARLAllocation.sol:24",
+    "large-numeric-literal src/ARLAllocation.sol:25",
+    "reentrancy-state-change src/ARLAnonymousSignal.sol:175",
+    "require-revert-in-loop src/ARLAnonymousSignal.sol:201",
+    "unchecked-return src/ARLTimelock.sol:43"
+  ]
+}

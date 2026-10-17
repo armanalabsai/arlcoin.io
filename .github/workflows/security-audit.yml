@@ -1,0 +1,181 @@
+name: Security audit
+
+# Reproduces the evidence in security/2026-10-17/ on every change: static analysis (Slither and
+# Aderyn, JSON and SARIF), Foundry fuzz and invariant tests, and Halmos symbolic checks. SARIF
+# results appear under the repository's Security tab. Mythril (slow) runs weekly and on demand.
+# Each job uploads its raw output as a workflow artifact.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "41 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+# Actions are pinned to full commit SHAs; the tag is noted for review.
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+
+      - uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09 # v1.9.1
+        with:
+          version: v1.8.3
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+
+      - run: pip install slither-analyzer==0.11.6
+      - run: npm install --global @cyfrin/aderyn@0.6.8
+
+      - run: mkdir -p out-security
+
+      # Fails on any result of low severity or higher; reports are written either way.
+      - name: Slither
+        working-directory: contracts
+        run: >
+          slither . --foundry-compile-all --filter-paths "lib/|test/" --exclude-dependencies
+          --json ../out-security/slither.json --sarif ../out-security/slither.sarif --fail-low
+
+      - name: Aderyn
+        working-directory: contracts
+        run: |
+          aderyn . --src src -o ../out-security/aderyn.json --no-snippets
+          aderyn . --src src -o ../out-security/aderyn.sarif
+
+      # Every Aderyn result must be one already triaged in security/2026-10-17/triage.md.
+      - name: Aderyn results match the triaged baseline
+        run: node scripts/check-aderyn-baseline.mjs out-security/aderyn.json security/aderyn-baseline.json
+
+      - uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        if: always() && hashFiles('out-security/slither.sarif') != ''
+        with:
+          sarif_file: out-security/slither.sarif
+          category: slither
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: static-analysis
+          path: out-security/
+
+  dynamic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+
+      - uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09 # v1.9.1
+        with:
+          version: v1.8.3
+
+      # 10,000 fuzz runs per test and 256 x 128 invariant runs (contracts/foundry.toml).
+      - name: Foundry unit, fuzz and invariant tests
+        working-directory: contracts
+        run: |
+          mkdir -p ../out-security
+          forge test --json > ../out-security/forge-test.json
+
+      - name: Every test passed, fuzz tests ran at least 10,000 times
+        run: node scripts/check-forge-evidence.mjs out-security/forge-test.json 10000
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: fuzz-invariant
+          path: out-security/
+
+  symbolic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+
+      - uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09 # v1.9.1
+        with:
+          version: v1.8.3
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - run: pip install halmos==0.3.3
+
+      - name: Halmos symbolic checks
+        working-directory: contracts
+        env:
+          FOUNDRY_DYNAMIC_TEST_LINKING: "false"
+        run: |
+          mkdir -p ../out-security
+          halmos --match-contract ARLSymbolic --solver-timeout-assertion 120000 --json-output ../out-security/halmos.json
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: symbolic
+          path: out-security/
+
+  mythril:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+
+      - uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09 # v1.9.1
+        with:
+          version: v1.8.3
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - run: pip install "setuptools<81" mythril==0.24.8
+
+      # Runtime bytecode of the contracts deployed at TGE. Results are triaged by hand
+      # (security/2026-10-17/triage.md); this job records them and does not gate.
+      - name: Mythril
+        working-directory: contracts
+        run: |
+          mkdir -p ../out-security
+          for c in ARLToken ARLTimelock ARLVestingWallet; do
+            forge inspect "$c" deployedBytecode | sed 's/^0x//' > "../out-security/$c.runtime.hex"
+            myth analyze -f "../out-security/$c.runtime.hex" --bin-runtime -t 2 \
+              --execution-timeout 900 --solver-timeout 20000 -o jsonv2 \
+              > "../out-security/mythril-$c.json" || true
+          done
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: mythril
+          path: out-security/
