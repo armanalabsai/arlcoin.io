@@ -1,6 +1,7 @@
 # Phase 1 Security Analysis
 
-Status: internal review and automated testing. No contract is deployed.
+Status: threat model and controls. The contracts are deployed on Base Sepolia; Base Mainnet
+opens at the TGE (2026-10-23).
 
 Latest audit: [security audit of 2026-10-17](../security/2026-10-17/report.md) (scope, raw
 tool outputs, triage, findings and their status).

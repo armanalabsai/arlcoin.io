@@ -14,8 +14,8 @@ Security audit of 2026-10-17. Reviewed commit:
 | `contracts/src/ARLStakingRewards.sol`    | `2bfcb880b0848abc039a61684be0cad870b56b45d4b10005fdbefe3a111027d3` | no (Base Sepolia)      |
 | `contracts/src/ARLMerkleDistributor.sol` | `7aa8d3959986ee840dc3536fea355970cbe6589638b887213d258c52c44a1762` | no (later airdrop)     |
 | `contracts/src/ComputePayment.sol`       | `774a225e24fbaa6b6622ba7418cb62777a8274aed308372299e5694f9b066d24` | no                     |
-| `contracts/src/ARLJobs.sol`              | `a455e849e6d1b3a4ee05549da6033d622ffd879cf3b9d943b45ba7f6f21f22fd` | no                     |
-| `contracts/src/ARLAnonymousSignal.sol`   | `a093a361e07d882db1f7db596e750a0a79caf4fdeadce531cfe870a1c24d45bd` | no                     |
+| `contracts/src/ARLJobs.sol`              | `a455e849e6d1b3a4ee05549da6033d622ffd879cf3b9d943b45ba7f6f21f22fd` | no (Base Sepolia)      |
+| `contracts/src/ARLAnonymousSignal.sol`   | `a093a361e07d882db1f7db596e750a0a79caf4fdeadce531cfe870a1c24d45bd` | no (Base Sepolia)      |
 | `contracts/zk/ARLSemaphoreVerifier.sol`  | `7336b1359bc1d49251a143373a96c97861c697bc1f9924459c97b3187ca64935` | no (generated)         |
 
 Also reviewed: the deployment scripts (`contracts/script/DeployARL.s.sol`, `ARLDeployer.sol`,

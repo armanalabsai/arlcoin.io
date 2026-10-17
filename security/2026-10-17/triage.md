@@ -23,7 +23,7 @@ reason next to it:
 | H `reentrancy-state-change`, `ARLAnonymousSignal.sol:175`     | False positive | `verifier.verify` is declared `view`, so the compiler issues a STATICCALL that cannot change state. The verifier address is immutable.                           |
 | L `large-numeric-literal`, `ARLAllocation.sol` (12 instances) | Accepted       | Allocation constants written as whole-token amounts times `UNIT`. A test in `packages/tokenomics` checks them against the TypeScript table.                      |
 | L `require-revert-in-loop`, `ARLAnonymousSignal.sol:201`      | By design      | One invalid commitment must revert the whole call.                                                                                                               |
-| L `unchecked-return`, `ARLTimelock.sol:43`                    | False positive | `_grantRole` returns false only if the role is already held. The constructor rejects a guardian that is also a proposer or executor, so the grant is always new. |
+| L `unchecked-return`, `ARLTimelock.sol:43`                    | Informational  | `_grantRole` returns false only if the role is already held. The constructor rejects a guardian that is also a proposer or executor, so the grant is always new. |
 
 ## Foundry fuzz and invariant (`dynamic/forge-test.json.gz`)
 

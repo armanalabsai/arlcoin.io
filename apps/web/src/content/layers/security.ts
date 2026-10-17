@@ -31,7 +31,7 @@ export const security: Layer = {
       weight: "primary",
       detail: {
         summary:
-          "A comprehensive, multi-layer internal security audit of the ARL contracts, built on open-source tools, was completed on 17 October 2026 at commit ab7595b: Slither and Aderyn static analysis, 271 Foundry tests with 29 fuzz tests at 10,000 runs and 5 invariant suites, Halmos symbolic proofs, Mythril symbolic execution and manual triage. It found no critical issue and no exploitable vulnerability in the contract code. Every finding is closed: fixed in the launch procedure, or accepted with a documented mitigation. The scope, raw tool outputs, triage and report are public, and a CI workflow reproduces them on every change.",
+          "A comprehensive, multi-layer internal security audit of the ARL contracts, built on open-source tools, was completed on 17 October 2026 at commit ab7595b: Slither and Aderyn static analysis, the 271-test default Foundry suite with 29 fuzz tests at 10,000 runs and 5 invariant suites, Halmos symbolic proofs, Mythril symbolic execution and manual triage. It found no critical issue and no exploitable vulnerability in the contract code. Every finding is closed: fixed in the launch procedure, or accepted with a documented mitigation. The scope, raw tool outputs, triage and report are public, and a CI workflow reproduces them on every change.",
         facts: [
           { label: "Critical findings", value: "None" },
           { label: "Open findings", value: "None" },
@@ -86,10 +86,11 @@ export const security: Layer = {
       weight: "tertiary",
       detail: {
         summary:
-          "Every change runs unit, fuzz and invariant tests, Slither static analysis and a full local deployment rehearsal that must reject misconfigured deployments.",
+          "Every change runs unit, fuzz and invariant tests, Slither and Aderyn static analysis, Halmos symbolic checks and a full local deployment rehearsal that must reject misconfigured deployments. Mythril runs weekly.",
         facts: [
           { label: "Tests", value: "Foundry unit, fuzz and invariant" },
-          { label: "Static analysis", value: "Slither" },
+          { label: "Static analysis", value: "Slither, Aderyn" },
+          { label: "Symbolic checks", value: "Halmos, Mythril" },
           { label: "Deployment rehearsal", value: "Local chain, in CI" },
         ],
       },
