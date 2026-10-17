@@ -20,6 +20,7 @@ import {
   type OperatorAction,
 } from "~~/lib/operatorRules";
 import { faucet, join, operatorAddress, relay, settle, status } from "~~/lib/server/operator";
+import { RateLimiter, clientKey } from "~~/lib/server/rateLimit";
 import scaffoldConfig from "~~/scaffold.config";
 
 export const runtime = "nodejs";
@@ -95,8 +96,17 @@ export async function GET(req: Request, { params }: Context) {
   }
 }
 
+/** One limiter per server instance: every POST counts against the client's window. */
+const limiter = new RateLimiter();
+
 export async function POST(req: Request, { params }: Context) {
   const origin = req.headers.get("origin");
+  const allowed = limiter.check(clientKey(req.headers));
+  if (!allowed.ok) {
+    const res = json(origin, { error: "too many requests; try again shortly" }, 429);
+    res.headers.set("retry-after", String(allowed.retryAfterSeconds));
+    return res;
+  }
   try {
     const action = actionOf((await params).action);
     if (action === "status") return json(origin, { error: "use GET" }, 405);

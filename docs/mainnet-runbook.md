@@ -89,7 +89,9 @@ stamped `base-mainnet`.
    write the supply API config with
    `node packages/deploy/src/supply-config-cli.ts <manifest.json> apps/web/api/supply-config.json`
    and redeploy (arlcoin.io/api/supply then reports the on-chain figures); start `monitor-cli.ts`
-   from the deployment block. After a few days of trading, apply to
+   from the deployment block, and commit the plan as `contracts/deploy/deployments/8453-plan.json`
+   next to `8453.json`: `.github/workflows/monitor.yml` then checks the deployment every 6 hours
+   and fails (GitHub emails the owner) on a critical finding. After a few days of trading, apply to
    CoinGecko and CoinMarketCap with [listing-applications.md](listing-applications.md).
 
 Stop at the first mismatch. A wrong Safe or contract address means the deployer's nonce or the

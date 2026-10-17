@@ -1,0 +1,63 @@
+name: Monitor mainnet
+
+# Read-only health check of the Base Mainnet deployment every 6 hours
+# (packages/deploy/src/monitor-cli.ts): genesis balances, supply, vesting, timelock roles and new
+# timelock operations. A critical finding fails the run, and GitHub notifies the owner by email.
+# It never signs or sends a transaction. Until the deployment is recorded
+# (contracts/deploy/deployments/8453-plan.json and 8453.json, see docs/mainnet-runbook.md) the
+# job skips, and does not fail.
+on:
+  schedule:
+    - cron: "41 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: monitor-mainnet
+  cancel-in-progress: false
+
+# Actions are pinned to full commit SHAs; the tag is noted for review.
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PLAN: contracts/deploy/deployments/8453-plan.json
+      RECORD: contracts/deploy/deployments/8453.json
+      RPC: ${{ vars.ARL_MAINNET_RPC || 'https://mainnet.base.org' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Skip until the mainnet deployment is recorded
+        id: recorded
+        run: |
+          if [ -f "$PLAN" ] && [ -f "$RECORD" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::$PLAN or $RECORD is missing; nothing to monitor yet."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.recorded.outputs.ready == 'true'
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - if: steps.recorded.outputs.ready == 'true'
+        run: npm ci
+
+      - name: Health check (last 12 hours of timelock events)
+        if: steps.recorded.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          LATEST=$(curl -sf -X POST -H 'content-type: application/json' \
+            --data '{"jsonrpc":"2.0","id":1,"method":"eth_blockNumber","params":[]}' "$RPC" \
+            | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log(BigInt(JSON.parse(s).result)))')
+          # Base produces a block every 2 s: 21,600 blocks are 12 hours, twice the schedule.
+          FROM=$((LATEST > 21600 ? LATEST - 21600 : 0))
+          node packages/deploy/src/monitor-cli.ts "$PLAN" "$RECORD" "$RPC" "$FROM"
