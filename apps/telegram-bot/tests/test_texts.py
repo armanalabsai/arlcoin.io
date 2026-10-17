@@ -2,7 +2,7 @@ import re
 
 from arlbot import texts
 
-ALL = [texts.START, texts.HELP, texts.RULES, texts.SCAM_WARNING, texts.welcome("Ada"), texts.SCAM_NOTICE]
+ALL = [texts.START, texts.HELP, texts.RULES, texts.SCAM_WARNING, texts.welcome("Ada"), texts.SCAM_NOTICE, texts.APP_TEXT, texts.FAUCET_TEXT, texts.WHITELIST_TEXT, texts.launch(1_790_000_000), texts.status(200_000, 1_000, 1_800_000_000, 1_790_000_000)]
 
 
 def test_english_ascii_only():
