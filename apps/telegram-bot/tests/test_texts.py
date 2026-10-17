@@ -22,6 +22,7 @@ def test_status_is_stated_honestly():
     assert "No airdrop at launch" in texts.START
     assert "x.com/arlprotocol" in texts.HELP
     assert texts.TESTNET_TOKEN in texts.START
+    assert texts.APP in texts.START and "no value" in texts.START
     assert "seed phrase" in texts.SCAM_WARNING
 
 

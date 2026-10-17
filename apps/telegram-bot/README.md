@@ -6,7 +6,7 @@ Moderates the community group https://t.me/arlcoin_community and answers three c
 
 | Feature           | Behaviour                                                                                                                         |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `/start`          | What ARL is and its current status (testnet token, mainnet target, payment rail in development, no airdrop at launch), with official links |
+| `/start`          | What ARL is and its current status (testnet token and app, mainnet target, no airdrop at launch), with official links |
 | `/help`           | Command list and official channels                                                                                                |
 | `/rules`          | Group rules and the security notice                                                                                               |
 | Welcome           | Greets new members with the rules pointer and the security notice                                                                |
