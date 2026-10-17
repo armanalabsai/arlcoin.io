@@ -15,7 +15,17 @@
       "permanent": true
     },
     {
-      "source": "/core/team/:card*",
+      "source": "/core/team/",
+      "destination": "/core/",
+      "permanent": true
+    },
+    {
+      "source": "/core/team/:card",
+      "destination": "/core/",
+      "permanent": true
+    },
+    {
+      "source": "/core/team/:card/",
       "destination": "/core/",
       "permanent": true
     }

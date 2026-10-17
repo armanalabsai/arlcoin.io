@@ -52,3 +52,21 @@ describe("hosting: website and app headers", () => {
     }
   });
 });
+
+describe("hosting: redirects", () => {
+  const redirects = (
+    JSON.parse(readFileSync(new URL("../../vercel.json", import.meta.url), "utf8")) as {
+      redirects: { source: string; destination: string; permanent: boolean }[];
+    }
+  ).redirects;
+
+  it("sends the removed team layer to the Core, with and without the trailing slash", () => {
+    // trailingSlash adds the slash first, so each source needs both forms.
+    for (const source of ["/core/team", "/core/team/", "/core/team/:card", "/core/team/:card/"]) {
+      const rule = redirects.find((r) => r.source === source);
+      assert.ok(rule, source);
+      assert.equal(rule.destination, "/core/");
+      assert.equal(rule.permanent, true);
+    }
+  });
+});
