@@ -124,7 +124,7 @@ specification.
   deployment config has one `tge` field and no per-schedule start; the planner
   derives both starts from it and `ARLDeployPlan` refuses schedules that do
   not share their start.
-- **Decided (owner, 2026-10-05): TGE date 2026-11-01** (`TGE_DATE` in `packages/tokenomics`).
+- **Decided (owner, 2026-10-05): TGE date 2026-10-23** (`TGE_DATE` in `packages/tokenomics`).
 - Team schedules start at each grant's date (M-3 per-grant tracking).
 
 ### 4.4 Founder allocation
@@ -133,19 +133,19 @@ The Founder allocation is 2,100,000 ARL. All of it is fully unlocked at TGE
 (CTO decision of 2026-09-28, which replaces the earlier split into 2,000,000
 ARL unlocked and 100,000 ARL TBD).
 
-| Parameter                                      | Value                                                                                                                                                                                                                                            | Status  |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
-| Total Founder allocation                       | 2,100,000 ARL                                                                                                                                                                                                                                    | LOCKED  |
-| Fully unlocked amount                          | 2,100,000 ARL (the whole allocation)                                                                                                                                                                                                             | LOCKED  |
-| Availability                                   | Available to the Founder at TGE                                                                                                                                                                                                                  | LOCKED  |
-| Cliff                                          | None                                                                                                                                                                                                                                             | LOCKED  |
-| Vesting                                        | None                                                                                                                                                                                                                                             | LOCKED  |
-| Timelock                                       | None                                                                                                                                                                                                                                             | LOCKED  |
-| Protocol-level transfer restriction            | None                                                                                                                                                                                                                                             | LOCKED  |
-| Protocol-level sale restriction                | None                                                                                                                                                                                                                                             | LOCKED  |
-| Right to transfer, use or sell                 | At any time, including through public exchanges, without protocol permission                                                                                                                                                                     | LOCKED  |
-| Address that receives the 2,100,000 ARL at TGE | The dedicated Founder Safe (Safe v1.5.0), owned by the Founder's wallet `0x3c3f71d694f709cBe60f015717c54A795636b165`; on Base Sepolia its address is in `apps/dapp/public/plans/84532-safes.json`. The Mainnet Founder Safe is created at launch | DECIDED |
-| Public disclosure of this structure            | The unlocked status and the Founder's right to sell are published with the tokenomics                                                                                                                                                            | LOCKED  |
+| Parameter                                      | Value                                                                                                                                                                | Status  |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| Total Founder allocation                       | 2,100,000 ARL                                                                                                                                                        | LOCKED  |
+| Fully unlocked amount                          | 2,100,000 ARL (the whole allocation)                                                                                                                                 | LOCKED  |
+| Availability                                   | Available to the Founder at TGE                                                                                                                                      | LOCKED  |
+| Cliff                                          | None                                                                                                                                                                 | LOCKED  |
+| Vesting                                        | None                                                                                                                                                                 | LOCKED  |
+| Timelock                                       | None                                                                                                                                                                 | LOCKED  |
+| Protocol-level transfer restriction            | None                                                                                                                                                                 | LOCKED  |
+| Protocol-level sale restriction                | None                                                                                                                                                                 | LOCKED  |
+| Right to transfer, use or sell                 | At any time, including through public exchanges, without protocol permission                                                                                         | LOCKED  |
+| Address that receives the 2,100,000 ARL at TGE | The dedicated Founder Safe (Safe v1.5.0); on Base Sepolia its address is in `apps/dapp/public/plans/84532-safes.json`. The Mainnet Founder Safe is created at launch | DECIDED |
+| Public disclosure of this structure            | The unlocked status and the Founder's right to sell are published with the tokenomics                                                                                | LOCKED  |
 
 - The 2,100,000 ARL is unlocked. It is not locked, vested, timelocked,
   restricted, reserved or subject to any future release schedule.
@@ -234,15 +234,15 @@ mechanisms distribute other tokens.
 
 ## 7. Public Launch Policy
 
-**Owner decision, 2026-10-05 (APPROVED; tranche reduced from 1,000,000 the same day):** 500,000 ARL distributed free at TGE through the Merkle
-claim to launchpad buyers and whitelist sign-ups; at most 10,000 ARL per address; 60-day claim
-window; unclaimed tokens and the remaining 4,000,000 ARL stay in the Public Launch Safe for later
-tranches; no participant vesting from this allocation. Enforced by `DeployDistributor`
-(`TGE_TRANCHE`, `MAX_CLAIM_WINDOW`) and by the claim list's `maxPerAddress`.
+**Owner decision, 2026-10-16 (APPROVED; replaces the 2026-10-05 TGE claim):** there is no airdrop
+at TGE. An airdrop of 500,000 ARL from the Public Launch allocation will take place at a much later
+date; its date, eligibility and rules will be announced later. Until then the 500,000 ARL stays in
+the Public Launch Safe. `ARLMerkleDistributor` and `DeployDistributor` stay as built and are not
+deployed at TGE; no participant vesting from this allocation.
 
 **Owner decisions, 2026-10-10 (APPROVED by the owner; LEGAL APPROVAL CONFIRMED by the owner on 2026-10-10, who obtained a
 legal opinion covering these sales; the opinion is kept by the owner, not in this repository):**
-of the 5,000,000 ARL, 500,000 ARL is the free claim tranche above; 2,500,000 ARL is reserved in
+of the 5,000,000 ARL, 500,000 ARL is the later airdrop above; 2,500,000 ARL is reserved in
 the Public Launch Safe for launchpad sales (`PUBLIC_LAUNCH.launchpadReserve`); the remaining
 2,000,000 ARL is sold through ARL-only Uniswap v3 positions opened by the Public Launch Safe on
 the same four pools and ranges as the Liquidity Safe, from 0.20 USD: ARL/USDT 600,000, ARL/USDC
@@ -278,7 +278,7 @@ IMPLEMENTATION CONSTRAINT: `ARLMerkleDistributor` implements the mechanism. It
 has no owner, admin, pause or upgrade path; the list, the claim window and the
 return address are fixed at deployment. The launch parameters below are not
 approved (`LAUNCH_PARAMETERS_APPROVED = false`); `DeployDistributor` runs only on
-local Anvil and Base Sepolia, and Base Mainnet opens only at the TGE (2026-11-01T00:00:00Z).
+local Anvil and Base Sepolia, and Base Mainnet opens only at the TGE (2026-10-23T00:00:00Z).
 
 TBD / REQUIRES CTO DECISION: the eligibility rules for the list, the operational
 split between public access, launch distribution and launch incentives, the
@@ -319,7 +319,7 @@ APPROVED / LOCKED:
 TBD / REQUIRES CTO DECISION: the emission curve and duration, any APY target
 (an APY depends on emission and on the amount staked, so it cannot be fixed
 without both), whether protocol revenue supplements rewards, the split between
-staking and other community rewards, and the staking contract and its audit.
+staking and other community rewards, and the staking contract.
 
 ## 10. Ecosystem & Growth Policy
 
@@ -417,9 +417,10 @@ operations.
 
 1. The TGE date. The vesting start rule is decided (`VESTING_START =
 TGE_TIMESTAMP`, section 4.3); the date is not.
-2. Public Launch: eligibility rules for the claim list, operational split, TGE
-   amount, limits, claim window, tranches, unused remainder (the mechanism, a
-   Merkle claim, is approved; section 7).
+2. Public Launch: date, eligibility rules, limits and claim window of the later
+   500,000 ARL airdrop (no airdrop at TGE; announced later), operational split,
+   tranches, unused remainder (the mechanism, a Merkle claim, is approved;
+   section 7).
 3. Early Users: epochs, budgets, formula, eligibility, Sybil controls, limits,
    referral rules, claim mechanism and contract, vesting of claims.
 4. Staking: emission curve, duration, APY target, revenue supplement, contract.
@@ -441,7 +442,7 @@ durations (12-month cliff, 36 months linear, calendar months) are enforced by
 the tokenomics package, the deployment planner, `ARLDeployPlan` and the
 verifier. Both schedules start at the TGE (section 4.3); the TGE date is not confirmed
 (`VESTING_SCHEDULES_APPROVED = false`). The tooling deploys only to local Anvil
-and Base Sepolia, which may use a placeholder start; Base Mainnet opens only at the TGE (2026-11-01T00:00:00Z).
+and Base Sepolia, which may use a placeholder start; Base Mainnet opens only at the TGE (2026-10-23T00:00:00Z).
 
 Founder implementation status (not a decision): the whole Founder allocation
 (2,100,000 ARL) is minted at genesis to one dedicated Founder Safe, with no
@@ -459,14 +460,12 @@ Before any mainnet deployment, all of the following must be true:
 3. The circulating-supply definition (section 5) is implemented against the
    deployment manifest and published with its address list.
 4. Any new contract (launch mechanism, claim, staking, LP lock) is specified,
-   implemented, tested and independently audited.
+   implemented and tested.
 5. The production chain is selected, and a testnet rehearsal with real test
    Safes for every role has passed.
 6. Signer sets for every Safe are in place and verified.
 7. Liquidity matching funds are secured and the LP-lock policy is approved.
 8. The launch mechanism has legal and implementation approval.
-9. An independent external audit of the final contracts is complete. No audit
-   has been performed so far.
 
 ## 17. ARL Core Monetary Standard
 

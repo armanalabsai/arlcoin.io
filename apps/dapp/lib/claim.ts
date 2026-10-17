@@ -1,5 +1,5 @@
-// The Public Launch claim (docs/launch-route.md, step 3): whitelist sign-ups claim their ARL from
-// `ARLMerkleDistributor`. The claim list is published as a static file, `claims/<chainId>.json`,
+// The Public Launch claim, reserved for a later airdrop (none at launch): listed addresses claim
+// their ARL from `ARLMerkleDistributor`. The claim list is published as a static file, `claims/<chainId>.json`,
 // and the page trusts nothing in it that it can check on chain: the distributor's own root, token
 // and deadline are read from the contract and must match the file, and every proof is verified
 // here before a transaction is offered. A claim always pays the listed account; nothing here holds

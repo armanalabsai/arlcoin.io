@@ -36,7 +36,7 @@ test("trade is closed before the launch", async ({ page }, testInfo) => {
   const missing = watchMissing(page);
   await page.goto("/app/trade/");
   await expect(page.getByTestId("trade-closed")).toContainText(
-    "Trading opens with the Base Mainnet launch on 2026-11-01",
+    "Trading opens with the Base Mainnet launch on 2026-10-23",
   );
   await expect(page.getByTestId("trade-submit")).toHaveCount(0);
   await page.screenshot({ path: testInfo.outputPath("trade.png"), fullPage: true });

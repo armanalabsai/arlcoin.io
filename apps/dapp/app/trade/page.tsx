@@ -291,8 +291,8 @@ function Trade({ token }: { token: Address }) {
         />
       </Facts>
       <p className="text-xs text-subtle">
-        Pool fee 1%. Prices move with every trade. No independent audit of ARL has been performed;
-        tokens can lose all their value. Only the ARL contract {token} is ARL.
+        Pool fee 1%. Prices move with every trade. Tokens can lose all their value. Only the ARL
+        contract {token} is ARL.
       </p>
     </div>
   );

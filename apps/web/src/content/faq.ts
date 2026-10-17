@@ -25,7 +25,7 @@ export const FAQ: readonly FaqEntry[] = [
   {
     question: "Does registering on the whitelist guarantee an allocation?",
     answer:
-      "No. The Public Launch gives away up to 500,000 ARL at the TGE through a free claim open for 60 days, at most 10,000 ARL per address; the exact list is published before the launch. Registration is free and no payment is requested.",
+      "No. There is no airdrop at the launch. An airdrop of 500,000 ARL is planned for a later date; its date, eligibility and rules will be announced on arlcoin.io, X @arlprotocol and the Telegram community. Registration is free and no payment is requested.",
   },
   {
     question: "Which blockchain will ARL use?",
@@ -35,17 +35,12 @@ export const FAQ: readonly FaqEntry[] = [
   {
     question: "When is the launch?",
     answer:
-      "The Base Mainnet launch (TGE) is targeted for 1 November 2026. The contracts are deployed and source-verified on the Base Sepolia testnet; Base Mainnet has not started.",
+      "The Base Mainnet launch (TGE) is targeted for 23 October 2026. The contracts are deployed and source-verified on the Base Sepolia testnet; Base Mainnet has not started.",
   },
   {
     question: "After the launch, can I sell ARL on a DEX?",
     answer:
       "Yes, the token has no transfer tax, blacklist or pause. The launch pools on Uniswap start with ARL only, priced from 0.20 USD: buyers pay USDC, USDT, ETH or BTC into them, and a seller can sell back only as much as buyers have paid in, never below 0.20 USD. Right after the launch a pool may therefore have little to pay sellers until buying starts. The free claim opens a few hours after the pools for this reason.",
-  },
-  {
-    question: "Has ARL been independently audited?",
-    answer:
-      "No. No independent audit has been performed. The contracts have unit, fuzz and invariant tests, static analysis and symbolic checks, and a bug bounty is open; the evidence is published in the documents. Treat the code as unaudited.",
   },
   {
     question: "Do testnet tokens have any value?",

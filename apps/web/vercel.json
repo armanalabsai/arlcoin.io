@@ -8,6 +8,18 @@
   "git": {
     "deploymentEnabled": false
   },
+  "redirects": [
+    {
+      "source": "/core/team",
+      "destination": "/core/",
+      "permanent": true
+    },
+    {
+      "source": "/core/team/:card*",
+      "destination": "/core/",
+      "permanent": true
+    }
+  ],
   "headers": [
     {
       "source": "/((?!app/).*)",

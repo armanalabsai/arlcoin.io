@@ -56,13 +56,13 @@ contract deployment exists and its addresses are published through the deploymen
 
 The public experience is open to everyone and needs no wallet or account. It has five areas:
 
-| Area         | Purpose                                                                           | Status today                                                        |
-| ------------ | --------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| Network      | What ARL is: technology, ecosystem, roadmap, team                                 | Exists as the Technology, Ecosystem, Roadmap and Team layers        |
-| ARL          | The token: supply, allocation, vesting                                            | Exists as the Token layer                                           |
-| Security     | Fixed supply, treasury controls, guardian, Safe model, verification, audit status | Exists as the Security layer; guardian and founder Safe are missing |
-| Developers   | Repository, contract sources, deployment and verification process, documentation  | `NOT IMPLEMENTED` as an area; links exist on individual cards       |
-| Transparency | Direct answers to the questions in section 5, each with its source                | `NOT IMPLEMENTED`                                                   |
+| Area         | Purpose                                                                          | Status today                                                        |
+| ------------ | -------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Network      | What ARL is: technology, ecosystem, roadmap, team                                | Exists as the Technology, Ecosystem, Roadmap and Team layers        |
+| ARL          | The token: supply, allocation, vesting                                           | Exists as the Token layer                                           |
+| Security     | Fixed supply, treasury controls, guardian, Safe model, verification              | Exists as the Security layer; guardian and founder Safe are missing |
+| Developers   | Repository, contract sources, deployment and verification process, documentation | `NOT IMPLEMENTED` as an area; links exist on individual cards       |
+| Transparency | Direct answers to the questions in section 5, each with its source               | `NOT IMPLEMENTED`                                                   |
 
 ### Homepage: "Enter the Network"
 
@@ -96,8 +96,7 @@ PUBLIC
 │   ├── Security Architecture
 │   ├── Treasury & Roles      (Treasury Safe → Timelock → Execution; Guardian Safe → Cancel)
 │   ├── Safe Model
-│   ├── Verification
-│   └── Audits                (status: none performed)
+│   └── Verification
 ├── Governance                (Planned / Not Currently Implemented)
 ├── Developers
 │   ├── Repository
@@ -157,7 +156,7 @@ SOURCE        the repository file and commit (or, after deployment, the contract
 | What can the guardian do?             | Only cancel pending operations. It cannot propose, execute, move funds or change roles (`ARLTimelock.sol`, `ARLVerify.sol`)                                                                                                                                                                                       | Guardian role check; cancelled operations              |
 | What is the Safe structure?           | Treasury Safe 2-of-3; separate guardian Safe; dedicated founder Safe. Signers and thresholds are Safe configuration, not stored in the repository                                                                                                                                                                 | Safe addresses; code present at each                   |
 | How is circulating supply calculated? | Total supply minus the balances of protocol-controlled or locked addresses, which are published in the deployment manifest (economic specification section 5). At TGE it is the Founder's unlocked 2,100,000 ARL                                                                                                  | Published methodology + on-chain reads                 |
-| Is the contract really verified?      | On Base Sepolia (testnet), yes: every contract is source-verified on Basescan, Blockscout and Sourcify. Nothing is on Base Mainnet yet. Evidence: unit, fuzz and invariant tests, Slither, and deployment rehearsals in CI. **No external audit has been performed**                                              | Explorer source verification + `VerifyARL` result      |
+| Is the contract really verified?      | No contract is deployed. Pre-deployment evidence: unit, fuzz and invariant tests, Slither, and a deployment rehearsal in CI                                                                                                                                                                                       | Explorer source verification + `VerifyARL` result      |
 
 ## 6. Technology Room
 
@@ -316,8 +315,8 @@ Applies only after deployment.
 - No request for a signature, seed phrase or private key, ever. The site states this in its
   security section.
 - Every external link is explicit about its destination (explorer, GitHub, Safe).
-- Security limits are shown next to the claims they qualify: no audit performed, lost keys depend
-  on the beneficiary Safe, the Safe threshold is Safe configuration rather than a contract rule.
+- Security limits are shown next to the claims they qualify: lost keys depend on the beneficiary
+  Safe, the Safe threshold is Safe configuration rather than a contract rule.
 - Security headers stay as they are (`nosniff`, `Referrer-Policy`, `X-Frame-Options: DENY`,
   `Permissions-Policy`), and a Content Security Policy is added.
 

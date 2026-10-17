@@ -3,7 +3,7 @@
 What happens when a security problem is reported or found. ARL contracts have **no pause, no
 upgrade and no owner** (by design), so a contract bug cannot be patched in place: the response is
 to warn users, stop the parts that are run by people (Safes, the testnet operator, the website),
-and, if needed, deploy a fixed version and move to it. No independent audit has been performed.
+and, if needed, deploy a fixed version and move to it.
 
 ## Who acts
 

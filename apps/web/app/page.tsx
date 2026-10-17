@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { faqJsonLd } from "@/content/faq.ts";
+import { websiteJsonLd } from "@/content/seo.ts";
 import { getCard, getLayer, pathFor } from "@/content/registry.ts";
 import { OG_IMAGE, SITE } from "@/content/site.ts";
 import type { Card } from "@/content/types.ts";
@@ -14,36 +15,13 @@ import { Reveal } from "@/site/Reveal.tsx";
 import { SiteFooter, SiteHeader } from "@/site/SiteFrame.tsx";
 import { TechShowcase } from "@/site/TechShowcase.tsx";
 
-const title = "ARL · The token for AI and compute services";
+const title = "ARL Protocol (ARL) · AI and Compute Token on Base";
 
 export const metadata: Metadata = {
   title,
   description: SITE.description,
   alternates: { canonical: "/" },
   openGraph: { title, description: SITE.description, url: "/", images: [OG_IMAGE] },
-};
-
-const websiteJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  name: SITE.name,
-  url: SITE.url,
-  description: SITE.description,
-  inLanguage: "en",
-  publisher: {
-    "@type": "Organization",
-    name: "ARL Protocol",
-    url: SITE.url,
-    logo: `${SITE.url}/arl-token-512.png`,
-    email: SITE.email,
-    sameAs: [SITE.social.x, SITE.social.telegram, SITE.social.github, SITE.social.instagram],
-    contactPoint: {
-      "@type": "ContactPoint",
-      contactType: "customer support",
-      email: SITE.email,
-      availableLanguage: ["en"],
-    },
-  },
 };
 
 /** Cards of one layer, in the given order, straight from the Core's content. */
@@ -310,7 +288,7 @@ export default function Home() {
         <Section
           alt
           heading="Where ARL is today."
-          sub="Base Mainnet is targeted for 1 November 2026."
+          sub="Base Mainnet is targeted for 23 October 2026."
         >
           <Reveal delay={120} className="glass mt-14 rounded-[28px] p-6 sm:p-10">
             <ol className="landing-road text-left">

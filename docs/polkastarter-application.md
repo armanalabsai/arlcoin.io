@@ -6,23 +6,23 @@ it and replies by e-mail.
 
 ## Basic information
 
-| Field                  | Answer                         |
-| ---------------------- | ------------------------------ |
-| Project Name           | ARL Protocol                   |
-| Contact Name           | Alaz Dağhan Göktürk            |
-| Contact Telegram Group | https://t.me/arlcoin_community |
-| Email                  | team@arlcoin.io                |
-| Referred by            | (empty)                        |
+| Field                   | Answer                         |
+| ----------------------- | ------------------------------ |
+| Project Name            | ARL Protocol                   |
+| Contact Name            | ARL Protocol team              |
+| Contact Telegram Handle | https://t.me/arlcoin_community |
+| Email                   | team@arlcoin.io                |
+| Referred by             | (empty)                        |
 
 ## Links
 
-| Field                       | Answer                                                                             |
-| --------------------------- | ---------------------------------------------------------------------------------- |
-| Website                     | https://arlcoin.io                                                                 |
-| Project Twitter             | https://x.com/arlprotocol                                                          |
-| Pitchdeck                   | https://arlcoin.io/arl-pitch-deck.pdf                                              |
-| Token Schedule (Tokenomics) | https://arlcoin.io/docs/tokenomics/                                                |
-| Other links                 | https://github.com/armanalabsai/arlcoin.io, https://www.instagram.com/armanalabsai |
+| Field                       | Answer                                                                     |
+| --------------------------- | -------------------------------------------------------------------------- |
+| Website                     | https://arlcoin.io                                                         |
+| Project Twitter             | https://x.com/arlprotocol                                                  |
+| Pitchdeck                   | https://arlcoin.io/arl-pitch-deck.pdf                                      |
+| Token Schedule (Tokenomics) | https://arlcoin.io/docs/tokenomics/                                        |
+| Other links                 | https://github.com/armanalabsai/arlcoin.io, https://t.me/arlcoin_community |
 
 ## Project details
 
@@ -35,33 +35,30 @@ it and replies by e-mail.
 > and reputation, ERC-8183 job escrow, staking and anonymous signals with zero-knowledge proofs. ARL
 > has a fixed supply of 21,000,000, minted once, with no owner, mint, pause or upgrade. The token,
 > vesting wallets and a 48-hour treasury timelock are deployed and source-verified on Base Sepolia
-> since 4 October 2026; Base Mainnet launch (TGE) is 1 November 2026, with ARL-only Uniswap v3 pools
+> since 4 October 2026; Base Mainnet launch (TGE) is 23 October 2026, with ARL-only Uniswap v3 pools
 > against USDC, USDT, ETH and BTC from 0.20 USD. Maturity: contracts written and tested (254 tests,
-> fuzzing, invariants, Slither with no findings, Halmos proofs, reproducible build); no independent
-> audit yet (requests sent to Hacken, Nethermind and Runtime Verification); bug bounty open; the AI
-> payment and compute services are not live yet.
+> fuzzing, invariants, Slither with no findings, Halmos proofs, reproducible build); bug bounty open; the AI payment
+> and compute services are not live yet.
 
 **Ecosystem:**
 
 > Hosted on Base (Ethereum L2). Token: ARL, ERC-20 with EIP-2612 permit, 18 decimals. Built on
-> OpenZeppelin v5.6.1 and Safe v1.5.0; open source (Apache-2.0) on GitLab. No grants received.
+> OpenZeppelin v5.6.1 and Safe v1.5.0; open source (Apache-2.0) on GitHub. No grants received.
 
 **Team Description:**
 
-> Founded by Alaz Dağhan Göktürk (Founder and CEO, Armanalabs), who leads product and engineering.
-> Only verified members are listed; the team is growing.
+> Provided privately to the launchpad during KYC.
 
-**Amount of team members:** 1 full-time founder; hiring
+**Amount of team members:** Provided privately to the launchpad during KYC.
 
 **Describe Current Community:**
 
-> Pre-launch. Official X (@arlprotocol), Instagram (@armanalabsai) and Telegram accounts
-> (group https://t.me/arlcoin_community, email team@arlcoin.io) and a whitelist on arlcoin.io.
+> Pre-launch. Official X https://x.com/arlprotocol (@arlprotocol), Telegram
+> https://t.me/arlcoin_community, email team@arlcoin.io and website https://arlcoin.io.
 
 **Size of Existing Users:**
 
-> Pre-launch: the token system is live on Base Sepolia (testnet) and the whitelist is open. No
-> mainnet users yet.
+> Pre-launch: the token system is live on Base Sepolia (testnet). No mainnet users yet.
 
 ## Capital
 
@@ -82,7 +79,7 @@ it and replies by e-mail.
 
 ## Other information
 
-**When do you want to conduct the sale?** Before the TGE on 1 November 2026; flexible.
+**When do you want to conduct the sale?** Before the TGE on 23 October 2026; flexible.
 
 **Status of partnerships:** No partnerships signed yet.
 

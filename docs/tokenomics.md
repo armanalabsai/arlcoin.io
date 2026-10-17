@@ -72,7 +72,7 @@ in `packages/tokenomics`. Every Safe is dedicated to one allocation.
 
 | Allocation                    | Rule                                                                                                                                                | Status                              |
 | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| Public Launch                 | Merkle claim from a published list (approved mechanism); amount at TGE, limits, claim window and remainder policy not defined                       | mechanism approved; terms undecided |
+| Public Launch                 | No airdrop at TGE (owner 2026-10-16); a 500,000 ARL airdrop by Merkle claim at a later date, with date, eligibility and rules announced later       | mechanism approved; terms undecided |
 | Community & Staking           | Paid from this allocation or protocol revenue; never new issuance. Rates and schedule not defined                                                   | undecided                           |
 | Ecosystem & Growth            | Programs tied to genuine, verifiable activity. Rules, rates and schedule not defined                                                                | undecided                           |
 | Strategic Partnerships        | Vesting wallet: 0% at TGE, 12-month cliff, 36 months linear; start date TBD. Not an unconditional pool: partnership → milestone → vesting → release | approved (start: undecided)         |
@@ -94,7 +94,7 @@ and `ARLDeployPlan` reject any schedule whose cliff is not 12 calendar months or
 whose linear period is not 36 calendar months. Every vesting schedule starts at
 the TGE (`VESTING_START = TGE_TIMESTAMP`, decided 2026-09-29): the config has a
 single `tge` date. The TGE date is not confirmed, so only local Anvil and Base
-Sepolia may use a placeholder TGE; Base Mainnet opens only at the TGE (2026-11-01T00:00:00Z).
+Sepolia may use a placeholder TGE; Base Mainnet opens only at the TGE (2026-10-23T00:00:00Z).
 
 Future reward programs (staking, referral, onboarding, early users) must be
 compatible with eligibility rules, Sybil resistance, abuse prevention, rate

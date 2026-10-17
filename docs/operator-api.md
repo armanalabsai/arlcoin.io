@@ -9,8 +9,7 @@ anonymous votes and settle x402 `upto` payments to its own demo service. It runs
 [`apps/dapp/lib/operatorRules.ts`](../apps/dapp/lib/operatorRules.ts).
 
 **Scope: Base Sepolia only.** Testnet tokens have no value. The operator refuses every chain other
-than 84532, and no Base Mainnet contract depends on it. Nothing here has been independently
-audited.
+than 84532, and no Base Mainnet contract depends on it.
 
 ## What the operator is trusted with
 

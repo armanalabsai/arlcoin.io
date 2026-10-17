@@ -207,7 +207,7 @@ To use MetaMask instead, add the network `http://127.0.0.1:8545`, chain id 31337
 ## Not yet
 
 - Base Sepolia live app: the ecosystem contracts are deployed and verified (2026-10-11,
-  [audit-evidence.md](audit-evidence.md)); the app is published by `deploy-app.yml` once merged.
+  [verification-evidence.md](verification-evidence.md)); the app is published by `deploy-app.yml` once merged.
 - Mobile wallets over WalletConnect: needs a WalletConnect project id (a free account; owner
   decision).
 - Base Mainnet as a build target: added with the mainnet deployment record at the TGE.

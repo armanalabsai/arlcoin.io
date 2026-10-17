@@ -1,46 +1,49 @@
 # X profile (@arlprotocol)
 
-Status: DRAFT. Not published. Apply by hand in X → Edit profile.
+Status: DRAFT. Not published. Apply by hand in X → Edit profile on https://x.com/arlprotocol.
 
 | Field        | Value                                                         |
 | ------------ | ------------------------------------------------------------- |
-| Display name | ARL Network                                                   |
-| Website      | arlcoin.io                                                    |
+| Display name | ARL Protocol                                                  |
+| Website      | https://arlcoin.io                                            |
 | Location     | Base (onchain)                                                |
 | Header image | Slide 1 of `social/2026-10-09/` (Payer → Facilitator → Payee) |
 
-## Bio (149 / 160 characters)
+## Bio (156 / 160 characters)
 
 ```text
-Payment rail for AI and compute on @base. ARL: 21M fixed supply, no mint, no owner. Testnet live, mainnet not yet. Not audited. Team never DMs first.
+ARL Protocol: AI and compute payments on @base. 21M fixed supply, no mint, no owner. Testnet live, mainnet targeted Oct 23. Team never DMs first. arlcoin.io
 ```
 
-## Pinned post (279 / 280 characters, link counted as 23)
+## Pinned post (280 / 280 characters, links counted as 23)
 
 ```text
-What ARL Network is, in one post:
+ARL Protocol: AI and compute payments on @base.
 
-A payment rail for AI and compute services on @base.
-
-- ARL: 21,000,000 fixed supply, no mint, no owner, no proxy
+- 21,000,000 ARL fixed supply, no mint, no owner, no proxy
 - Testnet: live on Base Sepolia
-- Mainnet: targeted Nov 1, not deployed
-- No audit; bug bounty open
+- Mainnet: targeted Oct 23, not deployed
+- No airdrop at launch; bug bounty open
 
-github.com/armanalabsai/arlcoin.io #Base
+arlcoin.io
+t.me/arlcoin_community
+
+#Base #AI
 ```
 
 ## When to change it
 
-- After a verified Base Mainnet deployment: replace "Testnet live, mainnet not yet" in the bio
-  and the two status lines in the pinned post with the mainnet address and explorer link.
-- If the 2026-11-01 target moves: change "targeted Nov 1" to the new date or to "date to be
+- After a verified Base Mainnet deployment: replace "Testnet live, mainnet targeted Oct 23" in the
+  bio and the two status lines in the pinned post with the mainnet address and explorer link.
+- If the 2026-10-23 target moves: change "targeted Oct 23" to the new date or to "date to be
   announced" the same day.
-- If an independent audit is ever completed: change "Not audited" only with a link to the
-  published report.
+- When the later airdrop of 500,000 ARL is announced: change "No airdrop at launch" only with a
+  link to the official announcement on arlcoin.io (date, eligibility and rules).
 
-## Checks (2026-10-10)
+## Checks (2026-10-16)
 
-- Every claim matches `social/calendar/2026-10-11_to_2026-11-01.md` → "Facts used".
-- No partnership, exchange listing, price, return or audit claim. `@base` is a mention, not a
+- Every claim matches `social/calendar/2026-10-11_to_2026-10-23.md` → "Facts used".
+- No partnership, exchange listing, price, return or free-token claim. `@base` is a mention, not a
   claim of endorsement.
+- Official channels: https://arlcoin.io, https://x.com/arlprotocol, https://t.me/arlcoin_community,
+  team@arlcoin.io.

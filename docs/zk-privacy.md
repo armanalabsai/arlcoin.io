@@ -1,9 +1,6 @@
 # ZK Privacy: anonymous signals
 
-Status: **IN DEVELOPMENT.** Deployed and source-verified on the Base Sepolia testnet only
-(`ARLAnonymousSignal` `0xFa5901E9dfD813b910061F29ef1f65a1faA0b268`, verifier
-`0x86DEB322fe7E9d5e5296f8Ee4B90A643F886a012`); not on Base Mainnet; the circuit and contract have not
-been externally audited.
+Status: **IN DEVELOPMENT.** Written and tested; not deployed.
 
 Members of a group can **signal** (vote in a poll, attest, give feedback) without revealing which
 member they are, and each member signals **once per scope**. This follows the Semaphore protocol.

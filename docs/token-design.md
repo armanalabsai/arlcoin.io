@@ -190,7 +190,9 @@ Team allocation is minted to the team pool Safe. See
 ### Public Launch claim distributor
 
 The approved Public Launch mechanism is a Merkle claim (economic specification
-section 7). `ARLMerkleDistributor` holds a fixed Merkle root of `(index,
+section 7). There is no airdrop at TGE: the distributor stays as built and is not deployed at
+TGE; it is kept for the 500,000 ARL airdrop at a later date, whose date, eligibility and rules
+will be announced later. `ARLMerkleDistributor` holds a fixed Merkle root of `(index,
 account, amount)` entries, encoded as an OpenZeppelin `StandardMerkleTree`
 (double-hashed leaves). Each entry can be claimed once before `claimEnd`; anyone
 may submit a claim, but the tokens always go to the listed account. After
@@ -216,7 +218,7 @@ their lists are refused.
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Benefit for AI payments | The x402 EVM specification (commit `dd927a26`) settles tokens without EIP-3009 through Permit2. Its `eip2612GasSponsoring` extension uses EIP-2612 so the user's one-time Permit2 approval is also gasless. Without permit, every payer first sends an on-chain `approve`. |
 | Irreversibility         | The token is immutable. Permit cannot be added after deployment.                                                                                                                                                                                                           |
-| OpenZeppelin support    | `ERC20Permit` in v5.6.1, covered by its audits. EIP-3009 is not in v5.6.1 and would be custom code — not recommended.                                                                                                                                                      |
+| OpenZeppelin support    | `ERC20Permit` in v5.6.1, covered by its published security reviews. EIP-3009 is not in v5.6.1 and would be custom code — not recommended.                                                                                                                                  |
 | Replay protection       | EIP-712 domain binds chain ID and contract address; per-owner sequential nonces; deadline; `ECDSA` rejects malleable signatures.                                                                                                                                           |
 | Supply                  | No effect. Permit only sets allowances.                                                                                                                                                                                                                                    |
 | Risks                   | Phishing of off-chain signatures; a front-run permit makes the victim's transaction revert (callers should tolerate an already-used permit); `ERC20Permit` verifies EOA signatures only — smart-contract wallets use Permit2 or `approve`.                                 |

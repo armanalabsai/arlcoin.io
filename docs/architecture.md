@@ -1,8 +1,8 @@
 # ARL Protocol — Architecture
 
 Status: Phase 1 (token, vesting, treasury contracts), the Public Launch
-Merkle claim distributor and the staking rewards contract are implemented and
-tested. The Phase 1 contracts are deployed on Base Sepolia (testnet) only; see
+Merkle claim distributor (not deployed at TGE; kept for the later airdrop) and the staking
+rewards contract are implemented and tested. The Phase 1 contracts are deployed on Base Sepolia (testnet) only; see
 [`README.md`](../README.md). Nothing is deployed on Base Mainnet.
 
 ## Repository
@@ -14,7 +14,7 @@ tested. The Phase 1 contracts are deployed on Base Sepolia (testnet) only; see
 | Tests              | `node:test`                                                                  |
 | Typecheck          | `tsc --noEmit`, strict                                                       |
 | Lint / format      | ESLint (typescript-eslint strict, type-checked) and Prettier                 |
-| CI                 | GitHub Actions: typecheck, lint, format check, tests, `npm audit`            |
+| CI                 | GitHub Actions: typecheck, lint, format check, tests, dependency scan        |
 | License            | Apache-2.0 (`LICENSE`, `NOTICE`); third parties in `THIRD_PARTY_LICENSES.md` |
 | Security policy    | `SECURITY.md`                                                                |
 | Contribution rules | `CONTRIBUTING.md`, `docs/content-standard.md`                                |
@@ -57,7 +57,7 @@ Rules:
 
 | Area         | Decision                                                                                             | Detail                                       |
 | ------------ | ---------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| Chain        | Base: Base Sepolia for testnet, Base Mainnet for production (opens at the TGE, 2026-11-01T00:00:00Z) | [`chain-evaluation.md`](chain-evaluation.md) |
+| Chain        | Base: Base Sepolia for testnet, Base Mainnet for production (opens at the TGE, 2026-10-23T00:00:00Z) | [`chain-evaluation.md`](chain-evaluation.md) |
 | License      | Apache-2.0                                                                                           | `LICENSE`, `NOTICE`                          |
 | Token        | ERC-20, 18 decimals, 21,000,000 ARL minted once, no mint function, no owner, no pause                | [`token-design.md`](token-design.md)         |
 | Allocation   | 11 allocations totalling 21,000,000 ARL (approved 2026-09-27)                                        | [`tokenomics.md`](tokenomics.md)             |
@@ -70,7 +70,7 @@ Rules:
 
 | Decision                                                               | Needed before                |
 | ---------------------------------------------------------------------- | ---------------------------- |
-| Base Mainnet opening time (`networkGate`, 2026-11-01T00:00:00Z)        | Production deployment        |
+| Base Mainnet opening time (`networkGate`, 2026-10-23T00:00:00Z)        | Production deployment        |
 | TGE date (both vesting schedules start at it; the date is TBD)         | Base Mainnet                 |
 | Team grant schedule; program rules for staking, growth and early users | The programs                 |
 | Exact launch and grant dates (contracts take explicit timestamps)      | Deployment                   |

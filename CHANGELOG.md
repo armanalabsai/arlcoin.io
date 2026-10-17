@@ -7,7 +7,7 @@ documents that back it; nothing here is deployed on Base Mainnet.
 
 - Website: official channels (X @arlprotocol, Telegram t.me/arlcoin_community, team@arlcoin.io),
   structured data, web app manifest, `/.well-known/security.txt`, HSTS with subdomains, FAQ on
-  audit status, testnet value, official channels and data deletion; background music removed.
+  testnet value, official channels and data deletion; background music removed.
 - Documents state the Base Sepolia deployment everywhere; new
   [operator API security model](docs/operator-api.md) and [incident response](docs/incident-response.md).
 - Repository links point to https://github.com/armanalabsai/arlcoin.io.
@@ -15,7 +15,7 @@ documents that back it; nothing here is deployed on Base Mainnet.
 ## 2026-10-11
 
 - Base Sepolia ecosystem deployed and source-verified: staking, ERC-8183 jobs escrow, zero-knowledge
-  verifier and anonymous-signal contract ([audit-evidence.md](docs/audit-evidence.md#explorer-verification-base-sepolia)).
+  verifier and anonymous-signal contract ([verification-evidence.md](docs/verification-evidence.md#explorer-verification-base-sepolia)).
 - The ARL app on Base Sepolia at https://arlcoin.io/app/ with the testnet operator at
   https://app.arlcoin.io (faucet, poll joins, vote relay, x402 settlement).
 - Mainnet signer addresses checked read-only on Base Mainnet ([mainnet-plan.md](docs/mainnet-plan.md)).

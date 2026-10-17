@@ -6,19 +6,21 @@ export const SITE = {
   name: "ARL",
   url: "https://arlcoin.io",
   description:
-    "ARL is the utility token for AI and compute services on Base: 21,000,000 ARL fixed supply, no owner, mint or upgrade. Live on Base Sepolia testnet; Base Mainnet launch targeted for 2026-11-01.",
+    "ARL Protocol: the utility token for AI and compute payments on Base. 21,000,000 ARL fixed supply, no mint or upgrade. Base Mainnet launch 23 October 2026.",
   /** Short line under the Core on the overview. */
   tagline: "The utility token for AI and compute services, live on Base Sepolia.",
+  /** Full project name, used in titles and structured data. */
+  brand: "ARL Protocol",
   repository: "https://github.com/armanalabsai/arlcoin.io",
-  /** Public contact address of the team. */
+  /** Public contact email. */
   email: "team@arlcoin.io",
   /** Official social accounts. */
   social: {
     x: "https://x.com/arlprotocol",
-    instagram: "https://www.instagram.com/armanalabsai",
+    /** X handle, for card metadata. */
+    xHandle: "@arlprotocol",
     /** Community group. */
     telegram: "https://t.me/arlcoin_community",
-    github: "https://github.com/armanalabsai/arlcoin.io",
   },
   /** Base Sepolia (testnet) deployment, source-verified on Basescan, Blockscout and Sourcify. */
   testnet: {
@@ -35,11 +37,10 @@ export const SITE = {
     token: null as string | null,
   },
   /** Target date of the Base Mainnet token deployment (the TGE). */
-  tgeTarget: "2026-11-01",
-  /** Data controller named in the privacy notice, as given by the owner. */
+  tgeTarget: "2026-10-23",
+  /** Data controller named in the privacy notice. */
   controller: {
-    name: "Alaz Daghan Gokturk",
-    business: "Armanalabs",
+    name: "ARL Protocol",
   },
 } as const;
 

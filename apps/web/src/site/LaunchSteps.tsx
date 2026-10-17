@@ -5,9 +5,6 @@ import { SITE } from "@/content/site.ts";
 import { AddToWallet } from "@/site/AddToWallet.tsx";
 import { Reveal } from "@/site/Reveal.tsx";
 
-/** The app's Claim screen, published next to the site under /app. */
-export const CLAIM_APP_PATH = "/app/claim/";
-
 const tge = new Date(`${SITE.tgeTarget}T00:00:00Z`).toLocaleDateString("en-GB", {
   day: "numeric",
   month: "long",
@@ -43,15 +40,14 @@ const STEPS: Step[] = [
   },
   {
     n: "2",
-    title: "Claim free ARL",
-    when: fromTge,
-    body: `Whitelisted addresses claim up to ${PUBLIC_LAUNCH.maxPerAddress.toLocaleString("en-US")} ARL each, ${PUBLIC_LAUNCH.tgeTranche.toLocaleString("en-US")} ARL in total, for ${String(PUBLIC_LAUNCH.claimWindowDays)} days. You pay only network gas.`,
-    // The app is hosted next to the site only from the launch; until then there is no link.
-    action: live ? (
-      <a href={CLAIM_APP_PATH} className={link}>
-        Open the claim ›
+    title: "Follow the official channels",
+    when: "Open now",
+    body: `There is no airdrop at launch. An airdrop of ${PUBLIC_LAUNCH.tgeTranche.toLocaleString("en-US")} ARL is planned for a later date; its date and rules are announced only on arlcoin.io, X ${SITE.social.xHandle} and Telegram.`,
+    action: (
+      <a href={SITE.social.telegram} target="_blank" rel="noopener noreferrer" className={link}>
+        Join Telegram ›
       </a>
-    ) : null,
+    ),
   },
   {
     n: "3",
@@ -75,7 +71,7 @@ const STEPS: Step[] = [
   },
 ];
 
-/** The launch route on the landing page: whitelist, claim, buy and add to a wallet. */
+/** The launch route on the landing page: whitelist, channels, buy and add to a wallet. */
 export function LaunchSteps() {
   return (
     <div className="mt-12 grid grid-cols-1 gap-4 text-left min-[480px]:grid-cols-2 lg:grid-cols-4">

@@ -1,12 +1,16 @@
 import type { Metadata } from "next";
+
+import { breadcrumbJsonLd } from "@/content/seo.ts";
+import { JsonLd } from "@/site/JsonLd.tsx";
 import Link from "next/link";
 
 import { DOCS, docPath } from "@/content/docs.ts";
 import { OG_IMAGE } from "@/content/site.ts";
 import { PageShell } from "@/site/PageShell.tsx";
 
-const title = "Documents · ARL";
-const description = "ARL's design, tokenomics, security and licence documents.";
+const title = "ARL Docs: Tokenomics, Architecture · ARL Protocol";
+const description =
+  "ARL Protocol documents: tokenomics, token design, architecture, security analysis, x402 payments and ZK privacy on Base.";
 
 export const metadata: Metadata = {
   title,
@@ -22,6 +26,7 @@ export default function DocsIndex() {
       title="Documents"
       lead="How ARL is designed, how the token works and how it is secured. The code is licensed under Apache-2.0."
     >
+      <JsonLd data={breadcrumbJsonLd([["Documents", "/docs"]])} />
       <ul className="glass flex flex-col rounded-[28px] px-6 sm:px-8">
         {DOCS.map((d) => (
           <li key={d.slug} className="border-b border-line last:border-b-0">

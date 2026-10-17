@@ -8,7 +8,7 @@ import { encodeFunctionData, getAddress, isAddress, parseAbi, type Address, type
 
 export const SEPOLIA_CHAIN_ID = 84_532;
 
-/** The testnet ARL token and the testnet Safes that hold its allocations (docs/audit-evidence.md). */
+/** The testnet ARL token and the testnet Safes that hold its allocations (docs/verification-evidence.md). */
 export const SEPOLIA = {
   token: "0x244312b619127B6458154F3467eFD7c87CD28500",
   communityStakingSafe: "0x6e7bD80144ea10e5E1FcF95Fc4B044415CFE61d4",

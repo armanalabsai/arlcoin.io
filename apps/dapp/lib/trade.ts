@@ -10,7 +10,7 @@ import { encodeFunctionData, getAddress, isAddress, type Address, type Hex } fro
 export const BASE_CHAIN_ID = 8_453;
 
 /** The approved TGE: trading in the official pools starts at the Base Mainnet deployment. */
-export const TGE_DATE = "2026-11-01T00:00:00Z";
+export const TGE_DATE = "2026-10-23T00:00:00Z";
 
 export const UNISWAP = {
   swapRouter02: "0x2626664c2603336E57B271c5C0b26F421741e481",

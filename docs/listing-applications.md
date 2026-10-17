@@ -1,6 +1,6 @@
 # CoinGecko and CoinMarketCap Listing Applications
 
-Status: **prepared; submitted after the TGE (2026-11-01).** Both sites list only tokens that are
+Status: **prepared; submitted after the TGE (2026-10-23).** Both sites list only tokens that are
 live on-chain and trading on a venue they track, so neither application can be accepted before the
 Base Mainnet deployment and the Uniswap pools exist. Everything else is ready. Their forms change;
 check each form when submitting. Listing is free on both sites: ignore anyone who offers a paid or
@@ -14,18 +14,18 @@ guaranteed listing.
 | Chain                     | Base (chain ID 8453)                                                                                                                             |
 | Decimals / standard       | 18 / ERC-20 with EIP-2612 permit                                                                                                                 |
 | Maximum and total supply  | 21,000,000 ARL (fixed; minted once in the constructor; no mint function)                                                                         |
-| Circulating supply at TGE | 2,100,000 ARL (the Founder allocation), before Public Launch claims and pool sales                                                               |
+| Circulating supply at TGE | 2,100,000 ARL (the Founder allocation), before pool sales; no airdrop at TGE                                                                     |
 | Circulating supply method | Total supply minus the balances of the protocol-controlled and locked addresses in the published manifest                                        |
 | Supply API                | `https://arlcoin.io/api/supply/?q=circulating` and `https://arlcoin.io/api/supply/?q=total` (plain number, read from the chain on every request) |
-| Launch date               | 2026-11-01 (TGE)                                                                                                                                 |
+| Launch date               | 2026-10-23 (TGE)                                                                                                                                 |
 | Trading venues and pairs  | Uniswap v3 on Base, 1%: ARL/USDC, ARL/USDT, ARL/WETH, ARL/cbBTC (pool addresses after the TGE)                                                   |
 | Website                   | https://arlcoin.io                                                                                                                               |
 | Source code               | https://github.com/armanalabsai/arlcoin.io                                                                                                       |
 | Whitepaper / deck         | https://arlcoin.io/arl-pitch-deck.pdf, https://arlcoin.io/docs/tokenomics/                                                                       |
-| Audit                     | None. Audit requests sent 2026-10-05 ([independent-audit-plan.md](independent-audit-plan.md)); bug bounty open                                   |
+| Bug bounty                | Open ([bug-bounty.md](bug-bounty.md))                                                                                                            |
 | Logo                      | https://arlcoin.io/arl-token-200.png (200 × 200 PNG), https://arlcoin.io/arl-token-512.png, https://arlcoin.io/arl-token.svg                     |
-| Social accounts           | https://x.com/arlprotocol, https://www.instagram.com/armanalabsai, Telegram group https://t.me/arlcoin_community, email team@arlcoin.io          |
-| Contact                   | team@arlcoin.io; Alaz Dağhan Göktürk, Founder and CEO                                                                                            |
+| Social accounts           | X https://x.com/arlprotocol (@arlprotocol), Telegram https://t.me/arlcoin_community                                                              |
+| Contact                   | ARL Protocol team, team@arlcoin.io                                                                                                               |
 
 ### Short description (English, for the form)
 

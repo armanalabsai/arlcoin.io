@@ -18,7 +18,7 @@ export function Footer() {
           Privacy
         </a>
         {" · "}
-        <a className="link" href="https://github.com/gokturkalazdaghan-dot/ARLCOIN">
+        <a className="link" href="https://github.com/armanalabsai/arlcoin.io">
           Source
         </a>
         {" · "}

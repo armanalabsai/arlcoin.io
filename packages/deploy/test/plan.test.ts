@@ -314,7 +314,7 @@ describe("buildPlan: fails closed", () => {
 
   it("the network gate opens Base Mainnet exactly at the TGE", () => {
     const tge = Date.parse(TGE_DATE);
-    assert.equal(tge, Date.parse("2026-11-01T00:00:00Z"));
+    assert.equal(tge, Date.parse("2026-10-23T00:00:00Z"));
     assert.throws(() => {
       networkGate(8453, tge - 1);
     }, PlanError);
@@ -426,7 +426,7 @@ describe("approved TGE (owner decision 2026-10-05)", () => {
     checkTge(8453, TGE_DATE);
     assert.throws(() => {
       checkTge(8453, "2027-01-01T00:00:00Z");
-    }, /must be the approved TGE 2026-11-01/);
+    }, /must be the approved TGE 2026-10-23/);
     assert.throws(() => {
       checkTge(8453, undefined);
     }, /must be the approved TGE/);

@@ -4,13 +4,11 @@ Status: **live since 2026-10-05**, with the public Base Sepolia test period and 
 repository (https://github.com/armanalabsai/arlcoin.io). Scope commit: `00d9056`. The amounts below are paid only when a valid report
 is accepted; nothing is paid up front.
 
-## Why a bounty instead of a paid audit
+## Coverage
 
-The owner decided on 2026-10-03 not to pay for an independent audit before launch. The contracts
-are instead covered by the checks in [audit-scope.md](audit-scope.md) (tests at 100% line and
-function coverage, fuzzing, invariants, Halmos proofs, Slither, Aderyn, Mythril), a public test
-period on Base Sepolia, and this bounty. Every listing and launchpad document states plainly that
-no independent audit has been done.
+The contracts are covered by the checks in [review-scope.md](review-scope.md) (tests at 100% line
+and function coverage, fuzzing, invariants, Halmos proofs, Slither, Aderyn, Mythril), a public test
+period on Base Sepolia, and this bounty.
 
 ## Funding
 
@@ -43,4 +41,4 @@ Bounty allocation never exceed its 400,000 ARL.
 
 ## Open items (owner)
 
-- None. The program is open; it is listed on arlcoin.io next to the audit status.
+- None. The program is open; it is listed on arlcoin.io.

@@ -17,8 +17,8 @@
 
 - **English only** — code, identifiers, comments, docs, commit messages and
   all user-facing text. See [`docs/content-standard.md`](docs/content-standard.md).
-- **Facts only.** Never present a deployment, audit, listing, partnership or
-  metric that does not exist.
+- **Facts only.** Never present a deployment, listing, partnership or metric
+  that does not exist.
 - **Tokenomics** are defined once, in `packages/tokenomics`. Do not restate
   numbers elsewhere in code.
 - **Open source first.** Before writing substantial new code, check for a

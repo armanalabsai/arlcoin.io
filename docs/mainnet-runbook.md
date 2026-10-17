@@ -9,10 +9,10 @@ the simulation are in [mainnet-plan.md](mainnet-plan.md); the testnet run of the
 
 | #   | Item                                                                                                                          | Check                                |
 | --- | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
-| 1   | `networkGate` opens 8453 at 2026-11-01T00:00:00Z (done 2026-10-05, tests)                                                     | run on or after 2026-11-01 00:00 UTC |
+| 1   | `networkGate` opens 8453 at 2026-10-23T00:00:00Z (done 2026-10-05, updated 2026-10-16, tests)                                 | run on or after 2026-10-23 00:00 UTC |
 | 2   | Deployer has never sent a transaction and has no code                                                                         | `cast nonce` = 0, `cast code` = `0x` |
 | 3   | Deployer `0x5a7F207B3764113c68c50219e31D2a7c22132F52` funded with at least 0.001 ETH on Base; it sends nothing before the run | `cast balance`                       |
-| 4   | Whitelist and launchpad buyers collected as `address,amount` (whole ARL)                                                      | CSV ready                            |
+| 4   | Deferred to the later airdrop (no airdrop at TGE): claim list collected as `address,amount` (whole ARL)                       | not needed at TGE                    |
 | 5   | Signer config `contracts/deploy/deployments/8453-signers.env` unchanged                                                       | SHA-256 in mainnet-plan.md           |
 | 6   | Full rehearsal on a Base Mainnet fork passes: `bash scripts/rehearse-base-mainnet-fork.sh`                                    | "MAINNET FORK REHEARSAL PASSED"      |
 
@@ -25,7 +25,7 @@ the addresses in [mainnet-plan.md](mainnet-plan.md) (token `0x0e8A5434f12D3d839a
 `VerifyARL` passed; total 21,000,000 and circulating 2,100,000 ARL; the deployer spent about
 0.00004 ETH of its 0.001 ETH; the four pools held 1,000,000 ARL with ETH and BTC floors from the
 Chainlink prices on the fork; the claim distributor was deployed and funded by the Public Launch
-Safe. Run it again in the last days before the TGE.
+Safe (rehearsal only; the distributor is not part of TGE day). Run it again in the last days before the TGE.
 
 ## Steps
 
@@ -34,19 +34,22 @@ tool from the run file the deploy screen signed (`broadcast/<Script>/8453/dry-ru
 or `8453/run-latest.json` after a broadcast); it writes nothing unless every check passes (exit 0):
 `node packages/deploy/src/record-cli.ts <safes|arl|distributor> <run.json> https://mainnet.base.org <record.json>`.
 The records go to `contracts/deploy/deployments/8453-safes.json`, `8453.json` and
-`8453-distributor.json`; the record must be stamped `base-mainnet`.
+`8453-distributor.json` (the distributor record only for the later airdrop); the record must be
+stamped `base-mainnet`.
 
 1. **Safes.** Dry-run `CreateSafes` against Base Mainnet with `--sender` = deployer, publish the
    plan to the deploy screen, sign the 12 transactions, then `record-cli.ts safes`. Check each Safe address against
    [mainnet-plan.md](mainnet-plan.md) and its owners and threshold on chain.
-2. **Config and plan.** `safes-config-cli.ts` with `2026-11-01T00:00:00Z` (the planner refuses any
+2. **Config and plan.** `safes-config-cli.ts` with `2026-10-23T00:00:00Z` (the planner refuses any
    other TGE off testnet), then `cli.ts`.
 3. **Contracts.** Dry-run `DeployARL`, sign nonces 12-15 on the deploy screen, then
    `record-cli.ts arl`; each created address must match the plan.
 4. **Verify.** `VerifyARL`, `bytecode-cli.ts verify`, `supply-cli.ts` (total 21,000,000, circulating
    2,100,000), then `explorer-cli.ts --check-broadcast --run` with `ETHERSCAN_API_KEY` set.
-5. **Claim list.** `launch-list-cli.ts whitelist.csv input.json` (applies the 500,000 ARL tranche
-   and the 10,000 ARL cap), then `distribution-cli.ts input.json distribution.json`.
+5. **Claim list — deferred to the later airdrop; not part of TGE day.** There is no airdrop at
+   TGE (owner decision 2026-10-16). When the 500,000 ARL airdrop is announced, build the list with
+   `launch-list-cli.ts <list.csv> input.json`, then `distribution-cli.ts input.json distribution.json`,
+   using the eligibility and limits announced then.
 6. **Pool.** The Liquidity Safe opens the single-sided ARL position at and above 0.20 USD
    ([launch-route.md](launch-route.md)); the position stays in the Safe for 12 months.
    - Check that no ARL/USDC, ARL/USDT, ARL/WETH or ARL/cbBTC 1% pool exists yet (`getPool` on the Uniswap v3 factory
@@ -68,7 +71,7 @@ The records go to `contracts/deploy/deployments/8453-safes.json`, `8453.json` an
 7. **Public Launch sale positions** (owner decision 2026-10-10; legal approval confirmed by the owner, see
    [tokenomics-economic-spec.md](tokenomics-economic-spec.md) section 7). Right after step 6 and before any address is announced, the Public Launch
    Safe adds ARL-only positions on the same four pools and ranges: USDT 600,000, USDC 500,000,
-   WETH 450,000, cbBTC 450,000 (2,000,000 ARL; its 500,000 ARL claim tranche and 2,500,000 ARL
+   WETH 450,000, cbBTC 450,000 (2,000,000 ARL; the 500,000 ARL kept for the later airdrop and the 2,500,000 ARL
    launchpad reserve stay in the Safe). Write `pools-public-launch.json` (example:
    `contracts/test-fork/fixtures/pools-public-launch.json`) with `"allocation": "publicLaunch"`,
    the Public Launch Safe as `liquiditySafe` and the same ETH and BTC prices as step 6, run
@@ -76,10 +79,10 @@ The records go to `contracts/deploy/deployments/8453-safes.json`, `8453.json` an
    `FOUNDRY_PROFILE=fork ARL_BASE_RPC=<Base RPC> forge test --match-contract UniswapPublicLaunchFork`,
    then sign with two of three owners. If anyone has traded since step 6 the batch reverts and
    deposits nothing (fork-tested); rebuild it with `priceUsd` at or above the pool's current price.
-8. **Distributor** (a few hours after the pools, so that buyers have put quote tokens in
-   the pools before claimed ARL can be sold). `DeployDistributor` with a claim end at most 60 days ahead (enforced), then
-   `record-cli.ts distributor … --distribution distribution.json`; the Public Launch Safe (2-of-3)
-   funds it with exactly the list total.
+8. **Distributor — deferred to the later airdrop; not part of TGE day.** `ARLMerkleDistributor`
+   is not deployed at TGE. For the later airdrop: `DeployDistributor` with the announced claim
+   end (the script currently enforces at most 60 days), then `record-cli.ts distributor … --distribution distribution.json`; the Public Launch Safe
+   (2-of-3) funds it with exactly the list total.
 9. **Announce.** Publish the addresses on arlcoin.io and in the repository: set
    `SITE.mainnet.token` (shows "Add ARL to your wallet") and write the token list with
    `node packages/deploy/src/tokenlist-cli.ts apps/web/public/tokenlist.json 8453=<ARL token>`;
