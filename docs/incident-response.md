@@ -11,6 +11,14 @@ The project has one maintainer today (see [branch-protection.md](branch-protecti
 go to team@arlcoin.io with "Security" in the subject, as described in [SECURITY.md](../SECURITY.md).
 Safe actions need the signers of the Safe concerned (see [mainnet-plan.md](mainnet-plan.md)).
 
+## Detection
+
+The [Uptime](../.github/workflows/uptime.yml) workflow checks every 10 minutes that the website,
+the app page, the testnet operator API and the Base Sepolia RPC answer, that the faucet holds at
+least 20 claims and that staking rewards run for at least 3 more days. A failed check fails the run
+and GitHub notifies the owner by email and in the mobile app. The [Monitor mainnet](../.github/workflows/monitor.yml)
+workflow does the same for the Base Mainnet deployment once it is recorded.
+
 ## Steps
 
 1. **Acknowledge** the report within 3 business days (as in SECURITY.md) and record it privately (date, reporter, affected

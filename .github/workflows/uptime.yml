@@ -1,0 +1,69 @@
+name: Uptime
+
+# Read-only uptime check of the public services every 10 minutes: the website, the app page, the
+# testnet operator API (and the faucet float it reports), the Base Sepolia RPC and the staking
+# reward window. Any failed check fails the run, and GitHub notifies the owner by email and in the
+# GitHub mobile app. Nothing is signed or sent. The Telegram bot is not pinged: on Render's free
+# tier a ping every 10 minutes would keep it awake around the clock and use up the free hours.
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: uptime
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      RPC: https://sepolia.base.org
+      STAKING: "0xA78480c1802F5c17B1007c59b7c2CF849549724e"
+    steps:
+      - name: Website and app
+        run: |
+          set -u
+          fail=0
+          check() { # url, text the page must contain
+            body=$(curl -sfL --max-time 20 --retry 2 --retry-delay 5 "$1") || { echo "::error::$1 is down"; fail=1; return; }
+            grep -q "$2" <<<"$body" || { echo "::error::$1 answered without \"$2\""; fail=1; return; }
+            echo "ok $1"
+          }
+          check https://arlcoin.io/ "ARL Protocol"
+          check https://arlcoin.io/app/ "ARL"
+          check https://arlcoin.io/.well-known/security.txt "team@arlcoin.io"
+          exit $fail
+
+      - name: Operator API and faucet float
+        run: |
+          set -euo pipefail
+          status=$(curl -sf --max-time 20 --retry 2 --retry-delay 5 https://app.arlcoin.io/api/operator/status) \
+            || { echo "::error::app.arlcoin.io operator API is down"; exit 1; }
+          node -e '
+            const s = JSON.parse(process.argv[1]);
+            const arl = BigInt(s.arl), claim = BigInt(s.faucetAmount);
+            console.log(`faucet float: ${arl / 10n ** 18n} ARL, ${arl / claim} claims left`);
+            if (s.chainId !== 84532) { console.log("::error::operator is not on Base Sepolia"); process.exit(1); }
+            if (arl < claim * 20n) { console.log("::error::faucet float is below 20 claims; refill from the Ecosystem Safe"); process.exit(1); }
+          ' "$status"
+
+      - name: Base Sepolia RPC and staking rewards
+        run: |
+          set -euo pipefail
+          rpc() { curl -sf --max-time 20 --retry 2 --retry-delay 5 -X POST -H 'content-type: application/json' --data "$1" "$RPC"; }
+          block=$(rpc '{"jsonrpc":"2.0","id":1,"method":"eth_getBlockByNumber","params":["latest",false]}') \
+            || { echo "::error::Base Sepolia RPC is down"; exit 1; }
+          finish=$(rpc "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"eth_call\",\"params\":[{\"to\":\"$STAKING\",\"data\":\"0xebe2b12b\"},\"latest\"]}")
+          node -e '
+            const now = Math.floor(Date.now() / 1000);
+            const ts = Number(BigInt(JSON.parse(process.argv[1]).result.timestamp));
+            const finish = Number(BigInt(JSON.parse(process.argv[2]).result));
+            console.log(`latest block ${now - ts}s old; staking rewards until ${new Date(finish * 1000).toISOString()}`);
+            if (now - ts > 300) { console.log("::error::Base Sepolia has not produced a block for 5 minutes"); process.exit(1); }
+            if (finish - now < 3 * 86400) { console.log("::error::staking rewards end within 3 days; fund the next period from the Community Safe"); process.exit(1); }
+          ' "$block" "$finish"
