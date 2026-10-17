@@ -10,6 +10,7 @@ import { CoreNavigation } from "./CoreNavigation.tsx";
 import { DetailSurface } from "./DetailSurface.tsx";
 import { Orbit } from "./Orbit.tsx";
 import { ProtocolIndex } from "./ProtocolIndex.tsx";
+import { LiveStatus } from "@/site/LiveStatus.tsx";
 import { HomeLink } from "@/site/HomeLink.tsx";
 import { SiteLinks } from "@/site/SiteLinks.tsx";
 import type { RingEntry } from "./RingCard.tsx";
@@ -111,7 +112,10 @@ export function InteractiveCore() {
 
       <header className="material-bar sticky top-0 z-30 border-b border-line">
         <div className="mx-auto flex h-14 max-w-[1440px] items-center justify-between gap-6 px-4 sm:px-8">
-          <HomeLink />
+          <div className="flex shrink-0 items-center gap-2.5">
+            <HomeLink />
+            <LiveStatus />
+          </div>
           <CoreNavigation
             current={layer}
             onSelect={(id) => navigate(pathFor(id))}

@@ -26,7 +26,7 @@ export function HomeLink() {
       aria-label="ARL home"
     >
       <BrandMark />
-      ARL
+      <span className="hidden min-[360px]:inline">ARL</span>
     </a>
   );
 }
