@@ -1,14 +1,17 @@
 # ARL community bot (Telegram)
 
-Status: **IN DEVELOPMENT.** Code and tests only; not deployed.
+Status: **live** as @Arlprotocol_bot in https://t.me/arlcoin_community (Render free web service, webhook mode).
 
-Moderates the community group https://t.me/arlcoin_community and answers three commands.
+Moderates the community group https://t.me/arlcoin_community and answers commands.
 
 | Feature           | Behaviour                                                                                                                         |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | `/start`          | What ARL is and its current status (testnet token and app, mainnet target, no airdrop at launch), with official links |
 | `/help`           | Command list and official channels                                                                                                |
 | `/rules`          | Group rules and the security notice                                                                                               |
+| `/app`, `/faucet`, `/whitelist` | Testnet app link, how to get testnet ARL, whitelist link                                                                 |
+| `/status`        | Faucet float and staking reward window, read live (cached 60 s) from the public operator status endpoint and a Base Sepolia RPC call |
+| `/launch`        | Countdown to the Base Mainnet target date and the fake-address warning                                                         |
 | Welcome           | Greets new members with the rules pointer and the security notice                                                                |
 | Scam filter       | Deletes messages matching known scam patterns (seed phrase requests, "DM me", fake support, wallet "validation", paid promotion) |
 | New-member limits | Links and forwarded posts from members who joined less than 24 hours ago are deleted                                             |
@@ -76,7 +79,7 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
 
 ## Deploy (owner action)
 
-Nothing here has been deployed. These steps are for the owner.
+Deployed on 2026-10-17 with these steps; kept for a redeploy or a token rotation.
 
 1. In @BotFather: `/newbot`, keep the token private. Then `/setprivacy` → **Disable**, so the bot
    can read group messages to moderate them.

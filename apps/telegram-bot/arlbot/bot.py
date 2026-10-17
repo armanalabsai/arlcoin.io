@@ -1,4 +1,4 @@
-"""ARL community bot: /start, /help, /rules, welcome messages and spam protection.
+"""ARL community bot: commands, welcome messages and spam protection.
 
 Configuration comes only from environment variables; nothing secret is written to disk or logs.
 
@@ -27,7 +27,7 @@ from telegram.constants import ChatType, UpdateType
 from telegram.error import TelegramError
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
 
-from . import spam, texts
+from . import chain, spam, texts
 
 log = logging.getLogger("arlbot")
 
@@ -51,6 +51,7 @@ class State:
         self.members = spam.NewMembers()
         self.cooldown = spam.Cooldown()
         self.admins: Dict[int, Tuple[float, FrozenSet[int]]] = {}
+        self.status = chain.StatusReader()
 
 
 def _state(context: ContextTypes.DEFAULT_TYPE) -> State:
@@ -92,6 +93,49 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def cmd_rules(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await _reply_once(update, context, "rules", texts.RULES)
+
+
+async def cmd_app(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await _reply_once(update, context, "app", texts.APP_TEXT)
+
+
+async def cmd_faucet(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await _reply_once(update, context, "faucet", texts.FAUCET_TEXT)
+
+
+async def cmd_whitelist(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await _reply_once(update, context, "whitelist", texts.WHITELIST_TEXT)
+
+
+async def cmd_launch(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await _reply_once(update, context, "launch", texts.launch(int(time.time())))
+
+
+async def cmd_status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    msg = update.effective_message
+    chat = update.effective_chat
+    if msg is None or chat is None:
+        return
+    if chat.type != ChatType.PRIVATE and not _state(context).cooldown.ready(chat.id, "status"):
+        return
+    st = await _state(context).status.read()
+    if st.faucet_arl is None and st.reward_period_finish is None:
+        text = texts.STATUS_UNAVAILABLE
+    else:
+        text = texts.status(st.faucet_arl, st.faucet_amount, st.reward_period_finish, int(time.time()))
+    await msg.reply_text(text, disable_web_page_preview=True)
+
+
+COMMANDS = {
+    "start": cmd_start,
+    "help": cmd_help,
+    "rules": cmd_rules,
+    "app": cmd_app,
+    "faucet": cmd_faucet,
+    "status": cmd_status,
+    "launch": cmd_launch,
+    "whitelist": cmd_whitelist,
+}
 
 
 async def _guard_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
@@ -177,9 +221,8 @@ async def on_error(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
 def build_application(token: str, state: State) -> Application:
     app = Application.builder().token(token).build()
     app.bot_data["state"] = state
-    app.add_handler(CommandHandler("start", cmd_start))
-    app.add_handler(CommandHandler("help", cmd_help))
-    app.add_handler(CommandHandler("rules", cmd_rules))
+    for name, handler in COMMANDS.items():
+        app.add_handler(CommandHandler(name, handler))
     groups = filters.ChatType.GROUPS
     app.add_handler(MessageHandler(groups & filters.StatusUpdate.NEW_CHAT_MEMBERS, on_new_members))
     app.add_handler(MessageHandler(groups & ~filters.StatusUpdate.ALL & ~filters.COMMAND, on_group_message))

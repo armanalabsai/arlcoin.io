@@ -115,7 +115,7 @@ def test_commands_have_group_cooldown_but_not_in_private():
 
 def test_build_application_registers_handlers():
     app = bot.build_application("123456:TEST-TOKEN-NOT-REAL", bot.State(None, 10))
-    assert sum(len(h) for h in app.handlers.values()) == 5
+    assert sum(len(h) for h in app.handlers.values()) == len(bot.COMMANDS) + 2
 
 
 def test_main_refuses_missing_or_weak_config(monkeypatch):
@@ -136,3 +136,42 @@ def test_logging_hides_request_urls_that_contain_the_token():
     bot.configure_logging()
     assert logging.getLogger("httpx").getEffectiveLevel() >= logging.WARNING
     assert logging.getLogger("httpcore").getEffectiveLevel() >= logging.WARNING
+
+
+class FakeReader:
+    def __init__(self, status):
+        self.status = status
+
+    async def read(self):
+        return self.status
+
+
+def test_link_commands_reply_once_per_cooldown():
+    update, ctx, msg, _, _ = make("/faucet")
+    run(bot.cmd_faucet(update, ctx))
+    run(bot.cmd_faucet(update, ctx))
+    assert msg.replies == [texts.FAUCET_TEXT]
+
+
+def test_status_reads_chain_figures():
+    from arlbot import chain
+
+    update, ctx, msg, _, state = make("/status")
+    state.status = FakeReader(chain.Status(200_000, 1_000, 4_000_000_000))
+    run(bot.cmd_status(update, ctx))
+    assert "200,000 testnet ARL left" in msg.replies[0]
+    assert "running until" in msg.replies[0]
+
+
+def test_status_unavailable_when_both_sources_fail():
+    from arlbot import chain
+
+    update, ctx, msg, _, state = make("/status")
+    state.status = FakeReader(chain.Status(None, None, None))
+    run(bot.cmd_status(update, ctx))
+    assert msg.replies == [texts.STATUS_UNAVAILABLE]
+
+
+def test_every_command_is_listed_in_help():
+    for name in bot.COMMANDS:
+        assert f"/{name}" in texts.HELP or name == "start"
