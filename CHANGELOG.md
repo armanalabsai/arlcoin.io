@@ -3,6 +3,14 @@
 Notable changes to ARL Protocol, newest first. Dates are UTC. Every entry links to the code and
 documents that back it; nothing here is deployed on Base Mainnet.
 
+## 2026-10-17
+
+- Verified evaluation of ERC-8183 jobs: `ARLVerifiedEvaluator`, a staked validator committee
+  chosen by the client that acts as the job's evaluator, with a challenge window, disputes, an
+  arbiter limited to disputed jobs, burn slashing and outcomes written to ERC-8004 reputation.
+  Built and tested (unit, fuzz, invariant; 100% coverage), not deployed
+  ([verifiable-execution.md](docs/verifiable-execution.md)).
+
 ## 2026-10-16
 
 - Website: official channels (X @arlprotocol, Telegram t.me/arlcoin_community, team@arlcoin.io),
