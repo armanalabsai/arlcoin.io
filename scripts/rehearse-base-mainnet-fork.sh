@@ -11,9 +11,9 @@
 #   0. before the TGE every deployment path is refused (PlanProductionLocked)
 #   1. CreateSafes: the 12 Safes, compared with docs/mainnet-plan.md
 #   2. config (TGE 2026-10-23), plan, DeployARL, VerifyARL, manifest, supply (2,100,000 circulating)
-#   3. the four ARL-only Uniswap v3 pools from the Liquidity Safe (1,000,000 ARL)
+#   3. the four ARL-only Uniswap v3 pools from the Liquidity Safe (2,000,000 ARL)
 #   3b. right after, the Public Launch sale: ARL-only positions in the same pools from the Public
-#       Launch Safe (2,000,000 ARL); the Safe keeps the 500,000 claim tranche and the 2,500,000
+#       Launch Safe (3,000,000 ARL); the Safe keeps the 500,000 claim tranche and the 1,500,000
 #       launchpad reserve
 #   4. the Public Launch claim distributor, funded by the Public Launch Safe
 #
@@ -138,24 +138,13 @@ node -e "const s=JSON.parse(process.argv[1]); console.log('total', s.totalSupply
 LEFT="$(cast balance "$ARL_DEPLOYER" --rpc-url "$RPC" -e)"
 echo "deployer ETH left of the 0.001 ETH: $LEFT"
 
-log "3. Four ARL-only Uniswap v3 pools from the Liquidity Safe (1,000,000 ARL)"
+log "3. Four ARL-only Uniswap v3 pools from the Liquidity Safe (2,000,000 ARL)"
 LIQUIDITY="$(node -e "const s=require('./$OUT/safes.json').safes; console.log(s.liquidity)")"
 ETH_USD="$(cast call 0x71041dddad3595F9CEd3DcCFBe3D1F4b0a16Bb70 'latestAnswer()(int256)' --rpc-url "$RPC" | cut -d' ' -f1)"
 BTC_USD="$(cast call 0x64c911996D3c6aC71f9b455B1E8E7266BcbD848F 'latestAnswer()(int256)' --rpc-url "$RPC" | cut -d' ' -f1)"
-node - "$OUT/pools.json" "$TOKEN" "$LIQUIDITY" "$ETH_USD" "$BTC_USD" <<'EOF'
-const [out, token, liquiditySafe, eth, btc] = process.argv.slice(2);
-const usd = (x) => (Number(x) / 1e8).toFixed(2); // Chainlink feeds: 8 decimals
-require("fs").writeFileSync(out, JSON.stringify({
-  token, liquiditySafe, priceUsd: "0.20", deadline: 1792713600 + 30 * 86400,
-  legs: [
-    { quote: "USDC", arlAmount: "400000", quoteUsd: "1" },
-    { quote: "USDT", arlAmount: "200000", quoteUsd: "1" },
-    { quote: "WETH", arlAmount: "300000", quoteUsd: usd(eth) },
-    { quote: "cbBTC", arlAmount: "100000", quoteUsd: usd(btc) },
-  ],
-}, null, 2));
-console.log(`ETH ${usd(eth)} USD, BTC ${usd(btc)} USD (Chainlink on the fork)`);
-EOF
+PUBLIC="$(node -e "console.log(require('./$OUT/safes.json').safes.publicLaunch)")"
+node "$ROOT/scripts/launch-pools.mjs" "$OUT" "$TOKEN" "$LIQUIDITY" "$PUBLIC" "$ETH_USD" "$BTC_USD" ||
+  die "pool inputs not written"
 node "$ROOT/packages/deploy/src/pool-cli.ts" "$OUT/pools.json" "$OUT/pool.json" || die "pool batch rejected"
 cast rpc anvil_setBalance "$LIQUIDITY" "$(cast to-hex 100000000000000000)" --rpc-url "$RPC" >/dev/null
 node -e "for (const t of require('./$OUT/pool.json').transactions) console.log(t.to, t.data)" |
@@ -171,28 +160,12 @@ for Q in 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913 0xfde4C96c8593536E31F229EA8f
   echo "pool $POOL holds $(cast from-wei "$BAL") ARL"
   INPOOLS="$(node -e "console.log((BigInt('$INPOOLS') + BigInt('$BAL')).toString())")"
 done
-node -e "const d=1000000n*10n**18n-BigInt('$INPOOLS'); if (d < 0n || d > 10n**12n) process.exit(1)" ||
-  die "the pools do not hold 1,000,000 ARL"
+node -e "const d=2000000n*10n**18n-BigInt('$INPOOLS'); if (d < 0n || d > 10n**12n) process.exit(1)" ||
+  die "the pools do not hold 2,000,000 ARL"
 [[ "$(cast call 0x03a520b32C04BF3bEEf7BEb72E919cf822Ed34f1 'balanceOf(address)(uint256)' "$LIQUIDITY" --rpc-url "$RPC")" == "4" ]] ||
   die "the Liquidity Safe does not hold the four position NFTs"
 
-log "3b. Public Launch sale: ARL-only positions from the Public Launch Safe (2,000,000 ARL)"
-PUBLIC="$(node -e "console.log(require('./$OUT/safes.json').safes.publicLaunch)")"
-node - "$OUT/pools-public-launch.json" "$TOKEN" "$PUBLIC" "$ETH_USD" "$BTC_USD" <<'EOF'
-const [out, token, publicLaunchSafe, eth, btc] = process.argv.slice(2);
-const usd = (x) => (Number(x) / 1e8).toFixed(2); // Chainlink feeds: 8 decimals
-// The batch format names the funding Safe "liquiditySafe"; allocation picks the cap.
-require("fs").writeFileSync(out, JSON.stringify({
-  token, liquiditySafe: publicLaunchSafe, allocation: "publicLaunch", priceUsd: "0.20",
-  deadline: 1792713600 + 30 * 86400,
-  legs: [
-    { quote: "USDC", arlAmount: "500000", quoteUsd: "1" },
-    { quote: "USDT", arlAmount: "600000", quoteUsd: "1" },
-    { quote: "WETH", arlAmount: "450000", quoteUsd: usd(eth) },
-    { quote: "cbBTC", arlAmount: "450000", quoteUsd: usd(btc) },
-  ],
-}, null, 2));
-EOF
+log "3b. Public Launch sale: ARL-only positions from the Public Launch Safe (3,000,000 ARL)"
 node "$ROOT/packages/deploy/src/pool-cli.ts" "$OUT/pools-public-launch.json" "$OUT/pool-public-launch.json" ||
   die "Public Launch sale batch rejected"
 PUBLIC_BEFORE="$(cast call "$TOKEN" 'balanceOf(address)(uint256)' "$PUBLIC" --rpc-url "$RPC" | cut -d' ' -f1)"
@@ -210,16 +183,16 @@ for Q in 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913 0xfde4C96c8593536E31F229EA8f
   echo "pool $POOL holds $(cast from-wei "$BAL") ARL"
   INPOOLS2="$(node -e "console.log((BigInt('$INPOOLS2') + BigInt('$BAL')).toString())")"
 done
-node -e "const d=3000000n*10n**18n-BigInt('$INPOOLS2'); if (d < 0n || d > 10n**12n) process.exit(1)" ||
-  die "the pools do not hold 3,000,000 ARL (1,000,000 liquidity + 2,000,000 sale)"
+node -e "const d=5000000n*10n**18n-BigInt('$INPOOLS2'); if (d < 0n || d > 10n**12n) process.exit(1)" ||
+  die "the pools do not hold 5,000,000 ARL (2,000,000 liquidity + 3,000,000 sale)"
 PUBLIC_AFTER="$(cast call "$TOKEN" 'balanceOf(address)(uint256)' "$PUBLIC" --rpc-url "$RPC" | cut -d' ' -f1)"
-node -e "const d=BigInt('$PUBLIC_BEFORE')-BigInt('$PUBLIC_AFTER')-2000000n*10n**18n; if (d < -(10n**12n) || d > 10n**12n) process.exit(1)" ||
-  die "the Public Launch Safe did not place exactly 2,000,000 ARL"
-node -e "const d=BigInt('$PUBLIC_AFTER')-3000000n*10n**18n; if (d < 0n || d > 10n**12n) process.exit(1)" ||
-  die "the Public Launch Safe does not keep 3,000,000 ARL (claim tranche and launchpad reserve)"
+node -e "const d=BigInt('$PUBLIC_BEFORE')-BigInt('$PUBLIC_AFTER')-3000000n*10n**18n; if (d < -(10n**12n) || d > 10n**12n) process.exit(1)" ||
+  die "the Public Launch Safe did not place exactly 3,000,000 ARL"
+node -e "const d=BigInt('$PUBLIC_AFTER')-2000000n*10n**18n; if (d < 0n || d > 10n**12n) process.exit(1)" ||
+  die "the Public Launch Safe does not keep 2,000,000 ARL (claim tranche and launchpad reserve)"
 [[ "$(cast call 0x03a520b32C04BF3bEEf7BEb72E919cf822Ed34f1 'balanceOf(address)(uint256)' "$PUBLIC" --rpc-url "$RPC")" == "4" ]] ||
   die "the Public Launch Safe does not hold the four position NFTs"
-echo "Public Launch Safe keeps $(cast from-wei "$PUBLIC_AFTER") ARL (500,000 claim + 2,500,000 launchpad)"
+echo "Public Launch Safe keeps $(cast from-wei "$PUBLIC_AFTER") ARL (500,000 claim + 1,500,000 launchpad)"
 
 log "4. Public Launch claim distributor (placeholder list), funded by the Public Launch Safe"
 CLAIM_END=$((TGE + 60 + 59 * 86400))

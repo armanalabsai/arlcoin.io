@@ -26,7 +26,8 @@ Key facts:
   multisig and a 48-hour timelock.
 - Roadmap: foundation and token contracts complete, internal security review complete, Base
   Sepolia testnet live since 4 October 2026, Base Mainnet targeted for 23 October 2026.
-- Launch: trading opens on Uniswap on Base at the Base Mainnet launch, from 0.20 USD per ARL.
+- Launch: trading opens on Uniswap on Base at the Base Mainnet launch, from 0.20 USD per ARL,
+  in ARL-only pools holding 5,000,000 ARL (2,000,000 Liquidity, 3,000,000 Public Launch).
   There is no airdrop at the launch; an airdrop of 500,000 ARL is planned for a later date.
 - ARL never asks for a private key, a seed phrase or a payment.
 

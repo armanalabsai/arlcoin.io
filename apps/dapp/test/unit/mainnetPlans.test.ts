@@ -1,0 +1,49 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { describe, it, mock } from "node:test";
+
+import { getContractAddress } from "viem";
+
+import { parseRun, recordCommand } from "../../lib/deploySteps.ts";
+import { TGE_DATE } from "../../lib/network.ts";
+
+// The Base Mainnet contract run published for TGE day (apps/dapp/public/plans/8453-deploy.json),
+// taken from the mainnet fork rehearsal with the real signers. It must load on the deploy screen
+// once Base Mainnet opens and create exactly the addresses in docs/mainnet-plan.md. The Safe run
+// names the Safe owners, so it stays out of the repository and is handed to the owner directly.
+const plan = (name: string) =>
+  JSON.parse(
+    readFileSync(new URL(`../../public/plans/${name}.json`, import.meta.url), "utf8"),
+  ) as unknown;
+const doc = readFileSync(new URL("../../../../docs/mainnet-plan.md", import.meta.url), "utf8");
+const planned = (label: string) =>
+  new RegExp(`\\| ${label} +\\| \`(0x[0-9a-fA-F]{40})\``).exec(doc)?.[1]?.toLowerCase();
+
+const afterTge = <T>(f: () => T): T => {
+  mock.timers.enable({ apis: ["Date"], now: Date.parse(TGE_DATE) + 60_000 });
+  try {
+    return f();
+  } finally {
+    mock.timers.reset();
+  }
+};
+
+describe("Base Mainnet plans for TGE day", () => {
+  it("deploys the ARL contracts at nonces 12 to 15, the token at the planned address", () => {
+    const run = afterTge(() => parseRun(plan("8453-deploy")));
+    assert.equal(run.chainId, 8453);
+    assert.deepEqual(
+      run.steps.map((s) => (s.kind === "create" ? s.contract : s.kind)),
+      ["ARLVestingWallet", "ARLVestingWallet", "ARLTimelock", "ARLToken"],
+    );
+    const token = run.steps[3];
+    assert.equal(token?.kind, "create");
+    if (token?.kind === "create") {
+      assert.equal(token.nonce, 15);
+      assert.equal(token.address, getContractAddress({ from: run.from, nonce: 15n }));
+      assert.equal(token.address.toLowerCase(), planned("ARL token"));
+    }
+    assert.equal(run.from.toLowerCase(), "0xe033104ae32fc7e13263b7aed577ab20d6e47eaa");
+    assert.ok(recordCommand(run, "x.json").command.includes(" https://mainnet.base.org "));
+  });
+});
