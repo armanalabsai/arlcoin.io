@@ -34,9 +34,9 @@ export default function TermsPage() {
     >
       <Section heading="What this site is">
         <p>
-          The site describes ARL Protocol, which is in development. The ARL token contracts are
-          written and tested but have not been deployed to any public network. There is no token
-          sale on this site.
+          The site describes ARL Protocol, which is in development. The ARL contracts are deployed
+          on the Base Sepolia test network only, where tokens have no value; nothing is deployed on
+          Base Mainnet. There is no token sale on this site.
         </p>
       </Section>
 

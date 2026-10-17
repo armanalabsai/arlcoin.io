@@ -6,18 +6,11 @@ import type { Metadata, Viewport } from "next";
 import { organizationJsonLd } from "@/content/seo.ts";
 import { SITE } from "@/content/site.ts";
 import { NucleusField } from "@/core/NucleusField.tsx";
-import { BackgroundMusic } from "@/site/BackgroundMusic.tsx";
 import { InfrastructureStrip } from "@/site/InfrastructureStrip.tsx";
 import { JsonLd } from "@/site/JsonLd.tsx";
 import { SoftNavigation } from "@/site/SoftNavigation.tsx";
 
 import "./globals.css";
-
-const AUDIO_UNLOCK = `(function(){try{if(localStorage.getItem("arl-music")==="off")return}catch(e){}
-var E=["pointerdown","touchend","click","keydown"];function go(){var C=window.AudioContext||window.webkitAudioContext;if(!C)return;
-var c=window.__arlAudio||(window.__arlAudio=new C());c.resume().then(function(){if(c.state!=="running")return;
-E.forEach(function(e){removeEventListener(e,go,true)});dispatchEvent(new Event("arl-audio-unlocked"))})}
-E.forEach(function(e){addEventListener(e,go,true)})})();`;
 
 export const metadata: Metadata = {
   // Google Search Console ownership of https://arlcoin.io/ (added 2026-10-05).
@@ -69,17 +62,11 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <head>
-        {/* Unlocks audio on the very first click, tap or key press, before the page has
-            hydrated, so that gesture is never lost; music.ts then plays through this context. */}
-        <script dangerouslySetInnerHTML={{ __html: AUDIO_UNLOCK }} />
-      </head>
       <body>
         <JsonLd data={organizationJsonLd} />
         <NucleusField />
         {children}
         <InfrastructureStrip />
-        <BackgroundMusic />
         <SoftNavigation />
         {/* Cookieless page counts; on only for the Vercel deployment, where the script is served. */}
         {process.env.NEXT_PUBLIC_ARL_ANALYTICS === "1" ? <Analytics /> : null}

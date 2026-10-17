@@ -43,6 +43,21 @@ export const FAQ: readonly FaqEntry[] = [
       "Yes, the token has no transfer tax, blacklist or pause. The launch pools on Uniswap start with ARL only, priced from 0.20 USD: buyers pay USDC, USDT, ETH or BTC into them, and a seller can sell back only as much as buyers have paid in, never below 0.20 USD. Right after the launch a pool may therefore have little to pay sellers until buying starts. The free claim opens a few hours after the pools for this reason.",
   },
   {
+    question: "Do testnet tokens have any value?",
+    answer:
+      "No. ARL on the Base Sepolia testnet has no value and cannot be exchanged for anything. The ARL app at arlcoin.io/app hands out testnet ARL from a faucet so the staking, jobs, payments and anonymous polls can be tried for free.",
+  },
+  {
+    question: "What are the official channels?",
+    answer:
+      "Only these: the website arlcoin.io, X @arlprotocol, the Telegram group t.me/arlcoin_community and the email address team@arlcoin.io. Any other account claiming to be ARL is not official.",
+  },
+  {
+    question: "How do I delete my whitelist registration?",
+    answer:
+      "Ask through the contact form or write to team@arlcoin.io from the email address you registered with. The registration is then deleted, as described in the privacy notice.",
+  },
+  {
     question: "Will ARL ever ask for my private key or seed phrase?",
     answer:
       "Never. ARL will never ask for your private key, your seed phrase or a payment. Anyone who does is attempting theft.",

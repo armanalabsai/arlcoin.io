@@ -6,8 +6,8 @@ import { useEffect } from "react";
 import { BASE_PATH, stripBase } from "@/core/basePath.ts";
 
 // Mounted once in the root layout. Turns plain clicks on links to other pages of this site into
-// client-side navigations, so the root layout, and the background music in it, stays alive and
-// keeps playing across pages. Next's <Link> does this already; this covers plain anchors such as
+// client-side navigations, so the root layout stays alive and pages switch without a full
+// reload. Next's <Link> does this already; this covers plain anchors such as
 // links inside documents. It runs after the page's own click handlers and leaves alone anything
 // they handled, modified clicks, new-tab and download links, other origins, the separate app
 // under /app, and in-page anchors.
