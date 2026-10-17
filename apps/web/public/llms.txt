@@ -21,10 +21,10 @@ Key facts:
 - Planned uses: AI services paid per use in ARL, GPU and CPU compute paid per second,
   zero-knowledge anonymous signals, and staking funded from existing allocations, never from
   new issuance.
-- Security: multi-layer security audit completed on 17 October 2026 with open-source tools
-  (Slither, Aderyn, Foundry fuzz and invariant tests, Halmos, Mythril) and manual triage; no
-  critical finding, every finding closed (fixed or accepted with a documented mitigation). Carried
-  out by the ARL team, not a third-party audit. Treasury actions pass a Safe
+- Security: multi-layer internal security audit completed on 17 October 2026 with open-source
+  tools (Slither, Aderyn, Foundry fuzz and invariant tests, Halmos, Mythril) and manual triage; no
+  critical finding, every finding closed (fixed or accepted with a documented mitigation).
+  Treasury actions pass a Safe
   multisig and a 48-hour timelock.
 - Roadmap: foundation and token contracts complete, internal security audit complete, Base
   Sepolia testnet live since 4 October 2026, Base Mainnet targeted for 23 October 2026.

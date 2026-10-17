@@ -31,7 +31,7 @@ export const security: Layer = {
       weight: "primary",
       detail: {
         summary:
-          "A comprehensive, multi-layer security audit of the ARL contracts, built on open-source tools, was completed on 17 October 2026 at commit ab7595b: Slither and Aderyn static analysis, 271 Foundry tests with 29 fuzz tests at 10,000 runs and 5 invariant suites, Halmos symbolic proofs, Mythril symbolic execution and manual triage. It found no critical issue and no exploitable vulnerability in the contract code. Every finding is closed: fixed in the launch procedure, or accepted with a documented mitigation. The audit was carried out internally by the ARL team with open-source tooling; it is not an independent third-party audit. The scope, raw tool outputs, triage and report are public, and a CI workflow reproduces them on every change.",
+          "A comprehensive, multi-layer internal security audit of the ARL contracts, built on open-source tools, was completed on 17 October 2026 at commit ab7595b: Slither and Aderyn static analysis, 271 Foundry tests with 29 fuzz tests at 10,000 runs and 5 invariant suites, Halmos symbolic proofs, Mythril symbolic execution and manual triage. It found no critical issue and no exploitable vulnerability in the contract code. Every finding is closed: fixed in the launch procedure, or accepted with a documented mitigation. The scope, raw tool outputs, triage and report are public, and a CI workflow reproduces them on every change.",
         facts: [
           { label: "Critical findings", value: "None" },
           { label: "Open findings", value: "None" },

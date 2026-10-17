@@ -12,7 +12,7 @@
 All evidence (raw tool outputs, triage, findings) is public at
 [github.com/armanalabsai/arlcoin.io/tree/main/security/2026-10-17](https://github.com/armanalabsai/arlcoin.io/tree/main/security/2026-10-17).
 
-This audit was multi-layer and built on open-source tools. It covered the nine ARL contracts,
+This internal audit was multi-layer and built on open-source tools. It covered the nine ARL contracts,
 the deployment scripts and the signed Base Mainnet run for the launch on 23 October 2026.
 
 - **No critical finding, and no exploitable vulnerability in contract code.**
@@ -72,7 +72,6 @@ FOUNDRY_DYNAMIC_TEST_LINKING=false halmos --match-contract ARLSymbolic --solver-
 
 ## Limits
 
-- This is an internal audit by the project team, not an independent third-party audit.
 - The Halmos proofs are bounded, not full formal verification.
 - The internals of OpenZeppelin, Safe and Uniswap v3 are trusted as published.
 - Off-chain components and market risk are out of scope (`scope.md`).
