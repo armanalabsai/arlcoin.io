@@ -2,6 +2,9 @@
 
 Status: internal review and automated testing. No contract is deployed.
 
+Latest review: [security review of 2026-10-17](../security/2026-10-17/report.md) (scope, raw
+tool outputs, triage, findings and their status).
+
 The allocation model changed on 2026-09-27 (11 allocations; the Ecosystem
 Reserve was removed). `ARLAllocation`, `ARLToken`, the deployment planner,
 deployer, verifier and rehearsal were changed with it. This is a new

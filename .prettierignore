@@ -17,3 +17,7 @@ apps/dapp/next-env.d.ts
 apps/dapp/LICENSE-scaffold-eth-2
 packages/zk/circuit/
 zk/semaphore/target/
+security/2026-10-17/static/
+security/2026-10-17/dynamic/
+security/2026-10-17/symbolic/
+security/2026-10-17/report.pdf

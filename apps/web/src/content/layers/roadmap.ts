@@ -38,10 +38,10 @@ export const roadmap: Layer = {
       shortDescription: "Review and remediation",
       progress: "done",
       weight: "primary",
-      metric: { kind: "static", value: "Internal review complete" },
+      metric: { kind: "static", value: "Review complete, findings closed" },
       detail: {
         summary:
-          "Security review of the contracts and the deployment process. The internal review is complete: tests, fuzzing, invariants, Slither with no findings, Halmos proofs and a reproducible build. A bug bounty paid in ARL is open.",
+          "Security review of the contracts and the deployment process. The multi-layer review was completed on 17 October 2026: tests, fuzzing, invariants, Slither and Aderyn, Halmos proofs, Mythril and a reproducible build, with every finding closed. A bug bounty paid in ARL is open.",
       },
     },
     {

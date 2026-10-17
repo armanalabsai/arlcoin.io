@@ -1,0 +1,244 @@
+{
+  "$schema": "http://json.schemastore.org/sarif-2.1.0-rtm.6",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "results": [
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/ARLVestingWallet.sol"
+                },
+                "region": {
+                  "byteLength": 16,
+                  "byteOffset": 1325
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "It appears that the contract includes a payable function to accept Ether but lacks a corresponding function to withdraw it, which leads to the Ether being locked in the contract. To resolve this issue, please implement a public or external function that allows for the withdrawal of Ether from the contract."
+          },
+          "ruleId": "contract-locks-ether"
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "State is changed at: `g.nullifiers[nullifier] = true`"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/ARLAnonymousSignal.sol"
+                },
+                "region": {
+                  "byteLength": 37,
+                  "byteOffset": 7386
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Changing state after an external call can lead to re-entrancy attacks.Use the checks-effects-interactions pattern to avoid this issue."
+          },
+          "ruleId": "reentrancy-state-change"
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/ARLAllocation.sol"
+                },
+                "region": {
+                  "byteLength": 10,
+                  "byteOffset": 486
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/ARLAllocation.sol"
+                },
+                "region": {
+                  "byteLength": 9,
+                  "byteOffset": 552
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/ARLAllocation.sol"
+                },
+                "region": {
+                  "byteLength": 9,
+                  "byteOffset": 620
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/ARLAllocation.sol"
+                },
+                "region": {
+                  "byteLength": 9,
+                  "byteOffset": 687
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/ARLAllocation.sol"
+                },
+                "region": {
+                  "byteLength": 9,
+                  "byteOffset": 760
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/ARLAllocation.sol"
+                },
+                "region": {
+                  "byteLength": 9,
+                  "byteOffset": 820
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/ARLAllocation.sol"
+                },
+                "region": {
+                  "byteLength": 9,
+                  "byteOffset": 969
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/ARLAllocation.sol"
+                },
+                "region": {
+                  "byteLength": 9,
+                  "byteOffset": 1029
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/ARLAllocation.sol"
+                },
+                "region": {
+                  "byteLength": 9,
+                  "byteOffset": 1088
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/ARLAllocation.sol"
+                },
+                "region": {
+                  "byteLength": 7,
+                  "byteOffset": 1143
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/ARLAllocation.sol"
+                },
+                "region": {
+                  "byteLength": 9,
+                  "byteOffset": 1203
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/ARLAllocation.sol"
+                },
+                "region": {
+                  "byteLength": 7,
+                  "byteOffset": 1271
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Large literal values multiples of 10000 can be replaced with scientific notation.Use `e` notation, for example: `1e18`, instead of its full numeric value."
+          },
+          "ruleId": "large-numeric-literal"
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/ARLAnonymousSignal.sol"
+                },
+                "region": {
+                  "byteLength": 161,
+                  "byteOffset": 8407
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Avoid `require` / `revert` statements in a loop because a single bad item can cause the whole transaction to fail. It's better to forgive on fail and return failed elements post processing of the loop"
+          },
+          "ruleId": "require-revert-in-loop"
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/ARLTimelock.sol"
+                },
+                "region": {
+                  "byteLength": 36,
+                  "byteOffset": 2315
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Function returns a value but it is ignored. Consider checking the return value."
+          },
+          "ruleId": "unchecked-return"
+        }
+      ],
+      "tool": {
+        "driver": {
+          "fullName": "Cyfrin - Aderyn",
+          "informationUri": "https://github.com/Cyfrin/aderyn",
+          "name": "Aderyn",
+          "organization": "Cyfrin",
+          "semanticVersion": "0.6.8",
+          "version": "0.6.8"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,194 @@
+{
+    "exitcode": 0,
+    "test_results": {
+        "test/symbolic/ARLSymbolic.t.sol:ARLSymbolic": [
+            {
+                "name": "check_BeneficiaryIsImmutable(address,address)",
+                "exitcode": 0,
+                "num_models": 0,
+                "models": [],
+                "num_paths": [
+                    3,
+                    1,
+                    0
+                ],
+                "time": [
+                    0.03972136800030057,
+                    0.03969381399974736,
+                    2.094999990731594e-05
+                ],
+                "num_bounded_loops": 0
+            },
+            {
+                "name": "check_ClaimPaysOnlyListedEntriesOnce(uint256,address,uint256,bytes32,address)",
+                "exitcode": 0,
+                "num_models": 0,
+                "models": [],
+                "num_paths": [
+                    95,
+                    35,
+                    0
+                ],
+                "time": [
+                    3.3005344830003196,
+                    3.199755732000085,
+                    0.10077123300015955
+                ],
+                "num_bounded_loops": 0
+            },
+            {
+                "name": "check_DelayFloorHolds(uint256)",
+                "exitcode": 0,
+                "num_models": 0,
+                "models": [],
+                "num_paths": [
+                    2,
+                    2,
+                    0
+                ],
+                "time": [
+                    0.05116021100002399,
+                    0.051139296000201284,
+                    1.50430000758206e-05
+                ],
+                "num_bounded_loops": 0
+            },
+            {
+                "name": "check_EverythingVestedAtEnd(uint64)",
+                "exitcode": 0,
+                "num_models": 0,
+                "models": [],
+                "num_paths": [
+                    2,
+                    1,
+                    0
+                ],
+                "time": [
+                    0.04137764300003255,
+                    0.04135188300006121,
+                    1.5286999769159593e-05
+                ],
+                "num_bounded_loops": 0
+            },
+            {
+                "name": "check_NoCallChangesSupply(address,bytes)",
+                "exitcode": 0,
+                "num_models": 0,
+                "models": [],
+                "num_paths": [
+                    65,
+                    64,
+                    0
+                ],
+                "time": [
+                    0.901889262000168,
+                    0.9018697639999118,
+                    1.4181000096868956e-05
+                ],
+                "num_bounded_loops": 0
+            },
+            {
+                "name": "check_NothingVestsBeforeCliffEnd(uint64)",
+                "exitcode": 0,
+                "num_models": 0,
+                "models": [],
+                "num_paths": [
+                    2,
+                    1,
+                    0
+                ],
+                "time": [
+                    0.05261477300018669,
+                    0.052589753000120254,
+                    1.9640999653347535e-05
+                ],
+                "num_bounded_loops": 0
+            },
+            {
+                "name": "check_SweepOnlyToReturnAddressAfterEnd(uint64,address)",
+                "exitcode": 0,
+                "num_models": 0,
+                "models": [],
+                "num_paths": [
+                    4,
+                    2,
+                    0
+                ],
+                "time": [
+                    0.09515100899989193,
+                    0.0951310039999953,
+                    1.5101999906619312e-05
+                ],
+                "num_bounded_loops": 0
+            },
+            {
+                "name": "check_TransferConservesSupplyAndBalances(address,uint256)",
+                "exitcode": 0,
+                "num_models": 0,
+                "models": [],
+                "num_paths": [
+                    9,
+                    4,
+                    0
+                ],
+                "time": [
+                    0.3396557500000199,
+                    0.3394422520000262,
+                    0.00020497500008787028
+                ],
+                "num_bounded_loops": 0
+            },
+            {
+                "name": "check_TransferFromNeverExceedsAllowance(address,address,uint256,uint256)",
+                "exitcode": 0,
+                "num_models": 0,
+                "models": [],
+                "num_paths": [
+                    9,
+                    7,
+                    0
+                ],
+                "time": [
+                    0.2672265129999687,
+                    0.26720377299989195,
+                    1.5790999896125868e-05
+                ],
+                "num_bounded_loops": 0
+            },
+            {
+                "name": "check_VestedIsMonotonic(uint64)",
+                "exitcode": 0,
+                "num_models": 0,
+                "models": [],
+                "num_paths": [
+                    17,
+                    8,
+                    0
+                ],
+                "time": [
+                    1.082453980000082,
+                    0.3797210239999913,
+                    0.7027271040001324
+                ],
+                "num_bounded_loops": 0
+            },
+            {
+                "name": "check_VestedNeverExceedsAllocation(uint64)",
+                "exitcode": 0,
+                "num_models": 0,
+                "models": [],
+                "num_paths": [
+                    8,
+                    4,
+                    0
+                ],
+                "time": [
+                    2.73628842800008,
+                    0.12387200200009829,
+                    2.6124096240000654
+                ],
+                "num_bounded_loops": 0
+            }
+        ]
+    }
+}
