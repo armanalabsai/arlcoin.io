@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 
-// Header indicator for the Base Sepolia testnet the ARL app runs on. It reads the latest block
-// from the public Base Sepolia RPC and shows "Testnet live" only while the chain answers; the
-// label never claims more than that answer. It links to the app.
+// "Live on Base" indicator next to the brand link, with the Base mark. It reads the latest block
+// from the public Base Sepolia RPC and says "live" only while the chain answers; the label never
+// claims more than that answer, and it names the testnet. It links to the app.
 const RPC = "https://sepolia.base.org";
 const APP = "https://arlcoin.io/app/";
 const POLL_MS = 30_000;
@@ -70,7 +70,7 @@ export function LiveStatus() {
       className="inline-flex min-h-11 items-center"
       data-state={state.kind}
     >
-      <span className="glass-pill inline-flex h-8 items-center gap-2 rounded-full px-3 text-[12px] text-fg">
+      <span className="glass-pill inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[12px] whitespace-nowrap text-fg">
         <span aria-hidden="true" className="relative inline-flex size-2">
           {live ? (
             <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-60 motion-reduce:animate-none" />
@@ -81,8 +81,15 @@ export function LiveStatus() {
             }`}
           />
         </span>
-        <span className="hidden min-[520px]:inline">{live ? "Testnet live" : "Testnet"}</span>
-        <span className="min-[520px]:hidden">Live</span>
+        <svg aria-hidden="true" viewBox="0 0 16 16" className="size-3.5 shrink-0">
+          <rect width="16" height="16" rx="3" fill="#0000FF" />
+        </svg>
+        <span className="hidden sm:inline">
+          {live ? "Live on Base Sepolia" : "Base Sepolia testnet"}
+        </span>
+        <span className="hidden min-[480px]:inline sm:hidden">
+          {live ? "Live on Base" : "Base"}
+        </span>
       </span>
     </a>
   );
