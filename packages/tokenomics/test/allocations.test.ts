@@ -343,7 +343,7 @@ describe("approved launch parameters (owner decision 2026-10-05)", () => {
     assert.equal(TGE_DATE, "2026-10-23T00:00:00Z");
     assert.deepEqual(PUBLIC_LAUNCH, {
       tgeTranche: 500_000,
-      launchpadReserve: 2_500_000,
+      launchpadReserve: 1_500_000,
       maxPerAddress: 10_000,
       claimWindowDays: 60,
     });

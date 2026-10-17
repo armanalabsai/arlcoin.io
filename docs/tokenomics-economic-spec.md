@@ -242,15 +242,17 @@ deployed at TGE; no participant vesting from this allocation.
 
 **Owner decisions, 2026-10-10 (APPROVED by the owner; LEGAL APPROVAL CONFIRMED by the owner on 2026-10-10, who obtained a
 legal opinion covering these sales; the opinion is kept by the owner, not in this repository):**
-of the 5,000,000 ARL, 500,000 ARL is the later airdrop above; 2,500,000 ARL is reserved in
-the Public Launch Safe for launchpad sales (`PUBLIC_LAUNCH.launchpadReserve`); the remaining
-2,000,000 ARL is sold through ARL-only Uniswap v3 positions opened by the Public Launch Safe on
-the same four pools and ranges as the Liquidity Safe, from 0.20 USD: ARL/USDT 600,000, ARL/USDC
-500,000, ARL/WETH 450,000, ARL/cbBTC 450,000. No funds are added by the project: every position
+of the 5,000,000 ARL, 500,000 ARL is the later airdrop above; 1,500,000 ARL is reserved in
+the Public Launch Safe for launchpad sales (`PUBLIC_LAUNCH.launchpadReserve`; 2,500,000 until the
+owner moved 1,000,000 ARL to the Uniswap sale on 2026-10-17); the remaining 3,000,000 ARL is sold
+through ARL-only Uniswap v3 positions opened by the Public Launch Safe on the same four pools and
+ranges as the Liquidity Safe, from 0.20 USD: ARL/USDT 900,000, ARL/USDC 750,000, ARL/WETH 675,000,
+ARL/cbBTC 675,000. The Liquidity Safe places its whole 2,000,000 ARL in the same pools (owner,
+2026-10-17), so 5,000,000 ARL is offered from 0.20 USD at TGE. No funds are added by the project: every position
 is single-sided. These are sale orders, not two-sided liquidity: the Safe supplies only ARL and
 buyers pay the quote token, so the rule below that Public Launch may not fund or disguise
 liquidity still holds. Both sales collect funds, so the rule "Any launch mechanism needs separate legal approval" applies; that approval is the
-owner's confirmation above. Tooling: `pool-cli.ts` with `"allocation": "publicLaunch"` (cap 2,000,000 ARL);
+owner's confirmation above. Tooling: `pool-cli.ts` with `"allocation": "publicLaunch"` (cap 3,000,000 ARL);
 fork test `contracts/test-fork/UniswapPublicLaunchFork.t.sol`.
 
 APPROVED / LOCKED:
