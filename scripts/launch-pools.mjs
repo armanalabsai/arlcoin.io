@@ -10,11 +10,12 @@
 //          <eth-usd> <btc-usd>     (prices as Chainlink answers with 8 decimals)
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
+import process from "node:process";
 
 const [outDir, token, liquiditySafe, publicLaunchSafe, eth, btc] = process.argv.slice(2);
 if (!btc) {
-  console.error(
-    "usage: launch-pools.mjs <out-dir> <token> <liquidity-safe> <public-launch-safe> <eth-usd> <btc-usd>",
+  process.stderr.write(
+    "usage: launch-pools.mjs <out-dir> <token> <liquidity-safe> <public-launch-safe> <eth-usd> <btc-usd>\n",
   );
   process.exit(2);
 }
@@ -41,4 +42,4 @@ write("pools-public-launch.json", {
   allocation: "publicLaunch",
   legs: legs("750000", "900000", "675000", "675000"),
 });
-console.log(`ETH ${usd(eth)} USD, BTC ${usd(btc)} USD (Chainlink)`);
+process.stdout.write(`ETH ${usd(eth)} USD, BTC ${usd(btc)} USD (Chainlink)\n`);

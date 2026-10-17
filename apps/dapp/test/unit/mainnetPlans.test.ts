@@ -44,6 +44,6 @@ describe("Base Mainnet plans for TGE day", () => {
       assert.equal(token.address.toLowerCase(), planned("ARL token"));
     }
     assert.equal(run.from.toLowerCase(), "0xe033104ae32fc7e13263b7aed577ab20d6e47eaa");
-    assert.match(recordCommand(run, "x.json").command, /https:\/\/mainnet\.base\.org/);
+    assert.ok(recordCommand(run, "x.json").command.includes(" https://mainnet.base.org "));
   });
 });
