@@ -1,0 +1,68 @@
+name: Backup whitelist
+
+# Daily encrypted backup of the whitelist (Supabase schema `arlcoin`, apps/web forms). The dump is
+# encrypted to the owner's public key before it leaves the runner, so the workflow artifact is
+# unreadable without the owner's private key; the plain dump is never stored.
+#
+# Needs two repository secrets (Settings → Secrets and variables → Actions):
+#   SUPABASE_DB_URL         the database connection string (Supabase → Project settings →
+#                           Database → Connection string, URI, with the password)
+#   BACKUP_GPG_PUBLIC_KEY   the owner's ASCII-armoured OpenPGP public key
+# Without them the job skips, and does not fail. Restore: download the artifact, then
+#   gpg --decrypt whitelist-<date>.sql.gpg | psql "<connection string>"
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backup-whitelist
+  cancel-in-progress: false
+
+# Actions are pinned to full commit SHAs; the tag is noted for review.
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      BACKUP_GPG_PUBLIC_KEY: ${{ secrets.BACKUP_GPG_PUBLIC_KEY }}
+    steps:
+      - name: Skip unless the backup secrets are set
+        id: secrets
+        run: |
+          if [ -n "$SUPABASE_DB_URL" ] && [ -n "$BACKUP_GPG_PUBLIC_KEY" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::SUPABASE_DB_URL or BACKUP_GPG_PUBLIC_KEY is not set; nothing backed up."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Dump and encrypt
+        if: steps.secrets.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          export GNUPGHOME="$RUNNER_TEMP/gnupg"
+          mkdir -p "$GNUPGHOME"
+          printf '%s\n' "$BACKUP_GPG_PUBLIC_KEY" | gpg --batch --import
+          RECIPIENT=$(gpg --batch --with-colons --list-keys | awk -F: '/^fpr:/ {print $10; exit}')
+          OUT="$RUNNER_TEMP/whitelist-$(date -u +%Y-%m-%d).sql.gpg"
+          # pg_dump 17 reads older servers; the dump goes straight into gpg, never to disk.
+          docker run --rm -e PGURL="$SUPABASE_DB_URL" postgres:17.6 \
+            sh -c 'pg_dump "$PGURL" --schema=arlcoin --no-owner --no-privileges' \
+            | gpg --batch --yes --trust-model always --encrypt --recipient "$RECIPIENT" --output "$OUT"
+          test -s "$OUT"
+          echo "BACKUP_FILE=$OUT" >> "$GITHUB_ENV"
+
+      - name: Keep the encrypted backup for 30 days
+        if: steps.secrets.outputs.ready == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: whitelist-backup
+          path: ${{ env.BACKUP_FILE }}
+          retention-days: 30
+          if-no-files-found: error
