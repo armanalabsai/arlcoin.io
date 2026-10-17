@@ -3,21 +3,25 @@
 ARL is a fixed-supply ERC-20 token (21,000,000 ARL) on Base, with vesting, a timelocked treasury,
 staking, escrowed jobs, usage-based payments and anonymous signals built around it.
 
-**Status: Base Sepolia testnet only. Not on Base Mainnet (targeted for 2026-10-23).** Every
-claim below links to the code, the tests and the document that back it. Anything without that evidence is listed as not built.
+**Status (2026-10-17): live on the Base Sepolia testnet. The Base Mainnet launch (TGE) is
+2026-10-23 at 00:00 UTC; the full launch was rehearsed on a Base Mainnet fork with the real
+signers on 2026-10-17 and passed.** Every claim below links to the code, the tests and the
+document that back it. Anything without that evidence is listed as not built.
 
 | Live                 | URL                                                         | What it is                                                                 |
 | -------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------- |
 | Website              | [arlcoin.io](https://arlcoin.io)                             | [`apps/web`](apps/web): the Interactive Core, roadmap, docs, whitelist     |
 | App (Base Sepolia)   | [arlcoin.io/app](https://arlcoin.io/app/)                    | [`apps/dapp`](apps/dapp): faucet, claim, vesting, staking, jobs, payments, anonymous polls |
 | Testnet operator API | [app.arlcoin.io/api/operator](https://app.arlcoin.io/api/operator/status) | Faucet, group joins, vote relay and x402 settlement for the app ([`route.api.ts`](apps/dapp/app/api/operator/%5Baction%5D/route.api.ts)) |
+| Community bot        | [@Arlprotocol_bot](https://t.me/Arlprotocol_bot) in [t.me/arlcoin_community](https://t.me/arlcoin_community) | [`apps/telegram-bot`](apps/telegram-bot): `/start`, `/app`, `/faucet`, `/status` (live faucet and staking figures), `/launch`, `/whitelist`, `/rules`; scam filter, new-member link limits, flood control |
+| Uptime monitor       | [Uptime workflow](.github/workflows/uptime.yml)             | Every 10 minutes: website, app, operator API, faucet float, Base Sepolia blocks and the staking reward window; a failure notifies the owner |
 
 ## Network and deployed contracts
 
 | Network      | Chain ID | Status                                                                         |
 | ------------ | -------: | ------------------------------------------------------------------------------ |
 | Base Sepolia |    84532 | Deployed (testnet). RPC `https://sepolia.base.org`                             |
-| Base Mainnet |     8453 | Not deployed. The code refuses Base Mainnet until the TGE gate is opened by review |
+| Base Mainnet |     8453 | Not deployed. The network gate opens at the TGE, 2026-10-23 00:00 UTC; the planned addresses are in [mainnet-plan.md](docs/mainnet-plan.md) |
 
 Base Sepolia contracts. The runtime bytecode of each address matches a clean build of `main`
 (`compareRuntime` in [`packages/deploy/src/bytecode.ts`](packages/deploy/src/bytecode.ts), checked
@@ -58,8 +62,8 @@ compares that build with the code at each deployed address.
 | Compute provider reference node          | [`packages/provider`](packages/provider/src)                                                             | [unit](packages/provider/test/provider.test.ts), [fork](packages/provider/test-fork/provider.fork.test.ts)                                  | [compute-provider.md](docs/compute-provider.md)                  | Reference software, no provider runs it |
 | ZK anonymous signals (Semaphore, Noir/UltraHonk) | [`zk/semaphore`](zk/semaphore/src/main.nr), [`ARLAnonymousSignal.sol`](contracts/src/ARLAnonymousSignal.sol) | [circuit](zk/check.sh), [real proofs](contracts/test-zk/ARLAnonymousSignal.t.sol), [`@arl/zk`](packages/zk/test/zk.test.ts)               | [zk-privacy.md](docs/zk-privacy.md)                              | Base Sepolia (deployed and verified) |
 | Web app (claim, vesting, staking, jobs, payments, private signals) | [`apps/dapp`](apps/dapp)                                                          | [unit](apps/dapp/test/unit), [end-to-end on Anvil](apps/dapp/test/e2e)                                                                      | [app.md](docs/app.md)                                            | Live on Base Sepolia ([arlcoin.io/app](https://arlcoin.io/app/)) |
-| Website: live testnet indicator, structured data, sitemap | [`apps/web`](apps/web), [`LiveStatus.tsx`](apps/web/src/site/LiveStatus.tsx) | [unit](apps/web/test/unit), [end-to-end](apps/web/test/e2e/site.spec.ts) | [content-standard.md](docs/content-standard.md) | Live at [arlcoin.io](https://arlcoin.io) |
-| DEX liquidity (Uniswap)                  | [`packages/deploy/src/pool.ts`](packages/deploy/src/pool.ts)                                             | [unit](packages/deploy/test/pool.test.ts), [fork](contracts/test-fork/UniswapLaunchFork.t.sol)                                              | [launch-route.md](docs/launch-route.md)                          | Planned, no pool exists        |
+| Website: "Live on Base Sepolia" badge (reads the chain every 30 s), structured data, sitemap | [`apps/web`](apps/web), [`LiveStatus.tsx`](apps/web/src/site/LiveStatus.tsx) | [unit](apps/web/test/unit), [end-to-end](apps/web/test/e2e/site.spec.ts) | [content-standard.md](docs/content-standard.md) | Live at [arlcoin.io](https://arlcoin.io) |
+| DEX launch: 5,000,000 ARL in ARL-only Uniswap v3 pools from 0.20 USD | [`pool.ts`](packages/deploy/src/pool.ts), [`launch-pools.mjs`](scripts/launch-pools.mjs), [`launch-day-pools.sh`](scripts/launch-day-pools.sh) | [unit](packages/deploy/test/pool.test.ts), [fork](contracts/test-fork/UniswapLaunchFork.t.sol), [sale fork](contracts/test-fork/UniswapPublicLaunchFork.t.sol), [mainnet rehearsal](scripts/rehearse-base-mainnet-fork.sh) | [mainnet-runbook.md](docs/mainnet-runbook.md) | Prepared for the TGE; no pool exists yet |
 
 Not built: private payments and verifiable computation (no circuits exist), an ARL-operated
 network or chain, governance or a DAO. ARL runs on Base; it is not a separate chain.
@@ -82,9 +86,15 @@ Every tool and action is pinned by version, commit or SHA-256.
 | `sbom`                   | CycloneDX SBOMs of the npm dependency trees, kept as an artifact                                                 |
 | CodeQL                   | Security findings in TypeScript/JavaScript ([codeql.yml](.github/workflows/codeql.yml))                          |
 
-Measured on 2026-10-11 (commit of this README): 289 Foundry tests (271 default profile, 18 with
-real proofs), 276 TypeScript package tests, 34 website unit tests and 109 website end-to-end
-tests, all passing; every contract at 100% line and function coverage, 91% of branches.
+Outside pull requests: [Uptime](.github/workflows/uptime.yml) every 10 minutes and
+[Monitor mainnet](.github/workflows/monitor.yml) every 6 hours once the deployment is recorded.
+`main` is protected by a ruleset: pull requests only, every gate above required, no force push
+or deletion ([branch-protection.md](docs/branch-protection.md)).
+
+Measured on 2026-10-17: 289 Foundry tests (271 default profile, 18 with real proofs), 10 Uniswap
+fork tests, 276 TypeScript package tests, 86 app unit tests, 32 website unit tests, 107 website
+end-to-end tests and 30 bot tests, all passing; every contract at 100% line and function
+coverage, 91% of branches.
 
 ## Requirements
 
@@ -125,19 +135,30 @@ only after CI passes ([deploy-site.yml](.github/workflows/deploy-site.yml),
 - Mainnet custody (Safes, timelock, guardian) and the launch procedure:
   [mainnet-plan.md](docs/mainnet-plan.md), [mainnet-runbook.md](docs/mainnet-runbook.md).
 
-## Open items before Base Mainnet
+## Launch (TGE, 2026-10-23 00:00 UTC)
 
-Tracked with owners in [docs/release-readiness.md](docs/release-readiness.md). Done: mainnet signers
-(2-of-3 role Safes, separate guardian) and a never-delegated deployer, checked read-only on Base
-Mainnet ([mainnet-plan.md](docs/mainnet-plan.md)); the testnet deployer's EIP-7702 delegation is
-removed. The rest need decisions or accounts held by the project owner.
+The order and every check are in [docs/mainnet-runbook.md](docs/mainnet-runbook.md); the owners
+sign every transaction in their own wallets and no key is handled by the tooling.
+
+| Step | Who signs | What happens |
+| ---- | --------- | ------------ |
+| 1 | Deployer | 12 Safes (11 role Safes 2-of-3, guardian 1-of-1), from a run prepared by the rehearsal |
+| 2 | Deployer | Two vesting wallets, the 48-hour treasury timelock and the token, which mints 21,000,000 ARL once ([`8453-deploy.json`](apps/dapp/public/plans/8453-deploy.json)) |
+| 3 | Liquidity Safe, 2 of 3 | 2,000,000 ARL in ARL-only pools against USDC, USDT, WETH and cbBTC from 0.20 USD |
+| 4 | Public Launch Safe, 2 of 3 | 3,000,000 ARL on the same pools and ranges (sale positions) |
+| 5 | none | Addresses published on arlcoin.io and here, token list, supply API, mainnet monitor |
+
+Circulating at TGE: 2,100,000 ARL (the Founder allocation); ARL bought from the pools adds to it.
+The Public Launch Safe keeps 500,000 ARL for a later airdrop and 1,500,000 ARL for launchpad
+sales. No project funds are added to the pools.
+
+Open items, tracked in [docs/release-readiness.md](docs/release-readiness.md):
 
 | Item                                                        | Type     |
 | ----------------------------------------------------------- | -------- |
-| Opening the Base Mainnet network gate (reviewed change) and the TGE run, with owner approval | BLOCKER  |
-| Liquidity plan and sale parameters                          | REQUIRED |
+| Deployer funded on Base (owner, 2026-10-20)                 | BLOCKER  |
+| The TGE run itself (steps 1 to 4 above)                     | BLOCKER  |
 | Legal opinion publication, KYC/AML policy, jurisdiction     | REQUIRED |
-| Public team, contact and community channels                 | REQUIRED |
 | Two-person review on `main` (second maintainer)             | REQUIRED |
 
 ## Documentation
@@ -145,9 +166,9 @@ removed. The rest need decisions or accounts held by the project owner.
 | Topic                 | Documents                                                                                                                          |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | Architecture          | [architecture.md](docs/architecture.md), [token-design.md](docs/token-design.md), [chain-evaluation.md](docs/chain-evaluation.md) |
-| Tokenomics            | [tokenomics.md](docs/tokenomics.md), [tokenomics-economic-spec.md](docs/tokenomics-economic-spec.md)                              |
+| Tokenomics            | [tokenomics.md](docs/tokenomics.md), [tokenomics-economic-spec.md](docs/tokenomics-economic-spec.md), [launch-decisions.md](docs/launch-decisions.md), [launch-route.md](docs/launch-route.md) |
 | Deployment            | [deployment.md](docs/deployment.md), [mainnet-plan.md](docs/mainnet-plan.md), [mainnet-runbook.md](docs/mainnet-runbook.md)      |
-| Products              | [app.md](docs/app.md), [jobs.md](docs/jobs.md), [payments.md](docs/payments.md), [compute-provider.md](docs/compute-provider.md), [zk-privacy.md](docs/zk-privacy.md), [operator-api.md](docs/operator-api.md), [incident-response.md](docs/incident-response.md) |
+| Products              | [app.md](docs/app.md), [telegram bot](apps/telegram-bot/README.md), [jobs.md](docs/jobs.md), [payments.md](docs/payments.md), [compute-provider.md](docs/compute-provider.md), [zk-privacy.md](docs/zk-privacy.md), [operator-api.md](docs/operator-api.md), [incident-response.md](docs/incident-response.md) |
 | Process               | [CONTRIBUTING.md](CONTRIBUTING.md), [branch-protection.md](docs/branch-protection.md), [open-source.md](docs/open-source.md), [content-standard.md](docs/content-standard.md) |
 
 ## Community and contact
