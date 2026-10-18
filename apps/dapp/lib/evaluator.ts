@@ -122,3 +122,127 @@ export const evaluatorAbi = [
     ],
   },
 ] as const;
+
+/** The block the evaluator was deployed in: its event history starts there. */
+export const EVALUATOR_DEPLOY_BLOCK = 48_277_116n;
+
+/** Events the public statistics are counted from. */
+export const evaluatorEvents = [
+  {
+    type: "event",
+    name: "Configured",
+    inputs: [
+      { name: "jobId", type: "uint256", indexed: true },
+      { name: "tier", type: "uint8", indexed: false },
+      { name: "threshold", type: "uint8", indexed: false },
+      { name: "voteWindow", type: "uint64", indexed: false },
+      { name: "challengeWindow", type: "uint64", indexed: false },
+      { name: "bond", type: "uint96", indexed: false },
+      { name: "providerAgentId", type: "uint256", indexed: false },
+      { name: "specHash", type: "bytes32", indexed: false },
+      { name: "committee", type: "address[]", indexed: false },
+    ],
+  },
+  {
+    type: "event",
+    name: "Finalized",
+    inputs: [
+      { name: "jobId", type: "uint256", indexed: true },
+      { name: "approved", type: "bool", indexed: false },
+      { name: "voteHash", type: "bytes32", indexed: false },
+    ],
+  },
+  {
+    type: "event",
+    name: "Staked",
+    inputs: [
+      { name: "validator", type: "address", indexed: true },
+      { name: "amount", type: "uint256", indexed: false },
+    ],
+  },
+  {
+    type: "event",
+    name: "Unstaked",
+    inputs: [
+      { name: "validator", type: "address", indexed: true },
+      { name: "amount", type: "uint256", indexed: false },
+    ],
+  },
+  {
+    type: "event",
+    name: "Slashed",
+    inputs: [
+      { name: "jobId", type: "uint256", indexed: true },
+      { name: "account", type: "address", indexed: true },
+      { name: "amount", type: "uint256", indexed: false },
+    ],
+  },
+  {
+    type: "event",
+    name: "Disputed",
+    inputs: [
+      { name: "jobId", type: "uint256", indexed: true },
+      { name: "challenger", type: "address", indexed: true },
+      { name: "evidence", type: "bytes32", indexed: false },
+    ],
+  },
+] as const;
+
+export interface EvaluatorStats {
+  jobs: number;
+  approved: number;
+  rejected: number;
+  disputes: number;
+  validators: number;
+  staked: bigint;
+  slashed: bigint;
+}
+
+type StatLog =
+  | { eventName: "Configured" }
+  | { eventName: "Finalized"; args: { approved?: boolean } }
+  | { eventName: "Staked" | "Unstaked"; args: { validator?: string; amount?: bigint } }
+  | { eventName: "Slashed"; args: { amount?: bigint } }
+  | { eventName: "Disputed" };
+
+/** Counts the network's activity from its events (staked = staked − unstaked − slashed). */
+export function countStats(logs: readonly StatLog[]): EvaluatorStats {
+  const s: EvaluatorStats = {
+    jobs: 0,
+    approved: 0,
+    rejected: 0,
+    disputes: 0,
+    validators: 0,
+    staked: 0n,
+    slashed: 0n,
+  };
+  const stakeOf = new Map<string, bigint>();
+  for (const l of logs) {
+    switch (l.eventName) {
+      case "Configured":
+        s.jobs += 1;
+        break;
+      case "Finalized":
+        if (l.args.approved) s.approved += 1;
+        else s.rejected += 1;
+        break;
+      case "Staked":
+      case "Unstaked": {
+        const who = (l.args.validator ?? "").toLowerCase();
+        const sign = l.eventName === "Staked" ? 1n : -1n;
+        stakeOf.set(who, (stakeOf.get(who) ?? 0n) + sign * (l.args.amount ?? 0n));
+        s.staked += sign * (l.args.amount ?? 0n);
+        break;
+      }
+      case "Slashed":
+        s.slashed += l.args.amount ?? 0n;
+        s.staked -= l.args.amount ?? 0n;
+        break;
+      case "Disputed":
+        s.disputes += 1;
+        break;
+    }
+  }
+  s.validators = [...stakeOf.values()].filter((v) => v > 0n).length;
+  return s;
+}

@@ -17,7 +17,9 @@ const ok = {
 
 describe("verified jobs", () => {
   it("accepts a 2-of-3 committee", () => {
-    assert.doesNotThrow(() => { checkOpenParams({ ...ok, committee: [...ok.committee] }); });
+    assert.doesNotThrow(() => {
+      checkOpenParams({ ...ok, committee: [...ok.committee] });
+    });
   });
 
   it("refuses what the evaluator would reject", () => {
@@ -29,7 +31,10 @@ describe("verified jobs", () => {
       { ...ok, specUri: "http://example.com/spec.json" },
       { ...ok, specHash: "0x1234" },
     ];
-    for (const p of bad) assert.throws(() => { checkOpenParams(p as never); });
+    for (const p of bad)
+      assert.throws(() => {
+        checkOpenParams(p as never);
+      });
   });
 
   it("names the eight verdict phases and the Base Sepolia deployment", () => {

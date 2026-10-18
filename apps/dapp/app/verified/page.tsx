@@ -21,10 +21,14 @@ import {
   EVALUATOR,
   EXPLORER,
   TIERS,
+  EVALUATOR_DEPLOY_BLOCK,
+  countStats,
   evaluatorAbi,
+  evaluatorEvents,
   phaseName,
 } from "~~/lib/evaluator";
 import { formatDate, timeLeft } from "~~/lib/format";
+import { eventsSince } from "~~/lib/logs";
 
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
 const firstLine = (e: unknown, fallback: string) =>
@@ -40,6 +44,7 @@ export default function VerifiedPage() {
         October 2026 internal security audit and is checked by its own tests, fuzzing, invariants
         and static analysis.
       </PageTitle>
+      {IS_TESTNET ? <NetworkStats /> : null}
       {IS_TESTNET ? (
         <RequireWallet>
           <Verified />
@@ -50,6 +55,46 @@ export default function VerifiedPage() {
         </p>
       )}
     </>
+  );
+}
+
+/** Public activity of the evaluator, counted from its events since deployment. */
+function NetworkStats() {
+  const client = usePublicClient();
+  const stats = useQuery({
+    queryKey: ["evaluator-stats"],
+    enabled: client !== undefined,
+    refetchInterval: 60_000,
+    queryFn: async () => {
+      if (!client) throw new Error("no client");
+      const logs = await eventsSince(client, EVALUATOR_DEPLOY_BLOCK, (range) =>
+        client.getContractEvents({ address: EVALUATOR, abi: evaluatorEvents, ...range }),
+      );
+      return countStats(logs as Parameters<typeof countStats>[0]);
+    },
+  });
+  const s = stats.data;
+  const n = (v: number | undefined) => (v === undefined ? "reading" : String(v));
+  return (
+    <section className="mb-6" aria-labelledby="stats-heading">
+      <h2 id="stats-heading" className="mb-2 text-sm font-extrabold">
+        Network activity
+      </h2>
+      <Facts>
+        <Stat label="Jobs configured" value={n(s?.jobs)} testId="stats-jobs" />
+        <Stat
+          label="Finalized"
+          value={s ? `${String(s.approved)} approved · ${String(s.rejected)} rejected` : "reading"}
+        />
+        <Stat label="Active validators" value={n(s?.validators)} />
+        <Stat label="ARL staked" value={<Arl value={s?.staked} />} />
+        <Stat label="Disputes" value={n(s?.disputes)} />
+        <Stat label="ARL slashed" value={<Arl value={s?.slashed} />} />
+      </Facts>
+      {stats.isError ? (
+        <p className="mt-2 text-xs text-subtle">The public RPC did not answer; retrying.</p>
+      ) : null}
+    </section>
   );
 }
 
