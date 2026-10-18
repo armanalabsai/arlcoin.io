@@ -1,0 +1,63 @@
+name: Validators
+
+# Three Base Sepolia validators of ARLVerifiedEvaluator, run on GitHub's runners every 10 minutes.
+# Each pass (`arl-verifier watch` with ARL_WATCH_ONCE=1) accepts the funded jobs whose committee
+# names the validator and, once the provider has submitted, re-executes the job's spec in a pinned
+# Docker container (no network, read-only, unprivileged; docs/reexecution-spec.md) and votes.
+# Jobs configured in the last two days (86,400 Base blocks) are considered. A validator whose key
+# secret (ARL_VALIDATOR_KEY_1, _2, _3) is not set is skipped. The keys only sign testnet
+# transactions; Base Mainnet is refused by the verifier itself.
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validators
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    strategy:
+      fail-fast: false
+      matrix:
+        validator: [1, 2, 3]
+    env:
+      # publicnode serves eth_getLogs over 50,000 blocks (sepolia.base.org only 200).
+      RPC: https://base-sepolia-rpc.publicnode.com
+      ARL_LOG_WINDOW: "50000"
+      EVALUATOR: "0x6808F80Eb11538543d31cf4b50332B268dDd4d14"
+    steps:
+      - name: Key present
+        id: key
+        env:
+          KEY: ${{ secrets[format('ARL_VALIDATOR_KEY_{0}', matrix.validator)] }}
+        run: |
+          if [ -n "$KEY" ]; then echo "present=1" >> "$GITHUB_OUTPUT"; else echo "validator ${{ matrix.validator }}: no key secret, skipped"; fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.key.outputs.present == '1'
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        if: steps.key.outputs.present == '1'
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install
+        if: steps.key.outputs.present == '1'
+        run: npm ci --ignore-scripts
+
+      - name: One validator pass
+        if: steps.key.outputs.present == '1'
+        env:
+          ARL_VALIDATOR_KEY: ${{ secrets[format('ARL_VALIDATOR_KEY_{0}', matrix.validator)] }}
+          ARL_WATCH_ONCE: "1"
+        run: node packages/verifier/src/cli.ts watch "$RPC" "$EVALUATOR" -86400 "$RUNNER_TEMP/state.json"

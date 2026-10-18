@@ -10,7 +10,8 @@
 //
 // `watch` runs unattended: every 15 seconds it accepts the funded jobs whose committee names this
 // validator and votes on the submitted ones, fetching each spec from the job's description
-// (https or ipfs). Its progress is kept in state.json (default .arl-verifier-state.json).
+// (https or ipfs). Its progress is kept in state.json (default .arl-verifier-state.json). A
+// negative fromBlock counts back from the head; ARL_WATCH_ONCE=1 makes one pass and exits.
 //
 // `vote` reads the job, refuses a spec whose hash differs from the job's specHash, re-runs it,
 // and votes approve or reject (the validator must have accepted the job). Base Sepolia and the
@@ -113,7 +114,7 @@ async function main(argv: readonly string[]): Promise<void> {
         evaluator === undefined ||
         !isAddress(evaluator) ||
         fromText === undefined ||
-        !/^\d+$/.test(fromText)
+        !/^-?\d+$/.test(fromText)
       ) {
         fail("usage: watch <rpc> <evaluator> <fromBlock> [state.json]");
       }
@@ -124,7 +125,10 @@ async function main(argv: readonly string[]): Promise<void> {
       const client = createPublicClient({ transport: http(rpc) });
       const chain = { ...baseSepolia, id: await client.getChainId() };
       const wallet = createWalletClient({ account, chain, transport: http(rpc) });
-      let state: WatchState = { fromBlock: BigInt(fromText), jobs: [] };
+      // A negative fromBlock counts back from the head ("-86400": the last two days on Base).
+      const head = await client.getBlockNumber({ cacheTime: 0 });
+      const from = fromText.startsWith("-") ? head + BigInt(fromText) : BigInt(fromText);
+      let state: WatchState = { fromBlock: from < 0n ? 0n : from, jobs: [] };
       try {
         const saved = JSON.parse(await readFile(statePath, "utf8")) as {
           fromBlock: string;
@@ -140,6 +144,8 @@ async function main(argv: readonly string[]): Promise<void> {
         evaluator,
         exec: opts,
         specFetcher: networkFetcher,
+        // ARL_LOG_WINDOW: blocks per eth_getLogs call, up to the RPC's limit.
+        logWindow: BigInt(process.env.ARL_LOG_WINDOW ?? "5000"),
         log: (e: Record<string, unknown>) => {
           print({ at: new Date().toISOString(), ...e });
         },
@@ -154,6 +160,8 @@ async function main(argv: readonly string[]): Promise<void> {
         } catch (e) {
           print({ event: "error", error: e instanceof Error ? e.message : String(e) });
         }
+        // ARL_WATCH_ONCE=1: one pass and exit, for a scheduled job (.github/workflows/validators.yml).
+        if (process.env.ARL_WATCH_ONCE === "1") return;
         await new Promise((r) => setTimeout(r, 15_000));
       }
     }

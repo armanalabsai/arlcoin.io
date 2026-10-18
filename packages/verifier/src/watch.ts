@@ -48,6 +48,8 @@ export interface WatchDeps {
   /** Fetches the spec document a job's description points to. */
   specFetcher: Pick<Fetcher, "file">;
   log?: (event: Record<string, unknown>) => void;
+  /** Blocks per `eth_getLogs` call; the RPC's own limit (default LOG_WINDOW). */
+  logWindow?: bigint;
 }
 
 /** The spec at `uri` (the job's description), parsed and size-checked. */
@@ -63,9 +65,10 @@ async function discover(deps: WatchDeps, state: WatchState, me: Address): Promis
   // cacheTime 0: viem otherwise reuses a block number for a few seconds and misses fresh logs.
   const head = await deps.client.getBlockNumber({ cacheTime: 0 });
   const jobs = new Set(state.jobs);
+  const window = deps.logWindow ?? LOG_WINDOW;
   let from = state.fromBlock;
   while (from <= head) {
-    const to = from + LOG_WINDOW - 1n < head ? from + LOG_WINDOW - 1n : head;
+    const to = from + window - 1n < head ? from + window - 1n : head;
     const logs = await deps.client.getLogs({
       address: deps.evaluator,
       event: configured,
