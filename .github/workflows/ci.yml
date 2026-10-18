@@ -144,6 +144,11 @@ jobs:
       # Local Anvil chain only: deploys, verifies and runs the negative cases.
       - run: npm run rehearse:local
 
+      # Reference validator: on-chain flow against the compiled evaluator on Anvil, and
+      # re-execution in a real container (Docker is on the runner).
+      - run: npm run test:anvil -w @arl/verifier
+      - run: npm run test:docker -w @arl/verifier
+
   zk:
     runs-on: ubuntu-latest
     timeout-minutes: 25

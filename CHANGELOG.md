@@ -15,6 +15,10 @@ documents that back it; nothing here is deployed on Base Mainnet.
   members that do not vote, and a Safe arbiter of at least 2-of-3 created by
   `CreateArbiterSafe` ([arbiter-safe.md](docs/arbiter-safe.md)). Tested on a Base Sepolia fork
   with a real Safe ruling and an allowlisted ERC-8004 read.
+- Re-execution spec `arl-reexec/1` and the reference validator `packages/verifier`: canonical spec
+  hash, inputs checked by hash and commit, a pinned container with no network, no capabilities and
+  an unprivileged user, the result hash as deliverable, and on-chain accept and vote
+  ([reexecution-spec.md](docs/reexecution-spec.md)).
 
 ## 2026-10-16
 

@@ -36,7 +36,7 @@ arbiter that is not such a Safe.
 
 1. Read the dispute: `Disputed(jobId, challenger, evidence)`, the job's `specHash`, the submitted
    deliverable and every `Voted` event.
-2. Re-run the job from its spec with the reference verifier (`packages/verifier`, next) on a machine
+2. Re-run the job from its spec with the reference verifier ([`packages/verifier`](../packages/verifier/src)) on a machine
    none of the involved parties controls, and compare the result hash.
 3. Propose `resolve(jobId, approve, reason)` from the Safe, with `reason` = the hash of the written
    ruling (inputs, commands, result hash). Signers check it independently before signing.
