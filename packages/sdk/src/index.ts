@@ -13,3 +13,16 @@ export {
   type StreamingClients,
   type StreamingErrorCode,
 } from "./streaming.ts";
+export {
+  BASE_SEPOLIA_VERIFIED,
+  VERDICT_PHASES,
+  VerifiedJobError,
+  checkOpenParams,
+  finalizeJob,
+  getVerdict,
+  openVerifiedJob,
+  verifiedEvaluatorAbi,
+  verifiedJobsAbi,
+  type OpenVerifiedJobParams,
+  type VerifiedClients,
+} from "./verified.ts";

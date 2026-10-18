@@ -27,6 +27,8 @@ import {
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
+import { openVerifiedJob } from "@arl/sdk";
+
 import {
   acceptJob,
   castVote,
@@ -38,8 +40,10 @@ import {
   readJob,
   sha256,
   specHash,
+  step,
   type ContainerRunner,
   type Fetcher,
+  type WatchState,
 } from "../src/index.ts";
 
 const PORT = 8547;
@@ -303,5 +307,65 @@ describe("validator flow on Anvil", () => {
       (await readJob(publicClient, evaluator, jobId, v3.address)).memberState,
       MemberState.Rejected,
     );
+  });
+  it("runs unattended: the watcher accepts and then votes once the job is ready", async () => {
+    // The client opens the job through the SDK: createJob and configure in one call.
+    const { jobId } = await openVerifiedJob(
+      { publicClient, walletClient: wallet(client) },
+      {
+        provider: provider.address,
+        specUri: "https://example.com/spec.json",
+        specHash: specHash(SPEC),
+        committee: [v1.address, v2.address, v3.address],
+        threshold: 2,
+        jobs,
+        evaluator,
+      },
+    );
+    assert.equal(jobId, 3n);
+    const specFetcher = { file: () => Promise.resolve(Buffer.from(JSON.stringify(SPEC))) };
+    const deps = (v: PrivateKeyAccount) => ({
+      client: publicClient,
+      wallet: wallet(v),
+      evaluator,
+      exec: opts,
+      specFetcher,
+    });
+    const states = new Map<PrivateKeyAccount, WatchState>(
+      [v1, v2].map((v) => [v, { fromBlock: 0n, jobs: [] }]),
+    );
+    const pass = async () => {
+      for (const v of [v1, v2])
+        states.set(v, await step(deps(v), states.get(v) ?? { fromBlock: 0n, jobs: [] }));
+    };
+
+    // Not funded and not approved by the provider yet: nothing to do, the job is tracked.
+    await pass();
+    assert.deepEqual(states.get(v1)?.jobs.includes("3"), true);
+    assert.equal(
+      (await readJob(publicClient, evaluator, jobId, v1.address)).memberState,
+      MemberState.Member,
+    );
+
+    await send(provider, evaluator, "ARLVerifiedEvaluator", "approveCommittee", [jobId]);
+    await send(provider, jobs, "ARLJobs", "setBudget", [jobId, parseUnits("20", 18), "0x"]);
+    await send(client, jobs, "ARLJobs", "fund", [jobId, parseUnits("20", 18), "0x"]);
+    await pass();
+    for (const v of [v1, v2])
+      assert.equal(
+        (await readJob(publicClient, evaluator, jobId, v.address)).memberState,
+        MemberState.Accepted,
+      );
+
+    const { hash: deliverable } = await execute(SPEC, opts);
+    await send(provider, jobs, "ARLJobs", "submit", [jobId, deliverable, "0x"]);
+    await pass();
+    const after = await readJob(publicClient, evaluator, jobId, v1.address);
+    assert.equal(after.phase, 2); // Approved
+    assert.equal(after.memberState, MemberState.Approved);
+
+    // Settled jobs drop out of the watch list.
+    await pass();
+    assert.equal(states.get(v1)?.jobs.includes("3"), false);
   });
 });

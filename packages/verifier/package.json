@@ -17,5 +17,8 @@
     "test": "node --test \"test/**/*.test.ts\"",
     "test:docker": "node --test \"test-docker/**/*.test.ts\"",
     "test:anvil": "node --test \"test-anvil/**/*.test.ts\""
+  },
+  "devDependencies": {
+    "@arl/sdk": "0.1.0"
   }
 }
