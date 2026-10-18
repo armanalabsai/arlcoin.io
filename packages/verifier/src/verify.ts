@@ -2,7 +2,8 @@
 // recomputed result hash must equal the deliverable the provider submitted, and the result must
 // meet the spec's own acceptance conditions. Providers use `execute` to produce the deliverable.
 
-import { chmod, lstat, mkdtemp, readdir, readFile, rm } from "node:fs/promises";
+import { constants } from "node:fs";
+import { chmod, mkdtemp, open, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -37,13 +38,20 @@ async function openUp(dir: string): Promise<void> {
 /** SHA-256 of a declared output, or null if it is missing or not a regular file (no symlinks). */
 async function outputEntry(outDir: string, path: string): Promise<OutputEntry> {
   const full = inside(outDir, path);
+  // One handle for the check and the read, so the file cannot be swapped in between; O_NOFOLLOW
+  // refuses a symlink where the platform supports it.
+  let handle;
   try {
-    const st = await lstat(full);
-    if (!st.isFile()) return { path, sha256: null };
+    handle = await open(full, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0));
   } catch {
     return { path, sha256: null };
   }
-  return { path, sha256: sha256(await readFile(full)) };
+  try {
+    if (!(await handle.stat()).isFile()) return { path, sha256: null };
+    return { path, sha256: sha256(await handle.readFile()) };
+  } finally {
+    await handle.close();
+  }
 }
 
 export interface ExecuteOptions {
