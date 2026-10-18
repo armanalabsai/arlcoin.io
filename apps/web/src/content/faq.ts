@@ -28,6 +28,31 @@ export const FAQ: readonly FaqEntry[] = [
       "No. There is no airdrop at the launch. An airdrop of 500,000 ARL is planned for a later date; its date, eligibility and rules will be announced on arlcoin.io, X @arlprotocol and the Telegram community. Registration is free and no payment is requested.",
   },
   {
+    question: "Why would an AI developer pay with ARL instead of existing payment methods?",
+    answer:
+      "Because of what happens to the money, not the token itself. A job paid through ARL sits in an on-chain escrow (ERC-8183) and is released only after a staked validator committee has checked the result, with a challenge window before payout; compute is paid per second and stops when the work stops. There are no chargebacks, no accounts to open with each provider and no intermediary holding the funds. ARL does not replace card payments for everything: it fits paying agents and providers you do not know. Today this runs on the Base Sepolia testnet only.",
+  },
+  {
+    question: "Why would a GPU provider accept ARL for capacity?",
+    answer:
+      "The client escrows the whole amount before the work starts, and the provider earns it second by second (ComputePayment) or on approval of the job (ARLJobs), so it never works on credit and cannot be charged back. Payment is settled on Base within seconds, with no invoicing or payment processor. A provider decides for itself whether to accept ARL; no provider is paid in ARL on Base Mainnet yet.",
+  },
+  {
+    question: "Will buyers actually use ARL, or only hold it to sell?",
+    answer:
+      "Both will happen; no token can prevent speculation. ARL has uses that spend it or lock it: paying for AI services and compute, staking, and validator stake on the verified evaluator, where each accepted job locks a bond that is burned if the validator misbehaves. How much ARL is used rather than held depends on real usage, which does not exist on Base Mainnet yet; the app publishes the network's jobs, stake and slashing so this can be checked rather than claimed.",
+  },
+  {
+    question: "What net revenue does the protocol earn per transaction?",
+    answer:
+      "Today, zero. The jobs escrow, the compute payment stream and the verified evaluator charge no protocol fee: the full amount goes from client to provider, and slashed bonds are burned, not collected. A validator fee paid by the client and shared among the voting validators is a published design for a later phase (docs/verifiable-execution.md); any fee would need new contracts and would be announced before it applies.",
+  },
+  {
+    question: "How do circulating supply and selling pressure change as demand grows?",
+    answer:
+      "The supply is fixed at 21,000,000 ARL with no minting, so demand cannot be met by issuing new tokens. At TGE the Founder's 2,100,000 ARL is unlocked and may be sold (this is disclosed). The launch pools hold ARL that leaves them only when buyers pay in. Investor, partnership and team allocations unlock after a 12-month cliff over 36 months, and treasury balances are not circulating until spent. Staked ARL stays circulating but is not for sale while staked, and validator bonds are locked while a job runs.",
+  },
+  {
     question: "Which blockchain will ARL use?",
     answer:
       "Base. ARL is an ERC-20 token on Base: Base Sepolia for the testnet (live) and Base Mainnet for production.",
