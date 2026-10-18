@@ -17,7 +17,7 @@ describe("evaluator", () => {
   });
 
   it("lists the functions the app calls", () => {
-    const names = evaluatorAbi.map((f) => f.name);
+    const names: string[] = evaluatorAbi.map((f) => f.name);
     for (const n of [
       "stakeOf",
       "lockedOf",
