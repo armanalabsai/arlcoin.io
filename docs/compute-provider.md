@@ -22,7 +22,10 @@ machine only. No provider runs it, and it runs on no public network.
 5. The job runs and is killed when the paid time runs out. Any part of a second is billed as a
    whole second. The amount settled is price × billed seconds and never exceeds the ceiling.
 6. The answer carries the job's output and a `PAYMENT-RESPONSE` header with the settlement
-   receipt.
+   receipt. With a `receiptSigner`, it also carries a signed usage receipt (`receipt` in the body
+   and the `ARL-USAGE-RECEIPT` header): the seconds billed, the price, the amount and a hash of
+   the output ([payments.md](payments.md#usage-receipts)). The signer's address is in the 402
+   requirements (`extra.receiptSigner`).
 
 Who pays for what:
 

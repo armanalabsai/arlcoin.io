@@ -36,7 +36,12 @@ export default defineConfig(
     extends: [tseslint.configs.disableTypeChecked],
   },
   {
-    files: ["**/test/**/*.ts", "**/test-fork/**/*.ts", "**/test-anvil/**/*.ts"],
+    files: [
+      "**/test/**/*.ts",
+      "**/test-fork/**/*.ts",
+      "**/test-anvil/**/*.ts",
+      "**/test-docker/**/*.ts",
+    ],
     rules: {
       // node:test's describe/it return promises that the runner awaits.
       "@typescript-eslint/no-floating-promises": "off",

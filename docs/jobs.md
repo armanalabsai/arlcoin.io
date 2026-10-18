@@ -73,6 +73,9 @@ the result as "Rated N/100 from M paid jobs" (`apps/dapp/lib/reputation.ts`).
 
 ## Not yet
 
-- Disputes or arbitration (the standard has none; reject and expiry are final).
+- Disputes or arbitration in `ARLJobs` itself (the standard has none; reject and expiry are
+  final). A job can instead name `ARLVerifiedEvaluator` as its evaluator: a staked validator
+  committee, a challenge window and a dispute path; see
+  [verifiable-execution.md](verifiable-execution.md) (built, not deployed).
 - Responses from providers to ratings (`appendResponse`) and revoking a rating from the app.
 - Gasless use through ERC-2771 and a facilitator.

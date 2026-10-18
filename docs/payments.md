@@ -62,6 +62,36 @@ Added by `@arl/payments` (`packages/payments`):
   seconds ahead, or already expired, are refused.
 - **Failures are not retried** with the same authorization; the payer signs a new one.
 
+## Usage receipts
+
+The ceiling bounds what a payer can lose; the amount settled under it is the service's metering. A
+**usage receipt** (`src/receipt.ts`) makes that metering a signed claim the payer can check.
+
+For every call, the service signs an EIP-712 `UsageReceipt` (domain `ARL Usage Receipt`, version
+`1`, chain id) with:
+
+| Field                          | Meaning                                                        |
+| ------------------------------ | -------------------------------------------------------------- |
+| `payer`, `payTo`, `token`      | From the Permit2 authorization charged                         |
+| `nonce`, `ceiling`, `deadline` | The authorization's Permit2 nonce, signed ceiling and deadline |
+| `resource`                     | keccak256 of the resource identifier (`job?seconds=n`)         |
+| `units`, `unitPrice`           | What the service counted and its price per unit                |
+| `amount`                       | min(units × unitPrice, ceiling): the amount settled            |
+| `response`                     | keccak256 of the response bytes returned to the payer          |
+
+- **Advertised signer.** The service names its receipt signer in the 402 requirements
+  (`extra.receiptSigner`), before the payer signs anything.
+- **Facilitator gate.** `ArlUptoFacilitator` takes `receiptSigners` (payee → signer). For a listed
+  payee it settles only when `requirements.extra.usageReceipt` is signed by that signer, matches
+  the authorization field for field, states exactly the amount being settled, and that amount is
+  min(units × unitPrice, ceiling). Payees without a signer settle as before.
+- **Payer check.** `checkUsageReceipt` checks the same against the authorization the payer signed,
+  the amount moved on chain and the response bytes received. The receipt is the payer's evidence.
+
+What a receipt does not do: it does not prove the units were really used. It makes the service's
+claim attributable, bound to one authorization and one response, and reproducible from
+units × price, so a wrong charge is signed evidence against the service.
+
 ## Facilitator service
 
 `createFacilitatorServer` (`src/service.ts`) serves the facilitator over the x402 facilitator API.
@@ -96,7 +126,8 @@ below).
 ## Known limitations
 
 - **Facilitator trust.** The facilitator chooses the settled amount (up to the ceiling). Payers
-  trust the service's metering for that amount; the ceiling bounds the loss.
+  trust the service's metering for that amount; the ceiling bounds the loss. With usage receipts,
+  that amount is a signed, checkable claim, but still the service's own measurement.
 - **Residual allowance.** An EIP-2612 permit approves Permit2 for the whole ceiling; after a
   partial settlement the rest stays approved to Permit2 (usable only with a new valid Permit2
   signature from the payer).
@@ -109,11 +140,11 @@ below).
 
 ## Tests
 
-| Suite               | Command                                                                                                | Covers                                                                                                                                                                                                                                                                                                |
-| ------------------- | ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unit                | `npm test -w @arl/payments`                                                                            | network gate, pinned-code check, requirements, metering, settlement policy, facilitator wrapper (with a stand-in SDK scheme), file store across restarts and crashes, the HTTP service through the SDK's `HTTPFacilitatorClient` (bearer token, malformed bodies)                                     |
-| Contract fork       | `FOUNDRY_PROFILE=fork ARL_FORK_RPC=<Base Sepolia RPC> forge test` in `contracts/`                      | the 15 agreed cases against the real Permit2 and proxy, fuzzing both sides of the ceiling, EIP-2612 → Permit2 (gasless, front-run, value mismatch), pinned code                                                                                                                                       |
-| SDK end-to-end fork | `ARL_FORK_RPC=<Base Sepolia RPC> npm run test:fork -w @arl/payments` (needs `forge build` and `anvil`) | real `@x402/evm` client and facilitator through `ArlUptoFacilitator` on a local Anvil fork: verify, metered settlement, replay refusal, ceiling, zero retirement, tampered payee                                                                                                                      |
-| Provider fork       | `ARL_FORK_RPC=<Base Sepolia RPC> npm run test:fork -w @arl/provider` (needs `forge build` and `anvil`) | the reference compute provider over HTTP, paid by the real SDK client and settled through the facilitator service (bearer token, file store): a job billed for seconds used and settled on-chain, a job killed at the paid time and settled at the ceiling, a replayed payment refused before it runs |
+| Suite               | Command                                                                                                | Covers                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit                | `npm test -w @arl/payments`                                                                            | network gate, usage receipts (signing, recovery, every mismatch, malformed receipts, the facilitator gate), pinned-code check, requirements, metering, settlement policy, facilitator wrapper (with a stand-in SDK scheme), file store across restarts and crashes, the HTTP service through the SDK's `HTTPFacilitatorClient` (bearer token, malformed bodies)                        |
+| Contract fork       | `FOUNDRY_PROFILE=fork ARL_FORK_RPC=<Base Sepolia RPC> forge test` in `contracts/`                      | the 15 agreed cases against the real Permit2 and proxy, fuzzing both sides of the ceiling, EIP-2612 → Permit2 (gasless, front-run, value mismatch), pinned code                                                                                                                                                                                                                        |
+| SDK end-to-end fork | `ARL_FORK_RPC=<Base Sepolia RPC> npm run test:fork -w @arl/payments` (needs `forge build` and `anvil`) | real `@x402/evm` client and facilitator through `ArlUptoFacilitator` on a local Anvil fork: verify, metered settlement, replay refusal, ceiling, zero retirement, tampered payee                                                                                                                                                                                                       |
+| Provider fork       | `ARL_FORK_RPC=<Base Sepolia RPC> npm run test:fork -w @arl/provider` (needs `forge build` and `anvil`) | the reference compute provider over HTTP, paid by the real SDK client and settled through the facilitator service (bearer token, file store): a job billed for seconds used and settled on-chain, a job killed at the paid time and settled at the ceiling, a replayed payment refused before it runs, and a signed usage receipt checked by the payer against the on-chain settlement |
 
 Fork tests read chain state only; every transaction stays in the local fork.
