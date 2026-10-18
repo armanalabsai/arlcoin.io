@@ -1,6 +1,9 @@
 # Arbiter Safe
 
-Status: **Script and checks built and tested on a Base Sepolia fork; no arbiter Safe exists yet.**
+Status: **Base Sepolia arbiter Safe created on 2026-10-18:**
+[`0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f`](https://base-sepolia.blockscout.com/address/0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f)
+(Safe v1.5.0, 2-of-3; owners `0x6dcB…9DAd`, `0x5598…90a4`, `0x9065…d0a1`). No mainnet arbiter Safe
+exists.
 
 The arbiter of [`ARLVerifiedEvaluator`](../contracts/src/ARLVerifiedEvaluator.sol) rules on
 disputed jobs only ([verifiable-execution.md](verifiable-execution.md)). It is a Safe v1.5.0, not a

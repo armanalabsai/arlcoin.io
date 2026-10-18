@@ -17,6 +17,7 @@ Last run: 2026-10-04/05, on commit `9b9952f` plus the changes in this document's
 | `src/ARLMerkleDistributor.sol`                  | not deployed                                                                                                                    | tests, fuzz, invariants, Slither, manual review |
 | `src/ARLStakingRewards.sol`                     | `0xA78480c1802F5c17B1007c59b7c2CF849549724e` (Base Sepolia)                                                                     | tests, deep invariant campaign, Slither         |
 | `src/ARLJobs.sol`, `src/ARLAnonymousSignal.sol` | `0xec79a897105aEd6daFBbB2a904E5bcFF71455644`, `0xFa5901E9dfD813b910061F29ef1f65a1faA0b268` (Base Sepolia)                       | tests, Slither                                  |
+| `src/ARLVerifiedEvaluator.sol`                  | `0x6808F80Eb11538543d31cf4b50332B268dDd4d14` (Base Sepolia; arbiter Safe `0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f`)          | tests, fuzz, invariants, Slither                |
 
 Dependencies: OpenZeppelin Contracts v5.6.1 (unmodified), forge-std, solidity-datetime v2.2.0
 (deployment tooling only).
