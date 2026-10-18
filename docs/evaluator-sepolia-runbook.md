@@ -5,14 +5,14 @@ command runs from the repository root unless it says `contracts/`. Base Sepolia 
 
 Fixed inputs:
 
-| Item              | Value                                                                        |
-| ----------------- | ---------------------------------------------------------------------------- |
-| RPC               | `https://sepolia.base.org` (chain 84532)                                     |
-| Deployer (funded) | `0x3b33Db294B9f52993728103215be1D86A7777093` (or the keystore you sign with) |
-| ARL token         | `0x244312b619127B6458154F3467eFD7c87CD28500`                                 |
-| ARLJobs (escrow)  | `0xec79a897105aEd6daFBbB2a904E5bcFF71455644`                                 |
-| Example spec      | `packages/verifier/examples/busybox-summary.json`                            |
-| Example spec hash | `0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f`         |
+| Item              | Value                                                                                                                                              |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RPC               | `https://sepolia.base.org` (chain 84532)                                                                                                           |
+| Deployer          | A Foundry keystore you hold, funded with about 0.005 Base Sepolia ETH (`0x3b33…7093` is the retired 2026-10-11 deployer; its key is not available) |
+| ARL token         | `0x244312b619127B6458154F3467eFD7c87CD28500`                                                                                                       |
+| ARLJobs (escrow)  | `0xec79a897105aEd6daFBbB2a904E5bcFF71455644`                                                                                                       |
+| Example spec      | `packages/verifier/examples/busybox-summary.json`                                                                                                  |
+| Example spec hash | `0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f`                                                                               |
 
 ```sh
 export RPC=https://sepolia.base.org
