@@ -89,19 +89,40 @@ node packages/verifier/src/cli.ts hash  spec.json               # specHash for c
 node packages/verifier/src/cli.ts run   spec.json               # provider: result and deliverable
 node packages/verifier/src/cli.ts check spec.json 0x<deliverable>
 ARL_VALIDATOR_KEY=0x… node packages/verifier/src/cli.ts vote <rpc> <evaluator> <jobId> spec.json
+ARL_VALIDATOR_KEY=0x… node packages/verifier/src/cli.ts watch <rpc> <evaluator> <fromBlock> [state.json]
 ```
 
 `vote` reads the job, refuses a validator that has not accepted it, re-runs the spec against the
 job's committed `specHash` and votes. Base Sepolia and the local chain only; the key is read from
 the environment, never from the command line.
 
+`watch` runs a validator unattended. Every 15 seconds it reads the evaluator's `Configured` events
+for committees that name the validator, accepts each such job once the provider has approved the
+committee and the client has funded it, and when the provider has submitted, fetches the spec from
+the job's description (https or ipfs, at most 64 KiB), re-runs it and votes. A spec whose hash
+differs from the committed `specHash` is voted down, never run. Progress is kept in `state.json`,
+so a restarted validator continues where it stopped. Jobs that are decided drop out of the list.
+
+### Running a validator
+
+A validator needs Base Sepolia ETH for gas, ARL staked on the evaluator (`stake`, at least the
+job bonds it accepts), Docker for the job containers, and Node.js 24:
+
+```sh
+npm ci
+ARL_VALIDATOR_KEY=0x… node packages/verifier/src/cli.ts watch   https://sepolia.base.org 0x6808F80Eb11538543d31cf4b50332B268dDd4d14 48277116
+```
+
+Clients open jobs for such a committee with the SDK (`openVerifiedJob` in `@arl/sdk`, which
+creates the job and configures the committee in one call) or the app's Jobs and Verified pages.
+
 ## Tests
 
-| Suite       | Command                                | Covers                                                                                                                                                                                                             |
-| ----------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Unit        | `npm test -w @arl/verifier`            | Canonical JSON (ordering, escaping, refusals), the pinned spec hash vector, every spec refusal, acceptance, docker arguments, path containment, git checkout check, input hash check, symlinked outputs, decisions |
-| Container   | `npm run test:docker -w @arl/verifier` | Real busybox container: deterministic result across runs, approval, no network, read-only root, uid 65534, exact environment, time limit, faithful report of a failing job and `expected_exit_code`                |
-| Local chain | `npm run test:anvil -w @arl/verifier`  | Compiled ARLToken, ARLJobs and ARLVerifiedEvaluator on Anvil: the ABI matches; accept, read the job and its deliverable, re-run, vote to an approval, finalize and pay; a forged deliverable is rejected           |
+| Suite       | Command                                | Covers                                                                                                                                                                                                                                                                          |
+| ----------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit        | `npm test -w @arl/verifier`            | Canonical JSON (ordering, escaping, refusals), the pinned spec hash vector, every spec refusal, acceptance, docker arguments, path containment, git checkout check, input hash check, symlinked outputs, decisions                                                              |
+| Container   | `npm run test:docker -w @arl/verifier` | Real busybox container: deterministic result across runs, approval, no network, read-only root, uid 65534, exact environment, time limit, faithful report of a failing job and `expected_exit_code`                                                                             |
+| Local chain | `npm run test:anvil -w @arl/verifier`  | Compiled ARLToken, ARLJobs and ARLVerifiedEvaluator on Anvil: the ABI matches; accept, read the job and its deliverable, re-run, vote to an approval, finalize and pay; a forged deliverable is rejected; a job opened with the SDK is accepted and voted by `watch` unattended |
 
 ## Limits
 
