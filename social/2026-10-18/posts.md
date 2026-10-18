@@ -9,28 +9,28 @@ listing, partnership or free-token claim; the TGE is a target.
 
 ## Facts used (checked 2026-10-18)
 
-| Claim                                                                                   | Source                                                |
-| --------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Internal multi-layer security audit, 17 Oct 2026, reviewed commit `ab7595b`             | `security/2026-10-17/report.md`                       |
-| 0 critical, no exploitable vulnerability in contract code; 1 H, 4 M, 3 L, 4 I; 0 open   | `security/2026-10-17/findings.md`                     |
-| Slither 102 detectors: 0 results; Aderyn: all triaged (false positive or by design)     | `security/2026-10-17/report.md` → Layers              |
-| Foundry 271/271 pass; 29 fuzz tests at 10,000 runs; deep campaign 200,000 runs          | `security/2026-10-17/report.md` → Layers              |
-| Halmos 11/11 properties proved (bounded); Mythril: no exploitable issue                 | `security/2026-10-17/report.md` → Layers              |
-| Base Mainnet fork rehearsal passes with the real signers                                | `CHANGELOG.md` 2026-10-17, `docs/mainnet-runbook.md`  |
-| TGE target 2026-10-23 00:00 UTC; Base Mainnet not deployed yet                          | `CHANGELOG.md` 2026-10-17                             |
-| 21,000,000 ARL minted once; no mint, owner, proxy, pause or blacklist                   | `contracts/src/ARLToken.sol`, audit "Areas checked"   |
-| Telegram bot @Arlprotocol_bot with `/status` and `/launch`                              | `CHANGELOG.md` 2026-10-17                             |
-| No airdrop at launch; mainnet addresses only on arlcoin.io after verification           | `social/telegram/pinned-messages.md`                  |
+| Claim                                                                                 | Source                                               |
+| ------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| Internal multi-layer security audit, 17 Oct 2026, reviewed commit `ab7595b`           | `security/2026-10-17/report.md`                      |
+| 0 critical, no exploitable vulnerability in contract code; 1 H, 4 M, 3 L, 4 I; 0 open | `security/2026-10-17/findings.md`                    |
+| Slither 102 detectors: 0 results; Aderyn: all triaged (false positive or by design)   | `security/2026-10-17/report.md` → Layers             |
+| Foundry 271/271 pass; 29 fuzz tests at 10,000 runs; deep campaign 200,000 runs        | `security/2026-10-17/report.md` → Layers             |
+| Halmos 11/11 properties proved (bounded); Mythril: no exploitable issue               | `security/2026-10-17/report.md` → Layers             |
+| Base Mainnet fork rehearsal passes with the real signers                              | `CHANGELOG.md` 2026-10-17, `docs/mainnet-runbook.md` |
+| TGE target 2026-10-23 00:00 UTC; Base Mainnet not deployed yet                        | `CHANGELOG.md` 2026-10-17                            |
+| 21,000,000 ARL minted once; no mint, owner, proxy, pause or blacklist                 | `contracts/src/ARLToken.sol`, audit "Areas checked"  |
+| Telegram bot @Arlprotocol_bot with `/status` and `/launch`                            | `CHANGELOG.md` 2026-10-17                            |
+| No airdrop at launch; mainnet addresses only on arlcoin.io after verification         | `social/telegram/pinned-messages.md`                 |
 
 Always say "internal audit". Never "audited by" a third party.
 
 ## Visuals
 
-| File                                                     | Size      | Use                     |
-| -------------------------------------------------------- | --------- | ----------------------- |
-| `x-telegram-1600x900/arl-week-recap-audit.png`           | 1600×900  | X post, Telegram post   |
+| File                                                      | Size      | Use                     |
+| --------------------------------------------------------- | --------- | ----------------------- |
+| `x-telegram-1600x900/arl-week-recap-audit.png`            | 1600×900  | X post, Telegram post   |
 | `instagram-1080x1350/arl-audit-1.png` … `arl-audit-5.png` | 1080×1350 | Instagram carousel, 1–5 |
-| `medium-1400x788/arl-audit-medium-cover.png`             | 1400×788  | Medium cover image      |
+| `medium-1400x788/arl-audit-medium-cover.png`              | 1400×788  | Medium cover image      |
 
 Source: `src/cards.html`. Re-render with `bash social/2026-10-18/src/render.sh` after a text change.
 
