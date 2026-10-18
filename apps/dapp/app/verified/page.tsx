@@ -36,7 +36,9 @@ export default function VerifiedPage() {
       <PageTitle title="Verified jobs">
         A staked validator committee decides whether an ERC-8183 job is paid. After the vote there
         is a challenge window; a 2-of-3 arbiter Safe rules on disputed jobs only and cannot receive
-        escrow or slashed funds. Base Sepolia testnet only. Not audited.
+        escrow or slashed funds. Base Sepolia testnet only. The evaluator was added after the 17
+        October 2026 internal security audit and is checked by its own tests, fuzzing, invariants
+        and static analysis.
       </PageTitle>
       {IS_TESTNET ? (
         <RequireWallet>

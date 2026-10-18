@@ -2,7 +2,9 @@
 
 Status: **Phase 1 contract built, tested and deployed on Base Sepolia** (testnet only:
 [`0x6808F80Eb11538543d31cf4b50332B268dDd4d14`](https://base-sepolia.blockscout.com/address/0x6808F80Eb11538543d31cf4b50332B268dDd4d14),
-source verified; evidence in [verification-evidence.md](verification-evidence.md)). Not audited.
+source verified; evidence in [verification-evidence.md](verification-evidence.md)). Added after the
+[17 October 2026 internal security audit](../security/2026-10-17/report.md); checked by its own
+tests, fuzzing, invariants, Slither and the triaged Aderyn results.
 Contract:
 [`ARLVerifiedEvaluator.sol`](../contracts/src/ARLVerifiedEvaluator.sol). Deployment script:
 [`DeploySepoliaEvaluator.s.sol`](../contracts/script/DeploySepoliaEvaluator.s.sol). Phases 2 and 3

@@ -8,7 +8,8 @@ documents that back it; nothing here is deployed on Base Mainnet.
 - Verified evaluator deployed on Base Sepolia (testnet): `ARLVerifiedEvaluator` at
   `0x6808F80Eb11538543d31cf4b50332B268dDd4d14` (source verified) with a 2-of-3 arbiter Safe at
   `0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f`; a first sample job was approved by a staked
-  three-validator committee. Not audited.
+  three-validator committee. The evaluator was added after the 17 October 2026 internal security
+  audit; its own tests, fuzzing, invariants, Slither and Aderyn results are in the repository.
 - Signed usage receipts for x402 `upto` calls: the provider signs an EIP-712 receipt of the
   authorization charged, the units, the price, the amount and a hash of the output; the
   facilitator settles only the amount a valid receipt states, and the payer checks it with
