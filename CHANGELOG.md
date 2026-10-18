@@ -3,6 +3,14 @@
 Notable changes to ARL Protocol, newest first. Dates are UTC. Every entry links to the code and
 documents that back it; nothing here is deployed on Base Mainnet.
 
+## 2026-10-18
+
+- Signed usage receipts for x402 `upto` calls: the provider signs an EIP-712 receipt of the
+  authorization charged, the units, the price, the amount and a hash of the output; the
+  facilitator settles only the amount a valid receipt states, and the payer checks it with
+  `checkUsageReceipt` ([payments.md](docs/payments.md#usage-receipts)). Tested through the HTTP
+  facilitator and on a Base Sepolia fork.
+
 ## 2026-10-17
 
 - Verified evaluation of ERC-8183 jobs: `ARLVerifiedEvaluator`, a staked validator committee
