@@ -1,0 +1,12 @@
+{
+  "version": "arl-reexec/1",
+  "container_digest": "docker.io/library/busybox@sha256:bdf57e528e45e4433820e045b29b4597825a1c9e38353532d90a01445013f82e",
+  "inputs": [],
+  "command": ["sh", "-c", "echo 'passed=3 failed=0' > /out/summary.txt"],
+  "workdir": ".",
+  "env": {},
+  "outputs": ["summary.txt"],
+  "limits": { "seconds": 30, "memory_mb": 64, "cpus": 1 },
+  "expected_exit_code": 0,
+  "verifier_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+}
