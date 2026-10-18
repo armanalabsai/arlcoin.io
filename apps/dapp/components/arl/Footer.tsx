@@ -26,7 +26,7 @@ export function Footer() {
         </a>
         {" · "}
         <a className="link" href="https://arlcoin.io/docs/security-audit">
-          Security audit (17 Oct 2026)
+          Internal security audit (17 Oct 2026)
         </a>
         {" · "}
         Built on Scaffold-ETH 2 (MIT)
