@@ -33,11 +33,11 @@ export const PUBLIC_LAUNCH = {
    */
   tgeTranche: 500_000,
   /**
-   * Kept in the Public Launch Safe for launchpad sales (owner decision 2026-10-10). The rest,
-   * 2,000,000 ARL, is sold through Uniswap positions; legal approval confirmed
-   * by the owner.
+   * Kept in the Public Launch Safe for launchpad sales (owner decision 2026-10-10, reduced from
+   * 2,500,000 on 2026-10-17). The rest, 3,000,000 ARL, is sold through Uniswap positions; legal
+   * approval confirmed by the owner.
    */
-  launchpadReserve: 2_500_000,
+  launchpadReserve: 1_500_000,
   /** Largest single claim. */
   maxPerAddress: 10_000,
   /** Claim window; afterwards the remainder can only return to the Public Launch Safe. */

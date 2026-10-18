@@ -21,12 +21,15 @@ Key facts:
 - Planned uses: AI services paid per use in ARL, GPU and CPU compute paid per second,
   zero-knowledge anonymous signals, and staking funded from existing allocations, never from
   new issuance.
-- Security: internal review complete (unit, fuzz and invariant tests, static analysis,
-  symbolic checks). Treasury actions pass a Safe
+- Security: multi-layer internal security audit completed on 17 October 2026 with open-source
+  tools (Slither, Aderyn, Foundry fuzz and invariant tests, Halmos, Mythril) and manual triage; no
+  critical finding, every finding closed (fixed or accepted with a documented mitigation).
+  Treasury actions pass a Safe
   multisig and a 48-hour timelock.
-- Roadmap: foundation and token contracts complete, internal security review complete, Base
+- Roadmap: foundation and token contracts complete, internal security audit complete, Base
   Sepolia testnet live since 4 October 2026, Base Mainnet targeted for 23 October 2026.
-- Launch: trading opens on Uniswap on Base at the Base Mainnet launch, from 0.20 USD per ARL.
+- Launch: trading opens on Uniswap on Base at the Base Mainnet launch, from 0.20 USD per ARL,
+  in ARL-only pools holding 5,000,000 ARL (2,000,000 Liquidity, 3,000,000 Public Launch).
   There is no airdrop at the launch; an airdrop of 500,000 ARL is planned for a later date.
 - ARL never asks for a private key, a seed phrase or a payment.
 
@@ -54,5 +57,6 @@ Key facts:
 - [Tokenomics](https://arlcoin.io/docs/tokenomics)
 - [Token, vesting and treasury](https://arlcoin.io/docs/token-design)
 - [Architecture](https://arlcoin.io/docs/architecture)
+- [Security audit report](https://arlcoin.io/docs/security-audit)
 - [Security analysis](https://arlcoin.io/docs/security-analysis)
 - [Security policy](https://arlcoin.io/docs/security)

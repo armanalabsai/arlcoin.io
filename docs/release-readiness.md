@@ -21,20 +21,20 @@ In MetaMask the smart-account switch is per network: select **Base Sepolia** bef
 
 ## 2. Remaining items by type
 
-| Item (launchpad-readiness #)                | Type                 | Minimum action                                                                                                       |
-| ------------------------------------------- | -------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| EIP-7702 delegation on the deployer (8)     | DONE                 | Removed on Base Sepolia (`eth_getCode` = `0x`, rechecked 2026-10-10); mainnet uses a fresh, never-delegated deployer |
-| Mainnet Safe signers and threshold (7)      | DONE                 | Provided 2026-10-10; mainnet fork rehearsal passes ([mainnet-plan.md](mainnet-plan.md))                              |
-| Aderyn, Halmos, Mythril re-run on Linux (5) | DONE                 | Re-run on Linux 2026-10-10 ([verification-evidence.md](verification-evidence.md))                                    |
-| Basescan verification (2)                   | DONE                 | All four Base Sepolia contracts verified on Basescan (owner check 2026-10-10)                                        |
-| Public source repository (16)               | DONE                 | https://github.com/armanalabsai/arlcoin.io                                                                           |
-| Liquidity plan (13)                         | ADMIN/LEGAL          | Pool size, pair, venue, LP custody                                                                                   |
-| Sale parameters (14)                        | DONE                 | Decided (launchpad-readiness #14)                                                                                    |
-| Security contact (18)                       | DONE                 | `team@arlcoin.io` (owner decision 2026-10-05)                                                                        |
-| Legal opinion, KYC (19)                     | ADMIN/LEGAL          | Legal opinion done; KYC provider if the launchpad requires one                                                       |
-| Social channels (20)                        | OPTIONAL             | Required by most launchpads in practice                                                                              |
-| Public test period and bug bounty (21)      | OPTIONAL             | Needs items 16 and 18                                                                                                |
-| Mainnet deployment (22)                     | Follows the blockers | After all technical blockers and an approved TGE                                                                     |
+| Item (launchpad-readiness #)                | Type                 | Minimum action                                                                                                                              |
+| ------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| EIP-7702 delegation on the deployer (8)     | DONE                 | Removed on Base Sepolia (`eth_getCode` = `0x`, rechecked 2026-10-10); mainnet uses a fresh, never-delegated deployer                        |
+| Mainnet Safe signers and threshold (7)      | DONE                 | Provided 2026-10-10; mainnet fork rehearsal passes ([mainnet-plan.md](mainnet-plan.md))                                                     |
+| Aderyn, Halmos, Mythril re-run on Linux (5) | DONE                 | Re-run on Linux 2026-10-10 ([verification-evidence.md](verification-evidence.md))                                                           |
+| Basescan verification (2)                   | DONE                 | All four Base Sepolia contracts verified on Basescan (owner check 2026-10-10)                                                               |
+| Public source repository (16)               | DONE                 | https://github.com/armanalabsai/arlcoin.io                                                                                                  |
+| Liquidity plan (13)                         | DONE                 | 2,000,000 ARL Liquidity + 3,000,000 ARL Public Launch in ARL-only Uniswap v3 pools from 0.20 USD; LP in the 2-of-3 Safes (owner 2026-10-17) |
+| Sale parameters (14)                        | DONE                 | Decided (launchpad-readiness #14)                                                                                                           |
+| Security contact (18)                       | DONE                 | `team@arlcoin.io` (owner decision 2026-10-05)                                                                                               |
+| Legal opinion, KYC (19)                     | ADMIN/LEGAL          | Legal opinion done; KYC provider if the launchpad requires one                                                                              |
+| Social channels (20)                        | OPTIONAL             | Required by most launchpads in practice                                                                                                     |
+| Public test period and bug bounty (21)      | OPTIONAL             | Needs items 16 and 18                                                                                                                       |
+| Mainnet deployment (22)                     | Follows the blockers | After all technical blockers and an approved TGE                                                                                            |
 
 ## 3. Base Mainnet security architecture (proposal; nothing created)
 
@@ -117,14 +117,14 @@ local repository, or create a repository on another host the owner controls and 
 
 ## 6. Remaining release checklist (CTO decision 2026-10-05: no mainnet yet)
 
-| #   | Item                                                                              | Owner action                        | Status                                                          |
-| --- | --------------------------------------------------------------------------------- | ----------------------------------- | --------------------------------------------------------------- |
-| 1   | EIP-7702 delegation removed on Base Sepolia                                       | MetaMask clean-up on Base Sepolia   | Done; `cast code` = `0x` (2026-10-10)                           |
-| 2   | Public repository https://github.com/armanalabsai/arlcoin.io                      | Push `main` (owner runs the push)   | Done; public, `main` (checked 2026-10-10)                       |
-| 3   | Basescan verification                                                             | Set `ETHERSCAN_API_KEY` (section 4) | Done 2026-10-10 (Base Sepolia, 4/4)                             |
-| 4   | Mainnet signers: 3 Ledger role signers, guardian signer(s), clean Ledger deployer | Provide public addresses            | Done 2026-10-10; fork rehearsal passes (`docs/mainnet-plan.md`) |
-| 5   | Liquidity plan and sale parameters                                                | Decide                              | Sale parameters decided (launchpad-readiness #14)               |
-| 6   | Legal opinion / KYC, social channels                                              | Decide                              | Open                                                            |
-| 7   | Mainnet network gate                                                              | Separate reviewed change after 1-6  | Locked                                                          |
+| #   | Item                                                                              | Owner action                        | Status                                                           |
+| --- | --------------------------------------------------------------------------------- | ----------------------------------- | ---------------------------------------------------------------- |
+| 1   | EIP-7702 delegation removed on Base Sepolia                                       | MetaMask clean-up on Base Sepolia   | Done; `cast code` = `0x` (2026-10-10)                            |
+| 2   | Public repository https://github.com/armanalabsai/arlcoin.io                      | Push `main` (owner runs the push)   | Done; public, `main` (checked 2026-10-10)                        |
+| 3   | Basescan verification                                                             | Set `ETHERSCAN_API_KEY` (section 4) | Done 2026-10-10 (Base Sepolia, 4/4)                              |
+| 4   | Mainnet signers: 3 Ledger role signers, guardian signer(s), clean Ledger deployer | Provide public addresses            | Done 2026-10-10; fork rehearsal passes (`docs/mainnet-plan.md`)  |
+| 5   | Liquidity plan and sale parameters                                                | Decide                              | Done 2026-10-17 (5,000,000 ARL in the pools; mainnet-runbook.md) |
+| 6   | Legal opinion / KYC, social channels                                              | Decide                              | Channels done (X, Telegram, email, bot); legal publication open  |
+| 7   | Mainnet network gate                                                              | Separate reviewed change after 1-6  | Opens automatically at 2026-10-23 00:00 UTC                      |
 
 Supplementary: Aderyn, Halmos and Mythril re-run on Linux on 2026-10-10 (done).

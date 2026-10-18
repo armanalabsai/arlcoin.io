@@ -270,7 +270,11 @@ export function recordCommand(
   }
   const out = `contracts/deploy/deployments/${String(run.chainId)}${kind === "safes" ? "-safes" : ""}.json`;
   const rpc =
-    run.chainId === LOCAL_CHAIN_ID ? "<local-rpc-url> --local-anvil" : "https://sepolia.base.org";
+    run.chainId === LOCAL_CHAIN_ID
+      ? "<local-rpc-url> --local-anvil"
+      : run.chainId === BASE_MAINNET_CHAIN_ID
+        ? "https://mainnet.base.org"
+        : "https://sepolia.base.org";
   return {
     kind,
     command: `node packages/deploy/src/record-cli.ts ${kind} ${runFile} ${rpc} ${out}`,

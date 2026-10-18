@@ -1,141 +1,147 @@
-# ARL Protocol SEO stratejisi (sıfır bütçe)
+# ARL Protocol SEO strategy (zero budget)
 
-Sahip: proje lideri. Tarih: 2026-10-16. Kapsam: arlcoin.io, X @arlprotocol, Telegram
+Owner: project lead. Date: 2026-10-16. Scope: arlcoin.io, X @arlprotocol, Telegram
 t.me/arlcoin_community, Farcaster, Mirror.xyz, GitHub armanalabsai/arlcoin.io.
 
-Sabit veriler (her içerikte aynı kalır): ARL, Base üzerinde ERC-20; sabit arz 21.000.000 ARL;
-mint/burn/pause/upgrade yok; hazine 2-of-3 Safe + 48 saat timelock; Base Mainnet hedefi
-**23 Ekim 2026**; Uniswap on Base havuzları 0,20 USD'den açılır; **lansmanda airdrop yok**
-(500.000 ARL'lik airdrop ileri bir tarihte, kuralları ayrıca duyurulur). Resmî kanallar:
-https://arlcoin.io · https://x.com/arlprotocol · https://t.me/arlcoin_community · team@arlcoin.io.
+Fixed facts (the same in every piece of content): ARL is an ERC-20 on Base; fixed supply
+21,000,000 ARL; no mint, burn, pause or upgrade; treasury in a 2-of-3 Safe behind a 48-hour
+timelock; Base Mainnet target **23 October 2026**; the Uniswap on Base pools open from 0.20 USD;
+**no airdrop at launch** (an airdrop of 500,000 ARL follows at a later date, with rules announced
+separately). Official channels: https://arlcoin.io · https://x.com/arlprotocol ·
+https://t.me/arlcoin_community · team@arlcoin.io.
 
-İçerik kuralları: fiyat vaadi yok, "listelenecek" vaadi yok, airdrop vaadi yok; her teknik iddia
-repodaki koda, teste veya dokümana bağlanır (bkz. [content-standard.md](content-standard.md)).
+Content rules: no price promises, no "will be listed" promises, no airdrop promises; every
+technical claim links to code, a test or a document in the repository (see
+[content-standard.md](content-standard.md)).
 
-Bu dokümanla birlikte sitede uygulananlar: başlık/açıklama uzunluk limitleri (test ile
-korunur), site geneli `Organization` + `WebSite` JSON-LD, doküman sayfalarında `TechArticle` +
-`BreadcrumbList`, Core kartlarında `BreadcrumbList`, FAQ'da `FAQPage`, `manifest.webmanifest`,
-sitemap öncelik/sıklık ipuçları, AI tarayıcılarına açık `robots.txt`, `llms.txt` resmî kanallar
-bölümü, kaldırılan `/core/team` adresleri için 301 yönlendirme.
+Applied on the site together with this document: title and description length limits (guarded by
+a test), site-wide `Organization` and `WebSite` JSON-LD, `TechArticle` and `BreadcrumbList` on
+document pages, `BreadcrumbList` on Core cards, `FAQPage` on the FAQ, `manifest.webmanifest`,
+sitemap priority and frequency hints, a `robots.txt` open to AI crawlers, an official-channels
+section in `llms.txt`, and 301 redirects for the removed `/core/team` URLs.
 
 ---
 
-## 1. Anahtar kelime araştırması
+## 1. Keyword research
 
-Hacim değerleri ücretsiz araçlarla (Google Keyword Planner aralıkları, Google Trends, Search
-Console ilk veriler, X arama sonuçları) yapılmış **tahminlerdir**; lansman sonrası Search
-Console verisiyle her ay güncellenir. Marka kelimeleri bugün düşük hacimli ama sıralaması en
-kolay ve dönüşümü en yüksek gruptur; lansman günü (23 Ekim) aramalar sıçrar.
+Volumes are **estimates** from free tools (Google Keyword Planner ranges, Google Trends, early
+Search Console data, X search results); they are updated every month from Search Console after
+the launch. Brand keywords have low volume today but are the easiest to rank for and convert
+best; searches spike on launch day (23 October).
 
-| #   | Anahtar kelime                         | Kategori    | Aylık hacim (tahmin) | Zorluk | Hedef sayfa        |
-| --- | -------------------------------------- | ----------- | -------------------: | ------ | ------------------ |
-| 1   | ARL Protocol                           | Marka       |               50–200 | Düşük  | /                  |
-| 2   | ARL token                              | Marka       |              100–500 | Düşük  | /core/token        |
-| 3   | ARL coin                               | Marka       |              100–500 | Orta   | /                  |
-| 4   | arlcoin                                | Marka       |               20–100 | Düşük  | /                  |
-| 5   | ARL crypto                             | Marka       |               50–300 | Orta   | /                  |
-| 6   | ARL price                              | Marka       |            200–1.000 | Orta   | /buy               |
-| 7   | buy ARL token                          | Marka       |               50–200 | Düşük  | /buy               |
-| 8   | ARL contract address                   | Marka       |               20–100 | Düşük  | /buy               |
-| 9   | ARL tokenomics                         | Marka       |               20–100 | Düşük  | /docs/tokenomics   |
-| 10  | ARL Base                               | Marka       |                10–50 | Düşük  | /                  |
-| 11  | how to buy ARL on Uniswap              | Uzun kuyruk |                10–50 | Düşük  | /buy               |
-| 12  | what is ARL Protocol                   | Uzun kuyruk |                10–50 | Düşük  | /faq               |
-| 13  | is ARL token safe                      | Uzun kuyruk |                10–50 | Düşük  | /core/security     |
-| 14  | when does ARL launch                   | Uzun kuyruk |                10–50 | Düşük  | /faq               |
-| 15  | how to add ARL to MetaMask             | Uzun kuyruk |                10–50 | Düşük  | /buy               |
-| 16  | how to pay for AI with crypto          | Uzun kuyruk |              100–500 | Orta   | blog               |
-| 17  | how to pay for GPU compute with crypto | Uzun kuyruk |               50–200 | Orta   | blog               |
-| 18  | what is a fixed supply token           | Uzun kuyruk |              100–300 | Düşük  | blog               |
-| 19  | how does a token timelock work         | Uzun kuyruk |               50–150 | Düşük  | /docs/token-design |
-| 20  | how to verify a token contract on Base | Uzun kuyruk |               50–200 | Düşük  | blog               |
-| 21  | Render token alternative               | Rakip       |              100–300 | Orta   | blog               |
-| 22  | Akash Network alternative              | Rakip       |               50–200 | Orta   | blog               |
-| 23  | Bittensor vs                           | Rakip       |            500–2.000 | Yüksek | blog               |
-| 24  | Virtuals Protocol alternative          | Rakip       |               50–200 | Orta   | blog               |
-| 25  | io.net alternative                     | Rakip       |               50–150 | Orta   | blog               |
-| 26  | AI agent tokens on Base                | Rakip       |              200–800 | Yüksek | blog               |
-| 27  | decentralized compute tokens           | Rakip       |              200–600 | Yüksek | blog               |
-| 28  | DePIN AI tokens                        | Rakip       |            500–1.500 | Yüksek | blog               |
-| 29  | AI crypto projects 2026                | Rakip       |          1.000–5.000 | Yüksek | blog               |
-| 30  | x402 vs stablecoin payments            | Rakip       |               20–100 | Düşük  | /docs/payments     |
-| 31  | Base network tokens                    | Base        |            500–2.000 | Yüksek | blog               |
-| 32  | new tokens on Base                     | Base        |          1.000–3.000 | Yüksek | /buy               |
-| 33  | Base ecosystem projects                | Base        |              300–900 | Orta   | /core/ecosystem    |
-| 34  | Uniswap on Base                        | Base        |            500–1.500 | Yüksek | /buy               |
-| 35  | Base Sepolia testnet tokens            | Base        |              100–400 | Düşük  | /core/roadmap      |
-| 36  | Base Sepolia faucet                    | Base        |          1.000–4.000 | Orta   | /app               |
-| 37  | build on Base                          | Base        |              300–800 | Orta   | GitHub README      |
-| 38  | Coinbase L2 token launch               | Base        |               50–200 | Orta   | blog               |
-| 39  | Base mainnet launch October 2026       | Base        |                10–50 | Düşük  | blog               |
-| 40  | onchain AI payments Base               | Base        |               20–100 | Düşük  | /core/technology   |
-| 41  | x402 payments                          | Teknik      |              300–900 | Orta   | /docs/payments     |
-| 42  | x402 upto scheme                       | Teknik      |                20–80 | Düşük  | /docs/payments     |
-| 43  | ERC-8004 registry                      | Teknik      |              100–400 | Düşük  | /core/technology   |
-| 44  | ERC-8183 job escrow                    | Teknik      |               20–100 | Düşük  | /docs/app          |
-| 45  | Permit2 spending limit                 | Teknik      |              100–300 | Orta   | /docs/payments     |
-| 46  | EIP-2612 permit token                  | Teknik      |              100–300 | Orta   | /docs/token-design |
-| 47  | Semaphore anonymous signals            | Teknik      |               50–150 | Düşük  | /docs/zk-privacy   |
-| 48  | Noir UltraHonk verifier                | Teknik      |               20–100 | Düşük  | /docs/zk-privacy   |
-| 49  | Safe multisig timelock                 | Teknik      |              100–400 | Orta   | /docs/token-design |
-| 50  | vesting wallet 12 month cliff          | Teknik      |               50–150 | Düşük  | /docs/tokenomics   |
+| #   | Keyword                                | Category   | Monthly volume (estimate) | Difficulty | Target page        |
+| --- | -------------------------------------- | ---------- | ------------------------: | ---------- | ------------------ |
+| 1   | ARL Protocol                           | Brand      |                    50–200 | Low        | /                  |
+| 2   | ARL token                              | Brand      |                   100–500 | Low        | /core/token        |
+| 3   | ARL coin                               | Brand      |                   100–500 | Medium     | /                  |
+| 4   | arlcoin                                | Brand      |                    20–100 | Low        | /                  |
+| 5   | ARL crypto                             | Brand      |                    50–300 | Medium     | /                  |
+| 6   | ARL price                              | Brand      |                 200–1,000 | Medium     | /buy               |
+| 7   | buy ARL token                          | Brand      |                    50–200 | Low        | /buy               |
+| 8   | ARL contract address                   | Brand      |                    20–100 | Low        | /buy               |
+| 9   | ARL tokenomics                         | Brand      |                    20–100 | Low        | /docs/tokenomics   |
+| 10  | ARL Base                               | Brand      |                     10–50 | Low        | /                  |
+| 11  | how to buy ARL on Uniswap              | Long tail  |                     10–50 | Low        | /buy               |
+| 12  | what is ARL Protocol                   | Long tail  |                     10–50 | Low        | /faq               |
+| 13  | is ARL token safe                      | Long tail  |                     10–50 | Low        | /core/security     |
+| 14  | when does ARL launch                   | Long tail  |                     10–50 | Low        | /faq               |
+| 15  | how to add ARL to MetaMask             | Long tail  |                     10–50 | Low        | /buy               |
+| 16  | how to pay for AI with crypto          | Long tail  |                   100–500 | Medium     | blog               |
+| 17  | how to pay for GPU compute with crypto | Long tail  |                    50–200 | Medium     | blog               |
+| 18  | what is a fixed supply token           | Long tail  |                   100–300 | Low        | blog               |
+| 19  | how does a token timelock work         | Long tail  |                    50–150 | Low        | /docs/token-design |
+| 20  | how to verify a token contract on Base | Long tail  |                    50–200 | Low        | blog               |
+| 21  | Render token alternative               | Competitor |                   100–300 | Medium     | blog               |
+| 22  | Akash Network alternative              | Competitor |                    50–200 | Medium     | blog               |
+| 23  | Bittensor vs                           | Competitor |                 500–2,000 | High       | blog               |
+| 24  | Virtuals Protocol alternative          | Competitor |                    50–200 | Medium     | blog               |
+| 25  | io.net alternative                     | Competitor |                    50–150 | Medium     | blog               |
+| 26  | AI agent tokens on Base                | Competitor |                   200–800 | High       | blog               |
+| 27  | decentralized compute tokens           | Competitor |                   200–600 | High       | blog               |
+| 28  | DePIN AI tokens                        | Competitor |                 500–1,500 | High       | blog               |
+| 29  | AI crypto projects 2026                | Competitor |               1,000–5,000 | High       | blog               |
+| 30  | x402 vs stablecoin payments            | Competitor |                    20–100 | Low        | /docs/payments     |
+| 31  | Base network tokens                    | Base       |                 500–2,000 | High       | blog               |
+| 32  | new tokens on Base                     | Base       |               1,000–3,000 | High       | /buy               |
+| 33  | Base ecosystem projects                | Base       |                   300–900 | Medium     | /core/ecosystem    |
+| 34  | Uniswap on Base                        | Base       |                 500–1,500 | High       | /buy               |
+| 35  | Base Sepolia testnet tokens            | Base       |                   100–400 | Low        | /core/roadmap      |
+| 36  | Base Sepolia faucet                    | Base       |               1,000–4,000 | Medium     | /app               |
+| 37  | build on Base                          | Base       |                   300–800 | Medium     | GitHub README      |
+| 38  | Coinbase L2 token launch               | Base       |                    50–200 | Medium     | blog               |
+| 39  | Base mainnet launch October 2026       | Base       |                     10–50 | Low        | blog               |
+| 40  | onchain AI payments Base               | Base       |                    20–100 | Low        | /core/technology   |
+| 41  | x402 payments                          | Technical  |                   300–900 | Medium     | /docs/payments     |
+| 42  | x402 upto scheme                       | Technical  |                     20–80 | Low        | /docs/payments     |
+| 43  | ERC-8004 registry                      | Technical  |                   100–400 | Low        | /core/technology   |
+| 44  | ERC-8183 job escrow                    | Technical  |                    20–100 | Low        | /docs/app          |
+| 45  | Permit2 spending limit                 | Technical  |                   100–300 | Medium     | /docs/payments     |
+| 46  | EIP-2612 permit token                  | Technical  |                   100–300 | Medium     | /docs/token-design |
+| 47  | Semaphore anonymous signals            | Technical  |                    50–150 | Low        | /docs/zk-privacy   |
+| 48  | Noir UltraHonk verifier                | Technical  |                    20–100 | Low        | /docs/zk-privacy   |
+| 49  | Safe multisig timelock                 | Technical  |                   100–400 | Medium     | /docs/token-design |
+| 50  | vesting wallet 12 month cliff          | Technical  |                    50–150 | Low        | /docs/tokenomics   |
 
-**Öncelik sırası** (hacim × dönüşüm ÷ zorluk; tek kişilik ekip için önce kazanılabilir olanlar):
+**Priority order** (volume × conversion ÷ difficulty; winnable keywords first for a one-person
+team):
 
-1. Marka + işlem niyeti: `ARL token`, `ARL coin`, `buy ARL token`, `ARL contract address`,
-   `ARL price` (lansman günü aranır; /buy sayfası hazır olmalı).
-2. Marka + bilgi: `ARL Protocol`, `what is ARL Protocol`, `ARL tokenomics`, `when does ARL launch`.
-3. Teknik niş (düşük rekabet, otorite kurar): `x402 upto scheme`, `ERC-8183 job escrow`,
+1. Brand + transactional intent: `ARL token`, `ARL coin`, `buy ARL token`, `ARL contract address`,
+   `ARL price` (searched on launch day; the /buy page must be ready).
+2. Brand + informational: `ARL Protocol`, `what is ARL Protocol`, `ARL tokenomics`,
+   `when does ARL launch`.
+3. Technical niche (low competition, builds authority): `x402 upto scheme`, `ERC-8183 job escrow`,
    `ERC-8004 registry`, `Semaphore anonymous signals`.
-4. Base ekosistemi uzun kuyruk: `onchain AI payments Base`, `Base Sepolia testnet tokens`,
+4. Base ecosystem long tail: `onchain AI payments Base`, `Base Sepolia testnet tokens`,
    `Base mainnet launch October 2026`.
-5. Rakip/karşılaştırma (ay 2–3, otorite oluştuktan sonra): `Render token alternative`,
+5. Competitor and comparison (months 2–3, once authority exists): `Render token alternative`,
    `Akash Network alternative`, `AI agent tokens on Base`.
 
-### Sonraki adım
+### Next step
 
-Search Console'da (zaten doğrulanmış: `verification.google` site meta etiketinde) "Performans"
-raporunu açıp ilk 10 sorguyu bu tablonun "Aylık hacim" sütununun yanına yazın.
+Open the "Performance" report in Search Console (already verified through the
+`verification.google` meta tag) and write the top 10 queries next to the "Monthly volume" column
+of this table.
 
 ---
 
-## 2. On-page SEO kontrol listesi
+## 2. On-page SEO checklist
 
-Kurallar: title ≤ 60 karakter, meta description ≤ 155 karakter (sitede `test/unit/seo.test.ts`
-bunu her build'de denetler), tek H1, H2'ler anahtar kelimeyi doğal biçimde taşır, her sayfa en az
-3 iç bağlantı verir. "Hakkında" ve "Yol haritası" sitede Core katmanlarıdır (/core/technology,
-/core/roadmap); "Blog" henüz yok, aşağıda şablonu var (Mirror.xyz kanonik kaynak olarak
-kullanılırsa sitedeki kopyaya `canonical` verilir).
+Rules: title ≤ 60 characters, meta description ≤ 155 characters (`test/unit/seo.test.ts` checks
+this on every build), one H1, H2s carry the keyword naturally, every page gives at least 3 internal
+links. "About" and "Roadmap" are Core layers on the site (/core/technology, /core/roadmap); there
+is no "Blog" yet, and its template is below (if Mirror.xyz is the canonical source, the copy on the
+site gets a `canonical`).
 
-| Sayfa                        | Title (uygulandı / önerilen)                      | Meta description                                                                                                                                           | Schema                                  |
-| ---------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| Ana sayfa `/`                | ARL Protocol (ARL) · AI and Compute Token on Base | ARL Protocol: the utility token for AI and compute payments on Base. 21,000,000 ARL fixed supply, no mint or upgrade. Base Mainnet launch 23 October 2026. | Organization, WebSite, FAQPage          |
-| Hakkında `/core/technology`  | Technology · ARL Protocol                         | How ARL pays for AI and compute on Base: x402 payments, ERC-8004 registry, ERC-8183 job escrow and zero-knowledge anonymous signals.                       | BreadcrumbList                          |
-| Yol haritası `/core/roadmap` | Roadmap · ARL Protocol                            | Where ARL Protocol is today: Base Sepolia testnet live since 4 October 2026, Base Mainnet launch on 23 October 2026, services next.                        | BreadcrumbList                          |
-| SSS `/faq`                   | ARL Token FAQ · ARL Protocol                      | ARL token FAQ: maximum supply, launch date, Base network, Uniswap trading, whitelist and airdrop timing, answered by ARL Protocol.                         | FAQPage, BreadcrumbList                 |
-| Blog `/blog` (öneri)         | ARL Protocol Blog: AI Payments on Base            | Guides on paying for AI and compute with ARL on Base: x402, Permit2, token design and launch updates from ARL Protocol.                                    | Blog, BlogPosting, BreadcrumbList       |
-| İletişim `/contact`          | Contact · ARL Protocol                            | Contact ARL Protocol: email team@arlcoin.io, X @arlprotocol or the Telegram community for partnerships, press and listings.                                | Organization (contactPoint), Breadcrumb |
-| Satın alma `/buy`            | How to Buy ARL on Uniswap on Base · ARL Protocol  | How to buy ARL: the official ARL/USDC, ARL/USDT, ARL/ETH and ARL/BTC pools on Uniswap on Base, from 0.20 USD, opening 23 October 2026.                     | BreadcrumbList                          |
-| Dokümanlar `/docs/<slug>`    | `<Doc title> · ARL Protocol`                      | Dokümanın kendi `description` alanı                                                                                                                        | TechArticle, BreadcrumbList             |
+| Page                     | Title (applied / proposed)                        | Meta description                                                                                                                                           | Schema                                  |
+| ------------------------ | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| Home `/`                 | ARL Protocol (ARL) · AI and Compute Token on Base | ARL Protocol: the utility token for AI and compute payments on Base. 21,000,000 ARL fixed supply, no mint or upgrade. Base Mainnet launch 23 October 2026. | Organization, WebSite, FAQPage          |
+| About `/core/technology` | Technology · ARL Protocol                         | How ARL pays for AI and compute on Base: x402 payments, ERC-8004 registry, ERC-8183 job escrow and zero-knowledge anonymous signals.                       | BreadcrumbList                          |
+| Roadmap `/core/roadmap`  | Roadmap · ARL Protocol                            | Where ARL Protocol is today: Base Sepolia testnet live since 4 October 2026, Base Mainnet launch on 23 October 2026, services next.                        | BreadcrumbList                          |
+| FAQ `/faq`               | ARL Token FAQ · ARL Protocol                      | ARL token FAQ: maximum supply, launch date, Base network, Uniswap trading, whitelist and airdrop timing, answered by ARL Protocol.                         | FAQPage, BreadcrumbList                 |
+| Blog `/blog` (proposed)  | ARL Protocol Blog: AI Payments on Base            | Guides on paying for AI and compute with ARL on Base: x402, Permit2, token design and launch updates from ARL Protocol.                                    | Blog, BlogPosting, BreadcrumbList       |
+| Contact `/contact`       | Contact · ARL Protocol                            | Contact ARL Protocol: email team@arlcoin.io, X @arlprotocol or the Telegram community for partnerships, press and listings.                                | Organization (contactPoint), Breadcrumb |
+| Buy `/buy`               | How to Buy ARL on Uniswap on Base · ARL Protocol  | How to buy ARL: the official ARL/USDC, ARL/USDT, ARL/ETH and ARL/BTC pools on Uniswap on Base, from 0.20 USD, opening 23 October 2026.                     | BreadcrumbList                          |
+| Documents `/docs/<slug>` | `<Doc title> · ARL Protocol`                      | The document's own `description` field                                                                                                                     | TechArticle, BreadcrumbList             |
 
-**H1/H2 şablonları**
+**H1/H2 templates**
 
-- Ana sayfa: H1 "The onchain token planned for decentralized AI and compute services." · H2'ler:
+- Home: H1 "The onchain token planned for decentralized AI and compute services." · H2s:
   "Launch on Base." / "Onchain. Verifiable." / "Fixed. Forever." / "Built for AI and compute." /
   "Where ARL is today." / "Questions."
-- SSS: H1 "Questions" · her soru bir `<summary>` (FAQPage ile eşleşir).
-- Blog yazısı: H1 = yazı başlığı (hedef kelime başta) · H2: "What is …", "How it works on Base",
-  "Step by step", "FAQ" · sonda CTA.
-- /buy: H1 "How to get ARL" · H2: "Before you buy", "Official pools", "Check the contract address".
+- FAQ: H1 "Questions" · every question is a `<summary>` (matches FAQPage).
+- Blog post: H1 = post title (target keyword first) · H2s: "What is …", "How it works on Base",
+  "Step by step", "FAQ" · a call to action at the end.
+- /buy: H1 "How to get ARL" · H2s: "Before you buy", "Official pools", "Check the contract address".
 
-**İç bağlantı haritası**
+**Internal link map**
 
-- Ana sayfa → /buy, /faq, /core/token, /docs/tokenomics, /whitelist.
-- /faq → /buy (satın alma), /docs/tokenomics (arz), /core/roadmap (tarih).
-- Her doküman → /faq ve ilgili Core kartı; her blog yazısı → 1 doküman + /buy veya /whitelist.
-- Anchor metni anahtar kelime taşır: "ARL tokenomics", "how to buy ARL on Uniswap", "x402 payments".
+- Home → /buy, /faq, /core/token, /docs/tokenomics, /whitelist.
+- /faq → /buy (buying), /docs/tokenomics (supply), /core/roadmap (dates).
+- Every document → /faq and the related Core card; every blog post → one document + /buy or
+  /whitelist.
+- Anchor text carries the keyword: "ARL tokenomics", "how to buy ARL on Uniswap", "x402 payments".
 
-**Blog yazısı JSON-LD şablonu**
+**Blog post JSON-LD template**
 
 ```json
 {
@@ -151,56 +157,57 @@ kullanılırsa sitedeki kopyaya `canonical` verilir).
 }
 ```
 
-### Sonraki adım
+### Next step
 
-/buy sayfasına 23 Ekim'de mainnet kontrat adresi `SITE.mainnet.token` ile girildiği anda
-yeniden build alın; "ARL contract address" aramasının cevabı o sayfadır.
-
----
-
-## 3. Teknik SEO kontrol listesi
-
-| Alan                 | Durum / adım                                                                                                                                                                              | Ücretsiz araç                                    |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| Site hızı            | Statik Next.js export, fontlar self-host. Hedef: mobil LCP < 2,5 s, CLS < 0,1, INP < 200 ms. Ses dosyası etkileşimden önce yüklenmemeli; görselleri PNG yerine WebP/AVIF olarak da sunun. | PageSpeed Insights, Lighthouse (Chrome DevTools) |
-| Mobil uyumluluk      | e2e testleri Pixel 7 profilinde yatay kaydırma ve 44 px dokunma hedefini denetliyor.                                                                                                      | Lighthouse mobil, Chrome cihaz modu              |
-| Dizine ekleme        | Search Console'da sitemap gönderin; lansman günü /, /buy, /faq için "URL denetimi → Dizine eklenmeyi iste". Bing için `node scripts/indexnow.mjs`.                                        | Google Search Console, Bing Webmaster, IndexNow  |
-| sitemap.xml          | `app/sitemap.ts` üretir; her URL sonda `/` ile, kanonikle aynı; öncelik ve sıklık ipuçları eklendi.                                                                                       | Screaming Frog (500 URL'ye kadar ücretsiz)       |
-| robots.txt           | Tüm tarayıcılara açık, AI arama tarayıcıları (GPTBot, ClaudeBot, PerplexityBot, Google-Extended …) açıkça izinli, `Sitemap:` ve `Host:` satırı var.                                       | Search Console robots.txt raporu                 |
-| Canonical            | Her sayfada `alternates.canonical`; `x-default` ve `en` hreflang kök düzeyde.                                                                                                             | Screaming Frog "Canonicals" sekmesi              |
-| HTTPS                | Vercel TLS, CSP `upgrade-insecure-requests`, `www` → apex yönlendirmesi DNS'te kontrol edilmeli.                                                                                          | SSL Labs, securityheaders.com                    |
-| Yapılandırılmış veri | Organization, WebSite, FAQPage, TechArticle, BreadcrumbList.                                                                                                                              | Rich Results Test, Schema Markup Validator       |
-| 404 / yönlendirme    | Kaldırılan `/core/team` URL'leri 301 ile `/core/`'a gider.                                                                                                                                | Screaming Frog "Response codes"                  |
-| AI görünürlüğü       | `/llms.txt` resmî kanallar ve lansman gerçekleriyle güncel.                                                                                                                               | Perplexity / ChatGPT'de "ARL Protocol" araması   |
-
-### Sonraki adım
-
-https://pagespeed.web.dev/ üzerinde `https://arlcoin.io/` mobil testini çalıştırıp LCP öğesini
-not edin; 2,5 s üstündeyse ilk iş o öğeyi küçültmek.
+Rebuild as soon as the mainnet contract address is set in `SITE.mainnet.token` on 23 October;
+the /buy page is the answer to the "ARL contract address" search.
 
 ---
 
-## 4. İçerik takvimi (12 hafta, İngilizce)
+## 3. Technical SEO checklist
 
-Her hafta: 1 blog yazısı (sitede veya Mirror'da kanonik), 1 X/Farcaster thread, 1 Mirror makalesi.
-CTA'lar dönüşüme göre değişir: lansman öncesi Telegram/whitelist, sonrası /buy ve app.
+| Area            | Status / step                                                                                                                                            | Free tool                                        |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| Site speed      | Static Next.js export, self-hosted fonts. Target: mobile LCP < 2.5 s, CLS < 0.1, INP < 200 ms. Serve images as WebP/AVIF as well as PNG.                 | PageSpeed Insights, Lighthouse (Chrome DevTools) |
+| Mobile          | The end-to-end tests check horizontal scrolling and 44 px touch targets on the Pixel 7 profile.                                                          | Lighthouse mobile, Chrome device mode            |
+| Indexing        | Submit the sitemap in Search Console; on launch day use "URL inspection → Request indexing" for /, /buy and /faq. For Bing: `node scripts/indexnow.mjs`. | Google Search Console, Bing Webmaster, IndexNow  |
+| sitemap.xml     | Generated by `app/sitemap.ts`; every URL ends in `/`, the same as the canonical; priority and frequency hints added.                                     | Screaming Frog (free up to 500 URLs)             |
+| robots.txt      | Open to all crawlers; AI search crawlers (GPTBot, ClaudeBot, PerplexityBot, Google-Extended …) explicitly allowed; `Sitemap:` and `Host:` lines present. | Search Console robots.txt report                 |
+| Canonical       | `alternates.canonical` on every page; `x-default` and `en` hreflang at the root.                                                                         | Screaming Frog "Canonicals" tab                  |
+| HTTPS           | Vercel TLS, CSP `upgrade-insecure-requests`, HSTS with subdomains; check the `www` → apex redirect in DNS.                                               | SSL Labs, securityheaders.com                    |
+| Structured data | Organization, WebSite, FAQPage, TechArticle, BreadcrumbList.                                                                                             | Rich Results Test, Schema Markup Validator       |
+| 404 / redirects | The removed `/core/team` URLs redirect with 301 to `/core/`.                                                                                             | Screaming Frog "Response codes"                  |
+| AI visibility   | `/llms.txt` is current with the official channels and launch facts.                                                                                      | "ARL Protocol" search in Perplexity / ChatGPT    |
 
-| Hafta (başlangıç) | Blog başlığı · hedef kelime                                                                | X/Farcaster thread                                              | Mirror makalesi                                            | İç bağlantı · CTA                                        |
-| ----------------- | ------------------------------------------------------------------------------------------ | --------------------------------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------------- |
-| 1 (19 Eki)        | **ARL Protocol Launches on Base on 23 October: What to Know** · `ARL token`                | "ARL launch day in 8 posts: supply, pools, address check"       | "Why ARL launches with no airdrop"                         | /buy, /faq · "Join t.me/arlcoin_community"               |
-| 2 (26 Eki)        | **How to Buy ARL on Uniswap on Base, Safely** · `how to buy ARL on Uniswap`                | "5 checks before you swap any new Base token"                   | "Single-sided liquidity from 0.20 USD, explained"          | /buy · "Verify the address on arlcoin.io/buy"            |
-| 3 (2 Kas)         | **What Is a Fixed Supply Token? ARL's 21,000,000 Cap** · `fixed supply token`              | "No mint, no burn, no pause, no upgrade: what that means"       | "Reading the ARL token contract line by line"              | /core/token, /docs/token-design · "Read the contract"    |
-| 4 (9 Kas)         | **How to Pay for AI with Crypto on Base** · `how to pay for AI with crypto`                | "x402 in one thread: sign a ceiling, pay only what you use"     | "Usage-based payments are the missing AI primitive"        | /docs/payments · "Try it on the testnet app"             |
-| 5 (16 Kas)        | **x402 upto Scheme: Usage-Based Payments with Permit2** · `x402 upto scheme`               | "Permit2 spending limits for AI agents"                         | "Metering AI work onchain without trusting a server"       | /docs/payments · "Read the docs"                         |
-| 6 (23 Kas)        | **ERC-8004 and ERC-8183: Registries and Job Escrow for AI Services** · `ERC-8004 registry` | "How an AI job is hired, escrowed and rated onchain"            | "Reputation for AI services that no one can edit"          | /core/technology · "Register a service"                  |
-| 7 (30 Kas)        | **How a 48-Hour Treasury Timelock Protects Token Holders** · `token timelock`              | "2-of-3 Safe + 48 h timelock: the full path of a treasury move" | "Custody design for a one-person project"                  | /docs/token-design · "See the timelock on Basescan"      |
-| 8 (7 Ara)         | **Paying for GPU Compute by the Second with ARL** · `pay for GPU compute with crypto`      | "Per-second compute billing in 6 posts"                         | "Compute providers on Base: a reference node"              | /docs/compute-provider (repo) · "Run the reference node" |
-| 9 (14 Ara)        | **Anonymous Onchain Polls with Semaphore and Noir** · `Semaphore anonymous signals`        | "Vote without revealing your wallet: how ZK signals work"       | "Privacy as a feature of payments infrastructure"          | /docs/zk-privacy · "Cast an anonymous signal"            |
-| 10 (21 Ara)       | **Render, Akash and ARL: Different Answers to AI Compute** · `Render token alternative`    | "Compute tokens compared: supply, payment model, chain"         | "Why ARL settles on Base instead of its own chain"         | /docs/chain-evaluation · "Read the chain evaluation"     |
-| 11 (28 Ara)       | **How to Verify a Token Contract on Base Before You Buy** · `verify token contract Base`   | "Basescan, Blockscout, Sourcify: 3 ways to check source"        | "Reproducible bytecode: proving a deploy matches the code" | /buy, /docs/deployment · "Check the ARL address"         |
-| 12 (4 Oca)        | **ARL Protocol in 2027: Services Roadmap on Base** · `ARL Protocol roadmap`                | "What shipped in Q4 2026, in 10 posts"                          | "Quarter one on mainnet: numbers and lessons"              | /core/roadmap · "Follow @arlprotocol"                    |
+### Next step
 
-**150 kelimelik özetler (İngilizce)**
+Run the mobile test for `https://arlcoin.io/` on https://pagespeed.web.dev/ and note the LCP
+element; if it is above 2.5 s, shrinking that element comes first.
+
+---
+
+## 4. Content calendar (12 weeks, English)
+
+Every week: 1 blog post (canonical on the site or on Mirror), 1 X/Farcaster thread, 1 Mirror
+article. Calls to action change with the funnel: Telegram and whitelist before the launch, /buy
+and the app after it.
+
+| Week (start) | Blog title · target keyword                                                                | X/Farcaster thread                                              | Mirror article                                             | Internal link · CTA                                      |
+| ------------ | ------------------------------------------------------------------------------------------ | --------------------------------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------------- |
+| 1 (19 Oct)   | **ARL Protocol Launches on Base on 23 October: What to Know** · `ARL token`                | "ARL launch day in 8 posts: supply, pools, address check"       | "Why ARL launches with no airdrop"                         | /buy, /faq · "Join t.me/arlcoin_community"               |
+| 2 (26 Oct)   | **How to Buy ARL on Uniswap on Base, Safely** · `how to buy ARL on Uniswap`                | "5 checks before you swap any new Base token"                   | "Single-sided liquidity from 0.20 USD, explained"          | /buy · "Verify the address on arlcoin.io/buy"            |
+| 3 (2 Nov)    | **What Is a Fixed Supply Token? ARL's 21,000,000 Cap** · `fixed supply token`              | "No mint, no burn, no pause, no upgrade: what that means"       | "Reading the ARL token contract line by line"              | /core/token, /docs/token-design · "Read the contract"    |
+| 4 (9 Nov)    | **How to Pay for AI with Crypto on Base** · `how to pay for AI with crypto`                | "x402 in one thread: sign a ceiling, pay only what you use"     | "Usage-based payments are the missing AI primitive"        | /docs/payments · "Try it on the testnet app"             |
+| 5 (16 Nov)   | **x402 upto Scheme: Usage-Based Payments with Permit2** · `x402 upto scheme`               | "Permit2 spending limits for AI agents"                         | "Metering AI work onchain without trusting a server"       | /docs/payments · "Read the docs"                         |
+| 6 (23 Nov)   | **ERC-8004 and ERC-8183: Registries and Job Escrow for AI Services** · `ERC-8004 registry` | "How an AI job is hired, escrowed and rated onchain"            | "Reputation for AI services that no one can edit"          | /core/technology · "Register a service"                  |
+| 7 (30 Nov)   | **How a 48-Hour Treasury Timelock Protects Token Holders** · `token timelock`              | "2-of-3 Safe + 48 h timelock: the full path of a treasury move" | "Custody design for a one-person project"                  | /docs/token-design · "See the timelock on Basescan"      |
+| 8 (7 Dec)    | **Paying for GPU Compute by the Second with ARL** · `pay for GPU compute with crypto`      | "Per-second compute billing in 6 posts"                         | "Compute providers on Base: a reference node"              | /docs/compute-provider (repo) · "Run the reference node" |
+| 9 (14 Dec)   | **Anonymous Onchain Polls with Semaphore and Noir** · `Semaphore anonymous signals`        | "Vote without revealing your wallet: how ZK signals work"       | "Privacy as a feature of payments infrastructure"          | /docs/zk-privacy · "Cast an anonymous signal"            |
+| 10 (21 Dec)  | **Render, Akash and ARL: Different Answers to AI Compute** · `Render token alternative`    | "Compute tokens compared: supply, payment model, chain"         | "Why ARL settles on Base instead of its own chain"         | /docs/chain-evaluation · "Read the chain evaluation"     |
+| 11 (28 Dec)  | **How to Verify a Token Contract on Base Before You Buy** · `verify token contract Base`   | "Basescan, Blockscout, Sourcify: 3 ways to check source"        | "Reproducible bytecode: proving a deploy matches the code" | /buy, /docs/deployment · "Check the ARL address"         |
+| 12 (4 Jan)   | **ARL Protocol in 2027: Services Roadmap on Base** · `ARL Protocol roadmap`                | "What shipped in Q4 2026, in 10 posts"                          | "Quarter one on mainnet: numbers and lessons"              | /core/roadmap · "Follow @arlprotocol"                    |
+
+**150-word summaries**
 
 1. _ARL Protocol Launches on Base on 23 October: What to Know._ ARL Protocol moves from the Base Sepolia testnet to Base Mainnet on 23 October 2026. This post lists what changes on launch day and what stays fixed. The token has a fixed supply of 21,000,000 ARL, minted once into 11 allocations; the contract has no owner, mint, burn, pause or upgrade path. Trading opens in the official ARL/USDC, ARL/USDT, ARL/ETH and ARL/BTC pools on Uniswap on Base from 0.20 USD per ARL. There is no airdrop at launch; an airdrop of 500,000 ARL is planned for a later date and will be announced only on arlcoin.io, X @arlprotocol and Telegram. The post explains how to find the official contract address, why any earlier "ARL" on a main network is not official, and how the treasury is protected by a 2-of-3 Safe and a 48-hour timelock. It ends with a short safety checklist for launch-day buyers.
 2. _How to Buy ARL on Uniswap on Base, Safely._ A step-by-step guide for first-time buyers. It starts with bridging or buying ETH on Base, then shows how to open Uniswap on Base, paste the official ARL address from arlcoin.io/buy, and compare it character by character with the address on Basescan. It explains the four official pools, the 1% fee tier, why the pools start with ARL only from a 0.20 USD floor, and what slippage settings mean when liquidity is new. It covers adding ARL to MetaMask, reading a swap preview, and recognising fake tokens with the same name. Safety rules close the post: ARL never asks for a seed phrase, a private key or a payment to a personal address, and no one from the project sends direct messages first. Readers are pointed to the FAQ and the Telegram community for questions.
@@ -215,27 +222,27 @@ CTA'lar dönüşüme göre değişir: lansman öncesi Telegram/whitelist, sonras
 11. _How to Verify a Token Contract on Base Before You Buy._ Fake tokens copy names and logos. This guide teaches readers to verify any Base token in minutes: find the official address from the project's own site, check it on Basescan, read the verified source, confirm total supply and owner functions, and cross-check on Blockscout and Sourcify. It then shows ARL's extra step: reproducible bytecode, where anyone can rebuild the contracts and compare the result with what is deployed. Screenshots walk through each screen. The post ends with red flags: unverified source, an owner that can mint, hidden fees and proxy upgrades.
 12. _ARL Protocol in 2027: Services Roadmap on Base._ A look back at the first weeks on Base Mainnet and the plan ahead. It reports what shipped since 23 October 2026 with links to transactions and releases: pools, holders, contracts, and app usage. It then lists the next milestones: AI services paid per use in ARL, compute providers, staking funded from existing allocations, and the later airdrop with its rules. Each item is marked planned, in development or complete, following the project's content standard. The post invites builders to the GitHub repository and the Telegram community.
 
-### Sonraki adım
+### Next step
 
-1. haftanın blog yazısını bugün taslak olarak yazıp 22 Ekim'de Mirror'da yayına hazırlayın.
+Draft the week-1 blog post today and have it ready to publish on Mirror on 22 October.
 
 ---
 
-## 5. Backlink stratejisi (sıfır bütçe)
+## 5. Backlink strategy (zero budget)
 
-| Kanal                | Somut adımlar                                                                                                                                                                                                                                                                       | Not                                                   |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Kripto dizinleri     | Mainnet adresi doğrulandıktan sonra: CoinGecko ve CoinMarketCap ücretsiz listeleme formu (Uniswap havuz adresi, Basescan doğrulaması, resmî kanallar), DexScreener token profili, GeckoTerminal, Base ekosistem sayfası (base.org/ecosystem, GitHub PR ile), DefiLlama (TVL varsa). | Formlarda yalnızca team@arlcoin.io ve resmî kanallar. |
-| Token listeleri      | Uniswap default değil; `tokenlist` paketiyle üretilen listeyi GitHub'da yayınlayın, Coinbase Wallet / Trust Wallet assets repolarına PR açın.                                                                                                                                       | Logo `assets/brand/png/arl-token-icon-256.png`.       |
-| Bitcointalk          | "[ANN] ARL Protocol" başlığı: özet, tokenomics tablosu, kontrat adresi, resmî kanallar. Haftalık güncelleme.                                                                                                                                                                        | İmza kampanyası yok (bütçe yok, risk).                |
-| Reddit               | r/BaseChain, r/ethdev (teknik yazılar), r/CryptoCurrency yalnızca kurallara uygun "daily discussion" içinde. Self-promo oranı ≤ %10.                                                                                                                                                | Link yerine öğretici içerik.                          |
-| GitHub / açık kaynak | README'de arlcoin.io bağlantısı; `awesome-base`, `awesome-x402`, `awesome-erc8004` listelerine PR; x402 ve Noir topluluklarında örnek olarak `@arl/payments` ve devre.                                                                                                              | En kalıcı dofollow kaynak.                            |
-| Konuk yazarlık       | Dev.to, Hashnode, Medium (canonical arlcoin.io/Mirror), Base builder blogları, Paragraph.                                                                                                                                                                                           | Her yazıda 1–2 bağlam içi link.                       |
-| Ücretsiz PR          | Lansman bülteni: EIN Presswire ücretsiz katman, PR.com, OpenPR, PRLog; kripto: CoinCodex/CryptoSlate "submit news".                                                                                                                                                                 | Fiyat vaadi yok.                                      |
-| Sosyal imleme        | Hacker News "Show HN" (teknik açı: x402 upto), Product Hunt (app), Lobsters (davetle), Mix.                                                                                                                                                                                         | Lansmandan 1 hafta sonra.                             |
-| Forumlar             | Base Discord builders kanalı, Farcaster /base ve /dev kanalları, Ethereum Magicians (ERC-8004/8183 uygulama raporu).                                                                                                                                                                | Teknik geri bildirim odaklı.                          |
+| Channel             | Concrete steps                                                                                                                                                                                                                                                                                     | Note                                                     |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| Crypto directories  | After the mainnet address is verified: the free CoinGecko and CoinMarketCap listing forms (Uniswap pool address, Basescan verification, official channels), the DexScreener token profile, GeckoTerminal, the Base ecosystem page (base.org/ecosystem, by GitHub PR), DefiLlama (if there is TVL). | Only team@arlcoin.io and the official channels in forms. |
+| Token lists         | Uniswap's default list is not available; publish the list built by the `tokenlist` package on GitHub and open PRs to the Coinbase Wallet / Trust Wallet assets repositories.                                                                                                                       | Logo `assets/brand/png/arl-token-icon-256.png`.          |
+| Bitcointalk         | An "[ANN] ARL Protocol" thread: summary, tokenomics table, contract address, official channels. Weekly updates.                                                                                                                                                                                    | No signature campaign (no budget, risk).                 |
+| Reddit              | r/BaseChain, r/ethdev (technical posts), r/CryptoCurrency only inside the "daily discussion" within its rules. Self-promotion ≤ 10%.                                                                                                                                                               | Tutorials instead of links.                              |
+| GitHub, open source | arlcoin.io link in the README; PRs to the `awesome-base`, `awesome-x402` and `awesome-erc8004` lists; `@arl/payments` and the circuit as examples in the x402 and Noir communities.                                                                                                                | The most lasting dofollow source.                        |
+| Guest posts         | Dev.to, Hashnode, Medium (canonical arlcoin.io or Mirror), Base builder blogs, Paragraph.                                                                                                                                                                                                          | 1–2 contextual links per post.                           |
+| Free PR             | Launch release: EIN Presswire free tier, PR.com, OpenPR, PRLog; crypto: CoinCodex and CryptoSlate "submit news".                                                                                                                                                                                   | No price promises.                                       |
+| Social bookmarking  | Hacker News "Show HN" (technical angle: x402 upto), Product Hunt (the app), Lobsters (by invitation), Mix.                                                                                                                                                                                         | One week after the launch.                               |
+| Forums              | Base Discord builders channel, Farcaster /base and /dev channels, Ethereum Magicians (ERC-8004/8183 implementation report).                                                                                                                                                                        | Focused on technical feedback.                           |
 
-**Örnek pitch (konuk yazı)**
+**Sample pitch (guest post)**
 
 ```text
 Subject: Guest post idea: usage-based AI payments with x402 on Base
@@ -254,7 +261,7 @@ Draft in 5 days if this fits. Thanks!
 ARL Protocol · team@arlcoin.io · x.com/arlprotocol
 ```
 
-**Örnek pitch (dizin/listeleme)**
+**Sample pitch (directory or listing)**
 
 ```text
 ARL Protocol (ARL) — ERC-20 on Base (chain 8453)
@@ -265,120 +272,121 @@ Source: verified on Basescan; github.com/armanalabsai/arlcoin.io
 Channels: arlcoin.io · x.com/arlprotocol · t.me/arlcoin_community · team@arlcoin.io
 ```
 
-### Sonraki adım
+### Next step
 
-GitHub'da `awesome-x402` (veya benzeri) listesine `@arl/payments` için bugün bir PR açın.
-
----
-
-## 6. Sosyal SEO
-
-| Platform       | Ad / bio                                                                                                                                                                                       | Bio linki          | Sabitlenmiş                                                                             | Etiketler                                                |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | --------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| X @arlprotocol | "ARL Protocol" · "Utility token for AI & compute payments on @base. 21M fixed supply, no mint. Mainnet Oct 23. Testnet live."                                                                  | https://arlcoin.io | Lansman bilgisi + resmî adres kontrolü + "No airdrop at launch" (`social/x/profile.md`) | #Base #BaseChain #AI #x402 #DePIN (en fazla 2 / gönderi) |
-| Farcaster      | Kullanıcı adı `arlprotocol`, aynı bio                                                                                                                                                          | arlcoin.io         | Aynı lansman cast'i; /base ve /dev kanalları                                            | Kanal seçimi hashtag yerine geçer                        |
-| Mirror.xyz     | Yayın adı "ARL Protocol", ENS veya cüzdanla; açıklama anahtar kelimeyle                                                                                                                        | arlcoin.io         | Haftalık makale; her makalede kanonik link                                              | Başlıkta hedef kelime                                    |
-| GitHub         | Repo açıklaması: "ARL Protocol — fixed-supply ERC-20 and AI/compute payment layer on Base"; website alanı arlcoin.io; topics: `base`, `erc20`, `x402`, `erc-8004`, `zk`, `solidity`, `foundry` | arlcoin.io         | README başında rozetler + resmî kanallar                                                | Topics = GitHub içi SEO                                  |
-| Telegram       | Grup adı "ARL Protocol Community", açıklamada arlcoin.io ve X                                                                                                                                  | arlcoin.io         | `social/telegram/pinned-messages.md`                                                    | —                                                        |
-
-Kurallar: her profilde aynı ad ("ARL Protocol"), aynı logo, aynı bio linki (NAP tutarlılığı;
-Organization `sameAs` ile eşleşir). Gönderilerde link başa değil sona; ilk satırda anahtar
-kelime ("ARL on Base", "x402 payments").
-
-### Sonraki adım
-
-GitHub repo "About" alanına açıklamayı, website'i ve topics'i girin (2 dakika).
+Open a PR today for `@arl/payments` on the `awesome-x402` list (or a similar list) on GitHub.
 
 ---
 
-## 7. Ölçümleme ve KPI'lar
+## 6. Social SEO
 
-**Kurulum**
+| Platform       | Name / bio                                                                                                                                                                                            | Bio link           | Pinned                                                                                 | Tags                                                   |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | -------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| X @arlprotocol | "ARL Protocol" · "Utility token for AI & compute payments on @base. 21M fixed supply, no mint. Mainnet Oct 23. Testnet live."                                                                         | https://arlcoin.io | Launch facts + official address check + "No airdrop at launch" (`social/x/profile.md`) | #Base #BaseChain #AI #x402 #DePIN (at most 2 per post) |
+| Farcaster      | Username `arlprotocol`, same bio                                                                                                                                                                      | arlcoin.io         | The same launch cast; /base and /dev channels                                          | Channel choice replaces hashtags                       |
+| Mirror.xyz     | Publication "ARL Protocol", with ENS or a wallet; description with the keyword                                                                                                                        | arlcoin.io         | A weekly article; a canonical link in each article                                     | Target keyword in the title                            |
+| GitHub         | Repository description: "ARL Protocol — fixed-supply ERC-20 and AI/compute payment layer on Base"; website field arlcoin.io; topics: `base`, `erc20`, `x402`, `erc-8004`, `zk`, `solidity`, `foundry` | arlcoin.io         | Badges + official channels at the top of the README                                    | Topics are GitHub's internal SEO                       |
+| Telegram       | Group name "ARL Protocol Community", arlcoin.io and X in the description                                                                                                                              | arlcoin.io         | `social/telegram/pinned-messages.md`                                                   | —                                                      |
 
-1. Google Search Console: alan zaten doğrulandı (meta etiket). Sitemap'i gönderin:
-   `https://arlcoin.io/sitemap.xml`. Domain property için DNS TXT kaydı da ekleyin.
-2. Google Analytics 4 (ücretsiz): analytics.google.com → mülk oluştur → Web veri akışı
-   `https://arlcoin.io` → Ölçüm kimliği `G-XXXX`. Site şu an çerezsiz Vercel Analytics
-   kullanıyor; GA4 eklenirse gizlilik bildirimi (`/privacy`) ve CSP (`script-src`, `connect-src`
-   için `googletagmanager.com`, `google-analytics.com`) birlikte güncellenmeli ve çerez onayı
-   gerekir. Sıfır bütçe ve gizlilik açısından önerilen: Search Console + Vercel Analytics.
-3. Bing Webmaster Tools: Search Console'dan içe aktarın; IndexNow anahtarı zaten yayında.
-4. Dönüşüm olayları: whitelist formu gönderimi, /buy → Uniswap tıklaması, Telegram tıklaması.
+Rules: the same name ("ARL Protocol"), the same logo and the same bio link on every profile (NAP
+consistency, matching the Organization `sameAs`). In posts the link goes at the end, not the
+start; the keyword goes in the first line ("ARL on Base", "x402 payments").
 
-**KPI'lar**
+### Next step
 
-| Metrik                              | Kaynak                       | 30 gün hedefi      | 90 gün hedefi |
-| ----------------------------------- | ---------------------------- | ------------------ | ------------- |
-| Organik tıklama                     | Search Console               | 500                | 3.000         |
-| Gösterim                            | Search Console               | 10.000             | 60.000        |
-| Ortalama CTR                        | Search Console               | ≥ %4               | ≥ %5          |
-| Marka sorgularında ort. sıra        | Search Console               | ≤ 3                | 1             |
-| Dizinlenen sayfa                    | Search Console "Sayfalar"    | Sitemap'in ≥ %90'ı | %100          |
-| Referring domain                    | Search Console "Bağlantılar" | 15                 | 50            |
-| Whitelist kaydı / Telegram katılımı | Form + Telegram              | izlenir            | izlenir       |
-| Core Web Vitals (mobil)             | PageSpeed / CrUX             | Tümü "İyi"         | Tümü "İyi"    |
+Enter the description, website and topics in the GitHub repository's "About" field (2 minutes).
 
-**Haftalık rapor şablonu**
+---
+
+## 7. Measurement and KPIs
+
+**Setup**
+
+1. Google Search Console: the property is already verified (meta tag). Submit the sitemap
+   `https://arlcoin.io/sitemap.xml`. Also add the DNS TXT record for a domain property.
+2. Google Analytics 4 (free): analytics.google.com → create a property → web data stream
+   `https://arlcoin.io` → measurement ID `G-XXXX`. The site uses cookieless Vercel Analytics
+   today; adding GA4 means updating the privacy notice (`/privacy`) and the CSP (`script-src`,
+   `connect-src` for `googletagmanager.com` and `google-analytics.com`) together, and it needs
+   cookie consent. Recommended for zero budget and privacy: Search Console + Vercel Analytics.
+3. Bing Webmaster Tools: import from Search Console; the IndexNow key is already published.
+4. Conversion events: whitelist form submission, /buy → Uniswap click, Telegram click.
+
+**KPIs**
+
+| Metric                              | Source                 | 30-day target    | 90-day target |
+| ----------------------------------- | ---------------------- | ---------------- | ------------- |
+| Organic clicks                      | Search Console         | 500              | 3,000         |
+| Impressions                         | Search Console         | 10,000           | 60,000        |
+| Average CTR                         | Search Console         | ≥ 4%             | ≥ 5%          |
+| Average position for brand queries  | Search Console         | ≤ 3              | 1             |
+| Indexed pages                       | Search Console "Pages" | ≥ 90% of sitemap | 100%          |
+| Referring domains                   | Search Console "Links" | 15               | 50            |
+| Whitelist sign-ups / Telegram joins | Form + Telegram        | tracked          | tracked       |
+| Core Web Vitals (mobile)            | PageSpeed / CrUX       | All "Good"       | All "Good"    |
+
+**Weekly report template**
 
 ```text
-Hafta: ____  (Pzt–Paz)
-Organik tıklama: ___ (önceki hafta ___, Δ ___%)
-Gösterim: ___  CTR: ___%  Ort. sıra: ___
-En iyi 5 sorgu: 1) ___ 2) ___ 3) ___ 4) ___ 5) ___
-Yeni dizinlenen / hata veren sayfa: ___ / ___
-Yayınlanan içerik: blog ___ · thread ___ · Mirror ___
-Kazanılan backlink: ___ (kaynaklar: ___)
-Dönüşüm: whitelist ___ · /buy→Uniswap ___ · Telegram ___
-Sonraki hafta tek öncelik: ___
+Week: ____  (Mon–Sun)
+Organic clicks: ___ (previous week ___, Δ ___%)
+Impressions: ___  CTR: ___%  Avg. position: ___
+Top 5 queries: 1) ___ 2) ___ 3) ___ 4) ___ 5) ___
+Newly indexed / failing pages: ___ / ___
+Published: blog ___ · thread ___ · Mirror ___
+Backlinks gained: ___ (sources: ___)
+Conversions: whitelist ___ · /buy→Uniswap ___ · Telegram ___
+Single priority next week: ___
 ```
 
-**Aylık rapor şablonu**
+**Monthly report template**
 
 ```text
-Ay: ____
-Özet (3 madde): ___
-KPI tablosu: hedef / gerçekleşen / fark
-Anahtar kelime hareketi: ilk 10'a giren ___, düşen ___
-İçerik performansı: en çok tıklanan 3 sayfa ___
-Teknik: CWV durumu ___, tarama hataları ___
-Backlink: yeni ___, kaybedilen ___
-Gelecek ay: 3 eylem ___
+Month: ____
+Summary (3 points): ___
+KPI table: target / actual / difference
+Keyword movement: entered the top 10 ___, dropped ___
+Content performance: 3 most-clicked pages ___
+Technical: CWV status ___, crawl errors ___
+Backlinks: new ___, lost ___
+Next month: 3 actions ___
 ```
 
-### Sonraki adım
+### Next step
 
-Search Console → Site haritaları → `sitemap.xml` gönder.
-
----
-
-## 8. Haftalık SEO rutini (7 adım, ~3 saat)
-
-| #   | Adım                                                                         | Süre  | Ücretsiz araç                                   |
-| --- | ---------------------------------------------------------------------------- | ----- | ----------------------------------------------- |
-| 1   | Search Console: tıklama, gösterim, CTR, yeni sorgular; raporu doldur         | 20 dk | Google Search Console                           |
-| 2   | Dizin ve hata kontrolü: "Sayfalar", 404, yönlendirme                         | 15 dk | Search Console, Screaming Frog                  |
-| 3   | Bir sayfanın title/description'ını CTR'ye göre iyileştir                     | 20 dk | Search Console + repo (`seo.test.ts` limitleri) |
-| 4   | Haftanın blog + Mirror yazısını yayınla, iç bağlantıları ekle                | 60 dk | Mirror.xyz, repo                                |
-| 5   | X + Farcaster thread'i yayınla, profil linklerini kontrol et                 | 20 dk | X, Warpcast                                     |
-| 6   | 2 backlink girişimi (dizin, PR, forum, awesome-list)                         | 30 dk | e-posta, GitHub                                 |
-| 7   | Hız ve IndexNow: mobil PSI testi, deploy sonrası `node scripts/indexnow.mjs` | 15 dk | PageSpeed Insights, IndexNow                    |
-
-### Sonraki adım
-
-Takviminize her pazartesi 09:00 için 3 saatlik "SEO rutini" bloğu ekleyin.
+Search Console → Sitemaps → submit `sitemap.xml`.
 
 ---
 
-## 9. Acil eylem planı (23 Ekim 2026 mainnet'e kadar)
+## 8. Weekly SEO routine (7 steps, about 3 hours)
 
-| Öncelik | İş                                                                                                                                                                                   | Son tarih                | Bitti sayılır                                                         |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------ | --------------------------------------------------------------------- |
-| 1       | Bu daldaki site değişikliklerini (meta, JSON-LD, sitemap, robots, manifest, resmî kanallar, airdrop/tarih metinleri) gözden geçirip yayına almak; Search Console'a sitemap göndermek | 18 Ekim                  | Rich Results Test'te Organization + FAQPage geçer; sitemap "Başarılı" |
-| 2       | X @arlprotocol, Telegram, GitHub, Farcaster profillerini aynı ad/bio/link ile güncellemek; sabitlenmiş gönderiler                                                                    | 19 Ekim                  | 4 profil aynı NAP; pinned post canlı                                  |
-| 3       | 1. hafta blog + Mirror yazısı ("Launches on Base on 23 October") ve lansman thread'i taslağı                                                                                         | 21 Ekim                  | Mirror taslağı, thread taslağı onaylı                                 |
-| 4       | Lansman günü: mainnet adresi doğrulandıktan sonra `SITE.mainnet.token` ile /buy ve token listesi build; IndexNow; Search Console "Dizine eklenmeyi iste" (/, /buy, /faq)             | 23 Ekim                  | /buy gerçek adresi gösterir; 3 URL dizinleme kuyruğunda               |
-| 5       | Dizin başvuruları: DexScreener profili, GeckoTerminal, CoinGecko ve CoinMarketCap formları, Bitcointalk [ANN]                                                                        | 25 Ekim (lansman +2 gün) | Başvuru e-postaları gönderildi                                        |
+| #   | Step                                                                           | Time   | Free tool                                    |
+| --- | ------------------------------------------------------------------------------ | ------ | -------------------------------------------- |
+| 1   | Search Console: clicks, impressions, CTR, new queries; fill in the report      | 20 min | Google Search Console                        |
+| 2   | Index and error check: "Pages", 404s, redirects                                | 15 min | Search Console, Screaming Frog               |
+| 3   | Improve one page's title and description based on CTR                          | 20 min | Search Console + repo (`seo.test.ts` limits) |
+| 4   | Publish the week's blog and Mirror post, add internal links                    | 60 min | Mirror.xyz, repo                             |
+| 5   | Publish the X and Farcaster thread, check the profile links                    | 20 min | X, Warpcast                                  |
+| 6   | 2 backlink attempts (directory, PR, forum, awesome list)                       | 30 min | Email, GitHub                                |
+| 7   | Speed and IndexNow: mobile PSI test, `node scripts/indexnow.mjs` after deploys | 15 min | PageSpeed Insights, IndexNow                 |
 
-### Sonraki adım
+### Next step
 
-Öncelik 1: bu dalı inceleyip merge onayı verin (merge ve deploy ayrıca onayınızla yapılır).
+Add a 3-hour "SEO routine" block to the calendar every Monday at 09:00.
+
+---
+
+## 9. Action plan until the 23 October 2026 mainnet launch
+
+| Priority | Task                                                                                                                                                                           | Deadline                  | Done when                                                            |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------- | -------------------------------------------------------------------- |
+| 1        | Review and publish the site changes on this branch (meta, JSON-LD, sitemap, robots, manifest, official channels, airdrop and date texts); submit the sitemap to Search Console | 18 October                | Organization + FAQPage pass the Rich Results Test; sitemap "Success" |
+| 2        | Update the X @arlprotocol, Telegram, GitHub and Farcaster profiles with the same name, bio and link; pinned posts                                                              | 19 October                | 4 profiles with the same NAP; pinned post live                       |
+| 3        | Week-1 blog and Mirror post ("Launches on Base on 23 October") and the launch thread draft                                                                                     | 21 October                | Mirror draft and thread draft approved                               |
+| 4        | Launch day: after the mainnet address is verified, build /buy and the token list with `SITE.mainnet.token`; IndexNow; Search Console "Request indexing" (/, /buy, /faq)        | 23 October                | /buy shows the real address; 3 URLs in the indexing queue            |
+| 5        | Directory applications: DexScreener profile, GeckoTerminal, CoinGecko and CoinMarketCap forms, Bitcointalk [ANN]                                                               | 25 October (launch + 2 d) | Application emails sent                                              |
+
+### Next step
+
+Priority 1: review this branch and approve the merge (merge and deploy happen separately, with the
+owner's approval).

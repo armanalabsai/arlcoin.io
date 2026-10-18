@@ -183,26 +183,26 @@ describe("launch liquidity plan", () => {
     }
   });
 
-  it("lets the Public Launch Safe pool all but its claim tranche and launchpad reserve (2,000,000 ARL)", () => {
-    assert.equal(POOL_CAPS.publicLaunch, 2_000_000n);
+  it("lets the Public Launch Safe pool all but its claim tranche and launchpad reserve (3,000,000 ARL)", () => {
+    assert.equal(POOL_CAPS.publicLaunch, 3_000_000n);
     const publicLaunch: PoolInput = {
       ...input,
       liquiditySafe: PUBLIC_LAUNCH_SAFE,
       allocation: "publicLaunch",
       legs: [
-        { quote: "USDT", arlAmount: "600000", quoteUsd: "1" },
-        { quote: "USDC", arlAmount: "500000", quoteUsd: "1" },
-        { quote: "WETH", arlAmount: "450000", quoteUsd: "4000" },
-        { quote: "cbBTC", arlAmount: "450000", quoteUsd: "100000" },
+        { quote: "USDT", arlAmount: "900000", quoteUsd: "1" },
+        { quote: "USDC", arlAmount: "750000", quoteUsd: "1" },
+        { quote: "WETH", arlAmount: "675000", quoteUsd: "4000" },
+        { quote: "cbBTC", arlAmount: "675000", quoteUsd: "100000" },
       ],
     };
     const plan = buildPoolPlan(publicLaunch);
-    assert.equal(BigInt(plan.totalArlWei), 2_000_000n * WEI);
+    assert.equal(BigInt(plan.totalArlWei), 3_000_000n * WEI);
     assert.throws(
       () =>
         buildPoolPlan({
           ...publicLaunch,
-          legs: [{ quote: "USDT", arlAmount: "2000001", quoteUsd: "1" }],
+          legs: [{ quote: "USDT", arlAmount: "3000001", quoteUsd: "1" }],
         }),
       PoolError,
     );
