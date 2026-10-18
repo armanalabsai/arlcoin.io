@@ -42,7 +42,10 @@ async function outputEntry(outDir: string, path: string): Promise<OutputEntry> {
   // refuses a symlink where the platform supports it.
   let handle;
   try {
-    handle = await open(full, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0));
+    handle = await open(
+      full,
+      constants.O_RDONLY | ((constants.O_NOFOLLOW as number | undefined) ?? 0),
+    );
   } catch {
     return { path, sha256: null };
   }
