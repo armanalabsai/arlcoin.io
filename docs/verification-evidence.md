@@ -4,7 +4,10 @@ This document records the free, reproducible checks that were run, with commands
 and results, so that anyone can repeat them. Scope and intended properties are in
 [review-scope.md](review-scope.md).
 
-Last run: 2026-10-04/05, on commit `9b9952f` plus the changes in this document's commit.
+Last run: 2026-10-04/05, on commit `9b9952f` plus the changes in this document's commit. The
+latest results (2026-10-17, commit `ab7595b`: 271 tests, Slither 0, Aderyn 5 issues triaged,
+Halmos 11/11, Mythril none exploitable) are in the
+[security audit of 2026-10-17](../security/2026-10-17/report.md).
 
 ## Contracts checked
 

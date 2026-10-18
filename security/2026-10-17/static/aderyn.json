@@ -1,0 +1,280 @@
+{
+  "files_summary": {
+    "total_source_units": 9,
+    "total_sloc": 826
+  },
+  "files_details": {
+    "files_details": [
+      {
+        "file_path": "src/ARLAllocation.sol",
+        "n_sloc": 16
+      },
+      {
+        "file_path": "src/ARLAnonymousSignal.sol",
+        "n_sloc": 142
+      },
+      {
+        "file_path": "src/ARLJobs.sol",
+        "n_sloc": 170
+      },
+      {
+        "file_path": "src/ARLMerkleDistributor.sol",
+        "n_sloc": 56
+      },
+      {
+        "file_path": "src/ARLStakingRewards.sol",
+        "n_sloc": 191
+      },
+      {
+        "file_path": "src/ARLTimelock.sol",
+        "n_sloc": 36
+      },
+      {
+        "file_path": "src/ARLToken.sol",
+        "n_sloc": 35
+      },
+      {
+        "file_path": "src/ARLVestingWallet.sol",
+        "n_sloc": 34
+      },
+      {
+        "file_path": "src/ComputePayment.sol",
+        "n_sloc": 146
+      }
+    ]
+  },
+  "issue_count": {
+    "high": 2,
+    "low": 3
+  },
+  "high_issues": {
+    "issues": [
+      {
+        "title": "Contract locks Ether without a withdraw function",
+        "description": "It appears that the contract includes a payable function to accept Ether but lacks a corresponding function to withdraw it, which leads to the Ether being locked in the contract. To resolve this issue, please implement a public or external function that allows for the withdrawal of Ether from the contract.",
+        "detector_name": "contract-locks-ether",
+        "instances": [
+          {
+            "contract_path": "src/ARLVestingWallet.sol",
+            "line_no": 22,
+            "src": "1325:16",
+            "src_char": "1325:16"
+          }
+        ]
+      },
+      {
+        "title": "Reentrancy: State change after external call",
+        "description": "Changing state after an external call can lead to re-entrancy attacks.Use the checks-effects-interactions pattern to avoid this issue.",
+        "detector_name": "reentrancy-state-change",
+        "instances": [
+          {
+            "contract_path": "src/ARLAnonymousSignal.sol",
+            "line_no": 175,
+            "src": "7386:37",
+            "src_char": "7386:37",
+            "hint": "State is changed at: `g.nullifiers[nullifier] = true`"
+          }
+        ]
+      }
+    ]
+  },
+  "low_issues": {
+    "issues": [
+      {
+        "title": "Large Numeric Literal",
+        "description": "Large literal values multiples of 10000 can be replaced with scientific notation.Use `e` notation, for example: `1e18`, instead of its full numeric value.",
+        "detector_name": "large-numeric-literal",
+        "instances": [
+          {
+            "contract_path": "src/ARLAllocation.sol",
+            "line_no": 12,
+            "src": "486:10",
+            "src_char": "486:10"
+          },
+          {
+            "contract_path": "src/ARLAllocation.sol",
+            "line_no": 14,
+            "src": "552:9",
+            "src_char": "552:9"
+          },
+          {
+            "contract_path": "src/ARLAllocation.sol",
+            "line_no": 15,
+            "src": "620:9",
+            "src_char": "620:9"
+          },
+          {
+            "contract_path": "src/ARLAllocation.sol",
+            "line_no": 16,
+            "src": "687:9",
+            "src_char": "687:9"
+          },
+          {
+            "contract_path": "src/ARLAllocation.sol",
+            "line_no": 17,
+            "src": "760:9",
+            "src_char": "760:9"
+          },
+          {
+            "contract_path": "src/ARLAllocation.sol",
+            "line_no": 18,
+            "src": "820:9",
+            "src_char": "820:9"
+          },
+          {
+            "contract_path": "src/ARLAllocation.sol",
+            "line_no": 20,
+            "src": "969:9",
+            "src_char": "969:9"
+          },
+          {
+            "contract_path": "src/ARLAllocation.sol",
+            "line_no": 21,
+            "src": "1029:9",
+            "src_char": "1029:9"
+          },
+          {
+            "contract_path": "src/ARLAllocation.sol",
+            "line_no": 22,
+            "src": "1088:9",
+            "src_char": "1088:9"
+          },
+          {
+            "contract_path": "src/ARLAllocation.sol",
+            "line_no": 23,
+            "src": "1143:7",
+            "src_char": "1143:7"
+          },
+          {
+            "contract_path": "src/ARLAllocation.sol",
+            "line_no": 24,
+            "src": "1203:9",
+            "src_char": "1203:9"
+          },
+          {
+            "contract_path": "src/ARLAllocation.sol",
+            "line_no": 25,
+            "src": "1271:7",
+            "src_char": "1271:7"
+          }
+        ]
+      },
+      {
+        "title": "Loop Contains `require`/`revert`",
+        "description": "Avoid `require` / `revert` statements in a loop because a single bad item can cause the whole transaction to fail. It's better to forgive on fail and return failed elements post processing of the loop",
+        "detector_name": "require-revert-in-loop",
+        "instances": [
+          {
+            "contract_path": "src/ARLAnonymousSignal.sol",
+            "line_no": 201,
+            "src": "8407:161",
+            "src_char": "8407:161"
+          }
+        ]
+      },
+      {
+        "title": "Unchecked Return",
+        "description": "Function returns a value but it is ignored. Consider checking the return value.",
+        "detector_name": "unchecked-return",
+        "instances": [
+          {
+            "contract_path": "src/ARLTimelock.sol",
+            "line_no": 43,
+            "src": "2315:36",
+            "src_char": "2315:36"
+          }
+        ]
+      }
+    ]
+  },
+  "detectors_used": [
+    "abi-encode-packed-hash-collision",
+    "arbitrary-transfer-from",
+    "assert-state-change",
+    "block-timestamp-deadline",
+    "boolean-equality",
+    "builtin-symbol-shadowing",
+    "centralization-risk",
+    "constant-function-changes-state",
+    "constant-function-contains-assembly",
+    "contract-locks-ether",
+    "costly-loop",
+    "dangerous-unary-operator",
+    "dead-code",
+    "delegate-call-unchecked-address",
+    "delegatecall-in-loop",
+    "delete-nested-mapping",
+    "deprecated-oz-function",
+    "division-before-multiplication",
+    "dynamic-array-length-assignment",
+    "ecrecover",
+    "empty-block",
+    "empty-require-revert",
+    "enumerable-loop-removal",
+    "eth-send-unchecked-address",
+    "experimental-encoder",
+    "function-initializing-state",
+    "function-pointer-in-constructor",
+    "function-selector-collision",
+    "inconsistent-type-names",
+    "incorrect-caret-operator",
+    "incorrect-erc20-interface",
+    "incorrect-erc721-interface",
+    "incorrect-shift-order",
+    "incorrect-use-of-modifier",
+    "internal-function-used-once",
+    "large-numeric-literal",
+    "literal-instead-of-constant",
+    "local-variable-shadowing",
+    "missing-inheritance",
+    "misused-boolean",
+    "modifier-used-only-once",
+    "msg-value-in-loop",
+    "multiple-constructors",
+    "multiple-placeholders",
+    "nested-struct-in-mapping",
+    "non-reentrant-not-first",
+    "out-of-order-retryable",
+    "pre-declared-local-variable-usage",
+    "push-zero-opcode",
+    "redundant-statement",
+    "reentrancy-state-change",
+    "require-revert-in-loop",
+    "return-bomb",
+    "reused-contract-name",
+    "rtlo",
+    "selfdestruct",
+    "signed-integer-storage-array",
+    "solmate-safe-transfer-lib",
+    "state-change-without-event",
+    "state-no-address-check",
+    "state-variable-could-be-constant",
+    "state-variable-could-be-immutable",
+    "state-variable-init-order",
+    "state-variable-read-external",
+    "state-variable-shadowing",
+    "storage-array-length-not-cached",
+    "storage-array-memory-edit",
+    "strict-equality-contract-balance",
+    "tautological-compare",
+    "tautology-or-contradiction",
+    "todo",
+    "tx-origin-used-for-auth",
+    "unchecked-low-level-call",
+    "unchecked-return",
+    "unchecked-send",
+    "uninitialized-local-variable",
+    "unprotected-initializer",
+    "unsafe-casting",
+    "unsafe-erc20-operation",
+    "unsafe-oz-erc721-mint",
+    "unspecific-solidity-pragma",
+    "unused-error",
+    "unused-import",
+    "unused-public-function",
+    "unused-state-variable",
+    "void-constructor",
+    "weak-randomness",
+    "yul-return"
+  ]
+}

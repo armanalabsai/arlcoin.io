@@ -132,6 +132,9 @@ only after CI passes ([deploy-site.yml](.github/workflows/deploy-site.yml),
 - Verification evidence and review scope:
   [verification-evidence.md](docs/verification-evidence.md), [review-scope.md](docs/review-scope.md),
   [security-analysis.md](docs/security-analysis.md).
+- Security audit of 2026-10-17: [report](security/2026-10-17/report.md) (PDF, scope, raw tool
+  outputs, triage and findings in [security/2026-10-17](security/2026-10-17/)); reproduced on every
+  change by [security-audit.yml](.github/workflows/security-audit.yml).
 - Mainnet custody (Safes, timelock, guardian) and the launch procedure:
   [mainnet-plan.md](docs/mainnet-plan.md), [mainnet-runbook.md](docs/mainnet-runbook.md).
 
