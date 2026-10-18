@@ -10,7 +10,10 @@ import { Providers } from "~~/components/Providers";
 
 export const metadata: Metadata = {
   title: "ARL App",
-  description: "ARL wallet, vesting and staking. Local test chain.",
+  description:
+    process.env.NEXT_PUBLIC_ARL_CHAIN === "84532"
+      ? "ARL wallet, staking, AI jobs with a verified evaluator, payments and private voting on Base Sepolia (testnet)."
+      : "ARL wallet, vesting and staking. Local test chain.",
   robots: { index: false, follow: false },
 };
 
