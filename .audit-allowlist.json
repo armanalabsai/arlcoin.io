@@ -1,3 +1,11 @@
 {
-  "advisories": []
+  "advisories": [
+    {
+      "id": "GHSA-mrhx-c7xc-m3w5",
+      "package": "zod",
+      "scope": ["arlcoin.io", "dapp"],
+      "reason": "Memory exhaustion when an array schema without a length limit validates a very large array. zod 3.25.x is pulled in only by @x402/core and @x402/evm (latest 2.28.0 still requires zod ^3; the fix exists only in zod 4.6.6) and by viem's abitype. ARL code does not import zod. The only untrusted input that reaches x402 schemas is the testnet operator API, whose request bodies are capped at 64 KiB (MAX_BODY_BYTES), which bounds array size. Remove when @x402 supports zod >= 4.6.6.",
+      "expires": "2026-11-23"
+    }
+  ]
 }
