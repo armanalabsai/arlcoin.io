@@ -85,8 +85,11 @@ if ((NOW < TGE)); then
 fi
 
 log "Moving the fork's clock to the TGE"
-cast rpc evm_setNextBlockTimestamp "$((TGE + 60))" --rpc-url "$RPC" >/dev/null
-cast rpc evm_mine --rpc-url "$RPC" >/dev/null
+# After the TGE the fork's clock is already past it and cannot move back.
+if ((NOW < TGE)); then
+  cast rpc evm_setNextBlockTimestamp "$((TGE + 60))" --rpc-url "$RPC" >/dev/null
+  cast rpc evm_mine --rpc-url "$RPC" >/dev/null
+fi
 echo "block time $(cast block latest --field timestamp --rpc-url "$RPC") (TGE $TGE)"
 
 log "1. CreateSafes with the real owners"
