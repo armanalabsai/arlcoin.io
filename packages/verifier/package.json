@@ -16,7 +16,8 @@
   "scripts": {
     "test": "node --test \"test/**/*.test.ts\"",
     "test:docker": "node --test \"test-docker/**/*.test.ts\"",
-    "test:anvil": "node --test \"test-anvil/**/*.test.ts\""
+    "test:anvil": "node --test \"test-anvil/**/*.test.ts\"",
+    "quickstart": "node examples/quickstart.ts"
   },
   "devDependencies": {
     "@arl/sdk": "0.1.0"
