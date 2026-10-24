@@ -4,9 +4,17 @@ import Link from "next/link";
 // for touch; the visible pill inside it can be smaller.
 const tap = "inline-flex min-h-11 items-center";
 
-export function SiteLinks({ current }: { current?: "whitelist" | "contact" | "faq" }) {
+export function SiteLinks({ current }: { current?: "whitelist" | "contact" | "faq" | "about" }) {
   return (
     <div className="flex items-center gap-2 sm:gap-4">
+      <Link
+        href="/about"
+        prefetch={false}
+        aria-current={current === "about" ? "page" : undefined}
+        className={`${tap} hidden text-[13px] text-fg-muted transition-colors hover:text-fg min-[480px]:inline-flex`}
+      >
+        About
+      </Link>
       <Link
         href="/faq"
         prefetch={false}
