@@ -34,6 +34,7 @@ import { baseSepolia } from "viem/chains";
 import { castVote, MemberState, readJob } from "./chain.ts";
 import { DockerRunner } from "./docker.ts";
 import { networkFetcher } from "./inputs.ts";
+import { validatorKey } from "./key.ts";
 import { parseSpec, specHash } from "./spec.ts";
 import { decide, execute } from "./verify.ts";
 import { buildBundle, verifyBundle, type EvidenceBundle } from "./bundle.ts";
@@ -90,9 +91,12 @@ async function main(argv: readonly string[]): Promise<void> {
       ) {
         fail("usage: vote <rpc> <evaluator> <jobId> <spec.json>");
       }
-      const key = process.env.ARL_VALIDATOR_KEY;
-      if (key === undefined || !isHex(key) || key.length !== 66)
-        fail("ARL_VALIDATOR_KEY must be set");
+      let key: `0x${string}`;
+      try {
+        key = validatorKey(process.env.ARL_VALIDATOR_KEY);
+      } catch (error) {
+        fail((error as Error).message);
+      }
       const account = privateKeyToAccount(key);
       const client = createPublicClient({ transport: http(rpc) });
       const chainId = await client.getChainId();
@@ -126,9 +130,12 @@ async function main(argv: readonly string[]): Promise<void> {
       ) {
         fail("usage: watch <rpc> <evaluator> <fromBlock> [state.json]");
       }
-      const key = process.env.ARL_VALIDATOR_KEY;
-      if (key === undefined || !isHex(key) || key.length !== 66)
-        fail("ARL_VALIDATOR_KEY must be set");
+      let key: `0x${string}`;
+      try {
+        key = validatorKey(process.env.ARL_VALIDATOR_KEY);
+      } catch (error) {
+        fail((error as Error).message);
+      }
       const account = privateKeyToAccount(key);
       const client = createPublicClient({ transport: http(rpc) });
       const chain = { ...baseSepolia, id: await client.getChainId() };
