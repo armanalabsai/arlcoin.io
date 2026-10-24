@@ -18,10 +18,10 @@ def test_no_forbidden_claims():
 
 
 def test_status_is_stated_honestly():
-    assert "not deployed yet" in texts.START
+    assert texts.MAINNET_TOKEN in texts.START
+    assert texts.MAINNET_TOKEN in texts.SCAM_WARNING
     assert "No airdrop at launch" in texts.START
     assert "x.com/arlprotocol" in texts.HELP
-    assert texts.TESTNET_TOKEN in texts.START
     assert texts.APP in texts.START and "no value" in texts.START
     assert "seed phrase" in texts.SCAM_WARNING
 

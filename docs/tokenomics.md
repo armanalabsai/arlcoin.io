@@ -16,9 +16,10 @@ replacement). It supersedes the 10-allocation Phase 1 table. The former
 - No mechanism may create supply above this cap. Staking and reward programs
   pay out existing allocations; they never issue new tokens. There is no
   inflation, emission or hidden reserve.
-- The token is deployed on Base Sepolia (testnet) at
-  `0x244312b619127B6458154F3467eFD7c87CD28500`. It is not on Base Mainnet: there is no
-  mainnet address, explorer page or circulating supply yet.
+- The token is deployed on Base Mainnet at `0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4` (2026-10-24, block
+  53,023,206, source-verified on Basescan); circulating supply is published at
+  arlcoin.io/api/supply. The testnet token on Base Sepolia is
+  `0x244312b619127B6458154F3467eFD7c87CD28500`.
 
 ## Allocation
 

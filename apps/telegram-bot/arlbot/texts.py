@@ -9,8 +9,8 @@ EMAIL = "team@arlcoin.io"
 COMMUNITY = "https://t.me/arlcoin_community"
 APP = "https://arlcoin.io/app/"
 WHITELIST = "https://arlcoin.io/whitelist/"
-MAINNET_TARGET = "2026-10-23"
-TESTNET_TOKEN = "0x244312b619127B6458154F3467eFD7c87CD28500"
+MAINNET_TOKEN = "0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4"
+BUY = "https://arlcoin.io/buy/"
 
 SCAM_WARNING = (
     "Security notice\n"
@@ -19,8 +19,8 @@ SCAM_WARNING = (
     "- There is no \"support\" account that fixes wallets.\n"
     f"- Official links are only on {WEBSITE}.\n"
     f"- There is no airdrop at launch. Any airdrop or claim link posted before the official announcement on {WEBSITE} is a scam.\n"
-    "- Base Mainnet contract addresses will be published there only after deployment is verified. "
-    "Any mainnet address posted before that is fake."
+    f"- The only official ARL contract on Base Mainnet is {MAINNET_TOKEN}. "
+    "Any other address presented as ARL is fake."
 )
 
 RULES = (
@@ -36,10 +36,10 @@ RULES = (
 START = (
     "ARL Protocol: a payment rail for AI and compute services on Base.\n\n"
     "- ARL token: 21,000,000 fixed supply, no mint function, no owner, no upgrade proxy.\n"
-    f"- Live on Base Sepolia testnet: {TESTNET_TOKEN}\n"
+    f"- Live on Base Mainnet since 2026-10-24: {MAINNET_TOKEN}\n"
+    f"- Trade in the official Uniswap v3 pools on Base: {BUY}\n"
     f"- Try the testnet app (faucet, staking, jobs, x402 per-use payments, anonymous polls): {APP}\n"
     "  Testnet ARL has no value.\n"
-    "- Base Mainnet: targeted for 2026-10-23, not deployed yet.\n"
     "- No airdrop at launch. An airdrop of 500,000 ARL is planned for a later date; "
     "date, eligibility and rules will be announced later on the official channels.\n"
     "- A bug bounty paid in ARL is open.\n\n"
@@ -104,25 +104,13 @@ WHITELIST_TEXT = (
 STATUS_UNAVAILABLE = "Status is unavailable right now. Try again in a minute."
 
 
-def _days_hours(seconds: int) -> str:
-    days, rest = divmod(max(0, seconds), 86400)
-    hours = rest // 3600
-    return f"{days} days {hours} hours" if days else f"{hours} hours"
-
-
 def launch(now_unix: int) -> str:
-    # Midnight UTC on the target date; the date is a target, not a commitment.
-    target = 1792713600  # 2026-10-23T00:00:00Z
-    left = target - now_unix
-    if left > 0:
-        head = f"Base Mainnet launch target: {MAINNET_TARGET} ({_days_hours(left)} to go)."
-    else:
-        head = f"The Base Mainnet launch target was {MAINNET_TARGET}."
+    del now_unix  # kept for the command handler's signature
     return (
-        f"{head}\n"
-        f"Contract addresses will be published on {WEBSITE} only after the deployment is verified. "
-        "Any mainnet address posted elsewhere is fake.\n"
-        "There is no airdrop at launch."
+        "ARL is live on Base Mainnet since 2026-10-24.\n"
+        f"Official contract: {MAINNET_TOKEN} (source-verified on Basescan).\n"
+        f"How to buy: {BUY}\n"
+        "Any other address presented as ARL is fake. There is no airdrop at launch."
     )
 
 

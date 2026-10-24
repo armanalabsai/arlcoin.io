@@ -15,7 +15,6 @@ import {
   BASE_CHAIN_ID,
   DEFAULT_SLIPPAGE_BPS,
   QUOTE_TOKENS,
-  TGE_DATE,
   UNISWAP,
   mainnetToken,
   minimumOut,
@@ -46,8 +45,8 @@ export default function TradePage() {
         </RequireWallet>
       ) : (
         <div className="glass-strong p-8 text-center text-muted" data-testid="trade-closed">
-          Trading opens with the Base Mainnet launch on {TGE_DATE.slice(0, 10)}. Until then no ARL
-          exists on Base Mainnet: any token offered as ARL there today is not ARL.
+          Trading is not open in this build. The only official ARL contract on Base Mainnet is
+          published on arlcoin.io/buy.
         </div>
       )}
     </>

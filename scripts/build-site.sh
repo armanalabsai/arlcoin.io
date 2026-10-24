@@ -4,8 +4,8 @@
 # and the app (apps/dapp) as a static export under /app, as the Pages workflow does. Used by
 # scripts/deploy-site.sh and by the app's hosted test (apps/dapp, npm run test:hosted).
 #
-# Until the Base Mainnet launch the public app shows Claim and Trade as closed: no claim list is
-# published (apps/dapp/public/claims/8453.json) and NEXT_PUBLIC_ARL_MAINNET_TOKEN is unset.
+# Trade is open: NEXT_PUBLIC_ARL_MAINNET_TOKEN is the Base Mainnet token (deployed and verified
+# 2026-10-24). Claim stays closed: no claim list is published (apps/dapp/public/claims/8453.json).
 #
 #   bash scripts/build-site.sh <stage-dir>
 set -euo pipefail
@@ -34,6 +34,7 @@ CHAIN_ENV=()
 if grep -q 84532 contracts/baseSepoliaContracts.ts; then
   CHAIN_ENV=(NEXT_PUBLIC_ARL_CHAIN=84532 "NEXT_PUBLIC_ARL_OPERATOR_URL=${ARL_OPERATOR_URL:-https://app.arlcoin.io}")
 fi
+CHAIN_ENV+=(NEXT_PUBLIC_ARL_MAINNET_TOKEN=0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4)
 env ${CHAIN_ENV[@]+"${CHAIN_ENV[@]}"} MSYS2_ENV_CONV_EXCL=ARL_BASE_PATH ARL_STATIC_EXPORT=1 ARL_BASE_PATH=/app npm run build
 
 # Vercel's project root directory is apps/web.

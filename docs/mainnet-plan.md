@@ -1,7 +1,9 @@
-# Base Mainnet plan (opens at the TGE 2026-10-23, not deployed)
+# Base Mainnet plan (deployed 2026-10-24)
 
-Locked 2026-10-05 by owner decision. **Nothing is deployed, created or funded on Base Mainnet.**
-The network gate still refuses chain 8453.
+Locked 2026-10-05 by owner decision. **Deployed on Base Mainnet on 2026-10-24** at the addresses
+below: the 12 Safes from block 53,022,497 and the token at block 53,023,206. `VerifyARL`, the
+bytecode check and the supply check passed on chain, and the token, both vesting wallets and the
+timelock are source-verified on Basescan.
 
 ## Custody
 
@@ -27,13 +29,14 @@ the TGE every path is refused (`PlanProductionLocked(8453)`); with the fork cloc
 `CreateSafes`, config and plan (TGE 2026-10-23), `DeployARL`, `VerifyARL`, manifest, supply, the
 four Uniswap v3 pools from the Liquidity Safe and the claim distributor (rehearsed only; the
 distributor is not deployed at TGE). The addresses below are
-the expected mainnet addresses if the deployer starts at nonce 0 and the default salt is used.
+the expected mainnet addresses if the deployer starts at nonce 0 and the default salt is used;
+on 2026-10-24 every one of them was checked on chain and holds the deployed contract.
 
 Result: all steps pass; total supply 21,000,000 ARL; circulating at TGE 2,100,000 ARL; role Safes
 2-of-3; guardian 1-of-1; timelock delay 172,800 s. The deployer, given 0.001 ETH, had 0.000958 ETH left after the Safes,
 the contracts and the distributor; fund it with at least 0.001 ETH.
 
-| Contract                       | Expected address                             |
+| Contract                       | Address (deployed 2026-10-24)                |
 | ------------------------------ | -------------------------------------------- |
 | Founder Safe                   | `0x7816Ee6349AeA591B351772eB951A6CF8b223E5c` |
 | Investors Safe                 | `0x183A501A6dEb7D575F870a12c36a2266666F8e8a` |

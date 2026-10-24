@@ -51,7 +51,7 @@ export function SiteFooter() {
   return (
     <footer className="border-t border-line px-4 py-8 sm:px-6">
       <div className="mx-auto flex max-w-[1100px] flex-col gap-4 text-[12px] leading-[1.6] text-fg-subtle sm:flex-row sm:items-center sm:justify-between sm:gap-8">
-        <p className="max-w-[64ch]">{TOKEN_DISCLAIMER}</p>
+        <p className="max-w-[64ch] [overflow-wrap:anywhere]">{TOKEN_DISCLAIMER}</p>
         <FooterLinks />
       </div>
     </footer>

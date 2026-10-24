@@ -31,8 +31,8 @@ export default function WhitelistPage() {
       <FactList
         title="Before you register"
         items={[
-          "ARL is live on the Base Sepolia testnet only; testnet tokens have no value. No ARL contract exists on Base Mainnet yet, so any token that claims to be ARL there today is not.",
-          "Registration is free. No payment is requested, and nothing is for sale.",
+          "ARL is live on Base Mainnet. The only official contract is 0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4; any other address presented as ARL is not official.",
+          "Registration is free. No payment is ever requested.",
           "Registering does not guarantee an allocation. There is no airdrop at the launch; an airdrop of 500,000 ARL is planned for a later date, with its rules announced before it opens.",
           "ARL will never ask for your private key or seed phrase. Anyone who does is attempting theft.",
           <>
