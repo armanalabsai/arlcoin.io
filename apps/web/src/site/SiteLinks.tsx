@@ -8,14 +8,6 @@ export function SiteLinks({ current }: { current?: "whitelist" | "contact" | "fa
   return (
     <div className="flex items-center gap-2 sm:gap-4">
       <Link
-        href="/about"
-        prefetch={false}
-        aria-current={current === "about" ? "page" : undefined}
-        className={`${tap} hidden text-[13px] text-fg-muted transition-colors hover:text-fg min-[480px]:inline-flex`}
-      >
-        About
-      </Link>
-      <Link
         href="/faq"
         prefetch={false}
         aria-current={current === "faq" ? "page" : undefined}
