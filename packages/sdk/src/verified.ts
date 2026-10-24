@@ -6,7 +6,8 @@
 //   const jobId = await openVerifiedJob({ publicClient, walletClient }, {
 //     provider, specUri, specHash, committee: [v1, v2, v3], threshold: 2 });
 //
-// Base Sepolia and the local chain only, like the contracts it calls.
+// Base Mainnet, Base Sepolia and the local chain. On Base Mainnet the prepared addresses are used
+// only once they hold code (docs/mainnet-services.md).
 
 import {
   parseAbi,
@@ -28,7 +29,35 @@ export const BASE_SEPOLIA_VERIFIED = {
   arbiterSafe: "0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f",
 } as const satisfies Record<string, unknown>;
 
-const ALLOWED = [84_532, 31_337];
+/**
+ * Base Mainnet deployment as prepared in docs/mainnet-services.md. The addresses follow from the
+ * deployer's nonces; calls check that they hold code before using them.
+ */
+export const BASE_MAINNET_VERIFIED = {
+  chainId: 8453,
+  token: "0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4",
+  jobs: "0x9e647BE305c75e2907aC0a03978261412Ccd31e9",
+  evaluator: "0x6c8A7712010f951f5B03A11C24b46C8b18d5997F",
+  arbiterSafe: "0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f",
+} as const satisfies Record<string, unknown>;
+
+const ALLOWED = [8453, 84_532, 31_337];
+
+/** The jobs escrow and evaluator of a chain, or undefined on the local chain. */
+export function verifiedDeployment(
+  chainId: number,
+): { jobs: Address; evaluator: Address } | undefined {
+  if (chainId === BASE_MAINNET_VERIFIED.chainId) return BASE_MAINNET_VERIFIED;
+  if (chainId === BASE_SEPOLIA_VERIFIED.chainId) return BASE_SEPOLIA_VERIFIED;
+  return undefined;
+}
+
+async function requireCode(client: PublicClient, address: Address, what: string): Promise<void> {
+  const code = await client.getCode({ address });
+  if (code === undefined || code === "0x") {
+    throw new VerifiedJobError(`${what} ${address} has no code on this chain (not deployed yet)`);
+  }
+}
 
 export const verifiedJobsAbi = parseAbi([
   "function createJob(address provider, address evaluator, uint256 expiredAt, string description, address hook) returns (uint256)",
@@ -86,13 +115,13 @@ export class VerifiedJobError extends Error {
   override name = "VerifiedJobError";
 }
 
-async function checkChain(client: PublicClient): Promise<number> {
+export async function checkVerifiedChain(client: PublicClient): Promise<number> {
   const id = await client.getChainId();
   if (!ALLOWED.includes(id)) throw new VerifiedJobError(`chain ${id} is not supported`);
   return id;
 }
 
-function account(wallet: VerifiedClients["walletClient"]): Account {
+export function walletAccount(wallet: VerifiedClients["walletClient"]): Account {
   if (!wallet.account) throw new VerifiedJobError("the wallet client has no account");
   return wallet.account;
 }
@@ -120,16 +149,18 @@ export async function openVerifiedJob(
   p: OpenVerifiedJobParams,
 ): Promise<{ jobId: bigint; createTx: Hash; configureTx: Hash }> {
   checkOpenParams(p);
-  const chainId = await checkChain(publicClient);
-  const local = chainId === 31_337;
-  const jobs = p.jobs ?? (local ? undefined : BASE_SEPOLIA_VERIFIED.jobs);
-  const evaluator = p.evaluator ?? (local ? undefined : BASE_SEPOLIA_VERIFIED.evaluator);
+  const chainId = await checkVerifiedChain(publicClient);
+  const known = verifiedDeployment(chainId);
+  const jobs = p.jobs ?? known?.jobs;
+  const evaluator = p.evaluator ?? known?.evaluator;
   if (!jobs || !evaluator) throw new VerifiedJobError("jobs and evaluator are required locally");
+  await requireCode(publicClient, jobs, "jobs escrow");
+  await requireCode(publicClient, evaluator, "evaluator");
   const voteWindow = p.voteWindow ?? 3_600n;
   const challengeWindow = p.challengeWindow ?? 3_600n;
   const { timestamp } = await publicClient.getBlock();
   const expiredAt = timestamp + (p.expiresIn ?? 86_400n);
-  const from = account(walletClient);
+  const from = walletAccount(walletClient);
 
   const createTx = await walletClient.writeContract({
     account: from,
@@ -181,14 +212,12 @@ export async function openVerifiedJob(
 }
 
 /** The job's verdict, with the phase as text. */
-export async function getVerdict(
-  publicClient: PublicClient,
-  jobId: bigint,
-  evaluator: Address = BASE_SEPOLIA_VERIFIED.evaluator,
-) {
-  await checkChain(publicClient);
+export async function getVerdict(publicClient: PublicClient, jobId: bigint, evaluator?: Address) {
+  const chainId = await checkVerifiedChain(publicClient);
+  const address = evaluator ?? verifiedDeployment(chainId)?.evaluator;
+  if (!address) throw new VerifiedJobError("evaluator is required locally");
   const v = await publicClient.readContract({
-    address: evaluator,
+    address,
     abi: verifiedEvaluatorAbi,
     functionName: "getVerdict",
     args: [jobId],
@@ -200,13 +229,15 @@ export async function getVerdict(
 export async function finalizeJob(
   { publicClient, walletClient }: VerifiedClients,
   jobId: bigint,
-  evaluator: Address = BASE_SEPOLIA_VERIFIED.evaluator,
+  evaluator?: Address,
 ): Promise<Hash> {
-  await checkChain(publicClient);
+  const chainId = await checkVerifiedChain(publicClient);
+  const address = evaluator ?? verifiedDeployment(chainId)?.evaluator;
+  if (!address) throw new VerifiedJobError("evaluator is required locally");
   const hash = await walletClient.writeContract({
-    account: account(walletClient),
+    account: walletAccount(walletClient),
     chain: walletClient.chain,
-    address: evaluator,
+    address,
     abi: verifiedEvaluatorAbi,
     functionName: "finalize",
     args: [jobId],
