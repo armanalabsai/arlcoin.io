@@ -390,6 +390,10 @@ export function NucleusField() {
       draw();
       frame = requestAnimationFrame(loop);
     }
+    let idle = 0;
+    const start = () => {
+      if (!document.hidden) frame = requestAnimationFrame(loop);
+    };
 
     const onMove = (e: PointerEvent) => {
       pointer.x = e.clientX;
@@ -420,9 +424,17 @@ export function NucleusField() {
       window.addEventListener("pointerdown", onDown, { passive: true });
       document.documentElement.addEventListener("pointerleave", onLeave);
       document.addEventListener("visibilitychange", onVisibility);
-      frame = requestAnimationFrame(loop);
+      // The field is decoration: draw one frame now and start the animation once the page is
+      // idle, so it never competes with the first render and the first input.
+      draw();
+      idle =
+        typeof window.requestIdleCallback === "function"
+          ? window.requestIdleCallback(start, { timeout: 2500 })
+          : window.setTimeout(start, 1200);
     }
     return () => {
+      if (typeof window.cancelIdleCallback === "function") window.cancelIdleCallback(idle);
+      window.clearTimeout(idle);
       cancelAnimationFrame(frame);
       window.removeEventListener("resize", onResize);
       window.removeEventListener("pointermove", onMove);
