@@ -119,7 +119,7 @@ Facilitator `invalidReason` / `errorReason` values: `arl_scheme`, `arl_network`,
 v0.2.0 is planned to add `scheme: "arl-escrow"`: the authorization funds an ERC-8183 job in
 `ARLJobs` instead of paying the service, and `ARLVerifiedEvaluator` releases it after a staked
 committee re-executes the work (`docs/reexecution-spec.md`) and the challenge window passes.
-Non-normative until then.
+Non-normative until then; the draft flow is in [`../../x402-arl-escrow/v0.2.0-draft/flow.md`](../../x402-arl-escrow/v0.2.0-draft/flow.md).
 
 ## 11. Versioning and conformance
 
