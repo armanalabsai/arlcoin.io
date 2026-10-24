@@ -39,3 +39,10 @@ export {
   type EscrowOffer,
   type PayVerifiedOptions,
 } from "./payVerified.ts";
+export {
+  ARL_SWAP,
+  acquireArl,
+  quoteArl,
+  type AcquireArlParams,
+  type ArlQuoteToken,
+} from "./acquireArl.ts";
