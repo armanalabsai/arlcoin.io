@@ -156,9 +156,14 @@ CI runs `scripts/audit.mjs` at the root and in each app instead of a bare
 so every exception is reviewed again, and an entry that no longer matches anything fails, so it
 gets removed.
 
-| Advisory              | Package (path)                                                                    | Why it is allowed                                                                                                        | Expires    |
-| --------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------- |
-| `GHSA-vfj7-8cjw-p6xm` | `braces` (eslint-config-next → @next/eslint-plugin-next → fast-glob → micromatch) | Lint-time only, on glob patterns written in this repository; not in the built sites. No patched `braces` release exists. | 2026-11-02 |
+| Advisory              | Package (path)                                   | Why it is allowed                                                                                                                                                                      | Expires    |
+| --------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `GHSA-mrhx-c7xc-m3w5` | `zod` 3.25 (@x402/core, @x402/evm, viem/abitype) | No zod 3 fix exists and @x402 2.28.0 still requires zod ^3. ARL code does not import zod; the only untrusted input reaching x402 schemas is the operator API, capped at 64 KiB bodies. | 2026-11-23 |
+
+On 2026-10-23 Next.js was raised from 16.3.8 to 16.4.3 for GHSA-2464-fhr4-w9xw, GHSA-673q-mjm6-r5xr
+(critical) and GHSA-p3m5-59mp-jv5r (high), the app's `follow-redirects` and `hono` and the site's
+lint-time `zod` 4 were raised to patched releases, and the `braces` exception (GHSA-vfj7-8cjw-p6xm)
+was removed because nothing pulls it in any more.
 
 ## Compiler
 
