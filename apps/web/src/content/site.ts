@@ -21,6 +21,8 @@ export const SITE = {
     xHandle: "@arlprotocol",
     /** Community group. */
     telegram: "https://t.me/arlcoin_community",
+    /** Medium publication account. */
+    medium: "https://medium.com/@arlprotocol",
   },
   /** Base Sepolia (testnet) deployment, source-verified on Basescan, Blockscout and Sourcify. */
   testnet: {
@@ -53,6 +55,7 @@ export const SITE_PAGES = [
   "/buy",
   "/faq",
   "/docs",
+  "/about",
   "/contact",
   "/privacy",
   "/terms",

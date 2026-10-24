@@ -4,7 +4,7 @@ import Link from "next/link";
 // for touch; the visible pill inside it can be smaller.
 const tap = "inline-flex min-h-11 items-center";
 
-export function SiteLinks({ current }: { current?: "whitelist" | "contact" | "faq" }) {
+export function SiteLinks({ current }: { current?: "whitelist" | "contact" | "faq" | "about" }) {
   return (
     <div className="flex items-center gap-2 sm:gap-4">
       <Link
