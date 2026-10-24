@@ -6,7 +6,7 @@ name: Validators
 # Docker container (no network, read-only, unprivileged; docs/reexecution-spec.md) and votes.
 # Jobs configured in the last two days (86,400 Base blocks) are considered. A validator whose key
 # secret (ARL_VALIDATOR_KEY_1, _2, _3) is not set is skipped. The keys only sign testnet
-# transactions; Base Mainnet is refused by the verifier itself.
+# transactions on Base Sepolia; this workflow does not run validators on Base Mainnet.
 on:
   schedule:
     - cron: "*/10 * * * *"
