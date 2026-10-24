@@ -119,7 +119,7 @@ function Shell({
   children: React.ReactNode;
 }) {
   return (
-    <article
+    <div
       className="rail-slide glass flex flex-col gap-6 rounded-[28px] p-6 text-left sm:p-8"
       data-active={active ? "true" : undefined}
       data-slide={index}
@@ -140,7 +140,7 @@ function Shell({
       >
         How it works ›
       </Link>
-    </article>
+    </div>
   );
 }
 
