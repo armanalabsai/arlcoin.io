@@ -104,7 +104,8 @@ export default function DeployPage() {
           <p className="font-semibold">Never type a seed phrase, private key or password here.</p>
           <p className="text-muted">
             This page only asks your wallet to sign the transactions listed below. Your wallet shows
-            each one again before you confirm it. Base Mainnet is accepted only from the TGE (2026-10-23).
+            each one again before you confirm it. Base Mainnet is accepted only from the TGE
+            (2026-10-23).
           </p>
         </section>
         <section className="glass-strong flex flex-col gap-3 p-5" aria-labelledby="plan-heading">
