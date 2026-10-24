@@ -1,0 +1,63 @@
+{
+  "version": "arl-evidence/1",
+  "chainId": 84532,
+  "jobs": "0xec79a897105aEd6daFBbB2a904E5bcFF71455644",
+  "evaluator": "0x6808F80Eb11538543d31cf4b50332B268dDd4d14",
+  "jobId": "1",
+  "job": {
+    "client": "0xc297BF7E525C5e42311039d94A29D22c2931d644",
+    "provider": "0xE4af1A17dc74136825a85202e2701624FB19dD67",
+    "budget": "10000000000000000000",
+    "status": 3,
+    "description": "https://raw.githubusercontent.com/armanalabsai/arlcoin.io/claude/arl-verifiable-execution-layer-kgded1/packages/verifier/examples/busybox-summary.json"
+  },
+  "config": {
+    "tier": 1,
+    "threshold": 2,
+    "specHash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f",
+    "committee": [
+      "0x83698D87eF2c727947Cb879dCB066b61dF85AbAE",
+      "0x23BF4CeF3B95aFa5CDf44c9EeE62a5400801Ac73",
+      "0xa3f71fFC9fA1fa31f43F92e2454340e477bec073"
+    ]
+  },
+  "submitted": {
+    "block": "48280382",
+    "tx": "0x355272fd5a113ef7cbb80999889acba804d4a15785bef0d76b701bfc458a414d",
+    "deliverable": "0xb2ff25afa39e522d6b5e7f8d9ed104b85d457b5b752132e72fb58fc1867d332b"
+  },
+  "votes": [
+    {
+      "block": "48280417",
+      "tx": "0xf7c9e3429a5f127103f0036068ffaa70fcffa32140102f558defe4cdd09926da",
+      "validator": "0x83698D87eF2c727947Cb879dCB066b61dF85AbAE",
+      "approve": true,
+      "deliverable": "0xb2ff25afa39e522d6b5e7f8d9ed104b85d457b5b752132e72fb58fc1867d332b",
+      "evidence": "0xb2ff25afa39e522d6b5e7f8d9ed104b85d457b5b752132e72fb58fc1867d332b"
+    },
+    {
+      "block": "48280426",
+      "tx": "0x91f7ecb91a28d874a2a660e9c82f87906874702a77f55338caed6ca4f5b34e19",
+      "validator": "0x23BF4CeF3B95aFa5CDf44c9EeE62a5400801Ac73",
+      "approve": true,
+      "deliverable": "0xb2ff25afa39e522d6b5e7f8d9ed104b85d457b5b752132e72fb58fc1867d332b",
+      "evidence": "0xb2ff25afa39e522d6b5e7f8d9ed104b85d457b5b752132e72fb58fc1867d332b"
+    }
+  ],
+  "decided": {
+    "block": "48280426",
+    "tx": "0x91f7ecb91a28d874a2a660e9c82f87906874702a77f55338caed6ca4f5b34e19",
+    "approved": true
+  },
+  "finalized": {
+    "block": "48282932",
+    "tx": "0x0d52cbf883d3ab448387a4342b6288e55f8e87b85cfd603a6b7e7d6682f7ddae",
+    "approved": true,
+    "voteHash": "0x3764c9d11ea9523039a9f91976df2a75c056fe7ae070333bdc0463fc7bcd5519"
+  },
+  "settlement": {
+    "block": "48282932",
+    "tx": "0x0d52cbf883d3ab448387a4342b6288e55f8e87b85cfd603a6b7e7d6682f7ddae",
+    "outcome": "completed"
+  }
+}

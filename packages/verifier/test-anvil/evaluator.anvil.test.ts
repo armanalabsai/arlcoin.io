@@ -39,8 +39,11 @@ import {
   parseSpec,
   readJob,
   sha256,
+  buildBundle,
+  checkBundle,
   specHash,
   step,
+  verifyBundle,
   type ContainerRunner,
   type Fetcher,
   type WatchState,
@@ -259,6 +262,18 @@ describe("validator flow on Anvil", () => {
       args: [provider.address],
     });
     assert.equal(paid, parseUnits("20", 18));
+  });
+
+  it("bundles the finalized job's evidence and verifies it against the chain", async () => {
+    const bundle = await buildBundle(publicClient, evaluator, 1n, 0n);
+    assert.equal(bundle.votes.length, 2);
+    assert.equal(bundle.settlement?.outcome, "completed");
+    assert.deepEqual(checkBundle(bundle), []);
+    assert.deepEqual(await verifyBundle(publicClient, bundle, 0n), []);
+    const tampered = { ...bundle, job: { ...bundle.job, budget: "1" } };
+    assert.ok(
+      (await verifyBundle(publicClient, tampered, 0n)).includes("job does not match the chain"),
+    );
   });
 
   it("rejects a forged deliverable", async () => {
