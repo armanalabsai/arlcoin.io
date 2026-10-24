@@ -133,3 +133,59 @@ Addresses and the full runbook are in the repository: https://github.com/armanal
 
 ARL token: 0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4 (Base Mainnet)
 ```
+
+## Farcaster (cast with the image, channel /base)
+
+```text
+ARL is live on Base Mainnet.
+
+Contract: 0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4
+
+21,000,000 fixed supply, no mint, no owner. Four Uniswap v3 pools on Base (USDC, USDT, WETH, cbBTC) from 0.20 USD per ARL.
+
+Any other address is fake. arlcoin.io
+```
+
+## Product Hunt (launch page)
+
+Name: ARL Protocol
+
+Tagline (max 60 characters): Verified payments for AI agents and compute, on Base
+
+Topics: Crypto, Artificial Intelligence, Developer Tools
+
+Description (max 260 characters):
+
+```text
+ARL settles AI and compute jobs on Base: the client's payment sits in an on-chain escrow and is released only after a staked validator committee re-runs the job and agrees on the result. The ARL token is live on Base Mainnet.
+```
+
+First comment (maker):
+
+```text
+Hi Product Hunt, I'm the founder of ARL Protocol.
+
+AI agents can already pay each other. What they cannot do is check that the work was actually done before the money moves. ARL puts the payment in an ERC-8183 escrow, a staked committee re-executes the job from a pinned spec, and the escrow pays out only on agreement, with a challenge window and slashing for dishonest validators.
+
+What you can try today:
+- The ARL token on Base Mainnet: 0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4
+- The verified-job flow, staking and x402 per-use payments on the Base Sepolia testnet: arlcoin.io/app
+- A one-command quickstart that runs a full verified job locally: github.com/armanalabsai/arlcoin.io
+
+Everything is open source. Feedback from builders of agents and compute marketplaces is very welcome.
+```
+
+Gallery: the launch image above, plus screenshots of arlcoin.io and arlcoin.io/app/verified.
+
+## Visibility in wallets and DEXes
+
+- Uniswap and aggregators (1inch, 0x, KyberSwap, Odos, ParaSwap) read the pools from the chain;
+  ARL is tradable there by contract address now. Uniswap shows its "unverified token" warning
+  until ARL is on its default list, which follows CoinGecko.
+- DexScreener and GeckoTerminal list a pool after its first swap. Their token-profile forms
+  (logo, links) need the owner's login; DexScreener's enhanced profile is paid and is not used.
+- MetaMask shows the token by import (contract address) until ARL is on at least two token
+  lists such as CoinGecko's.
+- CoinGecko and CoinMarketCap: apply after trading has started, with the contract, the four pools
+  and the Basescan link. The forms need the owner's login and a captcha.
+- Token list for wallets that accept a URL: https://arlcoin.io/tokenlist.json
