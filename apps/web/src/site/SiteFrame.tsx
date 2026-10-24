@@ -9,7 +9,7 @@ import { HomeLink } from "./HomeLink.tsx";
 import { SiteLinks } from "./SiteLinks.tsx";
 
 /** Header of the landing page and the standalone pages: brand, the layers, and the actions. */
-export function SiteHeader({ current }: { current?: "whitelist" | "contact" | "faq" }) {
+export function SiteHeader({ current }: { current?: "whitelist" | "contact" | "faq" | "about" }) {
   return (
     <header className="material-bar sticky top-0 z-30 border-b border-line">
       <div className="mx-auto flex h-14 max-w-[1100px] items-center justify-between gap-6 px-4 sm:px-6">
@@ -70,6 +70,9 @@ export function FooterLinks() {
       </Link>
       <Link href="/faq" prefetch={false} className={link}>
         FAQ
+      </Link>
+      <Link href="/about" prefetch={false} className={link}>
+        About
       </Link>
       <Link href="/contact" prefetch={false} className={link}>
         Contact
