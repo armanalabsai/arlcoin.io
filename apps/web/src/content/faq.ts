@@ -10,7 +10,7 @@ export const FAQ: readonly FaqEntry[] = [
   {
     question: "Is ARL for sale?",
     answer:
-      "No. ARL is live on the Base Sepolia testnet only, where tokens have no value, and nothing is for sale. No ARL contract exists on Base Mainnet yet, so any token that claims to be ARL on a main network today is not.",
+      "ARL is live on Base Mainnet. The only official contract is 0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4; it trades in the official Uniswap v3 pools on Base (see How to get ARL). Any other address presented as ARL is not official. Tokens can lose all their value, and nothing here is investment advice.",
   },
   {
     question: "What is ARL for?",
@@ -55,12 +55,12 @@ export const FAQ: readonly FaqEntry[] = [
   {
     question: "Which blockchain will ARL use?",
     answer:
-      "Base. ARL is an ERC-20 token on Base: Base Sepolia for the testnet (live) and Base Mainnet for production.",
+      "Base. ARL is an ERC-20 token on Base Mainnet (chain 8453). The app still runs on the Base Sepolia testnet, where tokens have no value.",
   },
   {
     question: "When is the launch?",
     answer:
-      "The Base Mainnet launch (TGE) is targeted for 23 October 2026. The contracts are deployed and source-verified on the Base Sepolia testnet; Base Mainnet has not started.",
+      "ARL launched on Base Mainnet on 24 October 2026: the token, the vesting wallets and the treasury timelock are deployed and source-verified on Basescan. The TGE date for every vesting schedule is 23 October 2026.",
   },
   {
     question: "After the launch, can I sell ARL on a DEX?",

@@ -1,9 +1,9 @@
 # Chain Evaluation
 
 Status: **network decision approved.** Testnet: **Base Sepolia (84532)**, the only
-deployable public network. Production: **Base Mainnet (8453)**, opening at the TGE (2026-10-23T00:00:00Z); no
-deployment tooling path permits it (see
-[`deployment.md`](deployment.md#network-gate)). Nothing is deployed. Contracts must stay chain-agnostic: no chain IDs, addresses or
+deployable public network. Production: **Base Mainnet (8453)**, opened by the network gate at the TGE
+(2026-10-23T00:00:00Z, see [`deployment.md`](deployment.md#network-gate)); the token was deployed
+there on 2026-10-24. Contracts must stay chain-agnostic: no chain IDs, addresses or
 chain-specific precompiles in contract code.
 
 ## Requirements by protocol layer

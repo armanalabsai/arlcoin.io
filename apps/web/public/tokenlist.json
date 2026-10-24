@@ -1,0 +1,21 @@
+{
+  "name": "ARL Protocol",
+  "timestamp": "2026-10-24T10:32:46.101Z",
+  "version": {
+    "major": 1,
+    "minor": 0,
+    "patch": 0
+  },
+  "logoURI": "https://arlcoin.io/arl-token-200.png",
+  "keywords": ["arl", "base"],
+  "tokens": [
+    {
+      "chainId": 8453,
+      "address": "0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4",
+      "name": "ARL",
+      "symbol": "ARL",
+      "decimals": 18,
+      "logoURI": "https://arlcoin.io/arl-token-200.png"
+    }
+  ]
+}

@@ -131,17 +131,24 @@ test("the brand link goes home, reloads its content and starts it at the top", a
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
 });
 
-test("the header shows the testnet as live only while Base Sepolia answers", async ({ page }) => {
-  await page.route("https://sepolia.base.org/**", (route) =>
-    route.fulfill({ json: { jsonrpc: "2.0", id: 1, result: "0x2dbfe85" } }),
+test("the header shows ARL as live only while Base Mainnet answers with the token", async ({
+  page,
+}) => {
+  // totalSupply() = 21,000,000 ARL (18 decimals).
+  await page.route("https://mainnet.base.org/**", (route) =>
+    route.fulfill({
+      json: { jsonrpc: "2.0", id: 1, result: "0x" + (21_000_000n * 10n ** 18n).toString(16) },
+    }),
   );
   await page.goto("/faq");
-  const status = page.locator('header a[href="https://arlcoin.io/app/"]');
+  const status = page.locator(
+    'header a[href="https://basescan.org/token/0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4"]',
+  );
   await expect(status).toHaveAttribute("data-state", "live");
-  await expect(status).toHaveAttribute("title", /block 47971973/);
+  await expect(status).toHaveAttribute("title", /21,000,000 ARL total supply/);
 
-  await page.unroute("https://sepolia.base.org/**");
-  await page.route("https://sepolia.base.org/**", (route) => route.abort());
+  await page.unroute("https://mainnet.base.org/**");
+  await page.route("https://mainnet.base.org/**", (route) => route.abort());
   await page.reload();
   await expect(status).toHaveAttribute("data-state", "down");
 });

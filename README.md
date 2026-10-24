@@ -3,9 +3,10 @@
 ARL is a fixed-supply ERC-20 token (21,000,000 ARL) on Base, with vesting, a timelocked treasury,
 staking, escrowed jobs, usage-based payments and anonymous signals built around it.
 
-**Status (2026-10-17): live on the Base Sepolia testnet. The Base Mainnet launch (TGE) is
-2026-10-23 at 00:00 UTC; the full launch was rehearsed on a Base Mainnet fork with the real
-signers on 2026-10-17 and passed.** Every claim below links to the code, the tests and the
+**Status (2026-10-24): live on Base Mainnet. The token is
+[`0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4`](https://basescan.org/token/0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4), deployed on
+2026-10-24 (block 53,023,206) and source-verified on Basescan; the app and the services still run
+on the Base Sepolia testnet.** Every claim below links to the code, the tests and the
 document that back it. Anything without that evidence is listed as not built.
 
 | Live                 | URL                                                         | What it is                                                                 |
@@ -21,7 +22,7 @@ document that back it. Anything without that evidence is listed as not built.
 | Network      | Chain ID | Status                                                                         |
 | ------------ | -------: | ------------------------------------------------------------------------------ |
 | Base Sepolia |    84532 | Deployed (testnet). RPC `https://sepolia.base.org`                             |
-| Base Mainnet |     8453 | Not deployed. The network gate opens at the TGE, 2026-10-23 00:00 UTC; the planned addresses are in [mainnet-plan.md](docs/mainnet-plan.md) |
+| Base Mainnet |     8453 | Deployed 2026-10-24: token [`0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4`](https://basescan.org/token/0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4); every address is in [mainnet-plan.md](docs/mainnet-plan.md) |
 
 Base Sepolia contracts. The runtime bytecode of each address matches a clean build of `main`
 (`compareRuntime` in [`packages/deploy/src/bytecode.ts`](packages/deploy/src/bytecode.ts), checked
@@ -142,10 +143,13 @@ only after CI passes ([deploy-site.yml](.github/workflows/deploy-site.yml),
 - Mainnet custody (Safes, timelock, guardian) and the launch procedure:
   [mainnet-plan.md](docs/mainnet-plan.md), [mainnet-runbook.md](docs/mainnet-runbook.md).
 
-## Launch (TGE, 2026-10-23 00:00 UTC)
+## Launch (2026-10-24; TGE date for vesting 2026-10-23)
 
 The order and every check are in [docs/mainnet-runbook.md](docs/mainnet-runbook.md); the owners
-sign every transaction in their own wallets and no key is handled by the tooling.
+signed every transaction in their own wallets and no key was handled by the tooling. On chain:
+`VerifyARL`, the bytecode check against a clean build and the supply check all passed (total
+21,000,000 ARL, circulating 2,100,000 at deployment), and the four contracts are source-verified
+on Basescan.
 
 | Step | Who signs | What happens |
 | ---- | --------- | ------------ |
@@ -163,8 +167,7 @@ Open items, tracked in [docs/release-readiness.md](docs/release-readiness.md):
 
 | Item                                                        | Type     |
 | ----------------------------------------------------------- | -------- |
-| Deployer funded on Base (owner, 2026-10-20)                 | BLOCKER  |
-| The TGE run itself (steps 1 to 4 above)                     | BLOCKER  |
+| Verified deployment records (`8453-safes.json`, `8453.json`) from the signed run files | REQUIRED |
 | Legal opinion publication, KYC/AML policy, jurisdiction     | REQUIRED |
 | Two-person review on `main` (second maintainer)             | REQUIRED |
 

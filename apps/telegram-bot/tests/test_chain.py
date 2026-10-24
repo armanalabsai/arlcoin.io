@@ -21,8 +21,8 @@ def test_status_text():
     assert "unknown" in texts.status(None, None, None, now)
 
 
-def test_launch_countdown():
-    target = 1792713600
-    assert "6 days 0 hours to go" in texts.launch(target - 6 * 86400)
-    assert "5 hours to go" in texts.launch(target - 5 * 3600)
-    assert "was 2026-10-23" in texts.launch(target + 1)
+def test_launch_names_the_mainnet_contract():
+    text = texts.launch(1792800000)
+    assert "live on Base Mainnet" in text
+    assert texts.MAINNET_TOKEN in text
+    assert texts.BUY in text

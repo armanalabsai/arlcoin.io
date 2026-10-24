@@ -1,7 +1,7 @@
 # Phase 1 Security Analysis
 
-Status: threat model and controls. The contracts are deployed on Base Sepolia; Base Mainnet
-opens at the TGE (2026-10-23).
+Status: threat model and controls. The token, vesting wallets and timelock are deployed on Base
+Mainnet (2026-10-24, token `0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4`); the other contracts run on Base Sepolia.
 
 Latest audit: [security audit of 2026-10-17](../security/2026-10-17/report.md) (scope, raw
 tool outputs, triage, findings and their status).

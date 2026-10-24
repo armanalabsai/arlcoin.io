@@ -10,7 +10,7 @@ import { FactList, PageShell } from "@/site/PageShell.tsx";
 
 const title = "How to Buy ARL on Uniswap on Base · ARL Protocol";
 const description =
-  "How to buy ARL: the official ARL/USDC, ARL/USDT, ARL/ETH and ARL/BTC pools on Uniswap on Base, from 0.20 USD, opening 23 October 2026.";
+  "How to buy ARL: the official ARL/USDC, ARL/USDT, ARL/ETH and ARL/BTC pools on Uniswap on Base, from 0.20 USD per ARL.";
 
 const USDC_BASE = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const token = SITE.mainnet.token;

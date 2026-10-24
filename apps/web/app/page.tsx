@@ -54,21 +54,14 @@ const CHIPS = [
   "ERC-20 on Base",
   "Source-verified on Basescan",
   "Fixed supply · no mint",
-  "Live on Base Sepolia",
+  "Live on Base",
 ];
-
-const tge = new Date(`${SITE.tgeTarget}T00:00:00Z`).toLocaleDateString("en-GB", {
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-  timeZone: "UTC",
-});
 
 const FACTS = [
   {
     label: "Chain",
     value: "Base",
-    note: `Ethereum layer 2. Sepolia testnet live; Mainnet targeted for ${tge}.`,
+    note: "Ethereum layer 2. Live on Base Mainnet since 24 October 2026.",
   },
   {
     label: "Standard",
@@ -177,13 +170,13 @@ export default function Home() {
             ))}
           </ul>
           <p className="mt-10 text-[12px] text-fg-subtle">
-            ARL is live on the Base Sepolia testnet. Nothing is for sale. Registering is free.
+            ARL is live on Base. Registering is free and no payment is ever requested.
           </p>
         </section>
 
         <Section
           heading="Launch on Base."
-          sub={`Base Mainnet launch targeted for ${tge}. Four steps, all from your own wallet. ARL never asks for your private key, your seed phrase or a payment to a personal address.`}
+          sub={`Live on Base Mainnet since 24 October 2026. Four steps, all from your own wallet. ARL never asks for your private key, your seed phrase or a payment to a personal address.`}
         >
           <LaunchSteps />
         </Section>
@@ -288,7 +281,7 @@ export default function Home() {
         <Section
           alt
           heading="Where ARL is today."
-          sub="Base Mainnet is targeted for 23 October 2026."
+          sub="Live on Base Mainnet since 24 October 2026."
         >
           <Reveal delay={120} className="glass mt-14 rounded-[28px] p-6 sm:p-10">
             <ol className="landing-road text-left">

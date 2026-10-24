@@ -1,5 +1,5 @@
 // The app as arlcoin.io serves it under /app (scripts/build-site.sh, playwright.hosted.config.ts).
-// Before the Base Mainnet launch the public build must offer nothing to claim or trade, and the
+// The public build offers trading for the Base Mainnet token and nothing to claim yet, and the
 // deploy screen must work from /app.
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
@@ -32,13 +32,13 @@ test("the website and the app are served together", async ({ page }) => {
   expect(missing).toEqual([]);
 });
 
-test("trade is closed before the launch", async ({ page }, testInfo) => {
+test("trade is open for the Base Mainnet token and asks for a wallet", async ({
+  page,
+}, testInfo) => {
   const missing = watchMissing(page);
   await page.goto("/app/trade/");
-  await expect(page.getByTestId("trade-closed")).toContainText(
-    "Trading opens with the Base Mainnet launch on 2026-10-23",
-  );
-  await expect(page.getByTestId("trade-submit")).toHaveCount(0);
+  await expect(page.getByTestId("trade-closed")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Connect wallet" }).first()).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath("trade.png"), fullPage: true });
   expect(missing).toEqual([]);
 });

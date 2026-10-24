@@ -6,7 +6,7 @@ import type { Layer } from "../types.ts";
 export const roadmap: Layer = {
   id: "roadmap",
   title: "Roadmap",
-  description: "Where ARL is today. Base Mainnet is targeted for 23 October 2026.",
+  description: "Where ARL is today. Live on Base Mainnet since 24 October 2026.",
   cards: [
     {
       id: "phase-0",
@@ -73,13 +73,19 @@ export const roadmap: Layer = {
       id: "mainnet",
       title: "Mainnet",
       shortDescription: "Production deployment",
-      progress: "active",
+      progress: "done",
       weight: "tertiary",
-      metric: { kind: "static", value: "Target 2026-10-23" },
+      metric: { kind: "static", value: "Live 2026-10-24" },
       detail: {
         summary:
-          "The production deployment of ARL on Base Mainnet, which is the TGE. Targeted for 23 October 2026; it is not deployed yet.",
+          "ARL was deployed on Base Mainnet on 24 October 2026: the token, two vesting wallets and the treasury timelock, source-verified on Basescan, with twelve allocation Safes. The official Uniswap v3 pools opened with 5,000,000 ARL from 0.20 USD per ARL.",
       },
+      links: [
+        {
+          label: "ARL on Basescan",
+          href: "https://basescan.org/token/0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4",
+        },
+      ],
     },
     {
       id: "services",
@@ -90,7 +96,7 @@ export const roadmap: Layer = {
       metric: { kind: "static", value: "Testnet live" },
       detail: {
         summary:
-          'The first services that settle in ARL: AI service payments and the compute marketplace. Per-use payments (x402 "upto"), job escrow (ERC-8183) and a reference compute provider run on the Base Sepolia testnet in the ARL app. They go to Base Mainnet with the TGE.',
+          'The first services that settle in ARL: AI service payments and the compute marketplace. Per-use payments (x402 "upto"), job escrow (ERC-8183) and a reference compute provider run on the Base Sepolia testnet in the ARL app. They move to Base Mainnet one by one, each after its own deployment and verification.',
       },
     },
   ],
