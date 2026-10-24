@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { describe, it, mock } from "node:test";
 
-import { PlanError, buildPlan, canonicalSafeSingletons } from "../src/plan.ts";
+import {
+  PRODUCTION_OPENS_AT_MS,
+  PlanError,
+  buildPlan,
+  canonicalSafeSingletons,
+} from "../src/plan.ts";
 import { configFromSafes, type SafesRecord } from "../src/safes-config.ts";
 
 // Placeholder addresses: keccak256("arl.safes.<n>") last 20 bytes would do; any distinct
@@ -78,7 +83,13 @@ describe("config from created Safes", () => {
   });
 
   it("refuses Base Mainnet and every unsupported chain", () => {
-    assert.throws(() => configFromSafes(record(8453), START), /Base Mainnet\) is locked/);
+    // Before the TGE the Base Mainnet gate is closed.
+    mock.timers.enable({ apis: ["Date"], now: PRODUCTION_OPENS_AT_MS - 1 });
+    try {
+      assert.throws(() => configFromSafes(record(8453), START), /Base Mainnet\) is locked/);
+    } finally {
+      mock.timers.reset();
+    }
     for (const chainId of [1, 10, 42161, 11155111]) {
       assert.throws(() => configFromSafes(record(chainId), START), PlanError);
     }
