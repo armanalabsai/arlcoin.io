@@ -90,7 +90,7 @@ test("deep links render the detail and survive a refresh", async ({ page }) => {
   const errors = watchErrors(page);
   await page.goto("/core/token/circulating-supply");
   await expect(surface(page)).toBeVisible();
-  await expect(surface(page)).toContainText("Not yet on Base Mainnet");
+  await expect(surface(page)).toContainText("arlcoin.io/api/supply");
   await page.reload();
   await expect(surface(page)).toBeVisible();
   await expect(page).toHaveTitle("Circulating Supply · Token · ARL Protocol");
@@ -191,9 +191,14 @@ test("no horizontal overflow on any layer", async ({ page }) => {
   }
 });
 
-test("deployment-dependent token values are never given a number", async ({ page }) => {
-  for (const id of ["circulating-supply", "contract-address", "staked"]) {
+test("token values that change on chain are never given a number", async ({ page }) => {
+  for (const [id, label] of [
+    ["circulating-supply", "Live at /api/supply"],
+    ["staked", "Not on Base Mainnet yet"],
+  ] as const) {
     await page.goto(`/core/token/${id}`);
-    await expect(surface(page)).toContainText("Not yet on Base Mainnet");
+    await expect(surface(page)).toContainText(label);
   }
+  await page.goto("/core/token/contract-address");
+  await expect(surface(page)).toContainText("0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4");
 });

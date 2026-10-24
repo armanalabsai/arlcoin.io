@@ -2,7 +2,8 @@
 
 Status: **IN DEVELOPMENT.** Integration code and tests only. No payment component is deployed and no facilitator
 runs. The ARL token is deployed on Base Sepolia (`0x244312b619127B6458154F3467eFD7c87CD28500`);
-it is not on Base Mainnet, and Base Mainnet is refused by the code.
+the token is also on Base Mainnet (`0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4`), but the payment components are not, and the
+payments code refuses Base Mainnet.
 
 ARL payments let an AI or compute service charge per use in ARL. They use the `upto` scheme of
 the x402 protocol: the payer signs a **ceiling**, the service meters actual usage, and the

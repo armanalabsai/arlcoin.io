@@ -37,9 +37,16 @@ export default function AboutPage() {
           "ARL is an ERC-20 utility token on Base for paying AI and compute services per request.",
           "Fixed supply of 21,000,000 ARL, minted once at deployment. The token has no owner, no mint, no pause and no upgrade path.",
           <>
-            Status: live on the Base Sepolia testnet, where tokens have no value. No ARL contract
-            exists on Base Mainnet yet; its address will be published on this site only after
-            deployment is verified.
+            Status: live on Base Mainnet since {SITE.mainnet.deployedOn}. Official contract:{" "}
+            <a
+              href={SITE.mainnet.explorer}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${link} break-all`}
+            >
+              {SITE.mainnet.token}
+            </a>
+            , source-verified on Basescan.
           </>,
           <>
             Open source under Apache-2.0:{" "}

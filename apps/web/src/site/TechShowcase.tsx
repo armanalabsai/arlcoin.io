@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { pathFor } from "@/content/registry.ts";
 
 // Interface previews of the four technologies, one per slide on a swipeable rail. Every
-// number is an example and nothing touches a network: ARL is not deployed. The previews show
+// number is an example and nothing touches a network. The previews show
 // how each flow is meant to work, step by step.
 
 const NOTE = "Preview · simulated · example values · no tokens move";

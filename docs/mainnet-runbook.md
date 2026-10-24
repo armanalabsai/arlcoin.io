@@ -1,6 +1,7 @@
-# Base Mainnet runbook (not run)
+# Base Mainnet runbook (run 2026-10-24)
 
-The exact order for launch day. **Nothing here has been run.** Every on-chain step is signed by
+The exact order for launch day. **Steps 1 to 4 ran on 2026-10-24** (Safes from block 53,022,497,
+token at block 53,023,206); the checks of step 4 passed on chain. Every on-chain step is signed by
 the owners in their own wallets; no private key is handled by the tooling. Custody, addresses and
 the simulation are in [mainnet-plan.md](mainnet-plan.md); the testnet run of the same steps is in
 [deployment.md](deployment.md).

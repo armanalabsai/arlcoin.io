@@ -11,6 +11,7 @@ import {
   pathFor,
 } from "../../src/content/registry.ts";
 import { DOCS, docPath } from "../../src/content/docs.ts";
+import { SITE } from "../../src/content/site.ts";
 import type { Card, Layer } from "../../src/content/types.ts";
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -136,17 +137,26 @@ describe("content accuracy", () => {
     assert.deepEqual(card?.metric, { kind: "static", value: "Base" });
   });
 
-  it("never gives deployment-dependent metrics a value", () => {
-    const deploymentDependent = ["circulating-supply", "contract-address", "staked", "liquidity"];
+  it("shows the Base Mainnet contract address", () => {
+    const card = token?.cards.find((c) => c.id === "contract-address");
+    assert.deepEqual(card?.metric, { kind: "static", value: "0xde91…aDb4" });
+    assert.match(card?.detail.summary ?? "", /0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4/);
+  });
+
+  it("never gives a guessed value to metrics that change on chain", () => {
+    const deploymentDependent = ["circulating-supply", "staked", "liquidity"];
     for (const id of deploymentDependent) {
       const card = token?.cards.find((c) => c.id === id);
       assert.equal(card?.metric?.kind, "unavailable", id);
     }
   });
 
-  it("marks nothing as LIVE", () => {
+  it("marks as LIVE only what Base Mainnet shows: the contract, the network and the pools", () => {
+    const live = new Set(["contract-address", "network", "liquidity"]);
     for (const layer of LAYERS) {
-      for (const card of layer.cards) assert.notEqual(card.status, "LIVE", card.id);
+      for (const card of layer.cards) {
+        if (card.status === "LIVE") assert.ok(layer.id === "token" && live.has(card.id), card.id);
+      }
     }
   });
 
@@ -159,15 +169,20 @@ describe("content accuracy", () => {
     }
     const roadmap = LAYERS.find((l) => l.id === "roadmap");
     const progress = Object.fromEntries((roadmap?.cards ?? []).map((c) => [c.id, c.progress]));
-    // Only phases with evidence are done; Base Mainnet is not deployed.
+    // Only phases with evidence are done; Base Mainnet was deployed and verified on 2026-10-24.
     assert.equal(progress.testnet, "done");
-    assert.equal(progress.mainnet, "active");
+    assert.equal(progress.mainnet, "done");
   });
 
-  it("contains no addresses, prices or market data", () => {
+  it("contains no addresses other than the official contracts, and no prices or market data", () => {
+    const official = new Set(
+      [SITE.mainnet.token, SITE.mainnet.timelock, SITE.testnet.token].map((a) => a.toLowerCase()),
+    );
     for (const layer of LAYERS) {
       for (const text of texts(layer)) {
-        assert.doesNotMatch(text, /0x[0-9a-fA-F]{6,}/, text);
+        for (const a of text.match(/0x[0-9a-fA-F]{6,}/g) ?? []) {
+          assert.ok(official.has(a.toLowerCase()), text);
+        }
         assert.doesNotMatch(text, /\$\s?\d|market cap|price target|holders:/i, text);
       }
     }

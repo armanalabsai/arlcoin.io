@@ -25,7 +25,7 @@ test("the landing page leads to the whitelist and the Core", async ({ page }) =>
   await expect(page.getByTestId("arl-core")).toBeVisible();
 });
 
-test("the landing page shows the launch route, closed until the Base Mainnet token exists", async ({
+test("the landing page shows the launch route, open with the Base Mainnet token", async ({
   page,
 }) => {
   await page.goto("/");
@@ -35,12 +35,12 @@ test("the landing page shows the launch route, closed until the Base Mainnet tok
   await launch.scrollIntoViewIfNeeded();
   await expect(launch.getByTestId("launch-when-1")).toHaveText("Open now");
   await expect(launch.getByTestId("launch-when-2")).toHaveText("Open now");
-  await expect(launch.getByTestId("launch-when-3")).toHaveText("From 23 October 2026");
-  await expect(launch.getByTestId("launch-when-4")).toHaveText("After launch");
+  await expect(launch.getByTestId("launch-when-3")).toHaveText("Open");
+  await expect(launch.getByTestId("launch-when-4")).toHaveText("Open");
   // No airdrop at the launch: the route never links to a claim.
   await expect(launch.getByRole("link", { name: /claim/i })).toHaveCount(0);
   await expect(launch).toContainText("There is no airdrop at launch.");
-  await expect(launch.getByRole("button", { name: "Add ARL to your wallet" })).toHaveCount(0);
+  await expect(launch.getByRole("button", { name: "Add ARL to your wallet" })).toHaveCount(1);
   await launch.getByRole("link", { name: "How to get ARL ›" }).click();
   await expect(page).toHaveURL(/\/buy\/?$/);
 });
@@ -131,17 +131,24 @@ test("the brand link goes home, reloads its content and starts it at the top", a
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
 });
 
-test("the header shows the testnet as live only while Base Sepolia answers", async ({ page }) => {
-  await page.route("https://sepolia.base.org/**", (route) =>
-    route.fulfill({ json: { jsonrpc: "2.0", id: 1, result: "0x2dbfe85" } }),
+test("the header shows ARL as live only while Base Mainnet answers with the token", async ({
+  page,
+}) => {
+  // totalSupply() = 21,000,000 ARL (18 decimals).
+  await page.route("https://mainnet.base.org/**", (route) =>
+    route.fulfill({
+      json: { jsonrpc: "2.0", id: 1, result: "0x" + (21_000_000n * 10n ** 18n).toString(16) },
+    }),
   );
   await page.goto("/faq");
-  const status = page.locator('header a[href="https://arlcoin.io/app/"]');
+  const status = page.locator(
+    'header a[href="https://basescan.org/token/0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4"]',
+  );
   await expect(status).toHaveAttribute("data-state", "live");
-  await expect(status).toHaveAttribute("title", /block 47971973/);
+  await expect(status).toHaveAttribute("title", /21,000,000 ARL total supply/);
 
-  await page.unroute("https://sepolia.base.org/**");
-  await page.route("https://sepolia.base.org/**", (route) => route.abort());
+  await page.unroute("https://mainnet.base.org/**");
+  await page.route("https://mainnet.base.org/**", (route) => route.abort());
   await page.reload();
   await expect(status).toHaveAttribute("data-state", "down");
 });
