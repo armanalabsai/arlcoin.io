@@ -159,7 +159,9 @@ on Basescan.
 | 4 | Public Launch Safe, 2 of 3 | 3,000,000 ARL on the same pools and ranges (sale positions) |
 | 5 | none | Addresses published on arlcoin.io and here, token list, supply API, mainnet monitor |
 
-Circulating at TGE: 2,100,000 ARL (the Founder allocation); ARL bought from the pools adds to it.
+Circulating at the token deployment: 2,100,000 ARL (the Founder allocation). Once the pools opened
+on 2026-10-24, the 5,000,000 ARL deposited in them count as circulating too (economic
+specification section 5), so the supply API reported about 7,100,000 ARL.
 The Public Launch Safe keeps 500,000 ARL for a later airdrop and 1,500,000 ARL for launchpad
 sales. No project funds are added to the pools.
 

@@ -68,13 +68,13 @@ What is on chain
 - A treasury timelock with a 48-hour delay; the guardian can only cancel.
 - Four Uniswap v3 pools on Base (1% fee tier): ARL/USDC, ARL/USDT, ARL/WETH and ARL/cbBTC, opened with 5,000,000 ARL from 0.20 USD per ARL. 2,000,000 ARL came from the Liquidity Safe and 3,000,000 ARL from the Public Launch Safe.
 
-Circulating supply at launch is 2,100,000 ARL. ARL bought from the pools adds to it.
+Circulating supply is about 7,100,000 ARL: the Founder's 2,100,000 ARL plus the 5,000,000 ARL deposited in the open pools, which the tokenomics specification counts as circulating. The live figure is at https://arlcoin.io/api/supply.
 
 How to check it yourself
 
 - The token, both vesting wallets and the timelock are source-verified on Basescan.
 - Every address, threshold and pool is listed in the repository: https://github.com/armanalabsai/arlcoin.io/blob/main/docs/mainnet-plan.md
-- The deployment was checked against the plan on chain (VerifyARL, a bytecode comparison with a clean build, and a supply check: 21,000,000 total, 2,100,000 circulating).
+- The deployment was checked against the plan on chain (VerifyARL, a bytecode comparison with a clean build, and a supply check: 21,000,000 total, 2,100,000 circulating before the pools opened).
 - Security review: https://arlcoin.io/docs/security-audit
 
 What is not on Base Mainnet yet
