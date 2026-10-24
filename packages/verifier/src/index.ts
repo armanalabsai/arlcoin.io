@@ -6,3 +6,4 @@ export * from "./docker.ts";
 export * from "./verify.ts";
 export * from "./chain.ts";
 export * from "./watch.ts";
+export * from "./bundle.ts";
