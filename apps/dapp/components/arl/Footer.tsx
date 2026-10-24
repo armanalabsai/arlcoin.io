@@ -5,8 +5,8 @@ export function Footer() {
     <footer className="border-t border-line px-4 py-6 text-center text-xs text-subtle">
       <p>
         {IS_LOCAL
-          ? "Local test chain only. ARL is deployed on Base Sepolia (testnet) only, not on Base Mainnet. Amounts and schedules on this chain are development values."
-          : "Base Sepolia testnet. ARL is not yet deployed on Base Mainnet. Testnet ARL has no value."}
+          ? "Local test chain only. Amounts and schedules on this chain are development values. The ARL token is on Base Mainnet at 0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4."
+          : "Base Sepolia testnet. Testnet ARL has no value. The ARL token is on Base Mainnet at 0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4."}
       </p>
       <p className="mt-2">
         <a className="link" href="https://arlcoin.io">

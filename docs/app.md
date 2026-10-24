@@ -1,8 +1,8 @@
 # ARL App (`apps/dapp`)
 
 Status: **IN DEVELOPMENT.** Built for one chain at a time (`NEXT_PUBLIC_ARL_CHAIN`): the local
-Anvil chain (default) or Base Sepolia (84532), the public testnet. Base Mainnet opens only at the
-TGE and is not a build target yet. Testnet ARL has no value.
+Anvil chain (default) or Base Sepolia (84532), the public testnet. The ARL token is on Base Mainnet
+(`0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4`); with `NEXT_PUBLIC_ARL_MAINNET_TOKEN` set, Trade opens. Testnet ARL has no value.
 
 The app is where ARL holders use the contracts: see their balance and send ARL, follow and release
 a vesting schedule, and stake ARL for rewards. It is built on

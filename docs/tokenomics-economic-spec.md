@@ -33,8 +33,8 @@ Every rule in this document carries one of these labels:
 - The Public Launch mechanism, the Early Users reward formula, the staking
   emission curve, program budgets, liquidity funding and the LP lock remain
   **TBD**.
-- Contracts are deployed on the Base Sepolia testnet only (testnet tokens have no value);
-  nothing is deployed on Base Mainnet.
+- The token, vesting wallets and treasury timelock are deployed on Base Mainnet (2026-10-24,
+  token `0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4`); the other contracts run on the Base Sepolia testnet only (testnet tokens have no value).
 - ARL Core, the planned native chain, uses **8 decimals**: 1 ARL =
   100,000,000 motes. The ERC-20 token keeps **18 decimals**. The Core monetary
   standard, including the 10,000,000 ARL burn floor and the burn epoch, is in

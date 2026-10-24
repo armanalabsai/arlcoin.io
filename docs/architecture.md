@@ -3,7 +3,7 @@
 Status: Phase 1 (token, vesting, treasury contracts), the Public Launch
 Merkle claim distributor (not deployed at TGE; kept for the later airdrop) and the staking
 rewards contract are implemented and tested. The Phase 1 contracts are deployed on Base Sepolia (testnet) only; see
-[`README.md`](../README.md). Nothing is deployed on Base Mainnet.
+[`README.md`](../README.md). The ARL token, its 12 Safes, both vesting wallets and the treasury timelock are deployed on Base Mainnet (2026-10-24, token `0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4`, see [mainnet-plan.md](mainnet-plan.md)); the other contracts run on Base Sepolia only.
 
 ## Repository
 
