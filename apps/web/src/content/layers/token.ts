@@ -84,12 +84,12 @@ export const token: Layer = {
     {
       id: "circulating-supply",
       title: "Circulating Supply",
-      shortDescription: "Computed from the chain, published at arlcoin.io/api/supply",
+      shortDescription: "Published live at arlcoin.io/api/supply",
       status: "IN DEVELOPMENT",
       weight: "secondary",
       metric: {
         kind: "unavailable",
-        label: "See arlcoin.io/api/supply",
+        label: "Live at /api/supply",
         source: "chain.circulatingSupply",
       },
       detail: {
@@ -148,7 +148,7 @@ export const token: Layer = {
     {
       id: "contract-address",
       title: "Contract Address",
-      shortDescription: "Base Mainnet, source-verified on Basescan",
+      shortDescription: "Base Mainnet, verified on Basescan",
       status: "LIVE",
       weight: "secondary",
       metric: {
@@ -181,7 +181,7 @@ export const token: Layer = {
     {
       id: "liquidity",
       title: "Liquidity / Exchange",
-      shortDescription: "Uniswap v3 on Base; no centralised exchange",
+      shortDescription: "Uniswap v3 on Base",
       status: "LIVE",
       weight: "tertiary",
       metric: { kind: "unavailable", label: "Uniswap v3 · Base", source: "market.listings" },

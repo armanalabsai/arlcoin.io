@@ -25,7 +25,7 @@ test("the landing page leads to the whitelist and the Core", async ({ page }) =>
   await expect(page.getByTestId("arl-core")).toBeVisible();
 });
 
-test("the landing page shows the launch route, closed until the Base Mainnet token exists", async ({
+test("the landing page shows the launch route, open with the Base Mainnet token", async ({
   page,
 }) => {
   await page.goto("/");
@@ -35,12 +35,12 @@ test("the landing page shows the launch route, closed until the Base Mainnet tok
   await launch.scrollIntoViewIfNeeded();
   await expect(launch.getByTestId("launch-when-1")).toHaveText("Open now");
   await expect(launch.getByTestId("launch-when-2")).toHaveText("Open now");
-  await expect(launch.getByTestId("launch-when-3")).toHaveText("From 23 October 2026");
-  await expect(launch.getByTestId("launch-when-4")).toHaveText("After launch");
+  await expect(launch.getByTestId("launch-when-3")).toHaveText("Open");
+  await expect(launch.getByTestId("launch-when-4")).toHaveText("Open");
   // No airdrop at the launch: the route never links to a claim.
   await expect(launch.getByRole("link", { name: /claim/i })).toHaveCount(0);
   await expect(launch).toContainText("There is no airdrop at launch.");
-  await expect(launch.getByRole("button", { name: "Add ARL to your wallet" })).toHaveCount(0);
+  await expect(launch.getByRole("button", { name: "Add ARL to your wallet" })).toHaveCount(1);
   await launch.getByRole("link", { name: "How to get ARL ›" }).click();
   await expect(page).toHaveURL(/\/buy\/?$/);
 });

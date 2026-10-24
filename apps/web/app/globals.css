@@ -57,6 +57,8 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
+    /* Contract addresses are 42 characters without a break point; they wrap instead of overflowing. */
+    overflow-wrap: break-word;
   }
 
   h1,
