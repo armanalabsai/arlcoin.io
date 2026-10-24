@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { describe, it } from "node:test";
+import { describe, it, mock } from "node:test";
 
 import { decodeAbiParameters, getAddress } from "viem";
 
 import { checkAgainstBroadcast, explorerTargets, verifyCommand } from "../src/explorer.ts";
 import type { DeploymentRecord } from "../src/manifest.ts";
-import { buildPlan, type DeployConfig } from "../src/plan.ts";
+import { PRODUCTION_OPENS_AT_MS, buildPlan, type DeployConfig } from "../src/plan.ts";
 
 const plan = buildPlan(
   JSON.parse(
@@ -106,11 +106,19 @@ describe("explorer source verification", () => {
       "--watch",
     ]);
     assert.ok(!cmd.some((a) => /api-key/i.test(a)));
-    assert.throws(() => verifyCommand(8453, at(targets, 3)), /locked/);
-    assert.throws(
-      () => explorerTargets({ ...plan, chainId: 8453 }, { ...deployment, chainId: 8453 }),
-      /locked/,
-    );
+    // The gate opens at the TGE: locked one millisecond before it, open from it.
+    mock.timers.enable({ apis: ["Date"], now: PRODUCTION_OPENS_AT_MS - 1 });
+    try {
+      assert.throws(() => verifyCommand(8453, at(targets, 3)), /locked/);
+      assert.throws(
+        () => explorerTargets({ ...plan, chainId: 8453 }, { ...deployment, chainId: 8453 }),
+        /locked/,
+      );
+      mock.timers.setTime(PRODUCTION_OPENS_AT_MS);
+      assert.equal(verifyCommand(8453, at(targets, 3))[2], "8453");
+    } finally {
+      mock.timers.reset();
+    }
     assert.throws(() => explorerTargets(plan, { ...deployment, chainId: 84532 }), /differs/);
   });
 });
