@@ -3,8 +3,20 @@
 Notable changes to ARL Protocol, newest first. Dates are UTC. Every entry links to the code and
 documents that back it; nothing here is deployed on Base Mainnet.
 
+## 2026-10-23
+
+- Portable evidence bundles for verified jobs: `arl-verifier bundle` exports a job's settlement
+  evidence (`arl-evidence/1`) and `verify-bundle` checks it offline and against the chain
+  ([reexecution-spec.md](docs/reexecution-spec.md#evidence-bundle)); the bundle of the first
+  Base Sepolia job is published in [docs/evidence](docs/evidence/base-sepolia-job-1.json).
+
 ## 2026-10-18
 
+- Validators run unattended: `arl-verifier watch` accepts the funded jobs whose committee names
+  the validator and re-executes and votes once the provider submits; three Base Sepolia validators
+  run it every 10 minutes on GitHub runners ([validators.yml](.github/workflows/validators.yml)).
+  `@arl/sdk` gains `openVerifiedJob`, `getVerdict` and `finalizeJob`, and the app's Verified page
+  shows the network's jobs, verdicts, validators, stake, disputes and slashing.
 - Verified evaluator deployed on Base Sepolia (testnet): `ARLVerifiedEvaluator` at
   `0x6808F80Eb11538543d31cf4b50332B268dDd4d14` (source verified) with a 2-of-3 arbiter Safe at
   `0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f`; a first sample job was approved by a staked

@@ -148,6 +148,8 @@ jobs:
       # Reference validator: on-chain flow against the compiled evaluator on Anvil, and
       # re-execution in a real container (Docker is on the runner).
       - run: npm run test:anvil -w @arl/verifier
+      # The developer quickstart must keep working end to end (docs/quickstart.md).
+      - run: npm run quickstart -w @arl/verifier
       - run: npm run test:docker -w @arl/verifier
 
   zk:

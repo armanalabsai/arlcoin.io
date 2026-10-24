@@ -3,5 +3,5 @@
   "compilerOptions": {
     "skipLibCheck": true
   },
-  "include": ["src", "test", "test-docker", "test-anvil"]
+  "include": ["src", "test", "test-docker", "test-anvil", "examples"]
 }

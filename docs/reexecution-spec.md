@@ -116,6 +116,25 @@ ARL_VALIDATOR_KEY=0x… node packages/verifier/src/cli.ts watch   https://sepoli
 Clients open jobs for such a committee with the SDK (`openVerifiedJob` in `@arl/sdk`, which
 creates the job and configures the committee in one call) or the app's Jobs and Verified pages.
 
+### Evidence bundle
+
+`bundle` collects one job's settlement evidence into a portable JSON document (`arl-evidence/1`):
+the job, the committed spec hash, the submitted deliverable, every validator vote, the decision,
+the finalize call and the escrow settlement, each with its block and transaction.
+`verify-bundle` checks it offline (committee membership, no double votes, approvals at the
+threshold naming the submitted deliverable, outcome matching the escrow) and re-reads every field
+from the chain; it exits 1 on any mismatch.
+
+```sh
+node packages/verifier/src/cli.ts bundle <rpc> <evaluator> <jobId> <fromBlock> > evidence.json
+node packages/verifier/src/cli.ts verify-bundle <rpc> evidence.json <fromBlock>
+```
+
+A valid bundle shows how the job was settled and that the approvals re-executed the committed
+spec to the submitted result. It does not show that a non-deterministic deliverable is correct.
+The bundle of the first Base Sepolia job is [evidence/base-sepolia-job-1.json](evidence/base-sepolia-job-1.json)
+(evaluator deployment block 48277116).
+
 ## Tests
 
 | Suite       | Command                                | Covers                                                                                                                                                                                                                                                                          |

@@ -13,6 +13,13 @@
 // (https or ipfs). Its progress is kept in state.json (default .arl-verifier-state.json). A
 // negative fromBlock counts back from the head; ARL_WATCH_ONCE=1 makes one pass and exits.
 //
+//   node src/cli.ts bundle <rpc> <evaluator> <jobId> <fromBlock>        > evidence.json
+//   node src/cli.ts verify-bundle <rpc> <evidence.json> <fromBlock>
+//
+// `bundle` writes one job's evidence (arl-evidence/1: spec hash, submission, votes, decision,
+// finalize, escrow settlement, each with block and tx). `verify-bundle` checks it for internal
+// consistency and re-reads every field from the chain; it exits 1 on any mismatch.
+//
 // `vote` reads the job, refuses a spec whose hash differs from the job's specHash, re-runs it,
 // and votes approve or reject (the validator must have accepted the job). Base Sepolia and the
 // local chain only. The key is read from the environment, never from arguments.
@@ -27,8 +34,10 @@ import { baseSepolia } from "viem/chains";
 import { castVote, MemberState, readJob } from "./chain.ts";
 import { DockerRunner } from "./docker.ts";
 import { networkFetcher } from "./inputs.ts";
+import { validatorKey } from "./key.ts";
 import { parseSpec, specHash } from "./spec.ts";
 import { decide, execute } from "./verify.ts";
+import { buildBundle, verifyBundle, type EvidenceBundle } from "./bundle.ts";
 import { step, type WatchState } from "./watch.ts";
 
 function print(value: unknown): void {
@@ -82,9 +91,12 @@ async function main(argv: readonly string[]): Promise<void> {
       ) {
         fail("usage: vote <rpc> <evaluator> <jobId> <spec.json>");
       }
-      const key = process.env.ARL_VALIDATOR_KEY;
-      if (key === undefined || !isHex(key) || key.length !== 66)
-        fail("ARL_VALIDATOR_KEY must be set");
+      let key: `0x${string}`;
+      try {
+        key = validatorKey(process.env.ARL_VALIDATOR_KEY);
+      } catch (error) {
+        fail((error as Error).message);
+      }
       const account = privateKeyToAccount(key);
       const client = createPublicClient({ transport: http(rpc) });
       const chainId = await client.getChainId();
@@ -118,9 +130,12 @@ async function main(argv: readonly string[]): Promise<void> {
       ) {
         fail("usage: watch <rpc> <evaluator> <fromBlock> [state.json]");
       }
-      const key = process.env.ARL_VALIDATOR_KEY;
-      if (key === undefined || !isHex(key) || key.length !== 66)
-        fail("ARL_VALIDATOR_KEY must be set");
+      let key: `0x${string}`;
+      try {
+        key = validatorKey(process.env.ARL_VALIDATOR_KEY);
+      } catch (error) {
+        fail((error as Error).message);
+      }
       const account = privateKeyToAccount(key);
       const client = createPublicClient({ transport: http(rpc) });
       const chain = { ...baseSepolia, id: await client.getChainId() };
@@ -165,8 +180,43 @@ async function main(argv: readonly string[]): Promise<void> {
         await new Promise((r) => setTimeout(r, 15_000));
       }
     }
+    case "bundle": {
+      const [rpc, evaluator, jobIdText, fromText] = args;
+      if (
+        rpc === undefined ||
+        evaluator === undefined ||
+        !isAddress(evaluator) ||
+        jobIdText === undefined ||
+        !/^\d+$/.test(jobIdText) ||
+        fromText === undefined ||
+        !/^\d+$/.test(fromText)
+      ) {
+        fail("usage: bundle <rpc> <evaluator> <jobId> <fromBlock>");
+      }
+      const client = createPublicClient({ transport: http(rpc) });
+      const window = BigInt(process.env.ARL_LOG_WINDOW ?? "5000");
+      print(await buildBundle(client, evaluator, BigInt(jobIdText), BigInt(fromText), window));
+      return;
+    }
+    case "verify-bundle": {
+      const [rpc, path, fromText] = args;
+      if (
+        rpc === undefined ||
+        path === undefined ||
+        fromText === undefined ||
+        !/^\d+$/.test(fromText)
+      )
+        fail("usage: verify-bundle <rpc> <evidence.json> <fromBlock>");
+      const bundle = JSON.parse(await readFile(path, "utf8")) as EvidenceBundle;
+      const client = createPublicClient({ transport: http(rpc) });
+      const window = BigInt(process.env.ARL_LOG_WINDOW ?? "5000");
+      const problems = await verifyBundle(client, bundle, BigInt(fromText), window);
+      print({ valid: problems.length === 0, problems });
+      if (problems.length > 0) process.exit(1);
+      return;
+    }
     default:
-      fail("commands: hash, run, check, vote, watch");
+      fail("commands: hash, run, check, vote, watch, bundle, verify-bundle");
   }
 }
 
