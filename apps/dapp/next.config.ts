@@ -43,11 +43,13 @@ const nextConfig: NextConfig = {
         source: "/:path*",
         headers: [
           // The same policy the website gives the app's static copy under /app
-          // (apps/web/vercel.json): no source lists, since the app talks to RPC nodes and wallets.
+          // (apps/web/vercel.json). Scripts and workers come only from the app itself; the
+          // in-browser ZK prover needs WebAssembly ('wasm-unsafe-eval') and blob: workers.
+          // Connections stay open, since the app talks to RPC nodes and wallets.
           {
             key: "Content-Security-Policy",
             value:
-              "frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests",
+              "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests",
           },
           {
             key: "Strict-Transport-Security",
