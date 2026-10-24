@@ -57,8 +57,8 @@ Club, Virtuals), which deploy their own token instead of selling ARL.
 > treasury sits behind a 48-hour timelock with a cancel-only guardian; the allocations are held in 2-of-3
 > Safes. Deployed and source-verified on Base Sepolia (token
 > 0x244312b619127B6458154F3467eFD7c87CD28500); 251 contract tests, fuzzing, invariants, Slither
-> with no findings and reproducible bytecode. TGE
-> target 2026-10-23 at 0.20 USD. Contact: team@arlcoin.io.
+> with no findings and reproducible bytecode. Live on Base Mainnet since 2026-10-24
+> (0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4), Uniswap v3 pools from 0.20 USD. Contact: team@arlcoin.io.
 
 Shared on submission: the text above, the website, the Base Sepolia addresses, the docs listed in
 [launchpad-application.md](launchpad-application.md), the ARL Protocol team contact (team@arlcoin.io) and the official Telegram

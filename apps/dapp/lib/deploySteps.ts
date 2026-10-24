@@ -10,7 +10,7 @@
 // - a Safe creation through the canonical Safe v1.5.0 SafeProxyFactory with a canonical
 //   singleton (on Base Sepolia), with its owners and threshold decoded for display.
 // Anything else is refused. The chain must be Base Sepolia (or the local Anvil chain); Base
-// Mainnet is refused by `assertAllowedChain` before the TGE.
+// Mainnet is refused by `assertAllowedChain` before the TGE (2026-10-23).
 
 import {
   decodeAbiParameters,
