@@ -21,15 +21,15 @@
 // consistency and re-reads every field from the chain; it exits 1 on any mismatch.
 //
 // `vote` reads the job, refuses a spec whose hash differs from the job's specHash, re-runs it,
-// and votes approve or reject (the validator must have accepted the job). Base Sepolia and the
-// local chain only. The key is read from the environment, never from arguments.
+// and votes approve or reject (the validator must have accepted the job). Base Mainnet, Base
+// Sepolia and the local chain only. The key is read from the environment, never from arguments.
 
 import { readFile, writeFile } from "node:fs/promises";
 import process from "node:process";
 
 import { createPublicClient, createWalletClient, http, isAddress, isHex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { baseSepolia } from "viem/chains";
+import { base, baseSepolia } from "viem/chains";
 
 import { castVote, MemberState, readJob } from "./chain.ts";
 import { DockerRunner } from "./docker.ts";
@@ -39,6 +39,9 @@ import { parseSpec, specHash } from "./spec.ts";
 import { decide, execute } from "./verify.ts";
 import { buildBundle, verifyBundle, type EvidenceBundle } from "./bundle.ts";
 import { step, type WatchState } from "./watch.ts";
+
+/** viem chain for signing: Base Mainnet as is, otherwise Base Sepolia's settings with the id. */
+const chainFor = (id: number) => (id === base.id ? base : { ...baseSepolia, id });
 
 function print(value: unknown): void {
   process.stdout.write(`${JSON.stringify(value, null, 2)}\n`);
@@ -100,7 +103,7 @@ async function main(argv: readonly string[]): Promise<void> {
       const account = privateKeyToAccount(key);
       const client = createPublicClient({ transport: http(rpc) });
       const chainId = await client.getChainId();
-      const chain = { ...baseSepolia, id: chainId };
+      const chain = chainFor(chainId);
       const wallet = createWalletClient({ account, chain, transport: http(rpc) });
       const jobId = BigInt(jobIdText);
       const job = await readJob(client, evaluator, jobId, account.address);
@@ -138,7 +141,7 @@ async function main(argv: readonly string[]): Promise<void> {
       }
       const account = privateKeyToAccount(key);
       const client = createPublicClient({ transport: http(rpc) });
-      const chain = { ...baseSepolia, id: await client.getChainId() };
+      const chain = chainFor(await client.getChainId());
       const wallet = createWalletClient({ account, chain, transport: http(rpc) });
       // A negative fromBlock counts back from the head ("-86400": the last two days on Base).
       const head = await client.getBlockNumber({ cacheTime: 0 });
