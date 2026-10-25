@@ -39,6 +39,35 @@ contract DeployMainnetVerifiedJobsTest is Test {
         assertEq(address(evaluator.identity()), address(0));
     }
 
+    function test_evaluatorOnlyForAnEscrowOnChain() public {
+        ARLJobs jobs = new ARLJobs(token);
+        ARLVerifiedEvaluator evaluator = script.deployEvaluator(
+            jobs,
+            address(token),
+            arbiter,
+            script.DEFAULT_MIN_CHALLENGE_WINDOW(),
+            script.DEFAULT_MIN_BOND()
+        );
+        assertEq(address(evaluator.jobs()), address(jobs));
+        assertEq(evaluator.arbiter(), arbiter);
+    }
+
+    function test_evaluatorOnlyRefusesAnEscrowInAnotherToken() public {
+        ARLJobs jobs = new ARLJobs(new TestToken());
+        vm.expectRevert(
+            abi.encodeWithSelector(DeployMainnetVerifiedJobs.WrongJobsToken.selector, address(jobs))
+        );
+        script.deployEvaluator(jobs, address(token), arbiter, 24 hours, 100 ether);
+    }
+
+    function test_evaluatorOnlyRefusesAnAddressWithoutCode() public {
+        address none = makeAddr("none");
+        vm.expectRevert(
+            abi.encodeWithSelector(DeployMainnetVerifiedJobs.NoCode.selector, "jobs escrow", none)
+        );
+        script.deployEvaluator(ARLJobs(none), address(token), arbiter, 24 hours, 100 ether);
+    }
+
     function test_defaultsAreTwentyFourHoursAndOneHundredArl() public view {
         assertEq(script.DEFAULT_MIN_CHALLENGE_WINDOW(), 24 hours);
         assertEq(script.DEFAULT_MIN_BOND(), 100 ether);
