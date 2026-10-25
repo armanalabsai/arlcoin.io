@@ -28,15 +28,16 @@ function Section({ heading, children }: { heading: string; children: React.React
 export default function TermsPage() {
   return (
     <PageShell
-      eyebrow="Last updated 28 September 2026"
+      eyebrow="Last updated 24 October 2026"
       title="Terms of use"
       lead="These terms apply to arlcoin.io and the forms on it. By using the site you accept them."
     >
       <Section heading="What this site is">
         <p>
-          The site describes ARL Protocol, which is in development. The ARL contracts are deployed
-          on the Base Sepolia test network only, where tokens have no value; nothing is deployed on
-          Base Mainnet. There is no token sale on this site.
+          The site describes ARL Protocol, which is in development. The ARL token, its vesting
+          wallets and its treasury timelock are deployed on Base Mainnet (token
+          0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4). The other ARL contracts run on the Base
+          Sepolia test network, where tokens have no value. There is no token sale on this site.
         </p>
       </Section>
 

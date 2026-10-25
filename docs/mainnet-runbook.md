@@ -62,6 +62,10 @@ stamped `base-mainnet`.
    using the eligibility and limits announced then.
 6. **Pool.** The Liquidity Safe opens the single-sided ARL position at and above 0.20 USD
    ([launch-route.md](launch-route.md)); the position stays in the Safe for 12 months.
+   - **Done 2026-10-24.** The batch (4 pool creations, approve, 4 mints) needs about 21.3M gas,
+     above Base's per-transaction cap of 16,777,216 (EIP-7825), so it ran as two Safe
+     transactions: USDC and USDT pools first, then WETH and cbBTC. Step 7 then ran unchanged
+     (about 1.35M gas once the pools exist). Pool addresses: [mainnet-plan.md](mainnet-plan.md#uniswap-v3-pools).
    - Check that no ARL/USDC, ARL/USDT, ARL/WETH or ARL/cbBTC 1% pool exists yet (`getPool` on the Uniswap v3 factory
      `0x33128a8fC17869897dcE68Ed026d694621f6FDfD` returns zero). If one exists, its price must be
      at or below 0.20 USD; otherwise the batch reverts and nothing is deposited (fork-tested).
