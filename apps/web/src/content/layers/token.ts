@@ -94,7 +94,7 @@ export const token: Layer = {
       },
       detail: {
         summary:
-          "Circulating supply is computed from on-chain balances on Base Mainnet and published at arlcoin.io/api/supply. At deployment it was 2,100,000 ARL, the Founder allocation; the other 18,900,000 ARL sit in vesting wallets, the timelock and allocation Safes and count as locked. Allocated supply is not circulating supply. The methodology is in the tokenomics document.",
+          "Circulating supply is computed from on-chain balances on Base Mainnet and published at arlcoin.io/api/supply. At deployment it was 2,100,000 ARL, the Founder allocation. When the Uniswap pools opened, the 5,000,000 ARL deposited in them became circulating too, as the specification counts ARL in an open pool; the rest sits in vesting wallets, the timelock and allocation Safes and counts as locked. Allocated supply is not circulating supply. The methodology is in the tokenomics document.",
       },
       links: [{ label: "Supply methodology", href: repoDoc("docs/tokenomics.md") }],
     },

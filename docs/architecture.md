@@ -3,7 +3,7 @@
 Status: Phase 1 (token, vesting, treasury contracts), the Public Launch
 Merkle claim distributor (not deployed at TGE; kept for the later airdrop) and the staking
 rewards contract are implemented and tested. The Phase 1 contracts are deployed on Base Sepolia (testnet) only; see
-[`README.md`](../README.md). Nothing is deployed on Base Mainnet.
+[`README.md`](../README.md). The ARL token, its 12 Safes, both vesting wallets and the treasury timelock are deployed on Base Mainnet (2026-10-24, token `0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4`, see [mainnet-plan.md](mainnet-plan.md)); the other contracts run on Base Sepolia only.
 
 ## Repository
 
@@ -56,16 +56,16 @@ Rules:
 
 ## Approved decisions
 
-| Area         | Decision                                                                                             | Detail                                       |
-| ------------ | ---------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| Chain        | Base: Base Sepolia for testnet, Base Mainnet for production (opens at the TGE, 2026-10-23T00:00:00Z) | [`chain-evaluation.md`](chain-evaluation.md) |
-| License      | Apache-2.0                                                                                           | `LICENSE`, `NOTICE`                          |
-| Token        | ERC-20, 18 decimals, 21,000,000 ARL minted once, no mint function, no owner, no pause                | [`token-design.md`](token-design.md)         |
-| Allocation   | 11 allocations totalling 21,000,000 ARL (approved 2026-09-27)                                        | [`tokenomics.md`](tokenomics.md)             |
-| Custody      | Vesting wallets, timelock or a dedicated Safe per allocation (approved 2026-09-27)                   | [`tokenomics.md`](tokenomics.md#custody)     |
-| Treasury     | Safe 2-of-3, minimum 48-hour timelock, guardian Safe that can only cancel (no sunset)                | [`token-design.md`](token-design.md)         |
-| Dependencies | Open source first, provenance recorded                                                               | [`open-source.md`](open-source.md)           |
-| Content      | English only; no unverified claims; no implied partnerships                                          | [`content-standard.md`](content-standard.md) |
+| Area         | Decision                                                                                  | Detail                                       |
+| ------------ | ----------------------------------------------------------------------------------------- | -------------------------------------------- |
+| Chain        | Base: Base Sepolia for testnet, Base Mainnet for production (token live since 2026-10-24) | [`chain-evaluation.md`](chain-evaluation.md) |
+| License      | Apache-2.0                                                                                | `LICENSE`, `NOTICE`                          |
+| Token        | ERC-20, 18 decimals, 21,000,000 ARL minted once, no mint function, no owner, no pause     | [`token-design.md`](token-design.md)         |
+| Allocation   | 11 allocations totalling 21,000,000 ARL (approved 2026-09-27)                             | [`tokenomics.md`](tokenomics.md)             |
+| Custody      | Vesting wallets, timelock or a dedicated Safe per allocation (approved 2026-09-27)        | [`tokenomics.md`](tokenomics.md#custody)     |
+| Treasury     | Safe 2-of-3, minimum 48-hour timelock, guardian Safe that can only cancel (no sunset)     | [`token-design.md`](token-design.md)         |
+| Dependencies | Open source first, provenance recorded                                                    | [`open-source.md`](open-source.md)           |
+| Content      | English only; no unverified claims; no implied partnerships                               | [`content-standard.md`](content-standard.md) |
 
 ## Decisions still open
 
