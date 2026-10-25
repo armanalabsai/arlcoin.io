@@ -14,15 +14,28 @@ export {
   type StreamingErrorCode,
 } from "./streaming.ts";
 export {
+  BASE_MAINNET_VERIFIED,
   BASE_SEPOLIA_VERIFIED,
   VERDICT_PHASES,
   VerifiedJobError,
   checkOpenParams,
+  checkVerifiedChain,
   finalizeJob,
   getVerdict,
   openVerifiedJob,
   verifiedEvaluatorAbi,
+  verifiedDeployment,
   verifiedJobsAbi,
+  walletAccount,
   type OpenVerifiedJobParams,
   type VerifiedClients,
 } from "./verified.ts";
+export {
+  ESCROW_SCHEME,
+  JOB_HEADER,
+  fundVerifiedJob,
+  parseEscrowOffer,
+  payVerified,
+  type EscrowOffer,
+  type PayVerifiedOptions,
+} from "./payVerified.ts";
