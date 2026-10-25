@@ -162,6 +162,7 @@ try {
     parseUnits("1", 18),
     zero,
     zero,
+    zero,
   ]);
   lap("contracts deployed (local chain)");
 

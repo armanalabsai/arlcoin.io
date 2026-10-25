@@ -30,8 +30,10 @@ interface IERC8004Reputation {
 /// @notice An `ARLJobs` client names this contract as the job's evaluator and, while the job is
 /// Open, proposes a committee of staked validators, a threshold, a bond floor and the job's vote
 /// and challenge windows. The provider approves the committee, so neither side picks it alone.
-/// Once the job is funded, each member accepts, locking a bond in the job's payment token: the
-/// larger of the floor and a tenth of the budget. After the provider submits, members check the
+/// Once the job is funded, each member accepts, locking a bond in the stake token. When the stake
+/// token is the job's payment token the bond is the larger of the floor and a tenth of the budget;
+/// when it is another token (for example an escrow paid in USDC with bonds in ARL) the budget
+/// cannot be compared with the bond, and the bond is the job's floor. After the provider submits, members check the
 /// work (re-execute it, or check a TEE or proof attestation, as the job's spec says) and vote
 /// within the vote window. Once the threshold approves, or approval can no longer be reached, the
 /// decision waits out the challenge window; without a dispute anyone finalizes it: the escrow goes
@@ -118,14 +120,18 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
     uint8 private constant ABSENT = 5;
 
     ARLJobs public immutable jobs;
-    /// @notice The jobs contract's payment token: stakes and bonds are in the escrow's token.
+    /// @notice Token of validator stakes and bonds: the escrow's payment token unless the
+    /// deployment names another one.
     IERC20 public immutable stakeToken;
+    /// @notice True when stakes are in the escrow's payment token, so a bond can follow the budget.
+    bool public immutable bondFollowsBudget;
     address public immutable arbiter;
     /// @notice Shortest challenge window a job may set (for example 1 hour on Base Sepolia,
     /// 24 hours on Base Mainnet).
     uint64 public immutable minChallengeWindow;
     /// @notice Smallest bond floor a job may set. A technical gate against zero-cost votes; the
-    /// economic bond is the larger of the floor and a tenth of the budget.
+    /// economic bond is the larger of the floor and a tenth of the budget when `bondFollowsBudget`,
+    /// else the job's floor.
     uint96 public immutable minBond;
     IERC8004Identity public immutable identity;
     IERC8004Reputation public immutable reputation;
@@ -194,7 +200,8 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         uint64 minChallengeWindow_,
         uint96 minBond_,
         IERC8004Identity identity_,
-        IERC8004Reputation reputation_
+        IERC8004Reputation reputation_,
+        IERC20 stakeToken_
     ) {
         if (address(jobs_) == address(0) || arbiter_ == address(0)) {
             revert ZeroAddress();
@@ -204,7 +211,9 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         }
         if (minBond_ == 0) revert BondTooLow();
         jobs = jobs_;
-        stakeToken = jobs_.paymentToken();
+        IERC20 payment = jobs_.paymentToken();
+        stakeToken = address(stakeToken_) == address(0) ? payment : stakeToken_;
+        bondFollowsBudget = stakeToken == payment;
         arbiter = arbiter_;
         minChallengeWindow = minChallengeWindow_;
         minBond = minBond_;
@@ -283,7 +292,8 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
 
     /// @notice Committee member only, once the committee is approved and the job is funded,
     /// before voting starts: commits to vote and locks the job's bond from the caller's stake.
-    /// The bond is fixed by the first acceptance (the budget cannot change once funded).
+    /// The bond is fixed by the first acceptance (the budget cannot change once funded). With
+    /// stakes in another token than the escrow's, the bond is the job's floor.
     function accept(uint256 jobId) external {
         Verdict storage v = _verdicts[jobId];
         if (v.phase != Phase.Configured || v.voteEnds != 0) revert WrongPhase();
@@ -295,7 +305,7 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         }
         uint256 bond = v.bond;
         if (bond == 0) {
-            bond = job.budget * BOND_BPS / 10_000;
+            bond = bondFollowsBudget ? job.budget * BOND_BPS / 10_000 : 0;
             uint256 floor = _configs[jobId].bond;
             if (bond < floor) bond = floor;
             v.bond = bond;

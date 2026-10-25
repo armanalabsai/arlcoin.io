@@ -6,8 +6,8 @@
 // chain first and nothing is written unless all pass:
 // - each creation in the run is an ARLJobs or ARLVerifiedEvaluator with code at its address (a run
 //   that creates only the evaluator, for an escrow already on chain, takes the escrow from it);
-// - the escrow is paid in the Base Mainnet ARL token;
-// - the evaluator belongs to that escrow, stakes in the same token and writes to the canonical
+// - the escrow is paid in the Base Mainnet ARL token or in USDC;
+// - the evaluator belongs to that escrow, stakes in ARL and writes to the canonical
 //   ERC-8004 registries;
 // - the arbiter is a Safe with at least two signatures of at least three owners.
 // Base Mainnet (8453) only. Exit codes: 0 written, 3 a check failed, 1 could not run, 2 usage.
@@ -18,6 +18,7 @@ import process from "node:process";
 import { createPublicClient, getAddress, http, parseAbi, type Address } from "viem";
 
 const ARL_TOKEN: Address = "0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4";
+const USDC: Address = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const IDENTITY: Address = "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432";
 const REPUTATION: Address = "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63";
 
@@ -95,7 +96,7 @@ const read = <T>(address: Address, functionName: (typeof abi)[number]["name"]) =
   client.readContract({ address, abi, functionName }) as unknown as Promise<T>;
 
 const token = getAddress(await read<Address>(jobs, "paymentToken"));
-check(token === ARL_TOKEN, `escrow is paid in ARL (${token})`);
+check(token === ARL_TOKEN || token === USDC, `escrow is paid in ARL or USDC (${token})`);
 check(
   getAddress(await read<Address>(evaluator, "jobs")) === jobs,
   "evaluator belongs to the escrow",
@@ -136,7 +137,8 @@ const record = {
     ? "base-mainnet-fork-rehearsal"
     : "base-mainnet",
   chainId,
-  token: ARL_TOKEN,
+  token,
+  stakeToken: ARL_TOKEN,
   jobs,
   evaluator,
   arbiter,

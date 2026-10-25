@@ -175,6 +175,7 @@ before(async () => {
     parseUnits("1", 18),
     zero,
     zero,
+    zero,
   ]);
   for (const v of [v1, v2, v3]) {
     await send(client, token, "ARLToken", "transfer", [v.address, parseUnits("100", 18)]);
