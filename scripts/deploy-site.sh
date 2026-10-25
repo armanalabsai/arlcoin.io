@@ -19,6 +19,8 @@ bash "$ROOT/scripts/build-site.sh" "$STAGE"
 cp -r "$ROOT/.vercel" "$STAGE/.vercel" 2>/dev/null || true
 
 cd "$STAGE"
+# --archive=tgz uploads the build as one compressed file instead of one request per file, which
+# keeps a deploy well inside Vercel's daily upload limit (5000 files on the free plan).
 TOKEN_ARGS=()
 if [ -n "${VERCEL_TOKEN:-}" ]; then TOKEN_ARGS=(--token "$VERCEL_TOKEN"); fi
-npx --yes vercel@latest deploy --prod --yes --scope alazdg ${TOKEN_ARGS[@]+"${TOKEN_ARGS[@]}"}
+npx --yes vercel@latest deploy --prod --yes --archive=tgz --scope alazdg ${TOKEN_ARGS[@]+"${TOKEN_ARGS[@]}"}
