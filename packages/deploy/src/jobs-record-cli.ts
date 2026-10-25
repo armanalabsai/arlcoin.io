@@ -81,7 +81,7 @@ const jobs =
       address: evaluator,
       abi,
       functionName: "jobs",
-    })) as Address,
+    })),
   );
 
 for (const [name, address] of [
