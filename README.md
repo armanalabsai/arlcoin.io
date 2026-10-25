@@ -67,7 +67,7 @@ compares that build with the code at each deployed address.
 | ZK anonymous signals (Semaphore, Noir/UltraHonk) | [`zk/semaphore`](zk/semaphore/src/main.nr), [`ARLAnonymousSignal.sol`](contracts/src/ARLAnonymousSignal.sol) | [circuit](zk/check.sh), [real proofs](contracts/test-zk/ARLAnonymousSignal.t.sol), [`@arl/zk`](packages/zk/test/zk.test.ts)               | [zk-privacy.md](docs/zk-privacy.md)                              | Base Sepolia (deployed and verified) |
 | Web app (claim, vesting, staking, jobs, verified jobs with public network activity, payments, private signals) | [`apps/dapp`](apps/dapp)                                                          | [unit](apps/dapp/test/unit), [end-to-end on Anvil](apps/dapp/test/e2e)                                                                      | [app.md](docs/app.md)                                            | Live on Base Sepolia ([arlcoin.io/app](https://arlcoin.io/app/)) |
 | Website: "Live on Base Sepolia" badge (reads the chain every 30 s), structured data, sitemap | [`apps/web`](apps/web), [`LiveStatus.tsx`](apps/web/src/site/LiveStatus.tsx) | [unit](apps/web/test/unit), [end-to-end](apps/web/test/e2e/site.spec.ts) | [content-standard.md](docs/content-standard.md) | Live at [arlcoin.io](https://arlcoin.io) |
-| DEX launch: 5,000,000 ARL in ARL-only Uniswap v3 pools from 0.20 USD | [`pool.ts`](packages/deploy/src/pool.ts), [`launch-pools.mjs`](scripts/launch-pools.mjs), [`launch-day-pools.sh`](scripts/launch-day-pools.sh) | [unit](packages/deploy/test/pool.test.ts), [fork](contracts/test-fork/UniswapLaunchFork.t.sol), [sale fork](contracts/test-fork/UniswapPublicLaunchFork.t.sol), [mainnet rehearsal](scripts/rehearse-base-mainnet-fork.sh) | [mainnet-runbook.md](docs/mainnet-runbook.md) | Prepared for the TGE; no pool exists yet |
+| DEX launch: 5,000,000 ARL in ARL-only Uniswap v3 pools from 0.20 USD | [`pool.ts`](packages/deploy/src/pool.ts), [`launch-pools.mjs`](scripts/launch-pools.mjs), [`launch-day-pools.sh`](scripts/launch-day-pools.sh) | [unit](packages/deploy/test/pool.test.ts), [fork](contracts/test-fork/UniswapLaunchFork.t.sol), [sale fork](contracts/test-fork/UniswapPublicLaunchFork.t.sol), [mainnet rehearsal](scripts/rehearse-base-mainnet-fork.sh) | [mainnet-runbook.md](docs/mainnet-runbook.md) | Live on Base Mainnet since 2026-10-24: four pools holding 5,000,000 ARL ([addresses](docs/mainnet-plan.md#uniswap-v3-pools)) |
 
 Not built: private payments and proof-verified computation (no circuits exist; the committee-based
 evaluator above is built, the proof tier is a design in [verifiable-execution.md](docs/verifiable-execution.md)), an ARL-operated
@@ -159,7 +159,9 @@ on Basescan.
 | 4 | Public Launch Safe, 2 of 3 | 3,000,000 ARL on the same pools and ranges (sale positions) |
 | 5 | none | Addresses published on arlcoin.io and here, token list, supply API, mainnet monitor |
 
-Circulating at TGE: 2,100,000 ARL (the Founder allocation); ARL bought from the pools adds to it.
+Circulating at the token deployment: 2,100,000 ARL (the Founder allocation). Once the pools opened
+on 2026-10-24, the 5,000,000 ARL deposited in them count as circulating too (economic
+specification section 5), so the supply API reported about 7,100,000 ARL.
 The Public Launch Safe keeps 500,000 ARL for a later airdrop and 1,500,000 ARL for launchpad
 sales. No project funds are added to the pools.
 

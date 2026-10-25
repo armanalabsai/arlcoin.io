@@ -409,14 +409,15 @@ describe("execute and decide", () => {
 });
 
 describe("chain gate", () => {
-  it("allows Base Sepolia and local only", () => {
+  it("allows Base Mainnet, Base Sepolia and local only", () => {
+    checkChain(8_453);
     checkChain(84_532);
     checkChain(31_337);
     assert.throws(() => {
-      checkChain(8_453);
+      checkChain(1);
     }, ChainError);
     assert.throws(() => {
-      checkChain(1);
+      checkChain(10);
     }, ChainError);
   });
 });
