@@ -2,7 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 // The hosted test: the site as arlcoin.io serves it, built by scripts/build-site.sh into
 // .hosted-stage (npm run test:hosted builds it first), with the app under /app.
-// No chain is needed: before the launch the public app reads nothing from Base Mainnet.
+// No chain is needed: the tested pages render without reading Base Mainnet.
 const executablePath = process.env.PW_CHROMIUM_PATH;
 const PORT = 3219;
 

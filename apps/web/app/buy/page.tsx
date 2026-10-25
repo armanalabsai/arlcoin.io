@@ -33,7 +33,7 @@ export default function BuyPage() {
       lead={
         token
           ? "ARL trades in the official ARL/USDC, ARL/USDT, ARL/ETH and ARL/BTC pools on Uniswap on Base. Check the contract address before you buy."
-          : `ARL is not available yet. It becomes available at the TGE, targeted for ${SITE.tgeTarget}, in the official ARL/USDC, ARL/USDT, ARL/ETH and ARL/BTC pools on Uniswap on Base.`
+          : "The official ARL/USDC, ARL/USDT, ARL/ETH and ARL/BTC pools are on Uniswap on Base. Check the contract address before you buy."
       }
     >
       <JsonLd data={breadcrumbJsonLd([["How to get ARL", "/buy"]])} />
