@@ -47,3 +47,42 @@ describe("Base Mainnet plans for TGE day", () => {
     assert.ok(recordCommand(run, "x.json").command.includes(" https://mainnet.base.org "));
   });
 });
+
+// The network services on Base Mainnet (docs/mainnet-services.md): the arbiter Safe of the
+// verified evaluator at nonce 19, then the jobs escrow and the evaluator at nonces 20 and 21.
+describe("Base Mainnet plans for the verified jobs", () => {
+  it("creates the 2-of-3 arbiter Safe of the three arbiters", () => {
+    const run = afterTge(() => parseRun(plan("8453-arbiter-safe")));
+    assert.equal(run.chainId, 8453);
+    assert.equal(run.steps.length, 1);
+    const safe = run.steps[0];
+    assert.equal(safe?.kind, "safe");
+    if (safe?.kind === "safe") {
+      assert.equal(safe.nonce, 19);
+      assert.equal(safe.threshold, 2n);
+      assert.equal(safe.owners.length, 3);
+    }
+    const record = recordCommand(run, "x.json");
+    assert.equal(record.kind, "arbiter");
+    assert.ok(!record.command.includes("8453-safes.json"));
+  });
+
+  it("creates the escrow paid in ARL and its evaluator, and records them apart", () => {
+    const run = afterTge(() => parseRun(plan("8453-verified-jobs")));
+    assert.deepEqual(
+      run.steps.map((s) => (s.kind === "create" ? s.contract : s.kind)),
+      ["ARLJobs", "ARLVerifiedEvaluator"],
+    );
+    const [jobs, evaluator] = run.steps;
+    if (jobs?.kind === "create" && evaluator?.kind === "create") {
+      assert.equal(jobs.nonce, 20);
+      assert.equal(String(jobs.args[0]).toLowerCase(), planned("ARL token"));
+      assert.equal(String(evaluator.args[0]).toLowerCase(), jobs.address.toLowerCase());
+      assert.equal(evaluator.args[2], 86_400n);
+      assert.equal(evaluator.args[3], 100n * 10n ** 18n);
+    }
+    const record = recordCommand(run, "x.json");
+    assert.equal(record.kind, "jobs");
+    assert.ok(record.command.includes("8453-jobs.json"));
+  });
+});
