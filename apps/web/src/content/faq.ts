@@ -55,7 +55,7 @@ export const FAQ: readonly FaqEntry[] = [
   {
     question: "Which blockchain will ARL use?",
     answer:
-      "Base. ARL is an ERC-20 token on Base Mainnet (chain 8453). The app still runs on the Base Sepolia testnet, where tokens have no value.",
+      "Base. ARL is an ERC-20 token on Base Mainnet (chain 8453). The app runs on the Base Sepolia testnet (chain 84532).",
   },
   {
     question: "When is the launch?",
