@@ -18,7 +18,7 @@ Security notice
 - There is no "support" account that fixes wallets.
 - Official links are only on https://arlcoin.io.
 - There is no airdrop at launch. Any airdrop or claim link posted before the official announcement on https://arlcoin.io is a scam.
-- Base Mainnet contract addresses will be published there only after deployment is verified. Any mainnet address posted before that is fake.
+- The only official ARL contract on Base Mainnet is 0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4. Any other address is fake.
 ```
 
 ## Pin 2: what ARL is
@@ -27,9 +27,9 @@ Security notice
 ARL Network: a payment rail for AI and compute services on Base.
 
 - ARL token: 21,000,000 fixed supply, no mint function, no owner, no upgrade proxy.
-- Live on Base Sepolia testnet: 0x244312b619127B6458154F3467eFD7c87CD28500
-- Base Mainnet: targeted for 2026-10-23, not deployed yet.
-- Per-use payments (x402 "upto"): in development, not deployed.
+- Live on Base Mainnet since 2026-10-24: 0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4
+- Uniswap v3 pools on Base: ARL/USDC, ARL/USDT, ARL/WETH, ARL/cbBTC, from 0.20 USD per ARL.
+- Per-use payments (x402 "upto"): live on the Base Sepolia testnet, not on Base Mainnet.
 - No airdrop at launch. An airdrop of 500,000 ARL is planned for a later date; date, eligibility and rules will be announced later on the official channels.
 - A bug bounty paid in ARL is open.
 

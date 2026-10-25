@@ -47,3 +47,48 @@ describe("Base Mainnet plans for TGE day", () => {
     assert.ok(recordCommand(run, "x.json").command.includes(" https://mainnet.base.org "));
   });
 });
+
+// The network services on Base Mainnet (docs/mainnet-services.md): the arbiter Safe of the
+// verified evaluator at nonce 19, the jobs escrow at nonce 21 (nonce 20 was a plain transfer), then
+// the evaluator at nonce 22.
+describe("Base Mainnet plans for the verified jobs", () => {
+  it("creates the 2-of-3 arbiter Safe of the three arbiters", () => {
+    const run = afterTge(() => parseRun(plan("8453-arbiter-safe")));
+    assert.equal(run.chainId, 8453);
+    assert.equal(run.steps.length, 1);
+    const safe = run.steps[0];
+    assert.equal(safe?.kind, "safe");
+    if (safe?.kind === "safe") {
+      assert.equal(safe.nonce, 19);
+      assert.equal(safe.threshold, 2n);
+      assert.equal(safe.owners.length, 3);
+    }
+    const record = recordCommand(run, "x.json");
+    assert.equal(record.kind, "arbiter");
+    assert.ok(!record.command.includes("8453-safes.json"));
+  });
+
+  it("creates the evaluator at nonce 22 for the escrow created at nonce 21", () => {
+    const run = afterTge(() => parseRun(plan("8453-verified-evaluator")));
+    assert.deepEqual(
+      run.steps.map((s) => (s.kind === "create" ? s.contract : s.kind)),
+      ["ARLVerifiedEvaluator"],
+    );
+    const evaluator = run.steps[0];
+    assert.equal(evaluator?.kind, "create");
+    if (evaluator?.kind === "create") {
+      assert.equal(evaluator.nonce, 22);
+      assert.equal(evaluator.address, getContractAddress({ from: run.from, nonce: 22n }));
+      assert.equal(
+        String(evaluator.args[0]).toLowerCase(),
+        getContractAddress({ from: run.from, nonce: 21n }).toLowerCase(),
+      );
+      assert.equal(String(evaluator.args[1]), "0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f");
+      assert.equal(evaluator.args[2], 86_400n);
+      assert.equal(evaluator.args[3], 100n * 10n ** 18n);
+    }
+    const record = recordCommand(run, "x.json");
+    assert.equal(record.kind, "jobs");
+    assert.ok(record.command.includes("8453-jobs.json"));
+  });
+});

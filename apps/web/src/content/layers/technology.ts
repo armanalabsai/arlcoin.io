@@ -154,7 +154,9 @@ export const technology: Layer = {
           },
           {
             heading: "Not yet built",
-            items: ["Nothing is deployed on Base Mainnet"],
+            items: [
+              "The network contracts are not deployed on Base Mainnet; only the ARL token, its Safes, vesting and timelock are",
+            ],
           },
         ],
       },

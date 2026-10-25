@@ -54,14 +54,14 @@ const CHIPS = [
   "ERC-20 on Base",
   "Source-verified on Basescan",
   "Fixed supply · no mint",
-  "Live on Base",
+  "Token live on Base",
 ];
 
 const FACTS = [
   {
     label: "Chain",
     value: "Base",
-    note: "Ethereum layer 2. Live on Base Mainnet since 24 October 2026.",
+    note: "Ethereum layer 2. The ARL token is live on Base Mainnet since 24 October 2026.",
   },
   {
     label: "Standard",
@@ -281,7 +281,7 @@ export default function Home() {
         <Section
           alt
           heading="Where ARL is today."
-          sub="Live on Base Mainnet since 24 October 2026."
+          sub="The ARL token is live on Base Mainnet since 24 October 2026. The network services (AI payments, compute, escrowed jobs, staking) run on the Base Sepolia testnet until each is deployed on Base Mainnet."
         >
           <Reveal delay={120} className="glass mt-14 rounded-[28px] p-6 sm:p-10">
             <ol className="landing-road text-left">
