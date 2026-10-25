@@ -18,7 +18,13 @@ const contractsDir = join(here, "..", "..", "..", "contracts");
 const outPath = join(here, "..", "lib", "deployArtifacts.ts");
 const check = process.argv.includes("--check");
 
-const NAMES = ["ARLVestingWallet", "ARLTimelock", "ARLToken"] as const;
+const NAMES = [
+  "ARLVestingWallet",
+  "ARLTimelock",
+  "ARLToken",
+  "ARLJobs",
+  "ARLVerifiedEvaluator",
+] as const;
 
 interface ForgeArtifact {
   bytecode: { object: Hex };
