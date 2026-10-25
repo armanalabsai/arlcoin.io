@@ -56,5 +56,20 @@ evaluator was created at the address above for the deployed escrow, and
 `node packages/deploy/src/jobs-record-cli.ts` passed every check (escrow paid in ARL, evaluator
 bound to the escrow, both registries, arbiter 2 of 3).
 
-After signing: `node packages/deploy/src/jobs-record-cli.ts <run.json> https://mainnet.base.org
-contracts/deploy/deployments/8453-jobs.json`, then source verification on Basescan.
+Signed on 25 October 2026 at deployer nonce 22 (the deployer's nonce is now 23). Checks after
+signing:
+
+```sh
+node packages/deploy/src/jobs-record-cli.ts apps/dapp/public/plans/8453-verified-evaluator.json \
+  https://mainnet.base.org contracts/deploy/deployments/8453-jobs.json
+```
+
+passed every check on chain: the escrow is paid in ARL, the evaluator belongs to the escrow and
+stakes in ARL, it writes to both ERC-8004 registries, and the arbiter Safe is 2 of 3. Challenge
+window 86,400 seconds, minimum bond 100 ARL. Like every deployment record, `8453-jobs.json` stays
+out of git (`contracts/deploy/deployments/` is ignored); anyone can rebuild it with the command
+above.
+
+Both contracts are source-verified on Basescan:
+[ARLJobs](https://basescan.org/address/0x6c8A7712010f951f5B03A11C24b46C8b18d5997F#code),
+[ARLVerifiedEvaluator](https://basescan.org/address/0x3a5dC803b84D5F150FCd2b070cb9D8a12BC35F34#code).
