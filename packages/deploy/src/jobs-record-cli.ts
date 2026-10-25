@@ -4,7 +4,8 @@
 // Writes the record of the jobs escrow and the verified evaluator from the run file of
 // `DeployMainnetVerifiedJobs` (the dry-run file the Deploy screen signed). Every check runs on
 // chain first and nothing is written unless all pass:
-// - each creation in the run is an ARLJobs or ARLVerifiedEvaluator with code at its address;
+// - each creation in the run is an ARLJobs or ARLVerifiedEvaluator with code at its address (a run
+//   that creates only the evaluator, for an escrow already on chain, takes the escrow from it);
 // - the escrow is paid in the Base Mainnet ARL token;
 // - the evaluator belongs to that escrow, stakes in the same token and writes to the canonical
 //   ERC-8004 registries;
@@ -64,13 +65,24 @@ const find = (name: string) => {
   const t = created.find((x) => x.contractName === name);
   return t?.contractAddress ? getAddress(t.contractAddress) : undefined;
 };
-const jobs = find("ARLJobs");
 const evaluator = find("ARLVerifiedEvaluator");
+const createdJobs = find("ARLJobs");
 check(
-  created.length === 2 && jobs !== undefined && evaluator !== undefined,
-  "run creates ARLJobs and ARLVerifiedEvaluator only",
+  evaluator !== undefined && created.length === (createdJobs === undefined ? 1 : 2),
+  createdJobs === undefined
+    ? "run creates ARLVerifiedEvaluator only"
+    : "run creates ARLJobs and ARLVerifiedEvaluator only",
 );
-if (!jobs || !evaluator) process.exit(3);
+if (!evaluator) process.exit(3);
+const jobs =
+  createdJobs ??
+  getAddress(
+    await client.readContract({
+      address: evaluator,
+      abi,
+      functionName: "jobs",
+    }),
+  );
 
 for (const [name, address] of [
   ["ARLJobs", jobs],

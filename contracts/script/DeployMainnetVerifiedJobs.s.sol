@@ -24,7 +24,8 @@ import {ISafe} from "./CreateSafes.s.sol";
 ///
 /// Inputs (environment): `ARL_ARBITER`; optionally `ARL_TOKEN` (default: the Base Mainnet ARL
 /// token; required on the local chain), `ARL_MIN_CHALLENGE_WINDOW` (seconds, default 24 hours)
-/// and `ARL_MIN_BOND` (wei of ARL, default 100 ARL).
+/// and `ARL_MIN_BOND` (wei of ARL, default 100 ARL). With `ARL_JOBS` set to an escrow already on
+/// chain, only the evaluator is deployed, for that escrow.
 ///   forge script script/DeployMainnetVerifiedJobs.s.sol:DeployMainnetVerifiedJobs \
 ///     --rpc-url https://mainnet.base.org --sender <deployer>
 /// (a dry run; the owner signs the run file on the app's Deploy screen).
@@ -48,6 +49,8 @@ contract DeployMainnetVerifiedJobs is Script {
     error WrongToken(address token);
     error ArbiterNotASafe(address arbiter);
     error ArbiterThresholdTooLow(uint256 threshold);
+    error WrongJobsToken(address jobs);
+    error NotARLJobs(address jobs);
 
     function run() external returns (ARLJobs jobs, ARLVerifiedEvaluator evaluator) {
         address arbiter = vm.envAddress("ARL_ARBITER");
@@ -55,7 +58,46 @@ contract DeployMainnetVerifiedJobs is Script {
         uint64 window =
             uint64(vm.envOr("ARL_MIN_CHALLENGE_WINDOW", uint256(DEFAULT_MIN_CHALLENGE_WINDOW)));
         uint96 minBond = uint96(vm.envOr("ARL_MIN_BOND", uint256(DEFAULT_MIN_BOND)));
+        address existing = vm.envOr("ARL_JOBS", address(0));
+        if (existing != address(0)) {
+            jobs = ARLJobs(existing);
+            return (jobs, deployEvaluator(jobs, token, arbiter, window, minBond));
+        }
         return deploy(token, arbiter, window, minBond);
+    }
+
+    /// @notice Only the evaluator, for an escrow already on chain (`ARL_JOBS`): reverts unless
+    /// the escrow runs the `ARLJobs` code and is paid in `token`.
+    function deployEvaluator(
+        ARLJobs jobs,
+        address token,
+        address arbiter,
+        uint64 window,
+        uint96 minBond
+    ) public returns (ARLVerifiedEvaluator evaluator) {
+        check(token, arbiter);
+        checkJobs(jobs, token);
+        vm.startBroadcast();
+        evaluator = new ARLVerifiedEvaluator(
+            jobs,
+            arbiter,
+            window,
+            minBond,
+            IERC8004Identity(identity()),
+            IERC8004Reputation(reputation())
+        );
+        vm.stopBroadcast();
+    }
+
+    /// @notice Reverts unless `jobs` holds the runtime code of `ARLJobs` for `token` and is paid
+    /// in it.
+    function checkJobs(ARLJobs jobs, address token) public {
+        if (address(jobs).code.length == 0) revert NoCode("jobs escrow", address(jobs));
+        if (address(jobs.paymentToken()) != token) revert WrongJobsToken(address(jobs));
+        ARLJobs expected = new ARLJobs(IERC20(token));
+        if (address(jobs).codehash != address(expected).codehash) {
+            revert NotARLJobs(address(jobs));
+        }
     }
 
     /// @notice The deployment itself, with every input explicit (`run` reads them from the

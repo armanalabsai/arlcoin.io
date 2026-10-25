@@ -49,7 +49,8 @@ describe("Base Mainnet plans for TGE day", () => {
 });
 
 // The network services on Base Mainnet (docs/mainnet-services.md): the arbiter Safe of the
-// verified evaluator at nonce 19, then the jobs escrow and the evaluator at nonces 20 and 21.
+// verified evaluator at nonce 19, the jobs escrow at nonce 21 (nonce 20 was a plain transfer), then
+// the evaluator at nonce 22.
 describe("Base Mainnet plans for the verified jobs", () => {
   it("creates the 2-of-3 arbiter Safe of the three arbiters", () => {
     const run = afterTge(() => parseRun(plan("8453-arbiter-safe")));
@@ -67,17 +68,22 @@ describe("Base Mainnet plans for the verified jobs", () => {
     assert.ok(!record.command.includes("8453-safes.json"));
   });
 
-  it("creates the escrow paid in ARL and its evaluator, and records them apart", () => {
-    const run = afterTge(() => parseRun(plan("8453-verified-jobs")));
+  it("creates the evaluator at nonce 22 for the escrow created at nonce 21", () => {
+    const run = afterTge(() => parseRun(plan("8453-verified-evaluator")));
     assert.deepEqual(
       run.steps.map((s) => (s.kind === "create" ? s.contract : s.kind)),
-      ["ARLJobs", "ARLVerifiedEvaluator"],
+      ["ARLVerifiedEvaluator"],
     );
-    const [jobs, evaluator] = run.steps;
-    if (jobs?.kind === "create" && evaluator?.kind === "create") {
-      assert.equal(jobs.nonce, 20);
-      assert.equal(String(jobs.args[0]).toLowerCase(), planned("ARL token"));
-      assert.equal(String(evaluator.args[0]).toLowerCase(), jobs.address.toLowerCase());
+    const evaluator = run.steps[0];
+    assert.equal(evaluator?.kind, "create");
+    if (evaluator?.kind === "create") {
+      assert.equal(evaluator.nonce, 22);
+      assert.equal(evaluator.address, getContractAddress({ from: run.from, nonce: 22n }));
+      assert.equal(
+        String(evaluator.args[0]).toLowerCase(),
+        getContractAddress({ from: run.from, nonce: 21n }).toLowerCase(),
+      );
+      assert.equal(String(evaluator.args[1]), "0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f");
       assert.equal(evaluator.args[2], 86_400n);
       assert.equal(evaluator.args[3], 100n * 10n ** 18n);
     }
