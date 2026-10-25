@@ -1,4 +1,4 @@
-# Secret scanning (gitleaks v8.28.0, CI job `secrets`). Default rules plus two reviewed
+# Secret scanning (gitleaks v8.28.0, CI job `secrets`). Default rules plus three reviewed
 # allowlist entries; every other match fails CI.
 [extend]
 useDefault = true
@@ -12,3 +12,13 @@ regexes = ['''^0x[0-9a-fA-F]{40}$''']
 description = "IndexNow site key: public by protocol, served at apps/web/public/<key>.txt."
 regexTarget = "secret"
 regexes = ['''^b724c1741fd52e966e7dadc12f4b8050$''']
+
+[[allowlists]]
+description = "Anvil and Hardhat default dev accounts 0-3 (mnemonic 'test test ... junk'): published in the Foundry and Hardhat docs, hold value on no real network, used only by tests and spec vectors. Any other 32-byte key is still reported."
+regexTarget = "secret"
+regexes = [
+  '''^0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80$''',
+  '''^0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d$''',
+  '''^0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a$''',
+  '''^0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6$''',
+]
