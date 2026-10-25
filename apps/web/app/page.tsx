@@ -312,22 +312,6 @@ export default function Home() {
             </Link>
           </Reveal>
         </Section>
-
-        <section className="landing-final border-t border-line px-4 py-20 text-center sm:px-6 sm:py-28">
-          <Reveal className="glass mx-auto max-w-[880px] rounded-[32px] px-6 py-14 sm:py-20">
-            <h2 className="text-[36px] leading-[1.1] font-bold sm:text-[56px]">
-              Be there at launch.
-            </h2>
-            <p className="mx-auto mt-4 max-w-[560px] text-[17px] leading-[1.5] text-fg-muted sm:text-[21px]">
-              Register a wallet address for launch updates. Free, and no payment is ever requested.
-            </p>
-            <div className="mt-8">
-              <Link href="/whitelist" prefetch={false} className={primary}>
-                Join the whitelist
-              </Link>
-            </div>
-          </Reveal>
-        </section>
       </main>
 
       <SiteFooter />

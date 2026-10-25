@@ -833,10 +833,6 @@
     left: 0;
   }
 }
-.landing-final {
-  background: linear-gradient(180deg, transparent 0%, rgb(11 29 68 / 0.9) 100%);
-}
-
 /*
  * Liquid glass. Surfaces float over the nucleus field: a translucent tint, a strong blur that
  * saturates what is behind, a bright specular rim on the top edge, a softer one at the bottom,

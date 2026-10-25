@@ -72,6 +72,3 @@ export const OG_IMAGE = {
   height: 630,
   alt: "ARL · 21,000,000 ARL maximum supply",
 } as const;
-
-export const TOKEN_DISCLAIMER =
-  "The only official ARL contract on Base Mainnet is 0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4. Tokens can lose all their value; nothing here is an offer, investment advice or a promise of price or listing.";
