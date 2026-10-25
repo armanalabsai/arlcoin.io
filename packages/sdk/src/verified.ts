@@ -36,8 +36,8 @@ export const BASE_SEPOLIA_VERIFIED = {
 export const BASE_MAINNET_VERIFIED = {
   chainId: 8453,
   token: "0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4",
-  jobs: "0x9e647BE305c75e2907aC0a03978261412Ccd31e9",
-  evaluator: "0x6c8A7712010f951f5B03A11C24b46C8b18d5997F",
+  jobs: "0x6c8A7712010f951f5B03A11C24b46C8b18d5997F",
+  evaluator: "0x3a5dC803b84D5F150FCd2b070cb9D8a12BC35F34",
   arbiterSafe: "0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f",
 } as const satisfies Record<string, unknown>;
 
