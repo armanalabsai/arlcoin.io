@@ -2,7 +2,7 @@
   "name": "@arl/sdk",
   "version": "0.1.0",
   "private": true,
-  "description": "ARL developer SDK: per-second compute payment streams (ComputePayment), viem-based",
+  "description": "ARL developer SDK: verified job payments (payVerified, ARLJobs + ARLVerifiedEvaluator), ARL purchase on Uniswap, compute streams; viem-based",
   "type": "module",
   "exports": {
     ".": "./src/index.ts"
@@ -12,6 +12,7 @@
   },
   "scripts": {
     "test": "node --test \"test/**/*.test.ts\"",
-    "test:anvil": "node --test \"test-anvil/**/*.test.ts\""
+    "test:anvil": "node --test \"test-anvil/**/*.test.ts\"",
+    "test:fork": "node --test \"test-fork/**/*.test.ts\""
   }
 }
