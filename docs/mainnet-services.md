@@ -1,17 +1,17 @@
 # Base Mainnet network services
 
-Status: **step 1 in progress: the jobs escrow is on Base Mainnet, the evaluator is not yet.** The ARL token, its Safes, vesting wallets and
+Status: **step 1 in progress: the escrow paid in ARL and its evaluator are on Base Mainnet; the escrow paid in USDC is next.** The ARL token, its Safes, vesting wallets and
 timelock are on Base Mainnet ([mainnet-plan.md](mainnet-plan.md)). The network services still
 run on the Base Sepolia testnet and move to Base Mainnet one at a time, each after its own
 rehearsal, signatures and on-chain check.
 
-| Step | Service                                          | Status                              |
-| ---- | ------------------------------------------------ | ----------------------------------- |
-| 1    | Jobs escrows (ARL, USDC) and verified evaluators | ARL escrow deployed, evaluator next |
-| 2    | Validators: keys, ETH for gas, staked ARL        | Not started                         |
-| 3    | Operator API (x402 per-use payments) on 8453     | Not started                         |
-| 4    | Staking rewards contract and its reward budget   | Not started                         |
-| 5    | App and site switched to Base Mainnet            | Not started                         |
+| Step | Service                                          | Status                                       |
+| ---- | ------------------------------------------------ | -------------------------------------------- |
+| 1    | Jobs escrows (ARL, USDC) and verified evaluators | ARL escrow and evaluator deployed, USDC next |
+| 2    | Validators: keys, ETH for gas, staked ARL        | Not started                                  |
+| 3    | Operator API (x402 per-use payments) on 8453     | Not started                                  |
+| 4    | Staking rewards contract and its reward budget   | Not started                                  |
+| 5    | App and site switched to Base Mainnet            | Not started                                  |
 
 ## Step 1: jobs escrow and verified evaluator
 
@@ -23,7 +23,7 @@ Deploy screen (`arlcoin.io/app/deploy/?plan=…`):
 |    19 | `8453-arbiter-safe` (`CreateArbiterSafe`) | Arbiter Safe, 2 of 3: Hakem 1, Hakem 2, Hakem 3 | `0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f` | Deployed |
 |    20 | none                                      | nothing (a plain ETH transfer by the owner)     |                                              |          |
 |    21 | earlier `8453-verified-jobs`              | `ARLJobs`, paid in ARL                          | `0x6c8A7712010f951f5B03A11C24b46C8b18d5997F` | Deployed |
-|    22 | `8453-verified-evaluator` (#94)           | `ARLVerifiedEvaluator` for that escrow          | `0x3a5dC803b84D5F150FCd2b070cb9D8a12BC35F34` | Next     |
+|    22 | `8453-verified-evaluator` (#94)           | `ARLVerifiedEvaluator` for that escrow          | `0x3a5dC803b84D5F150FCd2b070cb9D8a12BC35F34` | Deployed |
 |    23 | `8453-verified-jobs-usdc`                 | `ARLJobs`, paid in USDC                         | `0xc833140D2eE8607fd41662cffFAc557f3D535bE6` | Planned  |
 |    24 | `8453-verified-jobs-usdc`                 | `ARLVerifiedEvaluator` for it, bonds in ARL     | `0x4f7f61916d65ff9E7C5F62468a18E37d4Fb07FA7` | Planned  |
 
@@ -36,7 +36,7 @@ any other transaction from the deployer before it shifts the address and the pla
 Jobs are paid in ARL or in USDC, one escrow each; validators stake and bond in ARL for both. The
 evaluator for the escrow paid in USDC is deployed with ARL as its stake token: a budget in dollars
 cannot be compared with a bond in ARL, so there the bond is the floor the job sets (at least
-100 ARL) rather than a tenth of the budget. Its plan is signed after nonce 22, and its run is
+100 ARL) rather than a tenth of the budget. Its plan is signed next, and its run is
 recorded in `contracts/deploy/deployments/8453-jobs-usdc.json`.
 
 Fixed parameters (no owner can change them later):
