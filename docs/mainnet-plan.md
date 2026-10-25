@@ -71,3 +71,22 @@ the approved TGE before the mainnet run. The TGE changes the vesting dates, not 
    2026-10-23T00:00:00Z.
 4. The deployer funded with Base ETH; any transaction from it before the run shifts the
    contract addresses above.
+
+## Uniswap v3 pools
+
+Opened 2026-10-24 on Base Mainnet (Uniswap v3, 1% fee tier), from 0.20 USD per ARL. Each pool
+holds ARL only at opening; buyers pay in the quote token. Balances read on chain after opening:
+
+| Pool      | Address                                      | ARL at opening |
+| --------- | -------------------------------------------- | -------------: |
+| ARL/USDC  | `0xBE1c1d2Cd686c3dFEC9221C472A1421B71479b72` |      1,550,000 |
+| ARL/USDT  | `0x4A5579fa8aE69c6a1bC1Ad716cfa0fa80c7D5273` |      1,300,000 |
+| ARL/WETH  | `0x23C85918509FeBe27f74628FDaC34F064f013A78` |      1,275,000 |
+| ARL/cbBTC | `0x644565CF340310Cf24b0D1216D49C40d2A6975db` |        875,000 |
+| **Total** |                                              |  **5,000,000** |
+
+2,000,000 ARL came from the Liquidity Safe and 3,000,000 ARL from the Public Launch Safe, which
+keeps 2,000,000 ARL. The LP position NFTs are held by those two Safes. The Liquidity Safe batch
+needed about 21.3M gas, above Base's per-transaction cap of 16,777,216 (EIP-7825), so it ran as
+two Safe transactions (USDC and USDT pools first, then WETH and cbBTC), followed by the Public
+Launch batch; the calls and amounts are those of the published plan files.

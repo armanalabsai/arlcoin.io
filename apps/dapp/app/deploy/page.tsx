@@ -305,7 +305,8 @@ function Signer({ run, source }: { run: DeployRun; source: string }) {
           <p>
             All transactions are sent. Nothing counts as deployed yet: on a computer, write the
             verified record from this run file. It checks every contract{" "}
-            {recordCommand(run, source).kind === "safes"
+            {recordCommand(run, source).kind === "safes" ||
+            recordCommand(run, source).kind === "arbiter"
               ? "and every Safe's owners and threshold "
               : ""}
             on chain and writes nothing unless all checks pass:
@@ -317,9 +318,14 @@ function Signer({ run, source }: { run: DeployRun; source: string }) {
             {recordCommand(run, source).command}
           </code>
           <p className="text-muted">
-            {recordCommand(run, source).kind === "safes"
-              ? "The next plan takes the Safe addresses only from that record."
-              : "Then run VerifyARL and the deployment proof on that record."}
+            {
+              {
+                safes: "The next plan takes the Safe addresses only from that record.",
+                arl: "Then run VerifyARL and the deployment proof on that record.",
+                jobs: "The record lists the escrow and the evaluator with their checked parameters.",
+                arbiter: "Check that the owners are the three arbiters and the threshold is 2.",
+              }[recordCommand(run, source).kind]
+            }
           </p>
         </div>
       ) : null}

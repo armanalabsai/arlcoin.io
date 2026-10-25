@@ -1,6 +1,6 @@
 // The on-chain side of a validator: read a job and its committed spec hash, find the submitted
-// deliverable, accept, vote. Base Sepolia and the local chain only, like the rest of ARL's
-// testnet tooling: Base Mainnet is refused.
+// deliverable, accept, vote. Base Mainnet (where the evaluator is deployed, see
+// docs/mainnet-services.md), Base Sepolia and the local chain; any other chain is refused.
 
 import {
   parseAbi,
@@ -14,7 +14,7 @@ import {
   type WalletClient,
 } from "viem";
 
-export const ALLOWED_CHAINS = [84_532, 31_337] as const;
+export const ALLOWED_CHAINS = [8_453, 84_532, 31_337] as const;
 
 export class ChainError extends Error {
   override name = "ChainError";
@@ -22,7 +22,9 @@ export class ChainError extends Error {
 
 export function checkChain(chainId: number): void {
   if (!(ALLOWED_CHAINS as readonly number[]).includes(chainId)) {
-    throw new ChainError(`chain ${chainId} is not allowed (Base Sepolia and local only)`);
+    throw new ChainError(
+      `chain ${chainId} is not allowed (Base Mainnet, Base Sepolia and local only)`,
+    );
   }
 }
 
