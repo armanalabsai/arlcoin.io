@@ -6,7 +6,7 @@ import {
   shareOfSupply,
 } from "../../../../../packages/tokenomics/src/index.ts";
 import type { Allocation } from "../../../../../packages/tokenomics/src/index.ts";
-import { SITE, TOKEN_DISCLAIMER, repoDoc } from "../site.ts";
+import { SITE, repoDoc } from "../site.ts";
 import type { Fact, Layer } from "../types.ts";
 
 // Every number on this layer comes from packages/tokenomics. Nothing that
@@ -46,7 +46,6 @@ export const token: Layer = {
   id: "token",
   title: "Token",
   description: `${formatArl(MAX_SUPPLY)} maximum supply. Values that depend on a deployment are marked as such.`,
-  disclaimer: TOKEN_DISCLAIMER,
   cards: [
     {
       id: "max-supply",
