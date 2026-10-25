@@ -21,18 +21,27 @@ contract DeployMainnetVerifiedJobsTest is Test {
         vm.chainId(31_337);
         script = new DeployMainnetVerifiedJobs();
         token = new TestToken();
-        vm.setEnv("ARL_ARBITER", vm.toString(arbiter));
-        vm.setEnv("ARL_TOKEN", vm.toString(address(token)));
     }
 
     function test_localDeployWiresTheEscrowAndTheEvaluator() public {
-        (ARLJobs jobs, ARLVerifiedEvaluator evaluator) = script.run();
+        // Explicit inputs: other suites set ARL_* environment variables in parallel.
+        (ARLJobs jobs, ARLVerifiedEvaluator evaluator) = script.deploy(
+            address(token),
+            arbiter,
+            script.DEFAULT_MIN_CHALLENGE_WINDOW(),
+            script.DEFAULT_MIN_BOND()
+        );
         assertEq(address(jobs.paymentToken()), address(token));
         assertEq(address(evaluator.jobs()), address(jobs));
         assertEq(evaluator.arbiter(), arbiter);
         assertEq(evaluator.minChallengeWindow(), 24 hours);
         assertEq(evaluator.minBond(), 100 ether);
         assertEq(address(evaluator.identity()), address(0));
+    }
+
+    function test_defaultsAreTwentyFourHoursAndOneHundredArl() public view {
+        assertEq(script.DEFAULT_MIN_CHALLENGE_WINDOW(), 24 hours);
+        assertEq(script.DEFAULT_MIN_BOND(), 100 ether);
     }
 
     function test_refusesOtherChains() public {

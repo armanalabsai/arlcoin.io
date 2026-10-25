@@ -55,6 +55,16 @@ contract DeployMainnetVerifiedJobs is Script {
         uint64 window =
             uint64(vm.envOr("ARL_MIN_CHALLENGE_WINDOW", uint256(DEFAULT_MIN_CHALLENGE_WINDOW)));
         uint96 minBond = uint96(vm.envOr("ARL_MIN_BOND", uint256(DEFAULT_MIN_BOND)));
+        return deploy(token, arbiter, window, minBond);
+    }
+
+    /// @notice The deployment itself, with every input explicit (`run` reads them from the
+    /// environment). Tests call this, so they never depend on process-wide environment variables
+    /// that other test suites set in parallel.
+    function deploy(address token, address arbiter, uint64 window, uint96 minBond)
+        public
+        returns (ARLJobs jobs, ARLVerifiedEvaluator evaluator)
+    {
         check(token, arbiter);
         vm.startBroadcast();
         jobs = new ARLJobs(IERC20(token));
