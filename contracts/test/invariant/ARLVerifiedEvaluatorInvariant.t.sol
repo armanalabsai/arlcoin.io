@@ -273,7 +273,8 @@ contract ARLVerifiedEvaluatorInvariant is ARLTestBase {
             1 hours,
             10 ether,
             IERC8004Identity(address(0)),
-            IERC8004Reputation(address(0))
+            IERC8004Reputation(address(0)),
+            IERC20(address(0))
         );
 
         address[] memory vs = new address[](5);

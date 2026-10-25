@@ -2,6 +2,7 @@
 pragma solidity 0.8.36;
 
 import {Script} from "forge-std/Script.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import {ARLJobs} from "../src/ARLJobs.sol";
 import {
@@ -81,7 +82,8 @@ contract DeploySepoliaEvaluator is Script {
             minChallengeWindow,
             minBond,
             IERC8004Identity(identity),
-            IERC8004Reputation(reputation)
+            IERC8004Reputation(reputation),
+            IERC20(address(0))
         );
     }
 

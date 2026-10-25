@@ -2,6 +2,7 @@
 pragma solidity 0.8.36;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 import {ARLJobs} from "../src/ARLJobs.sol";
 import {
@@ -13,6 +14,19 @@ import {ARLTestBase} from "./ARLTestBase.sol";
 
 /// @dev Stand-in for the ERC-8004 IdentityRegistry: settable owners, or a registry that reverts or
 /// returns malformed data.
+/// A six-decimal dollar token standing in for USDC.
+contract MockUsd is ERC20 {
+    constructor() ERC20("USD Coin", "USDC") {}
+
+    function decimals() public pure override returns (uint8) {
+        return 6;
+    }
+
+    function mint(address to, uint256 amount) external {
+        _mint(to, amount);
+    }
+}
+
 contract MockIdentity is IERC8004Identity {
     mapping(uint256 => address) public owners;
     uint8 public mode; // 0: normal, 1: revert, 2: short return data
@@ -103,7 +117,9 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         identity = new MockIdentity();
         reputation = new MockReputation();
         rep = IERC8004Reputation(address(reputation));
-        ev = new ARLVerifiedEvaluator(jobs, arbiter, MIN_WINDOW, MIN_BOND, identity, rep);
+        ev = new ARLVerifiedEvaluator(
+            jobs, arbiter, MIN_WINDOW, MIN_BOND, identity, rep, IERC20(address(0))
+        );
         identity.setOwner(AGENT, provider);
 
         address[6] memory funded = [client, challenger, provider, v1, v2, v3];
@@ -253,22 +269,29 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
     /// Stakes and bonds are in the escrow's own token, whatever it is.
     function test_stakeTokenIsTheEscrowToken() public {
         ARLJobs other = new ARLJobs(IERC20(address(investorsVesting)));
-        ARLVerifiedEvaluator e =
-            new ARLVerifiedEvaluator(other, arbiter, MIN_WINDOW, MIN_BOND, identity, rep);
+        ARLVerifiedEvaluator e = new ARLVerifiedEvaluator(
+            other, arbiter, MIN_WINDOW, MIN_BOND, identity, rep, IERC20(address(0))
+        );
         assertEq(address(e.stakeToken()), address(investorsVesting));
     }
 
     function test_RevertWhen_ConstructorInvalid() public {
         vm.expectRevert(ARLVerifiedEvaluator.ZeroAddress.selector);
-        new ARLVerifiedEvaluator(ARLJobs(address(0)), arbiter, MIN_WINDOW, MIN_BOND, identity, rep);
+        new ARLVerifiedEvaluator(
+            ARLJobs(address(0)), arbiter, MIN_WINDOW, MIN_BOND, identity, rep, IERC20(address(0))
+        );
         vm.expectRevert(ARLVerifiedEvaluator.ZeroAddress.selector);
-        new ARLVerifiedEvaluator(jobs, address(0), MIN_WINDOW, MIN_BOND, identity, rep);
+        new ARLVerifiedEvaluator(
+            jobs, address(0), MIN_WINDOW, MIN_BOND, identity, rep, IERC20(address(0))
+        );
         vm.expectRevert(ARLVerifiedEvaluator.BadWindow.selector);
-        new ARLVerifiedEvaluator(jobs, arbiter, 0, MIN_BOND, identity, rep);
+        new ARLVerifiedEvaluator(jobs, arbiter, 0, MIN_BOND, identity, rep, IERC20(address(0)));
         vm.expectRevert(ARLVerifiedEvaluator.BadWindow.selector);
-        new ARLVerifiedEvaluator(jobs, arbiter, 30 days + 1, MIN_BOND, identity, rep);
+        new ARLVerifiedEvaluator(
+            jobs, arbiter, 30 days + 1, MIN_BOND, identity, rep, IERC20(address(0))
+        );
         vm.expectRevert(ARLVerifiedEvaluator.BondTooLow.selector);
-        new ARLVerifiedEvaluator(jobs, arbiter, MIN_WINDOW, 0, identity, rep);
+        new ARLVerifiedEvaluator(jobs, arbiter, MIN_WINDOW, 0, identity, rep, IERC20(address(0)));
     }
 
     // ---------------------------------------------------------------- stake
@@ -748,6 +771,53 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         ev.closeUndecided(id);
     }
 
+    // ---------------------------------------------------------------- paid in USDC, bonded in ARL
+
+    /// An escrow paid in a six-decimal dollar token with validator bonds in ARL: the bond is the
+    /// job's floor in ARL, whatever the budget, the provider is paid in dollars and the bonds come
+    /// back in ARL.
+    function test_paidInUsdBondedInArl() public {
+        MockUsd usd = new MockUsd();
+        jobs = new ARLJobs(IERC20(address(usd)));
+        ev = new ARLVerifiedEvaluator(
+            jobs, arbiter, MIN_WINDOW, MIN_BOND, identity, rep, IERC20(address(token))
+        );
+        assertEq(address(ev.stakeToken()), address(token));
+        assertFalse(ev.bondFollowsBudget());
+        address[3] memory validators = [v1, v2, v3];
+        for (uint256 i; i < validators.length; ++i) {
+            vm.startPrank(validators[i]);
+            token.approve(address(ev), type(uint256).max);
+            ev.stake(STAKE);
+            vm.stopPrank();
+        }
+        uint256 budget = 1_000_000e6;
+        usd.mint(client, budget);
+        vm.prank(client);
+        usd.approve(address(jobs), budget);
+
+        uint256 id = _configured(_reexec());
+        _approveCommittee(id);
+        _fund(id, budget);
+        _acceptAll(id);
+        assertEq(ev.getVerdict(id).bond, BOND);
+        assertEq(_lockedTotal(), 3 * uint256(BOND));
+
+        _submit(id);
+        _vote(id, v1, true);
+        _vote(id, v2, true);
+        vm.warp(block.timestamp + WINDOW);
+        ev.finalize(id);
+        assertEq(usd.balanceOf(provider), budget);
+        assertEq(_lockedTotal(), 0);
+        assertEq(token.balanceOf(address(ev)), 3 * STAKE);
+    }
+
+    function test_defaultStakeTokenIsTheEscrowToken() public view {
+        assertEq(address(ev.stakeToken()), address(token));
+        assertTrue(ev.bondFollowsBudget());
+    }
+
     // ---------------------------------------------------------------- finalize
 
     function test_finalizeApprovedPaysProviderAndWritesReputation() public {
@@ -866,12 +936,19 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
                 MIN_WINDOW,
                 MIN_BOND,
                 IERC8004Identity(address(0)),
-                IERC8004Reputation(address(0))
+                IERC8004Reputation(address(0)),
+                IERC20(address(0))
             )
         );
         _finalizeOn(
             new ARLVerifiedEvaluator(
-                jobs, arbiter, MIN_WINDOW, MIN_BOND, IERC8004Identity(address(0)), rep
+                jobs,
+                arbiter,
+                MIN_WINDOW,
+                MIN_BOND,
+                IERC8004Identity(address(0)),
+                rep,
+                IERC20(address(0))
             )
         );
         assertEq(reputation.count(), 0);

@@ -266,6 +266,9 @@ export function publishedPlanPath(name: string, basePath = ""): string {
   return `${basePath}/plans/${name}.json`;
 }
 
+/** Circle's native USDC on Base Mainnet: the payment token of the second jobs escrow. */
+const BASE_USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+
 /**
  * After every transaction is signed: the command that writes the verified deployment record
  * from this run file (`packages/deploy/src/record-cli.ts`). Nothing counts as deployed until it
@@ -285,9 +288,16 @@ export function recordCommand(
     s.kind === "create" && (s.contract === "ARLJobs" || s.contract === "ARLVerifiedEvaluator");
   if (run.steps.some(isJobs)) {
     if (!run.steps.every(isJobs)) fail("the run mixes the jobs contracts with other steps");
+    // The escrow paid in USDC is recorded apart from the one paid in ARL.
+    const usdc = run.steps.some(
+      (s) =>
+        s.kind === "create" &&
+        s.contract === "ARLJobs" &&
+        String(s.args[0]).toLowerCase() === BASE_USDC.toLowerCase(),
+    );
     return {
       kind: "jobs",
-      command: `node packages/deploy/src/jobs-record-cli.ts ${runFile} ${rpc} contracts/deploy/deployments/${String(run.chainId)}-jobs.json`,
+      command: `node packages/deploy/src/jobs-record-cli.ts ${runFile} ${rpc} contracts/deploy/deployments/${String(run.chainId)}-jobs${usdc ? "-usdc" : ""}.json`,
     };
   }
   // A single Safe is the evaluator's arbiter (CreateArbiterSafe), not the twelve allocation Safes.

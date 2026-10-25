@@ -134,8 +134,8 @@ export const DEPLOY_ARTIFACTS = {
     ],
   },
   ARLVerifiedEvaluator: {
-    creationHash: "0xe36ae803e575ce583170dcb93bbccfa176974263401144400a009d8b464c0716",
-    creationSize: 14330,
+    creationHash: "0x02f3a47b045158d3c4521170c90ccd15c7c2b3b228fec9c869a692ae0cd0d901",
+    creationSize: 14529,
     constructorInputs: [
       {
         name: "jobs_",
@@ -166,6 +166,11 @@ export const DEPLOY_ARTIFACTS = {
         name: "reputation_",
         type: "address",
         internalType: "contract IERC8004Reputation",
+      },
+      {
+        name: "stakeToken_",
+        type: "address",
+        internalType: "contract IERC20",
       },
     ],
   },
