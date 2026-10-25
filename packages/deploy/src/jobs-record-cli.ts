@@ -77,11 +77,11 @@ if (!evaluator) process.exit(3);
 const jobs =
   createdJobs ??
   getAddress(
-    (await client.readContract({
+    await client.readContract({
       address: evaluator,
       abi,
       functionName: "jobs",
-    })),
+    }),
   );
 
 for (const [name, address] of [
