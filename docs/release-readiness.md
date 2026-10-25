@@ -1,6 +1,8 @@
 # Release readiness
 
-Prepared 2026-10-05. Nothing here has been sent, signed or submitted. Base Sepolia live; Base Mainnet opens only at the TGE (2026-10-23T00:00:00Z).
+Prepared 2026-10-05 (state below as of that date). **Update 2026-10-24:** ARL is deployed on Base
+Mainnet (token `0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4`) and the four Uniswap v3 pools hold 5,000,000 ARL; see
+[mainnet-plan.md](mainnet-plan.md).
 
 ## 1. Current state (read-only checks, Base Sepolia block 47,690,188)
 

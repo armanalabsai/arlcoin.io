@@ -6,7 +6,7 @@ import type { Page } from "@playwright/test";
 
 /**
  * Fails the test on any request under /app that the static host does not serve. Two misses are
- * expected: the claim list before the launch, and Next.js's segment prefetches
+ * expected: the claim list (not published), and Next.js's segment prefetches
  * (`__next.<segment>.__PAGE__.txt`), which a static export writes under another name; the
  * website has the same, and a missed prefetch only means a full page load on navigation.
  */
@@ -43,7 +43,7 @@ test("trade is open for the Base Mainnet token and asks for a wallet", async ({
   expect(missing).toEqual([]);
 });
 
-test("claim is closed before the launch: no Base Mainnet claim list is published", async ({
+test("claim is closed: no Base Mainnet claim list is published", async ({
   page,
   request,
 }, testInfo) => {
