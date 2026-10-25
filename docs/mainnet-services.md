@@ -1,17 +1,17 @@
 # Base Mainnet network services
 
-Status: **step 1 in progress: the jobs escrow is on Base Mainnet, the evaluator is not yet.** The ARL token, its Safes, vesting wallets and
+Status: **step 1 done: the jobs escrow and the verified evaluator are on Base Mainnet.** The ARL token, its Safes, vesting wallets and
 timelock are on Base Mainnet ([mainnet-plan.md](mainnet-plan.md)). The network services still
 run on the Base Sepolia testnet and move to Base Mainnet one at a time, each after its own
 rehearsal, signatures and on-chain check.
 
-| Step | Service                                        | Status                          |
-| ---- | ---------------------------------------------- | ------------------------------- |
-| 1    | Jobs escrow (ERC-8183) and verified evaluator  | Escrow deployed, evaluator next |
-| 2    | Validators: keys, ETH for gas, staked ARL      | Not started                     |
-| 3    | Operator API (x402 per-use payments) on 8453   | Not started                     |
-| 4    | Staking rewards contract and its reward budget | Not started                     |
-| 5    | App and site switched to Base Mainnet          | Not started                     |
+| Step | Service                                        | Status                    |
+| ---- | ---------------------------------------------- | ------------------------- |
+| 1    | Jobs escrow (ERC-8183) and verified evaluator  | Deployed, source-verified |
+| 2    | Validators: keys, ETH for gas, staked ARL      | Not started               |
+| 3    | Operator API (x402 per-use payments) on 8453   | Not started               |
+| 4    | Staking rewards contract and its reward budget | Not started               |
+| 5    | App and site switched to Base Mainnet          | Not started               |
 
 ## Step 1: jobs escrow and verified evaluator
 
@@ -23,7 +23,7 @@ Deploy screen (`arlcoin.io/app/deploy/?plan=…`):
 |    19 | `8453-arbiter-safe` (`CreateArbiterSafe`) | Arbiter Safe, 2 of 3: Hakem 1, Hakem 2, Hakem 3 | `0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f` | Deployed |
 |    20 | none                                      | nothing (a plain ETH transfer by the owner)     |                                              |          |
 |    21 | earlier `8453-verified-jobs`              | `ARLJobs`, paid in ARL                          | `0x6c8A7712010f951f5B03A11C24b46C8b18d5997F` | Deployed |
-|    22 | `8453-verified-evaluator`                 | `ARLVerifiedEvaluator` for that escrow          | `0x3a5dC803b84D5F150FCd2b070cb9D8a12BC35F34` | Next     |
+|    22 | `8453-verified-evaluator`                 | `ARLVerifiedEvaluator` for that escrow          | `0x3a5dC803b84D5F150FCd2b070cb9D8a12BC35F34` | Deployed |
 
 The escrow at nonce 21 runs the same code as the `ARLJobs` of the fork rehearsal (runtime code
 hash `0xbdddd7e2…a6f0fb`) and is paid in ARL. The evaluator plan comes from
@@ -47,5 +47,20 @@ evaluator was created at the address above for the deployed escrow, and
 `node packages/deploy/src/jobs-record-cli.ts` passed every check (escrow paid in ARL, evaluator
 bound to the escrow, both registries, arbiter 2 of 3).
 
-After signing: `node packages/deploy/src/jobs-record-cli.ts <run.json> https://mainnet.base.org
-contracts/deploy/deployments/8453-jobs.json`, then source verification on Basescan.
+Signed on 25 October 2026 at deployer nonce 22 (the deployer's nonce is now 23). Checks after
+signing:
+
+```sh
+node packages/deploy/src/jobs-record-cli.ts apps/dapp/public/plans/8453-verified-evaluator.json \
+  https://mainnet.base.org contracts/deploy/deployments/8453-jobs.json
+```
+
+passed every check on chain: the escrow is paid in ARL, the evaluator belongs to the escrow and
+stakes in ARL, it writes to both ERC-8004 registries, and the arbiter Safe is 2 of 3. Challenge
+window 86,400 seconds, minimum bond 100 ARL. Like every deployment record, `8453-jobs.json` stays
+out of git (`contracts/deploy/deployments/` is ignored); anyone can rebuild it with the command
+above.
+
+Both contracts are source-verified on Basescan:
+[ARLJobs](https://basescan.org/address/0x6c8A7712010f951f5B03A11C24b46C8b18d5997F#code),
+[ARLVerifiedEvaluator](https://basescan.org/address/0x3a5dC803b84D5F150FCd2b070cb9D8a12BC35F34#code).
