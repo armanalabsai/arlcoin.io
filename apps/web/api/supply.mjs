@@ -5,22 +5,14 @@
 // The endpoint CoinGecko and CoinMarketCap read. Every request reads the chain: totalSupply minus
 // the balances of the protocol-controlled and locked addresses listed in supply-config.json, which
 // `packages/deploy/src/supply-config-cli.ts` writes from the verified deployment manifest (same
-// rule as packages/deploy/src/circulating.ts). Without that file it answers 404: there is no
-// number to report before the Base Mainnet deployment, and none is ever hard-coded.
-
-import { readFile } from "node:fs/promises";
+// rule as packages/deploy/src/circulating.ts). Without a configuration it answers 404: there is
+// no number to report before the Base Mainnet deployment, and none is ever hard-coded.
+//
+// Served by the Cloudflare Pages Function functions/api/supply.js, which passes the configuration.
 
 const RPC = { 8453: "https://mainnet.base.org", 84532: "https://sepolia.base.org" };
 const TOTAL_SUPPLY = "0x18160ddd";
 const BALANCE_OF = "0x70a08231";
-
-async function loadConfig() {
-  try {
-    return JSON.parse(await readFile(new URL("./supply-config.json", import.meta.url), "utf8"));
-  } catch {
-    return null;
-  }
-}
 
 async function rpc(url, calls) {
   const body = calls.map((c, id) => ({
@@ -74,12 +66,12 @@ export async function supply(config, which) {
   return total - locked;
 }
 
-export async function GET(request) {
+/** Answers a GET request for the supply, with the configuration (or null before deployment). */
+export async function handle(request, config) {
   const q = new URL(request.url).searchParams.get("q") ?? "circulating";
   if (q !== "total" && q !== "circulating") {
     return new Response("q must be total or circulating\n", { status: 400 });
   }
-  const config = await loadConfig();
   if (!config) return new Response("ARL is not on Base Mainnet yet\n", { status: 404 });
   try {
     const value = await supply(config, q);

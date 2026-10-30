@@ -14,6 +14,10 @@ export default defineConfig(
       "apps/web/**",
       // The web app likewise has its own config and CI job.
       "apps/dapp/**",
+      // Cloudflare Pages Functions: a two-line wrapper around apps/web/api, which apps/web lints.
+      "functions/**",
+      "dist/**",
+      ".wrangler/**",
     ],
   },
   js.configs.recommended,

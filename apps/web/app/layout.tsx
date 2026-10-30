@@ -1,6 +1,5 @@
 import "@fontsource-variable/inter";
 import "@fontsource-variable/jetbrains-mono";
-import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 
 import { organizationJsonLd } from "@/content/seo.ts";
@@ -68,8 +67,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
         <InfrastructureStrip />
         <SoftNavigation />
-        {/* Cookieless page counts; on only for the Vercel deployment, where the script is served. */}
-        {process.env.NEXT_PUBLIC_ARL_ANALYTICS === "1" ? <Analytics /> : null}
       </body>
     </html>
   );
