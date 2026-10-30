@@ -64,13 +64,13 @@ contract ARLVestingWallet is VestingWallet {
         view
         returns (uint64)
     {
+        if (cliffStart_ == 0 || cliffStart_ > cliffEnd_ || cliffEnd_ >= vestingEnd_) {
+            revert ARLVestingInvalidSchedule(cliffStart_, cliffEnd_, vestingEnd_);
+        }
         // `cliffStart_` may be in the past: the Base Mainnet wallets are deployed at or after the
         // TGE they start from. What must not have passed is the start of vesting.
         // slither-disable-next-line timestamp
-        if (
-            cliffStart_ == 0 || cliffStart_ > cliffEnd_ || cliffEnd_ >= vestingEnd_
-                || cliffEnd_ <= block.timestamp
-        ) {
+        if (cliffEnd_ <= block.timestamp) {
             revert ARLVestingInvalidSchedule(cliffStart_, cliffEnd_, vestingEnd_);
         }
         return vestingEnd_ - cliffEnd_;

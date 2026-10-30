@@ -196,6 +196,7 @@ contract ARLAnonymousSignal {
     /// @notice Whether `nullifier` has signalled. Nullifiers are global; the group id is kept in
     /// the signature for interface compatibility and does not change the answer.
     function isNullifierUsed(uint256 groupId, uint256 nullifier) external view returns (bool) {
+        // slither-disable-next-line redundant-statements
         groupId;
         return _nullifiers[nullifier];
     }
