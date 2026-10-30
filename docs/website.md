@@ -14,9 +14,11 @@ workflow does. Until the Base Mainnet launch the app shows Claim and Trade as cl
 gives the website its strict content policy and the app under `/app` its own headers (no frames,
 no source lists, since it talks to RPC nodes and wallets; popups allowed for wallets).
 `npm run test:hosted` in `apps/dapp` builds the same output and tests it in a browser.
-Hosting: Vercel serves `arlcoin.io` from `main` (the shared
-Vercel team was paused on 2026-09-28 for exceeding Hobby fair-use limits and received its one-time
-courtesy unblock the same day, valid 30 days). A static mirror is published to GitHub Pages at
+Hosting: arlcoin.io moves to Cloudflare Pages ([cloudflare-pages.md](cloudflare-pages.md)): the
+shared Vercel team was paused on 2026-09-28 for exceeding Hobby fair-use limits, its one-time
+30-day courtesy unblock ran out, and since 2026-10-30 Vercel answers `402 DEPLOYMENT_DISABLED`.
+`.github/workflows/deploy-cloudflare.yml` deploys the same build with `scripts/build-cloudflare.sh`.
+A static mirror is published to GitHub Pages at
 `https://gokturkalazdaghan-dot.github.io/ARLCOIN/` by `.github/workflows/pages.yml`, as a fallback
 that does not depend on Vercel.
 
