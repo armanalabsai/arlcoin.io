@@ -46,7 +46,10 @@ addresses with their deploy blocks are recorded in
 Reproduce: `npm run check:bytecode` proves a clean build matches
 [`contracts/deploy/bytecode.json`](contracts/deploy/bytecode.json);
 `node packages/deploy/src/bytecode-cli.ts verify contracts <plan.json> <deployment.json> https://sepolia.base.org`
-compares that build with the code at each deployed address.
+compares that build with the code at each deployed address. The jobs escrow and its evaluator on
+Base Sepolia run the code before the deadline fix of 2026-10-25
+([security/2026-10-25-jobs-deadline.md](security/2026-10-25-jobs-deadline.md)); verify them
+against commit `f12604c`.
 
 ## Claims and evidence
 
