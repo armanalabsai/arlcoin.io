@@ -6,6 +6,7 @@ import { getContractAddress } from "viem";
 
 import { parseRun, recordCommand } from "../../lib/deploySteps.ts";
 import { TGE_DATE } from "../../lib/network.ts";
+import { RELEASE_ARTIFACTS } from "../fixtures/deploy/releaseArtifacts.ts";
 
 // The Base Mainnet contract run published for TGE day (apps/dapp/public/plans/8453-deploy.json),
 // taken from the mainnet fork rehearsal with the real signers. It must load on the deploy screen
@@ -30,7 +31,7 @@ const afterTge = <T>(f: () => T): T => {
 
 describe("Base Mainnet plans for TGE day", () => {
   it("deploys the ARL contracts at nonces 12 to 15, the token at the planned address", () => {
-    const run = afterTge(() => parseRun(plan("8453-deploy")));
+    const run = afterTge(() => parseRun(plan("8453-deploy"), RELEASE_ARTIFACTS));
     assert.equal(run.chainId, 8453);
     assert.deepEqual(
       run.steps.map((s) => (s.kind === "create" ? s.contract : s.kind)),
@@ -54,7 +55,7 @@ describe("Base Mainnet plans for TGE day", () => {
 // evaluator, bonded in ARL, at nonces 23 and 24.
 describe("Base Mainnet plans for the verified jobs", () => {
   it("creates the 2-of-3 arbiter Safe of the three arbiters", () => {
-    const run = afterTge(() => parseRun(plan("8453-arbiter-safe")));
+    const run = afterTge(() => parseRun(plan("8453-arbiter-safe"), RELEASE_ARTIFACTS));
     assert.equal(run.chainId, 8453);
     assert.equal(run.steps.length, 1);
     const safe = run.steps[0];
@@ -70,7 +71,7 @@ describe("Base Mainnet plans for the verified jobs", () => {
   });
 
   it("creates the escrow paid in USDC and its evaluator bonded in ARL at nonces 23 and 24", () => {
-    const run = afterTge(() => parseRun(plan("8453-verified-jobs-usdc")));
+    const run = afterTge(() => parseRun(plan("8453-verified-jobs-usdc"), RELEASE_ARTIFACTS));
     assert.deepEqual(
       run.steps.map((s) => (s.kind === "create" ? s.contract : s.kind)),
       ["ARLJobs", "ARLVerifiedEvaluator"],
