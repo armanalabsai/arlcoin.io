@@ -48,8 +48,13 @@ interface IERC8004Reputation {
 /// - the arbiter only rules on disputed jobs, can only pay the escrow to the client or the
 ///   provider, and never receives slashed bonds (they are burned), so it cannot profit from a
 ///   ruling;
-/// - if nothing is decided before the job's deadline, `ARLJobs.claimRefund` returns the escrow to
-///   the client and `release` unlocks every bond here: no state can lock funds.
+/// - the whole evaluation fits before the job's deadline: members can only accept, and voting can
+///   only start, while the vote window and two challenge windows still end before it. A decision
+///   therefore ends its challenge window at least one challenge window before the deadline, and
+///   anyone can finalize it in that time;
+/// - at the deadline `ARLJobs` closes the job: the escrow of a job that was not settled goes back
+///   to the client through `claimRefund`, and `release` unlocks every bond here: no state can lock
+///   funds, and the outcome never depends on which transaction lands first.
 contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
     using SafeERC20 for IERC20;
 
@@ -303,6 +308,7 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         if (job.status != ARLJobs.JobStatus.Funded && job.status != ARLJobs.JobStatus.Submitted) {
             revert WrongJobStatus();
         }
+        _checkFits(jobId, job.expiredAt);
         uint256 bond = v.bond;
         if (bond == 0) {
             bond = bondFollowsBudget ? job.budget * BOND_BPS / 10_000 : 0;
@@ -321,8 +327,9 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
     function startVoting(uint256 jobId) external {
         Verdict storage v = _verdicts[jobId];
         if (v.phase != Phase.Configured || v.voteEnds != 0) revert WrongPhase();
-        if (jobs.getJob(jobId).status != ARLJobs.JobStatus.Submitted) revert WrongJobStatus();
-        _startVoting(jobId, v);
+        ARLJobs.Job memory job = jobs.getJob(jobId);
+        if (job.status != ARLJobs.JobStatus.Submitted) revert WrongJobStatus();
+        _startVoting(jobId, v, job.expiredAt);
     }
 
     /// @notice Member that accepted only, once the job is Submitted, within the vote window and
@@ -335,9 +342,10 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         Verdict storage v = _verdicts[jobId];
         if (v.phase != Phase.Configured) revert WrongPhase();
         if (_votes[jobId][msg.sender] != ACCEPTED) revert Unauthorized();
-        if (jobs.getJob(jobId).status != ARLJobs.JobStatus.Submitted) revert WrongJobStatus();
+        ARLJobs.Job memory job = jobs.getJob(jobId);
+        if (job.status != ARLJobs.JobStatus.Submitted) revert WrongJobStatus();
         if (v.voteEnds == 0) {
-            _startVoting(jobId, v);
+            _startVoting(jobId, v, job.expiredAt);
             // slither-disable-next-line timestamp
         } else if (block.timestamp >= v.voteEnds) {
             revert VoteWindowClosed();
@@ -365,7 +373,8 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
     }
 
     /// @notice Anyone, once the vote window has ended without a decision: burns the bonds of the
-    /// members who accepted but did not vote, unlocks those who voted, and refunds the client.
+    /// members who accepted but did not vote, unlocks those who voted, and refunds the client
+    /// (also after the job's deadline).
     function closeUndecided(uint256 jobId) external nonReentrant {
         Verdict storage v = _verdicts[jobId];
         if (v.phase != Phase.Configured || v.voteEnds == 0) revert WrongPhase();
@@ -374,7 +383,15 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         v.phase = Phase.Failed;
         emit Failed(jobId);
         uint256 burned = _unlock(jobId, ABSENT, true);
-        jobs.reject(jobId, v.voteHash, "");
+        // The client is refunded either way: by rejecting before the deadline, through
+        // `claimRefund` after it (unless someone already called it). Absent members are slashed
+        // in every case.
+        ARLJobs.Job memory job = jobs.getJob(jobId);
+        if (job.status == ARLJobs.JobStatus.Submitted) {
+            // slither-disable-next-line timestamp
+            if (block.timestamp < job.expiredAt) jobs.reject(jobId, v.voteHash, "");
+            else jobs.claimRefund(jobId);
+        }
         if (burned != 0) stakeToken.safeTransfer(SLASH_SINK, burned);
     }
 
@@ -493,7 +510,20 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         }
     }
 
-    function _startVoting(uint256 jobId, Verdict storage v) private {
+    /// The vote window and both challenge windows must end before the job's deadline, so a
+    /// decision can always be settled (or disputed and ruled on) while the escrow is still here.
+    /// `configure` checks this against the time of configuration; the client may fund and the
+    /// provider submit later, so it is checked again when members accept and when voting starts.
+    function _checkFits(uint256 jobId, uint256 expiredAt) private view {
+        Config storage cfg = _configs[jobId];
+        // slither-disable-next-line timestamp
+        if (expiredAt < block.timestamp + cfg.voteWindow + 2 * uint256(cfg.challengeWindow)) {
+            revert ExpiryTooSoon();
+        }
+    }
+
+    function _startVoting(uint256 jobId, Verdict storage v, uint256 expiredAt) private {
+        _checkFits(jobId, expiredAt);
         // slither-disable-next-line timestamp
         uint64 ends = uint64(block.timestamp) + _configs[jobId].voteWindow;
         v.voteEnds = ends;

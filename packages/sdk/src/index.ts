@@ -18,6 +18,7 @@ export {
   BASE_SEPOLIA_VERIFIED,
   VERDICT_PHASES,
   VerifiedJobError,
+  checkEvaluationFits,
   checkOpenParams,
   checkVerifiedChain,
   finalizeJob,

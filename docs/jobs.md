@@ -22,8 +22,12 @@ is designed to work with ERC-8004 identities and x402 payments.
 
 The evaluator is chosen by the client when the job is posted. It can be the client, another
 account or a contract (for example one that checks a proof). Once work is submitted only the
-evaluator decides, so a client cannot take the budget back after the provider has delivered;
-the deadline is the provider's and the client's protection against an evaluator that never acts.
+evaluator decides until the deadline, so a client cannot take the budget back while the evaluation
+is open. The deadline closes the job: from then on the evaluator can no longer complete or reject
+it, and anyone can return the budget to the client. The deadline is the provider's and the
+client's protection against an evaluator that never acts, and the outcome after it never depends
+on which transaction lands first. `ARLVerifiedEvaluator` only starts an evaluation that can finish,
+challenge window included, before the deadline.
 
 ## Contract
 
@@ -35,7 +39,8 @@ function signatures. ARL choices:
 - No hooks: `hook` must be `address(0)`, which the standard allows; `optParams` are accepted and
   ignored.
 - `fund` requires the expected budget, as the standard requires (the reference contract omits it).
-- A provider can only submit before the deadline; a job must run at least 5 minutes; descriptions
+- A provider can only submit, and the evaluator only complete or reject a funded job, before the
+  deadline; a job must run at least 5 minutes; descriptions
   are at most 1,024 bytes.
 - Reentrancy guard on every function that moves tokens; SafeERC20.
 

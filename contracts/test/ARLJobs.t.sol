@@ -338,6 +338,67 @@ contract ARLJobsTest is ARLTestBase {
         jobs.claimRefund(funded);
     }
 
+    /// The deadline closes a funded job for the evaluator too: from `expiredAt` on, neither
+    /// `complete` nor `reject` works, so after the deadline the escrow can only go back to the
+    /// client and no transaction ordering can change that.
+    function test_RevertWhen_EvaluatorActsAtOrAfterExpiry() public {
+        uint256 funded = _funded();
+        uint256 submitted = _submitted();
+        uint256 expiredAt = jobs.getJob(submitted).expiredAt;
+
+        for (uint256 t = expiredAt; t <= expiredAt + 1; ++t) {
+            vm.warp(t);
+            vm.startPrank(evaluator);
+            vm.expectRevert(ARLJobs.JobExpiredAlready.selector);
+            jobs.complete(submitted, bytes32("late"), "");
+            vm.expectRevert(ARLJobs.JobExpiredAlready.selector);
+            jobs.reject(submitted, bytes32("late"), "");
+            vm.expectRevert(ARLJobs.JobExpiredAlready.selector);
+            jobs.reject(funded, bytes32("late"), "");
+            vm.stopPrank();
+        }
+
+        uint256 providerBefore = token.balanceOf(provider);
+        uint256 clientBefore = token.balanceOf(client);
+        vm.prank(stranger);
+        jobs.claimRefund(submitted);
+        vm.prank(stranger);
+        jobs.claimRefund(funded);
+        assertEq(token.balanceOf(client), clientBefore + 2 * BUDGET);
+        assertEq(token.balanceOf(provider), providerBefore);
+        assertEq(uint256(_status(submitted)), uint256(ARLJobs.JobStatus.Expired));
+
+        // a refunded job stays refunded
+        vm.prank(evaluator);
+        vm.expectRevert(ARLJobs.WrongStatus.selector);
+        jobs.complete(submitted, bytes32("late"), "");
+    }
+
+    /// One second before the deadline the evaluator still decides.
+    function test_evaluatorActsUntilTheSecondBeforeExpiry() public {
+        uint256 approved = _submitted();
+        uint256 rejected = _submitted();
+        vm.warp(jobs.getJob(approved).expiredAt - 1);
+        vm.startPrank(evaluator);
+        jobs.complete(approved, bytes32("ok"), "");
+        jobs.reject(rejected, bytes32("no"), "");
+        vm.stopPrank();
+        assertEq(token.balanceOf(provider), BUDGET);
+        assertEq(uint256(_status(approved)), uint256(ARLJobs.JobStatus.Completed));
+        assertEq(uint256(_status(rejected)), uint256(ARLJobs.JobStatus.Rejected));
+        vm.expectRevert(ARLJobs.WrongStatus.selector);
+        jobs.claimRefund(approved);
+    }
+
+    /// The client can still cancel an Open job after its deadline: nothing is escrowed yet.
+    function test_clientRejectsOpenJobAfterExpiry() public {
+        uint256 id = _create(provider);
+        vm.warp(block.timestamp + 2 days);
+        vm.prank(client);
+        jobs.reject(id, bytes32(0), "");
+        assertEq(uint256(_status(id)), uint256(ARLJobs.JobStatus.Rejected));
+    }
+
     function test_openJobCannotBeRefunded() public {
         uint256 id = _create(provider);
         vm.warp(block.timestamp + 2 days);
