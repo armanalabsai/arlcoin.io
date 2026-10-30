@@ -55,10 +55,38 @@ contract ARLVestingWalletTest is ARLTestBase {
         _expectInvalid(LAUNCH, INVESTORS_CLIFF_END, INVESTORS_CLIFF_END - 1);
     }
 
-    function testFuzz_ConstructorValidation(uint64 cliffStart, uint64 cliffEnd, uint64 vestingEnd)
-        public
-    {
-        bool valid = cliffStart != 0 && cliffStart <= cliffEnd && cliffEnd < vestingEnd;
+    /// Audit F-4: a schedule whose vesting has already started released part or all of the
+    /// balance in the deployment block, and could not be corrected.
+    function test_RevertWhen_ScheduleAlreadyElapsed() public {
+        // The auditor's case: everything in the past.
+        vm.warp(LAUNCH);
+        _expectInvalid(1, 2, 3);
+        // Vesting starting now or already running.
+        _expectInvalid(LAUNCH, LAUNCH, LAUNCH_PLUS_2Y);
+        _expectInvalid(LAUNCH - 365 days, LAUNCH - 1, LAUNCH_PLUS_2Y);
+    }
+
+    function test_StartAtOrBeforeDeploymentIsAllowedWhileTheCliffRuns() public {
+        // Base Mainnet: deployed after the TGE (cliffStart) it vests from, inside the cliff.
+        vm.warp(LAUNCH + 1 days);
+        ARLVestingWallet w =
+            new ARLVestingWallet(member, LAUNCH, INVESTORS_CLIFF_END, INVESTORS_VESTING_END);
+        vm.prank(teamPoolSafe);
+        token.transfer(address(w), 1_000 ether);
+        assertEq(w.releasable(address(token)), 0);
+        // The earliest valid start of vesting is the next second.
+        new ARLVestingWallet(member, LAUNCH, LAUNCH + 1 days + 1, INVESTORS_VESTING_END);
+    }
+
+    function testFuzz_ConstructorValidation(
+        uint64 cliffStart,
+        uint64 cliffEnd,
+        uint64 vestingEnd,
+        uint64 now_
+    ) public {
+        vm.warp(now_);
+        bool valid =
+            cliffStart != 0 && cliffStart <= cliffEnd && cliffEnd < vestingEnd && cliffEnd > now_;
         if (!valid) {
             _expectInvalid(cliffStart, cliffEnd, vestingEnd);
             return;
