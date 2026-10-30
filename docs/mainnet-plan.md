@@ -1,7 +1,9 @@
-# Base Mainnet plan (opens at the TGE 2026-10-23, not deployed)
+# Base Mainnet plan (deployed 2026-10-24)
 
-Locked 2026-10-05 by owner decision. **Nothing is deployed, created or funded on Base Mainnet.**
-The network gate still refuses chain 8453.
+Locked 2026-10-05 by owner decision. **Deployed on Base Mainnet on 2026-10-24** at the addresses
+below: the 12 Safes from block 53,022,497 and the token at block 53,023,206. `VerifyARL`, the
+bytecode check and the supply check passed on chain, and the token, both vesting wallets and the
+timelock are source-verified on Basescan.
 
 ## Custody
 
@@ -27,13 +29,14 @@ the TGE every path is refused (`PlanProductionLocked(8453)`); with the fork cloc
 `CreateSafes`, config and plan (TGE 2026-10-23), `DeployARL`, `VerifyARL`, manifest, supply, the
 four Uniswap v3 pools from the Liquidity Safe and the claim distributor (rehearsed only; the
 distributor is not deployed at TGE). The addresses below are
-the expected mainnet addresses if the deployer starts at nonce 0 and the default salt is used.
+the expected mainnet addresses if the deployer starts at nonce 0 and the default salt is used;
+on 2026-10-24 every one of them was checked on chain and holds the deployed contract.
 
 Result: all steps pass; total supply 21,000,000 ARL; circulating at TGE 2,100,000 ARL; role Safes
 2-of-3; guardian 1-of-1; timelock delay 172,800 s. The deployer, given 0.001 ETH, had 0.000958 ETH left after the Safes,
 the contracts and the distributor; fund it with at least 0.001 ETH.
 
-| Contract                       | Expected address                             |
+| Contract                       | Address (deployed 2026-10-24)                |
 | ------------------------------ | -------------------------------------------- |
 | Founder Safe                   | `0x7816Ee6349AeA591B351772eB951A6CF8b223E5c` |
 | Investors Safe                 | `0x183A501A6dEb7D575F870a12c36a2266666F8e8a` |
@@ -68,3 +71,22 @@ the approved TGE before the mainnet run. The TGE changes the vesting dates, not 
    2026-10-23T00:00:00Z.
 4. The deployer funded with Base ETH; any transaction from it before the run shifts the
    contract addresses above.
+
+## Uniswap v3 pools
+
+Opened 2026-10-24 on Base Mainnet (Uniswap v3, 1% fee tier), from 0.20 USD per ARL. Each pool
+holds ARL only at opening; buyers pay in the quote token. Balances read on chain after opening:
+
+| Pool      | Address                                      | ARL at opening |
+| --------- | -------------------------------------------- | -------------: |
+| ARL/USDC  | `0xBE1c1d2Cd686c3dFEC9221C472A1421B71479b72` |      1,550,000 |
+| ARL/USDT  | `0x4A5579fa8aE69c6a1bC1Ad716cfa0fa80c7D5273` |      1,300,000 |
+| ARL/WETH  | `0x23C85918509FeBe27f74628FDaC34F064f013A78` |      1,275,000 |
+| ARL/cbBTC | `0x644565CF340310Cf24b0D1216D49C40d2A6975db` |        875,000 |
+| **Total** |                                              |  **5,000,000** |
+
+2,000,000 ARL came from the Liquidity Safe and 3,000,000 ARL from the Public Launch Safe, which
+keeps 2,000,000 ARL. The LP position NFTs are held by those two Safes. The Liquidity Safe batch
+needed about 21.3M gas, above Base's per-transaction cap of 16,777,216 (EIP-7825), so it ran as
+two Safe transactions (USDC and USDT pools first, then WETH and cbBTC), followed by the Public
+Launch batch; the calls and amounts are those of the published plan files.

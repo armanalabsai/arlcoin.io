@@ -6,6 +6,10 @@
 //    rebuilds the requirements itself (it never trusts the payer's copy), has the facilitator
 //    verify the authorization, runs the job killed at `seconds`, bills the seconds used (any part
 //    of a second counts as one), and settles that amount, never above the ceiling.
+// 3. With a `receiptSigner`, every run also gets a signed usage receipt (`@arl/payments`
+//    receipt.ts): the authorization charged, the seconds billed, the price, the amount and a
+//    hash of the output returned. The signer's address is advertised in the requirements, the
+//    receipt goes to the facilitator with the settlement and back to the payer with the output.
 //
 // One authorization pays for one run. The payments policy refuses authorizations that live
 // longer than MAX_AUTHORIZATION_SECONDS, and an authorization must still be valid when the run
@@ -13,16 +17,19 @@
 // Longer jobs would need consecutive authorizations, which this reference does not implement.
 
 import type { PaymentPayload, PaymentRequirements, SettleResponse } from "@x402/core/types";
-import { getAddress } from "viem";
+import { getAddress, type LocalAccount } from "viem";
 
 import {
   MAX_AUTHORIZATION_SECONDS,
   MIN_AUTHORIZATION_SECONDS,
   authorizationKey,
   buildUptoRequirements,
+  buildUsageReceipt,
+  signUsageReceipt,
   meter,
   readAuthorization,
   type ArlUptoFacilitator,
+  type SignedUsageReceipt,
 } from "@arl/payments";
 
 import { JobStartError, runProcess, type ComputeJob, type Runner } from "./runner.ts";
@@ -50,6 +57,8 @@ export interface ProviderConfig {
   maxOutputBytes?: number;
   /** Replaces the process runner, for tests. */
   runner?: Runner;
+  /** Signs a usage receipt for every run; its address is advertised in the requirements. */
+  receiptSigner?: LocalAccount;
 }
 
 export interface JobResult {
@@ -66,6 +75,8 @@ export interface JobResult {
   /** Usage reached the signed ceiling. */
   capped: boolean;
   settlement: SettleResponse;
+  /** The signed usage receipt, when the provider has a receipt signer. */
+  receipt?: SignedUsageReceipt;
 }
 
 export class ProviderError extends Error {
@@ -85,7 +96,10 @@ export function billedSeconds(elapsedMs: number): bigint {
 }
 
 export class ComputeProvider {
-  readonly #c: Required<Omit<ProviderConfig, "runner">> & { runner: Runner };
+  readonly #c: Required<Omit<ProviderConfig, "runner" | "receiptSigner">> & {
+    runner: Runner;
+    receiptSigner?: LocalAccount;
+  };
   /** Authorizations that started a run. Each pays for one run only, so none starts a second. */
   readonly #used = new Set<string>();
 
@@ -126,6 +140,11 @@ export class ComputeProvider {
     return this.#c.maxInputBytes;
   }
 
+  /** The resource a receipt names: the job and the paid duration. */
+  static resource(job: string, seconds: number): string {
+    return `${job}?seconds=${String(seconds)}`;
+  }
+
   /** What the payer must sign to run `job` for up to `seconds`. */
   requirements(job: string, seconds: number): PaymentRequirements {
     if (!Object.hasOwn(this.#c.jobs, job)) throw new ProviderError(`unknown job ${job}`, 404);
@@ -135,7 +154,7 @@ export class ComputeProvider {
         400,
       );
     }
-    return buildUptoRequirements({
+    const r = buildUptoRequirements({
       chainId: this.#c.chainId,
       arlToken: this.#c.arlToken,
       maxAmount: this.#c.pricePerSecond * BigInt(seconds),
@@ -143,6 +162,8 @@ export class ComputeProvider {
       facilitator: this.#c.facilitatorAddress,
       maxTimeoutSeconds: Math.max(seconds + SETTLEMENT_MARGIN_SECONDS, MIN_AUTHORIZATION_SECONDS),
     });
+    const signer = this.#c.receiptSigner;
+    return signer ? { ...r, extra: { ...r.extra, receiptSigner: signer.address } } : r;
   }
 
   /** Verifies the authorization, runs the job for at most `seconds`, settles the seconds used. */
@@ -173,8 +194,10 @@ export class ComputeProvider {
     }
 
     let key: string;
+    let auth;
     try {
-      key = authorizationKey(this.#c.chainId, readAuthorization(payload.payload));
+      auth = readAuthorization(payload.payload);
+      key = authorizationKey(this.#c.chainId, auth);
     } catch {
       throw new ProviderError("not an upto authorization", 402);
     }
@@ -199,9 +222,24 @@ export class ComputeProvider {
       units: billed,
       ceiling: BigInt(expected.amount),
     });
+    let receipt: SignedUsageReceipt | undefined;
+    if (this.#c.receiptSigner) {
+      receipt = await signUsageReceipt(
+        this.#c.receiptSigner,
+        this.#c.chainId,
+        buildUsageReceipt({
+          auth,
+          resource: ComputeProvider.resource(job, seconds),
+          units: billed,
+          unitPrice: this.#c.pricePerSecond,
+          response: run.stdout,
+        }),
+      );
+    }
     const settlement = await this.#c.facilitator.settle(payload, {
       ...expected,
       amount: amount.toString(),
+      extra: receipt ? { ...expected.extra, usageReceipt: receipt } : expected.extra,
     });
     const paid = settlement.success;
     return {
@@ -215,6 +253,7 @@ export class ComputeProvider {
       amount,
       capped,
       settlement,
+      ...(receipt ? { receipt } : {}),
     };
   }
 }

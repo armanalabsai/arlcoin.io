@@ -7,7 +7,11 @@ import {
   BASE_SEPOLIA,
   InMemoryAuthorizationStore,
   PaymentNetworkLocked,
+  checkUsageReceipt,
+  readAuthorization,
+  resourceHash,
   type Permit2Authorization,
+  type SignedUsageReceipt,
   type UptoScheme,
 } from "@arl/payments";
 import {
@@ -16,6 +20,7 @@ import {
   encodePaymentSignatureHeader,
 } from "@x402/core/http";
 import type { PaymentPayload, PaymentRequirements, SettleResponse } from "@x402/core/types";
+import { privateKeyToAccount } from "viem/accounts";
 
 import {
   ComputeProvider,
@@ -364,5 +369,136 @@ describe("x402 HTTP server", () => {
     } finally {
       server.close();
     }
+  });
+});
+
+describe("usage receipts", () => {
+  // A Foundry test key; local tests only.
+  const signer = privateKeyToAccount(
+    "0x59c6995e998f97a5a0044966f0945389dc9c86dae88c7a8412cacc3dc8a9b8a7",
+  );
+
+  function withReceipts(runner: Runner) {
+    const scheme = new FakeScheme();
+    const facilitator = new ArlUptoFacilitator({
+      chainId: 84_532,
+      arlToken: ARL,
+      scheme,
+      store: new InMemoryAuthorizationStore(),
+      nowSeconds: () => NOW,
+      receiptSigners: { [PAY_TO]: signer.address },
+    });
+    const provider = new ComputeProvider({
+      chainId: 84_532,
+      arlToken: ARL,
+      payTo: PAY_TO,
+      facilitatorAddress: FACILITATOR,
+      pricePerSecond: PRICE,
+      maxSeconds: 120,
+      jobs: JOBS,
+      facilitator,
+      runner,
+      receiptSigner: signer,
+    });
+    return { scheme, provider };
+  }
+
+  it("advertises the receipt signer in the requirements", () => {
+    const { provider } = withReceipts(timed(1_000));
+    assert.equal(provider.requirements("echo", 10).extra.receiptSigner, signer.address);
+    const { provider: plain } = setup();
+    assert.equal(plain.requirements("echo", 10).extra.receiptSigner, undefined);
+  });
+
+  it("signs a receipt the payer can check against its authorization, the settlement and the output", async () => {
+    const { provider, scheme } = withReceipts(timed(2_400));
+    const r = provider.requirements("echo", 10);
+    const payment = pay(r);
+    const out = await provider.execute("echo", 10, Buffer.alloc(0), payment);
+    assert.equal(out.settlement.success, true);
+    assert.ok(out.receipt);
+    assert.equal(out.receipt.receipt.units, "3");
+    assert.equal(out.receipt.receipt.amount, (PRICE * 3n).toString());
+    assert.equal(out.receipt.receipt.resource, resourceHash("echo?seconds=10"));
+    assert.deepEqual(scheme.settled, [(PRICE * 3n).toString()]);
+    const problems = await checkUsageReceipt({
+      chainId: 84_532,
+      signed: out.receipt,
+      signer: r.extra.receiptSigner as string,
+      auth: readAuthorization(payment.payload),
+      amount: BigInt(out.settlement.amount ?? "0"),
+      response: out.stdout,
+    });
+    assert.deepEqual(problems, []);
+  });
+
+  it("returns the receipt over HTTP", async () => {
+    const { provider } = withReceipts(timed(1_000));
+    const server = createProviderServer(provider).listen(0, "127.0.0.1");
+    await new Promise((r) => server.once("listening", r));
+    const base = `http://127.0.0.1:${String((server.address() as AddressInfo).port)}`;
+    try {
+      const unpaid = await fetch(`${base}/jobs/echo?seconds=5`, { method: "POST" });
+      const [accepted] = decodePaymentRequiredHeader(
+        unpaid.headers.get("PAYMENT-REQUIRED") ?? "",
+      ).accepts;
+      assert.ok(accepted);
+      const payment = pay(accepted);
+      const paid = await fetch(`${base}/jobs/echo?seconds=5`, {
+        method: "POST",
+        headers: { "PAYMENT-SIGNATURE": encodePaymentSignatureHeader(payment) },
+      });
+      assert.equal(paid.status, 200);
+      const body = (await paid.json()) as {
+        stdout: string;
+        amount: string;
+        receipt: SignedUsageReceipt;
+      };
+      const header = JSON.parse(
+        Buffer.from(paid.headers.get("ARL-USAGE-RECEIPT") ?? "", "base64").toString(),
+      ) as SignedUsageReceipt;
+      assert.deepEqual(header, body.receipt);
+      const problems = await checkUsageReceipt({
+        chainId: 84_532,
+        signed: header,
+        signer: accepted.extra.receiptSigner as string,
+        auth: readAuthorization(payment.payload),
+        amount: BigInt(body.amount),
+        response: Buffer.from(body.stdout, "base64"),
+      });
+      assert.deepEqual(problems, []);
+    } finally {
+      server.close();
+    }
+  });
+
+  it("cannot settle when the provider's signer is not the one the facilitator pins", async () => {
+    const { provider, scheme } = withReceipts(timed(1_000));
+    const impostor = new ComputeProvider({
+      chainId: 84_532,
+      arlToken: ARL,
+      payTo: PAY_TO,
+      facilitatorAddress: FACILITATOR,
+      pricePerSecond: PRICE,
+      maxSeconds: 120,
+      jobs: JOBS,
+      facilitator: new ArlUptoFacilitator({
+        chainId: 84_532,
+        arlToken: ARL,
+        scheme,
+        store: new InMemoryAuthorizationStore(),
+        nowSeconds: () => NOW,
+        receiptSigners: { [PAY_TO]: signer.address },
+      }),
+      runner: timed(1_000),
+      receiptSigner: privateKeyToAccount(
+        "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a",
+      ),
+    });
+    const r = provider.requirements("echo", 10);
+    const out = await impostor.execute("echo", 10, Buffer.alloc(0), pay(r));
+    assert.equal(out.settlement.success, false);
+    assert.match(out.settlement.errorReason ?? "", /arl_receipt/);
+    assert.equal(out.stdout.length, 0);
   });
 });

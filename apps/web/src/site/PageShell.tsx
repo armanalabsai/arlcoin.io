@@ -1,7 +1,7 @@
 import { SiteFooter, SiteHeader } from "./SiteFrame.tsx";
 
 interface Props {
-  current?: "whitelist" | "contact" | "faq";
+  current?: "whitelist" | "contact" | "faq" | "about";
   eyebrow: string;
   title: string;
   lead: string;

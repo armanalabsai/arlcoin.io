@@ -1,7 +1,7 @@
 # Phase 1 Security Analysis
 
-Status: threat model and controls. The contracts are deployed on Base Sepolia; Base Mainnet
-opens at the TGE (2026-10-23).
+Status: threat model and controls. The token, vesting wallets and timelock are deployed on Base
+Mainnet (2026-10-24, token `0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4`); the other contracts run on Base Sepolia.
 
 Latest audit: [security audit of 2026-10-17](../security/2026-10-17/report.md) (scope, raw
 tool outputs, triage, findings and their status).
@@ -156,9 +156,14 @@ CI runs `scripts/audit.mjs` at the root and in each app instead of a bare
 so every exception is reviewed again, and an entry that no longer matches anything fails, so it
 gets removed.
 
-| Advisory              | Package (path)                                                                    | Why it is allowed                                                                                                        | Expires    |
-| --------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------- |
-| `GHSA-vfj7-8cjw-p6xm` | `braces` (eslint-config-next → @next/eslint-plugin-next → fast-glob → micromatch) | Lint-time only, on glob patterns written in this repository; not in the built sites. No patched `braces` release exists. | 2026-11-02 |
+| Advisory              | Package (path)                                   | Why it is allowed                                                                                                                                                                                                                                               | Expires    |
+| --------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `GHSA-mrhx-c7xc-m3w5` | `zod` 3.25 (@x402/core, @x402/evm, viem/abitype) | The vulnerable `$ZodArray` code is zod 4's; in zod 3.25 it ships only under `zod/v4`, which nothing loads. @x402 (2.28.0 still needs zod ^3) imports the zod 3 root and ARL code does not import zod; `scripts/check-zod-v3-only.mjs` fails CI if that changes. | 2026-11-23 |
+
+On 2026-10-23 Next.js was raised from 16.3.8 to 16.4.3 for GHSA-2464-fhr4-w9xw, GHSA-673q-mjm6-r5xr
+(critical) and GHSA-p3m5-59mp-jv5r (high), the app's `follow-redirects` and `hono` and the site's
+lint-time `zod` 4 were raised to patched releases, and the `braces` exception (GHSA-vfj7-8cjw-p6xm)
+was removed because nothing pulls it in any more.
 
 ## Compiler
 

@@ -10,7 +10,7 @@ import { FactList, PageShell } from "@/site/PageShell.tsx";
 
 const title = "How to Buy ARL on Uniswap on Base · ARL Protocol";
 const description =
-  "How to buy ARL: the official ARL/USDC, ARL/USDT, ARL/ETH and ARL/BTC pools on Uniswap on Base, from 0.20 USD, opening 23 October 2026.";
+  "How to buy ARL: the official ARL/USDC, ARL/USDT, ARL/ETH and ARL/BTC pools on Uniswap on Base, from 0.20 USD per ARL.";
 
 const USDC_BASE = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const token = SITE.mainnet.token;
@@ -33,7 +33,7 @@ export default function BuyPage() {
       lead={
         token
           ? "ARL trades in the official ARL/USDC, ARL/USDT, ARL/ETH and ARL/BTC pools on Uniswap on Base. Check the contract address before you buy."
-          : `ARL is not available yet. It becomes available at the TGE, targeted for ${SITE.tgeTarget}, in the official ARL/USDC, ARL/USDT, ARL/ETH and ARL/BTC pools on Uniswap on Base.`
+          : "The official ARL/USDC, ARL/USDT, ARL/ETH and ARL/BTC pools are on Uniswap on Base. Check the contract address before you buy."
       }
     >
       <JsonLd data={breadcrumbJsonLd([["How to get ARL", "/buy"]])} />

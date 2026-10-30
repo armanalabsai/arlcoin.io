@@ -1,9 +1,8 @@
 # ARL Protocol (ARL)
 
-> ARL is the native utility token planned for decentralized AI and compute services, an ERC-20
-> on Base. It is live on the Base Sepolia testnet only (testnet tokens have no value); no ARL
-> contract exists on Base Mainnet, nothing is for sale, and nothing on arlcoin.io is an offer,
-> investment advice or a promise of listing.
+> ARL is the utility token for decentralized AI and compute services, an ERC-20 on Base. It is
+> live on Base Mainnet since 24 October 2026 at 0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4, source-verified on
+> Basescan. Nothing on arlcoin.io is an offer, investment advice or a promise of price or listing.
 
 Key facts:
 
@@ -12,8 +11,9 @@ Key facts:
 - Standard: ERC-20 with EIP-2612 permit, 18 decimals, on Base (Ethereum layer 2).
 - Testnet: Base Sepolia (chain 84532), token 0x244312b619127B6458154F3467eFD7c87CD28500,
   source-verified on Basescan, Blockscout and Sourcify.
-- Mainnet: Base (chain 8453), targeted for 23 October 2026. The address will be published on
-  arlcoin.io at deployment; any earlier "ARL" on a main network is not official.
+- Mainnet: Base (chain 8453), token 0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4, deployed 24 October 2026
+  (block 53,023,206) and source-verified on Basescan. Any other address presented as ARL is not
+  official.
 - How a payment works: the wallet signs a spending ceiling (x402 upto scheme, Permit2), the AI
   or compute service meters the work, a facilitator settles only the ARL used, never above the
   ceiling, and the transfer is recorded on Base where anyone can verify it; ratings are kept on
@@ -27,9 +27,9 @@ Key facts:
   Treasury actions pass a Safe
   multisig and a 48-hour timelock.
 - Roadmap: foundation and token contracts complete, internal security audit complete, Base
-  Sepolia testnet live since 4 October 2026, Base Mainnet targeted for 23 October 2026.
-- Launch: trading opens on Uniswap on Base at the Base Mainnet launch, from 0.20 USD per ARL,
-  in ARL-only pools holding 5,000,000 ARL (2,000,000 Liquidity, 3,000,000 Public Launch).
+  Sepolia testnet live since 4 October 2026, Base Mainnet live since 24 October 2026.
+- Trading: Uniswap v3 on Base, pools ARL/USDC, ARL/USDT, ARL/WETH and ARL/cbBTC (1% fee),
+  opened from 0.20 USD per ARL with 5,000,000 ARL (2,000,000 Liquidity, 3,000,000 Public Launch).
   There is no airdrop at the launch; an airdrop of 500,000 ARL is planned for a later date.
 - ARL never asks for a private key, a seed phrase or a payment.
 

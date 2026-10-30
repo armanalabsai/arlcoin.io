@@ -288,7 +288,7 @@ function Surface({ layer, card, originRect, onClose, onStep }: SurfaceProps) {
 
                 <Dialog.Description
                   id="detail-summary"
-                  className="max-w-[60ch] text-[17px] leading-[1.6] text-fg"
+                  className="max-w-[60ch] text-[17px] leading-[1.6] [overflow-wrap:anywhere] text-fg"
                 >
                   {card.detail.summary}
                 </Dialog.Description>
@@ -304,7 +304,7 @@ function Surface({ layer, card, originRect, onClose, onStep }: SurfaceProps) {
                         <dd
                           className={
                             f.mono
-                              ? "font-mono text-[14px] tabular-nums"
+                              ? "font-mono text-[14px] tabular-nums [overflow-wrap:anywhere]"
                               : "text-[15px] leading-snug"
                           }
                         >
@@ -376,7 +376,7 @@ function Surface({ layer, card, originRect, onClose, onStep }: SurfaceProps) {
                 ) : null}
 
                 {layer.disclaimer ? (
-                  <p className="max-w-[60ch] border-t border-line pt-5 text-[12px] leading-[1.6] text-fg-subtle">
+                  <p className="max-w-[60ch] border-t border-line pt-5 text-[12px] leading-[1.6] [overflow-wrap:anywhere] text-fg-subtle">
                     {layer.disclaimer}
                   </p>
                 ) : null}

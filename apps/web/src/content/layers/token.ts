@@ -6,7 +6,7 @@ import {
   shareOfSupply,
 } from "../../../../../packages/tokenomics/src/index.ts";
 import type { Allocation } from "../../../../../packages/tokenomics/src/index.ts";
-import { NOT_DEPLOYED, SITE, TOKEN_DISCLAIMER, repoDoc } from "../site.ts";
+import { SITE, repoDoc } from "../site.ts";
 import type { Fact, Layer } from "../types.ts";
 
 // Every number on this layer comes from packages/tokenomics. Nothing that
@@ -46,7 +46,6 @@ export const token: Layer = {
   id: "token",
   title: "Token",
   description: `${formatArl(MAX_SUPPLY)} maximum supply. Values that depend on a deployment are marked as such.`,
-  disclaimer: TOKEN_DISCLAIMER,
   cards: [
     {
       id: "max-supply",
@@ -84,14 +83,19 @@ export const token: Layer = {
     {
       id: "circulating-supply",
       title: "Circulating Supply",
-      shortDescription: "Nothing circulates before the mainnet launch.",
-      status: "PLANNED",
+      shortDescription: "Published live at arlcoin.io/api/supply",
+      status: "IN DEVELOPMENT",
       weight: "secondary",
-      metric: { kind: "unavailable", label: NOT_DEPLOYED, source: "chain.circulatingSupply" },
+      metric: {
+        kind: "unavailable",
+        label: "Live at /api/supply",
+        source: "chain.circulatingSupply",
+      },
       detail: {
         summary:
-          "ARL exists only on the Base Sepolia testnet, where tokens have no value, so nothing circulates. Allocated supply is not circulating supply. After deployment, circulating supply will be computed from on-chain state and published together with its methodology: what counts as locked, vested, released and held in custody.",
+          "Circulating supply is computed from on-chain balances on Base Mainnet and published at arlcoin.io/api/supply. At deployment it was 2,100,000 ARL, the Founder allocation. When the Uniswap pools opened, the 5,000,000 ARL deposited in them became circulating too, as the specification counts ARL in an open pool; the rest sits in vesting wallets, the timelock and allocation Safes and counts as locked. Allocated supply is not circulating supply. The methodology is in the tokenomics document.",
       },
+      links: [{ label: "Supply methodology", href: repoDoc("docs/tokenomics.md") }],
     },
     {
       id: "treasury",
@@ -110,7 +114,7 @@ export const token: Layer = {
             value: `${treasuryControls.threshold} of ${treasuryControls.signers} Safe signers`,
           },
           { label: "Minimum delay", value: `${treasuryControls.minDelayHours} hours` },
-          { label: "Deployment", value: NOT_DEPLOYED },
+          { label: "Timelock on Base", value: SITE.mainnet.timelock, mono: true },
         ],
       },
     },
@@ -123,7 +127,7 @@ export const token: Layer = {
       metric: { kind: "static", value: String(vesting.length), unit: "vesting wallets" },
       detail: {
         summary:
-          "These allocations are held by vesting wallets that release only to a dedicated Safe, only on their schedule: nothing at the start, a 12-month cliff, then 36 months of linear vesting. Every schedule starts at the TGE, the Base Mainnet token deployment, targeted for 2026-10-23.",
+          "These allocations are held by vesting wallets that release only to a dedicated Safe, only on their schedule: nothing at the start, a 12-month cliff, then 36 months of linear vesting. Every schedule starts at the TGE date, 23 October 2026, so the cliff ends on 23 October 2027.",
         facts: [
           ...vesting.map((a) => ({
             label: `${a.name} · ${formatArl(a.amount)}`,
@@ -143,15 +147,20 @@ export const token: Layer = {
     {
       id: "contract-address",
       title: "Contract Address",
-      shortDescription: "Base Sepolia testnet only",
-      status: "PLANNED",
+      shortDescription: "Base Mainnet, verified on Basescan",
+      status: "LIVE",
       weight: "secondary",
-      metric: { kind: "unavailable", label: NOT_DEPLOYED, source: "chain.contractAddress" },
-      detail: {
-        summary:
-          "No ARL contract exists on Base Mainnet. The only official contract is the testnet token on Base Sepolia, source-verified on Basescan (link below); testnet tokens have no value. Any other address presented as ARL is not official. The Base Mainnet address will be published here and in the repository at deployment.",
+      metric: {
+        kind: "static",
+        value: `${SITE.mainnet.token.slice(0, 6)}…${SITE.mainnet.token.slice(-4)}`,
       },
-      links: [{ label: "Testnet token on Basescan", href: SITE.testnet.explorer }],
+      detail: {
+        summary: `The official ARL contract on Base Mainnet is ${SITE.mainnet.token}, deployed on ${SITE.mainnet.deployedOn} and source-verified on Basescan. Any other address presented as ARL is not official. The Base Sepolia testnet token (${SITE.testnet.token}) has no value.`,
+      },
+      links: [
+        { label: "ARL on Basescan", href: SITE.mainnet.explorer },
+        { label: "Testnet token on Basescan", href: SITE.testnet.explorer },
+      ],
     },
     {
       id: "staked",
@@ -159,7 +168,11 @@ export const token: Layer = {
       shortDescription: "Staking live on Base Sepolia testnet",
       status: "PLANNED",
       weight: "tertiary",
-      metric: { kind: "unavailable", label: NOT_DEPLOYED, source: "chain.stakedSupply" },
+      metric: {
+        kind: "unavailable",
+        label: "Not on Base Mainnet yet",
+        source: "chain.stakedSupply",
+      },
       detail: {
         summary: `The staking contract is deployed on Base Sepolia (testnet), where staked tokens have no value; there is no staking on Base Mainnet yet. Rewards are planned to come from the Community & Staking allocation (${formatArl(allocation("community-staking").amount)}) or from protocol revenue. Staking never creates new ARL.`,
       },
@@ -167,13 +180,14 @@ export const token: Layer = {
     {
       id: "liquidity",
       title: "Liquidity / Exchange",
-      shortDescription: "Not listed on any exchange",
-      status: "PLANNED",
+      shortDescription: "Uniswap v3 on Base",
+      status: "LIVE",
       weight: "tertiary",
-      metric: { kind: "unavailable", label: "Not listed", source: "market.listings" },
+      metric: { kind: "unavailable", label: "Uniswap v3 · Base", source: "market.listings" },
       detail: {
-        summary: `ARL is not listed on any exchange. ${formatArl(allocation("liquidity").amount)} is allocated to liquidity and held in a dedicated Safe. A listing is never guaranteed.`,
+        summary: `ARL trades in four Uniswap v3 pools on Base (ARL/USDC, ARL/USDT, ARL/WETH and ARL/cbBTC, 1% fee tier), opened with 5,000,000 ARL from the Liquidity Safe (${formatArl(allocation("liquidity").amount)}) and the Public Launch Safe (3,000,000 ARL), from 0.20 USD per ARL. ARL is not listed on any centralised exchange, and a listing is never guaranteed.`,
       },
+      links: [{ label: "How to get ARL", href: "https://arlcoin.io/buy/" }],
     },
     {
       id: "decimals",
@@ -206,13 +220,13 @@ export const token: Layer = {
     {
       id: "network",
       title: "Network",
-      shortDescription: "Base. Sepolia testnet live.",
-      status: "IN DEVELOPMENT",
+      shortDescription: "Base Mainnet (chain 8453)",
+      status: "LIVE",
       weight: "tertiary",
       metric: { kind: "static", value: "Base" },
       detail: {
         summary:
-          "ARL is an ERC-20 token on Base, an Ethereum layer 2. It is live on the Base Sepolia testnet (chain 84532); Base Mainnet (chain 8453) is targeted for 23 October 2026. The evaluation that selected Base is documented in the repository.",
+          "ARL is an ERC-20 token on Base, an Ethereum layer 2. It is live on Base Mainnet (chain 8453) since 24 October 2026; the testnet deployment on Base Sepolia (chain 84532) keeps running for the app. The evaluation that selected Base is documented in the repository.",
       },
       links: [{ label: "Chain evaluation", href: repoDoc("docs/chain-evaluation.md") }],
     },

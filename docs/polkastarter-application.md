@@ -79,7 +79,7 @@ it and replies by e-mail.
 
 ## Other information
 
-**When do you want to conduct the sale?** Before the TGE on 23 October 2026; flexible.
+**When do you want to conduct the sale?** Flexible. The token is live on Base Mainnet since 24 October 2026; the launchpad reserve of 1,500,000 ARL stays in the Public Launch Safe.
 
 **Status of partnerships:** No partnerships signed yet.
 

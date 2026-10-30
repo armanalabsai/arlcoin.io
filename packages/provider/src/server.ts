@@ -4,6 +4,7 @@
 //   POST /jobs/<name>?seconds=<n>   → without a payment: 402 with PAYMENT-REQUIRED
 //                                     with PAYMENT-SIGNATURE: runs the job (body is its stdin)
 //                                     and answers with PAYMENT-RESPONSE and the job's output
+//                                     (and ARL-USAGE-RECEIPT when the provider signs receipts)
 //
 // Uses node:http only; put it behind a TLS-terminating proxy on a public network.
 
@@ -116,8 +117,15 @@ export function createProviderServer(provider: ComputeProvider): Server {
         capped: result.capped,
         stdout: result.stdout.toString("base64"),
         stderr: result.stderr.toString("base64"),
+        ...(result.receipt ? { receipt: result.receipt } : {}),
       },
-      { "PAYMENT-RESPONSE": encodePaymentResponseHeader(result.settlement) },
+      {
+        "PAYMENT-RESPONSE": encodePaymentResponseHeader(result.settlement),
+        // The signed usage receipt; its `response` is keccak256 of the decoded stdout.
+        ...(result.receipt
+          ? { "ARL-USAGE-RECEIPT": Buffer.from(JSON.stringify(result.receipt)).toString("base64") }
+          : {}),
+      },
     );
   }
 }

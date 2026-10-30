@@ -3,5 +3,5 @@
   "compilerOptions": {
     "skipLibCheck": true
   },
-  "include": ["src", "test", "test-anvil"]
+  "include": ["src", "test", "test-anvil", "test-fork"]
 }

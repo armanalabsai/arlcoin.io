@@ -28,10 +28,10 @@ for (const [path, heading] of PAGES) {
   });
 }
 
-test("the Core header and footer link to the whitelist and contact pages", async ({ page }) => {
+test("the Core header and footer link to the buy and contact pages", async ({ page }) => {
   await page.goto("/core");
-  await page.getByRole("banner").getByRole("link", { name: "Join whitelist" }).click();
-  await expect(page).toHaveURL(/\/whitelist\/?$/);
+  await page.getByRole("banner").getByRole("link", { name: "Get ARL" }).click();
+  await expect(page).toHaveURL(/\/buy\/?$/);
   await page.goto("/core");
   const footer = page.getByRole("navigation", { name: "Site" });
   await expect(footer.getByRole("link", { name: "Contact" })).toBeVisible();

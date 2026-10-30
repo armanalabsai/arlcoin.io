@@ -6,9 +6,9 @@ export const SITE = {
   name: "ARL",
   url: "https://arlcoin.io",
   description:
-    "ARL Protocol: the utility token for AI and compute payments on Base. 21,000,000 ARL fixed supply, no mint or upgrade. Base Mainnet launch 23 October 2026.",
+    "ARL Protocol: the utility token for AI and compute payments on Base. 21,000,000 ARL fixed supply, no mint or upgrade. Live on Base Mainnet.",
   /** Short line under the Core on the overview. */
-  tagline: "The utility token for AI and compute services, live on Base Sepolia.",
+  tagline: "The utility token for AI and compute services, live on Base.",
   /** Full project name, used in titles and structured data. */
   brand: "ARL Protocol",
   repository: "https://github.com/armanalabsai/arlcoin.io",
@@ -21,6 +21,8 @@ export const SITE = {
     xHandle: "@arlprotocol",
     /** Community group. */
     telegram: "https://t.me/arlcoin_community",
+    /** Medium publication account. */
+    medium: "https://medium.com/@arlprotocol",
   },
   /** Base Sepolia (testnet) deployment, source-verified on Basescan, Blockscout and Sourcify. */
   testnet: {
@@ -29,14 +31,17 @@ export const SITE = {
     explorer: "https://sepolia.basescan.org/token/0x244312b619127B6458154F3467eFD7c87CD28500",
   },
   /**
-   * Base Mainnet deployment. `token` stays null until the token is deployed and verified; the
-   * "Add ARL to your wallet" button and the token list appear only once it is set.
+   * Base Mainnet deployment, deployed on 2026-10-24 (block 53,023,206) and source-verified on
+   * Basescan. Setting `token` shows "Add ARL to your wallet" and the Uniswap link.
    */
   mainnet: {
     chain: "Base",
-    token: null as string | null,
+    token: "0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4",
+    explorer: "https://basescan.org/token/0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4",
+    timelock: "0xF3820BC1510a9A1B9aa2b318Dd997127f198B1c2",
+    deployedOn: "24 October 2026",
   },
-  /** Target date of the Base Mainnet token deployment (the TGE). */
+  /** The TGE date: every vesting schedule starts here (the 12-month cliff ends 2027-10-23). */
   tgeTarget: "2026-10-23",
   /** Data controller named in the privacy notice. */
   controller: {
@@ -53,12 +58,11 @@ export const SITE_PAGES = [
   "/buy",
   "/faq",
   "/docs",
+  "/about",
   "/contact",
   "/privacy",
   "/terms",
 ] as const;
-
-export const NOT_DEPLOYED = "Not yet on Base Mainnet";
 
 /** Social preview image (app/opengraph-image.png). Pages that set `openGraph` repeat it,
  * because a page-level `openGraph` object replaces the inherited one. */
@@ -68,6 +72,3 @@ export const OG_IMAGE = {
   height: 630,
   alt: "ARL · 21,000,000 ARL maximum supply",
 } as const;
-
-export const TOKEN_DISCLAIMER =
-  "ARL is deployed on the Base Sepolia testnet only; testnet tokens have no value. No ARL contract exists on Base Mainnet, nothing is for sale, and nothing here is an offer, investment advice or a promise of listing.";

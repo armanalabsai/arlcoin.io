@@ -55,13 +55,15 @@ printf '{"rootDirectory":"apps/dapp"}' >.vercel/project-patch.json
   --silent "${SCOPE[@]}" ${TOKEN_ARGS[@]+"${TOKEN_ARGS[@]}"}
 rm -f .vercel/project-patch.json
 
-NEXT_PUBLIC_ARL_CHAIN=84532 "${VERCEL[@]}" build --prod --yes "${SCOPE[@]}" ${TOKEN_ARGS[@]+"${TOKEN_ARGS[@]}"}
+# The trade page opens once the Base Mainnet token is set (deployed and verified 2026-10-24).
+MAINNET_TOKEN=0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4
+NEXT_PUBLIC_ARL_CHAIN=84532 NEXT_PUBLIC_ARL_MAINNET_TOKEN="$MAINNET_TOKEN" "${VERCEL[@]}" build --prod --yes "${SCOPE[@]}" ${TOKEN_ARGS[@]+"${TOKEN_ARGS[@]}"}
 if find .vercel/output -name '.env*' | grep -q .; then
   echo "refusing to deploy: an .env file is in the output" >&2
   exit 1
 fi
 
-ENV_ARGS=(--env NEXT_PUBLIC_ARL_CHAIN=84532)
+ENV_ARGS=(--env NEXT_PUBLIC_ARL_CHAIN=84532 --env "NEXT_PUBLIC_ARL_MAINNET_TOKEN=$MAINNET_TOKEN")
 if [ -n "${ARL_OPERATOR_KEY:-}" ]; then ENV_ARGS+=(--env "ARL_OPERATOR_KEY=$ARL_OPERATOR_KEY"); fi
 URL="$("${VERCEL[@]}" deploy --prebuilt --prod --yes "${ENV_ARGS[@]}" "${SCOPE[@]}" ${TOKEN_ARGS[@]+"${TOKEN_ARGS[@]}"})"
 echo "deployed: $URL"

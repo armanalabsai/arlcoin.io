@@ -9,12 +9,13 @@
 //   constructor arguments decoded for display;
 // - a Safe creation through the canonical Safe v1.5.0 SafeProxyFactory with a canonical
 //   singleton (on Base Sepolia), with its owners and threshold decoded for display.
-// Anything else is refused. The chain must be Base Sepolia (or the local Anvil chain); Base
-// Mainnet is refused by `assertAllowedChain` before the TGE.
+// Anything else is refused. The chain must be Base Sepolia, Base Mainnet (from the TGE) or the
+// local Anvil chain (`assertAllowedChain`).
 
 import {
   decodeAbiParameters,
   decodeFunctionData,
+  formatUnits,
   getAddress,
   getContractAddress,
   isAddress,
@@ -242,6 +243,16 @@ export function describeStep(step: DeployStep): { title: string; detail: string 
         detail:
           "Creates the ARL token and mints the fixed 21,000,000 ARL once, to the eleven allocation holders. Nothing is minted to your address and the token has no owner.",
       };
+    case "ARLJobs":
+      return {
+        title: "Create the jobs escrow",
+        detail: `Creates the ERC-8183 jobs escrow, paid in the token ${short(String(a[0]))}. Clients fund jobs into it and it pays the provider or refunds the client as the job's evaluator decides. It has no owner and holds no tokens until a job is funded.`,
+      };
+    case "ARLVerifiedEvaluator":
+      return {
+        title: "Create the verified evaluator",
+        detail: `Creates the staked validator committee for the escrow ${short(String(a[0]))}. Disputes go to the arbiter Safe ${short(String(a[1]))}; every challenge window is at least ${String(Number(a[2]) / 3600)} hours and every bond at least ${formatUnits(BigInt(String(a[3])), 18)} tokens. It has no owner.`,
+      };
   }
 }
 
@@ -255,6 +266,9 @@ export function publishedPlanPath(name: string, basePath = ""): string {
   return `${basePath}/plans/${name}.json`;
 }
 
+/** Circle's native USDC on Base Mainnet: the payment token of the second jobs escrow. */
+const BASE_USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+
 /**
  * After every transaction is signed: the command that writes the verified deployment record
  * from this run file (`packages/deploy/src/record-cli.ts`). Nothing counts as deployed until it
@@ -263,18 +277,42 @@ export function publishedPlanPath(name: string, basePath = ""): string {
 export function recordCommand(
   run: DeployRun,
   runFile: string,
-): { kind: "safes" | "arl"; command: string } {
-  const kind = run.steps.every((s) => s.kind === "safe") ? "safes" : "arl";
-  if (kind === "arl" && run.steps.some((s) => s.kind !== "create")) {
-    fail("the run mixes Safe creations and contract creations");
-  }
-  const out = `contracts/deploy/deployments/${String(run.chainId)}${kind === "safes" ? "-safes" : ""}.json`;
+): { kind: "safes" | "arl" | "jobs" | "arbiter"; command: string } {
   const rpc =
     run.chainId === LOCAL_CHAIN_ID
       ? "<local-rpc-url> --local-anvil"
       : run.chainId === BASE_MAINNET_CHAIN_ID
         ? "https://mainnet.base.org"
         : "https://sepolia.base.org";
+  const isJobs = (s: DeployStep) =>
+    s.kind === "create" && (s.contract === "ARLJobs" || s.contract === "ARLVerifiedEvaluator");
+  if (run.steps.some(isJobs)) {
+    if (!run.steps.every(isJobs)) fail("the run mixes the jobs contracts with other steps");
+    // The escrow paid in USDC is recorded apart from the one paid in ARL.
+    const usdc = run.steps.some(
+      (s) =>
+        s.kind === "create" &&
+        s.contract === "ARLJobs" &&
+        String(s.args[0]).toLowerCase() === BASE_USDC.toLowerCase(),
+    );
+    return {
+      kind: "jobs",
+      command: `node packages/deploy/src/jobs-record-cli.ts ${runFile} ${rpc} contracts/deploy/deployments/${String(run.chainId)}-jobs${usdc ? "-usdc" : ""}.json`,
+    };
+  }
+  // A single Safe is the evaluator's arbiter (CreateArbiterSafe), not the twelve allocation Safes.
+  if (run.steps.length === 1 && run.steps[0]?.kind === "safe") {
+    const safe = run.steps[0].safe ?? "<safe>";
+    return {
+      kind: "arbiter",
+      command: `cast call ${safe} "getOwners()(address[])" --rpc-url ${rpc.split(" ")[0]} && cast call ${safe} "getThreshold()(uint256)" --rpc-url ${rpc.split(" ")[0]}`,
+    };
+  }
+  const kind = run.steps.every((s) => s.kind === "safe") ? "safes" : "arl";
+  if (kind === "arl" && run.steps.some((s) => s.kind !== "create")) {
+    fail("the run mixes Safe creations and contract creations");
+  }
+  const out = `contracts/deploy/deployments/${String(run.chainId)}${kind === "safes" ? "-safes" : ""}.json`;
   return {
     kind,
     command: `node packages/deploy/src/record-cli.ts ${kind} ${runFile} ${rpc} ${out}`,

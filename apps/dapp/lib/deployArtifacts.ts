@@ -122,4 +122,56 @@ export const DEPLOY_ARTIFACTS = {
       },
     ],
   },
+  ARLJobs: {
+    creationHash: "0xdb31fe27bf1443a256da4e52fa9fa243ce9e86d7f43863e7ef014449e17df327",
+    creationSize: 5143,
+    constructorInputs: [
+      {
+        name: "paymentToken_",
+        type: "address",
+        internalType: "contract IERC20",
+      },
+    ],
+  },
+  ARLVerifiedEvaluator: {
+    creationHash: "0x02f3a47b045158d3c4521170c90ccd15c7c2b3b228fec9c869a692ae0cd0d901",
+    creationSize: 14529,
+    constructorInputs: [
+      {
+        name: "jobs_",
+        type: "address",
+        internalType: "contract ARLJobs",
+      },
+      {
+        name: "arbiter_",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "minChallengeWindow_",
+        type: "uint64",
+        internalType: "uint64",
+      },
+      {
+        name: "minBond_",
+        type: "uint96",
+        internalType: "uint96",
+      },
+      {
+        name: "identity_",
+        type: "address",
+        internalType: "contract IERC8004Identity",
+      },
+      {
+        name: "reputation_",
+        type: "address",
+        internalType: "contract IERC8004Reputation",
+      },
+      {
+        name: "stakeToken_",
+        type: "address",
+        internalType: "contract IERC20",
+      },
+    ],
+  },
 } as const;

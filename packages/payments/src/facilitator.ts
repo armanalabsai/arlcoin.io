@@ -2,7 +2,9 @@
 //
 // The SDK (`@x402/evm/upto/facilitator`) verifies the payload and sends the settlement through
 // the pinned x402UptoPermit2Proxy. This wrapper refuses anything that is not ARL on Base Sepolia,
-// and applies `decideSettlement` before any settlement is sent.
+// and applies `decideSettlement` before any settlement is sent. For a payee with a pinned receipt
+// signer, it also settles only an amount backed by that payee's signed usage receipt
+// (`receipt.ts`), passed in `requirements.extra.usageReceipt`.
 
 import type {
   PaymentPayload,
@@ -14,6 +16,7 @@ import { getAddress } from "viem";
 
 import { paymentNetwork, type PaymentNetwork } from "./networks.ts";
 import { decideSettlement, readAuthorization, type AuthorizationStore } from "./policy.ts";
+import { checkUsageReceipt } from "./receipt.ts";
 
 /** The two SDK facilitator methods ARL uses. */
 export interface UptoScheme {
@@ -28,6 +31,11 @@ export interface ArlFacilitatorConfig {
   scheme: UptoScheme;
   store: AuthorizationStore;
   nowSeconds?: () => number;
+  /**
+   * Payee → the address that signs its usage receipts. A settlement to a listed payee needs a
+   * valid receipt for exactly the amount settled; other payees settle without one.
+   */
+  receiptSigners?: Readonly<Record<string, string>>;
 }
 
 export class ArlUptoFacilitator {
@@ -36,6 +44,7 @@ export class ArlUptoFacilitator {
   readonly #scheme: UptoScheme;
   readonly #store: AuthorizationStore;
   readonly #now: () => number;
+  readonly #receiptSigners: ReadonlyMap<string, string>;
 
   constructor(config: ArlFacilitatorConfig) {
     this.#net = paymentNetwork(config.chainId);
@@ -43,6 +52,12 @@ export class ArlUptoFacilitator {
     this.#scheme = config.scheme;
     this.#store = config.store;
     this.#now = config.nowSeconds ?? (() => Math.floor(Date.now() / 1000));
+    this.#receiptSigners = new Map(
+      Object.entries(config.receiptSigners ?? {}).map(([payTo, signer]) => [
+        getAddress(payTo),
+        getAddress(signer),
+      ]),
+    );
   }
 
   #check(payload: PaymentPayload, requirements: PaymentRequirements): string | undefined {
@@ -84,6 +99,17 @@ export class ArlUptoFacilitator {
     if (reason) return failed(reason);
 
     const auth = readAuthorization(payload.payload);
+    const signer = this.#receiptSigners.get(getAddress(requirements.payTo));
+    if (signer !== undefined) {
+      const problems = await checkUsageReceipt({
+        chainId: this.#net.chainId,
+        signed: requirements.extra.usageReceipt,
+        signer,
+        auth,
+        amount: BigInt(requirements.amount),
+      });
+      if (problems.length > 0) return failed(`arl_receipt: ${problems.join("; ")}`);
+    }
     const decision = await decideSettlement({
       chainId: this.#net.chainId,
       auth,

@@ -14,6 +14,7 @@ const NAV = [
   { href: "/payments", label: "Payments" },
   { href: "/network", label: "Network" },
   { href: "/jobs", label: "Jobs" },
+  { href: "/verified", label: "Verified" },
   { href: "/private", label: "Private" },
 ];
 

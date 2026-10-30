@@ -14,7 +14,7 @@ const arlAmount = (id: string): string => {
 export const technology: Layer = {
   id: "technology",
   title: "Technology",
-  description: "What ARL is for. Live on Base Sepolia; not on Base Mainnet yet.",
+  description: "What ARL is for. The token is live on Base; these services run on Base Sepolia.",
   cards: [
     {
       id: "ai-payments",
@@ -97,7 +97,7 @@ export const technology: Layer = {
             heading: "Not yet built",
             items: [
               "Private payments and verifiable computation are research topics; no circuits exist for them",
-              "Not deployed on Base Mainnet",
+              "The poll contracts are not deployed on Base Mainnet",
             ],
           },
         ],
@@ -154,7 +154,9 @@ export const technology: Layer = {
           },
           {
             heading: "Not yet built",
-            items: ["Nothing is deployed on Base Mainnet"],
+            items: [
+              "The network contracts are not deployed on Base Mainnet; only the ARL token, its Safes, vesting and timelock are",
+            ],
           },
         ],
       },

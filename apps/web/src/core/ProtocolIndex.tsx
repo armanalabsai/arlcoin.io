@@ -1,7 +1,6 @@
 "use client";
 
 import { LAYERS, pathFor } from "@/content/registry.ts";
-import { TOKEN_DISCLAIMER } from "@/content/site.ts";
 import { FooterLinks } from "@/site/SiteFrame.tsx";
 
 import { withBase } from "./basePath.ts";
@@ -57,7 +56,6 @@ export function ProtocolIndex({ onOpen }: Props) {
           ))}
         </div>
         <div className="flex flex-col gap-3 border-t border-line pt-8 text-[12px] leading-[1.6] text-fg-subtle sm:flex-row sm:justify-between sm:gap-8">
-          <p className="max-w-[70ch]">{TOKEN_DISCLAIMER}</p>
           <FooterLinks />
         </div>
       </div>

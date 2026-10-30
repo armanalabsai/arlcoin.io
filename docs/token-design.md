@@ -1,8 +1,8 @@
 # ARL Token, Vesting and Treasury
 
-Status: **implemented and tested; deployed and source-verified on the Base Sepolia testnet
-only.** Addresses are in [`contracts/deploy/base-sepolia.json`](../contracts/deploy/base-sepolia.json).
-Nothing is deployed on Base Mainnet; that deployment requires a separate approval.
+Status: **implemented and tested; deployed and source-verified on Base Mainnet (2026-10-24,
+token `0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4`) and on the Base Sepolia testnet.** Addresses are in [`contracts/deploy/base-sepolia.json`](../contracts/deploy/base-sepolia.json).
+Base Mainnet addresses are in [`mainnet-plan.md`](mainnet-plan.md).
 
 Source: [`contracts/src/`](../contracts/src). Upstream: OpenZeppelin Contracts
 v5.6.1 (`5fd1781b1454fd1ef8e722282f86f9293cacf256`). Compiler: solc 0.8.36,

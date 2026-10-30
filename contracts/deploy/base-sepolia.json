@@ -27,6 +27,17 @@
     "address": "0x86DEB322fe7E9d5e5296f8Ee4B90A643F886a012",
     "deployedOnBlock": 47962115
   },
+  "verifiedEvaluator": {
+    "address": "0x6808F80Eb11538543d31cf4b50332B268dDd4d14",
+    "deployedOnBlock": 48277116,
+    "arbiterSafe": "0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f",
+    "arbiterThreshold": 2,
+    "arbiterOwners": [
+      "0x6dcBD851E982C4f2196D85005A7A9a104C4C9DAd",
+      "0x5598E36b61b8F513e163D289E3092DF0F9f990a4",
+      "0x9065d7e4E5e63e91174A275Aae1a693082Edd0a1"
+    ]
+  },
   "vestingWallets": {
     "investors": "0x830e35CdF48F8F30F83d1DBE8431f02a7BE9dCcE",
     "strategicPartnerships": "0x02c7692918C98EC710970D390b08f247A76D5A37"

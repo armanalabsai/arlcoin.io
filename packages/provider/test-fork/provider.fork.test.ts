@@ -23,7 +23,10 @@ import {
   BASE_SEPOLIA,
   FileAuthorizationStore,
   assertPinnedCode,
+  checkUsageReceipt,
   createFacilitatorServer,
+  readAuthorization,
+  type SignedUsageReceipt,
 } from "@arl/payments";
 import {
   HTTPFacilitatorClient,
@@ -90,6 +93,9 @@ async function waitForAnvil(): Promise<void> {
 }
 
 /** ARL's facilitator as a service; returns the SDK client a resource server uses to reach it. */
+// Signs the provider's usage receipts; the facilitator settles payTo only with its receipts.
+const receiptSigner = mnemonicToAccount(DEV_MNEMONIC, { addressIndex: 7 });
+
 async function startFacilitator(token: string) {
   const wallet = createWalletClient({
     account: facilitatorAccount,
@@ -111,6 +117,7 @@ async function startFacilitator(token: string) {
       chainId: 84_532,
       arlToken: arl,
       scheme: new UptoFacilitator(signer),
+      receiptSigners: { [payTo]: receiptSigner.address },
       store: new FileAuthorizationStore(
         join(mkdtempSync(join(tmpdir(), "arl-facilitator-")), "authorizations.jsonl"),
       ),
@@ -238,6 +245,7 @@ describe(
             forever: node("setInterval(() => {}, 1000)"),
           },
           facilitator: f.client,
+          receiptSigner,
         }),
       ).listen(0, "127.0.0.1");
       close = () => {
@@ -284,6 +292,7 @@ describe(
         billedSeconds: string;
         capped: boolean;
         timedOut: boolean;
+        receipt: SignedUsageReceipt;
       };
       return {
         status: res.status,
@@ -307,6 +316,19 @@ describe(
       assert.match(r.receipt.transaction, /^0x[0-9a-f]{64}$/);
       assert.equal((await balance(payTo)) - payToBefore, PRICE * 2n);
       assert.equal(payerBefore - (await balance(payer.address)), PRICE * 2n);
+
+      // The payer checks the signed usage receipt against what it signed, what was settled on
+      // chain and the output it received.
+      const problems = await checkUsageReceipt({
+        chainId: 84_532,
+        signed: r.body.receipt,
+        signer: r.payment.accepted.extra.receiptSigner as string,
+        auth: readAuthorization(r.payment.payload),
+        amount: (await balance(payTo)) - payToBefore,
+        response: Buffer.from(r.body.stdout, "base64"),
+      });
+      assert.deepEqual(problems, []);
+      assert.equal(r.body.receipt.receipt.units, "2");
     });
 
     it("kills a job at the paid time and settles exactly the ceiling", async () => {

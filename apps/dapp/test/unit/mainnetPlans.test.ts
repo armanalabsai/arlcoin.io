@@ -47,3 +47,48 @@ describe("Base Mainnet plans for TGE day", () => {
     assert.ok(recordCommand(run, "x.json").command.includes(" https://mainnet.base.org "));
   });
 });
+
+// The network services on Base Mainnet (docs/mainnet-services.md): the arbiter Safe of the
+// verified evaluator at nonce 19, the escrow paid in ARL at nonce 21 (nonce 20 was a plain transfer)
+// and its evaluator at nonce 22 (signed from the earlier plan), then the escrow paid in USDC and its
+// evaluator, bonded in ARL, at nonces 23 and 24.
+describe("Base Mainnet plans for the verified jobs", () => {
+  it("creates the 2-of-3 arbiter Safe of the three arbiters", () => {
+    const run = afterTge(() => parseRun(plan("8453-arbiter-safe")));
+    assert.equal(run.chainId, 8453);
+    assert.equal(run.steps.length, 1);
+    const safe = run.steps[0];
+    assert.equal(safe?.kind, "safe");
+    if (safe?.kind === "safe") {
+      assert.equal(safe.nonce, 19);
+      assert.equal(safe.threshold, 2n);
+      assert.equal(safe.owners.length, 3);
+    }
+    const record = recordCommand(run, "x.json");
+    assert.equal(record.kind, "arbiter");
+    assert.ok(!record.command.includes("8453-safes.json"));
+  });
+
+  it("creates the escrow paid in USDC and its evaluator bonded in ARL at nonces 23 and 24", () => {
+    const run = afterTge(() => parseRun(plan("8453-verified-jobs-usdc")));
+    assert.deepEqual(
+      run.steps.map((s) => (s.kind === "create" ? s.contract : s.kind)),
+      ["ARLJobs", "ARLVerifiedEvaluator"],
+    );
+    const [jobs, evaluator] = run.steps;
+    assert.equal(jobs?.kind, "create");
+    assert.equal(evaluator?.kind, "create");
+    if (jobs?.kind === "create" && evaluator?.kind === "create") {
+      assert.equal(jobs.nonce, 23);
+      assert.equal(String(jobs.args[0]), "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913");
+      assert.equal(evaluator.nonce, 24);
+      assert.equal(String(evaluator.args[0]).toLowerCase(), jobs.address.toLowerCase());
+      assert.equal(String(evaluator.args[1]), "0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f");
+      assert.equal(evaluator.args[3], 100n * 10n ** 18n);
+      assert.equal(String(evaluator.args[6]).toLowerCase(), planned("ARL token"));
+    }
+    const record = recordCommand(run, "x.json");
+    assert.equal(record.kind, "jobs");
+    assert.ok(record.command.includes("8453-jobs-usdc.json"));
+  });
+});

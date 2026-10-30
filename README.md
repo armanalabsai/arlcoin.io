@@ -3,10 +3,11 @@
 ARL is a fixed-supply ERC-20 token (21,000,000 ARL) on Base, with vesting, a timelocked treasury,
 staking, escrowed jobs, usage-based payments and anonymous signals built around it.
 
-**Status (2026-10-17): live on the Base Sepolia testnet. The Base Mainnet launch (TGE) is
-2026-10-23 at 00:00 UTC; the full launch was rehearsed on a Base Mainnet fork with the real
-signers on 2026-10-17 and passed.** Every claim below links to the code, the tests and the
-document that back it. Anything without that evidence is listed as not built.
+**Live on Base Mainnet since 2026-10-24.** Token
+[`0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4`](https://basescan.org/token/0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4)
+(block 53,023,206, source-verified on Basescan), four Uniswap v3 pools holding 5,000,000 ARL, and
+the verified jobs escrow with its evaluator (source-verified). Every claim below links to the code,
+the tests and the document that back it.
 
 | Live                 | URL                                                         | What it is                                                                 |
 | -------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------- |
@@ -21,7 +22,7 @@ document that back it. Anything without that evidence is listed as not built.
 | Network      | Chain ID | Status                                                                         |
 | ------------ | -------: | ------------------------------------------------------------------------------ |
 | Base Sepolia |    84532 | Deployed (testnet). RPC `https://sepolia.base.org`                             |
-| Base Mainnet |     8453 | Not deployed. The network gate opens at the TGE, 2026-10-23 00:00 UTC; the planned addresses are in [mainnet-plan.md](docs/mainnet-plan.md) |
+| Base Mainnet |     8453 | Deployed 2026-10-24: token [`0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4`](https://basescan.org/token/0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4); every address is in [mainnet-plan.md](docs/mainnet-plan.md). Jobs escrow [`0x6c8A7712010f951f5B03A11C24b46C8b18d5997F`](https://basescan.org/address/0x6c8A7712010f951f5B03A11C24b46C8b18d5997F#code) and verified evaluator [`0x3a5dC803b84D5F150FCd2b070cb9D8a12BC35F34`](https://basescan.org/address/0x3a5dC803b84D5F150FCd2b070cb9D8a12BC35F34#code) ([mainnet-services.md](docs/mainnet-services.md)) |
 
 Base Sepolia contracts. The runtime bytecode of each address matches a clean build of `main`
 (`compareRuntime` in [`packages/deploy/src/bytecode.ts`](packages/deploy/src/bytecode.ts), checked
@@ -58,15 +59,15 @@ compares that build with the code at each deployed address.
 | Public Launch Merkle claim               | [`ARLMerkleDistributor.sol`](contracts/src/ARLMerkleDistributor.sol)                                     | [unit](contracts/test/ARLMerkleDistributor.t.sol), [invariant](contracts/test/invariant/ARLDistributorInvariant.t.sol)                      | [deployment.md](docs/deployment.md)                              | Built, not deployed; reserved for a later airdrop |
 | Staking (no new issuance)                | [`ARLStakingRewards.sol`](contracts/src/ARLStakingRewards.sol)                                           | [unit](contracts/test/ARLStakingRewards.t.sol), [invariant](contracts/test/invariant/ARLStakingInvariant.t.sol)                             | [app.md](docs/app.md)                                            | Base Sepolia (deployed and verified) |
 | AI / compute jobs paid in ARL (ERC-8183 escrow) | [`ARLJobs.sol`](contracts/src/ARLJobs.sol)                                                        | [unit](contracts/test/ARLJobs.t.sol), [invariant](contracts/test/invariant/ARLJobsInvariant.t.sol)                                          | [jobs.md](docs/jobs.md)                                          | Base Sepolia (deployed and verified) |
+| Verified evaluation of jobs (staked validator committee, challenge window, slashing, ERC-8004 outcome) | [`ARLVerifiedEvaluator.sol`](contracts/src/ARLVerifiedEvaluator.sol) | [unit](contracts/test/ARLVerifiedEvaluator.t.sol), [invariant](contracts/test/invariant/ARLVerifiedEvaluatorInvariant.t.sol) | [verifiable-execution.md](docs/verifiable-execution.md) | Deployed on Base Sepolia: [`0x6808…4d14`](https://base-sepolia.blockscout.com/address/0x6808F80Eb11538543d31cf4b50332B268dDd4d14), arbiter Safe (2-of-3) [`0x8FF6…466f`](https://base-sepolia.blockscout.com/address/0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f) |
 | Usage-based payments in ARL (x402 `upto`) | [`packages/payments`](packages/payments/src)                                                            | [unit](packages/payments/test), [Base Sepolia fork](packages/payments/test-fork/upto.fork.test.ts)                                          | [payments.md](docs/payments.md)                                  | Base Sepolia; settled by the app's testnet operator |
+| Validator: re-executes `arl-reexec/1` specs in a pinned, isolated container and votes; `watch` runs it unattended; `bundle` / `verify-bundle` export and check a job's evidence | [`packages/verifier`](packages/verifier/src), [`validators.yml`](.github/workflows/validators.yml) | [unit](packages/verifier/test/verifier.test.ts), [container](packages/verifier/test-docker/docker.test.ts), [local chain, incl. unattended `watch`](packages/verifier/test-anvil/evaluator.anvil.test.ts) | [reexecution-spec.md](docs/reexecution-spec.md) | Three Base Sepolia validators run every 10 minutes on GitHub runners |
+| SDK for verified jobs: `openVerifiedJob`, `getVerdict`, `finalizeJob`; one-command [quickstart](docs/quickstart.md) | [`packages/sdk`](packages/sdk/src/verified.ts) | [unit](packages/sdk/test/verified.test.ts), [local chain](packages/verifier/test-anvil/evaluator.anvil.test.ts) | [reexecution-spec.md](docs/reexecution-spec.md) | Base Sepolia and local chain |
 | Compute provider reference node          | [`packages/provider`](packages/provider/src)                                                             | [unit](packages/provider/test/provider.test.ts), [fork](packages/provider/test-fork/provider.fork.test.ts)                                  | [compute-provider.md](docs/compute-provider.md)                  | Reference software, no provider runs it |
 | ZK anonymous signals (Semaphore, Noir/UltraHonk) | [`zk/semaphore`](zk/semaphore/src/main.nr), [`ARLAnonymousSignal.sol`](contracts/src/ARLAnonymousSignal.sol) | [circuit](zk/check.sh), [real proofs](contracts/test-zk/ARLAnonymousSignal.t.sol), [`@arl/zk`](packages/zk/test/zk.test.ts)               | [zk-privacy.md](docs/zk-privacy.md)                              | Base Sepolia (deployed and verified) |
-| Web app (claim, vesting, staking, jobs, payments, private signals) | [`apps/dapp`](apps/dapp)                                                          | [unit](apps/dapp/test/unit), [end-to-end on Anvil](apps/dapp/test/e2e)                                                                      | [app.md](docs/app.md)                                            | Live on Base Sepolia ([arlcoin.io/app](https://arlcoin.io/app/)) |
+| Web app (claim, vesting, staking, jobs, verified jobs with public network activity, payments, private signals) | [`apps/dapp`](apps/dapp)                                                          | [unit](apps/dapp/test/unit), [end-to-end on Anvil](apps/dapp/test/e2e)                                                                      | [app.md](docs/app.md)                                            | Live on Base Sepolia ([arlcoin.io/app](https://arlcoin.io/app/)) |
 | Website: "Live on Base Sepolia" badge (reads the chain every 30 s), structured data, sitemap | [`apps/web`](apps/web), [`LiveStatus.tsx`](apps/web/src/site/LiveStatus.tsx) | [unit](apps/web/test/unit), [end-to-end](apps/web/test/e2e/site.spec.ts) | [content-standard.md](docs/content-standard.md) | Live at [arlcoin.io](https://arlcoin.io) |
-| DEX launch: 5,000,000 ARL in ARL-only Uniswap v3 pools from 0.20 USD | [`pool.ts`](packages/deploy/src/pool.ts), [`launch-pools.mjs`](scripts/launch-pools.mjs), [`launch-day-pools.sh`](scripts/launch-day-pools.sh) | [unit](packages/deploy/test/pool.test.ts), [fork](contracts/test-fork/UniswapLaunchFork.t.sol), [sale fork](contracts/test-fork/UniswapPublicLaunchFork.t.sol), [mainnet rehearsal](scripts/rehearse-base-mainnet-fork.sh) | [mainnet-runbook.md](docs/mainnet-runbook.md) | Prepared for the TGE; no pool exists yet |
-
-Not built: private payments and verifiable computation (no circuits exist), an ARL-operated
-network or chain, governance or a DAO. ARL runs on Base; it is not a separate chain.
+| DEX launch: 5,000,000 ARL in ARL-only Uniswap v3 pools from 0.20 USD | [`pool.ts`](packages/deploy/src/pool.ts), [`launch-pools.mjs`](scripts/launch-pools.mjs), [`launch-day-pools.sh`](scripts/launch-day-pools.sh) | [unit](packages/deploy/test/pool.test.ts), [fork](contracts/test-fork/UniswapLaunchFork.t.sol), [sale fork](contracts/test-fork/UniswapPublicLaunchFork.t.sol), [mainnet rehearsal](scripts/rehearse-base-mainnet-fork.sh) | [mainnet-runbook.md](docs/mainnet-runbook.md) | Live on Base Mainnet since 2026-10-24: four pools holding 5,000,000 ARL ([addresses](docs/mainnet-plan.md#uniswap-v3-pools)) |
 
 ## Quality gates (CI, every pull request)
 
@@ -138,10 +139,13 @@ only after CI passes ([deploy-site.yml](.github/workflows/deploy-site.yml),
 - Mainnet custody (Safes, timelock, guardian) and the launch procedure:
   [mainnet-plan.md](docs/mainnet-plan.md), [mainnet-runbook.md](docs/mainnet-runbook.md).
 
-## Launch (TGE, 2026-10-23 00:00 UTC)
+## Launch (2026-10-24; TGE date for vesting 2026-10-23)
 
 The order and every check are in [docs/mainnet-runbook.md](docs/mainnet-runbook.md); the owners
-sign every transaction in their own wallets and no key is handled by the tooling.
+signed every transaction in their own wallets and no key was handled by the tooling. On chain:
+`VerifyARL`, the bytecode check against a clean build and the supply check all passed (total
+21,000,000 ARL, circulating 2,100,000 at deployment), and the four contracts are source-verified
+on Basescan.
 
 | Step | Who signs | What happens |
 | ---- | --------- | ------------ |
@@ -151,18 +155,11 @@ sign every transaction in their own wallets and no key is handled by the tooling
 | 4 | Public Launch Safe, 2 of 3 | 3,000,000 ARL on the same pools and ranges (sale positions) |
 | 5 | none | Addresses published on arlcoin.io and here, token list, supply API, mainnet monitor |
 
-Circulating at TGE: 2,100,000 ARL (the Founder allocation); ARL bought from the pools adds to it.
+Circulating at the token deployment: 2,100,000 ARL (the Founder allocation). Once the pools opened
+on 2026-10-24, the 5,000,000 ARL deposited in them count as circulating too (economic
+specification section 5), so the supply API reported about 7,100,000 ARL.
 The Public Launch Safe keeps 500,000 ARL for a later airdrop and 1,500,000 ARL for launchpad
 sales. No project funds are added to the pools.
-
-Open items, tracked in [docs/release-readiness.md](docs/release-readiness.md):
-
-| Item                                                        | Type     |
-| ----------------------------------------------------------- | -------- |
-| Deployer funded on Base (owner, 2026-10-20)                 | BLOCKER  |
-| The TGE run itself (steps 1 to 4 above)                     | BLOCKER  |
-| Legal opinion publication, KYC/AML policy, jurisdiction     | REQUIRED |
-| Two-person review on `main` (second maintainer)             | REQUIRED |
 
 ## Documentation
 
@@ -188,8 +185,7 @@ ARL never asks for a private key, a seed phrase or a payment in any channel.
 
 ## Disclaimer
 
-ARL Protocol is a technology project under development. Nothing in this repository constitutes
-financial, investment or legal advice.
+Nothing in this repository constitutes financial, investment or legal advice.
 
 ## License
 

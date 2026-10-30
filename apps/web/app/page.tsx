@@ -54,21 +54,14 @@ const CHIPS = [
   "ERC-20 on Base",
   "Source-verified on Basescan",
   "Fixed supply · no mint",
-  "Live on Base Sepolia",
+  "Token live on Base",
 ];
-
-const tge = new Date(`${SITE.tgeTarget}T00:00:00Z`).toLocaleDateString("en-GB", {
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-  timeZone: "UTC",
-});
 
 const FACTS = [
   {
     label: "Chain",
     value: "Base",
-    note: `Ethereum layer 2. Sepolia testnet live; Mainnet targeted for ${tge}.`,
+    note: "Ethereum layer 2. The ARL token is live on Base Mainnet since 24 October 2026.",
   },
   {
     label: "Standard",
@@ -177,13 +170,13 @@ export default function Home() {
             ))}
           </ul>
           <p className="mt-10 text-[12px] text-fg-subtle">
-            ARL is live on the Base Sepolia testnet. Nothing is for sale. Registering is free.
+            ARL is live on Base. Registering is free and no payment is ever requested.
           </p>
         </section>
 
         <Section
           heading="Launch on Base."
-          sub={`Base Mainnet launch targeted for ${tge}. Four steps, all from your own wallet. ARL never asks for your private key, your seed phrase or a payment to a personal address.`}
+          sub={`Live on Base Mainnet since 24 October 2026. Four steps, all from your own wallet. ARL never asks for your private key, your seed phrase or a payment to a personal address.`}
         >
           <LaunchSteps />
         </Section>
@@ -288,7 +281,7 @@ export default function Home() {
         <Section
           alt
           heading="Where ARL is today."
-          sub="Base Mainnet is targeted for 23 October 2026."
+          sub="The ARL token is live on Base Mainnet since 24 October 2026. The network services (AI payments, compute, escrowed jobs, staking) run on the Base Sepolia testnet until each is deployed on Base Mainnet."
         >
           <Reveal delay={120} className="glass mt-14 rounded-[28px] p-6 sm:p-10">
             <ol className="landing-road text-left">
@@ -319,22 +312,6 @@ export default function Home() {
             </Link>
           </Reveal>
         </Section>
-
-        <section className="landing-final border-t border-line px-4 py-20 text-center sm:px-6 sm:py-28">
-          <Reveal className="glass mx-auto max-w-[880px] rounded-[32px] px-6 py-14 sm:py-20">
-            <h2 className="text-[36px] leading-[1.1] font-bold sm:text-[56px]">
-              Be there at launch.
-            </h2>
-            <p className="mx-auto mt-4 max-w-[560px] text-[17px] leading-[1.5] text-fg-muted sm:text-[21px]">
-              Register a wallet address for launch updates. Free, and no payment is ever requested.
-            </p>
-            <div className="mt-8">
-              <Link href="/whitelist" prefetch={false} className={primary}>
-                Join the whitelist
-              </Link>
-            </div>
-          </Reveal>
-        </section>
       </main>
 
       <SiteFooter />

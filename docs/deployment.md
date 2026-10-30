@@ -1,7 +1,8 @@
 # Deployment Tooling
 
 Status: **Base Sepolia testnet deployed** (2026-10-04, see
-[Base Sepolia deployment](#base-sepolia-deployment)). Nothing is deployed on Base Mainnet. No
+[Base Sepolia deployment](#base-sepolia-deployment)). **Base Mainnet deployed** (2026-10-24, see
+[mainnet-plan.md](mainnet-plan.md)). No
 production address, no key and no private RPC endpoint exists in this repository.
 
 ## Pipeline
