@@ -1,0 +1,6 @@
+# Cloudflare Pages project for arlcoin.io (the Pages project "arlcoin-io", connected to this
+# repository). Build command: bash scripts/build-cloudflare.sh. The build writes the static site,
+# with the app under /app, to dist/; functions/ holds the API (arlcoin.io/api/supply).
+name = "arlcoin-io"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-10-01"

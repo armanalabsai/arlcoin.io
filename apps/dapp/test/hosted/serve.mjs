@@ -1,4 +1,4 @@
-// Serves a directory staged by scripts/build-site.sh the way Vercel serves arlcoin.io for the
+// Serves a directory staged by scripts/build-site.sh the way Cloudflare Pages serves arlcoin.io for the
 // hosted test: static files, `trailingSlash` (a directory is its index.html), and 404.html for a
 // missing page. Usage: node test/hosted/serve.mjs <dir> <port>
 import { createReadStream, existsSync, statSync } from "node:fs";

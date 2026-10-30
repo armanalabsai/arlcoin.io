@@ -47,7 +47,7 @@ guaranteed listing.
 ## Gaps
 
 - **E-mail on the project domain:** done 2026-10-05. Every address at arlcoin.io (team@, info@ ...)
-  forwards to the team inbox through ImprovMX (MX and SPF records on Vercel DNS); tested.
+  forwards to the team inbox through ImprovMX (MX and SPF records in the domain's DNS); tested.
   Receiving only: replying from the domain needs a paid plan, so replies come from the team inbox.
 - **Trading history.** Both sites look for real trading on the pools before listing; apply a few
   days after the TGE.

@@ -1,10 +1,7 @@
 // ARL's partners, as a scrolling band at the very bottom of every page. The owner states that
 // a partnership with each listed company is in place (2026-10-05).
 
-const PROVIDERS = [
-  { name: "Vercel", role: "Hosting", href: "https://vercel.com" },
-  { name: "Supabase", role: "Database", href: "https://supabase.com" },
-] as const;
+const PROVIDERS = [{ name: "Supabase", role: "Database", href: "https://supabase.com" }] as const;
 
 /** Enough copies to fill a wide screen; the track holds two runs of them. */
 const COPIES = 4;
