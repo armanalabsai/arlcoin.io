@@ -10,7 +10,16 @@
 //
 // Served by the Cloudflare Pages Function functions/api/supply.js, which passes the configuration.
 
-const RPC = { 8453: "https://mainnet.base.org", 84532: "https://sepolia.base.org" };
+// Public RPC endpoints, tried in order: one that refuses or fails hands over to the next.
+const RPC = {
+  8453: [
+    "https://mainnet.base.org",
+    "https://base-rpc.publicnode.com",
+    "https://base.drpc.org",
+    "https://base-mainnet.public.blastapi.io",
+  ],
+  84532: ["https://sepolia.base.org", "https://base-sepolia-rpc.publicnode.com"],
+};
 const TOTAL_SUPPLY = "0x18160ddd";
 const BALANCE_OF = "0x70a08231";
 
@@ -43,8 +52,20 @@ export function formatArl(units) {
 }
 
 export async function supply(config, which) {
-  const url = RPC[config.chainId];
-  if (!url) throw new Error("unsupported chain");
+  const urls = RPC[config.chainId];
+  if (!urls) throw new Error("unsupported chain");
+  let failure;
+  for (const url of urls) {
+    try {
+      return await supplyFrom(url, config, which);
+    } catch (e) {
+      failure = e;
+    }
+  }
+  throw failure;
+}
+
+async function supplyFrom(url, config, which) {
   const blockRes = await fetch(url, {
     method: "POST",
     headers: { "content-type": "application/json" },
