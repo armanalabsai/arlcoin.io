@@ -20,7 +20,7 @@ import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/Reentrancy
 /// - no hooks: `hook` must be address(0) (a non-hooked kernel is compliant); `optParams` are
 ///   accepted for interface compatibility and ignored;
 /// - `fund` takes the expected budget (front-running protection, as the specification requires);
-/// - a provider can only submit before the job expires.
+/// - a provider can only submit, and an evaluator can only complete, before the job expires.
 contract ARLJobs is ReentrancyGuardTransient {
     using SafeERC20 for IERC20;
 
@@ -166,12 +166,16 @@ contract ARLJobs is ReentrancyGuardTransient {
         emit JobSubmitted(jobId, msg.sender, deliverable);
     }
 
-    /// @notice Evaluator only, once Submitted: pays the escrow to the provider.
+    /// @notice Evaluator only, once Submitted and before expiry: pays the escrow to the provider.
+    /// From `expiredAt` only claimRefund can settle the job, so the outcome never depends on
+    /// which of two valid transactions lands first.
     /// @param reason Optional attestation (for example a hash of the evaluation).
     function complete(uint256 jobId, bytes32 reason, bytes calldata) external nonReentrant {
         Job storage job = _job(jobId);
         if (job.status != JobStatus.Submitted) revert WrongStatus();
         if (msg.sender != job.evaluator) revert Unauthorized();
+        // slither-disable-next-line timestamp
+        if (block.timestamp >= job.expiredAt) revert JobExpiredAlready();
 
         job.status = JobStatus.Completed;
         uint256 amount = job.budget;

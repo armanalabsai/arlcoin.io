@@ -266,6 +266,60 @@ contract ARLJobsTest is ARLTestBase {
         assertEq(token.balanceOf(provider), BUDGET);
     }
 
+    // ---------------------------------------------------------------- settlement at the deadline (F-2)
+
+    /// Audit F-2: from expiredAt, complete() and claimRefund() were both valid on a Submitted job,
+    /// so a stranger could refund delivered work first. Now only claimRefund settles it.
+    function test_completeRevertsAtExpiry() public {
+        uint256 id = _submitted();
+        vm.warp(jobs.getJob(id).expiredAt);
+        vm.prank(evaluator);
+        vm.expectRevert(ARLJobs.JobExpiredAlready.selector);
+        jobs.complete(id, REASON, "");
+
+        vm.prank(stranger);
+        jobs.claimRefund(id);
+        assertEq(uint256(_status(id)), uint256(ARLJobs.JobStatus.Expired));
+        assertEq(token.balanceOf(provider), 0);
+        assertEq(token.balanceOf(address(jobs)), 0);
+    }
+
+    function test_completeOneSecondBeforeExpiryWinsAndBlocksRefund() public {
+        uint256 id = _submitted();
+        vm.warp(jobs.getJob(id).expiredAt - 1);
+        vm.prank(stranger);
+        vm.expectRevert(ARLJobs.WrongStatus.selector);
+        jobs.claimRefund(id);
+
+        vm.prank(evaluator);
+        jobs.complete(id, REASON, "");
+        assertEq(token.balanceOf(provider), BUDGET);
+
+        vm.warp(block.timestamp + 1);
+        vm.prank(stranger);
+        vm.expectRevert(ARLJobs.WrongStatus.selector);
+        jobs.claimRefund(id);
+        assertEq(token.balanceOf(provider), BUDGET);
+    }
+
+    /// At any instant, exactly one of complete() and claimRefund() can settle a Submitted job.
+    function testFuzz_onlyOneSettlementIsValidAtAnyTime(uint32 offset) public {
+        uint256 id = _submitted();
+        uint256 deadline = jobs.getJob(id).expiredAt;
+        vm.warp(bound(uint256(offset), block.timestamp, deadline + 365 days));
+
+        uint256 snap = vm.snapshotState();
+        vm.prank(evaluator);
+        (bool completed,) =
+            address(jobs).call(abi.encodeCall(ARLJobs.complete, (id, REASON, bytes(""))));
+        vm.revertToState(snap);
+        vm.prank(stranger);
+        (bool refunded,) = address(jobs).call(abi.encodeCall(ARLJobs.claimRefund, (id)));
+
+        assertTrue(completed != refunded);
+        assertEq(completed, block.timestamp < deadline);
+    }
+
     // ---------------------------------------------------------------- reject
 
     function test_clientRejectsWhileOpen() public {
