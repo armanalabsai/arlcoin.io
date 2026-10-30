@@ -17,6 +17,10 @@ const plan = (name: string) =>
     readFileSync(new URL(`../../public/plans/${name}.json`, import.meta.url), "utf8"),
   ) as unknown;
 const doc = readFileSync(new URL("../../../../docs/mainnet-plan.md", import.meta.url), "utf8");
+const docServices = readFileSync(
+  new URL("../../../../docs/mainnet-services.md", import.meta.url),
+  "utf8",
+);
 const planned = (label: string) =>
   new RegExp(`\\| ${label} +\\| \`(0x[0-9a-fA-F]{40})\``).exec(doc)?.[1]?.toLowerCase();
 
@@ -76,6 +80,54 @@ describe("Base Mainnet plans for the verified jobs", () => {
   for (const name of ["8453-verified-jobs-usdc", "8453-verified-jobs-arl"]) {
     it(`refuses ${name}: pre-audit bytecode, do not use`, () => {
       assert.throws(() => afterTge(() => parseRun(plan(name))), /ARLJobs|code/);
+    });
+  }
+
+  // Built from the code with the 2026-10-28 audit fixes (F-2, F-3) at the same nonces; the deploy
+  // screen accepts them with the current build.
+  const pairs = [
+    {
+      name: "8453-verified-jobs-usdc-v2",
+      nonce: 23,
+      token: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      jobs: "0xc833140D2eE8607fd41662cffFAc557f3D535bE6",
+      evaluator: "0x4f7f61916d65ff9E7C5F62468a18E37d4Fb07FA7",
+      record: "8453-jobs-usdc.json",
+    },
+    {
+      name: "8453-verified-jobs-arl-v2",
+      nonce: 25,
+      token: "0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4",
+      jobs: "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+      evaluator: "0xa2f8945f301C46f2649b79Cd42A7eb1102e9009E",
+      record: "8453-jobs.json",
+    },
+  ];
+  for (const p of pairs) {
+    it(`creates ${p.name}: escrow at nonce ${String(p.nonce)} and its evaluator bonded in ARL`, () => {
+      const run = afterTge(() => parseRun(plan(p.name)));
+      assert.deepEqual(
+        run.steps.map((s) => (s.kind === "create" ? s.contract : s.kind)),
+        ["ARLJobs", "ARLVerifiedEvaluator"],
+      );
+      const [jobs, evaluator] = run.steps;
+      assert.equal(jobs?.kind, "create");
+      assert.equal(evaluator?.kind, "create");
+      if (jobs?.kind === "create" && evaluator?.kind === "create") {
+        assert.equal(jobs.nonce, p.nonce);
+        assert.equal(evaluator.nonce, p.nonce + 1);
+        assert.equal(jobs.address, getContractAddress({ from: run.from, nonce: BigInt(p.nonce) }));
+        assert.equal(jobs.address.toLowerCase(), p.jobs.toLowerCase());
+        assert.equal(evaluator.address.toLowerCase(), p.evaluator.toLowerCase());
+        assert.equal(String(jobs.args[0]).toLowerCase(), p.token.toLowerCase());
+        assert.equal(String(evaluator.args[0]).toLowerCase(), p.jobs.toLowerCase());
+        assert.equal(String(evaluator.args[1]), "0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f");
+        assert.equal(evaluator.args[3], 100n * 10n ** 18n);
+        assert.ok(doc.includes(p.jobs) || docServices.includes(p.jobs));
+      }
+      const record = recordCommand(run, "x.json");
+      assert.equal(record.kind, "jobs");
+      assert.ok(record.command.endsWith(p.record));
     });
   }
 });
