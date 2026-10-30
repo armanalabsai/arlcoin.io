@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>ARL social cards 2026-10-18</title>
+    <style>
+      :root {
+        --bg: #050b1e;
+        --line: #1f5fd6;
+        --glow: #2f7bff;
+        --ink: #ffffff;
+        --muted: #aeb8d0;
+        --ok: #3ddc97;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Inter", sans-serif;
+        overflow: hidden;
+      }
+      .card {
+        position: relative;
+        width: var(--w);
+        height: var(--h);
+        padding: var(--pad);
+        background:
+          radial-gradient(ellipse at 70% 20%, rgba(47, 123, 255, 0.12), transparent 60%), var(--bg);
+        display: none;
+      }
+      .card.on {
+        display: flex;
+        flex-direction: column;
+      }
+      .frame {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+      .top {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        font-size: 26px;
+        color: var(--muted);
+        letter-spacing: 0.04em;
+      }
+      .top img {
+        width: 64px;
+        height: 64px;
+      }
+      .top b {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      h1 {
+        font-family: "Inter Display", "Inter", sans-serif;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1.05;
+      }
+      .sub {
+        color: var(--muted);
+        font-size: 30px;
+        line-height: 1.4;
+      }
+      .grow {
+        flex: 1;
+      }
+      .tiles {
+        display: grid;
+        gap: 22px;
+      }
+      .tile {
+        border: 2px solid var(--line);
+        border-radius: 22px;
+        padding: 26px 28px;
+        background: rgba(31, 95, 214, 0.08);
+      }
+      .tile .v {
+        font-family: "Inter Display", "Inter", sans-serif;
+        font-weight: 700;
+        font-size: 58px;
+        line-height: 1;
+      }
+      .tile .k {
+        color: var(--muted);
+        font-size: 24px;
+        margin-top: 12px;
+        line-height: 1.3;
+      }
+      .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        border-bottom: 1px solid rgba(174, 184, 208, 0.25);
+        padding: 22px 0;
+        font-size: 32px;
+      }
+      .row span:last-child {
+        font-weight: 700;
+        color: var(--ok);
+      }
+      .list li {
+        list-style: none;
+        font-size: 40px;
+        line-height: 1.35;
+        margin: 14px 0;
+        padding-left: 48px;
+        position: relative;
+      }
+      .list li::before {
+        content: "✕";
+        position: absolute;
+        left: 0;
+        color: var(--glow);
+        font-weight: 700;
+      }
+      .list.check li::before {
+        content: "→";
+      }
+      .foot {
+        display: flex;
+        justify-content: space-between;
+        color: var(--muted);
+        font-size: 24px;
+      }
+      .pill {
+        display: inline-block;
+        border: 2px solid var(--glow);
+        color: var(--ink);
+        border-radius: 999px;
+        padding: 10px 22px;
+        font-size: 26px;
+        font-weight: 600;
+      }
+      .note {
+        color: var(--muted);
+        font-size: 22px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- X / Telegram: 1600x900 -->
+    <section class="card" id="x" style="--w: 1600px; --h: 900px; --pad: 90px 110px">
+      <div class="frame"></div>
+      <div class="top">
+        <img src="../../../assets/brand/arl-mark-on-dark.svg" alt="" /><b>ARL Protocol</b> · Week
+        recap · 18 Oct 2026
+      </div>
+      <div class="grow"></div>
+      <h1 style="font-size: 92px">Audited before launch.</h1>
+      <p class="sub" style="margin-top: 18px">
+        Internal multi-layer security audit, 17 Oct 2026. Evidence is public.
+      </p>
+      <div class="grow"></div>
+      <div class="tiles" style="grid-template-columns: repeat(4, 1fr)">
+        <div class="tile">
+          <div class="v">0</div>
+          <div class="k">critical findings<br />0 open</div>
+        </div>
+        <div class="tile">
+          <div class="v">271/271</div>
+          <div class="k">Foundry tests pass<br />fuzz + invariants</div>
+        </div>
+        <div class="tile">
+          <div class="v">11/11</div>
+          <div class="k">Halmos properties<br />proved (bounded)</div>
+        </div>
+        <div class="tile">
+          <div class="v">Oct 23</div>
+          <div class="k">TGE target on Base<br />00:00 UTC</div>
+        </div>
+      </div>
+      <div class="grow"></div>
+      <div class="foot">
+        <span>arlcoin.io</span><span>Base Mainnet: not deployed yet · team never DMs first</span>
+      </div>
+    </section>
+
+    <!-- Medium cover: 1400x788 -->
+    <section class="card" id="medium" style="--w: 1400px; --h: 788px; --pad: 80px 100px">
+      <div class="frame"></div>
+      <div class="top">
+        <img src="../../../assets/brand/arl-mark-on-dark.svg" alt="" /><b>ARL Protocol</b> · Build
+        log
+      </div>
+      <div class="grow"></div>
+      <h1 style="font-size: 84px">How we audited ARL<br />before the TGE</h1>
+      <p class="sub" style="margin-top: 20px">
+        Slither · Aderyn · Foundry · Halmos · Mythril · Base Mainnet fork rehearsal
+      </p>
+      <div class="grow"></div>
+      <div class="foot">
+        <span>17 Oct 2026 · internal audit · 12 findings, 0 open</span><span>arlcoin.io</span>
+      </div>
+    </section>
+
+    <!-- Instagram carousel: 1080x1350 -->
+    <section class="card" id="ig1" style="--w: 1080px; --h: 1350px; --pad: 110px 100px">
+      <div class="frame"></div>
+      <div class="top">
+        <img src="../../../assets/brand/arl-mark-on-dark.svg" alt="" /><b>ARL Protocol</b> · 18 Oct
+        2026
+      </div>
+      <div class="grow"></div>
+      <h1 style="font-size: 118px">Audited<br />before<br />launch.</h1>
+      <p class="sub" style="margin-top: 36px">
+        Week recap: the security audit is done.<br />5 days to the TGE target.
+      </p>
+      <div class="grow"></div>
+      <div class="foot"><span>Swipe →</span><span>1 / 5</span></div>
+    </section>
+
+    <section class="card" id="ig2" style="--w: 1080px; --h: 1350px; --pad: 110px 100px">
+      <div class="frame"></div>
+      <div class="top">
+        <img src="../../../assets/brand/arl-mark-on-dark.svg" alt="" /><b>The token contract</b>
+      </div>
+      <div class="grow"></div>
+      <h1 style="font-size: 96px">21,000,000 ARL.<br />Minted once.</h1>
+      <p class="sub" style="margin: 28px 0 30px">What is not in the contract:</p>
+      <ul class="list">
+        <li>a mint function</li>
+        <li>an owner</li>
+        <li>an upgrade proxy</li>
+        <li>a pause button</li>
+        <li>a blacklist</li>
+      </ul>
+      <div class="grow"></div>
+      <div class="foot">
+        <span>OpenZeppelin ERC20 + ERC20Permit, unmodified</span><span>2 / 5</span>
+      </div>
+    </section>
+
+    <section class="card" id="ig3" style="--w: 1080px; --h: 1350px; --pad: 110px 100px">
+      <div class="frame"></div>
+      <div class="top">
+        <img src="../../../assets/brand/arl-mark-on-dark.svg" alt="" /><b>Audit layers</b> · 17 Oct
+        2026
+      </div>
+      <div class="grow"></div>
+      <h1 style="font-size: 80px; margin-bottom: 30px">Six layers.<br />One public report.</h1>
+      <div class="row"><span>Slither, 102 detectors</span><span>0 results</span></div>
+      <div class="row"><span>Aderyn</span><span>triaged</span></div>
+      <div class="row"><span>Foundry unit, fuzz, invariant</span><span>271/271</span></div>
+      <div class="row"><span>Halmos symbolic proofs</span><span>11/11</span></div>
+      <div class="row"><span>Mythril symbolic execution</span><span>no exploit</span></div>
+      <div class="row"><span>Base Mainnet fork rehearsal</span><span>pass</span></div>
+      <div class="grow"></div>
+      <div class="foot"><span>Re-run in CI on every change</span><span>3 / 5</span></div>
+    </section>
+
+    <section class="card" id="ig4" style="--w: 1080px; --h: 1350px; --pad: 110px 100px">
+      <div class="frame"></div>
+      <div class="top">
+        <img src="../../../assets/brand/arl-mark-on-dark.svg" alt="" /><b>Findings</b>
+      </div>
+      <div class="grow"></div>
+      <h1 style="font-size: 96px">0 critical.<br />0 open.</h1>
+      <p class="sub" style="margin: 28px 0 40px">
+        No exploitable vulnerability in contract code. 12 findings on custody, launch procedure and
+        design choices, each fixed, mitigated or accepted with the reason recorded.
+      </p>
+      <div class="tiles" style="grid-template-columns: repeat(4, 1fr)">
+        <div class="tile">
+          <div class="v">1</div>
+          <div class="k">high</div>
+        </div>
+        <div class="tile">
+          <div class="v">4</div>
+          <div class="k">medium</div>
+        </div>
+        <div class="tile">
+          <div class="v">3</div>
+          <div class="k">low</div>
+        </div>
+        <div class="tile">
+          <div class="v">4</div>
+          <div class="k">info</div>
+        </div>
+      </div>
+      <div class="grow"></div>
+      <div class="foot"><span>Internal audit · evidence on GitHub</span><span>4 / 5</span></div>
+    </section>
+
+    <section class="card" id="ig5" style="--w: 1080px; --h: 1350px; --pad: 110px 100px">
+      <div class="frame"></div>
+      <div class="top">
+        <img src="../../../assets/brand/arl-mark-on-dark.svg" alt="" /><b>Next</b>
+      </div>
+      <div class="grow"></div>
+      <span class="pill" style="align-self: flex-start">TGE target · 23 Oct 2026 · 00:00 UTC</span>
+      <h1 style="font-size: 92px; margin-top: 34px">Verify<br />before you trust.</h1>
+      <ul class="list check" style="margin-top: 34px">
+        <li>No airdrop at launch</li>
+        <li>Mainnet addresses only on arlcoin.io, after verification</li>
+        <li>The team never DMs first</li>
+      </ul>
+      <div class="grow"></div>
+      <div class="foot"><span>arlcoin.io · t.me/arlcoin_community</span><span>5 / 5</span></div>
+    </section>
+
+    <script>
+      const id = location.hash.slice(1) || "x";
+      const card = document.getElementById(id);
+      card.classList.add("on");
+      // Cut-corner frame with two target marks, drawn to the card's size.
+      const w = card.offsetWidth,
+        h = card.offsetHeight,
+        m = 34,
+        c = 70;
+      card.querySelector(".frame").innerHTML =
+        `<svg width="${w}" height="${h}" fill="none" stroke="#1F5FD6" stroke-width="2">
+      <polygon opacity=".8" points="${m},${m} ${w - m - c},${m} ${w - m},${m + c} ${w - m},${h - m} ${m + c},${h - m} ${m},${h - m - c}"/>
+      <g stroke="#2F7BFF"><circle cx="${m + 38}" cy="${m + 38}" r="13"/><circle cx="${w - m - 38}" cy="${h - m - 38}" r="13"/></g>
+    </svg>`;
+    </script>
+  </body>
+</html>

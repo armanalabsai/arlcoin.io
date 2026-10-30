@@ -70,26 +70,12 @@ describe("Base Mainnet plans for the verified jobs", () => {
     assert.ok(!record.command.includes("8453-safes.json"));
   });
 
-  it("creates the escrow paid in USDC and its evaluator bonded in ARL at nonces 23 and 24", () => {
-    const run = afterTge(() => parseRun(plan("8453-verified-jobs-usdc"), RELEASE_ARTIFACTS));
-    assert.deepEqual(
-      run.steps.map((s) => (s.kind === "create" ? s.contract : s.kind)),
-      ["ARLJobs", "ARLVerifiedEvaluator"],
-    );
-    const [jobs, evaluator] = run.steps;
-    assert.equal(jobs?.kind, "create");
-    assert.equal(evaluator?.kind, "create");
-    if (jobs?.kind === "create" && evaluator?.kind === "create") {
-      assert.equal(jobs.nonce, 23);
-      assert.equal(String(jobs.args[0]), "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913");
-      assert.equal(evaluator.nonce, 24);
-      assert.equal(String(evaluator.args[0]).toLowerCase(), jobs.address.toLowerCase());
-      assert.equal(String(evaluator.args[1]), "0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f");
-      assert.equal(evaluator.args[3], 100n * 10n ** 18n);
-      assert.equal(String(evaluator.args[6]).toLowerCase(), planned("ARL token"));
-    }
-    const record = recordCommand(run, "x.json");
-    assert.equal(record.kind, "jobs");
-    assert.ok(record.command.includes("8453-jobs-usdc.json"));
-  });
+  // Both plans were built before the audit fixes of 2026-10-28 (F-3: one-year cap on a job's
+  // deadline) and were never signed. The current build refuses them; their -v2 replacements are
+  // built from the fixed code.
+  for (const name of ["8453-verified-jobs-usdc", "8453-verified-jobs-arl"]) {
+    it(`refuses ${name}: pre-audit bytecode, do not use`, () => {
+      assert.throws(() => afterTge(() => parseRun(plan(name))), /ARLJobs|code/);
+    });
+  }
 });

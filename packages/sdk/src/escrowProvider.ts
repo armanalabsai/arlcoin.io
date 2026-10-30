@@ -13,6 +13,7 @@ import { getAddress, parseAbi, type Address, type Hash, type Hex } from "viem";
 import { ESCROW_SCHEME, type EscrowOffer } from "./payVerified.ts";
 import {
   VerifiedJobError,
+  checkEvaluationFits,
   checkVerifiedChain,
   verifiedDeployment,
   walletAccount,
@@ -125,6 +126,7 @@ export async function checkFundedJob(
   if (committee !== offer.committee.join()) problems.push("another committee");
   if (problems.length > 0)
     throw new VerifiedJobError(`job ${jobId.toString()}: ${problems.join(", ")}`);
+  await checkEvaluationFits(publicClient, offer.jobs, jobId);
   return { jobId, client: getAddress(job.client) };
 }
 

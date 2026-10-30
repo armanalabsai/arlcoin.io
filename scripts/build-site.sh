@@ -21,7 +21,7 @@ fi
 
 cd "$ROOT/apps/web"
 rm -rf out .next
-ARL_STATIC_EXPORT=1 NEXT_PUBLIC_ARL_ANALYTICS=1 npm run build
+ARL_STATIC_EXPORT=1 NEXT_PUBLIC_ARL_ANALYTICS="${NEXT_PUBLIC_ARL_ANALYTICS:-1}" npm run build
 
 # The app: @arl/zk (packages/zk) is linked into it and its dependencies install at the root.
 cd "$ROOT/apps/dapp"
