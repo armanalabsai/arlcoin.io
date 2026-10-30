@@ -149,9 +149,10 @@ contract ARLVerifiedEvaluatorHandler is Test {
     function closeUndecided(uint256 j) external {
         uint256 id = _id(j);
         if (id == 0) return;
-        uint256 budget = jobs.getJob(id).budget;
+        ARLJobs.Job memory job = jobs.getJob(id);
         try ev.closeUndecided(id) {
-            ghostSettled += budget;
+            // after a refund someone else made, closing only slashes
+            if (job.status == ARLJobs.JobStatus.Submitted) ghostSettled += job.budget;
         } catch {}
     }
 
@@ -312,6 +313,21 @@ contract ARLVerifiedEvaluatorInvariant is ARLTestBase {
             staked += ev.stakeOf(handler.validatorAt(i));
         }
         assertEq(token.balanceOf(address(ev)), staked + handler.ghostOpenChallengeBonds());
+    }
+
+    /// Every decision leaves at least one challenge window between the end of its own challenge
+    /// window and the job's deadline, so it can always be finalized before the deadline closes
+    /// the job (security report 2026-10-25).
+    function invariant_decisionsSettleBeforeTheDeadline() public view {
+        for (uint256 k; k < handler.idCount(); ++k) {
+            uint256 id = handler.ids(k);
+            ARLVerifiedEvaluator.Verdict memory v = ev.getVerdict(id);
+            if (v.challengeEnds == 0) continue;
+            assertLe(
+                uint256(v.challengeEnds) + ev.getConfig(id).challengeWindow,
+                jobs.getJob(id).expiredAt
+            );
+        }
     }
 
     /// No validator has more locked than staked.

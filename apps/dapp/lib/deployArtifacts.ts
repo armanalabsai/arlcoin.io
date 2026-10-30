@@ -123,8 +123,8 @@ export const DEPLOY_ARTIFACTS = {
     ],
   },
   ARLJobs: {
-    creationHash: "0xdb31fe27bf1443a256da4e52fa9fa243ce9e86d7f43863e7ef014449e17df327",
-    creationSize: 5143,
+    creationHash: "0x0c46a7151b6c8b68e891a59e875beff5b2b4c517b121a9b6aaa82a5c6a5ae2b8",
+    creationSize: 5215,
     constructorInputs: [
       {
         name: "paymentToken_",
@@ -134,8 +134,8 @@ export const DEPLOY_ARTIFACTS = {
     ],
   },
   ARLVerifiedEvaluator: {
-    creationHash: "0x02f3a47b045158d3c4521170c90ccd15c7c2b3b228fec9c869a692ae0cd0d901",
-    creationSize: 14529,
+    creationHash: "0x0e624298c134ce184bfd77ed590b80de42c2a7b6ef50c764b00f37b6e6777ad1",
+    creationSize: 15016,
     constructorInputs: [
       {
         name: "jobs_",
