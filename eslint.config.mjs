@@ -36,6 +36,11 @@ export default defineConfig(
     extends: [tseslint.configs.disableTypeChecked],
   },
   {
+    // A Cloudflare Pages Function: runs on Workers, with the web platform's globals.
+    files: ["scripts/cloudflare/supply-function.mjs"],
+    languageOptions: { globals: { Response: "readonly", URL: "readonly" } },
+  },
+  {
     files: [
       "**/test/**/*.ts",
       "**/test-fork/**/*.ts",
