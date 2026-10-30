@@ -196,7 +196,7 @@ at `00d9056`), not from `main`: check out the tag, then run `npm run check:bytec
 https://mainnet.base.org`. The tag covers the token, vesting wallets, timelock and the jobs escrow
 `0x6c8A7712010f951f5B03A11C24b46C8b18d5997F`. The verified evaluator
 `0x3a5dC803b84D5F150FCd2b070cb9D8a12BC35F34` was built before its optional stake token was added,
-from commit `15ad6c0`.
+from commit `15ad6c0` (tag `v1.0.1-evaluator-15ad6c0`).
 
 Anyone can repeat the proof from a clean checkout: `forge build --skip test --skip script` in
 `contracts/`, then `npm run check:bytecode` and `verify` against a public RPC. The local
