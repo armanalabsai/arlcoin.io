@@ -1077,6 +1077,152 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         ev.resolve(id, true, bytes32(0));
     }
 
+    // ---------------------------------------------------------------- deadline
+
+    /// Time the whole evaluation needs before the deadline: the vote window and two challenge
+    /// windows.
+    function _needed() internal pure returns (uint256) {
+        return uint256(VOTE_WINDOW) + 2 * uint256(WINDOW);
+    }
+
+    /// Late funding: the client funds when the evaluation no longer fits. Members cannot accept,
+    /// so no committee can approve work that the deadline would then refund.
+    function test_RevertWhen_AcceptTooLateToEvaluate() public {
+        uint256 id = _configured(_reexec());
+        _approveCommittee(id);
+        uint256 expiredAt = jobs.getJob(id).expiredAt;
+        vm.warp(expiredAt - _needed() + 1);
+        _fund(id, BUDGET);
+        vm.prank(v1);
+        vm.expectRevert(ARLVerifiedEvaluator.ExpiryTooSoon.selector);
+        ev.accept(id);
+
+        // the escrow goes back to the client at the deadline; nothing was locked
+        vm.warp(expiredAt);
+        uint256 clientBefore = token.balanceOf(client);
+        jobs.claimRefund(id);
+        assertEq(token.balanceOf(client), clientBefore + BUDGET);
+        ev.release(id);
+        assertEq(_lockedTotal(), 0);
+    }
+
+    /// Late submission: members accepted in time, but the provider submits when the evaluation no
+    /// longer fits. Voting cannot start, so no decision can be overtaken by the deadline.
+    function test_RevertWhen_VotingStartsTooLateToEvaluate() public {
+        uint256 id = _configured(_reexec());
+        _approveCommittee(id);
+        _fund(id, BUDGET);
+        _acceptAll(id);
+        uint256 expiredAt = jobs.getJob(id).expiredAt;
+        vm.warp(expiredAt - _needed() + 1);
+        _submit(id);
+        vm.expectRevert(ARLVerifiedEvaluator.ExpiryTooSoon.selector);
+        ev.startVoting(id);
+        vm.prank(v1);
+        vm.expectRevert(ARLVerifiedEvaluator.ExpiryTooSoon.selector);
+        ev.vote(id, true, WORK, EVIDENCE);
+
+        vm.warp(expiredAt);
+        jobs.claimRefund(id);
+        ev.release(id);
+        assertEq(_lockedTotal(), 0);
+        assertEq(ev.stakeOf(v1), STAKE);
+    }
+
+    /// Exactly enough time left: voting starts, and an approval is finalized and paid before the
+    /// deadline, with at least one challenge window to spare.
+    function test_evaluationThatJustFitsPaysTheProvider() public {
+        uint256 id = _configured(_reexec());
+        _approveCommittee(id);
+        uint256 expiredAt = jobs.getJob(id).expiredAt;
+        vm.warp(expiredAt - _needed());
+        _fund(id, BUDGET);
+        _acceptAll(id);
+        _submit(id);
+        ev.startVoting(id);
+        vm.warp(block.timestamp + VOTE_WINDOW - 1);
+        _vote(id, v1, true);
+        _vote(id, v2, true);
+        ARLVerifiedEvaluator.Verdict memory v = ev.getVerdict(id);
+        assertEq(uint256(v.phase), uint256(ARLVerifiedEvaluator.Phase.Approved));
+        assertLe(uint256(v.challengeEnds) + WINDOW, expiredAt, "a challenge window to settle");
+
+        // the client cannot refund while the decision waits out its challenge window
+        vm.expectRevert(ARLJobs.WrongStatus.selector);
+        jobs.claimRefund(id);
+
+        vm.warp(v.challengeEnds);
+        uint256 providerBefore = token.balanceOf(provider);
+        ev.finalize(id);
+        assertEq(token.balanceOf(provider), providerBefore + BUDGET);
+        assertEq(uint256(_status(id)), uint256(ARLJobs.JobStatus.Completed));
+        vm.warp(expiredAt);
+        vm.expectRevert(ARLJobs.WrongStatus.selector);
+        jobs.claimRefund(id);
+    }
+
+    /// The reported attack (security report 2026-10-25): with the SDK defaults (1 h vote, 1 h
+    /// challenge, 24 h deadline) the client funds at hour 23 and the provider submits one second
+    /// later. The committee can no longer accept, so there is no approval to overtake.
+    function test_lateFundingCannotVoidAnApproval() public {
+        ARLVerifiedEvaluator.Config memory cfg = _reexec();
+        cfg.voteWindow = 1 hours;
+        cfg.challengeWindow = 1 hours;
+        uint256 id = _create(address(ev), 24 hours);
+        vm.prank(client);
+        ev.configure(id, cfg);
+        _approveCommittee(id);
+        vm.warp(block.timestamp + 23 hours);
+        _fund(id, BUDGET);
+        vm.prank(v1);
+        vm.expectRevert(ARLVerifiedEvaluator.ExpiryTooSoon.selector);
+        ev.accept(id);
+    }
+
+    /// A deadline that passes before anyone closes an undecided vote: absent members are still
+    /// slashed, and closing refunds the client through `claimRefund`.
+    function test_closeUndecidedAfterExpiryRefundsAndSlashes() public {
+        uint256 id = _submitted();
+        ev.startVoting(id);
+        _vote(id, v1, true);
+        vm.warp(jobs.getJob(id).expiredAt);
+        uint256 clientBefore = token.balanceOf(client);
+        uint256 sinkBefore = token.balanceOf(SINK);
+        ev.closeUndecided(id);
+        assertEq(token.balanceOf(client), clientBefore + BUDGET);
+        assertEq(uint256(_status(id)), uint256(ARLJobs.JobStatus.Expired));
+        assertEq(token.balanceOf(SINK), sinkBefore + 2 * BOND, "v2 and v3 were absent");
+        assertEq(ev.stakeOf(v1), STAKE);
+        assertEq(_lockedTotal(), 0);
+    }
+
+    /// Someone refunds first: closing still slashes the absent members.
+    function test_closeUndecidedAfterRefundStillSlashes() public {
+        uint256 id = _submitted();
+        ev.startVoting(id);
+        vm.warp(jobs.getJob(id).expiredAt);
+        jobs.claimRefund(id);
+        uint256 sinkBefore = token.balanceOf(SINK);
+        ev.closeUndecided(id);
+        assertEq(token.balanceOf(SINK), sinkBefore + 3 * BOND);
+        assertEq(_lockedTotal(), 0);
+        assertEq(uint256(_phase(id)), uint256(ARLVerifiedEvaluator.Phase.Failed));
+        vm.expectRevert(ARLVerifiedEvaluator.WrongPhase.selector);
+        ev.release(id);
+    }
+
+    /// A dispute the arbiter does not rule on before the deadline ends in a refund: the ruling
+    /// can no longer move the escrow, and `release` returns the challenger's bond.
+    function test_RevertWhen_ResolveAfterExpiry() public {
+        uint256 id = _approved();
+        vm.prank(challenger);
+        ev.dispute(id, EVIDENCE);
+        vm.warp(jobs.getJob(id).expiredAt);
+        vm.prank(arbiter);
+        vm.expectRevert(ARLJobs.JobExpiredAlready.selector);
+        ev.resolve(id, true, bytes32(0));
+    }
+
     // ---------------------------------------------------------------- release
 
     function test_releaseAfterExpiryWhileDisputed() public {

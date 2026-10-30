@@ -9,8 +9,10 @@ import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/Reentrancy
 /// @notice A client posts a job, agrees a budget with a provider and escrows it here. The provider
 /// submits the work (a reference such as a hash), and the job's evaluator, chosen by the client at
 /// creation, either completes it (the escrow goes to the provider) or rejects it (the escrow goes
-/// back to the client). If the job expires before it is evaluated, anyone can return the escrow to
-/// the client. The evaluator can be the client itself, another account or a contract.
+/// back to the client). The deadline closes the job: from `expiredAt` on, the evaluator can no
+/// longer complete or reject it, and anyone can return the escrow to the client. So the outcome
+/// after the deadline is fixed by the contract, not by which transaction lands first. The
+/// evaluator can be the client itself, another account or a contract.
 ///
 /// Implements ERC-8183 (ethereum/ERCs, ERCS/erc-8183.md, Draft, CC0-1.0). The state machine,
 /// roles, events and function signatures follow the specification and its reference
@@ -20,7 +22,8 @@ import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/Reentrancy
 /// - no hooks: `hook` must be address(0) (a non-hooked kernel is compliant); `optParams` are
 ///   accepted for interface compatibility and ignored;
 /// - `fund` takes the expected budget (front-running protection, as the specification requires);
-/// - a provider can only submit before the job expires.
+/// - a provider can only submit, and the evaluator only complete or reject a funded job, before
+///   the job expires.
 contract ARLJobs is ReentrancyGuardTransient {
     using SafeERC20 for IERC20;
 
@@ -166,12 +169,14 @@ contract ARLJobs is ReentrancyGuardTransient {
         emit JobSubmitted(jobId, msg.sender, deliverable);
     }
 
-    /// @notice Evaluator only, once Submitted: pays the escrow to the provider.
+    /// @notice Evaluator only, once Submitted and before expiry: pays the escrow to the provider.
     /// @param reason Optional attestation (for example a hash of the evaluation).
     function complete(uint256 jobId, bytes32 reason, bytes calldata) external nonReentrant {
         Job storage job = _job(jobId);
         if (job.status != JobStatus.Submitted) revert WrongStatus();
         if (msg.sender != job.evaluator) revert Unauthorized();
+        // slither-disable-next-line timestamp
+        if (block.timestamp >= job.expiredAt) revert JobExpiredAlready();
 
         job.status = JobStatus.Completed;
         uint256 amount = job.budget;
@@ -181,8 +186,9 @@ contract ARLJobs is ReentrancyGuardTransient {
         paymentToken.safeTransfer(provider, amount);
     }
 
-    /// @notice The client while Open; the evaluator while Funded or Submitted (the escrow goes
-    /// back to the client).
+    /// @notice The client while Open; the evaluator while Funded or Submitted and before expiry (the
+    /// escrow goes back to the client). After expiry a funded job only leaves through
+    /// `claimRefund`.
     function reject(uint256 jobId, bytes32 reason, bytes calldata) external nonReentrant {
         Job storage job = _job(jobId);
         JobStatus status = job.status;
@@ -190,6 +196,8 @@ contract ARLJobs is ReentrancyGuardTransient {
             if (msg.sender != job.client) revert Unauthorized();
         } else if (status == JobStatus.Funded || status == JobStatus.Submitted) {
             if (msg.sender != job.evaluator) revert Unauthorized();
+            // slither-disable-next-line timestamp
+            if (block.timestamp >= job.expiredAt) revert JobExpiredAlready();
         } else {
             revert WrongStatus();
         }

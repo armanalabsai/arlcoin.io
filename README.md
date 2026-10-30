@@ -5,9 +5,8 @@ staking, escrowed jobs, usage-based payments and anonymous signals built around 
 
 **Live on Base Mainnet since 2026-10-24.** Token
 [`0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4`](https://basescan.org/token/0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4)
-(block 53,023,206, source-verified on Basescan), four Uniswap v3 pools holding 5,000,000 ARL, and
-the verified jobs escrow with its evaluator (source-verified). Every claim below links to the code,
-the tests and the document that back it.
+(block 53,023,206, source-verified on Basescan) and four Uniswap v3 pools holding 5,000,000 ARL.
+Every claim below links to the code, the tests and the document that back it.
 
 | Live                 | URL                                                         | What it is                                                                 |
 | -------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------- |
@@ -22,7 +21,7 @@ the tests and the document that back it.
 | Network      | Chain ID | Status                                                                         |
 | ------------ | -------: | ------------------------------------------------------------------------------ |
 | Base Sepolia |    84532 | Deployed (testnet). RPC `https://sepolia.base.org`                             |
-| Base Mainnet |     8453 | Deployed 2026-10-24: token [`0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4`](https://basescan.org/token/0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4); every address is in [mainnet-plan.md](docs/mainnet-plan.md). Jobs escrow [`0x6c8A7712010f951f5B03A11C24b46C8b18d5997F`](https://basescan.org/address/0x6c8A7712010f951f5B03A11C24b46C8b18d5997F#code) and verified evaluator [`0x3a5dC803b84D5F150FCd2b070cb9D8a12BC35F34`](https://basescan.org/address/0x3a5dC803b84D5F150FCd2b070cb9D8a12BC35F34#code) ([mainnet-services.md](docs/mainnet-services.md)) |
+| Base Mainnet |     8453 | Deployed 2026-10-24: token [`0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4`](https://basescan.org/token/0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4); every address is in [mainnet-plan.md](docs/mainnet-plan.md); jobs escrows and evaluators: [mainnet-services.md](docs/mainnet-services.md) |
 
 Base Sepolia contracts. The runtime bytecode of each address matches a clean build of `main`
 (`compareRuntime` in [`packages/deploy/src/bytecode.ts`](packages/deploy/src/bytecode.ts), checked
@@ -47,7 +46,10 @@ addresses with their deploy blocks are recorded in
 Reproduce: `npm run check:bytecode` proves a clean build matches
 [`contracts/deploy/bytecode.json`](contracts/deploy/bytecode.json);
 `node packages/deploy/src/bytecode-cli.ts verify contracts <plan.json> <deployment.json> https://sepolia.base.org`
-compares that build with the code at each deployed address.
+compares that build with the code at each deployed address. The jobs escrow and its evaluator on
+Base Sepolia run the code before the deadline fix of 2026-10-25
+([security/2026-10-25-jobs-deadline.md](security/2026-10-25-jobs-deadline.md)); verify them
+against commit `f12604c`.
 
 ## Claims and evidence
 

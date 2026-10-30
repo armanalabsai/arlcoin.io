@@ -2,9 +2,10 @@
 
 ## Status
 
-ARL Protocol is under development. The token, two vesting wallets and the treasury timelock are
-deployed on Base Sepolia (testnet) only; the addresses are in [README.md](README.md). Nothing is
-deployed on Base Mainnet. Do not use the testnet contracts to hold value.
+The ARL token, its vesting wallets and the treasury timelock are deployed on Base Mainnet and
+source-verified; the addresses are in [README.md](README.md) and
+[docs/mainnet-plan.md](docs/mainnet-plan.md). The app and its services run on Base Sepolia
+(testnet); testnet tokens have no value.
 
 ## Reporting a vulnerability
 
@@ -21,7 +22,8 @@ The bug bounty, funded from the Grants / Bug Bounty allocation, is described in
 ## Scope
 
 - Code in this repository.
-- The Base Sepolia contracts listed in [README.md](README.md).
+- The Base Mainnet and Base Sepolia contracts listed in [README.md](README.md) and
+  [docs/mainnet-plan.md](docs/mainnet-plan.md).
 - Out of scope: third-party components (report those upstream), and any
   contract or token that claims to be ARL at an address not listed in [README.md](README.md).
 

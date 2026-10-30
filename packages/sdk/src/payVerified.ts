@@ -12,6 +12,7 @@ import { getAddress, isAddress, parseAbi, type Address, type Hash, type Hex } fr
 
 import {
   VerifiedJobError,
+  checkEvaluationFits,
   checkVerifiedChain,
   openVerifiedJob,
   verifiedDeployment,
@@ -123,6 +124,7 @@ export async function fundVerifiedJob(
     args: [from.address],
   });
   if (balance < budget) throw new VerifiedJobError("the client holds less ARL than the budget");
+  await checkEvaluationFits(publicClient, jobs, jobId);
   const send = async (
     address: Address,
     abi: typeof escrowAbi | typeof tokenAbi,

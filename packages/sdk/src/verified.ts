@@ -30,14 +30,15 @@ export const BASE_SEPOLIA_VERIFIED = {
 } as const satisfies Record<string, unknown>;
 
 /**
- * Base Mainnet deployment as prepared in docs/mainnet-services.md. The addresses follow from the
- * deployer's nonces; calls check that they hold code before using them.
+ * Base Mainnet deployment as prepared in docs/mainnet-services.md: the pair with the deadline fix
+ * (security report 2026-10-25), deployer nonces 25 and 26. The addresses follow from those nonces;
+ * calls check that they hold code before using them.
  */
 export const BASE_MAINNET_VERIFIED = {
   chainId: 8453,
   token: "0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4",
-  jobs: "0x6c8A7712010f951f5B03A11C24b46C8b18d5997F",
-  evaluator: "0x3a5dC803b84D5F150FCd2b070cb9D8a12BC35F34",
+  jobs: "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+  evaluator: "0xa2f8945f301C46f2649b79Cd42A7eb1102e9009E",
   arbiterSafe: "0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f",
 } as const satisfies Record<string, unknown>;
 
@@ -113,6 +114,45 @@ export interface OpenVerifiedJobParams {
 
 export class VerifiedJobError extends Error {
   override name = "VerifiedJobError";
+}
+
+const deadlineAbi = parseAbi([
+  "struct Job { uint256 id; address client; address provider; address evaluator; string description; uint256 budget; uint256 expiredAt; uint8 status; address hook; }",
+  "function getJob(uint256 jobId) view returns (Job)",
+  "struct Config { uint8 tier; uint8 threshold; uint64 voteWindow; uint64 challengeWindow; uint96 bond; uint256 providerAgentId; bytes32 specHash; address[] committee; }",
+  "function getConfig(uint256 jobId) view returns (Config)",
+]);
+
+/**
+ * Refuses a job whose evaluation can no longer finish before its deadline: the vote window and
+ * two challenge windows must still fit. Past that point a decision could be overtaken by the
+ * deadline, which returns the escrow to the client (security report 2026-10-25). The evaluator
+ * enforces this itself from the fixed release on; this check also protects jobs on evaluators
+ * deployed before it. Call it before funding (client) and before doing the work (provider).
+ */
+export async function checkEvaluationFits(
+  publicClient: PublicClient,
+  jobs: Address,
+  jobId: bigint,
+): Promise<void> {
+  const job = await publicClient.readContract({
+    address: jobs,
+    abi: deadlineAbi,
+    functionName: "getJob",
+    args: [jobId],
+  });
+  const cfg = await publicClient.readContract({
+    address: job.evaluator,
+    abi: deadlineAbi,
+    functionName: "getConfig",
+    args: [jobId],
+  });
+  const { timestamp } = await publicClient.getBlock();
+  const needed = cfg.voteWindow + 2n * cfg.challengeWindow;
+  if (timestamp + needed > job.expiredAt)
+    throw new VerifiedJobError(
+      `job ${jobId.toString()}: too late, the evaluation needs ${needed.toString()} s before the deadline`,
+    );
 }
 
 export async function checkVerifiedChain(client: PublicClient): Promise<number> {
