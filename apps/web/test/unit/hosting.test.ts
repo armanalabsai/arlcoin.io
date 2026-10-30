@@ -2,40 +2,79 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 
-// arlcoin.io serves the website and, under /app, the app (scripts/build-site.sh). The two get
-// different headers from apps/web/vercel.json: the website keeps its strict policy, and the app,
-// which talks to RPC nodes and wallets, keeps every header except the website's source lists.
+// arlcoin.io serves the website and, under /app, the app (scripts/build-site.sh) from Cloudflare
+// Pages. The two get different headers from apps/web/public/_headers: the website keeps its strict
+// policy, and the app, which talks to RPC nodes and wallets, keeps every header except the
+// website's source lists.
 
 interface Rule {
-  source: string;
-  headers: { key: string; value: string }[];
+  pattern: RegExp;
+  set: { key: string; value: string }[];
+  detach: string[];
 }
 
-const vercel = JSON.parse(readFileSync(new URL("../../vercel.json", import.meta.url), "utf8")) as {
-  headers: Rule[];
-};
+/** Parses a Cloudflare `_headers` file: a path pattern, then indented `Name: value` or `! Name`. */
+function parseHeaders(text: string): Rule[] {
+  const rules: Rule[] = [];
+  for (const line of text.split("\n")) {
+    if (line.trim() === "" || line.trimStart().startsWith("#")) continue;
+    if (!line.startsWith(" ")) {
+      const re = line
+        .trim()
+        .replace(/[.+?^${}()|[\]\\]/g, "\\$&")
+        .replace(/\*/g, ".*");
+      rules.push({ pattern: new RegExp(`^${re}$`), set: [], detach: [] });
+      continue;
+    }
+    const rule = rules.at(-1);
+    assert.ok(rule, `header line before any path: ${line}`);
+    const body = line.trim();
+    if (body.startsWith("!")) rule.detach.push(body.slice(1).trim().toLowerCase());
+    else {
+      const i = body.indexOf(":");
+      rule.set.push({ key: body.slice(0, i).trim(), value: body.slice(i + 1).trim() });
+    }
+  }
+  return rules;
+}
 
-/** Vercel matches `source` as a path-to-regexp pattern; these two read the same as a regex. */
-const matches = (rule: Rule, path: string) => new RegExp(`^${rule.source}$`).test(path);
+const rules = parseHeaders(readFileSync(new URL("../../public/_headers", import.meta.url), "utf8"));
 
-function headersFor(path: string): Map<string, string> {
-  const out = new Map<string, string>();
-  for (const rule of vercel.headers.filter((r) => matches(r, path))) {
-    for (const h of rule.headers) {
-      assert.ok(!out.has(h.key), `${path}: ${h.key} set by two rules`);
-      out.set(h.key, h.value);
+/**
+ * The headers Cloudflare sends for a path: every matching rule applies, values of a header set by
+ * two rules are joined, and `! Name` in a rule removes what the other rules set for that header.
+ */
+function headersFor(path: string): Map<string, string[]> {
+  const matching = rules.filter((r) => r.pattern.test(path));
+  const out = new Map<string, string[]>();
+  for (const rule of matching) {
+    for (const h of rule.set) {
+      const key = h.key.toLowerCase();
+      out.set(key, [...(out.get(key) ?? []), h.value]);
+    }
+  }
+  for (const rule of matching) {
+    for (const key of rule.detach) {
+      const own = rule.set.filter((h) => h.key.toLowerCase() === key).map((h) => h.value);
+      out.set(key, own);
     }
   }
   return out;
 }
 
-const header = (path: string, key: string) => headersFor(path).get(key) ?? "";
+function header(path: string, key: string): string {
+  const values = headersFor(path).get(key.toLowerCase()) ?? [];
+  assert.ok(values.length <= 1, `${path}: ${key} set ${String(values.length)} times`);
+  return values[0] ?? "";
+}
 
 describe("hosting: website and app headers", () => {
   it("the website keeps its strict policy on every page", () => {
     for (const path of ["/", "/buy/", "/docs/whitepaper/", "/application/", "/apps/"]) {
       assert.match(header(path, "Content-Security-Policy"), /default-src 'self'/, path);
       assert.equal(header(path, "Cross-Origin-Opener-Policy"), "same-origin", path);
+      assert.equal(header(path, "X-Frame-Options"), "DENY", path);
+      assert.match(header(path, "Strict-Transport-Security"), /max-age=63072000/, path);
     }
   });
 
@@ -54,19 +93,17 @@ describe("hosting: website and app headers", () => {
 });
 
 describe("hosting: redirects", () => {
-  const redirects = (
-    JSON.parse(readFileSync(new URL("../../vercel.json", import.meta.url), "utf8")) as {
-      redirects: { source: string; destination: string; permanent: boolean }[];
-    }
-  ).redirects;
+  const redirects = readFileSync(new URL("../../public/_redirects", import.meta.url), "utf8")
+    .split("\n")
+    .filter((l) => l.trim() !== "" && !l.startsWith("#"))
+    .map((l) => l.trim().split(/\s+/));
 
   it("sends the removed team layer to the Core, with and without the trailing slash", () => {
-    // trailingSlash adds the slash first, so each source needs both forms.
-    for (const source of ["/core/team", "/core/team/", "/core/team/:card", "/core/team/:card/"]) {
-      const rule = redirects.find((r) => r.source === source);
+    for (const source of ["/core/team", "/core/team/", "/core/team/*"]) {
+      const rule = redirects.find((r) => r[0] === source);
       assert.ok(rule, source);
-      assert.equal(rule.destination, "/core/");
-      assert.equal(rule.permanent, true);
+      assert.equal(rule[1], "/core/");
+      assert.equal(rule[2], "301");
     }
   });
 });

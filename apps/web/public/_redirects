@@ -1,0 +1,4 @@
+# Redirects for arlcoin.io on Cloudflare Pages. The Team layer was removed from the Core.
+/core/team /core/ 301
+/core/team/ /core/ 301
+/core/team/* /core/ 301

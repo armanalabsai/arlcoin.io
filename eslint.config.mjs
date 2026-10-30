@@ -14,6 +14,10 @@ export default defineConfig(
       "apps/web/**",
       // The web app likewise has its own config and CI job.
       "apps/dapp/**",
+      // Cloudflare Pages Functions: a two-line wrapper around apps/web/api, which apps/web lints.
+      "functions/**",
+      "dist/**",
+      ".wrangler/**",
     ],
   },
   js.configs.recommended,
@@ -34,11 +38,6 @@ export default defineConfig(
   {
     files: ["**/*.mjs"],
     extends: [tseslint.configs.disableTypeChecked],
-  },
-  {
-    // A Cloudflare Pages Function: runs on Workers, with the web platform's globals.
-    files: ["scripts/cloudflare/supply-function.mjs"],
-    languageOptions: { globals: { Response: "readonly", URL: "readonly" } },
   },
   {
     files: [

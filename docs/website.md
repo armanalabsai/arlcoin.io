@@ -1,26 +1,19 @@
 # Website: the Interactive Core
 
-Source: [`apps/web`](../apps/web). Deploy: after CI passes on `main`,
-`.github/workflows/deploy-site.yml` runs `scripts/deploy-site.sh`, which builds the static export
-and uploads it prebuilt to Vercel production. It needs the repository secrets `VERCEL_TOKEN`,
-`VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` and skips without them. Vercel's own Git builds are off
-(`git.deploymentEnabled: false` in `apps/web/vercel.json`, and in `apps/dapp/vercel.json` for the
-Git-connected `arlcoin-io` project, whose root is the local-only dApp). The same script can be run
-by hand.
-The build is `scripts/build-site.sh`: the website, its supply API and, under `/app`, a static
-export of the app (`apps/dapp`, `ARL_STATIC_EXPORT=1`, `ARL_BASE_PATH=/app`), as the Pages
-workflow does. Until the Base Mainnet launch the app shows Claim and Trade as closed (no
-`apps/dapp/public/claims/8453.json`, no `NEXT_PUBLIC_ARL_MAINNET_TOKEN`). `apps/web/vercel.json`
-gives the website its strict content policy and the app under `/app` its own headers (no frames,
-no source lists, since it talks to RPC nodes and wallets; popups allowed for wallets).
-`npm run test:hosted` in `apps/dapp` builds the same output and tests it in a browser.
-Hosting: arlcoin.io moves to Cloudflare Pages ([cloudflare-pages.md](cloudflare-pages.md)): the
-shared Vercel team was paused on 2026-09-28 for exceeding Hobby fair-use limits, its one-time
-30-day courtesy unblock ran out, and since 2026-10-30 Vercel answers `402 DEPLOYMENT_DISABLED`.
-`.github/workflows/deploy-cloudflare.yml` deploys the same build with `scripts/build-cloudflare.sh`.
-A static mirror is published to GitHub Pages at
-`https://gokturkalazdaghan-dot.github.io/ARLCOIN/` by `.github/workflows/pages.yml`, as a fallback
-that does not depend on Vercel.
+Source: [`apps/web`](../apps/web). Hosting: Cloudflare Pages, project `arlcoin-io`, connected to
+this repository ([`wrangler.toml`](../wrangler.toml)). Every push builds; `main` is production and
+other branches get preview URLs. Build command, set once in the project's settings:
+`bash scripts/build-cloudflare.sh`; the output directory comes from `wrangler.toml` (`dist`).
+The build is `scripts/build-site.sh`: the website and, under `/app`, a static export of the app
+(`apps/dapp`, `ARL_STATIC_EXPORT=1`, `ARL_BASE_PATH=/app`). `apps/web/public/_headers` gives the
+website its strict content policy and the app under `/app` its own headers (no frames, no source
+lists, since it talks to RPC nodes and wallets; popups allowed for wallets);
+`apps/web/public/_redirects` holds the redirects. The supply API (`/api/supply`) is the Pages
+Function [`functions/api/supply.js`](../functions/api/supply.js). `npm run test:hosted` in
+`apps/dapp` builds the same output and tests it in a browser.
+Until 2026-10-30 Vercel served the site; that account was blocked, and the site moved to
+Cloudflare. A static mirror can still be published to GitHub Pages by `.github/workflows/pages.yml`
+(by hand), as a fallback that depends on neither.
 
 ## Concept
 
@@ -187,7 +180,7 @@ CI runs all of these in the `web` job, plus `npm audit --audit-level=high`.
   footer of every page.
 - Both forms post from the browser to [Web3Forms](https://web3forms.com) (free plan: 250
   submissions a month), which emails each submission to the team. No server or database is
-  involved, so the forms work on Vercel and on the static GitHub Pages build alike.
+  involved, so the forms work on Cloudflare Pages and on the static GitHub Pages build alike.
 - The access key lives in `src/content/forms.ts` (overridable with `NEXT_PUBLIC_WEB3FORMS_KEY`)
   and delivers to the team inbox. It is public by design: it can only send to the inbox it was
   created for. With no key the
@@ -214,7 +207,7 @@ CI runs all of these in the `web` job, plus `npm audit --audit-level=high`.
 - Static hosting cannot send response headers, so the security headers in `next.config.ts` apply
   only to server hosting; the referrer policy is also set as a meta tag.
 - One-time owner setting: repository Settings → Pages → Source "GitHub Actions". No custom domain
-  is set there while `arlcoin.io` is served by Vercel; setting one (and pointing DNS at GitHub:
+  is set there while `arlcoin.io` is served by Cloudflare Pages; setting one (and pointing DNS at GitHub:
   apex A 185.199.108.153–185.199.111.153, `www` CNAME `gokturkalazdaghan-dot.github.io`) moves
   the domain to Pages with no code change.
 
