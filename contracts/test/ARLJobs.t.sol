@@ -86,6 +86,11 @@ contract ARLJobsTest is ARLTestBase {
         jobs.createJob(provider, address(0), block.timestamp + 1 days, "", address(0));
         vm.expectRevert(ARLJobs.ExpiryTooShort.selector);
         jobs.createJob(provider, evaluator, block.timestamp + 5 minutes - 1, "", address(0));
+        // Audit F-3: a far-future deadline would put the permissionless refund out of reach.
+        vm.expectRevert(ARLJobs.ExpiryTooLong.selector);
+        jobs.createJob(provider, evaluator, block.timestamp + 365 days + 1, "", address(0));
+        vm.expectRevert(ARLJobs.ExpiryTooLong.selector);
+        jobs.createJob(provider, evaluator, type(uint256).max, "", address(0));
         vm.expectRevert(ARLJobs.HooksUnsupported.selector);
         jobs.createJob(provider, evaluator, block.timestamp + 1 days, "", address(1));
         vm.expectRevert(ARLJobs.DescriptionTooLong.selector);
@@ -96,6 +101,7 @@ contract ARLJobsTest is ARLTestBase {
         jobs.createJob(
             provider, evaluator, block.timestamp + 5 minutes, string(new bytes(1024)), address(0)
         );
+        jobs.createJob(provider, evaluator, block.timestamp + 365 days, "", address(0));
         vm.stopPrank();
     }
 
@@ -264,6 +270,37 @@ contract ARLJobsTest is ARLTestBase {
         vm.prank(client);
         jobs.complete(id, bytes32(0), "");
         assertEq(token.balanceOf(provider), BUDGET);
+    }
+
+    /// Audit F-3: with the longest deadline allowed, a funded job whose evaluator never acts is
+    /// still refundable by anyone, at most a year after creation.
+    function test_longestJobIsStillRefundable() public {
+        uint256 expiredAt = block.timestamp + jobs.MAX_DURATION();
+        vm.prank(client);
+        uint256 id = jobs.createJob(provider, evaluator, expiredAt, "", address(0));
+        vm.prank(provider);
+        jobs.setBudget(id, BUDGET, "");
+        vm.prank(client);
+        jobs.fund(id, BUDGET, "");
+        uint256 before = token.balanceOf(client);
+
+        vm.warp(block.timestamp + 365 days);
+        vm.prank(stranger);
+        jobs.claimRefund(id);
+        assertEq(token.balanceOf(client), before + BUDGET);
+        assertEq(token.balanceOf(address(jobs)), 0);
+    }
+
+    function testFuzz_expiryWithinBounds(uint256 expiredAt) public {
+        uint256 lo = block.timestamp + jobs.MIN_DURATION();
+        uint256 hi = block.timestamp + jobs.MAX_DURATION();
+        vm.prank(client);
+        if (expiredAt < lo) {
+            vm.expectRevert(ARLJobs.ExpiryTooShort.selector);
+        } else if (expiredAt > hi) {
+            vm.expectRevert(ARLJobs.ExpiryTooLong.selector);
+        }
+        jobs.createJob(provider, evaluator, expiredAt, "", address(0));
     }
 
     // ---------------------------------------------------------------- settlement at the deadline (F-2)
