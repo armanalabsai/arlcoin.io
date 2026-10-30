@@ -69,6 +69,9 @@ contract ARLStakingRewards is ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     uint256 private constant PRECISION = 1e18;
+    /// @notice Longest reward period. Unallocated rewards can only be returned once a period has
+    /// ended, so the period length bounds how long they can be held back.
+    uint256 public constant MAX_REWARDS_DURATION = 365 days;
 
     IERC20 public immutable stakingToken;
     IERC20 public immutable rewardsToken;
@@ -106,6 +109,7 @@ contract ARLStakingRewards is ReentrancyGuard {
     error StakingZeroAddress();
     error StakingZeroAmount();
     error StakingZeroDuration();
+    error StakingDurationTooLong();
     error StakingNotDistributor();
     error StakingPeriodActive();
     error StakingRewardTooLow();
@@ -125,7 +129,8 @@ contract ARLStakingRewards is ReentrancyGuard {
     /// @param rewardsToken_ Token paid as reward (ARL).
     /// @param rewardsDistribution_ Funds periods; must be the Community & Staking allocation holder
     /// (checked by the deployment verifier, not here).
-    /// @param rewardsDuration_ Length of each reward period in seconds. Must be non-zero.
+    /// @param rewardsDuration_ Length of each reward period in seconds. Must be non-zero and at
+    /// most MAX_REWARDS_DURATION.
     constructor(
         IERC20 stakingToken_,
         IERC20 rewardsToken_,
@@ -137,6 +142,7 @@ contract ARLStakingRewards is ReentrancyGuard {
                 || rewardsDistribution_ == address(0)
         ) revert StakingZeroAddress();
         if (rewardsDuration_ == 0) revert StakingZeroDuration();
+        if (rewardsDuration_ > MAX_REWARDS_DURATION) revert StakingDurationTooLong();
         stakingToken = stakingToken_;
         rewardsToken = rewardsToken_;
         rewardsDistribution = rewardsDistribution_;
@@ -283,6 +289,7 @@ contract ARLStakingRewards is ReentrancyGuard {
         // slither-disable-next-line timestamp
         if (block.timestamp <= periodFinish) revert StakingPeriodActive();
         if (duration == 0) revert StakingZeroDuration();
+        if (duration > MAX_REWARDS_DURATION) revert StakingDurationTooLong();
         rewardsDuration = duration;
         emit RewardsDurationUpdated(duration);
     }
