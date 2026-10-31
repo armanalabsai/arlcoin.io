@@ -79,7 +79,7 @@ Not deployed on Base Mainnet yet. Addresses go up on arlcoin.io only after the d
 No airdrop at launch. The team never DMs first.
 ```
 
-## Telegram (t.me/arlcoin_community)
+## Telegram (t.me/arlprotocol_community)
 
 Image: `arl-week-recap-audit.png`. Pin until the 2026-10-22 post.
 
@@ -206,7 +206,7 @@ https://github.com/armanalabsai/arlcoin.io/tree/main/security/2026-10-17
 - There is no airdrop at launch.
 - The team never sends the first direct message.
 
-Questions about the audit are welcome in our community: https://t.me/arlcoin_community
+Questions about the audit are welcome in our community: https://t.me/arlprotocol_community
 
 Verify before you trust.
 ```

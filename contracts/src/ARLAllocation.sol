@@ -2,6 +2,7 @@
 pragma solidity 0.8.36;
 
 /// @title ARL allocation table
+/// @author Alazdg
 /// @notice On-chain copy of `packages/tokenomics/src/allocations.ts` (the 11-allocation model
 /// approved on 2026-09-27). A test in that package parses this file and fails if the two ever
 /// differ.

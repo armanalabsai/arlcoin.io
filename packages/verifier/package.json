@@ -1,6 +1,7 @@
 {
   "name": "@arl/verifier",
   "version": "0.1.0",
+  "author": "Alazdg <team@arlcoin.io>",
   "private": true,
   "description": "Reference ARL validator: re-executes arl-reexec/1 job specs in a pinned container and votes on ARLVerifiedEvaluator",
   "type": "module",

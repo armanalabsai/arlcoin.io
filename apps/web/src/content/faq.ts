@@ -80,7 +80,7 @@ export const FAQ: readonly FaqEntry[] = [
   {
     question: "What are the official channels?",
     answer:
-      "Only these: the website arlcoin.io, X @arlprotocol, the Telegram group t.me/arlcoin_community and the email address team@arlcoin.io. Any other account claiming to be ARL is not official.",
+      "Only these: the website arlcoin.io, X @arlprotocol, the Telegram group t.me/arlprotocol_community and the email address team@arlcoin.io. Any other account claiming to be ARL is not official.",
   },
   {
     question: "How do I delete my whitelist registration?",

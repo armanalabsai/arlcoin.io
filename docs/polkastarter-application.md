@@ -6,23 +6,23 @@ it and replies by e-mail.
 
 ## Basic information
 
-| Field                   | Answer                         |
-| ----------------------- | ------------------------------ |
-| Project Name            | ARL Protocol                   |
-| Contact Name            | ARL Protocol team              |
-| Contact Telegram Handle | https://t.me/arlcoin_community |
-| Email                   | team@arlcoin.io                |
-| Referred by             | (empty)                        |
+| Field                   | Answer                             |
+| ----------------------- | ---------------------------------- |
+| Project Name            | ARL Protocol                       |
+| Contact Name            | ARL Protocol team                  |
+| Contact Telegram Handle | https://t.me/arlprotocol_community |
+| Email                   | team@arlcoin.io                    |
+| Referred by             | (empty)                            |
 
 ## Links
 
-| Field                       | Answer                                                                     |
-| --------------------------- | -------------------------------------------------------------------------- |
-| Website                     | https://arlcoin.io                                                         |
-| Project Twitter             | https://x.com/arlprotocol                                                  |
-| Pitchdeck                   | https://arlcoin.io/arl-pitch-deck.pdf                                      |
-| Token Schedule (Tokenomics) | https://arlcoin.io/docs/tokenomics/                                        |
-| Other links                 | https://github.com/armanalabsai/arlcoin.io, https://t.me/arlcoin_community |
+| Field                       | Answer                                                                         |
+| --------------------------- | ------------------------------------------------------------------------------ |
+| Website                     | https://arlcoin.io                                                             |
+| Project Twitter             | https://x.com/arlprotocol                                                      |
+| Pitchdeck                   | https://arlcoin.io/arl-pitch-deck.pdf                                          |
+| Token Schedule (Tokenomics) | https://arlcoin.io/docs/tokenomics/                                            |
+| Other links                 | https://github.com/armanalabsai/arlcoin.io, https://t.me/arlprotocol_community |
 
 ## Project details
 
@@ -54,7 +54,7 @@ it and replies by e-mail.
 **Describe Current Community:**
 
 > Pre-launch. Official X https://x.com/arlprotocol (@arlprotocol), Telegram
-> https://t.me/arlcoin_community, email team@arlcoin.io and website https://arlcoin.io.
+> https://t.me/arlprotocol_community, email team@arlcoin.io and website https://arlcoin.io.
 
 **Size of Existing Users:**
 

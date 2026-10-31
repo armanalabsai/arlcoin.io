@@ -1,14 +1,14 @@
 # ARL Protocol SEO strategy (zero budget)
 
 Owner: project lead. Date: 2026-10-16. Scope: arlcoin.io, X @arlprotocol, Telegram
-t.me/arlcoin_community, Farcaster, Mirror.xyz, GitHub armanalabsai/arlcoin.io.
+t.me/arlprotocol_community, Farcaster, Mirror.xyz, GitHub armanalabsai/arlcoin.io.
 
 Fixed facts (the same in every piece of content): ARL is an ERC-20 on Base; fixed supply
 21,000,000 ARL; no mint, burn, pause or upgrade; treasury in a 2-of-3 Safe behind a 48-hour
 timelock; Base Mainnet target **23 October 2026**; the Uniswap on Base pools open from 0.20 USD;
 **no airdrop at launch** (an airdrop of 500,000 ARL follows at a later date, with rules announced
 separately). Official channels: https://arlcoin.io · https://x.com/arlprotocol ·
-https://t.me/arlcoin_community · team@arlcoin.io.
+https://t.me/arlprotocol_community · team@arlcoin.io.
 
 Content rules: no price promises, no "will be listed" promises, no airdrop promises; every
 technical claim links to code, a test or a document in the repository (see
@@ -194,7 +194,7 @@ and the app after it.
 
 | Week (start) | Blog title · target keyword                                                                | X/Farcaster thread                                              | Mirror article                                             | Internal link · CTA                                      |
 | ------------ | ------------------------------------------------------------------------------------------ | --------------------------------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------------- |
-| 1 (19 Oct)   | **ARL Protocol Launches on Base on 23 October: What to Know** · `ARL token`                | "ARL launch day in 8 posts: supply, pools, address check"       | "Why ARL launches with no airdrop"                         | /buy, /faq · "Join t.me/arlcoin_community"               |
+| 1 (19 Oct)   | **ARL Protocol Launches on Base on 23 October: What to Know** · `ARL token`                | "ARL launch day in 8 posts: supply, pools, address check"       | "Why ARL launches with no airdrop"                         | /buy, /faq · "Join t.me/arlprotocol_community"           |
 | 2 (26 Oct)   | **How to Buy ARL on Uniswap on Base, Safely** · `how to buy ARL on Uniswap`                | "5 checks before you swap any new Base token"                   | "Single-sided liquidity from 0.20 USD, explained"          | /buy · "Verify the address on arlcoin.io/buy"            |
 | 3 (2 Nov)    | **What Is a Fixed Supply Token? ARL's 21,000,000 Cap** · `fixed supply token`              | "No mint, no burn, no pause, no upgrade: what that means"       | "Reading the ARL token contract line by line"              | /core/token, /docs/token-design · "Read the contract"    |
 | 4 (9 Nov)    | **How to Pay for AI with Crypto on Base** · `how to pay for AI with crypto`                | "x402 in one thread: sign a ceiling, pay only what you use"     | "Usage-based payments are the missing AI primitive"        | /docs/payments · "Try it on the testnet app"             |
@@ -269,7 +269,7 @@ Contract: <mainnet address, from arlcoin.io/buy>
 Supply: 21,000,000 fixed; no mint, burn, pause or upgrade
 Pools: Uniswap v3 on Base, ARL/USDC, ARL/USDT, ARL/WETH, ARL/cbBTC
 Source: verified on Basescan; github.com/armanalabsai/arlcoin.io
-Channels: arlcoin.io · x.com/arlprotocol · t.me/arlcoin_community · team@arlcoin.io
+Channels: arlcoin.io · x.com/arlprotocol · t.me/arlprotocol_community · team@arlcoin.io
 ```
 
 ### Next step
