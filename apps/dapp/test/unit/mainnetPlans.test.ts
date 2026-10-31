@@ -6,6 +6,7 @@ import { getContractAddress } from "viem";
 
 import { parseRun, recordCommand } from "../../lib/deploySteps.ts";
 import { TGE_DATE } from "../../lib/network.ts";
+import { JOBS_V2_ARTIFACTS } from "../fixtures/deploy/jobsV2Artifacts.ts";
 import { RELEASE_ARTIFACTS } from "../fixtures/deploy/releaseArtifacts.ts";
 
 // The Base Mainnet contract run published for TGE day (apps/dapp/public/plans/8453-deploy.json),
@@ -83,8 +84,10 @@ describe("Base Mainnet plans for the verified jobs", () => {
     });
   }
 
-  // Built from the code with the 2026-10-28 audit fixes (F-2, F-3) at the same nonces; the deploy
-  // screen accepts them with the current build.
+  // Built from the code with the 2026-10-28 audit fixes (F-2, F-3) at the same nonces, and
+  // executed. Their evaluators predate the fix of the 2026-10-31 report (acceptance closed when
+  // voting started), so the current build refuses them; the tests read them against the build
+  // they were made from.
   const pairs = [
     {
       name: "8453-verified-jobs-usdc-v2",
@@ -105,7 +108,8 @@ describe("Base Mainnet plans for the verified jobs", () => {
   ];
   for (const p of pairs) {
     it(`creates ${p.name}: escrow at nonce ${String(p.nonce)} and its evaluator bonded in ARL`, () => {
-      const run = afterTge(() => parseRun(plan(p.name)));
+      assert.throws(() => afterTge(() => parseRun(plan(p.name))), /ARLVerifiedEvaluator code/);
+      const run = afterTge(() => parseRun(plan(p.name), JOBS_V2_ARTIFACTS));
       assert.deepEqual(
         run.steps.map((s) => (s.kind === "create" ? s.contract : s.kind)),
         ["ARLJobs", "ARLVerifiedEvaluator"],
