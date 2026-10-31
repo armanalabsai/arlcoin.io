@@ -7,6 +7,7 @@ import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20P
 import {ARLAllocation} from "./ARLAllocation.sol";
 
 /// @title ARL token
+/// @author Alazdg
 /// @notice Fixed-supply ERC-20. The full 21,000,000 ARL is minted once, in the constructor,
 /// to the eleven allocation holders. The contract has no owner, no admin role, no pause, no
 /// upgrade path and no function that can mint after deployment.

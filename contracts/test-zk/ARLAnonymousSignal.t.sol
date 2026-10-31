@@ -153,11 +153,38 @@ contract ARLAnonymousSignalTest is Test {
         signals.signal(1, p[0].scope, p[0].message, p[0].root, p[0].nullifier, p[0].proof);
     }
 
-    function test_proofIsGroupBound() public {
-        // The same membership root in a second group is a separate nullifier space.
-        uint256 g = signals.createGroup(root);
-        signals.signal(g, p[0].scope, p[0].message, p[0].root, p[0].nullifier, p[0].proof);
+    /// Audit F-1: the proof does not commit to a group, so republishing a root in new groups used
+    /// to give a member one more signal per clone in the same scope. Nullifiers are now global.
+    function test_clonedGroupsCannotReplayAProof() public {
         _signal(p[0]);
+        address attacker = makeAddr("attacker");
+        for (uint256 i; i < 6; ++i) {
+            vm.prank(attacker);
+            uint256 clone = signals.createGroup(root);
+            vm.prank(attacker);
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    ARLAnonymousSignal.SignalNullifierUsed.selector, p[0].nullifier
+                )
+            );
+            signals.signal(clone, p[0].scope, p[0].message, p[0].root, p[0].nullifier, p[0].proof);
+        }
+    }
+
+    function test_proofSpentInACloneIsSpentEverywhere() public {
+        // Signalling first in a clone does not leave a second signal in the original group.
+        uint256 clone = signals.createGroup(root);
+        signals.signal(clone, p[0].scope, p[0].message, p[0].root, p[0].nullifier, p[0].proof);
+        assertTrue(signals.isNullifierUsed(0, p[0].nullifier));
+        assertTrue(signals.isNullifierUsed(clone, p[0].nullifier));
+        vm.expectRevert(
+            abi.encodeWithSelector(ARLAnonymousSignal.SignalNullifierUsed.selector, p[0].nullifier)
+        );
+        _signal(p[0]);
+
+        // Other members and other scopes are unaffected.
+        _signal(p[1]);
+        _signal(p[2]);
     }
 
     function test_hashToFieldMatchesTheProver() public view {

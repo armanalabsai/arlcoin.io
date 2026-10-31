@@ -122,12 +122,11 @@ npm run coverage:contracts       # coverage gate
 npm run rehearse:local           # full deploy-and-verify rehearsal on a local chain
 ```
 
-Deployment needs these repository secrets (never committed): `VERCEL_TOKEN`, `VERCEL_ORG_ID` and
-`VERCEL_PROJECT_ID` for the website; `VERCEL_APP_PROJECT_ID` (optional, the app project is linked
-by name otherwise) and `ARL_OPERATOR_KEY` (the testnet operator, Base Sepolia only) for the app;
-`ETHERSCAN_API_KEY` locally for Basescan verification. The website and the app deploy from `main`
-only after CI passes ([deploy-site.yml](.github/workflows/deploy-site.yml),
-[deploy-app.yml](.github/workflows/deploy-app.yml)).
+The website (with the app under `/app`) is built and served by Cloudflare Pages from this
+repository ([`wrangler.toml`](wrangler.toml), [`scripts/build-cloudflare.sh`](scripts/build-cloudflare.sh));
+`main` is production. Secrets (never committed): `ARL_OPERATOR_KEY` (the testnet operator, Base
+Sepolia only) for the app's operator API ([deploy-app.yml](.github/workflows/deploy-app.yml));
+`ETHERSCAN_API_KEY` locally for Basescan verification.
 
 ## Security
 
@@ -191,6 +190,6 @@ Nothing in this repository constitutes financial, investment or legal advice.
 
 ## License
 
-Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE). Third-party components keep their
+Author: Alazdg. Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE). Third-party components keep their
 own licenses; see [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md). Name and logo use:
 [TRADEMARKS.md](TRADEMARKS.md). Changes: [CHANGELOG.md](CHANGELOG.md).

@@ -1,0 +1,17 @@
+# Response headers for arlcoin.io on Cloudflare Pages.
+# Every path gets the website's headers; the app under /app detaches the two that differ and
+# sets its own (Cloudflare joins the values of a header set by two rules, so detach first).
+/*
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://mainnet.base.org https://sepolia.base.org https://ltqpitckngaytisjyjqi.supabase.co https://api.web3forms.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  Cross-Origin-Opener-Policy: same-origin
+
+/app/*
+  ! Content-Security-Policy
+  ! Cross-Origin-Opener-Policy
+  Content-Security-Policy: script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests
+  Cross-Origin-Opener-Policy: same-origin-allow-popups

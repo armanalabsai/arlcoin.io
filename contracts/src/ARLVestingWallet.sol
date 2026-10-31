@@ -4,6 +4,7 @@ pragma solidity 0.8.36;
 import {VestingWallet} from "@openzeppelin/contracts/finance/VestingWallet.sol";
 
 /// @title ARL vesting wallet
+/// @author Alazdg
 /// @notice OpenZeppelin `VestingWallet` with two ARL-specific changes:
 /// 1. The schedule is set with explicit timestamps: nothing vests during the cliff
 ///    (`cliffStart` .. `cliffEnd`), then tokens vest linearly from `cliffEnd` to `vestingEnd`.
@@ -30,6 +31,8 @@ contract ARLVestingWallet is VestingWallet {
     /// @param beneficiary Receives released tokens. Must be non-zero (enforced by `Ownable`).
     /// @param cliffStart_ Grant or launch timestamp. Must be non-zero and not after `cliffEnd`.
     /// @param cliffEnd_ Timestamp at which linear vesting begins. Equal to `cliffStart_` for no cliff.
+    /// Must be in the future, so nothing is releasable when the wallet is deployed: the schedule
+    /// cannot be corrected afterwards (immutable, and the beneficiary is fixed).
     /// @param vestingEnd_ Timestamp at which everything is vested. Must be after `cliffEnd_`.
     constructor(address beneficiary, uint64 cliffStart_, uint64 cliffEnd_, uint64 vestingEnd_)
         VestingWallet(beneficiary, cliffEnd_, _linearDuration(cliffStart_, cliffEnd_, vestingEnd_))
@@ -59,10 +62,16 @@ contract ARLVestingWallet is VestingWallet {
 
     function _linearDuration(uint64 cliffStart_, uint64 cliffEnd_, uint64 vestingEnd_)
         private
-        pure
+        view
         returns (uint64)
     {
         if (cliffStart_ == 0 || cliffStart_ > cliffEnd_ || cliffEnd_ >= vestingEnd_) {
+            revert ARLVestingInvalidSchedule(cliffStart_, cliffEnd_, vestingEnd_);
+        }
+        // `cliffStart_` may be in the past: the Base Mainnet wallets are deployed at or after the
+        // TGE they start from. What must not have passed is the start of vesting.
+        // slither-disable-next-line timestamp
+        if (cliffEnd_ <= block.timestamp) {
             revert ARLVestingInvalidSchedule(cliffStart_, cliffEnd_, vestingEnd_);
         }
         return vestingEnd_ - cliffEnd_;
