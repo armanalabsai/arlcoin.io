@@ -5,6 +5,7 @@ export const SOURCE = "https://github.com/armanalabsai/arlcoin.io";
 export const X_ACCOUNT = "https://x.com/arlprotocol";
 export const EMAIL = "team@arlcoin.io";
 export const COMMUNITY = "https://t.me/arlprotocol_community";
+export const CHAT = "https://t.me/arlprotocol_chat";
 export const APP = "https://arlcoin.io/app/";
 export const WHITELIST = "https://arlcoin.io/whitelist/";
 export const MAINNET_TOKEN = "0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4";
@@ -42,7 +43,8 @@ export const START =
   "- A bug bounty paid in ARL is open.\n\n" +
   `Website: ${WEBSITE}\n` +
   `X: ${X_ACCOUNT}\n` +
-  `Telegram: ${COMMUNITY}\n` +
+  `Telegram: ${COMMUNITY} (announcements), ${CHAT} (chat)
+` +
   `Contact: ${EMAIL}\n` +
   `Source code: ${SOURCE}\n\n` +
   "Type /help for commands.";

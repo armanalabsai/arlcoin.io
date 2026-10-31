@@ -1,6 +1,7 @@
 # Community bot
 
-The bot that moderates https://t.me/arlprotocol_community. Code: [`packages/telegram-bot`](../packages/telegram-bot);
+The bot that moderates the chat group https://t.me/arlprotocol_chat (linked to the announcement
+channel https://t.me/arlprotocol_community). Code: [`packages/telegram-bot`](../packages/telegram-bot);
 it runs as the Cloudflare Worker `arl-telegram-bot` on a Telegram webhook. It replaces the Python
 bot that ran on Render until 2026-10-31.
 
