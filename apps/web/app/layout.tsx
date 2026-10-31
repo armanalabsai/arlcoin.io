@@ -7,6 +7,7 @@ import { SITE } from "@/content/site.ts";
 import { NucleusField } from "@/core/NucleusField.tsx";
 import { InfrastructureStrip } from "@/site/InfrastructureStrip.tsx";
 import { JsonLd } from "@/site/JsonLd.tsx";
+import { SmoothScroll } from "@/site/SmoothScroll.tsx";
 import { SoftNavigation } from "@/site/SoftNavigation.tsx";
 
 import "./globals.css";
@@ -67,6 +68,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
         <InfrastructureStrip />
         <SoftNavigation />
+        <SmoothScroll />
       </body>
     </html>
   );
