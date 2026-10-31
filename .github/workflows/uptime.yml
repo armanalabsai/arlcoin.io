@@ -3,7 +3,8 @@ name: Uptime
 # Read-only uptime check of the public services every 10 minutes: the website, the app page, the
 # testnet operator API (and the faucet float it reports), the Base Sepolia RPC and the staking
 # reward window. Any failed check fails the run, and GitHub notifies the owner by email and in the
-# GitHub mobile app. Nothing is signed or sent.
+# GitHub mobile app. Nothing is signed or sent. The operator API is checked once the repository
+# variable OPERATOR_LIVE is "true" (set it after ARL_OPERATOR_KEY is in the Cloudflare project).
 on:
   schedule:
     - cron: "*/10 * * * *"
@@ -39,6 +40,7 @@ jobs:
           exit $fail
 
       - name: Operator API and faucet float
+        if: vars.OPERATOR_LIVE == 'true'
         run: |
           set -euo pipefail
           status=$(curl -sf --max-time 20 --retry 2 --retry-delay 5 https://arlcoin.io/api/operator/status) \

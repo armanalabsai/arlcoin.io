@@ -48,4 +48,6 @@ The testnet operator API runs on the same Pages project as a Pages Function,
 handler (`apps/dapp/lib/server/operatorHttp.ts`) into `build/operator.mjs`. The Base Sepolia
 operator key is the project's encrypted variable `ARL_OPERATOR_KEY` (Settings → Variables and
 Secrets, type Secret), set by the owner; `wrangler.toml` turns on `nodejs_compat` so the handler
-reads it from `process.env`.
+reads it from `process.env`. Once `arlcoin.io/api/operator/status` answers, set the repository
+variable `OPERATOR_LIVE` to `true` (GitHub → Settings → Secrets and variables → Actions →
+Variables) so the uptime check covers the operator and the faucet float again.
