@@ -15,7 +15,7 @@ export const FAQ: readonly FaqEntry[] = [
   {
     question: "What is ARL for?",
     answer:
-      "ARL is the native utility token planned for decentralized AI and compute services: AI services paid per use, GPU and CPU capacity paid per second, and staking. The token, staking, jobs escrow and anonymous-poll contracts and the ARL app run on the Base Sepolia testnet (arlcoin.io/app); nothing is on Base Mainnet yet.",
+      "ARL is the native utility token for decentralized AI and compute services: AI services paid per use, GPU and CPU capacity paid per second, and staking. The token and the verified jobs escrows (paid in ARL or USDC, with staked ARL validators) are live on Base Mainnet; staking, per-use payments and anonymous polls run on the Base Sepolia testnet in the ARL app (arlcoin.io/app).",
   },
   {
     question: "What is the maximum supply?",
@@ -80,7 +80,7 @@ export const FAQ: readonly FaqEntry[] = [
   {
     question: "What are the official channels?",
     answer:
-      "Only these: the website arlcoin.io, X @arlprotocol, the Telegram group t.me/arlcoin_community and the email address team@arlcoin.io. Any other account claiming to be ARL is not official.",
+      "Only these: the website arlcoin.io, X @arlprotocol, the Telegram group t.me/arlprotocol_community and the email address team@arlcoin.io. Any other account claiming to be ARL is not official.",
   },
   {
     question: "How do I delete my whitelist registration?",

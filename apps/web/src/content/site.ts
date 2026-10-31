@@ -20,7 +20,7 @@ export const SITE = {
     /** X handle, for card metadata. */
     xHandle: "@arlprotocol",
     /** Community group. */
-    telegram: "https://t.me/arlcoin_community",
+    telegram: "https://t.me/arlprotocol_community",
   },
   /** Base Sepolia (testnet) deployment, source-verified on Basescan, Blockscout and Sourcify. */
   testnet: {

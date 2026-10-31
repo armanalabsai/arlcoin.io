@@ -30,8 +30,8 @@
     "@heroicons/react": "2.2.0",
     "@rainbow-me/rainbowkit": "2.2.11",
     "@tanstack/react-query": "5.104.0",
-    "@x402/core": "2.27.0",
-    "@x402/evm": "2.27.0",
+    "@x402/core": "2.28.0",
+    "@x402/evm": "2.28.0",
     "blo": "2.0.0",
     "next": "16.4.3",
     "react": "19.3.0",
@@ -60,6 +60,7 @@
   "overrides": {
     "ws": "8.22.0",
     "uuid": "11.1.1",
-    "decode-uri-component": "0.5.1"
+    "decode-uri-component": "0.5.1",
+    "follow-redirects": "1.16.2"
   }
 }

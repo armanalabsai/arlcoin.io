@@ -13,7 +13,7 @@ test("the landing page leads to the whitelist and the Core", async ({ page }) =>
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: "The onchain token planned for decentralized AI and compute services.",
+      name: "The onchain token for decentralized AI and compute services.",
     }),
   ).toBeVisible();
   const cta = page.getByRole("main").getByRole("link", { name: "Join the whitelist" }).first();

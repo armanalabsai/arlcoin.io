@@ -38,8 +38,8 @@ Deploy screen (`arlcoin.io/app/deploy/?plan=…`):
 `8453-verified-jobs-usdc` and `8453-verified-jobs-arl` are invalid, do not use: they hold pre-audit
 bytecode (before the audit fixes of 2026-10-28) and the deploy screen refuses them. Their `-v2`
 replacements are built from the fixed code at the same nonces, so they create contracts at the same
-addresses. Sign `8453-verified-jobs-usdc-v2` first (nonces 23 and 24), then
-`8453-verified-jobs-arl-v2` (25 and 26). Rehearsal of the `-v2` plans (Base Mainnet fork, deployer
+addresses. Both `-v2` pairs were signed on 2026-10-31 and `jobs-record-cli.ts` passed all nine checks for each
+on Base Mainnet; the record is `contracts/deploy/base-mainnet-jobs.json`. Rehearsal of the `-v2` plans (Base Mainnet fork, deployer
 impersonated at nonce 23, nothing sent): every contract was created at the address above and
 `jobs-record-cli.ts` passed all nine checks for each pair.
 Every address follows from the deployer and its nonce: any other transaction from the deployer
