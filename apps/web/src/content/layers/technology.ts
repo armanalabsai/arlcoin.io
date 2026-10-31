@@ -14,7 +14,7 @@ const arlAmount = (id: string): string => {
 export const technology: Layer = {
   id: "technology",
   title: "Technology",
-  description: "What ARL is for. The token is live on Base; these services run on Base Sepolia.",
+  description: "What ARL is for. The token and the verified jobs escrows are live on Base; the other services run on Base Sepolia.",
   cards: [
     {
       id: "ai-payments",
@@ -61,7 +61,7 @@ export const technology: Layer = {
             items: [
               "Provider registration and capacity listing in the ARL app: GPU model and count, GPU memory, vCPUs, memory and the longest job, priced per GPU or CPU second. Live in the ARL app on Base Sepolia",
               "Per-second metering settled in ARL over x402 upto: seconds rounded up, never above the signed ceiling",
-              "Escrowed jobs with a deadline and refunds (ERC-8183), deployed and source-verified on Base Sepolia, and ratings from paid jobs (ERC-8004)",
+              "Escrowed jobs with a deadline and refunds (ERC-8183), live on Base Mainnet paid in ARL or USDC with staked ARL validators, and ratings from paid jobs (ERC-8004)",
               "Reference provider software: runs the provider's own jobs for the paid time, bills the seconds used and settles them over x402. Tested locally, not running anywhere",
             ],
           },
