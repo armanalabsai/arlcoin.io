@@ -14,7 +14,12 @@ interface IARLSignalVerifier {
 /// @notice Members of a group signal (vote, attest, give feedback) without revealing which member
 /// they are, at most once per scope. Membership is proven with a zero-knowledge proof against the
 /// group's Merkle root; the proof also yields a nullifier that is the same for a member every time
-/// they signal in a scope, and the contract accepts each nullifier once.
+/// they signal in a scope, and the contract accepts each nullifier once, across all groups.
+///
+/// The proof does not commit to a group, only to a root, and anyone can create a group with any
+/// root. Nullifiers are therefore recorded once for the whole contract, not per group: a proof
+/// replayed into a group that republishes the same root is refused. A scope is global, so a
+/// consumer that runs separate polls per group derives each poll's scope from its group id.
 ///
 /// The protocol follows Semaphore. The proof checks (current or recently replaced root, unused
 /// nullifier, scope and message hashed into the field, public input order) are adapted from
@@ -40,11 +45,11 @@ contract ARLAnonymousSignal {
         address admin;
         uint256 root;
         mapping(uint256 root => uint256 replacedAt) replacedRoots;
-        mapping(uint256 nullifier => bool) nullifiers;
     }
 
     uint256 public groupCount;
     mapping(uint256 groupId => Group) private _groups;
+    mapping(uint256 nullifier => bool) private _nullifiers;
 
     event GroupCreated(uint256 indexed groupId, address indexed admin, uint256 root);
     event MembersAdded(uint256 indexed groupId, uint256[] commitments);
@@ -148,7 +153,7 @@ contract ARLAnonymousSignal {
     /// @notice Records `message` in `scope` from an anonymous member of `groupId`.
     /// @param root The membership root the proof was made against (current, or replaced within
     /// ROOT_GRACE_PERIOD).
-    /// @param nullifier The proof's nullifier; each is accepted once per group.
+    /// @param nullifier The proof's nullifier; each is accepted once, whatever the group.
     function signal(
         uint256 groupId,
         uint256 scope,
@@ -165,7 +170,7 @@ contract ARLAnonymousSignal {
             // slither-disable-next-line timestamp
             if (block.timestamp > replacedAt + ROOT_GRACE_PERIOD) revert SignalRootExpired(root);
         }
-        if (g.nullifiers[nullifier]) revert SignalNullifierUsed(nullifier);
+        if (_nullifiers[nullifier]) revert SignalNullifierUsed(nullifier);
 
         bytes32[] memory publicInputs = new bytes32[](4);
         publicInputs[0] = bytes32(hashToField(scope));
@@ -174,7 +179,7 @@ contract ARLAnonymousSignal {
         publicInputs[3] = bytes32(nullifier);
         if (!verifier.verify(proof, publicInputs)) revert SignalInvalidProof();
 
-        g.nullifiers[nullifier] = true;
+        _nullifiers[nullifier] = true;
         emit Signal(groupId, scope, message, nullifier, root);
     }
 
@@ -188,8 +193,12 @@ contract ARLAnonymousSignal {
         return _groups[groupId].root;
     }
 
+    /// @notice Whether `nullifier` has signalled. Nullifiers are global; the group id is kept in
+    /// the signature for interface compatibility and does not change the answer.
     function isNullifierUsed(uint256 groupId, uint256 nullifier) external view returns (bool) {
-        return _groups[groupId].nullifiers[nullifier];
+        // slither-disable-next-line redundant-statements
+        groupId;
+        return _nullifiers[nullifier];
     }
 
     /// @notice Maps a uint256 into the field, as the prover does (Semaphore convention).

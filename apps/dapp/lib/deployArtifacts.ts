@@ -3,8 +3,8 @@
  */
 export const DEPLOY_ARTIFACTS = {
   ARLVestingWallet: {
-    creationHash: "0xec33acfaaeb7a7eeec179484b0b7e26f649feca2ebe45ad2d7e56e53c809b1ca",
-    creationSize: 2857,
+    creationHash: "0x678b32ffc3f99c7a999cbe36f522af209c64a66423edce5f0882db06b66c45fa",
+    creationSize: 2925,
     constructorInputs: [
       {
         name: "beneficiary",
@@ -123,8 +123,8 @@ export const DEPLOY_ARTIFACTS = {
     ],
   },
   ARLJobs: {
-    creationHash: "0x0c46a7151b6c8b68e891a59e875beff5b2b4c517b121a9b6aaa82a5c6a5ae2b8",
-    creationSize: 5215,
+    creationHash: "0x8dba7980824476029d0f955e1accfba000594f8783852a2128b7087a35a9354f",
+    creationSize: 5298,
     constructorInputs: [
       {
         name: "paymentToken_",

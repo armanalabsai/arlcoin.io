@@ -1,5 +1,9 @@
 {
-  "reviewed": ["security/2026-10-17/triage.md", "security/2026-10-18-evaluator-triage.md"],
+  "reviewed": [
+    "security/2026-10-17/triage.md",
+    "security/2026-10-18-evaluator-triage.md",
+    "security/2026-10-28-audit-triage.md"
+  ],
   "results": [
     "contract-locks-ether src/ARLVestingWallet.sol:22",
     "costly-loop src/ARLVerifiedEvaluator.sol:265",
@@ -18,14 +22,15 @@
     "large-numeric-literal src/ARLAllocation.sol:25",
     "large-numeric-literal src/ARLVerifiedEvaluator.sol:118",
     "large-numeric-literal src/ARLVerifiedEvaluator.sol:314",
-    "reentrancy-state-change src/ARLAnonymousSignal.sol:175",
+    "redundant-statement src/ARLAnonymousSignal.sol:200",
+    "reentrancy-state-change src/ARLAnonymousSignal.sol:180",
     "reentrancy-state-change src/ARLVerifiedEvaluator.sol:219",
     "reentrancy-state-change src/ARLVerifiedEvaluator.sol:256",
     "reentrancy-state-change src/ARLVerifiedEvaluator.sol:292",
     "reentrancy-state-change src/ARLVerifiedEvaluator.sol:307",
     "reentrancy-state-change src/ARLVerifiedEvaluator.sol:345",
     "reentrancy-state-change src/ARLVerifiedEvaluator.sol:458",
-    "require-revert-in-loop src/ARLAnonymousSignal.sol:201",
+    "require-revert-in-loop src/ARLAnonymousSignal.sol:210",
     "require-revert-in-loop src/ARLVerifiedEvaluator.sol:265",
     "unchecked-return src/ARLTimelock.sol:43",
     "unchecked-return src/ARLVerifiedEvaluator.sol:420",

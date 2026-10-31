@@ -50,6 +50,9 @@ contract ARLJobs is ReentrancyGuardTransient {
 
     /// @notice A job must stay open to funding and work for at least this long.
     uint256 public constant MIN_DURATION = 5 minutes;
+    /// @notice A job expires at most this long after creation, so the permissionless refund
+    /// (claimRefund) is always within reach.
+    uint256 public constant MAX_DURATION = 365 days;
     /// @notice Upper bound on a job description, in bytes (a brief or a reference to one).
     uint256 public constant MAX_DESCRIPTION = 1024;
 
@@ -81,6 +84,7 @@ contract ARLJobs is ReentrancyGuardTransient {
     error Unauthorized();
     error ZeroAddress();
     error ExpiryTooShort();
+    error ExpiryTooLong();
     error ZeroBudget();
     error ProviderNotSet();
     error BudgetMismatch();
@@ -107,6 +111,8 @@ contract ARLJobs is ReentrancyGuardTransient {
         if (evaluator == address(0)) revert ZeroAddress();
         // slither-disable-next-line timestamp
         if (expiredAt < block.timestamp + MIN_DURATION) revert ExpiryTooShort();
+        // slither-disable-next-line timestamp
+        if (expiredAt > block.timestamp + MAX_DURATION) revert ExpiryTooLong();
         if (hook != address(0)) revert HooksUnsupported();
         if (bytes(description).length > MAX_DESCRIPTION) revert DescriptionTooLong();
 
@@ -170,6 +176,8 @@ contract ARLJobs is ReentrancyGuardTransient {
     }
 
     /// @notice Evaluator only, once Submitted and before expiry: pays the escrow to the provider.
+    /// From `expiredAt` only claimRefund can settle the job, so the outcome never depends on
+    /// which of two valid transactions lands first.
     /// @param reason Optional attestation (for example a hash of the evaluation).
     function complete(uint256 jobId, bytes32 reason, bytes calldata) external nonReentrant {
         Job storage job = _job(jobId);
