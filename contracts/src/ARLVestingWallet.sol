@@ -4,6 +4,7 @@ pragma solidity 0.8.36;
 import {VestingWallet} from "@openzeppelin/contracts/finance/VestingWallet.sol";
 
 /// @title ARL vesting wallet
+/// @author Alazdg
 /// @notice OpenZeppelin `VestingWallet` with two ARL-specific changes:
 /// 1. The schedule is set with explicit timestamps: nothing vests during the cliff
 ///    (`cliffStart` .. `cliffEnd`), then tokens vest linearly from `cliffEnd` to `vestingEnd`.

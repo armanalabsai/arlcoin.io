@@ -1,6 +1,7 @@
 {
   "name": "@arl/zk",
   "version": "0.1.0",
+  "author": "Alazdg <team@arlcoin.io>",
   "private": true,
   "description": "ARL anonymous signals: identities, groups and zero-knowledge proofs (Noir, UltraHonk)",
   "type": "module",

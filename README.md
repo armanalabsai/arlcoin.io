@@ -190,6 +190,6 @@ Nothing in this repository constitutes financial, investment or legal advice.
 
 ## License
 
-Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE). Third-party components keep their
+Author: Alazdg. Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE). Third-party components keep their
 own licenses; see [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md). Name and logo use:
 [TRADEMARKS.md](TRADEMARKS.md). Changes: [CHANGELOG.md](CHANGELOG.md).

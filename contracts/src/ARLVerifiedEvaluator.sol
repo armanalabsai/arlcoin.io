@@ -27,6 +27,7 @@ interface IERC8004Reputation {
 }
 
 /// @title ARL verified evaluator: a staked validator committee as the ERC-8183 evaluator
+/// @author Alazdg
 /// @notice An `ARLJobs` client names this contract as the job's evaluator and, while the job is
 /// Open, proposes a committee of staked validators, a threshold, a bond floor and the job's vote
 /// and challenge windows. The provider approves the committee, so neither side picks it alone.
