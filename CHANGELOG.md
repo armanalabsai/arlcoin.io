@@ -3,6 +3,11 @@
 Notable changes to ARL Protocol, newest first. Dates are UTC. Every entry links to the code and
 documents that back it; nothing here is deployed on Base Mainnet.
 
+## 2026-10-31
+
+- The official Telegram group is now t.me/arlprotocol_community. The community bot in
+  `apps/telegram-bot` is retired; a new bot will be set up for the new group.
+
 ## 2026-10-23
 
 - Portable evidence bundles for verified jobs: `arl-verifier bundle` exports a job's settlement

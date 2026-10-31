@@ -4,6 +4,7 @@ pragma solidity 0.8.36;
 import {TimelockController} from "@openzeppelin/contracts/governance/TimelockController.sol";
 
 /// @title ARL treasury timelock
+/// @author Alazdg
 /// @notice OpenZeppelin `TimelockController` that holds the treasury allocation. The treasury
 /// Safe (3-of-5) is the proposer, canceller and executor; every operation waits at least
 /// 48 hours between scheduling and execution. An independent guardian Safe holds only

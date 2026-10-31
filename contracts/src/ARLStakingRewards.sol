@@ -33,6 +33,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /// @title ARL staking rewards
+/// @author Alazdg
 /// @notice Stake ARL and earn ARL rewards paid from a funded pool, linearly over fixed reward
 /// periods. Rewards come only from tokens that `rewardsDistribution` transfers in through
 /// `notifyRewardAmount`; nothing is minted.

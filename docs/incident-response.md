@@ -40,4 +40,4 @@ workflow does the same for the Base Mainnet deployment once it is recorded.
 
 - Email: team@arlcoin.io
 - X: https://x.com/arlprotocol
-- Telegram: https://t.me/arlcoin_community
+- Telegram: https://t.me/arlprotocol_community

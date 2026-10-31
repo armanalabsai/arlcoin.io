@@ -1,6 +1,7 @@
 {
   "name": "@arl/deploy",
   "version": "0.1.0",
+  "author": "Alazdg <team@arlcoin.io>",
   "private": true,
   "description": "Builds and validates ARL deployment plans from public config and tokenomics",
   "type": "module",

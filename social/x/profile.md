@@ -26,7 +26,7 @@ ARL Protocol: AI and compute payments on @base.
 - No airdrop at launch; bug bounty open
 
 arlcoin.io
-t.me/arlcoin_community
+t.me/arlprotocol_community
 
 #Base #AI
 ```
@@ -45,5 +45,5 @@ t.me/arlcoin_community
 - Every claim matches `social/calendar/2026-10-11_to_2026-10-23.md` → "Facts used".
 - No partnership, exchange listing, price, return or free-token claim. `@base` is a mention, not a
   claim of endorsement.
-- Official channels: https://arlcoin.io, https://x.com/arlprotocol, https://t.me/arlcoin_community,
+- Official channels: https://arlcoin.io, https://x.com/arlprotocol, https://t.me/arlprotocol_community,
   team@arlcoin.io.

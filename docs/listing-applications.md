@@ -24,7 +24,7 @@ guaranteed listing.
 | Whitepaper / deck         | https://arlcoin.io/arl-pitch-deck.pdf, https://arlcoin.io/docs/tokenomics/                                                                       |
 | Bug bounty                | Open ([bug-bounty.md](bug-bounty.md))                                                                                                            |
 | Logo                      | https://arlcoin.io/arl-token-200.png (200 × 200 PNG), https://arlcoin.io/arl-token-512.png, https://arlcoin.io/arl-token.svg                     |
-| Social accounts           | X https://x.com/arlprotocol (@arlprotocol), Telegram https://t.me/arlcoin_community                                                              |
+| Social accounts           | X https://x.com/arlprotocol (@arlprotocol), Telegram https://t.me/arlprotocol_community                                                          |
 | Contact                   | ARL Protocol team, team@arlcoin.io                                                                                                               |
 
 ### Short description (English, for the form)

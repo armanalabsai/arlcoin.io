@@ -28,7 +28,7 @@ Details:
 Not investment advice.
 ```
 
-## Telegram (@arlcoin_community): post and pin
+## Telegram (@arlprotocol_community): post and pin
 
 ```text
 ARL is live on Base Mainnet.

@@ -1,6 +1,6 @@
 # Telegram group: pinned messages
 
-Status: DRAFT. Post in https://t.me/arlcoin_community and pin. Same text as the bot's `/rules` and `/start` (`apps/telegram-bot/arlbot/texts.py`); change both together.
+Status: DRAFT. Post in https://t.me/arlprotocol_community and pin.
 
 ## Pin 1: rules and security notice
 
@@ -35,7 +35,7 @@ ARL Network: a payment rail for AI and compute services on Base.
 
 Website: https://arlcoin.io
 X: https://x.com/arlprotocol
-Telegram: https://t.me/arlcoin_community
+Telegram: https://t.me/arlprotocol_community
 Contact: team@arlcoin.io
 Source code: https://github.com/armanalabsai/arlcoin.io
 
@@ -44,7 +44,7 @@ Bot commands: /start /rules /help
 
 ## Group settings (owner action)
 
-- Group type: public, username @arlcoin_community.
+- Group type: public, username @arlprotocol_community.
 - Chat history for new members: visible, so the pinned messages are read.
 - Slow mode: 10 seconds while the group is small and moderation is manual.
 - Admin titles: only real team members; never "Support".
