@@ -5,6 +5,7 @@ import type { MouseEvent } from "react";
 
 import { withBase } from "@/core/basePath.ts";
 import { BrandMark } from "@/core/BrandMark.tsx";
+import { scrollPageTo } from "@/site/SmoothScroll.tsx";
 
 // The brand link in the header. A click goes to the home page, reloads its content and starts it
 // at the top. It navigates inside the app instead of reloading the whole document. Modified clicks
@@ -14,7 +15,7 @@ export function HomeLink() {
   const onClick = (e: MouseEvent<HTMLAnchorElement>) => {
     if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     e.preventDefault();
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    scrollPageTo(0, true);
     router.push("/", { scroll: true });
     router.refresh();
   };
