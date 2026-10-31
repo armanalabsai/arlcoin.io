@@ -1,5 +1,6 @@
 // A validator that runs unattended: it finds the jobs whose committee names it, accepts them once
-// the provider has approved the committee and the client has funded the job, and when the
+// the provider has approved the committee and the client has funded the job (also when the
+// provider has already submitted, as the contract allows until the vote window ends), and when the
 // provider has submitted, re-executes the job's spec and votes. Each step is one `step` call, so
 // the loop can be driven by a timer, a cron job or a test. Spec, re-execution and vote are the
 // same code as the `vote` command (`decide`, `castVote`); this file only decides when to call them.
@@ -101,11 +102,22 @@ export async function step(deps: WatchDeps, state: WatchState): Promise<WatchSta
         continue;
       }
       keep.push(id);
-      if (job.memberState === MemberState.Member && job.status === JobStatus.Funded) {
-        // accept() also requires the provider's committee approval; a revert here just means
-        // "not yet" and the job is tried again on the next pass.
+      if (
+        job.memberState === MemberState.Member &&
+        (job.status === JobStatus.Funded || job.status === JobStatus.Submitted)
+      ) {
+        // A job can go from Funded to Submitted between two passes; the contract still accepts
+        // it until the vote window ends. accept() also requires the provider's committee
+        // approval; a revert here just means "not yet" and the job is tried again next pass.
         const tx = await acceptJob(deps.wallet, deps.client, deps.evaluator, jobId).catch(
-          () => null,
+          (e: unknown) => {
+            log({
+              jobId: id,
+              event: "accept-pending",
+              reason: e instanceof Error ? e.message : String(e),
+            });
+            return null;
+          },
         );
         if (tx) log({ jobId: id, event: "accepted", tx });
       } else if (job.memberState === MemberState.Accepted && job.deliverable !== null) {
