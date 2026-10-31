@@ -187,6 +187,17 @@ distributor, staking, jobs) and the compiler settings.
   cliff start, cliff end, linear duration and beneficiary against the plan). Exit code 3 on any
   failed check.
 
+### Release tag of the live Base Mainnet deployment
+
+Later changes to `main` change the bytecode (the audit fixes of 2026-10-28 among them), so the live
+Base Mainnet contracts are proven from the tag `v1.0.0-release-00d9056` (commit `f12604c`, audited
+at `00d9056`), not from `main`: check out the tag, then run `npm run check:bytecode` and
+`node packages/deploy/src/bytecode-cli.ts verify contracts <plan.json> <deployment.json>
+https://mainnet.base.org`. The tag covers the token, vesting wallets, timelock and the jobs escrow
+`0x6c8A7712010f951f5B03A11C24b46C8b18d5997F`. The verified evaluator
+`0x3a5dC803b84D5F150FCd2b070cb9D8a12BC35F34` was built before its optional stake token was added,
+from commit `15ad6c0` (tag `v1.0.1-evaluator-15ad6c0`).
+
 Anyone can repeat the proof from a clean checkout: `forge build --skip test --skip script` in
 `contracts/`, then `npm run check:bytecode` and `verify` against a public RPC. The local
 rehearsal runs `verify` on its deployment and checks that a record with two addresses swapped and
