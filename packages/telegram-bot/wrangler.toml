@@ -1,0 +1,5 @@
+# Cloudflare Worker for the ARL community bot (packages/telegram-bot). Deploy from this folder with
+# `npx wrangler@4.40.0 deploy`; secrets are set in the dashboard or with `wrangler secret put`.
+name = "arl-telegram-bot"
+main = "src/worker.ts"
+compatibility_date = "2026-10-01"
