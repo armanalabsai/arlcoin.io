@@ -1,6 +1,7 @@
 {
   "name": "@arl/monetary",
   "version": "0.1.0",
+  "author": "Alazdg <team@arlcoin.io>",
   "private": true,
   "description": "Reference implementation and test vectors of the ARL Core monetary standard",
   "type": "module",

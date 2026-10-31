@@ -6,6 +6,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
 
 /// @title ARL jobs: escrowed work paid in ARL (ERC-8183 Agentic Commerce)
+/// @author Alazdg
 /// @notice A client posts a job, agrees a budget with a provider and escrows it here. The provider
 /// submits the work (a reference such as a hash), and the job's evaluator, chosen by the client at
 /// creation, either completes it (the escrow goes to the provider) or rejects it (the escrow goes
