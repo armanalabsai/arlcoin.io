@@ -11,6 +11,7 @@ interface IARLSignalVerifier {
 }
 
 /// @title ARL anonymous signals
+/// @author Alazdg
 /// @notice Members of a group signal (vote, attest, give feedback) without revealing which member
 /// they are, at most once per scope. Membership is proven with a zero-knowledge proof against the
 /// group's Merkle root; the proof also yields a nullifier that is the same for a member every time

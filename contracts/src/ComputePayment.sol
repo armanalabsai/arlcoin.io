@@ -6,6 +6,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
 
 /// @title ARL compute payment: per-second streaming of ARL to a compute provider
+/// @author Alazdg
 /// @notice A client (the sender) opens a stream to a compute provider at a fixed rate per second
 /// for at most `maxDuration` seconds, and escrows `ratePerSecond * maxDuration` here. The provider
 /// earns the rate every second until the stream is stopped or reaches its end time, whichever
