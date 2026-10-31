@@ -12,6 +12,7 @@ import { Orbit } from "./Orbit.tsx";
 import { ProtocolIndex } from "./ProtocolIndex.tsx";
 import { LiveStatus } from "@/site/LiveStatus.tsx";
 import { HomeLink } from "@/site/HomeLink.tsx";
+import { scrollPageTo } from "@/site/SmoothScroll.tsx";
 import { SiteLinks } from "@/site/SiteLinks.tsx";
 import type { RingEntry } from "./RingCard.tsx";
 import { useCoreRoute } from "./useCoreRoute.ts";
@@ -76,7 +77,7 @@ export function InteractiveCore() {
       origin.current = null;
       if (cardId) openCard(layerId, cardId);
       else navigate(pathFor(layerId));
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      scrollPageTo(0);
     },
     [navigate, openCard],
   );

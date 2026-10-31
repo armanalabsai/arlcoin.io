@@ -1152,3 +1152,21 @@ html.js .reveal.is-in {
     min-height: 34px;
   }
 }
+
+/*
+ * Smooth page scrolling (Lenis, src/site/SmoothScroll.tsx): the rules Lenis expects. Lenis adds
+ * these classes to <html> only while it runs, so native scrolling is untouched without it.
+ */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
+}
