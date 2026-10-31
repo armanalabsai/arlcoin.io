@@ -15,7 +15,7 @@ export const FAQ: readonly FaqEntry[] = [
   {
     question: "What is ARL for?",
     answer:
-      "ARL is the native utility token planned for decentralized AI and compute services: AI services paid per use, GPU and CPU capacity paid per second, and staking. The token, staking, jobs escrow and anonymous-poll contracts and the ARL app run on the Base Sepolia testnet (arlcoin.io/app); nothing is on Base Mainnet yet.",
+      "ARL is the native utility token for decentralized AI and compute services: AI services paid per use, GPU and CPU capacity paid per second, and staking. The token and the verified jobs escrows (paid in ARL or USDC, with staked ARL validators) are live on Base Mainnet; staking, per-use payments and anonymous polls run on the Base Sepolia testnet in the ARL app (arlcoin.io/app).",
   },
   {
     question: "What is the maximum supply?",

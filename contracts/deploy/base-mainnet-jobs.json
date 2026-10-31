@@ -1,0 +1,45 @@
+{
+  "network": "base-mainnet",
+  "chainId": 8453,
+  "note": "Verified on chain with packages/deploy/src/jobs-record-cli.ts; plans apps/dapp/public/plans/8453-verified-jobs-usdc-v2.json and 8453-verified-jobs-arl-v2.json.",
+  "usdc": {
+    "network": "base-mainnet",
+    "chainId": 8453,
+    "token": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "stakeToken": "0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4",
+    "jobs": "0xc833140D2eE8607fd41662cffFAc557f3D535bE6",
+    "evaluator": "0x4f7f61916d65ff9E7C5F62468a18E37d4Fb07FA7",
+    "arbiter": "0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f",
+    "arbiterOwners": [
+      "0x6dcBD851E982C4f2196D85005A7A9a104C4C9DAd",
+      "0x5598E36b61b8F513e163D289E3092DF0F9f990a4",
+      "0x9065d7e4E5e63e91174A275Aae1a693082Edd0a1"
+    ],
+    "arbiterThreshold": 2,
+    "minChallengeWindowSeconds": 86400,
+    "minBondWei": "100000000000000000000",
+    "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+    "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+    "block": "53315460"
+  },
+  "arl": {
+    "network": "base-mainnet",
+    "chainId": 8453,
+    "token": "0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4",
+    "stakeToken": "0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4",
+    "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+    "evaluator": "0xa2f8945f301C46f2649b79Cd42A7eb1102e9009E",
+    "arbiter": "0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f",
+    "arbiterOwners": [
+      "0x6dcBD851E982C4f2196D85005A7A9a104C4C9DAd",
+      "0x5598E36b61b8F513e163D289E3092DF0F9f990a4",
+      "0x9065d7e4E5e63e91174A275Aae1a693082Edd0a1"
+    ],
+    "arbiterThreshold": 2,
+    "minChallengeWindowSeconds": 86400,
+    "minBondWei": "100000000000000000000",
+    "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+    "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+    "block": "53315472"
+  }
+}

@@ -1,17 +1,17 @@
 # Base Mainnet network services
 
-Status: **step 1 in progress: the jobs escrows and evaluators with the deadline fix (security report 2026-10-25) are planned at nonces 23 to 26.** The ARL token, its Safes, vesting wallets and
+Status: **step 1 done: the jobs escrows (ARL, USDC) and their evaluators with the audit fixes are on Base Mainnet (nonces 23 to 26).** The ARL token, its Safes, vesting wallets and
 timelock are on Base Mainnet ([mainnet-plan.md](mainnet-plan.md)). The network services still
 run on the Base Sepolia testnet and move to Base Mainnet one at a time, each after its own
 rehearsal, signatures and on-chain check.
 
-| Step | Service                                          | Status                                |
-| ---- | ------------------------------------------------ | ------------------------------------- |
-| 1    | Jobs escrows (ARL, USDC) and verified evaluators | Fixed pairs planned (nonces 23 to 26) |
-| 2    | Validators: keys, ETH for gas, staked ARL        | Not started                           |
-| 3    | Operator API (x402 per-use payments) on 8453     | Not started                           |
-| 4    | Staking rewards contract and its reward budget   | Not started                           |
-| 5    | App and site switched to Base Mainnet            | Not started                           |
+| Step | Service                                          | Status                     |
+| ---- | ------------------------------------------------ | -------------------------- |
+| 1    | Jobs escrows (ARL, USDC) and verified evaluators | Deployed (nonces 23 to 26) |
+| 2    | Validators: keys, ETH for gas, staked ARL        | Not started                |
+| 3    | Operator API (x402 per-use payments) on 8453     | Not started                |
+| 4    | Staking rewards contract and its reward budget   | Not started                |
+| 5    | App and site switched to Base Mainnet            | Not started                |
 
 ## Step 1: jobs escrow and verified evaluator
 
@@ -28,16 +28,16 @@ Deploy screen (`arlcoin.io/app/deploy/?plan=…`):
 |    24 | `8453-verified-jobs-usdc`                 | `ARLVerifiedEvaluator` for it, bonds in ARL     | `0x4f7f61916d65ff9E7C5F62468a18E37d4Fb07FA7` | Invalid                |
 |    25 | `8453-verified-jobs-arl`                  | `ARLJobs`, paid in ARL                          | `0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9` | Invalid                |
 |    26 | `8453-verified-jobs-arl`                  | `ARLVerifiedEvaluator` for it, bonds in ARL     | `0xa2f8945f301C46f2649b79Cd42A7eb1102e9009E` | Invalid                |
-|    23 | `8453-verified-jobs-usdc-v2`              | `ARLJobs`, paid in USDC (audit fixes)           | `0xc833140D2eE8607fd41662cffFAc557f3D535bE6` | Planned                |
-|    24 | `8453-verified-jobs-usdc-v2`              | `ARLVerifiedEvaluator` for it, bonds in ARL     | `0x4f7f61916d65ff9E7C5F62468a18E37d4Fb07FA7` | Planned                |
-|    25 | `8453-verified-jobs-arl-v2`               | `ARLJobs`, paid in ARL (audit fixes)            | `0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9` | Planned                |
-|    26 | `8453-verified-jobs-arl-v2`               | `ARLVerifiedEvaluator` for it, bonds in ARL     | `0xa2f8945f301C46f2649b79Cd42A7eb1102e9009E` | Planned                |
+|    23 | `8453-verified-jobs-usdc-v2`              | `ARLJobs`, paid in USDC (audit fixes)           | `0xc833140D2eE8607fd41662cffFAc557f3D535bE6` | Deployed               |
+|    24 | `8453-verified-jobs-usdc-v2`              | `ARLVerifiedEvaluator` for it, bonds in ARL     | `0x4f7f61916d65ff9E7C5F62468a18E37d4Fb07FA7` | Deployed               |
+|    25 | `8453-verified-jobs-arl-v2`               | `ARLJobs`, paid in ARL (audit fixes)            | `0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9` | Deployed               |
+|    26 | `8453-verified-jobs-arl-v2`               | `ARLVerifiedEvaluator` for it, bonds in ARL     | `0xa2f8945f301C46f2649b79Cd42A7eb1102e9009E` | Deployed               |
 
 `8453-verified-jobs-usdc` and `8453-verified-jobs-arl` are invalid, do not use: they hold pre-audit
 bytecode (before the audit fixes of 2026-10-28) and the deploy screen refuses them. Their `-v2`
 replacements are built from the fixed code at the same nonces, so they create contracts at the same
-addresses. Sign `8453-verified-jobs-usdc-v2` first (nonces 23 and 24), then
-`8453-verified-jobs-arl-v2` (25 and 26). Rehearsal of the `-v2` plans (Base Mainnet fork, deployer
+addresses. Both `-v2` pairs were signed on 2026-10-31 and `jobs-record-cli.ts` passed all nine checks for each
+on Base Mainnet; the record is `contracts/deploy/base-mainnet-jobs.json`. Rehearsal of the `-v2` plans (Base Mainnet fork, deployer
 impersonated at nonce 23, nothing sent): every contract was created at the address above and
 `jobs-record-cli.ts` passed all nine checks for each pair.
 Every address follows from the deployer and its nonce: any other transaction from the deployer
