@@ -15,7 +15,7 @@ Where we are, honestly:
 • The ARL token is live on Base Sepolia testnet. Not on mainnet yet.
 • The payment rail is IN DEVELOPMENT: tested on a local Base Sepolia fork, no facilitator running.
 
-We build in public. The code is open source on GitHub (link in bio). Join the community: t.me/arlcoin_community
+We build in public. The code is open source on GitHub (link in bio). Join the community: t.me/arlprotocol_community
 
 Question for builders: per second, per request or per token? How would you bill AI compute?
 

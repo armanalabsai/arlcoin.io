@@ -13,7 +13,7 @@ Every claim below links to the code, the tests and the document that back it.
 | Website              | [arlcoin.io](https://arlcoin.io)                             | [`apps/web`](apps/web): the Interactive Core, roadmap, docs, whitelist     |
 | App (Base Sepolia)   | [arlcoin.io/app](https://arlcoin.io/app/)                    | [`apps/dapp`](apps/dapp): faucet, claim, vesting, staking, jobs, payments, anonymous polls |
 | Testnet operator API | [app.arlcoin.io/api/operator](https://app.arlcoin.io/api/operator/status) | Faucet, group joins, vote relay and x402 settlement for the app ([`route.api.ts`](apps/dapp/app/api/operator/%5Baction%5D/route.api.ts)) |
-| Community bot        | [@Arlprotocol_bot](https://t.me/Arlprotocol_bot) in [t.me/arlcoin_community](https://t.me/arlcoin_community) | [`apps/telegram-bot`](apps/telegram-bot): `/start`, `/app`, `/faucet`, `/status` (live faucet and staking figures), `/launch`, `/whitelist`, `/rules`; scam filter, new-member link limits, flood control |
+| Community            | [t.me/arlprotocol_community](https://t.me/arlprotocol_community) | Official Telegram group |
 | Uptime monitor       | [Uptime workflow](.github/workflows/uptime.yml)             | Every 10 minutes: website, app, operator API, faucet float, Base Sepolia blocks and the staking reward window; a failure notifies the owner |
 
 ## Network and deployed contracts
@@ -122,12 +122,11 @@ npm run coverage:contracts       # coverage gate
 npm run rehearse:local           # full deploy-and-verify rehearsal on a local chain
 ```
 
-Deployment needs these repository secrets (never committed): `VERCEL_TOKEN`, `VERCEL_ORG_ID` and
-`VERCEL_PROJECT_ID` for the website; `VERCEL_APP_PROJECT_ID` (optional, the app project is linked
-by name otherwise) and `ARL_OPERATOR_KEY` (the testnet operator, Base Sepolia only) for the app;
-`ETHERSCAN_API_KEY` locally for Basescan verification. The website and the app deploy from `main`
-only after CI passes ([deploy-site.yml](.github/workflows/deploy-site.yml),
-[deploy-app.yml](.github/workflows/deploy-app.yml)).
+The website (with the app under `/app`) is built and served by Cloudflare Pages from this
+repository ([`wrangler.toml`](wrangler.toml), [`scripts/build-cloudflare.sh`](scripts/build-cloudflare.sh));
+`main` is production. Secrets (never committed): `ARL_OPERATOR_KEY` (the testnet operator, Base
+Sepolia only) for the app's operator API ([deploy-app.yml](.github/workflows/deploy-app.yml));
+`ETHERSCAN_API_KEY` locally for Basescan verification.
 
 ## Security
 
@@ -170,7 +169,7 @@ sales. No project funds are added to the pools.
 | Architecture          | [architecture.md](docs/architecture.md), [token-design.md](docs/token-design.md), [chain-evaluation.md](docs/chain-evaluation.md) |
 | Tokenomics            | [tokenomics.md](docs/tokenomics.md), [tokenomics-economic-spec.md](docs/tokenomics-economic-spec.md), [launch-decisions.md](docs/launch-decisions.md), [launch-route.md](docs/launch-route.md) |
 | Deployment            | [deployment.md](docs/deployment.md), [mainnet-plan.md](docs/mainnet-plan.md), [mainnet-runbook.md](docs/mainnet-runbook.md)      |
-| Products              | [app.md](docs/app.md), [telegram bot](apps/telegram-bot/README.md), [jobs.md](docs/jobs.md), [payments.md](docs/payments.md), [compute-provider.md](docs/compute-provider.md), [zk-privacy.md](docs/zk-privacy.md), [operator-api.md](docs/operator-api.md), [incident-response.md](docs/incident-response.md) |
+| Products              | [app.md](docs/app.md), [jobs.md](docs/jobs.md), [payments.md](docs/payments.md), [compute-provider.md](docs/compute-provider.md), [zk-privacy.md](docs/zk-privacy.md), [operator-api.md](docs/operator-api.md), [incident-response.md](docs/incident-response.md) |
 | Process               | [CONTRIBUTING.md](CONTRIBUTING.md), [branch-protection.md](docs/branch-protection.md), [open-source.md](docs/open-source.md), [content-standard.md](docs/content-standard.md) |
 
 ## Community and contact
@@ -179,7 +178,7 @@ sales. No project funds are added to the pools.
 | --------- | ---------------------------------------------------------------- |
 | Website   | [arlcoin.io](https://arlcoin.io)                                 |
 | X         | [@arlprotocol](https://x.com/arlprotocol)                        |
-| Telegram  | [t.me/arlcoin_community](https://t.me/arlcoin_community)         |
+| Telegram  | [t.me/arlprotocol_community](https://t.me/arlprotocol_community)         |
 | Email     | [team@arlcoin.io](mailto:team@arlcoin.io)                        |
 | Security  | private reports per [SECURITY.md](SECURITY.md)                   |
 
@@ -191,6 +190,6 @@ Nothing in this repository constitutes financial, investment or legal advice.
 
 ## License
 
-Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE). Third-party components keep their
+Author: Alazdg. Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE). Third-party components keep their
 own licenses; see [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md). Name and logo use:
 [TRADEMARKS.md](TRADEMARKS.md). Changes: [CHANGELOG.md](CHANGELOG.md).

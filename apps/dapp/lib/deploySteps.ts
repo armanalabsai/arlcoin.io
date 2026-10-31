@@ -29,6 +29,15 @@ import {
 import { DEPLOY_ARTIFACTS } from "./deployArtifacts.ts";
 import { BASE_MAINNET_CHAIN_ID, LOCAL_CHAIN_ID, assertAllowedChain } from "./network.ts";
 
+/** The creation code a run may contain, per contract. */
+export type DeployArtifacts = {
+  readonly [K in keyof typeof DEPLOY_ARTIFACTS]: {
+    readonly creationHash: string;
+    readonly creationSize: number;
+    readonly constructorInputs: readonly unknown[];
+  };
+};
+
 /** Canonical Safe v1.5.0 contracts (safe-global/safe-deployments), as pinned in CreateSafes. */
 export const SAFE_FACTORY_V150: Address = "0x14F2982D601c9458F93bd70B218933A6f8165e7b";
 export const SAFE_SINGLETONS_V150: readonly Address[] = [
@@ -108,8 +117,10 @@ interface ForgeTransaction {
   };
 }
 
-/** Reads and checks a Foundry dry-run file. Throws on anything that is not an ARL deployment. */
-export function parseRun(json: unknown): DeployRun {
+/** Reads and checks a Foundry dry-run file. Throws on anything that is not an ARL deployment.
+ * `artifacts` is the build the creations must match: the current one, except in tests that read
+ * runs made from an earlier release. */
+export function parseRun(json: unknown, artifacts: DeployArtifacts = DEPLOY_ARTIFACTS): DeployRun {
   const run = json as { transactions?: unknown; chain?: unknown };
   if (!Array.isArray(run.transactions) || run.transactions.length === 0) {
     fail("the file has no transactions");
@@ -144,11 +155,11 @@ export function parseRun(json: unknown): DeployRun {
       if (tx.to !== null && tx.to !== undefined)
         fail(`transaction ${String(index + 1)}: not a creation`);
       const name = t.contractName;
-      if (typeof name !== "string" || !(name in DEPLOY_ARTIFACTS)) {
+      if (typeof name !== "string" || !(name in artifacts)) {
         fail(`transaction ${String(index + 1)}: creates an unknown contract`);
       }
       const contract = name as keyof typeof DEPLOY_ARTIFACTS;
-      const artifact = DEPLOY_ARTIFACTS[contract];
+      const artifact = artifacts[contract];
       const size = artifact.creationSize;
       if ((tx.input.length - 2) / 2 < size)
         fail(`transaction ${String(index + 1)}: code too short`);

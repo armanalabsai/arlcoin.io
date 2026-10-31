@@ -1562,6 +1562,19 @@ const localContracts = {
         },
         {
           type: "function",
+          name: "MAX_REWARDS_DURATION",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
           name: "accruedRewards",
           inputs: [],
           outputs: [
@@ -2121,6 +2134,11 @@ const localContracts = {
         },
         {
           type: "error",
+          name: "StakingDurationTooLong",
+          inputs: [],
+        },
+        {
+          type: "error",
           name: "StakingInsufficientBalance",
           inputs: [
             {
@@ -2184,6 +2202,19 @@ const localContracts = {
         {
           type: "function",
           name: "MAX_DESCRIPTION",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "MAX_DURATION",
           inputs: [],
           outputs: [
             {
@@ -2741,6 +2772,11 @@ const localContracts = {
         {
           type: "error",
           name: "DescriptionTooLong",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "ExpiryTooLong",
           inputs: [],
         },
         {

@@ -75,6 +75,16 @@ contract ARLStakingRewardsTest is ARLTestBase {
         new ARLStakingRewards(token, token, communitySafe, 0);
     }
 
+    /// Audit F-5: an unbounded period length could hold unallocated rewards back for decades.
+    function test_RevertWhen_ConstructorDurationTooLong() public {
+        vm.expectRevert(ARLStakingRewards.StakingDurationTooLong.selector);
+        new ARLStakingRewards(token, token, communitySafe, 365 days + 1);
+        vm.expectRevert(ARLStakingRewards.StakingDurationTooLong.selector);
+        new ARLStakingRewards(token, token, communitySafe, 10 * 365 days);
+        ARLStakingRewards s = new ARLStakingRewards(token, token, communitySafe, 365 days);
+        assertEq(s.rewardsDuration(), s.MAX_REWARDS_DURATION());
+    }
+
     function test_HasNoOwnerMintOrRecovery() public view {
         // The only privileged address is the immutable distributor.
         assertEq(staking.rewardsDistribution(), communitySafe);
@@ -421,6 +431,43 @@ contract ARLStakingRewardsTest is ARLTestBase {
         vm.prank(communitySafe);
         vm.expectRevert(ARLStakingRewards.StakingZeroDuration.selector);
         staking.setRewardsDuration(0);
+    }
+
+    function test_RevertWhen_SetDurationTooLong() public {
+        vm.startPrank(communitySafe);
+        vm.expectRevert(ARLStakingRewards.StakingDurationTooLong.selector);
+        staking.setRewardsDuration(365 days + 1);
+        vm.expectRevert(ARLStakingRewards.StakingDurationTooLong.selector);
+        staking.setRewardsDuration(type(uint256).max);
+        staking.setRewardsDuration(365 days);
+        vm.stopPrank();
+        assertEq(staking.rewardsDuration(), 365 days);
+    }
+
+    /// With the longest period, unallocated rewards come back within a year of funding.
+    function test_UnallocatedReturnableWithinTheLongestPeriod() public {
+        vm.startPrank(communitySafe);
+        staking.setRewardsDuration(365 days);
+        staking.notifyRewardAmount(REWARD);
+        vm.stopPrank();
+        assertEq(staking.periodFinish(), block.timestamp + 365 days);
+
+        // Nobody staked, so the whole funding is unallocated once the period has ended.
+        vm.warp(block.timestamp + 365 days + 1);
+        uint256 before = token.balanceOf(communitySafe);
+        vm.prank(communitySafe);
+        staking.returnUnallocated();
+        assertEq(token.balanceOf(communitySafe), before + REWARD);
+    }
+
+    function testFuzz_DurationBounds(uint256 duration) public {
+        vm.prank(communitySafe);
+        if (duration == 0) {
+            vm.expectRevert(ARLStakingRewards.StakingZeroDuration.selector);
+        } else if (duration > 365 days) {
+            vm.expectRevert(ARLStakingRewards.StakingDurationTooLong.selector);
+        }
+        staking.setRewardsDuration(duration);
     }
 
     /// Whatever the timing, nothing reserved for an active period can be returned, and a return

@@ -7,6 +7,7 @@ import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProo
 import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 
 /// @title ARL Merkle claim distributor
+/// @author Alazdg
 /// @notice Distributes a fixed, published list of ARL amounts. Each entry `(index, account,
 /// amount)` is a leaf of a Merkle tree whose root is fixed at deployment; an entry can be claimed
 /// once, before `claimEnd`, and the tokens always go to `account`. After `claimEnd` anyone can

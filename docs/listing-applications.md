@@ -24,7 +24,7 @@ guaranteed listing.
 | Whitepaper / deck         | https://arlcoin.io/arl-pitch-deck.pdf, https://arlcoin.io/docs/tokenomics/                                                                       |
 | Bug bounty                | Open ([bug-bounty.md](bug-bounty.md))                                                                                                            |
 | Logo                      | https://arlcoin.io/arl-token-200.png (200 × 200 PNG), https://arlcoin.io/arl-token-512.png, https://arlcoin.io/arl-token.svg                     |
-| Social accounts           | X https://x.com/arlprotocol (@arlprotocol), Telegram https://t.me/arlcoin_community                                                              |
+| Social accounts           | X https://x.com/arlprotocol (@arlprotocol), Telegram https://t.me/arlprotocol_community                                                          |
 | Contact                   | ARL Protocol team, team@arlcoin.io                                                                                                               |
 
 ### Short description (English, for the form)
@@ -47,7 +47,7 @@ guaranteed listing.
 ## Gaps
 
 - **E-mail on the project domain:** done 2026-10-05. Every address at arlcoin.io (team@, info@ ...)
-  forwards to the team inbox through ImprovMX (MX and SPF records on Vercel DNS); tested.
+  forwards to the team inbox through ImprovMX (MX and SPF records in the domain's DNS); tested.
   Receiving only: replying from the domain needs a paid plan, so replies come from the team inbox.
 - **Trading history.** Both sites look for real trading on the pools before listing; apply a few
   days after the TGE.

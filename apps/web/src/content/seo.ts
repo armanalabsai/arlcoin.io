@@ -16,7 +16,7 @@ export const organizationJsonLd = {
   url: SITE.url,
   logo: { "@type": "ImageObject", url: `${SITE.url}/arl-token-512.png`, width: 512, height: 512 },
   email: SITE.email,
-  sameAs: [SITE.social.x, SITE.social.telegram, SITE.social.medium, SITE.repository],
+  sameAs: [SITE.social.x, SITE.social.telegram, SITE.repository],
   contactPoint: {
     "@type": "ContactPoint",
     contactType: "customer support",

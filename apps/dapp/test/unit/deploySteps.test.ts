@@ -14,6 +14,10 @@ import {
   publishedPlanPath,
 } from "../../lib/deploySteps.ts";
 import { NetworkLocked, TGE_DATE } from "../../lib/network.ts";
+import { RELEASE_ARTIFACTS } from "../fixtures/deploy/releaseArtifacts.ts";
+
+// The fixtures and published plans were made from the released build (see releaseArtifacts.ts).
+const parse = (run: unknown) => parseRun(run, RELEASE_ARTIFACTS);
 
 // Dry-run files from the local deployment rehearsal (Anvil development accounts, no keys).
 const load = (name: string) =>
@@ -29,13 +33,13 @@ const load = (name: string) =>
 
 const refused = (run: unknown, pattern: RegExp) =>
   assert.throws(
-    () => parseRun(run),
+    () => parse(run),
     (e: unknown) => e instanceof DeployRunError && pattern.test(e.message),
   );
 
 describe("deployment run file", () => {
   it("reads the ARL contract creations and checks their code and addresses", () => {
-    const run = parseRun(load("DeployARL"));
+    const run = parse(load("DeployARL"));
     assert.equal(run.chainId, 31337);
     assert.deepEqual(
       run.steps.map((s) => (s.kind === "create" ? s.contract : s.kind)),
@@ -57,8 +61,18 @@ describe("deployment run file", () => {
     assert.match(token?.detail ?? "", /21,000,000 ARL once/);
   });
 
+  it("refuses a run of the released contracts: only the current build is signed", () => {
+    // Audit 2026-10-28: the released ARLVestingWallet lacks the fixes, so the deploy screen
+    // must not offer it for signing again.
+    assert.throws(
+      () => parseRun(load("DeployARL")),
+      (e: unknown) =>
+        e instanceof DeployRunError && /ARLVestingWallet code is not the ARL build/.test(e.message),
+    );
+  });
+
   it("reads Safe creations with their owners and threshold", () => {
-    const run = parseRun(load("CreateSafes"));
+    const run = parse(load("CreateSafes"));
     assert.equal(run.steps.length, 12);
     const first = run.steps[0];
     assert.equal(first?.kind, "safe");
@@ -72,7 +86,7 @@ describe("deployment run file", () => {
   it("refuses Base Mainnet, other code, ETH transfers, nonce gaps and unknown contracts", () => {
     mock.timers.enable({ apis: ["Date"], now: Date.parse(TGE_DATE) - 1 });
     try {
-      assert.throws(() => parseRun({ ...load("DeployARL"), chain: 8453 }), NetworkLocked);
+      assert.throws(() => parse({ ...load("DeployARL"), chain: 8453 }), NetworkLocked);
     } finally {
       mock.timers.reset();
     }
@@ -120,7 +134,7 @@ describe("deployment run file", () => {
 });
 
 describe("before each signature", () => {
-  const run = parseRun(load("DeployARL"));
+  const run = parse(load("DeployARL"));
   const step = run.steps[0]!;
   const ok = { account: run.from, chainId: 31337, nonce: step.nonce };
 
@@ -148,7 +162,7 @@ describe("published plans", () => {
   });
 
   it("the published Base Sepolia Safe plan is accepted and creates twelve 1-of-1 Safes", () => {
-    const run = parseRun(
+    const run = parse(
       JSON.parse(
         readFileSync(new URL("../../public/plans/84532-safes.json", import.meta.url), "utf8"),
       ),
@@ -164,7 +178,7 @@ describe("published plans", () => {
 
 describe("after signing", () => {
   it("points to the verified-record tool; Safe addresses come only from its record", () => {
-    const safes = parseRun(
+    const safes = parse(
       JSON.parse(
         readFileSync(new URL("../../public/plans/84532-safes.json", import.meta.url), "utf8"),
       ),
@@ -174,7 +188,7 @@ describe("after signing", () => {
       command:
         "node packages/deploy/src/record-cli.ts safes apps/dapp/public/plans/84532-safes.json https://sepolia.base.org contracts/deploy/deployments/84532-safes.json",
     });
-    const deploy = parseRun(
+    const deploy = parse(
       JSON.parse(
         readFileSync(new URL("../../public/plans/84532-deploy.json", import.meta.url), "utf8"),
       ),
@@ -183,7 +197,7 @@ describe("after signing", () => {
       recordCommand(deploy, "run.json").command,
       "node packages/deploy/src/record-cli.ts arl run.json https://sepolia.base.org contracts/deploy/deployments/84532.json",
     );
-    const local = parseRun(load("DeployARL"));
+    const local = parse(load("DeployARL"));
     assert.match(recordCommand(local, "x.json").command, /--local-anvil/);
   });
 });
