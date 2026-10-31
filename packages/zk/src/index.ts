@@ -12,16 +12,17 @@
 import { UltraHonkBackend, Barretenberg } from "@aztec/bb.js";
 import { Noir } from "@noir-lang/noir_js";
 import type { CompiledCircuit } from "@noir-lang/noir_js";
-import { LeanIMT } from "@zk-kit/lean-imt";
+import type { LeanIMT } from "@zk-kit/lean-imt";
 import { poseidon1, poseidon2 } from "poseidon-lite";
 import { encodePacked, hexToBytes, keccak256, toHex } from "viem";
 import type { Hex } from "viem";
 
+import { SNARK_FIELD, createGroup } from "./group.ts";
+
+export { SNARK_FIELD, createGroup };
+
 /** Maximum group depth supported by the circuit (65,536 members). */
 export const MAX_DEPTH = 16;
-/** BN254 scalar field order. */
-export const SNARK_FIELD =
-  21888242871839275222246405745257275088548364400416034343698204186575808495617n;
 
 /** An identity secret derived from a wallet signature over a fixed message. The secret is never
  *  stored: signing the same message with the same wallet gives the same identity again. */
@@ -45,12 +46,6 @@ export function commitment(secret: bigint): bigint {
  *  uint256(keccak256(abi.encodePacked(value))) >> 8. */
 export function hashToField(value: bigint): bigint {
   return BigInt(keccak256(encodePacked(["uint256"], [value]))) >> 8n;
-}
-
-export function createGroup(commitments: readonly bigint[] = []): LeanIMT {
-  const group = new LeanIMT<bigint>((a, b) => poseidon2([a, b]));
-  if (commitments.length) group.insertMany([...commitments]);
-  return group;
 }
 
 export interface SignalInputs {

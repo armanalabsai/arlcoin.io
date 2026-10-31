@@ -41,8 +41,13 @@ public Base RPCs when one refuses). No API token or GitHub secret is needed.
 4. **Search Console.** After the domain answers 200: Sitemaps → resubmit
    `https://arlcoin.io/sitemap.xml`, and URL Inspection → Request indexing for the home page.
 
-## Not moved yet
+## Testnet operator API
 
-`app.arlcoin.io` (the testnet operator API, `scripts/deploy-app.sh`) runs as a Next.js server and
-is still on Vercel, so it stays down until it moves to Cloudflare. `arlcoin.io/app/` (the static
-app) moves with the website.
+The testnet operator API runs on the same Pages project as a Pages Function,
+`functions/api/operator/[action].js`, at `arlcoin.io/api/operator/*`. The build bundles its
+handler (`apps/dapp/lib/server/operatorHttp.ts`) into `build/operator.mjs`. The Base Sepolia
+operator key is the project's encrypted variable `ARL_OPERATOR_KEY` (Settings → Variables and
+Secrets, type Secret), set by the owner; `wrangler.toml` turns on `nodejs_compat` so the handler
+reads it from `process.env`. Once `arlcoin.io/api/operator/status` answers, set the repository
+variable `OPERATOR_LIVE` to `true` (GitHub → Settings → Secrets and variables → Actions →
+Variables) so the uptime check covers the operator and the faucet float again.
