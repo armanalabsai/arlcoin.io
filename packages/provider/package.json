@@ -1,6 +1,7 @@
 {
   "name": "@arl/provider",
   "version": "0.1.0",
+  "author": "Alazdg <team@arlcoin.io>",
   "private": true,
   "description": "Reference ARL compute provider: runs operator-defined jobs for a paid time and settles the seconds used in ARL over x402 upto (Base Sepolia only)",
   "type": "module",

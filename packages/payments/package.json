@@ -1,6 +1,7 @@
 {
   "name": "@arl/payments",
   "version": "0.1.0",
+  "author": "Alazdg <team@arlcoin.io>",
   "private": true,
   "description": "ARL usage-based payments over the x402 upto scheme (Permit2), Base Sepolia only",
   "type": "module",

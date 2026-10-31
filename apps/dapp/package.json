@@ -1,6 +1,7 @@
 {
   "name": "@arl/dapp",
   "version": "0.1.0",
+  "author": "Alazdg <team@arlcoin.io>",
   "private": true,
   "description": "ARL web app: wallet, vesting and staking (local Anvil chain only)",
   "license": "Apache-2.0",
