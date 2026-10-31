@@ -62,4 +62,4 @@ Club, Virtuals), which deploy their own token instead of selling ARL.
 
 Shared on submission: the text above, the website, the Base Sepolia addresses, the docs listed in
 [launchpad-application.md](launchpad-application.md), the ARL Protocol team contact (team@arlcoin.io) and the official Telegram
-https://t.me/arlcoin_community.
+https://t.me/arlprotocol_community.

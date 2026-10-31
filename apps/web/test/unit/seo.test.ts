@@ -67,7 +67,7 @@ describe("seo: structured data", () => {
   it("names only the official channels", () => {
     assert.deepEqual(organizationJsonLd.sameAs, [
       "https://x.com/arlprotocol",
-      "https://t.me/arlcoin_community",
+      "https://t.me/arlprotocol_community",
       "https://github.com/armanalabsai/arlcoin.io",
     ]);
     assert.equal(organizationJsonLd.email, "team@arlcoin.io");

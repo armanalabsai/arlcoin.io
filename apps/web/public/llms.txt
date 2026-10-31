@@ -37,7 +37,7 @@ Key facts:
 
 - Website: https://arlcoin.io
 - X: https://x.com/arlprotocol (@arlprotocol)
-- Telegram: https://t.me/arlcoin_community
+- Telegram: https://t.me/arlprotocol_community
 - Email: team@arlcoin.io
 - Source code: https://github.com/armanalabsai/arlcoin.io
 

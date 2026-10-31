@@ -3,8 +3,7 @@ name: Uptime
 # Read-only uptime check of the public services every 10 minutes: the website, the app page, the
 # testnet operator API (and the faucet float it reports), the Base Sepolia RPC and the staking
 # reward window. Any failed check fails the run, and GitHub notifies the owner by email and in the
-# GitHub mobile app. Nothing is signed or sent. The Telegram bot is not pinged: on Render's free
-# tier a ping every 10 minutes would keep it awake around the clock and use up the free hours.
+# GitHub mobile app. Nothing is signed or sent.
 on:
   schedule:
     - cron: "*/10 * * * *"

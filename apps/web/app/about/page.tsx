@@ -85,7 +85,7 @@ export default function AboutPage() {
             </a>{" "}
             · Telegram:{" "}
             <a href={SITE.social.telegram} {...ext} className={link}>
-              t.me/arlcoin_community
+              t.me/arlprotocol_community
             </a>
           </>,
           "These are the only official channels. The team never sends the first direct message and never asks for a private key, seed phrase or payment.",
