@@ -6,6 +6,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./group": "./src/group.ts",
     "./circuit": "./circuit/arl_semaphore.json"
   },
   "scripts": {

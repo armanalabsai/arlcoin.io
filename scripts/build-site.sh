@@ -28,11 +28,11 @@ cd "$ROOT/apps/dapp"
 rm -rf out .next
 # Git Bash on Windows would rewrite "/app" into a Windows path; the exclusion keeps it as is.
 # The public app targets Base Sepolia once the ecosystem is recorded (contracts/deploy/
-# base-sepolia.json); its testnet operator API is served by the server-hosted app
-# (app.arlcoin.io), which a static export cannot serve itself.
+# base-sepolia.json); its testnet operator API is the Pages Function at
+# arlcoin.io/api/operator (functions/api/operator), which a static export cannot serve itself.
 CHAIN_ENV=()
 if grep -q 84532 contracts/baseSepoliaContracts.ts; then
-  CHAIN_ENV=(NEXT_PUBLIC_ARL_CHAIN=84532 "NEXT_PUBLIC_ARL_OPERATOR_URL=${ARL_OPERATOR_URL:-https://app.arlcoin.io}")
+  CHAIN_ENV=(NEXT_PUBLIC_ARL_CHAIN=84532 "NEXT_PUBLIC_ARL_OPERATOR_URL=${ARL_OPERATOR_URL:-https://arlcoin.io}")
 fi
 CHAIN_ENV+=(NEXT_PUBLIC_ARL_MAINNET_TOKEN=0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4)
 env ${CHAIN_ENV[@]+"${CHAIN_ENV[@]}"} MSYS2_ENV_CONV_EXCL=ARL_BASE_PATH ARL_STATIC_EXPORT=1 ARL_BASE_PATH=/app npm run build

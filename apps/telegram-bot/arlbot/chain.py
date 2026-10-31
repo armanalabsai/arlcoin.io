@@ -15,7 +15,7 @@ import httpx
 
 log = logging.getLogger("arlbot")
 
-OPERATOR_STATUS_URL = "https://app.arlcoin.io/api/operator/status"
+OPERATOR_STATUS_URL = "https://arlcoin.io/api/operator/status"
 RPC_URL = "https://sepolia.base.org"
 STAKING = "0xA78480c1802F5c17B1007c59b7c2CF849549724e"
 PERIOD_FINISH_SELECTOR = "0xebe2b12b"  # periodFinish()

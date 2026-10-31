@@ -4,7 +4,7 @@
 // adds members to the demo poll group, relays anonymous votes (so the voter's wallet is not the
 // sender) and settles x402 `upto` payments to its demo service. It never holds user funds.
 
-import { SNARK_FIELD } from "@arl/zk";
+import { SNARK_FIELD } from "@arl/zk/group";
 import { getAddress, isAddress, isHex, type Address, type Hex } from "viem";
 
 import { POLL } from "./poll.ts";

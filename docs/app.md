@@ -179,8 +179,9 @@ in the browser; it holds testnet ARL from the Ecosystem & Growth Safe and a litt
 and no contract gives it a role. The rules of every request are in `lib/operatorRules.ts`.
 
 Deployment: `scripts/rehearse-sepolia-ecosystem.sh` rehearses the contracts and Safe batches on a
-local fork; `.github/workflows/deploy-app.yml` (`scripts/deploy-app.sh`) builds the app for Base
-Sepolia and deploys it to Vercel after CI passes on `main`.
+local fork. The app is built for Base Sepolia with the website (`scripts/build-cloudflare.sh`) and
+served by Cloudflare Pages under arlcoin.io/app; its operator API is the Pages Function
+`functions/api/operator/[action].js` (arlcoin.io/api/operator/*).
 
 ## Run it
 
@@ -207,7 +208,7 @@ To use MetaMask instead, add the network `http://127.0.0.1:8545`, chain id 31337
 ## Not yet
 
 - Base Sepolia live app: the ecosystem contracts are deployed and verified (2026-10-11,
-  [verification-evidence.md](verification-evidence.md)); the app is published by `deploy-app.yml` once merged.
+  [verification-evidence.md](verification-evidence.md)); the app is published with the website by Cloudflare Pages.
 - Mobile wallets over WalletConnect: needs a WalletConnect project id (a free account; owner
   decision).
 - Base Mainnet as a build target: added with the mainnet deployment record at the TGE.

@@ -28,8 +28,8 @@ workflow does the same for the Base Mainnet deployment once it is recorded.
 3. **Contain** what people control:
    - Treasury: the guardian cancels any queued timelock operation that the issue affects.
    - Safes: signers stop signing transactions that touch the affected contract.
-   - Testnet operator: remove `ARL_OPERATOR_KEY` from the deployment or take `app.arlcoin.io`
-     down; the contracts keep working without it ([operator-api.md](operator-api.md)).
+   - Testnet operator: remove `ARL_OPERATOR_KEY` from the Cloudflare Pages project's variables
+     and redeploy; the contracts keep working without it ([operator-api.md](operator-api.md)).
    - Website: publish a warning banner and remove links to the affected feature.
 4. **Fix**: write the fix with a failing test first, run the full CI, and deploy a new contract
    version when a contract is affected. Existing contracts cannot be changed.
