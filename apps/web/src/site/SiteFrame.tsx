@@ -94,9 +94,6 @@ export function FooterLinks() {
       <a href={SITE.social.telegram} rel="me noopener noreferrer" target="_blank" className={link}>
         Telegram
       </a>
-      <a href={SITE.social.medium} rel="me noopener noreferrer" target="_blank" className={link}>
-        Medium
-      </a>
       <a href={SITE.repository} rel="me noopener noreferrer" target="_blank" className={link}>
         GitHub
       </a>
