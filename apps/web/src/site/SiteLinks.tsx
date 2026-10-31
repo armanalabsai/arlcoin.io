@@ -3,8 +3,9 @@ import Link from "next/link";
 import { withBase } from "@/core/basePath.ts";
 
 // Header actions shared by the Core and the standalone pages. Each link is at least 44px tall
-// for touch; the visible pill inside it can be smaller. FAQ, Contact and Whitelist are also in the
-// footer, so they give way first when the header is narrow; Open app and Get ARL always show.
+// for touch; the visible pill inside it can be smaller. FAQ and Contact live in the footer only.
+// Whitelist, also in the footer, gives way when the header is narrow; Open app and Get ARL always
+// show.
 const tap = "inline-flex min-h-11 items-center";
 // The same box for links shown only from a breakpoint: no display class of its own, so `hidden`
 // and the breakpoint's `inline-flex` decide.
@@ -17,22 +18,6 @@ export function SiteLinks({
 }) {
   return (
     <div className="flex items-center gap-2 sm:gap-4">
-      <Link
-        href="/faq"
-        prefetch={false}
-        aria-current={current === "faq" ? "page" : undefined}
-        className={`${tapAt} hidden text-[13px] text-fg-muted transition-colors hover:text-fg md:inline-flex lg:hidden xl:inline-flex`}
-      >
-        FAQ
-      </Link>
-      <Link
-        href="/contact"
-        prefetch={false}
-        aria-current={current === "contact" ? "page" : undefined}
-        className={`${tapAt} hidden text-[13px] text-fg-muted transition-colors hover:text-fg md:inline-flex lg:hidden xl:inline-flex`}
-      >
-        Contact
-      </Link>
       <Link
         href="/whitelist"
         prefetch={false}
