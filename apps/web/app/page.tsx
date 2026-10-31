@@ -145,7 +145,7 @@ export default function Home() {
             Native utility token on Base
           </p>
           <h1 className="mx-auto mt-6 max-w-[720px] text-[28px] leading-[1.2] font-bold tracking-[-0.02em] text-heading sm:text-[40px]">
-            The onchain token planned for decentralized AI and compute services.
+            The onchain token for decentralized AI and compute services.
           </h1>
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link href="/whitelist" prefetch={false} className={primary}>
@@ -243,7 +243,7 @@ export default function Home() {
         <Section
           alt
           heading="Built for AI and compute."
-          sub="Swipe through how each one is meant to work. The token runs on the Base Sepolia testnet; nothing is on Base Mainnet yet."
+          sub="Swipe through how each one is meant to work. The token and the verified jobs escrows are live on Base Mainnet; the other services run on the Base Sepolia testnet."
         >
           <Reveal delay={120} className="mt-12">
             <TechShowcase />
