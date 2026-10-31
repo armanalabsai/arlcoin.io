@@ -1,6 +1,7 @@
 {
   "name": "@arl/web",
   "version": "0.1.0",
+  "author": "Alazdg <team@arlcoin.io>",
   "private": true,
   "description": "ARL website: the Interactive Core",
   "license": "Apache-2.0",

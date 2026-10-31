@@ -1,5 +1,6 @@
 {
   "name": "arl-protocol",
+  "author": "Alazdg <team@arlcoin.io>",
   "private": true,
   "description": "ARL Protocol monorepo",
   "engines": {

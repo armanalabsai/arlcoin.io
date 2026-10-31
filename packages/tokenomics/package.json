@@ -1,6 +1,7 @@
 {
   "name": "@arl/tokenomics",
   "version": "0.1.0",
+  "author": "Alazdg <team@arlcoin.io>",
   "private": true,
   "description": "ARL allocation table, validation and supply share calculation",
   "type": "module",
