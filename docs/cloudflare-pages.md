@@ -21,22 +21,22 @@ production and other branches get preview URLs (`<branch>.arlcoin-io.pages.dev`)
 | Headers            | [`apps/web/public/_headers`](../apps/web/public/_headers)                                |
 | Redirects          | [`apps/web/public/_redirects`](../apps/web/public/_redirects)                            |
 | `/api/supply`      | Pages Function [`functions/api/supply.js`](../functions/api/supply.js)                   |
-| Analytics          | None (Vercel Web Analytics was removed)                                                  |
+| Analytics          | None                                                                                     |
 
 Checked on the preview deployment of 2026-10-30: pages answer 200, `/about` redirects to
 `/about/`, `/core/team/...` redirects to `/core/`, unknown paths answer 404, the site and the app
 get their own headers, and `/api/supply` returns the on-chain figures (it falls back to other
 public Base RPCs when one refuses). No API token or GitHub secret is needed.
 
-## Owner steps (one time)
+## Owner steps (one time, done on 2026-10-30)
 
 1. **Build command.** Workers & Pages → `arlcoin-io` → Settings → Build: build command
    `bash scripts/build-cloudflare.sh` (the output directory comes from `wrangler.toml`).
-2. **DNS.** arlcoin.io's nameservers are Vercel's (`ns1.vercel-dns.com`, `ns2.vercel-dns.com`). In
+2. **DNS.** Until 2026-10-30 arlcoin.io's nameservers were Vercel's. In
    Cloudflare: Add a domain → `arlcoin.io` → Free plan. Check that the imported records include
    the mail records (MX `mx1.improvmx.com` priority 10, MX `mx2.improvmx.com` priority 20, TXT
    `v=spf1 include:spf.improvmx.com ~all`), then set Cloudflare's two nameservers at the registrar
-   where arlcoin.io was bought.
+   (`ainsley.ns.cloudflare.com`, `grant.ns.cloudflare.com` since 2026-10-30).
 3. **Custom domains.** Pages project → Custom domains → add `arlcoin.io` and `www.arlcoin.io`.
 4. **Search Console.** After the domain answers 200: Sitemaps → resubmit
    `https://arlcoin.io/sitemap.xml`, and URL Inspection → Request indexing for the home page.
