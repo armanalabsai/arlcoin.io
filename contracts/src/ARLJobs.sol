@@ -25,6 +25,8 @@ import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/Reentrancy
 /// - `fund` takes the expected budget (front-running protection, as the specification requires);
 /// - a provider can only submit, and the evaluator only complete or reject a funded job, before
 ///   the job expires.
+/// @dev The payment token is immutable; every function that moves tokens is `nonReentrant` and
+/// updates state before the transfer.
 contract ARLJobs is ReentrancyGuardTransient {
     using SafeERC20 for IERC20;
 
