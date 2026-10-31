@@ -48,9 +48,11 @@ export {
   type ArlQuoteToken,
 } from "./acquireArl.ts";
 export {
+  acceptedCount,
   approveCommittee,
   buildEscrowOffer,
   checkFundedJob,
   submitDeliverable,
+  waitForAcceptance,
   type EscrowOfferInput,
 } from "./escrowProvider.ts";
