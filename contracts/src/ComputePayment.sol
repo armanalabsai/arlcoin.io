@@ -21,6 +21,7 @@ import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/Reentrancy
 /// - no owner, no upgrade, no pause, no fees: the contract has no privileged role at all;
 /// - either party can stop a stream at any time; after its end time anyone can settle it, so the
 ///   escrow can never be locked. Settlement only ever pays the two parties of the stream.
+/// @dev The payment token is immutable; every function that moves tokens is `nonReentrant`.
 contract ComputePayment is ReentrancyGuardTransient {
     using SafeERC20 for IERC20;
 
