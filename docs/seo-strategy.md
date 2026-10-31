@@ -125,7 +125,7 @@ site gets a `canonical`).
 
 **H1/H2 templates**
 
-- Home: H1 "The onchain token planned for decentralized AI and compute services." · H2s:
+- Home: H1 "The onchain token for decentralized AI and compute services." · H2s:
   "Launch on Base." / "Onchain. Verifiable." / "Fixed. Forever." / "Built for AI and compute." /
   "Where ARL is today." / "Questions."
 - FAQ: H1 "Questions" · every question is a `<summary>` (matches FAQPage).
