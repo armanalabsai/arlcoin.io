@@ -601,7 +601,10 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         ev.accept(id);
     }
 
-    function test_RevertWhen_AcceptAfterVotingStarted() public {
+    /// Report 2026-10-31 (F-1): starting the vote, by anyone or by a first vote, used to close
+    /// acceptance and could leave the committee short of the threshold for good. Members can now
+    /// accept until the vote window ends.
+    function test_acceptDuringVoteWindowAfterFirstVote() public {
         uint256 id = _configured(_reexec());
         _approveCommittee(id);
         _fund(id, BUDGET);
@@ -610,8 +613,77 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         _submit(id);
         _vote(id, v1, true);
         vm.prank(v2);
-        vm.expectRevert(ARLVerifiedEvaluator.WrongPhase.selector);
         ev.accept(id);
+        _vote(id, v2, true);
+        assertEq(uint256(_phase(id)), uint256(ARLVerifiedEvaluator.Phase.Approved));
+    }
+
+    function test_acceptAfterAStrangerStartsVoting() public {
+        uint256 id = _configured(_reexec());
+        _approveCommittee(id);
+        _fund(id, BUDGET);
+        vm.prank(v1);
+        ev.accept(id);
+        _submit(id);
+        vm.prank(stranger);
+        ev.startVoting(id);
+        vm.warp(block.timestamp + VOTE_WINDOW - 1);
+        vm.prank(v2);
+        ev.accept(id);
+        _vote(id, v1, true);
+        _vote(id, v2, true);
+        assertEq(uint256(_phase(id)), uint256(ARLVerifiedEvaluator.Phase.Approved));
+        uint256 providerBefore = token.balanceOf(provider);
+        vm.warp(block.timestamp + WINDOW);
+        ev.finalize(id);
+        assertEq(token.balanceOf(provider), providerBefore + BUDGET);
+    }
+
+    function test_RevertWhen_AcceptAfterVoteWindowOrDecision() public {
+        uint256 id = _configured(_reexec());
+        _approveCommittee(id);
+        _fund(id, BUDGET);
+        vm.prank(v1);
+        ev.accept(id);
+        _submit(id);
+        vm.prank(stranger);
+        ev.startVoting(id);
+        vm.warp(ev.getVerdict(id).voteEnds);
+        vm.prank(v2);
+        vm.expectRevert(ARLVerifiedEvaluator.VoteWindowClosed.selector);
+        ev.accept(id);
+
+        // After a decision the phase is no longer Configured.
+        uint256 decided = _configured(_reexec());
+        _approveCommittee(decided);
+        _fund(decided, BUDGET);
+        vm.prank(v1);
+        ev.accept(decided);
+        vm.prank(v2);
+        ev.accept(decided);
+        _submit(decided);
+        _vote(decided, v1, true);
+        _vote(decided, v2, true);
+        vm.prank(v3);
+        vm.expectRevert(ARLVerifiedEvaluator.WrongPhase.selector);
+        ev.accept(decided);
+    }
+
+    /// A member that accepts during the vote window and then does not vote is slashed like any
+    /// other absent member.
+    function test_lateAcceptThenSilentIsSlashed() public {
+        uint256 id = _configured(_reexec());
+        _approveCommittee(id);
+        _fund(id, BUDGET);
+        _submit(id);
+        vm.prank(stranger);
+        ev.startVoting(id);
+        vm.prank(v1);
+        ev.accept(id);
+        vm.warp(ev.getVerdict(id).voteEnds);
+        ev.closeUndecided(id);
+        assertEq(ev.stakeOf(v1), STAKE - BOND);
+        assertEq(ev.voteOf(id, v1), 5);
     }
 
     // ---------------------------------------------------------------- voting
