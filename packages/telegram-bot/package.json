@@ -1,0 +1,11 @@
+{
+  "name": "@arl/telegram-bot",
+  "version": "0.1.0",
+  "author": "Alazdg <team@arlcoin.io>",
+  "private": true,
+  "description": "ARL community Telegram bot on a Cloudflare Worker: commands, live testnet status, scam filter, new-member link limits, flood control",
+  "type": "module",
+  "scripts": {
+    "test": "node --test \"test/**/*.test.ts\""
+  }
+}

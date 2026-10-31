@@ -29,6 +29,7 @@ ARL Network: a payment rail for AI and compute services on Base.
 - ARL token: 21,000,000 fixed supply, no mint function, no owner, no upgrade proxy.
 - Live on Base Mainnet since 2026-10-24: 0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4
 - Uniswap v3 pools on Base: ARL/USDC, ARL/USDT, ARL/WETH, ARL/cbBTC, from 0.20 USD per ARL.
+- Verified jobs for AI agents: escrows on Base Mainnet, paid in ARL or USDC, checked by staked ARL validators.
 - Per-use payments (x402 "upto"): live on the Base Sepolia testnet, not on Base Mainnet.
 - No airdrop at launch. An airdrop of 500,000 ARL is planned for a later date; date, eligibility and rules will be announced later on the official channels.
 - A bug bounty paid in ARL is open.
@@ -39,7 +40,7 @@ Telegram: https://t.me/arlprotocol_community
 Contact: team@arlcoin.io
 Source code: https://github.com/armanalabsai/arlcoin.io
 
-Bot commands: /start /rules /help
+Bot commands: /start /rules /app /faucet /status /launch /whitelist /help
 ```
 
 ## Group settings (owner action)
