@@ -1,17 +1,17 @@
 # Base Mainnet network services
 
-Status: **step 1 in progress: the jobs escrows with the deadline fix are on Base Mainnet (nonces 23 and 25); their evaluators are replaced by the acceptance fix (security report 2026-10-31), planned at nonces 27 and 28.** The ARL token, its Safes, vesting wallets and
+Status: **step 1 done: the jobs escrows with the deadline fix are on Base Mainnet (nonces 23 and 25), with the evaluators that carry the acceptance fix (security report 2026-10-31) at nonces 27 and 28.** The ARL token, its Safes, vesting wallets and
 timelock are on Base Mainnet ([mainnet-plan.md](mainnet-plan.md)). The network services still
 run on the Base Sepolia testnet and move to Base Mainnet one at a time, each after its own
 rehearsal, signatures and on-chain check.
 
-| Step | Service                                          | Status                                                  |
-| ---- | ------------------------------------------------ | ------------------------------------------------------- |
-| 1    | Jobs escrows (ARL, USDC) and verified evaluators | Escrows deployed; evaluators planned (nonces 27 and 28) |
-| 2    | Validators: keys, ETH for gas, staked ARL        | Not started                                             |
-| 3    | Operator API (x402 per-use payments) on 8453     | Not started                                             |
-| 4    | Staking rewards contract and its reward budget   | Not started                                             |
-| 5    | App and site switched to Base Mainnet            | Not started                                             |
+| Step | Service                                          | Status                                                |
+| ---- | ------------------------------------------------ | ----------------------------------------------------- |
+| 1    | Jobs escrows (ARL, USDC) and verified evaluators | Deployed (evaluators at nonces 27 and 28, 2026-11-01) |
+| 2    | Validators: keys, ETH for gas, staked ARL        | Not started                                           |
+| 3    | Operator API (x402 per-use payments) on 8453     | Not started                                           |
+| 4    | Staking rewards contract and its reward budget   | Not started                                           |
+| 5    | App and site switched to Base Mainnet            | Not started                                           |
 
 ## Step 1: jobs escrow and verified evaluator
 
@@ -32,8 +32,8 @@ Deploy screen (`arlcoin.io/app/deploy/?plan=…`):
 |    24 | `8453-verified-jobs-usdc-v2`              | `ARLVerifiedEvaluator` for it, bonds in ARL                 | `0x4f7f61916d65ff9E7C5F62468a18E37d4Fb07FA7` | Retired: report 2026-10-31 |
 |    25 | `8453-verified-jobs-arl-v2`               | `ARLJobs`, paid in ARL (audit fixes)                        | `0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9` | Deployed                   |
 |    26 | `8453-verified-jobs-arl-v2`               | `ARLVerifiedEvaluator` for it, bonds in ARL                 | `0xa2f8945f301C46f2649b79Cd42A7eb1102e9009E` | Retired: report 2026-10-31 |
-|    27 | `8453-verified-evaluator-arl-v3`          | `ARLVerifiedEvaluator` for the ARL escrow (acceptance fix)  | `0x817E13e512fF810B0ECe0EE278bf112a3947DAd6` | Planned                    |
-|    28 | `8453-verified-evaluator-usdc-v3`         | `ARLVerifiedEvaluator` for the USDC escrow (acceptance fix) | `0x3F4EA7f388bcFf00267aEB21446ef005Fea784c9` | Planned                    |
+|    27 | `8453-verified-evaluator-arl-v3`          | `ARLVerifiedEvaluator` for the ARL escrow (acceptance fix)  | `0x817E13e512fF810B0ECe0EE278bf112a3947DAd6` | Deployed                   |
+|    28 | `8453-verified-evaluator-usdc-v3`         | `ARLVerifiedEvaluator` for the USDC escrow (acceptance fix) | `0x3F4EA7f388bcFf00267aEB21446ef005Fea784c9` | Deployed                   |
 
 `8453-verified-jobs-usdc` and `8453-verified-jobs-arl` are invalid, do not use: they hold pre-audit
 bytecode (before the audit fixes of 2026-10-28) and the deploy screen refuses them. Their `-v2`
@@ -46,6 +46,10 @@ Every address follows from the deployer and its nonce: any other transaction fro
 before them shifts the addresses, and the Deploy screen then refuses the plan.
 
 ### Acceptance fix (security report 2026-10-31)
+
+The `-v3` evaluators were signed on 2026-11-01 at nonces 27 and 28, `jobs-record-cli.ts` passed all
+nine checks for each on Base Mainnet, and both are source-verified on Basescan. The record is
+`contracts/deploy/base-mainnet-jobs.json`.
 
 The `-v2` plans were signed and executed: the escrows at nonces 23 and 25 carry the audit fixes
 and stay in service. Their evaluators (nonces 24 and 26) closed acceptance as soon as voting

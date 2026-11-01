@@ -13,7 +13,7 @@ this baseline).
 | Vesting wallets, timelock, allocation Safes                     | LIVE       | [mainnet-plan.md](mainnet-plan.md)                                                                            |
 | Liquidity: four Uniswap v3 pools (USDC, USDT, WETH, cbBTC)      | LIVE       | Pool addresses in [mainnet-plan.md](mainnet-plan.md)                                                          |
 | Jobs escrow (ERC-8183), paid in ARL and in USDC                 | LIVE       | Base Mainnet `0x4664…98f9` (ARL) and `0xc833…5bE6` (USDC); `jobs-record-cli.ts` 9/9 checks each on 2026-10-31 |
-| Verified evaluator (staked ARL validators, 2-of-3 arbiter Safe) | BUILDING   | Replacements with the acceptance fix planned at nonces 27 and 28; the evaluators at 24 and 26 are retired     |
+| Verified evaluator (staked ARL validators, 2-of-3 arbiter Safe) | LIVE       | Base Mainnet `0x817E…DAd6` (ARL) and `0x3F4E…84c9` (USDC), nonces 27 and 28, 9/9 checks each on 2026-11-01    |
 | Website and the app under `/app`                                | LIVE       | `https://arlcoin.io` on Cloudflare Pages; `/`, `/faq/`, `/app/` answer 200                                    |
 | Supply API                                                      | LIVE       | `https://arlcoin.io/api/supply` (circulating); `?q=total` returns 21000000                                    |
 | App on Base Sepolia: faucet, staking, jobs, payments, polls     | LIVE       | Base Sepolia contracts in the README; app at arlcoin.io/app                                                   |
@@ -46,7 +46,7 @@ rehearsal) on every pull request; #105 was green on all required checks.
 ## Deployment evidence by network
 
 - **Base Mainnet (8453):** token, vesting, timelock and Safes ([mainnet-plan.md](mainnet-plan.md));
-  jobs escrows and evaluators at deployer nonces 23 to 26, record in
+  jobs escrows and evaluators at deployer nonces 23 to 28, record in
   `contracts/deploy/base-mainnet-jobs.json`; arbiter Safe `0x8FF6…466f` (2 of 3). The pair at
   nonces 21 and 22 is retired; it never held a job.
 - **Base Sepolia (84532):** token, vesting, treasury, staking, jobs, evaluator and anonymous
