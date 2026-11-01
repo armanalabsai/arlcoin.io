@@ -11,7 +11,7 @@ import {
 } from "../src/bot.ts";
 import type { Status } from "../src/chain.ts";
 import * as texts from "../src/texts.ts";
-import { handleRequest, parseChatIds, sameSecret } from "../src/worker.ts";
+import { handleRequest, parseChatIds, sameSecret, webhookSecret } from "../src/worker.ts";
 
 class FakeApi implements TelegramApi {
   sent: { chatId: number; text: string }[] = [];
@@ -205,15 +205,46 @@ describe("worker", () => {
     assert.equal((await handleRequest(req("x".repeat(40)), env, noNetwork)).status, 403);
   });
 
-  it("refuses to run without a token or with a weak secret", async () => {
+  it("refuses to run without a token and ignores a weak secret", async () => {
     assert.equal(
       (await handleRequest(req(SECRET), { WEBHOOK_SECRET: SECRET }, noNetwork)).status,
       503,
     );
     assert.equal(
       (await handleRequest(req("short"), { ...env, WEBHOOK_SECRET: "short" }, noNetwork)).status,
-      503,
+      403,
     );
+  });
+
+  it("derives the secret from the token when none is set", async () => {
+    const tokenOnly = { TELEGRAM_BOT_TOKEN: env.TELEGRAM_BOT_TOKEN };
+    const derived = await webhookSecret(tokenOnly);
+    assert.match(derived, /^[0-9a-f]{64}$/);
+    assert.equal(await webhookSecret(env), SECRET);
+    assert.equal(await webhookSecret({}), "");
+    assert.equal((await handleRequest(req(derived, "{}"), tokenOnly, noNetwork)).status, 200);
+    assert.equal((await handleRequest(req(SECRET), tokenOnly, noNetwork)).status, 403);
+  });
+
+  it("points the webhook at its own /telegram path on /setup", async () => {
+    const calls: { url: string; body: Record<string, unknown> }[] = [];
+    const telegram: typeof fetch = (input, init) => {
+      calls.push({ url: String(input), body: JSON.parse(String(init?.body)) });
+      return Promise.resolve(Response.json({ ok: true, result: true }));
+    };
+    const res = await handleRequest(new Request("https://bot.example/setup"), env, telegram);
+    assert.equal(res.status, 200);
+    assert.equal(await res.text(), "webhook set");
+    assert.equal(calls.length, 1);
+    assert.ok(calls[0]?.url.endsWith("/setWebhook"));
+    assert.equal(calls[0]?.body.url, "https://bot.example/telegram");
+    assert.equal(calls[0]?.body.secret_token, SECRET);
+    const refused: typeof fetch = () => Promise.resolve(Response.json({ ok: false }));
+    assert.equal(
+      (await handleRequest(new Request("https://bot.example/setup"), env, refused)).status,
+      502,
+    );
+    assert.equal((await handleRequest(new Request("https://bot.example/setup"), {})).status, 503);
   });
 
   it("accepts an update with the secret and answers 200", async () => {
@@ -222,7 +253,7 @@ describe("worker", () => {
     assert.equal((await handleRequest(req(SECRET, "not json"), env, noNetwork)).status, 400);
   });
 
-  it("answers only /telegram and the health check", async () => {
+  it("answers only /telegram, /setup and the health check", async () => {
     assert.equal((await handleRequest(new Request("https://bot.example/"), env)).status, 200);
     assert.equal((await handleRequest(new Request("https://bot.example/x"), env)).status, 404);
   });
