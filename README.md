@@ -6,6 +6,8 @@ staking, escrowed jobs, usage-based payments and anonymous signals built around 
 **Live on Base Mainnet since 2026-10-24.** Token
 [`0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4`](https://basescan.org/token/0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4)
 (block 53,023,206, source-verified on Basescan) and four Uniswap v3 pools holding 5,000,000 ARL.
+This is the only official ARL contract. A CoinMarketCap listing has been requested (#1470740) and
+is not live yet; listing status is in [listing-pack.md](docs/listing-pack.md#status-2026-11-01).
 Every claim below links to the code, the tests and the document that back it.
 
 | Live                 | URL                                                         | What it is                                                                 |
