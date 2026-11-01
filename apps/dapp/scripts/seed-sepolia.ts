@@ -19,7 +19,7 @@ import {
   validateService,
 } from "../lib/registry.ts";
 
-const [rpcUrl, recordPath, appUrl = "https://app.arlcoin.io"] = process.argv.slice(2);
+const [rpcUrl, recordPath, appUrl = "https://arlcoin.io"] = process.argv.slice(2);
 if (!rpcUrl || !recordPath) {
   console.error("usage: seed-sepolia.ts <rpc-url> <base-sepolia.json> [app-url]");
   process.exit(2);

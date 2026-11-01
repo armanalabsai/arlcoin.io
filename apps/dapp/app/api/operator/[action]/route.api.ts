@@ -1,145 +1,22 @@
-// The testnet operator's HTTP API (server hosting only; the static export has no API). Base
-// Sepolia only: on the local chain the app plays these roles with development accounts.
-//
-//   GET  /api/operator/status   → operator address and balances
-//   POST /api/operator/faucet   { account }                                 → 1,000 testnet ARL
-//   POST /api/operator/join     { account, commitment, signature }          → added to the poll
-//   POST /api/operator/relay    { scope, message, root, nullifier, proof }   → vote submitted
-//   POST /api/operator/settle   { payload, requirements, amount }            → x402 settlement
-import { NextResponse } from "next/server";
-
-import { ARL } from "~~/lib/contracts";
-import {
-  MAX_BODY_BYTES,
-  OPERATOR_ACTIONS,
-  OperatorRequestError,
-  parseFaucet,
-  parseJoin,
-  parseRelay,
-  parseSettle,
-  type OperatorAction,
-} from "~~/lib/operatorRules";
-import { faucet, join, operatorAddress, relay, settle, status } from "~~/lib/server/operator";
-import { RateLimiter, clientKey } from "~~/lib/server/rateLimit";
-import scaffoldConfig from "~~/scaffold.config";
+// The testnet operator's HTTP API for local development with the Next.js server (the static export
+// has no API). On arlcoin.io the same handler runs as a Cloudflare Pages Function
+// (functions/api/operator/[action].js). See lib/server/operatorHttp.ts.
+import { handleOperator } from "~~/lib/server/operatorHttp";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-/**
- * Origins whose pages may call this API from the browser: the static copy of the app on the
- * website (arlcoin.io/app). ARL_OPERATOR_ORIGINS (comma-separated) replaces the default.
- */
-const ORIGINS = (process.env.ARL_OPERATOR_ORIGINS ?? "https://arlcoin.io,https://www.arlcoin.io")
-  .split(",")
-  .map((o) => o.trim())
-  .filter(Boolean);
-
-function cors(origin: string | null): Record<string, string> {
-  if (!origin || !ORIGINS.includes(origin)) return {};
-  return {
-    "access-control-allow-origin": origin,
-    "access-control-allow-methods": "GET, POST, OPTIONS",
-    "access-control-allow-headers": "content-type",
-    "access-control-max-age": "600",
-    vary: "Origin",
-  };
-}
-
-const json = (origin: string | null, body: unknown, status = 200) =>
-  new NextResponse(
-    JSON.stringify(body, (_k, v: unknown) => (typeof v === "bigint" ? v.toString() : v)),
-    {
-      status,
-      headers: {
-        "content-type": "application/json",
-        "cache-control": "no-store",
-        ...cors(origin),
-      },
-    },
-  );
-
-export function OPTIONS(req: Request) {
-  return new NextResponse(null, { status: 204, headers: cors(req.headers.get("origin")) });
-}
-
-function actionOf(value: string): OperatorAction {
-  if (!(OPERATOR_ACTIONS as readonly string[]).includes(value))
-    throw new OperatorRequestError("unknown action", 404);
-  return value as OperatorAction;
-}
-
-function failure(origin: string | null, error: unknown) {
-  if (error instanceof OperatorRequestError)
-    return json(origin, { error: error.message }, error.status);
-  process.stderr.write(
-    `operator error: ${error instanceof Error ? (error.stack ?? error.message) : String(error)}\n`,
-  );
-  const text = error instanceof Error ? error.message : String(error);
-  // Two requests can race for the operator's next nonce; the caller may simply retry.
-  if (/nonce|replacement|underpriced/i.test(text))
-    return json(origin, { error: "the operator is busy; try again in a few seconds" }, 503);
-  return json(origin, { error: "the operator could not complete the request" }, 500);
-}
-
 type Context = { params: Promise<{ action: string }> };
 
-export async function GET(req: Request, { params }: Context) {
-  const origin = req.headers.get("origin");
-  try {
-    if (actionOf((await params).action) !== "status")
-      return json(origin, { error: "use POST" }, 405);
-    return json(origin, await status());
-  } catch (e) {
-    return failure(origin, e);
-  }
+export async function OPTIONS(req: Request, { params }: Context) {
+  return handleOperator(req, (await params).action);
 }
 
-/** One limiter per server instance: every POST counts against the client's window. */
-const limiter = new RateLimiter();
+export async function GET(req: Request, { params }: Context) {
+  return handleOperator(req, (await params).action);
+}
 
 export async function POST(req: Request, { params }: Context) {
-  const origin = req.headers.get("origin");
-  const allowed = limiter.check(clientKey(req.headers));
-  if (!allowed.ok) {
-    const res = json(origin, { error: "too many requests; try again shortly" }, 429);
-    res.headers.set("retry-after", String(allowed.retryAfterSeconds));
-    return res;
-  }
-  try {
-    const action = actionOf((await params).action);
-    if (action === "status") return json(origin, { error: "use GET" }, 405);
-    const length = Number(req.headers.get("content-length") ?? "0");
-    if (length > MAX_BODY_BYTES) throw new OperatorRequestError("body too large", 413);
-    const text = await req.text();
-    if (text.length > MAX_BODY_BYTES) throw new OperatorRequestError("body too large", 413);
-    let body: unknown;
-    try {
-      body = JSON.parse(text);
-    } catch {
-      throw new OperatorRequestError("body is not JSON");
-    }
-    switch (action) {
-      case "faucet":
-        return json(origin, await faucet(parseFaucet(body).account));
-      case "join":
-        return json(origin, await join(parseJoin(body)));
-      case "relay":
-        return json(origin, await relay(parseRelay(body)));
-      case "settle":
-        return json(
-          origin,
-          await settle(
-            parseSettle(body, {
-              payTo: operatorAddress(),
-              asset: ARL.ARLToken.address,
-              network: `eip155:${String(scaffoldConfig.targetNetworks[0].id)}`,
-            }),
-          ),
-        );
-    }
-  } catch (e) {
-    return failure(origin, e);
-  }
+  return handleOperator(req, (await params).action);
 }
