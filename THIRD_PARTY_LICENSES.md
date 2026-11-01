@@ -89,6 +89,7 @@ Runtime (included in the built site):
 | next                                                            | 16.3.6  | MIT     | Framework, routing, static generation                                               |
 | react / react-dom                                               | 19.3.0  | MIT     | UI runtime                                                                          |
 | motion                                                          | 13.4.4  | MIT     | Springs, presence and drag animations                                               |
+| lenis                                                           | 1.3.27  | MIT     | Smooth page scrolling on the website (wheel and trackpad); off under reduced motion |
 | @radix-ui/react-dialog                                          | 1.1.23  | MIT     | Accessible dialog (focus trap, Escape, ARIA)                                        |
 | @fontsource-variable/inter, @fontsource-variable/jetbrains-mono | 5.3.0   | OFL-1.1 | Inter (text and headings), JetBrains Mono (figures, badges, addresses); self-hosted |
 | @noble/hashes                                                   | 2.4.0   | MIT     | Keccak-256 for the EIP-55 address checksum in the whitelist form                    |

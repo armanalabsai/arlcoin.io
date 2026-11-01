@@ -17,6 +17,10 @@ updates:
       # scripts/check-zod-v3-only.mjs, .audit-allowlist.json and docs/security-analysis.md).
       - dependency-name: zod
         versions: [">=4.0.0"]
+      # minimatch 3 comes only through the ESLint toolchain (lint at build time, never shipped); its
+      # advisory fix is minimatch 11, which no ESLint plugin in use accepts, so no update resolves it.
+      - dependency-name: minimatch
+        versions: [">=4.0.0"]
 
   - package-ecosystem: npm
     directory: /apps/web
@@ -32,6 +36,10 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "@types/node"
         update-types: ["version-update:semver-major"]
+      # minimatch 3 comes only through the ESLint toolchain (lint at build time, never shipped); its
+      # advisory fix is minimatch 11, which no ESLint plugin in use accepts, so no update resolves it.
+      - dependency-name: minimatch
+        versions: [">=4.0.0"]
 
   # Security updates only (no version-update pull requests); the ignore rule applies to them.
   - package-ecosystem: npm
@@ -45,6 +53,14 @@ updates:
       # scripts/check-zod-v3-only.mjs, .audit-allowlist.json and docs/security-analysis.md).
       - dependency-name: zod
         versions: [">=4.0.0"]
+      # minimatch 3 comes only through the ESLint toolchain (lint at build time, never shipped); its
+      # advisory fix is minimatch 11, which no ESLint plugin in use accepts, so no update resolves it.
+      - dependency-name: minimatch
+        versions: [">=4.0.0"]
+      # deepmerge 4.3.1 comes through RainbowKit's @vanilla-extract/css; no deepmerge release fixes the
+      # low advisory, and the app never passes untrusted objects to it.
+      - dependency-name: deepmerge
+        versions: [">=4.3.2"]
 
   - package-ecosystem: github-actions
     directory: /

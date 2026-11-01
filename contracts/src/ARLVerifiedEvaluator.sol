@@ -7,13 +7,31 @@ import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/Reentrancy
 
 import {ARLJobs} from "./ARLJobs.sol";
 
-/// @dev The subset of the ERC-8004 IdentityRegistry used here (an ERC-721).
+/// @title ERC-8004 identity registry (subset)
+/// @author Alazdg
+/// @notice The subset of the ERC-8004 IdentityRegistry used here (an ERC-721).
+/// @dev Only `ownerOf` is called, to find the address that owns a validator's agent id.
 interface IERC8004Identity {
+    /// @notice Owner of an agent id.
+    /// @param agentId The ERC-8004 agent id.
+    /// @return The address that owns the agent id.
     function ownerOf(uint256 agentId) external view returns (address);
 }
 
-/// @dev The subset of the ERC-8004 ReputationRegistry used here.
+/// @title ERC-8004 reputation registry (subset)
+/// @author Alazdg
+/// @notice The subset of the ERC-8004 ReputationRegistry used here.
+/// @dev Only `giveFeedback` is called, to record a job's outcome for its provider.
 interface IERC8004Reputation {
+    /// @notice Records feedback for an agent.
+    /// @param agentId The ERC-8004 agent id that receives the feedback.
+    /// @param value The feedback value, scaled by `valueDecimals`.
+    /// @param valueDecimals Decimals of `value`.
+    /// @param tag1 First tag.
+    /// @param tag2 Second tag.
+    /// @param endpoint Endpoint the feedback refers to.
+    /// @param feedbackURI URI of the feedback details.
+    /// @param feedbackHash Hash of the feedback details.
     function giveFeedback(
         uint256 agentId,
         int128 value,
@@ -58,6 +76,8 @@ interface IERC8004Reputation {
 /// - at the deadline `ARLJobs` closes the job: the escrow of a job that was not settled goes back
 ///   to the client through `claimRefund`, and `release` unlocks every bond here: no state can lock
 ///   funds, and the outcome never depends on which transaction lands first.
+/// @dev Every parameter that bounds a job is immutable; every function that moves tokens is
+/// `nonReentrant`.
 contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
     using SafeERC20 for IERC20;
 
