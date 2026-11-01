@@ -37,3 +37,6 @@ mnemonic*
 /sbom/
 dist/
 .wrangler/
+
+# Cloudflare build output (scripts/build-cloudflare.sh)
+/build/

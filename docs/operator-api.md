@@ -3,8 +3,9 @@
 The ARL app on Base Sepolia uses a small server, the **testnet operator**, to do what development
 accounts do on a local chain: hand out testnet ARL, add members to the demo poll group, relay
 anonymous votes and settle x402 `upto` payments to its own demo service. It runs at
-`https://app.arlcoin.io/api/operator/*` and is built from
-[`apps/dapp/app/api/operator/[action]/route.api.ts`](../apps/dapp/app/api/operator/%5Baction%5D/route.api.ts),
+`https://arlcoin.io/api/operator/*` as a Cloudflare Pages Function
+([`functions/api/operator/[action].js`](../functions/api/operator/%5Baction%5D.js)) and is built from
+[`apps/dapp/lib/server/operatorHttp.ts`](../apps/dapp/lib/server/operatorHttp.ts),
 [`apps/dapp/lib/server/operator.ts`](../apps/dapp/lib/server/operator.ts) and the request rules in
 [`apps/dapp/lib/operatorRules.ts`](../apps/dapp/lib/operatorRules.ts).
 
@@ -25,9 +26,9 @@ the payer signed, to the payee named in the signature, once.
 
 ## Key handling
 
-- The private key comes only from the host's runtime environment (`ARL_OPERATOR_KEY`, a GitHub
-  Actions secret passed to the Vercel deployment). It is never written to the repository, a build
-  artefact or a log; the deploy script refuses to ship an output that contains an `.env` file.
+- The private key comes only from the host's runtime environment (`ARL_OPERATOR_KEY`, an
+  encrypted variable of the Cloudflare Pages project, set by the owner in the dashboard). It is
+  never written to the repository, a build artefact or a log.
 - `operatorKey()` accepts the 64-hex-digit key with or without `0x` and reports a misconfiguration
   without echoing the value.
 - The operator is a dedicated testnet account (`0x26DEAaCAa112cA495bD7CC8Cb92c91cD85e1A2a0`) with
@@ -58,8 +59,9 @@ hold for any caller.
 - **Centralised helper.** The faucet, relayer and settlement service are run by one testnet
   account. If it is down, the app's faucet, anonymous voting and paid demo service stop; the
   contracts keep working and anyone can call them directly.
-- **No IP rate limiting.** Abuse is bounded by the on-chain per-address faucet window and the
-  float the operator holds, not by request rate. Vercel's platform limits apply.
+- **Per-instance rate limiting only.** Abuse is bounded by the on-chain per-address faucet window and the
+  float the operator holds and by the per-client limit of 30 requests a minute per instance
+  (`lib/server/rateLimit.ts`). Cloudflare's platform limits apply.
 - **Relayer censorship.** The relayer can refuse to submit a vote. Votes remain valid if anyone
   else submits them to `ARLAnonymousSignal`.
 - **Nonce races.** Concurrent requests can race for the next nonce; the API answers 503 and the

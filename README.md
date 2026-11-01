@@ -6,13 +6,15 @@ staking, escrowed jobs, usage-based payments and anonymous signals built around 
 **Live on Base Mainnet since 2026-10-24.** Token
 [`0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4`](https://basescan.org/token/0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4)
 (block 53,023,206, source-verified on Basescan) and four Uniswap v3 pools holding 5,000,000 ARL.
+This is the only official ARL contract. A CoinMarketCap listing has been requested (#1470740) and
+is not live yet; listing status is in [listing-pack.md](docs/listing-pack.md#status-2026-11-01).
 Every claim below links to the code, the tests and the document that back it.
 
 | Live                 | URL                                                         | What it is                                                                 |
 | -------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------- |
 | Website              | [arlcoin.io](https://arlcoin.io)                             | [`apps/web`](apps/web): the Interactive Core, roadmap, docs, whitelist     |
 | App (Base Sepolia)   | [arlcoin.io/app](https://arlcoin.io/app/)                    | [`apps/dapp`](apps/dapp): faucet, claim, vesting, staking, jobs, payments, anonymous polls |
-| Testnet operator API | [app.arlcoin.io/api/operator](https://app.arlcoin.io/api/operator/status) | Faucet, group joins, vote relay and x402 settlement for the app ([`route.api.ts`](apps/dapp/app/api/operator/%5Baction%5D/route.api.ts)) |
+| Testnet operator API | [arlcoin.io/api/operator](https://arlcoin.io/api/operator/status) | Faucet, group joins, vote relay and x402 settlement for the app, a Cloudflare Pages Function ([`operatorHttp.ts`](apps/dapp/lib/server/operatorHttp.ts)) |
 | Community            | [t.me/arlprotocol_community](https://t.me/arlprotocol_community) (announcements), [t.me/arlprotocol_chat](https://t.me/arlprotocol_chat) (chat) | Official Telegram channel and its chat group, the chat moderated by the community bot ([`packages/telegram-bot`](packages/telegram-bot), a Cloudflare Worker): `/start`, `/rules`, `/app`, `/faucet`, `/status`, `/launch`, `/whitelist`, `/help`; scam filter, new-member link limits, flood control |
 | Uptime monitor       | [Uptime workflow](.github/workflows/uptime.yml)             | Every 10 minutes: website, app, operator API, faucet float, Base Sepolia blocks and the staking reward window; a failure notifies the owner |
 
@@ -125,7 +127,7 @@ npm run rehearse:local           # full deploy-and-verify rehearsal on a local c
 The website (with the app under `/app`) is built and served by Cloudflare Pages from this
 repository ([`wrangler.toml`](wrangler.toml), [`scripts/build-cloudflare.sh`](scripts/build-cloudflare.sh));
 `main` is production. Secrets (never committed): `ARL_OPERATOR_KEY` (the testnet operator, Base
-Sepolia only) for the app's operator API ([deploy-app.yml](.github/workflows/deploy-app.yml));
+Sepolia only), an encrypted variable of the Cloudflare Pages project, for the operator API;
 `ETHERSCAN_API_KEY` locally for Basescan verification.
 
 ## Security

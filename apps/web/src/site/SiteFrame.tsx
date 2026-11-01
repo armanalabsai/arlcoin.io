@@ -3,6 +3,7 @@ import Link from "next/link";
 import { docPath } from "@/content/docs.ts";
 import { LAYERS, pathFor } from "@/content/registry.ts";
 import { SITE } from "@/content/site.ts";
+import { withBase } from "@/core/basePath.ts";
 
 import { LiveStatus } from "./LiveStatus.tsx";
 import { HomeLink } from "./HomeLink.tsx";
@@ -64,6 +65,9 @@ export function FooterLinks() {
       <Link href="/whitelist" prefetch={false} className={link}>
         Whitelist
       </Link>
+      <a href={withBase("/app/")} className={link}>
+        App
+      </a>
       <Link href="/buy" prefetch={false} className={link}>
         Get ARL
       </Link>
