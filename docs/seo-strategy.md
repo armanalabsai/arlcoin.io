@@ -390,3 +390,61 @@ Add a 3-hour "SEO routine" block to the calendar every Monday at 09:00.
 
 Priority 1: review this branch and approve the merge (merge and deploy happen separately, with the
 owner's approval).
+
+---
+
+## 10. Use-case landing pages (1 November 2026)
+
+Five landing pages on arlcoin.io, one per search term, each written for the reader who searches
+it. They live on the main domain rather than a separate SEO site, so every link they earn
+strengthens arlcoin.io. Content is in
+[`apps/web/src/content/solutions.ts`](../apps/web/src/content/solutions.ts); the page frame is
+[`SolutionPage.tsx`](../apps/web/src/site/SolutionPage.tsx).
+
+| URL                                                                                     | Keyword                         | Reader                            | Search intent                                  | Main action                      |
+| --------------------------------------------------------------------------------------- | ------------------------------- | --------------------------------- | ---------------------------------------------- | -------------------------------- |
+| [/per-second-gpu-billing](https://arlcoin.io/per-second-gpu-billing/)                   | per-second GPU billing          | GPU providers                     | Commercial: how to bill GPU time by the second | List GPU capacity (app, Network) |
+| [/ai-agent-payment-infrastructure](https://arlcoin.io/ai-agent-payment-infrastructure/) | AI agent payment infrastructure | AI agent developers               | Technical: how an agent pays services          | Try escrowed jobs (app, Jobs)    |
+| [/on-chain-compute-payments](https://arlcoin.io/on-chain-compute-payments/)             | on-chain compute payments       | Teams looking for crypto payments | Comparison: payment models on a blockchain     | Try a payment (app, Payments)    |
+| [/pay-per-second-ai-inference](https://arlcoin.io/pay-per-second-ai-inference/)         | pay-per-second AI inference     | AI inference providers            | Commercial: sell inference by usage            | List an inference service (app)  |
+| [/decentralized-gpu-marketplace](https://arlcoin.io/decentralized-gpu-marketplace/)     | decentralized GPU marketplace   | The decentralized GPU ecosystem   | Informational: how an open GPU market works    | Open the network (app)           |
+
+**Each page carries**
+
+- The keyword in the URL, the title (≤ 60 characters), the H1 and the meta description
+  (≤ 155 characters); a unit test (`test/unit/seo.test.ts`) enforces all four.
+- Sections on the problem and the ARL answer, a numbered "How it works", "Where it runs today",
+  three questions, and links to the design documents.
+- Structured data: `BreadcrumbList`, `TechArticle` (with `about` = the keyword) and `FAQPage`.
+- A canonical URL, Open Graph metadata, a sitemap entry (priority 0.8, weekly) and an entry in
+  `llms.txt`.
+
+**Internal links**
+
+- Every page links to the other four ("Related use cases").
+- The footer of every page and of the landing page has a "Use cases" row with all five.
+- Each page links to the ARL app page that fits its reader, to /buy and to the Core, and the
+  "Read more" list links to the documents behind its claims.
+
+**Conversion**
+
+Two buttons at the top and at the end of each page: the matching ARL app page (`/app/network/`,
+`/app/jobs/` or `/app/payments/`) and Get ARL (`/buy`). The site runs no analytics script, so
+conversion is measured without one:
+
+1. Search Console → Performance → filter by page: impressions, clicks, CTR and position per
+   landing page and per keyword.
+2. Search Console → Links: which external sites link to each page.
+3. On-chain: new provider registrations, payments and jobs in the ARL app, which are public on
+   Base Sepolia and Base.
+4. Optional, owner decision: Cloudflare Web Analytics (cookieless) on the `arlcoin-io` Pages
+   project gives page views and referrers per landing page; turning it on means updating the
+   privacy notice, which today says that the site runs no analytics scripts.
+
+**After deploy**
+
+1. Search Console → URL inspection → request indexing for the five URLs.
+2. `node scripts/indexnow.mjs` for Bing and the other IndexNow engines.
+3. Rich Results Test on one page: `FAQPage` and `BreadcrumbList` valid.
+4. After four weeks: compare the queries Search Console reports for each page with its keyword;
+   add the questions people actually search for to that page's FAQ.

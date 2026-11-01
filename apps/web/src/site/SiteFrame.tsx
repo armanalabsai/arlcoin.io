@@ -3,6 +3,7 @@ import Link from "next/link";
 import { docPath } from "@/content/docs.ts";
 import { LAYERS, pathFor } from "@/content/registry.ts";
 import { SITE } from "@/content/site.ts";
+import { SOLUTIONS } from "@/content/solutions.ts";
 import { withBase } from "@/core/basePath.ts";
 
 import { LiveStatus } from "./LiveStatus.tsx";
@@ -51,10 +52,25 @@ export function SiteHeader({ current }: { current?: "whitelist" | "contact" | "f
 export function SiteFooter() {
   return (
     <footer className="border-t border-line px-4 py-8 sm:px-6">
-      <div className="mx-auto flex max-w-[1100px] flex-col gap-4 text-[12px] leading-[1.6] text-fg-subtle sm:flex-row sm:items-center sm:justify-between sm:gap-8">
+      <div className="mx-auto flex max-w-[1100px] flex-col gap-2 text-[12px] leading-[1.6] text-fg-subtle">
+        <UseCaseLinks />
         <FooterLinks />
       </div>
     </footer>
+  );
+}
+
+/** The landing pages, linked from every page so search engines and readers can find them. */
+export function UseCaseLinks() {
+  const link = "inline-flex min-h-11 items-center hover:text-fg";
+  return (
+    <nav aria-label="Use cases" className="flex flex-wrap gap-x-5">
+      {SOLUTIONS.map((s) => (
+        <Link key={s.slug} href={`/${s.slug}`} prefetch={false} className={link}>
+          {s.short}
+        </Link>
+      ))}
+    </nav>
   );
 }
 

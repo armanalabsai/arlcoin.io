@@ -13,6 +13,7 @@ import {
 import { HOME, LAYERS } from "../../src/content/registry.ts";
 import { breadcrumbJsonLd, organizationJsonLd } from "../../src/content/seo.ts";
 import { SITE } from "../../src/content/site.ts";
+import { SOLUTION_PATHS, SOLUTIONS } from "../../src/content/solutions.ts";
 
 // Search snippets: titles up to 60 characters and descriptions up to 155 are shown in full.
 
@@ -83,5 +84,34 @@ describe("seo: structured data", () => {
         [2, "FAQ", "https://arlcoin.io/faq/"],
       ],
     );
+  });
+});
+
+describe("seo: landing pages", () => {
+  it("keeps every landing page within the snippet limits and names its keyword", () => {
+    const slugs = new Set<string>();
+    for (const s of SOLUTIONS) {
+      assert.ok(s.title.length <= MAX_TITLE, `${s.slug}: title ${String(s.title.length)}`);
+      assert.ok(
+        s.description.length <= MAX_DESCRIPTION,
+        `${s.slug}: description ${String(s.description.length)}`,
+      );
+      assert.match(s.slug, /^[a-z0-9-]+$/);
+      assert.equal(s.slug, s.keyword.toLowerCase().replace(/ /g, "-"));
+      const words = s.keyword.toLowerCase().split(/[\s-]+/);
+      for (const text of [s.title, s.heading, s.description])
+        for (const w of words)
+          assert.ok(text.toLowerCase().includes(w), `${s.slug}: "${w}" missing in "${text}"`);
+      assert.ok(s.faq.length >= 3 && s.links.length >= 3, s.slug);
+      slugs.add(s.slug);
+    }
+    assert.equal(slugs.size, SOLUTIONS.length);
+  });
+
+  it("has a page file for every landing page", () => {
+    for (const path of SOLUTION_PATHS) {
+      const src = readFileSync(join(app, path, "page.tsx"), "utf8");
+      assert.ok(src.includes(`solutionMetadata("${path.slice(1)}")`), path);
+    }
   });
 });
