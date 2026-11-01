@@ -76,3 +76,12 @@ the source code link. Contact email: team@arlcoin.io.
 CoinMarketCap → Request → "Add cryptoasset". Use the same facts, the long description, the
 512×512 logo, the circulating supply API (CoinMarketCap reads a plain number), the four pools as
 market pairs, and team@arlcoin.io as the project email.
+
+## Status (2026-11-01)
+
+| Site          | State                                                                                                                                                                     |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Basescan      | Token information update submitted after contract ownership was verified; waiting for Basescan                                                                            |
+| CoinMarketCap | Request #1470740 submitted (free listing, no CMC Priority); public verification on [X](https://x.com/ARLPROTOCOL/status/2116711942626943416) and Telegram; not listed yet |
+| CoinGecko     | Not submitted: the form's bot check has to be passed by the owner                                                                                                         |
+| GeckoTerminal | Not submitted: the token info update is paid                                                                                                                              |
