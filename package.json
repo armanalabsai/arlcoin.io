@@ -10,7 +10,7 @@
     "packages/*"
   ],
   "scripts": {
-    "typecheck": "tsc -p packages/tokenomics && tsc -p packages/deploy && tsc -p packages/monetary && tsc -p packages/payments && tsc -p packages/provider && tsc -p packages/zk && tsc -p packages/sdk && tsc -p packages/verifier",
+    "typecheck": "tsc -p packages/tokenomics && tsc -p packages/deploy && tsc -p packages/monetary && tsc -p packages/payments && tsc -p packages/provider && tsc -p packages/zk && tsc -p packages/sdk && tsc -p packages/telegram-bot && tsc -p packages/verifier",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
