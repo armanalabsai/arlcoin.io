@@ -229,16 +229,22 @@ describe("worker", () => {
   it("points the webhook at its own /telegram path on /setup", async () => {
     const calls: { url: string; body: Record<string, unknown> }[] = [];
     const telegram: typeof fetch = (input, init) => {
-      calls.push({ url: String(input), body: JSON.parse(String(init?.body)) });
+      const url = input instanceof Request ? input.url : input.toString();
+      const body = JSON.parse(typeof init?.body === "string" ? init.body : "{}") as Record<
+        string,
+        unknown
+      >;
+      calls.push({ url, body });
       return Promise.resolve(Response.json({ ok: true, result: true }));
     };
     const res = await handleRequest(new Request("https://bot.example/setup"), env, telegram);
     assert.equal(res.status, 200);
     assert.equal(await res.text(), "webhook set");
     assert.equal(calls.length, 1);
-    assert.ok(calls[0]?.url.endsWith("/setWebhook"));
-    assert.equal(calls[0]?.body.url, "https://bot.example/telegram");
-    assert.equal(calls[0]?.body.secret_token, SECRET);
+    const [call] = calls;
+    assert.ok(call?.url.endsWith("/setWebhook"));
+    assert.equal(call.body.url, "https://bot.example/telegram");
+    assert.equal(call.body.secret_token, SECRET);
     const refused: typeof fetch = () => Promise.resolve(Response.json({ ok: false }));
     assert.equal(
       (await handleRequest(new Request("https://bot.example/setup"), env, refused)).status,
