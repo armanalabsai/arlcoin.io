@@ -67,8 +67,10 @@ interface IERC8004Reputation {
 /// - the arbiter only rules on disputed jobs, can only pay the escrow to the client or the
 ///   provider, and never receives slashed bonds (they are burned), so it cannot profit from a
 ///   ruling;
-/// - the whole evaluation fits before the job's deadline: members can only accept, and voting can
-///   only start, while the vote window and two challenge windows still end before it. A decision
+/// - the whole evaluation fits before the job's deadline: voting can only start, and members can
+///   only accept before it starts, while the vote window and two challenge windows still end
+///   before it; once it has started, members can still accept until the vote window ends, so
+///   starting the vote never shuts out a member who has not accepted yet. A decision
 ///   therefore ends its challenge window at least one challenge window before the deadline, and
 ///   anyone can finalize it in that time;
 /// - at the deadline `ARLJobs` closes the job: the escrow of a job that was not settled goes back
@@ -316,20 +318,28 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         emit CommitteeApproved(jobId, msg.sender);
     }
 
-    /// @notice Committee member only, once the committee is approved and the job is funded,
-    /// before voting starts: commits to vote and locks the job's bond from the caller's stake.
+    /// @notice Committee member only, once the committee is approved and the job is funded, until
+    /// the vote window ends and before a decision: commits to vote and locks the job's bond from
+    /// the caller's stake. Starting the vote (which anyone can do) does not close acceptance, so
+    /// it cannot leave the committee short of the threshold.
     /// The bond is fixed by the first acceptance (the budget cannot change once funded). With
     /// stakes in another token than the escrow's, the bond is the job's floor.
     function accept(uint256 jobId) external {
         Verdict storage v = _verdicts[jobId];
-        if (v.phase != Phase.Configured || v.voteEnds != 0) revert WrongPhase();
+        if (v.phase != Phase.Configured) revert WrongPhase();
         if (!v.providerApproved) revert NotApprovedByProvider();
         if (_votes[jobId][msg.sender] != MEMBER) revert Unauthorized();
         ARLJobs.Job memory job = jobs.getJob(jobId);
         if (job.status != ARLJobs.JobStatus.Funded && job.status != ARLJobs.JobStatus.Submitted) {
             revert WrongJobStatus();
         }
-        _checkFits(jobId, job.expiredAt);
+        if (v.voteEnds == 0) {
+            _checkFits(jobId, job.expiredAt);
+            // slither-disable-next-line timestamp
+        } else if (block.timestamp >= v.voteEnds) {
+            // The vote started within the deadline's bounds; it is open until it ends.
+            revert VoteWindowClosed();
+        }
         uint256 bond = v.bond;
         if (bond == 0) {
             bond = bondFollowsBudget ? job.budget * BOND_BPS / 10_000 : 0;
@@ -344,7 +354,7 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
     }
 
     /// @notice Anyone, once the job is Submitted: starts the vote window (the first vote also
-    /// starts it). The provider calls it right after submitting.
+    /// starts it). Members that have not accepted yet can still accept until the window ends.
     function startVoting(uint256 jobId) external {
         Verdict storage v = _verdicts[jobId];
         if (v.phase != Phase.Configured || v.voteEnds != 0) revert WrongPhase();

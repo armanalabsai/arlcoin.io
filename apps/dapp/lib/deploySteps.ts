@@ -299,12 +299,19 @@ export function recordCommand(
     s.kind === "create" && (s.contract === "ARLJobs" || s.contract === "ARLVerifiedEvaluator");
   if (run.steps.some(isJobs)) {
     if (!run.steps.every(isJobs)) fail("the run mixes the jobs contracts with other steps");
-    // The escrow paid in USDC is recorded apart from the one paid in ARL.
+    // The escrow paid in USDC is recorded apart from the one paid in ARL. A run that creates only
+    // an evaluator names its escrow, not the escrow's token; DeployMainnetVerifiedJobs passes the
+    // stake token explicitly only when it differs from the payment token (bonds in ARL for the
+    // escrow paid in USDC) and address(0) otherwise.
+    const zero = "0x0000000000000000000000000000000000000000";
     const usdc = run.steps.some(
       (s) =>
         s.kind === "create" &&
-        s.contract === "ARLJobs" &&
-        String(s.args[0]).toLowerCase() === BASE_USDC.toLowerCase(),
+        ((s.contract === "ARLJobs" &&
+          String(s.args[0]).toLowerCase() === BASE_USDC.toLowerCase()) ||
+          (s.contract === "ARLVerifiedEvaluator" &&
+            !run.steps.some((t) => t.kind === "create" && t.contract === "ARLJobs") &&
+            String(s.args[6]).toLowerCase() !== zero)),
     );
     return {
       kind: "jobs",
