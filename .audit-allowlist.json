@@ -3,8 +3,8 @@
     {
       "id": "GHSA-mrhx-c7xc-m3w5",
       "package": "zod",
-      "scope": ["arlcoin.io", "dapp"],
-      "reason": "Memory exhaustion in zod 4's $ZodArray when an unbounded array schema validates a very large array. The vulnerable code ships inside zod 3.25.76 only under the zod/v4 subpath, which nothing here loads: @x402/core and @x402/evm (latest 2.28.0 still requires zod ^3.24.2) import the zod 3 root, viem's abitype uses zod only in its unused abitype/zod entry, and ARL code does not import zod. scripts/check-zod-v3-only.mjs fails CI if either changes. Remove when @x402 supports zod >= 4.6.6.",
+      "scope": ["dapp"],
+      "reason": "Memory exhaustion in zod 4's $ZodArray (fixed in zod 4.6.6). @x402/core and @x402/evm 2.29.0 use zod 4.6.7, and so does everything that loads zod/v4. The app's wallet libraries (WalletConnect, Reown AppKit, Coinbase CDP SDK) still pin zod 3.22-3.25 and load only the zod 3 root, which does not contain the vulnerable code; ARL code does not import zod. scripts/check-zod.mjs fails CI if any of this changes. Remove when the wallet libraries move to zod >= 4.6.6.",
       "expires": "2026-11-23"
     }
   ]

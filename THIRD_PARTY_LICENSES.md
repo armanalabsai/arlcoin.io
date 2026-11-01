@@ -64,8 +64,8 @@ Exact versions and integrity hashes are recorded in `package-lock.json`.
 | viem                            | 2.56.9  | MIT        | Reads `totalSupply` and manifest balances from the chain for the circulating-supply report (`packages/deploy`), and address checks in `packages/payments`; used as published, no source copied                                                                                                               |
 | @openzeppelin/merkle-tree       | 1.0.8   | MIT        | Builds and verifies Public Launch claim lists (`StandardMerkleTree`) for `ARLMerkleDistributor` (`packages/deploy`); used as published, no source copied. Its transitive `uuid` is pinned to 11.1.1 by an npm override (GHSA-w5hq-g745-h8pq)                                                                 |
 
-| @x402/core | 2.27.0 | Apache-2.0 | x402 protocol types and facilitator plumbing for ARL payments (`packages/payments`); used as published, no source copied. Source: x402-foundation/x402 @ `71eb9a55e081e7b81ba3046d0bd17c3eb9c7bf81` (tag `npm-@x402/core@v2.27.0`); NOTICE: "Copyright 2026 x402 Foundation" |
-| @x402/evm | 2.27.0 | Apache-2.0 | x402 `upto` client and facilitator (Permit2) for ARL payments (`packages/payments`); used as published, no source copied. Same source commit and NOTICE as `@x402/core`. Brings `zod` (MIT) |
+| @x402/core | 2.29.0 | Apache-2.0 | x402 protocol types and facilitator plumbing for ARL payments (`packages/payments`); used as published, no source copied. Source: x402-foundation/x402 @ `71eb9a55e081e7b81ba3046d0bd17c3eb9c7bf81` (tag `npm-@x402/core@v2.27.0`); NOTICE: "Copyright 2026 x402 Foundation" |
+| @x402/evm | 2.29.0 | Apache-2.0 | x402 `upto` client and facilitator (Permit2) for ARL payments (`packages/payments`); used as published, no source copied. Same source commit and NOTICE as `@x402/core`. Brings `zod` (MIT) |
 
 ### Third-party contracts ARL payments call (deployed, not distributed)
 
@@ -169,7 +169,7 @@ Runtime packages (included in the built app), used as published:
 | zustand                                                 | 5.0.15  | MIT        | Selected network state                               |
 | usehooks-ts                                             | 3.1.1   | MIT        | React hooks                                          |
 | blo                                                     | 2.0.0   | MIT        | Address avatars                                      |
-| @x402/evm, @x402/core                                   | 2.27.0  | Apache-2.0 | x402 `upto` client and facilitator (Payments screen) |
+| @x402/evm, @x402/core                                   | 2.29.0  | Apache-2.0 | x402 `upto` client and facilitator (Payments screen) |
 | @fontsource-variable/inter, @fontsource/source-code-pro | 5.3.0   | OFL-1.1    | Inter, Source Code Pro (Adobe), self-hosted          |
 | @heroicons/react                                        | 2.2.0   | MIT        | Icons                                                |
 

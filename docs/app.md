@@ -41,7 +41,7 @@ Rules the app follows:
 
 ## Payments (x402 `upto`)
 
-The Payments screen uses the x402 SDK (`@x402/evm` 2.27.0) as published, against the canonical
+The Payments screen uses the x402 SDK (`@x402/evm` 2.29.0) as published, against the canonical
 Permit2 and `x402UptoPermit2Proxy` code, which the local chain setup installs at their canonical
 addresses (`scripts/install-x402.ts`, code hashes checked). The flow:
 

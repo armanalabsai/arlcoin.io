@@ -156,9 +156,9 @@ CI runs `scripts/audit.mjs` at the root and in each app instead of a bare
 so every exception is reviewed again, and an entry that no longer matches anything fails, so it
 gets removed.
 
-| Advisory              | Package (path)                                   | Why it is allowed                                                                                                                                                                                                                                               | Expires    |
-| --------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| `GHSA-mrhx-c7xc-m3w5` | `zod` 3.25 (@x402/core, @x402/evm, viem/abitype) | The vulnerable `$ZodArray` code is zod 4's; in zod 3.25 it ships only under `zod/v4`, which nothing loads. @x402 (2.28.0 still needs zod ^3) imports the zod 3 root and ARL code does not import zod; `scripts/check-zod-v3-only.mjs` fails CI if that changes. | 2026-11-23 |
+| Advisory              | Package (path)                                                            | Why it is allowed                                                                                                                                                                                                                                            | Expires    |
+| --------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- |
+| `GHSA-mrhx-c7xc-m3w5` | `zod` 3.22–3.25 (app only: WalletConnect, Reown AppKit, Coinbase CDP SDK) | The vulnerable `$ZodArray` code is zod 4's, fixed in 4.6.6. @x402 2.29.0 and everything that loads `zod/v4` use zod 4.6.7; the wallet libraries load only the zod 3 root and ARL code does not import zod. `scripts/check-zod.mjs` fails CI if that changes. | 2026-11-23 |
 
 On 2026-10-23 Next.js was raised from 16.3.8 to 16.4.3 for GHSA-2464-fhr4-w9xw, GHSA-673q-mjm6-r5xr
 (critical) and GHSA-p3m5-59mp-jv5r (high), the app's `follow-redirects` and `hono` and the site's
