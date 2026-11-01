@@ -33,7 +33,7 @@ import {
   validateService,
 } from "../lib/registry.ts";
 
-const [rpcUrl, recordPath, agent, next, appUrl = "https://app.arlcoin.io"] = process.argv.slice(2);
+const [rpcUrl, recordPath, agent, next, appUrl = "https://arlcoin.io"] = process.argv.slice(2);
 if (!rpcUrl || !recordPath || !agent || !next || !isAddress(next) || !/^[0-9]+$/.test(agent)) {
   console.error(
     "usage: move-sepolia-operator.ts <rpc-url> <base-sepolia.json> <agent-id> <new-operator> [app-url]",

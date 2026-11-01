@@ -1,6 +1,7 @@
 // Calls the testnet operator's API (app/api/operator) from the browser. Only used on Base
-// Sepolia; on the local chain the app uses development accounts instead. The API runs on the
-// server-hosted app; a static copy (arlcoin.io/app) reaches it at NEXT_PUBLIC_ARL_OPERATOR_URL.
+// Sepolia; on the local chain the app uses development accounts instead. The static app
+// (arlcoin.io/app) reaches the API at NEXT_PUBLIC_ARL_OPERATOR_URL (the Pages Function at
+// arlcoin.io/api/operator); a Next.js dev server serves it itself.
 
 /** Where the operator API is: NEXT_PUBLIC_ARL_OPERATOR_URL (an https origin), else this app. */
 export function operatorBase(): string {

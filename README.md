@@ -14,8 +14,8 @@ Every claim below links to the code, the tests and the document that back it.
 | -------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------- |
 | Website              | [arlcoin.io](https://arlcoin.io)                             | [`apps/web`](apps/web): the Interactive Core, roadmap, docs, whitelist     |
 | App (Base Sepolia)   | [arlcoin.io/app](https://arlcoin.io/app/)                    | [`apps/dapp`](apps/dapp): faucet, claim, vesting, staking, jobs, payments, anonymous polls |
-| Testnet operator API | [app.arlcoin.io/api/operator](https://app.arlcoin.io/api/operator/status) | Faucet, group joins, vote relay and x402 settlement for the app ([`route.api.ts`](apps/dapp/app/api/operator/%5Baction%5D/route.api.ts)) |
-| Community            | [t.me/arlprotocol_community](https://t.me/arlprotocol_community) | Official Telegram group |
+| Testnet operator API | [arlcoin.io/api/operator](https://arlcoin.io/api/operator/status) | Faucet, group joins, vote relay and x402 settlement for the app, a Cloudflare Pages Function ([`operatorHttp.ts`](apps/dapp/lib/server/operatorHttp.ts)) |
+| Community            | [t.me/arlprotocol_community](https://t.me/arlprotocol_community) (announcements), [t.me/arlprotocol_chat](https://t.me/arlprotocol_chat) (chat) | Official Telegram channel and its chat group, the chat moderated by the community bot ([`packages/telegram-bot`](packages/telegram-bot), a Cloudflare Worker): `/start`, `/rules`, `/app`, `/faucet`, `/status`, `/launch`, `/whitelist`, `/help`; scam filter, new-member link limits, flood control |
 | Uptime monitor       | [Uptime workflow](.github/workflows/uptime.yml)             | Every 10 minutes: website, app, operator API, faucet float, Base Sepolia blocks and the staking reward window; a failure notifies the owner |
 
 ## Network and deployed contracts
@@ -127,7 +127,7 @@ npm run rehearse:local           # full deploy-and-verify rehearsal on a local c
 The website (with the app under `/app`) is built and served by Cloudflare Pages from this
 repository ([`wrangler.toml`](wrangler.toml), [`scripts/build-cloudflare.sh`](scripts/build-cloudflare.sh));
 `main` is production. Secrets (never committed): `ARL_OPERATOR_KEY` (the testnet operator, Base
-Sepolia only) for the app's operator API ([deploy-app.yml](.github/workflows/deploy-app.yml));
+Sepolia only), an encrypted variable of the Cloudflare Pages project, for the operator API;
 `ETHERSCAN_API_KEY` locally for Basescan verification.
 
 ## Security
@@ -180,7 +180,7 @@ sales. No project funds are added to the pools.
 | --------- | ---------------------------------------------------------------- |
 | Website   | [arlcoin.io](https://arlcoin.io)                                 |
 | X         | [@arlprotocol](https://x.com/arlprotocol)                        |
-| Telegram  | [t.me/arlprotocol_community](https://t.me/arlprotocol_community)         |
+| Telegram  | [t.me/arlprotocol_community](https://t.me/arlprotocol_community) (announcements), [t.me/arlprotocol_chat](https://t.me/arlprotocol_chat) (chat) |
 | Email     | [team@arlcoin.io](mailto:team@arlcoin.io)                        |
 | Security  | private reports per [SECURITY.md](SECURITY.md)                   |
 

@@ -1,6 +1,7 @@
 # Telegram group: pinned messages
 
-Status: DRAFT. Post in https://t.me/arlprotocol_community and pin.
+Status: posted and pinned in the chat group https://t.me/arlprotocol_chat on 2026-10-31. The
+announcement channel is https://t.me/arlprotocol_community.
 
 ## Pin 1: rules and security notice
 
@@ -29,22 +30,23 @@ ARL Network: a payment rail for AI and compute services on Base.
 - ARL token: 21,000,000 fixed supply, no mint function, no owner, no upgrade proxy.
 - Live on Base Mainnet since 2026-10-24: 0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4
 - Uniswap v3 pools on Base: ARL/USDC, ARL/USDT, ARL/WETH, ARL/cbBTC, from 0.20 USD per ARL.
+- Verified jobs for AI agents: escrows on Base Mainnet, paid in ARL or USDC, checked by staked ARL validators.
 - Per-use payments (x402 "upto"): live on the Base Sepolia testnet, not on Base Mainnet.
 - No airdrop at launch. An airdrop of 500,000 ARL is planned for a later date; date, eligibility and rules will be announced later on the official channels.
 - A bug bounty paid in ARL is open.
 
 Website: https://arlcoin.io
 X: https://x.com/arlprotocol
-Telegram: https://t.me/arlprotocol_community
+Announcements: https://t.me/arlprotocol_community
 Contact: team@arlcoin.io
 Source code: https://github.com/armanalabsai/arlcoin.io
 
-Bot commands: /start /rules /help
+Bot commands: /start /rules /app /faucet /status /launch /whitelist /help
 ```
 
 ## Group settings (owner action)
 
-- Group type: public, username @arlprotocol_community.
+- Group type: public, username @arlprotocol_chat, linked as the channel's discussion group.
 - Chat history for new members: visible, so the pinned messages are read.
 - Slow mode: 10 seconds while the group is small and moderation is manual.
 - Admin titles: only real team members; never "Support".

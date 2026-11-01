@@ -4,7 +4,7 @@
 import "server-only";
 
 import { ArlUptoFacilitator, InMemoryAuthorizationStore } from "@arl/payments";
-import { createGroup } from "@arl/zk";
+import { createGroup } from "@arl/zk/group";
 import type { PaymentPayload, PaymentRequirements, SettleResponse } from "@x402/core/types";
 import { toFacilitatorEvmSigner } from "@x402/evm";
 import { UptoEvmScheme as UptoFacilitator } from "@x402/evm/upto/facilitator";
