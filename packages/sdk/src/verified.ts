@@ -30,15 +30,17 @@ export const BASE_SEPOLIA_VERIFIED = {
 } as const satisfies Record<string, unknown>;
 
 /**
- * Base Mainnet deployment as prepared in docs/mainnet-services.md: the pair with the deadline fix
- * (security report 2026-10-25), deployer nonces 25 and 26. The addresses follow from those nonces;
- * calls check that they hold code before using them.
+ * Base Mainnet deployment as prepared in docs/mainnet-services.md: the escrow paid in ARL with the
+ * deadline fix (security report 2026-10-25, audit 2026-10-28; deployer nonce 25) and its evaluator
+ * with the acceptance fix (security report 2026-10-31; nonce 27). The evaluator at nonce 26 closed
+ * acceptance when voting started and is retired. The addresses follow from the nonces; calls check
+ * that they hold code before using them.
  */
 export const BASE_MAINNET_VERIFIED = {
   chainId: 8453,
   token: "0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4",
   jobs: "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
-  evaluator: "0xa2f8945f301C46f2649b79Cd42A7eb1102e9009E",
+  evaluator: "0x817E13e512fF810B0ECe0EE278bf112a3947DAd6",
   arbiterSafe: "0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f",
 } as const satisfies Record<string, unknown>;
 
