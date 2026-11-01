@@ -147,7 +147,8 @@ export async function acceptJob(
     functionName: "accept",
     args: [jobId],
   });
-  await client.waitForTransactionReceipt({ hash });
+  const receipt = await client.waitForTransactionReceipt({ hash });
+  if (receipt.status !== "success") throw new Error(`transaction ${hash} reverted`);
   return hash;
 }
 
@@ -167,6 +168,7 @@ export async function castVote(
     functionName: "vote",
     args: [jobId, approve, deliverable, evidence],
   });
-  await client.waitForTransactionReceipt({ hash });
+  const receipt = await client.waitForTransactionReceipt({ hash });
+  if (receipt.status !== "success") throw new Error(`transaction ${hash} reverted`);
   return hash;
 }

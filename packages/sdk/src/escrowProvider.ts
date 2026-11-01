@@ -6,6 +6,7 @@
 //   const job = await checkFundedJob(publicClient, offer, req.headers["x-arl-job"]);
 //   await approveCommittee(clients, offer, job.jobId);   // validators can now accept
 //   … run the spec …
+//   await waitForAcceptance(publicClient, offer, job.jobId); // threshold members accepted
 //   await submitDeliverable(clients, offer, job.jobId, deliverableHash);
 
 import { getAddress, parseAbi, type Address, type Hash, type Hex } from "viem";
@@ -80,7 +81,12 @@ const evaluatorAbi = parseAbi([
   "struct Config { uint8 tier; uint8 threshold; uint64 voteWindow; uint64 challengeWindow; uint96 bond; uint256 providerAgentId; bytes32 specHash; address[] committee; }",
   "function getConfig(uint256 jobId) view returns (Config)",
   "function approveCommittee(uint256 jobId)",
+  "function voteOf(uint256 jobId, address validator) view returns (uint8)",
 ]);
+
+/** ARLVerifiedEvaluator member states (`voteOf`): accepted (2), voted (3, 4), absent (5). */
+const ACCEPTED = 2;
+const ABSENT = 5;
 
 /** ARLJobs.JobStatus.Funded. */
 const FUNDED = 1;
@@ -159,14 +165,68 @@ export function approveCommittee(
   return send(clients, offer.evaluator, evaluatorAbi, "approveCommittee", [jobId]);
 }
 
-/** As the provider: submits the deliverable hash (the result manifest's deliverable). */
-export function submitDeliverable(
+/** How many committee members of the job have accepted it (and locked their bond). */
+export async function acceptedCount(
+  publicClient: VerifiedClients["publicClient"],
+  offer: EscrowOffer,
+  jobId: bigint,
+): Promise<number> {
+  const states = await Promise.all(
+    offer.committee.map((member) =>
+      publicClient.readContract({
+        address: offer.evaluator,
+        abi: evaluatorAbi,
+        functionName: "voteOf",
+        args: [jobId, member],
+      }),
+    ),
+  );
+  return states.filter((s) => s >= ACCEPTED && s !== ABSENT).length;
+}
+
+/**
+ * Waits until `threshold` committee members have accepted the job. Submitting before then lets
+ * the job end undecided (the client is refunded and the provider is not paid) if not enough
+ * members accept in time.
+ */
+export async function waitForAcceptance(
+  publicClient: VerifiedClients["publicClient"],
+  offer: EscrowOffer,
+  jobId: bigint,
+  { timeoutMs = 30 * 60_000, pollMs = 15_000 }: { timeoutMs?: number; pollMs?: number } = {},
+): Promise<number> {
+  const until = Date.now() + timeoutMs;
+  for (;;) {
+    const accepted = await acceptedCount(publicClient, offer, jobId);
+    if (accepted >= offer.threshold) return accepted;
+    if (Date.now() >= until)
+      throw new VerifiedJobError(
+        `job ${jobId.toString()}: ${String(accepted)} of ${String(offer.threshold)} members accepted`,
+      );
+    await new Promise((r) => setTimeout(r, pollMs));
+  }
+}
+
+/**
+ * As the provider: submits the deliverable hash (the result manifest's deliverable). Refuses
+ * while fewer than `threshold` committee members have accepted (see `waitForAcceptance`), unless
+ * `requireAccepted` is false.
+ */
+export async function submitDeliverable(
   clients: VerifiedClients,
   offer: EscrowOffer,
   jobId: bigint,
   deliverable: Hex,
+  { requireAccepted = true }: { requireAccepted?: boolean } = {},
 ): Promise<Hash> {
   if (!/^0x[0-9a-fA-F]{64}$/.test(deliverable))
     throw new VerifiedJobError("deliverable must be 32 bytes");
+  if (requireAccepted) {
+    const accepted = await acceptedCount(clients.publicClient, offer, jobId);
+    if (accepted < offer.threshold)
+      throw new VerifiedJobError(
+        `job ${jobId.toString()}: only ${String(accepted)} of ${String(offer.threshold)} members accepted; submit after waitForAcceptance`,
+      );
+  }
   return send(clients, offer.jobs, jobsAbi, "submit", [jobId, deliverable, "0x"]);
 }
