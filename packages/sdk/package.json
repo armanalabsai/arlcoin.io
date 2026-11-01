@@ -9,7 +9,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "viem": "2.56.9"
+    "viem": "2.57.13"
   },
   "scripts": {
     "test": "node --test \"test/**/*.test.ts\"",
