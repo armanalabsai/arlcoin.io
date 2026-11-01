@@ -1,4 +1,4 @@
-// End-to-end: the x402 SDK (client and facilitator, npm @x402/evm 2.27.0) through ARL's wrapper,
+// End-to-end: the x402 SDK (client and facilitator, npm @x402/evm 2.29.0) through ARL's wrapper,
 // on a local Anvil fork of Base Sepolia with the real Permit2 and x402UptoPermit2Proxy.
 //
 // Nothing leaves the machine: Anvil forks read state from the RPC and every transaction stays

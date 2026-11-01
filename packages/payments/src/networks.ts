@@ -15,7 +15,7 @@ export interface PaymentNetwork {
   uptoProxyCodehash: `0x${string}`;
 }
 
-/** x402-foundation/x402 @ 71eb9a55e081e7b81ba3046d0bd17c3eb9c7bf81 (npm @x402/* 2.27.0). */
+/** x402-foundation/x402 @ 71eb9a55e081e7b81ba3046d0bd17c3eb9c7bf81 (contracts; SDK npm @x402/* 2.29.0). */
 export const X402_SOURCE_COMMIT = "71eb9a55e081e7b81ba3046d0bd17c3eb9c7bf81";
 
 export const BASE_SEPOLIA: PaymentNetwork = {
