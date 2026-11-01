@@ -1,7 +1,7 @@
 "use client";
 
 import { LAYERS, pathFor } from "@/content/registry.ts";
-import { FooterLinks } from "@/site/SiteFrame.tsx";
+import { FooterLinks, UseCaseLinks } from "@/site/SiteFrame.tsx";
 
 import { withBase } from "./basePath.ts";
 import { isPlainClick } from "./useCoreRoute.ts";
@@ -55,7 +55,8 @@ export function ProtocolIndex({ onOpen }: Props) {
             </section>
           ))}
         </div>
-        <div className="flex flex-col gap-3 border-t border-line pt-8 text-[12px] leading-[1.6] text-fg-subtle sm:flex-row sm:justify-between sm:gap-8">
+        <div className="flex flex-col gap-2 border-t border-line pt-8 text-[12px] leading-[1.6] text-fg-subtle">
+          <UseCaseLinks />
           <FooterLinks />
         </div>
       </div>

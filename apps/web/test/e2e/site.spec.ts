@@ -2,11 +2,18 @@ import { expect, test } from "@playwright/test";
 
 import { DOCS, docPath } from "../../src/content/docs.ts";
 import { FAQ } from "../../src/content/faq.ts";
+import { SOLUTIONS } from "../../src/content/solutions.ts";
 
 // The landing page, the FAQ, the published documents and site-wide rules: no links to a code
 // host, touch targets of at least 44px, no horizontal scroll.
 
-const PAGES = ["/", "/faq", "/docs", ...DOCS.map((d) => docPath(d.slug))];
+const PAGES = [
+  "/",
+  "/faq",
+  "/docs",
+  ...DOCS.map((d) => docPath(d.slug)),
+  ...SOLUTIONS.map((s) => `/${s.slug}`),
+];
 
 test("the landing page leads to the whitelist and the Core", async ({ page }) => {
   await page.goto("/");
@@ -61,6 +68,41 @@ test("every published document renders", async ({ page }) => {
     expect(res?.status(), d.slug).toBe(200);
     await expect(page.getByRole("heading", { level: 1, name: d.title })).toBeVisible();
     await expect(page.locator(".doc-prose")).not.toBeEmpty();
+  }
+});
+
+test("every landing page has its keyword, metadata, structured data and a way into the app", async ({
+  page,
+}) => {
+  for (const s of SOLUTIONS) {
+    const res = await page.goto(`/${s.slug}`);
+    expect(res?.status(), s.slug).toBe(200);
+    await expect(page).toHaveTitle(s.title);
+    await expect(page.getByRole("heading", { level: 1, name: s.heading })).toBeVisible();
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      "href",
+      new RegExp(`https://arlcoin\\.io/${s.slug}/?$`),
+    );
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+      "content",
+      s.description,
+    );
+    const types = (await page.locator('script[type="application/ld+json"]').allTextContents()).map(
+      (t) => (JSON.parse(t) as { "@type": string })["@type"],
+    );
+    for (const type of ["BreadcrumbList", "TechArticle", "FAQPage"]) expect(types).toContain(type);
+    const main = page.getByRole("main");
+    await expect(main.getByRole("link", { name: s.appLabel }).first()).toHaveAttribute(
+      "href",
+      s.appPath,
+    );
+    await expect(main.getByRole("link", { name: "Get ARL" }).first()).toBeVisible();
+    // Every other landing page is linked from this one, and all five from the footer.
+    for (const o of SOLUTIONS.filter((o) => o.slug !== s.slug))
+      await expect(main.locator(`a[href^="/${o.slug}"]`)).toHaveCount(1);
+    await expect(
+      page.getByRole("navigation", { name: "Use cases", exact: true }).getByRole("link"),
+    ).toHaveCount(SOLUTIONS.length);
   }
 });
 
