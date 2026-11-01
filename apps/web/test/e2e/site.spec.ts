@@ -161,8 +161,9 @@ test("navigation between pages stays in the same document, through header links 
     (window as unknown as { sameDocument?: boolean }).sameDocument = true;
   });
 
-  await page.locator("header").getByRole("link", { name: "Contact" }).click();
-  await expect(page).toHaveURL(/\/contact\/?$/);
+  // Get ARL shows in the header at every width (Contact gives way on narrow screens).
+  await page.locator("header").getByRole("link", { name: "Get ARL" }).click();
+  await expect(page).toHaveURL(/\/buy\/?$/);
   // A plain anchor, as in documents, is navigated inside the app too.
   await page.evaluate(() => {
     const a = document.createElement("a");
