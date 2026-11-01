@@ -1,0 +1,181 @@
+/**
+ * Creation code of the jobs escrows and evaluators executed on Base Mainnet at nonces 23 to 26
+ * (main at 3cb4a17: the 2026-10-28 audit fixes, before the evaluator fix of the 2026-10-31
+ * report). The -v2 plans in public/plans were built from it, so the tests read them against this
+ * set. The deploy screen itself accepts only the current build (lib/deployArtifacts.ts). Copied
+ * verbatim from that commit's lib/deployArtifacts.ts.
+ */
+export const JOBS_V2_ARTIFACTS = {
+  ARLVestingWallet: {
+    creationHash: "0x678b32ffc3f99c7a999cbe36f522af209c64a66423edce5f0882db06b66c45fa",
+    creationSize: 2925,
+    constructorInputs: [
+      {
+        name: "beneficiary",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "cliffStart_",
+        type: "uint64",
+        internalType: "uint64",
+      },
+      {
+        name: "cliffEnd_",
+        type: "uint64",
+        internalType: "uint64",
+      },
+      {
+        name: "vestingEnd_",
+        type: "uint64",
+        internalType: "uint64",
+      },
+    ],
+  },
+  ARLTimelock: {
+    creationHash: "0x7ebd1071cb25c96daf20bbcf5c524c0946d38d49511ff775081d86f5e0f81356",
+    creationSize: 7938,
+    constructorInputs: [
+      {
+        name: "minDelay",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "proposers",
+        type: "address[]",
+        internalType: "address[]",
+      },
+      {
+        name: "executors",
+        type: "address[]",
+        internalType: "address[]",
+      },
+      {
+        name: "guardian",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+  },
+  ARLToken: {
+    creationHash: "0xe45878e1c9fca3c5b5450898e5ebf53ee2574d19c80c0011ac8acbabd6fcb0b1",
+    creationSize: 5911,
+    constructorInputs: [
+      {
+        name: "r",
+        type: "tuple",
+        internalType: "struct ARLToken.Recipients",
+        components: [
+          {
+            name: "publicLaunch",
+            type: "address",
+            internalType: "address",
+          },
+          {
+            name: "communityStaking",
+            type: "address",
+            internalType: "address",
+          },
+          {
+            name: "ecosystemGrowth",
+            type: "address",
+            internalType: "address",
+          },
+          {
+            name: "strategicPartnerships",
+            type: "address",
+            internalType: "address",
+          },
+          {
+            name: "liquidity",
+            type: "address",
+            internalType: "address",
+          },
+          {
+            name: "founder",
+            type: "address",
+            internalType: "address",
+          },
+          {
+            name: "investors",
+            type: "address",
+            internalType: "address",
+          },
+          {
+            name: "treasury",
+            type: "address",
+            internalType: "address",
+          },
+          {
+            name: "team",
+            type: "address",
+            internalType: "address",
+          },
+          {
+            name: "earlyUsers",
+            type: "address",
+            internalType: "address",
+          },
+          {
+            name: "grantsBugBounty",
+            type: "address",
+            internalType: "address",
+          },
+        ],
+      },
+    ],
+  },
+  ARLJobs: {
+    creationHash: "0x8dba7980824476029d0f955e1accfba000594f8783852a2128b7087a35a9354f",
+    creationSize: 5298,
+    constructorInputs: [
+      {
+        name: "paymentToken_",
+        type: "address",
+        internalType: "contract IERC20",
+      },
+    ],
+  },
+  ARLVerifiedEvaluator: {
+    creationHash: "0x0e624298c134ce184bfd77ed590b80de42c2a7b6ef50c764b00f37b6e6777ad1",
+    creationSize: 15016,
+    constructorInputs: [
+      {
+        name: "jobs_",
+        type: "address",
+        internalType: "contract ARLJobs",
+      },
+      {
+        name: "arbiter_",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "minChallengeWindow_",
+        type: "uint64",
+        internalType: "uint64",
+      },
+      {
+        name: "minBond_",
+        type: "uint96",
+        internalType: "uint96",
+      },
+      {
+        name: "identity_",
+        type: "address",
+        internalType: "contract IERC8004Identity",
+      },
+      {
+        name: "reputation_",
+        type: "address",
+        internalType: "contract IERC8004Reputation",
+      },
+      {
+        name: "stakeToken_",
+        type: "address",
+        internalType: "contract IERC20",
+      },
+    ],
+  },
+} as const;

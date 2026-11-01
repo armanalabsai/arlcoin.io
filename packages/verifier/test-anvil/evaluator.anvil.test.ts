@@ -384,4 +384,57 @@ describe("validator flow on Anvil", () => {
     await pass();
     assert.equal(states.get(v1)?.jobs.includes("3"), false);
   });
+
+  it("accepts a job that went from Funded to Submitted between two passes, then votes", async () => {
+    // Report 2026-10-31 (F-2): the watcher only accepted while Funded, so a provider that
+    // submitted before the next pass left the job without a committee.
+    const { jobId } = await openVerifiedJob(
+      { publicClient, walletClient: wallet(client) },
+      {
+        provider: provider.address,
+        specUri: "https://example.com/spec.json",
+        specHash: specHash(SPEC),
+        committee: [v1.address, v2.address, v3.address],
+        threshold: 2,
+        jobs,
+        evaluator,
+      },
+    );
+    const specFetcher = { file: () => Promise.resolve(Buffer.from(JSON.stringify(SPEC))) };
+    const logs: Record<string, unknown>[] = [];
+    const deps = (v: PrivateKeyAccount) => ({
+      client: publicClient,
+      wallet: wallet(v),
+      evaluator,
+      exec: opts,
+      specFetcher,
+      log: (e: Record<string, unknown>) => logs.push(e),
+    });
+    const states = new Map<PrivateKeyAccount, WatchState>();
+    const pass = async () => {
+      for (const v of [v1, v2])
+        states.set(v, await step(deps(v), states.get(v) ?? { fromBlock: 0n, jobs: [] }));
+    };
+    await pass();
+
+    // Approval, funding and submission all land before the next pass.
+    await send(provider, evaluator, "ARLVerifiedEvaluator", "approveCommittee", [jobId]);
+    await send(provider, jobs, "ARLJobs", "setBudget", [jobId, parseUnits("20", 18), "0x"]);
+    await send(client, jobs, "ARLJobs", "fund", [jobId, parseUnits("20", 18), "0x"]);
+    const { hash: deliverable } = await execute(SPEC, opts);
+    await send(provider, jobs, "ARLJobs", "submit", [jobId, deliverable, "0x"]);
+    // And a third party starts the vote right away.
+    await send(v3, evaluator, "ARLVerifiedEvaluator", "startVoting", [jobId]);
+
+    await pass(); // accepts while Submitted
+    for (const v of [v1, v2])
+      assert.equal(
+        (await readJob(publicClient, evaluator, jobId, v.address)).memberState,
+        MemberState.Accepted,
+      );
+    await pass(); // votes
+    const after = await readJob(publicClient, evaluator, jobId, v1.address);
+    assert.equal(after.phase, 2); // Approved
+    assert.ok(logs.some((l) => l.jobId === jobId.toString() && l.event === "voted"));
+  });
 });

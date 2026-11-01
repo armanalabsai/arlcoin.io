@@ -6,6 +6,7 @@ import { getContractAddress } from "viem";
 
 import { parseRun, recordCommand } from "../../lib/deploySteps.ts";
 import { TGE_DATE } from "../../lib/network.ts";
+import { JOBS_V2_ARTIFACTS } from "../fixtures/deploy/jobsV2Artifacts.ts";
 import { RELEASE_ARTIFACTS } from "../fixtures/deploy/releaseArtifacts.ts";
 
 // The Base Mainnet contract run published for TGE day (apps/dapp/public/plans/8453-deploy.json),
@@ -83,8 +84,10 @@ describe("Base Mainnet plans for the verified jobs", () => {
     });
   }
 
-  // Built from the code with the 2026-10-28 audit fixes (F-2, F-3) at the same nonces; the deploy
-  // screen accepts them with the current build.
+  // Built from the code with the 2026-10-28 audit fixes (F-2, F-3) at the same nonces, and
+  // executed. Their evaluators predate the fix of the 2026-10-31 report (acceptance closed when
+  // voting started), so the current build refuses them; the tests read them against the build
+  // they were made from.
   const pairs = [
     {
       name: "8453-verified-jobs-usdc-v2",
@@ -105,7 +108,8 @@ describe("Base Mainnet plans for the verified jobs", () => {
   ];
   for (const p of pairs) {
     it(`creates ${p.name}: escrow at nonce ${String(p.nonce)} and its evaluator bonded in ARL`, () => {
-      const run = afterTge(() => parseRun(plan(p.name)));
+      assert.throws(() => afterTge(() => parseRun(plan(p.name))), /ARLVerifiedEvaluator code/);
+      const run = afterTge(() => parseRun(plan(p.name), JOBS_V2_ARTIFACTS));
       assert.deepEqual(
         run.steps.map((s) => (s.kind === "create" ? s.contract : s.kind)),
         ["ARLJobs", "ARLVerifiedEvaluator"],
@@ -124,6 +128,48 @@ describe("Base Mainnet plans for the verified jobs", () => {
         assert.equal(String(evaluator.args[1]), "0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f");
         assert.equal(evaluator.args[3], 100n * 10n ** 18n);
         assert.ok(doc.includes(p.jobs) || docServices.includes(p.jobs));
+      }
+      const record = recordCommand(run, "x.json");
+      assert.equal(record.kind, "jobs");
+      assert.ok(record.command.endsWith(p.record));
+    });
+  }
+  // Report 2026-10-31: new evaluators with acceptance open until the vote window ends, for the
+  // escrows already on chain (nonces 25 and 23). The current build accepts them.
+  const evaluators = [
+    {
+      name: "8453-verified-evaluator-arl-v3",
+      nonce: 27,
+      jobs: "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+      evaluator: "0x817E13e512fF810B0ECe0EE278bf112a3947DAd6",
+      stake: "0x0000000000000000000000000000000000000000",
+      record: "8453-jobs.json",
+    },
+    {
+      name: "8453-verified-evaluator-usdc-v3",
+      nonce: 28,
+      jobs: "0xc833140D2eE8607fd41662cffFAc557f3D535bE6",
+      evaluator: "0x3F4EA7f388bcFf00267aEB21446ef005Fea784c9",
+      stake: "0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4",
+      record: "8453-jobs-usdc.json",
+    },
+  ];
+  for (const p of evaluators) {
+    it(`creates ${p.name}: only the evaluator, at nonce ${String(p.nonce)}`, () => {
+      const run = afterTge(() => parseRun(plan(p.name)));
+      assert.equal(run.steps.length, 1);
+      const [evaluator] = run.steps;
+      assert.equal(evaluator?.kind, "create");
+      if (evaluator?.kind === "create") {
+        assert.equal(evaluator.contract, "ARLVerifiedEvaluator");
+        assert.equal(evaluator.nonce, p.nonce);
+        assert.equal(evaluator.address.toLowerCase(), p.evaluator.toLowerCase());
+        assert.equal(String(evaluator.args[0]).toLowerCase(), p.jobs.toLowerCase());
+        assert.equal(String(evaluator.args[1]), "0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f");
+        assert.equal(evaluator.args[2], 86_400n);
+        assert.equal(evaluator.args[3], 100n * 10n ** 18n);
+        assert.equal(String(evaluator.args[6]).toLowerCase(), p.stake.toLowerCase());
+        assert.ok(docServices.includes(p.evaluator));
       }
       const record = recordCommand(run, "x.json");
       assert.equal(record.kind, "jobs");
