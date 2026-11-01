@@ -22,12 +22,14 @@ import { privateKeyToAccount } from "viem/accounts";
 
 import {
   JOB_HEADER,
+  acceptedCount,
   approveCommittee,
   buildEscrowOffer,
   checkFundedJob,
   parseEscrowOffer,
   payVerified,
   submitDeliverable,
+  waitForAcceptance,
 } from "../src/index.ts";
 
 const PORT = 8550;
@@ -153,7 +155,20 @@ describe("arl-escrow round trip", () => {
     assert.equal(response.status, 200);
     assert.equal(served, jobId);
     assert.ok(jobId !== undefined);
-    await submitDeliverable(providerClients, offer, jobId, `0x${"ee".repeat(32)}`);
+    // Nobody on this placeholder committee accepts: by default the provider may not submit, or the
+    // job could only end undecided (report 2026-10-31).
+    assert.equal(await acceptedCount(publicClient, offer, jobId), 0);
+    await assert.rejects(
+      submitDeliverable(providerClients, offer, jobId, `0x${"ee".repeat(32)}`),
+      /only 0 of 2 members accepted/,
+    );
+    await assert.rejects(
+      waitForAcceptance(publicClient, offer, jobId, { timeoutMs: 0, pollMs: 1 }),
+      /0 of 2 members accepted/,
+    );
+    await submitDeliverable(providerClients, offer, jobId, `0x${"ee".repeat(32)}`, {
+      requireAccepted: false,
+    });
 
     await assert.rejects(
       checkFundedJob(publicClient, offer, `31337:${jobs}:${String(jobId)}`),
