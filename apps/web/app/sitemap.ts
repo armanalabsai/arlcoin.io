@@ -3,6 +3,7 @@ import type { MetadataRoute } from "next";
 import { DOCS, docPath } from "@/content/docs.ts";
 import { allPaths } from "@/content/registry.ts";
 import { SITE, SITE_PAGES } from "@/content/site.ts";
+import { SOLUTION_PATHS } from "@/content/solutions.ts";
 
 // Generated at build time; required for the static GitHub Pages export.
 export const dynamic = "force-static";
@@ -13,17 +14,28 @@ export const dynamic = "force-static";
 const withSlash = (path: string) => (path.endsWith("/") ? path : `${path}/`);
 
 // Crawl hints: the home page and the launch pages first, legal pages last.
-const PRIORITY: Record<string, number> = { "/": 1, "/buy": 0.9, "/whitelist": 0.9, "/faq": 0.8 };
+const PRIORITY: Record<string, number> = {
+  "/": 1,
+  "/buy": 0.9,
+  "/whitelist": 0.9,
+  "/faq": 0.8,
+  ...Object.fromEntries(SOLUTION_PATHS.map((p) => [p, 0.8])),
+};
 const LOW = new Set(["/privacy", "/terms"]);
 // The web app lives under /app/ on the same domain.
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return ["/", ...allPaths(), ...SITE_PAGES, ...DOCS.map((d) => docPath(d.slug)), "/app/"].map(
-    (path) => ({
-      url: new URL(withSlash(path), SITE.url).toString(),
-      changeFrequency:
-        path === "/" || path === "/buy" ? "daily" : LOW.has(path) ? "yearly" : "weekly",
-      priority: PRIORITY[path] ?? (LOW.has(path) ? 0.3 : path.startsWith("/docs") ? 0.6 : 0.7),
-    }),
-  );
+  return [
+    "/",
+    ...allPaths(),
+    ...SITE_PAGES,
+    ...SOLUTION_PATHS,
+    ...DOCS.map((d) => docPath(d.slug)),
+    "/app/",
+  ].map((path) => ({
+    url: new URL(withSlash(path), SITE.url).toString(),
+    changeFrequency:
+      path === "/" || path === "/buy" ? "daily" : LOW.has(path) ? "yearly" : "weekly",
+    priority: PRIORITY[path] ?? (LOW.has(path) ? 0.3 : path.startsWith("/docs") ? 0.6 : 0.7),
+  }));
 }

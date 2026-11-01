@@ -52,6 +52,14 @@ Key facts:
 - [Contact](https://arlcoin.io/contact)
 - [Privacy](https://arlcoin.io/privacy) and [Terms](https://arlcoin.io/terms)
 
+## Use cases
+
+- [Per-second GPU billing](https://arlcoin.io/per-second-gpu-billing): GPU time billed by the second in ARL
+- [AI agent payment infrastructure](https://arlcoin.io/ai-agent-payment-infrastructure): x402 payments, escrowed jobs (ERC-8183) and ratings (ERC-8004) for agents
+- [On-chain compute payments](https://arlcoin.io/on-chain-compute-payments): per use, escrow and per-second streams on Base
+- [Pay-per-second AI inference](https://arlcoin.io/pay-per-second-ai-inference): a model served as a job, settled by the second
+- [Decentralized GPU marketplace](https://arlcoin.io/decentralized-gpu-marketplace): open registry, payments and validators on Base
+
 ## Documents
 
 - [Tokenomics](https://arlcoin.io/docs/tokenomics)

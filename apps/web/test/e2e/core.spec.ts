@@ -3,6 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { DOCS } from "../../src/content/docs.ts";
 import { allPaths } from "../../src/content/registry.ts";
 import { SITE_PAGES } from "../../src/content/site.ts";
+import { SOLUTION_PATHS } from "../../src/content/solutions.ts";
 
 // Behaviour of the Interactive Core against the production build.
 
@@ -113,9 +114,11 @@ test("sitemap lists every route and robots points to it", async ({ request }) =>
   const sitemap = await (await request.get("/sitemap.xml")).text();
   expect(sitemap.match(/<loc>/g)).toHaveLength(
     // + 1 for the testnet app under /app/.
-    1 + allPaths().length + SITE_PAGES.length + DOCS.length + 1,
+    1 + allPaths().length + SITE_PAGES.length + SOLUTION_PATHS.length + DOCS.length + 1,
   );
   expect(sitemap).toContain("<loc>https://arlcoin.io/app/</loc>");
+  for (const path of SOLUTION_PATHS)
+    expect(sitemap).toContain(`<loc>https://arlcoin.io${path}/</loc>`);
   for (const path of SITE_PAGES) expect(sitemap).toContain(`<loc>https://arlcoin.io${path}/</loc>`);
   expect(sitemap).not.toMatch(/[^/]<\/loc>/);
   const robots = await (await request.get("/robots.txt")).text();
