@@ -7,6 +7,7 @@ import { getContractAddress } from "viem";
 import { parseRun, recordCommand } from "../../lib/deploySteps.ts";
 import { TGE_DATE } from "../../lib/network.ts";
 import { JOBS_V2_ARTIFACTS } from "../fixtures/deploy/jobsV2Artifacts.ts";
+import { JOBS_V3_ARTIFACTS } from "../fixtures/deploy/jobsV3Artifacts.ts";
 import { RELEASE_ARTIFACTS } from "../fixtures/deploy/releaseArtifacts.ts";
 
 // The Base Mainnet contract run published for TGE day (apps/dapp/public/plans/8453-deploy.json),
@@ -134,8 +135,10 @@ describe("Base Mainnet plans for the verified jobs", () => {
       assert.ok(record.command.endsWith(p.record));
     });
   }
-  // Report 2026-10-31: new evaluators with acceptance open until the vote window ends, for the
-  // escrows already on chain (nonces 25 and 23). The current build accepts them.
+  // Report 2026-10-31: evaluators with acceptance open until the vote window ends, for the
+  // escrows already on chain (nonces 25 and 23), executed on 2026-11-01. Evaluator v4 replaces
+  // them, so the current build refuses them; the tests read them against the build they were
+  // made from.
   const evaluators = [
     {
       name: "8453-verified-evaluator-arl-v3",
@@ -153,10 +156,32 @@ describe("Base Mainnet plans for the verified jobs", () => {
       stake: "0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4",
       record: "8453-jobs-usdc.json",
     },
+    // Evaluator v4 (bug bounty reports of 2026-11-03): approvals per deliverable, release and
+    // rulings after the deadline. The current build accepts them.
+    {
+      name: "8453-verified-evaluator-arl-v4",
+      nonce: 29,
+      jobs: "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+      evaluator: "0x5cA6dab18E6b9a5Cd44a4FfFBdf2c5BA3Cd87DfF",
+      stake: "0x0000000000000000000000000000000000000000",
+      record: "8453-jobs.json",
+    },
+    {
+      name: "8453-verified-evaluator-usdc-v4",
+      nonce: 30,
+      jobs: "0xc833140D2eE8607fd41662cffFAc557f3D535bE6",
+      evaluator: "0x8C017f24615AC749Ec7297FB07b14E558B670CFC",
+      stake: "0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4",
+      record: "8453-jobs-usdc.json",
+    },
   ];
   for (const p of evaluators) {
     it(`creates ${p.name}: only the evaluator, at nonce ${String(p.nonce)}`, () => {
-      const run = afterTge(() => parseRun(plan(p.name)));
+      const artifacts = p.name.endsWith("-v3") ? JOBS_V3_ARTIFACTS : undefined;
+      if (artifacts) {
+        assert.throws(() => afterTge(() => parseRun(plan(p.name))), /ARLVerifiedEvaluator code/);
+      }
+      const run = afterTge(() => parseRun(plan(p.name), artifacts));
       assert.equal(run.steps.length, 1);
       const [evaluator] = run.steps;
       assert.equal(evaluator?.kind, "create");
