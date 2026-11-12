@@ -83,13 +83,14 @@ export default function PrivacyPage() {
           .
         </p>
         <p>
-          Whitelist registrations are also stored in a database run by Supabase in the European
-          Union (Ireland), together with the time you gave each confirmation and the version of this
-          notice you accepted. The database accepts new registrations from the site but never
-          returns stored data to it; only the team can read the list.
+          Whitelist registrations are also stored in ARL&apos;s own database on Cloudflare D1 in
+          Western Europe, together with the time you gave each confirmation and the version of this
+          notice you accepted. It holds ARL data only and is not shared with any other project. The
+          site can add new registrations but never reads stored data back; only the team can read
+          the list.
         </p>
         <p>
-          Supabase and Web3Forms may be located outside the country where you live. Your data is
+          Cloudflare and Web3Forms may be located outside the country where you live. Your data is
           transferred to them only with the explicit consent you give on the whitelist form, and a
           registration is not possible without it. The data is not shared with anyone else unless a
           court or authority requires it by law.
