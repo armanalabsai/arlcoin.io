@@ -174,4 +174,41 @@ export const DEPLOY_ARTIFACTS = {
       },
     ],
   },
+  ComputePayment: {
+    creationHash: "0xe8592167ebc78efa94507d6a3a6348f6dda75d027edba3e416737d3b89402461",
+    creationSize: 4332,
+    constructorInputs: [
+      {
+        name: "paymentToken_",
+        type: "address",
+        internalType: "contract IERC20",
+      },
+    ],
+  },
+  ARLStakingRewards: {
+    creationHash: "0x4c7fa234f56364b020d229bd03afe237129092fed553793663b917b34ea60478",
+    creationSize: 4819,
+    constructorInputs: [
+      {
+        name: "stakingToken_",
+        type: "address",
+        internalType: "contract IERC20",
+      },
+      {
+        name: "rewardsToken_",
+        type: "address",
+        internalType: "contract IERC20",
+      },
+      {
+        name: "rewardsDistribution_",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "rewardsDuration_",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+  },
 } as const;

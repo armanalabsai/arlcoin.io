@@ -24,6 +24,8 @@ const NAMES = [
   "ARLToken",
   "ARLJobs",
   "ARLVerifiedEvaluator",
+  "ComputePayment",
+  "ARLStakingRewards",
 ] as const;
 
 interface ForgeArtifact {

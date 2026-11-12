@@ -207,4 +207,32 @@ describe("Base Mainnet plans for the verified jobs", () => {
       assert.ok(record.command.endsWith(p.record));
     });
   }
+  // Network services (owner decision of 2026-11-01): compute payment and staking rewards, after
+  // the v4 evaluators (nonces 29 and 30).
+  it("creates 8453-services: compute payment and staking at nonces 31 and 32", () => {
+    const run = afterTge(() => parseRun(plan("8453-services")));
+    assert.deepEqual(
+      run.steps.map((s) => (s.kind === "create" ? s.contract : s.kind)),
+      ["ComputePayment", "ARLStakingRewards"],
+    );
+    const [payment, staking] = run.steps;
+    if (payment?.kind === "create" && staking?.kind === "create") {
+      assert.equal(payment.nonce, 31);
+      assert.equal(staking.nonce, 32);
+      assert.equal(payment.address, "0x1bFE932896fdd32175836a7364dcaf53d49EE464");
+      assert.equal(staking.address, "0x15e257009BE9B1875fbfa69D291320aaFE3fa102");
+      const arl = "0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4";
+      assert.equal(String(payment.args[0]), arl);
+      assert.equal(String(staking.args[0]), arl);
+      assert.equal(String(staking.args[1]), arl);
+      assert.equal(String(staking.args[2]), "0xfF12597A671ebAF0cAe37999EE659e03c4f444B5");
+      assert.equal(staking.args[3], 180n * 86_400n);
+      assert.ok(docServices.includes(payment.address) && docServices.includes(staking.address));
+    } else {
+      assert.fail("both steps must be creations");
+    }
+    const record = recordCommand(run, "x.json");
+    assert.equal(record.kind, "services");
+    assert.ok(record.command.endsWith("8453-services.json"));
+  });
 });
