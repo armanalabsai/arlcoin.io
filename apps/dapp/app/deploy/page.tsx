@@ -323,6 +323,8 @@ function Signer({ run, source }: { run: DeployRun; source: string }) {
                 safes: "The next plan takes the Safe addresses only from that record.",
                 arl: "Then run VerifyARL and the deployment proof on that record.",
                 jobs: "The record lists the escrow and the evaluator with their checked parameters.",
+                services:
+                  "The record lists the compute payment and staking contracts with their checked parameters.",
                 arbiter: "Check that the owners are the three arbiters and the threshold is 2.",
               }[recordCommand(run, source).kind]
             }

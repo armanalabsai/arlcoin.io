@@ -31,7 +31,7 @@ import { BASE_MAINNET_CHAIN_ID, LOCAL_CHAIN_ID, assertAllowedChain } from "./net
 
 /** The creation code a run may contain, per contract. */
 export type DeployArtifacts = {
-  readonly [K in keyof typeof DEPLOY_ARTIFACTS]: {
+  readonly [K in keyof typeof DEPLOY_ARTIFACTS]?: {
     readonly creationHash: string;
     readonly creationSize: number;
     readonly constructorInputs: readonly unknown[];
@@ -159,7 +159,9 @@ export function parseRun(json: unknown, artifacts: DeployArtifacts = DEPLOY_ARTI
         fail(`transaction ${String(index + 1)}: creates an unknown contract`);
       }
       const contract = name as keyof typeof DEPLOY_ARTIFACTS;
-      const artifact = artifacts[contract];
+      const artifact =
+        artifacts[contract] ??
+        fail(`transaction ${String(index + 1)}: creates an unknown contract`);
       const size = artifact.creationSize;
       if ((tx.input.length - 2) / 2 < size)
         fail(`transaction ${String(index + 1)}: code too short`);
@@ -264,6 +266,16 @@ export function describeStep(step: DeployStep): { title: string; detail: string 
         title: "Create the verified evaluator",
         detail: `Creates the staked validator committee for the escrow ${short(String(a[0]))}. Disputes go to the arbiter Safe ${short(String(a[1]))}; every challenge window is at least ${String(Number(a[2]) / 3600)} hours and every bond at least ${formatUnits(BigInt(String(a[3])), 18)} tokens. It has no owner.`,
       };
+    case "ComputePayment":
+      return {
+        title: "Create the compute payment contract",
+        detail: `Creates the per-second payment streams, paid in the token ${short(String(a[0]))}. A client escrows a stream to a compute provider and either side can stop it. It has no owner and holds no tokens until a stream is opened.`,
+      };
+    case "ARLStakingRewards":
+      return {
+        title: "Create the staking rewards contract",
+        detail: `Creates staking for the token ${short(String(a[0]))}, with rewards in ${short(String(a[1]))} over periods of ${String(Number(a[3]) / 86_400)} days. Only ${short(String(a[2]))} can fund a reward period; nothing is funded or minted now, and it has no owner.`,
+      };
   }
 }
 
@@ -288,7 +300,7 @@ const BASE_USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 export function recordCommand(
   run: DeployRun,
   runFile: string,
-): { kind: "safes" | "arl" | "jobs" | "arbiter"; command: string } {
+): { kind: "safes" | "arl" | "jobs" | "services" | "arbiter"; command: string } {
   const rpc =
     run.chainId === LOCAL_CHAIN_ID
       ? "<local-rpc-url> --local-anvil"
@@ -316,6 +328,16 @@ export function recordCommand(
     return {
       kind: "jobs",
       command: `node packages/deploy/src/jobs-record-cli.ts ${runFile} ${rpc} contracts/deploy/deployments/${String(run.chainId)}-jobs${usdc ? "-usdc" : ""}.json`,
+    };
+  }
+  // Compute payment and staking rewards (DeployMainnetServices) have their own record.
+  const isService = (s: DeployStep) =>
+    s.kind === "create" && (s.contract === "ComputePayment" || s.contract === "ARLStakingRewards");
+  if (run.steps.some(isService)) {
+    if (!run.steps.every(isService)) fail("the run mixes the network services with other steps");
+    return {
+      kind: "services",
+      command: `node packages/deploy/src/services-record-cli.ts ${runFile} ${rpc} contracts/deploy/deployments/${String(run.chainId)}-services.json`,
     };
   }
   // A single Safe is the evaluator's arbiter (CreateArbiterSafe), not the twelve allocation Safes.

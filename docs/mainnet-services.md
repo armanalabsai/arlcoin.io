@@ -36,6 +36,8 @@ Deploy screen (`arlcoin.io/app/deploy/?plan=…`):
 |    28 | `8453-verified-evaluator-usdc-v3`         | `ARLVerifiedEvaluator` for the USDC escrow (acceptance fix) | `0x3F4EA7f388bcFf00267aEB21446ef005Fea784c9` | Deployed                   |
 |    29 | `8453-verified-evaluator-arl-v4`          | `ARLVerifiedEvaluator` v4 for the ARL escrow                | `0x5cA6dab18E6b9a5Cd44a4FfFBdf2c5BA3Cd87DfF` | Planned                    |
 |    30 | `8453-verified-evaluator-usdc-v4`         | `ARLVerifiedEvaluator` v4 for the USDC escrow               | `0x8C017f24615AC749Ec7297FB07b14E558B670CFC` | Planned                    |
+|    31 | `8453-services`                           | `ComputePayment`, paid in ARL                               | `0x1bFE932896fdd32175836a7364dcaf53d49EE464` | Planned                    |
+|    32 | `8453-services`                           | `ARLStakingRewards`, ARL, 180-day periods                   | `0x15e257009BE9B1875fbfa69D291320aaFE3fa102` | Planned                    |
 
 `8453-verified-jobs-usdc` and `8453-verified-jobs-arl` are invalid, do not use: they hold pre-audit
 bytecode (before the audit fixes of 2026-10-28) and the deploy screen refuses them. Their `-v2`
@@ -46,6 +48,22 @@ impersonated at nonce 23, nothing sent): every contract was created at the addre
 `jobs-record-cli.ts` passed all nine checks for each pair.
 Every address follows from the deployer and its nonce: any other transaction from the deployer
 before them shifts the addresses, and the Deploy screen then refuses the plan.
+
+### Compute payment and staking (planned)
+
+`8453-services` (`DeployMainnetServices`, nonces 31 and 32, after the v4 evaluators) creates
+`ComputePayment` (per-second streams in ARL) and `ARLStakingRewards` (stake ARL, rewards in ARL,
+180-day periods). Neither has an owner. Only the Community & Staking Safe
+`0xfF12597A671ebAF0cAe37999EE659e03c4f444B5` (2 of 3) can fund a reward period; the first period
+is 300,000 ARL (owner decision of 2026-11-01), funded by the Safe afterwards with `approve` and
+`notifyRewardAmount`. Rehearsal (Base Mainnet fork, v4 evaluators applied first, deployer
+impersonated, nothing sent): both contracts were created at the addresses above,
+`services-record-cli.ts` passed all ten checks, and the Safe funded 300,000 ARL (reward rate
+0.01929 ARL per second for 180 days). After signing:
+
+```sh
+node packages/deploy/src/services-record-cli.ts <run.json> https://mainnet.base.org   contracts/deploy/deployments/8453-services.json
+```
 
 ### Evaluator v4 (planned)
 
