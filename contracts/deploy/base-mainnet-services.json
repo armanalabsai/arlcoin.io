@@ -1,0 +1,17 @@
+{
+  "network": "base-mainnet",
+  "chainId": 8453,
+  "token": "0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4",
+  "computePayment": "0x1bFE932896fdd32175836a7364dcaf53d49EE464",
+  "staking": "0x15e257009BE9B1875fbfa69D291320aaFE3fa102",
+  "rewardsDistribution": "0xfF12597A671ebAF0cAe37999EE659e03c4f444B5",
+  "rewardsDistributionOwners": [
+    "0x380A7f9B512d9ac7364be3EdFf5feAfD36659c25",
+    "0x5CD124a418FED1fc5614aEAd5601348EeDd0cC74",
+    "0xCefc623Afe379F390E0C434D28D16d6dc1C6641D"
+  ],
+  "rewardsDistributionThreshold": 2,
+  "rewardsDurationSeconds": 15552000,
+  "block": "56650438",
+  "note": "Verified on chain with packages/deploy/src/services-record-cli.ts from plan 8453-services (deployer nonces 31 and 32, 2026-11-12). The first reward period is funded by the Community & Staking Safe."
+}

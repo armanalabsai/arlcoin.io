@@ -13,7 +13,7 @@ this baseline).
 | Vesting wallets, timelock, allocation Safes                     | LIVE       | [mainnet-plan.md](mainnet-plan.md)                                                                            |
 | Liquidity: four Uniswap v3 pools (USDC, USDT, WETH, cbBTC)      | LIVE       | Pool addresses in [mainnet-plan.md](mainnet-plan.md)                                                          |
 | Jobs escrow (ERC-8183), paid in ARL and in USDC                 | LIVE       | Base Mainnet `0x4664…98f9` (ARL) and `0xc833…5bE6` (USDC); `jobs-record-cli.ts` 9/9 checks each on 2026-10-31 |
-| Verified evaluator (staked ARL validators, 2-of-3 arbiter Safe) | LIVE       | Base Mainnet `0x817E…DAd6` (ARL) and `0x3F4E…84c9` (USDC), nonces 27 and 28, 9/9 checks each on 2026-11-01    |
+| Verified evaluator (staked ARL validators, 2-of-3 arbiter Safe) | LIVE       | Base Mainnet v4 `0x5cA6…7DfF` (ARL) and `0x8C01…0CFC` (USDC), nonces 29 and 30, 9/9 checks each on 2026-11-12 |
 | Website and the app under `/app`                                | LIVE       | `https://arlcoin.io` on Cloudflare Pages; `/`, `/faq/`, `/app/` answer 200                                    |
 | Supply API                                                      | LIVE       | `https://arlcoin.io/api/supply` (circulating); `?q=total` returns 21000000                                    |
 | App on Base Sepolia: faucet, staking, jobs, payments, polls     | LIVE       | Base Sepolia contracts in the README; app at arlcoin.io/app                                                   |
@@ -21,7 +21,8 @@ this baseline).
 | x402 `upto` payments with usage receipts                        | BUILDING   | `packages/payments`, spec v0.1.0 with test vectors; settles on Base Sepolia only                              |
 | SDK: `payVerified`, `acquireArl`, escrow provider helpers       | BUILDING   | `packages/sdk`, unit and Anvil tests; mainnet addresses point to the live ARL pair                            |
 | Validators re-executing jobs (`arl-reexec/1`)                   | BUILDING   | `packages/verifier`; three Base Sepolia validators on GitHub runners                                          |
-| Staking rewards on Base Mainnet                                 | PLANNED    | [mainnet-services.md](mainnet-services.md), step 4                                                            |
+| Staking rewards on Base Mainnet                                 | BUILDING   | Deployed `0x15e2…a102` (nonce 32), 10/10 checks; first 300,000 ARL period not funded yet                      |
+| Compute payment on Base Mainnet                                 | LIVE       | `0x1bFE…E464` (nonce 31), paid in ARL, no owner; 10/10 checks on 2026-11-12                                   |
 | Operator API for x402 on Base Mainnet                           | PLANNED    | [mainnet-services.md](mainnet-services.md), step 3                                                            |
 | Base Sepolia staking, signal and jobs with the 2026-10-28 fixes | PLANNED    | Rehearsal passed on a fork on 2026-10-30; the testnet operator key signs                                      |
 | Auditor confirmation of the 2026-10-28 fixes                    | UNVERIFIED | Fixes merged (#105); the auditor's proofs of concept have not been run against them                           |

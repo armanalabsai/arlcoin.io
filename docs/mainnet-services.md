@@ -32,12 +32,12 @@ Deploy screen (`arlcoin.io/app/deploy/?plan=…`):
 |    24 | `8453-verified-jobs-usdc-v2`              | `ARLVerifiedEvaluator` for it, bonds in ARL                 | `0x4f7f61916d65ff9E7C5F62468a18E37d4Fb07FA7` | Retired: report 2026-10-31 |
 |    25 | `8453-verified-jobs-arl-v2`               | `ARLJobs`, paid in ARL (audit fixes)                        | `0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9` | Deployed                   |
 |    26 | `8453-verified-jobs-arl-v2`               | `ARLVerifiedEvaluator` for it, bonds in ARL                 | `0xa2f8945f301C46f2649b79Cd42A7eb1102e9009E` | Retired: report 2026-10-31 |
-|    27 | `8453-verified-evaluator-arl-v3`          | `ARLVerifiedEvaluator` for the ARL escrow (acceptance fix)  | `0x817E13e512fF810B0ECe0EE278bf112a3947DAd6` | Deployed                   |
-|    28 | `8453-verified-evaluator-usdc-v3`         | `ARLVerifiedEvaluator` for the USDC escrow (acceptance fix) | `0x3F4EA7f388bcFf00267aEB21446ef005Fea784c9` | Deployed                   |
-|    29 | `8453-verified-evaluator-arl-v4`          | `ARLVerifiedEvaluator` v4 for the ARL escrow                | `0x5cA6dab18E6b9a5Cd44a4FfFBdf2c5BA3Cd87DfF` | Planned                    |
-|    30 | `8453-verified-evaluator-usdc-v4`         | `ARLVerifiedEvaluator` v4 for the USDC escrow               | `0x8C017f24615AC749Ec7297FB07b14E558B670CFC` | Planned                    |
-|    31 | `8453-services`                           | `ComputePayment`, paid in ARL                               | `0x1bFE932896fdd32175836a7364dcaf53d49EE464` | Planned                    |
-|    32 | `8453-services`                           | `ARLStakingRewards`, ARL, 180-day periods                   | `0x15e257009BE9B1875fbfa69D291320aaFE3fa102` | Planned                    |
+|    27 | `8453-verified-evaluator-arl-v3`          | `ARLVerifiedEvaluator` for the ARL escrow (acceptance fix)  | `0x817E13e512fF810B0ECe0EE278bf112a3947DAd6` | Retired: v4 2026-11-12     |
+|    28 | `8453-verified-evaluator-usdc-v3`         | `ARLVerifiedEvaluator` for the USDC escrow (acceptance fix) | `0x3F4EA7f388bcFf00267aEB21446ef005Fea784c9` | Retired: v4 2026-11-12     |
+|    29 | `8453-verified-evaluator-arl-v4`          | `ARLVerifiedEvaluator` v4 for the ARL escrow                | `0x5cA6dab18E6b9a5Cd44a4FfFBdf2c5BA3Cd87DfF` | Deployed                   |
+|    30 | `8453-verified-evaluator-usdc-v4`         | `ARLVerifiedEvaluator` v4 for the USDC escrow               | `0x8C017f24615AC749Ec7297FB07b14E558B670CFC` | Deployed                   |
+|    31 | `8453-services`                           | `ComputePayment`, paid in ARL                               | `0x1bFE932896fdd32175836a7364dcaf53d49EE464` | Deployed                   |
+|    32 | `8453-services`                           | `ARLStakingRewards`, ARL, 180-day periods                   | `0x15e257009BE9B1875fbfa69D291320aaFE3fa102` | Deployed                   |
 
 `8453-verified-jobs-usdc` and `8453-verified-jobs-arl` are invalid, do not use: they hold pre-audit
 bytecode (before the audit fixes of 2026-10-28) and the deploy screen refuses them. Their `-v2`
@@ -49,14 +49,15 @@ impersonated at nonce 23, nothing sent): every contract was created at the addre
 Every address follows from the deployer and its nonce: any other transaction from the deployer
 before them shifts the addresses, and the Deploy screen then refuses the plan.
 
-### Compute payment and staking (planned)
+### Compute payment and staking
 
 `8453-services` (`DeployMainnetServices`, nonces 31 and 32, after the v4 evaluators) creates
 `ComputePayment` (per-second streams in ARL) and `ARLStakingRewards` (stake ARL, rewards in ARL,
 180-day periods). Neither has an owner. Only the Community & Staking Safe
 `0xfF12597A671ebAF0cAe37999EE659e03c4f444B5` (2 of 3) can fund a reward period; the first period
 is 300,000 ARL (owner decision of 2026-11-01), funded by the Safe afterwards with `approve` and
-`notifyRewardAmount`. Rehearsal (Base Mainnet fork, v4 evaluators applied first, deployer
+`notifyRewardAmount`. Signed on 2026-11-12; `services-record-cli.ts` passed all ten checks on Base
+Mainnet (record `contracts/deploy/base-mainnet-services.json`). The reward period is not funded yet. Rehearsal (Base Mainnet fork, v4 evaluators applied first, deployer
 impersonated, nothing sent): both contracts were created at the addresses above,
 `services-record-cli.ts` passed all ten checks, and the Safe funded 300,000 ARL (reward rate
 0.01929 ARL per second for 180 days). After signing:
@@ -65,15 +66,15 @@ impersonated, nothing sent): both contracts were created at the addresses above,
 node packages/deploy/src/services-record-cli.ts <run.json> https://mainnet.base.org   contracts/deploy/deployments/8453-services.json
 ```
 
-### Evaluator v4 (planned)
+### Evaluator v4
 
 `8453-verified-evaluator-arl-v4` (nonce 29) and `8453-verified-evaluator-usdc-v4` (nonce 30) replace
 the evaluators at nonces 27 and 28 for the escrows already on chain, with the same parameters.
 Rehearsal (Base Mainnet fork, deployer impersonated at nonce 29, nothing sent): both evaluators
 were created at the addresses above and `jobs-record-cli.ts` passed all nine checks for each. Sign
 the ARL plan first, then the USDC plan; any other transaction from the deployer before them shifts
-the addresses, and the Deploy screen then refuses the plans. Until they are signed and recorded,
-the evaluators at nonces 27 and 28 stay the ones in service.
+the addresses, and the Deploy screen then refuses the plans. Both were signed on 2026-11-12 and `jobs-record-cli.ts` passed all nine checks for each on Base
+Mainnet; the evaluators at nonces 27 and 28 are retired.
 
 ### Acceptance fix (security report 2026-10-31)
 
