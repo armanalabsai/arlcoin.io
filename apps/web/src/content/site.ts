@@ -19,8 +19,12 @@ export const SITE = {
     x: "https://x.com/arlprotocol",
     /** X handle, for card metadata. */
     xHandle: "@arlprotocol",
-    /** Community group. */
+    /** Announcement channel. */
     telegram: "https://t.me/arlprotocol_community",
+    /** Community chat group. */
+    telegramChat: "https://t.me/arlprotocol_chat",
+    devto: "https://dev.to/armanalabs_b86b3803a4445c",
+    productHunt: "https://www.producthunt.com/products/arl-protocol",
   },
   /** Base Sepolia (testnet) deployment, source-verified on Basescan, Blockscout and Sourcify. */
   testnet: {
