@@ -170,11 +170,13 @@ contract ARLVerifiedEvaluatorHandler is Test {
         uint256 id = _id(j);
         if (id == 0) return;
         uint256 bond = ev.getVerdict(id).bond;
-        uint256 budget = jobs.getJob(id).budget;
+        ARLJobs.Job memory job = jobs.getJob(id);
+        // After a refund the ruling settles only the bonds; the escrow already left.
+        bool escrowed = job.status == ARLJobs.JobStatus.Submitted;
         vm.prank(arbiter);
         try ev.resolve(id, approve, bytes32(0)) {
             ghostOpenChallengeBonds -= bond;
-            ghostSettled += budget;
+            if (escrowed) ghostSettled += job.budget;
         } catch {}
     }
 
@@ -199,11 +201,8 @@ contract ARLVerifiedEvaluatorHandler is Test {
     function release(uint256 j) external {
         uint256 id = _id(j);
         if (id == 0) return;
-        bool disputed = ev.getVerdict(id).phase == ARLVerifiedEvaluator.Phase.Disputed;
-        uint256 bond = ev.getVerdict(id).bond;
-        try ev.release(id) {
-            if (disputed) ghostOpenChallengeBonds -= bond;
-        } catch {}
+        // A disputed job is never released; the arbiter rules on it.
+        try ev.release(id) {} catch {}
     }
 
     /// Moves one job to its next phase with the expected caller: submit, a committee vote, a

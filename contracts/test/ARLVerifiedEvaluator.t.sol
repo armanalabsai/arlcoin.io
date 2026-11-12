@@ -786,12 +786,39 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         ev.vote(id, true, WORK, EVIDENCE);
     }
 
-    function test_RevertWhen_VoteDeliverableMismatch() public {
+    function test_RevertWhen_VoteApprovesNoDeliverable() public {
         uint256 id = _submitted();
-        _vote(id, v1, true);
-        vm.prank(v2);
+        vm.prank(v1);
         vm.expectRevert(ARLVerifiedEvaluator.DeliverableMismatch.selector);
-        ev.vote(id, true, keccak256("other"), EVIDENCE);
+        ev.vote(id, true, bytes32(0), EVIDENCE);
+    }
+
+    /// Bug bounty 2026-11-03 (E1): a first approval of a wrong hash no longer fixes the
+    /// deliverable, so the honest approvals of the submitted work still reach the threshold.
+    function test_poisonedFirstApprovalCannotBlockTheHonestOnes() public {
+        uint256 id = _submitted();
+        vm.prank(v1);
+        ev.vote(id, true, keccak256("garbage"), EVIDENCE);
+        _vote(id, v2, true);
+        assertEq(uint256(_phase(id)), uint256(ARLVerifiedEvaluator.Phase.Configured));
+        _vote(id, v3, true);
+        assertEq(uint256(_phase(id)), uint256(ARLVerifiedEvaluator.Phase.Approved));
+        assertEq(ev.getVerdict(id).deliverable, WORK);
+
+        vm.warp(ev.getVerdict(id).challengeEnds);
+        uint256 providerBefore = token.balanceOf(provider);
+        ev.finalize(id);
+        assertEq(token.balanceOf(provider), providerBefore + BUDGET);
+    }
+
+    /// Approvals split over two hashes so that neither can reach the threshold: rejected.
+    function test_splitApprovalsThatCannotReachTheThresholdReject() public {
+        uint256 id = _submitted();
+        vm.prank(v1);
+        ev.vote(id, true, keccak256("garbage"), EVIDENCE);
+        _vote(id, v2, true);
+        _vote(id, v3, false);
+        assertEq(uint256(_phase(id)), uint256(ARLVerifiedEvaluator.Phase.Rejected));
     }
 
     // ---------------------------------------------------------------- non-vote penalty
@@ -1283,45 +1310,82 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         ev.release(id);
     }
 
-    /// A dispute the arbiter does not rule on before the deadline ends in a refund: the ruling
-    /// can no longer move the escrow, and `release` returns the challenger's bond.
-    function test_RevertWhen_ResolveAfterExpiry() public {
+    /// Bug bounty 2026-11-03 (DELTA-1): a ruling after the deadline still settles the bonds;
+    /// the escrow can only go back to the client.
+    function test_resolveAfterExpiryOverturnSlashesAndRefunds() public {
+        uint256 id = _approved();
+        vm.prank(challenger);
+        ev.dispute(id, EVIDENCE);
+        uint256 challengerAfterDispute = token.balanceOf(challenger);
+        uint256 clientBefore = token.balanceOf(client);
+        uint256 sinkBefore = token.balanceOf(SINK);
+        vm.warp(jobs.getJob(id).expiredAt);
+
+        vm.prank(arbiter);
+        ev.resolve(id, false, bytes32(0));
+
+        assertEq(token.balanceOf(SINK), sinkBefore + 2 * BOND); // v1 and v2 approved
+        assertEq(token.balanceOf(challenger), challengerAfterDispute + BOND);
+        assertEq(token.balanceOf(client), clientBefore + BUDGET);
+        assertEq(uint256(_status(id)), uint256(ARLJobs.JobStatus.Expired));
+        assertEq(uint256(_phase(id)), uint256(ARLVerifiedEvaluator.Phase.Finalized));
+        assertEq(_lockedTotal(), 0);
+    }
+
+    /// Someone refunds before the ruling: the ruling still settles the bonds (here it stands, so
+    /// the challenger's bond is burned).
+    function test_resolveAfterRefundStillSettlesBonds() public {
         uint256 id = _approved();
         vm.prank(challenger);
         ev.dispute(id, EVIDENCE);
         vm.warp(jobs.getJob(id).expiredAt);
+        jobs.claimRefund(id);
+        uint256 sinkBefore = token.balanceOf(SINK);
+
         vm.prank(arbiter);
-        vm.expectRevert(ARLJobs.JobExpiredAlready.selector);
         ev.resolve(id, true, bytes32(0));
+
+        assertEq(token.balanceOf(SINK), sinkBefore + BOND);
+        assertEq(ev.stakeOf(v1), STAKE);
+        assertEq(uint256(_phase(id)), uint256(ARLVerifiedEvaluator.Phase.Finalized));
+        assertEq(_lockedTotal(), 0);
     }
 
     // ---------------------------------------------------------------- release
 
-    function test_releaseAfterExpiryWhileDisputed() public {
+    /// Bug bounty 2026-11-03 (DELTA-1): a refund cannot erase a pending dispute.
+    function test_RevertWhen_ReleaseDisputedAfterExpiry() public {
         uint256 id = _approved();
         vm.prank(challenger);
         ev.dispute(id, EVIDENCE);
-        uint256 challengerBefore = token.balanceOf(challenger);
-
-        vm.expectRevert(ARLVerifiedEvaluator.WrongJobStatus.selector);
-        ev.release(id);
-
         vm.warp(jobs.getJob(id).expiredAt);
         jobs.claimRefund(id);
+        vm.expectRevert(ARLVerifiedEvaluator.WrongPhase.selector);
+        ev.release(id);
+        assertEq(uint256(_phase(id)), uint256(ARLVerifiedEvaluator.Phase.Disputed));
+    }
+
+    /// Bug bounty 2026-11-03 (release bypass): after a refund, releasing an undecided vote slashes
+    /// the members who accepted and did not vote, as `closeUndecided` does.
+    function test_releaseAfterUndecidedVoteSlashesAbsentees() public {
+        uint256 id = _submitted();
+        _vote(id, v1, true); // v2 and v3 accepted and never vote
+        vm.warp(jobs.getJob(id).expiredAt);
+        jobs.claimRefund(id);
+        uint256 sinkBefore = token.balanceOf(SINK);
+
         vm.expectEmit(address(ev));
-        emit ARLVerifiedEvaluator.Released(id);
+        emit ARLVerifiedEvaluator.Failed(id);
         ev.release(id);
 
-        assertEq(token.balanceOf(challenger), challengerBefore + BOND);
-        assertEq(_lockedTotal(), 0);
+        assertEq(token.balanceOf(SINK), sinkBefore + 2 * BOND);
         assertEq(ev.stakeOf(v1), STAKE);
-        assertEq(uint256(_phase(id)), uint256(ARLVerifiedEvaluator.Phase.Released));
-
+        assertEq(ev.stakeOf(v2), STAKE - BOND);
+        assertEq(ev.stakeOf(v3), STAKE - BOND);
+        assertEq(_lockedTotal(), 0);
+        assertEq(uint256(_phase(id)), uint256(ARLVerifiedEvaluator.Phase.Failed));
         vm.expectRevert(ARLVerifiedEvaluator.WrongPhase.selector);
-        ev.release(id);
-        vm.prank(arbiter);
-        vm.expectRevert(ARLVerifiedEvaluator.WrongPhase.selector);
-        ev.resolve(id, true, bytes32(0));
+        ev.closeUndecided(id);
     }
 
     function test_releaseAfterClientCancelsOpenJob() public {
