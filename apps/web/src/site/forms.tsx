@@ -48,20 +48,17 @@ async function send(subject: string, fields: Record<string, string>): Promise<St
 
 /** Stores a whitelist registration in the database. Existing entries answer the same as new ones. */
 async function store(wallet: string, email: string): Promise<Status> {
-  if (!WHITELIST_DB.url) return { kind: "sent" };
+  if (!WHITELIST_DB.endpoint) return { kind: "sent" };
   try {
-    const res = await fetch(WHITELIST_DB.url + WHITELIST_DB.rpc, {
+    const res = await fetch(WHITELIST_DB.endpoint, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: WHITELIST_DB.publishableKey,
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        p_wallet: wallet,
-        p_email: email,
-        p_notice_version: PRIVACY_NOTICE_VERSION,
-        p_privacy_accepted: true,
-        p_transfer_consent: true,
+        wallet,
+        email,
+        noticeVersion: PRIVACY_NOTICE_VERSION,
+        privacyAccepted: true,
+        transferConsent: true,
       }),
     });
     if (res.ok) return { kind: "sent" };
@@ -316,9 +313,9 @@ export function WhitelistForm() {
           .
         </Check>
         <Check name="transfer" error={errors.transfer}>
-          I consent to my wallet address and email being stored with Supabase in the European Union
-          and sent to the team by email through Web3Forms, which may be outside my country, as
-          described in the privacy notice.
+          I consent to my wallet address and email being stored in ARL&apos;s own database on
+          Cloudflare in Western Europe and sent to the team by email through Web3Forms, which may be
+          outside my country, as described in the privacy notice.
         </Check>
       </div>
       <Submit status={status} label="Register" />

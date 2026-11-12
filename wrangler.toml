@@ -7,3 +7,10 @@ pages_build_output_dir = "dist"
 compatibility_date = "2026-10-01"
 # process.env carries the project variables (ARL_OPERATOR_KEY) to the operator API.
 compatibility_flags = ["nodejs_compat"]
+
+# Whitelist registrations (functions/api/whitelist.js): ARL's own D1 database, schema in
+# db/whitelist/. It shares nothing with any other project.
+[[d1_databases]]
+binding = "WHITELIST_DB"
+database_name = "arl-whitelist"
+database_id = "e3a4ac67-d31a-46a6-9e3b-2fae3d094a1c"
