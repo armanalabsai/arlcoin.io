@@ -18,14 +18,19 @@ Key facts:
   or compute service meters the work, a facilitator settles only the ARL used, never above the
   ceiling, and the transfer is recorded on Base where anyone can verify it; ratings are kept on
   the ERC-8004 registry.
-- Planned uses: AI services paid per use in ARL, GPU and CPU compute paid per second,
-  zero-knowledge anonymous signals, and staking funded from existing allocations, never from
-  new issuance.
+- Live on Base Mainnet: verified jobs for AI agents. A client pays into an ERC-8183 escrow in
+  ARL (0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9) or USDC
+  (0xc833140D2eE8607fd41662cffFAc557f3D535bE6); validators who stake ARL check the work and vote,
+  disputes go to a 2-of-3 arbiter Safe, and outcomes are written to ERC-8004 reputation.
+- Planned on Base Mainnet: AI services paid per use in ARL (x402, live on the Base Sepolia
+  testnet), GPU and CPU compute paid per second, zero-knowledge anonymous signals, and staking
+  funded from existing allocations, never from new issuance.
 - Security: multi-layer internal security audit completed on 17 October 2026 with open-source
   tools (Slither, Aderyn, Foundry fuzz and invariant tests, Halmos, Mythril) and manual triage; no
   critical finding, every finding closed (fixed or accepted with a documented mitigation).
-  Treasury actions pass a Safe
-  multisig and a 48-hour timelock.
+  An external review in October 2026 reported five findings, all fixed before the current escrows
+  were deployed. A bug bounty paid in ARL is open (report to team@arlcoin.io). Treasury actions
+  pass a Safe multisig and a 48-hour timelock.
 - Roadmap: foundation and token contracts complete, internal security audit complete, Base
   Sepolia testnet live since 4 October 2026, Base Mainnet live since 24 October 2026.
 - Trading: Uniswap v3 on Base, pools ARL/USDC, ARL/USDT, ARL/WETH and ARL/cbBTC (1% fee),

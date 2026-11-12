@@ -65,10 +65,10 @@ test.describe("forms open", () => {
       bodies.push(route.request().postDataJSON() as Record<string, unknown>);
       await route.fulfill({ json: { success: true, body: { message: "ok" } } });
     });
-    await page.route(WHITELIST_DB.url + WHITELIST_DB.rpc, async (route) => {
-      expect(route.request().headers().apikey).toBe(WHITELIST_DB.publishableKey);
+    await page.route("**" + WHITELIST_DB.endpoint, async (route) => {
+      expect(route.request().headers().apikey).toBeUndefined();
       stored.push(route.request().postDataJSON() as Record<string, unknown>);
-      await route.fulfill({ json: "ok" });
+      await route.fulfill({ json: { ok: true } });
     });
     await page.goto("/whitelist");
     const form = page.getByRole("form", { name: "Whitelist registration" });
@@ -95,11 +95,11 @@ test.describe("forms open", () => {
     await expect(page.getByRole("status")).toContainText("You are registered");
     expect(stored).toEqual([
       {
-        p_wallet: "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
-        p_email: "holder@example.com",
-        p_notice_version: PRIVACY_NOTICE_VERSION,
-        p_privacy_accepted: true,
-        p_transfer_consent: true,
+        wallet: "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+        email: "holder@example.com",
+        noticeVersion: PRIVACY_NOTICE_VERSION,
+        privacyAccepted: true,
+        transferConsent: true,
       },
     ]);
     expect(bodies).toHaveLength(1);
@@ -118,7 +118,7 @@ test.describe("forms open", () => {
       emails++;
       await route.fulfill({ json: { success: true } });
     });
-    await page.route(WHITELIST_DB.url + WHITELIST_DB.rpc, (route) =>
+    await page.route("**" + WHITELIST_DB.endpoint, (route) =>
       route.fulfill({ status: 500, json: { message: "error" } }),
     );
     await page.goto("/whitelist");
