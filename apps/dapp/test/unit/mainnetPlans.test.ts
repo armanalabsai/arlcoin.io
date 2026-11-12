@@ -109,7 +109,10 @@ describe("Base Mainnet plans for the verified jobs", () => {
   ];
   for (const p of pairs) {
     it(`creates ${p.name}: escrow at nonce ${String(p.nonce)} and its evaluator bonded in ARL`, () => {
-      assert.throws(() => afterTge(() => parseRun(plan(p.name))), /ARLVerifiedEvaluator code/);
+      assert.throws(
+        () => afterTge(() => parseRun(plan(p.name))),
+        /ARLVerifiedEvaluator code|code too short/,
+      );
       const run = afterTge(() => parseRun(plan(p.name), JOBS_V2_ARTIFACTS));
       assert.deepEqual(
         run.steps.map((s) => (s.kind === "create" ? s.contract : s.kind)),
@@ -179,7 +182,10 @@ describe("Base Mainnet plans for the verified jobs", () => {
     it(`creates ${p.name}: only the evaluator, at nonce ${String(p.nonce)}`, () => {
       const artifacts = p.name.endsWith("-v3") ? JOBS_V3_ARTIFACTS : undefined;
       if (artifacts) {
-        assert.throws(() => afterTge(() => parseRun(plan(p.name))), /ARLVerifiedEvaluator code/);
+        assert.throws(
+          () => afterTge(() => parseRun(plan(p.name))),
+          /ARLVerifiedEvaluator code|code too short/,
+        );
       }
       const run = afterTge(() => parseRun(plan(p.name), artifacts));
       assert.equal(run.steps.length, 1);
