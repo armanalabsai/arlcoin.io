@@ -116,6 +116,7 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         bool providerApproved;
         uint8 approvals;
         uint8 rejections;
+        uint8 topApprovals;
         uint64 voteEnds;
         uint64 challengeEnds;
         address challenger;
@@ -170,6 +171,8 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
     mapping(uint256 jobId => Config) private _configs;
     mapping(uint256 jobId => Verdict) private _verdicts;
     mapping(uint256 jobId => mapping(address validator => uint8)) private _votes;
+    /// Approvals per deliverable hash: a decision needs `threshold` approvals of the same hash.
+    mapping(uint256 jobId => mapping(bytes32 deliverable => uint8)) private _approvalsFor;
 
     event Staked(address indexed validator, uint256 amount);
     event Unstaked(address indexed validator, uint256 amount);
@@ -364,8 +367,9 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
     }
 
     /// @notice Member that accepted only, once the job is Submitted, within the vote window and
-    /// before a decision. Every approval must name the same deliverable (the hash the provider
-    /// submitted, which the voter checked).
+    /// before a decision. An approval names the deliverable the voter checked (the hash the
+    /// provider submitted); the job is approved once `threshold` approvals name the same hash, so a
+    /// member approving a different hash cannot block the others.
     function vote(uint256 jobId, bool approve, bytes32 deliverable, bytes32 evidence)
         external
         nonReentrant
@@ -383,8 +387,12 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         }
 
         if (approve) {
-            if (v.approvals == 0) v.deliverable = deliverable;
-            else if (v.deliverable != deliverable) revert DeliverableMismatch();
+            if (deliverable == bytes32(0)) revert DeliverableMismatch();
+            uint8 count = ++_approvalsFor[jobId][deliverable];
+            if (count > v.topApprovals) {
+                v.topApprovals = count;
+                v.deliverable = deliverable;
+            }
             ++v.approvals;
             _votes[jobId][msg.sender] = APPROVED;
         } else {
@@ -396,9 +404,11 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
 
         Config storage cfg = _configs[jobId];
         uint256 threshold = cfg.threshold;
-        if (v.approvals == threshold) {
+        uint256 open = cfg.committee.length - v.approvals - v.rejections;
+        if (v.topApprovals == threshold) {
             _decide(jobId, v, Phase.Approved, cfg.challengeWindow);
-        } else if (v.rejections > cfg.committee.length - threshold) {
+        } else if (v.topApprovals + open < threshold) {
+            // No deliverable can reach the threshold any more.
             _decide(jobId, v, Phase.Rejected, cfg.challengeWindow);
         }
     }
@@ -452,15 +462,16 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         _settle(jobId, v, phase == Phase.Approved);
     }
 
-    /// @notice Arbiter only, on a disputed job that is still Submitted. If the ruling overturns the
-    /// decision, the bonds of the validators who voted for it are burned and the challenger gets
-    /// its bond back; if it stands, the challenger's bond is burned.
+    /// @notice Arbiter only, on a disputed job. If the ruling overturns the decision, the bonds of
+    /// the validators who voted for it are burned and the challenger gets its bond back; if it
+    /// stands, the challenger's bond is burned. The ruling stays possible after the job's deadline:
+    /// the bonds are then settled the same way, and the escrow can only go back to the client.
     function resolve(uint256 jobId, bool approve, bytes32 reason) external nonReentrant {
         if (msg.sender != arbiter) revert Unauthorized();
         Verdict storage v = _verdicts[jobId];
         if (v.phase != Phase.Disputed) revert WrongPhase();
 
-        bool decidedApproved = v.approvals == _configs[jobId].threshold;
+        bool decidedApproved = v.topApprovals == _configs[jobId].threshold;
         bool overturned = approve != decidedApproved;
         emit Resolved(jobId, approve, overturned, reason);
 
@@ -471,29 +482,43 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
             emit Slashed(jobId, challenger, bond);
             burned += bond;
         }
-        _settle(jobId, v, approve);
+        ARLJobs.Job memory job = jobs.getJob(jobId);
+        // slither-disable-next-line timestamp
+        if (job.status == ARLJobs.JobStatus.Submitted && block.timestamp < job.expiredAt) {
+            _settle(jobId, v, approve);
+        } else {
+            // After the deadline the escrow can only go back to the client.
+            v.phase = Phase.Finalized;
+            emit Finalized(jobId, false, v.voteHash);
+            if (job.status == ARLJobs.JobStatus.Submitted) jobs.claimRefund(jobId);
+        }
         if (burned != 0) stakeToken.safeTransfer(SLASH_SINK, burned);
         if (overturned) stakeToken.safeTransfer(challenger, bond);
     }
 
     /// @notice Anyone, once the job has left `ARLJobs` without this contract settling it (expired
-    /// and refunded, or rejected by its client while Open): unlocks every bond and returns a
-    /// challenger's bond. Nothing is slashed.
+    /// and refunded, or rejected by its client while Open): unlocks every bond. If a vote had
+    /// started and ended undecided, the members who accepted and did not vote are slashed, as in
+    /// `closeUndecided`. A disputed job is not released: the arbiter rules on it (also after the
+    /// deadline), so a pending dispute cannot be erased by the refund.
     function release(uint256 jobId) external nonReentrant {
         Verdict storage v = _verdicts[jobId];
         Phase phase = v.phase;
         if (
             phase == Phase.None || phase == Phase.Finalized || phase == Phase.Released
-                || phase == Phase.Failed
+                || phase == Phase.Failed || phase == Phase.Disputed
         ) revert WrongPhase();
         ARLJobs.JobStatus status = jobs.getJob(jobId).status;
         if (status != ARLJobs.JobStatus.Expired && status != ARLJobs.JobStatus.Rejected) {
             revert WrongJobStatus();
         }
-        v.phase = Phase.Released;
-        emit Released(jobId);
-        _unlock(jobId, 0, false);
-        if (phase == Phase.Disputed) stakeToken.safeTransfer(v.challenger, v.bond);
+        // An open vote ends before the deadline, so a started, undecided vote is over here.
+        bool undecided = phase == Phase.Configured && v.voteEnds != 0;
+        v.phase = undecided ? Phase.Failed : Phase.Released;
+        if (undecided) emit Failed(jobId);
+        else emit Released(jobId);
+        uint256 burned = _unlock(jobId, ABSENT, undecided);
+        if (burned != 0) stakeToken.safeTransfer(SLASH_SINK, burned);
     }
 
     // ---------------------------------------------------------------- views

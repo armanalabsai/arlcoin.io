@@ -34,6 +34,8 @@ Deploy screen (`arlcoin.io/app/deploy/?plan=…`):
 |    26 | `8453-verified-jobs-arl-v2`               | `ARLVerifiedEvaluator` for it, bonds in ARL                 | `0xa2f8945f301C46f2649b79Cd42A7eb1102e9009E` | Retired: report 2026-10-31 |
 |    27 | `8453-verified-evaluator-arl-v3`          | `ARLVerifiedEvaluator` for the ARL escrow (acceptance fix)  | `0x817E13e512fF810B0ECe0EE278bf112a3947DAd6` | Deployed                   |
 |    28 | `8453-verified-evaluator-usdc-v3`         | `ARLVerifiedEvaluator` for the USDC escrow (acceptance fix) | `0x3F4EA7f388bcFf00267aEB21446ef005Fea784c9` | Deployed                   |
+|    29 | `8453-verified-evaluator-arl-v4`          | `ARLVerifiedEvaluator` v4 for the ARL escrow                | `0x5cA6dab18E6b9a5Cd44a4FfFBdf2c5BA3Cd87DfF` | Planned                    |
+|    30 | `8453-verified-evaluator-usdc-v4`         | `ARLVerifiedEvaluator` v4 for the USDC escrow               | `0x8C017f24615AC749Ec7297FB07b14E558B670CFC` | Planned                    |
 
 `8453-verified-jobs-usdc` and `8453-verified-jobs-arl` are invalid, do not use: they hold pre-audit
 bytecode (before the audit fixes of 2026-10-28) and the deploy screen refuses them. Their `-v2`
@@ -44,6 +46,16 @@ impersonated at nonce 23, nothing sent): every contract was created at the addre
 `jobs-record-cli.ts` passed all nine checks for each pair.
 Every address follows from the deployer and its nonce: any other transaction from the deployer
 before them shifts the addresses, and the Deploy screen then refuses the plan.
+
+### Evaluator v4 (planned)
+
+`8453-verified-evaluator-arl-v4` (nonce 29) and `8453-verified-evaluator-usdc-v4` (nonce 30) replace
+the evaluators at nonces 27 and 28 for the escrows already on chain, with the same parameters.
+Rehearsal (Base Mainnet fork, deployer impersonated at nonce 29, nothing sent): both evaluators
+were created at the addresses above and `jobs-record-cli.ts` passed all nine checks for each. Sign
+the ARL plan first, then the USDC plan; any other transaction from the deployer before them shifts
+the addresses, and the Deploy screen then refuses the plans. Until they are signed and recorded,
+the evaluators at nonces 27 and 28 stay the ones in service.
 
 ### Acceptance fix (security report 2026-10-31)
 
