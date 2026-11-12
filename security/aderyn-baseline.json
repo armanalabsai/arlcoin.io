@@ -2,7 +2,8 @@
   "reviewed": [
     "security/2026-10-17/triage.md",
     "security/2026-10-18-evaluator-triage.md",
-    "security/2026-10-28-audit-triage.md"
+    "security/2026-10-28-audit-triage.md",
+    "security/2026-11-12-evaluator-v4-triage.md"
   ],
   "results": [
     "contract-locks-ether src/ARLVestingWallet.sol:23",
@@ -29,6 +30,7 @@
     "reentrancy-state-change src/ARLVerifiedEvaluator.sol:318",
     "reentrancy-state-change src/ARLVerifiedEvaluator.sol:335",
     "reentrancy-state-change src/ARLVerifiedEvaluator.sol:380",
+    "reentrancy-state-change src/ARLVerifiedEvaluator.sol:485",
     "reentrancy-state-change src/ARLVerifiedEvaluator.sol:511",
     "require-revert-in-loop src/ARLAnonymousSignal.sol:220",
     "require-revert-in-loop src/ARLVerifiedEvaluator.sol:291",
