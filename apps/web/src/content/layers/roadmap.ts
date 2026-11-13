@@ -76,15 +76,27 @@ export const roadmap: Layer = {
       links: [{ label: "Open the app", href: "https://arlcoin.io/app/verified/" }],
     },
     {
-      id: "services",
-      title: "Compute, Staking and AI Payments",
-      shortDescription: "The next services on ARL",
-      progress: "active",
+      id: "compute-staking",
+      title: "Compute Payments and Staking",
+      shortDescription: "Contracts deployed on Base Mainnet",
+      progress: "done",
       weight: "tertiary",
-      metric: { kind: "static", value: "Rolling out on Base Mainnet" },
+      metric: { kind: "static", value: "Deployed 2026-11-12" },
       detail: {
         summary:
-          'The compute payment contract and the staking contract were deployed on Base Mainnet on 12 November 2026. Staking runs 180-day reward periods funded by the Community & Staking Safe and opens when the first period is funded. Per-use AI payments (x402 "upto"), the provider marketplace and anonymous polls follow, each after its own deployment and verification.',
+          "The compute payment contract and the staking contract were deployed on Base Mainnet on 12 November 2026. Staking runs 180-day reward periods funded by the Community & Staking Safe, never by new issuance, and opens when the first period is funded.",
+      },
+    },
+    {
+      id: "services",
+      title: "AI Payments and Marketplace",
+      shortDescription: "The next services on ARL",
+      progress: "next",
+      weight: "tertiary",
+      metric: { kind: "static", value: "Next on Base Mainnet" },
+      detail: {
+        summary:
+          'Per-use AI payments (x402 "upto"), the GPU and CPU provider marketplace and anonymous polls are built and tested. Each goes live on Base Mainnet after its own deployment and verification.',
       },
     },
   ],
