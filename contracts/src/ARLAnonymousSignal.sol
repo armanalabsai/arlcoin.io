@@ -42,6 +42,8 @@ interface IARLSignalVerifier {
 /// @dev The verifier is immutable and the contract has no owner; nullifiers live in one mapping
 /// shared by every group.
 contract ARLAnonymousSignal {
+    /// @notice A scope carries its group id above this bit (`scopeFor`).
+    uint256 public constant SCOPE_GROUP_SHIFT = 128;
     /// @notice BN254 scalar field order; roots and nullifiers are field elements.
     uint256 public constant SNARK_FIELD =
         21_888_242_871_839_275_222_246_405_745_257_275_088_548_364_400_416_034_343_698_204_186_575_808_495_617;
@@ -182,7 +184,7 @@ contract ARLAnonymousSignal {
             // slither-disable-next-line timestamp
             if (block.timestamp > replacedAt + ROOT_GRACE_PERIOD) revert SignalRootExpired(root);
         }
-        if (scope >> 128 != groupId) revert SignalScopeNotForGroup(scope, groupId);
+        if (scope >> SCOPE_GROUP_SHIFT != groupId) revert SignalScopeNotForGroup(scope, groupId);
         if (_nullifiers[nullifier]) revert SignalNullifierUsed(nullifier);
 
         bytes32[] memory publicInputs = new bytes32[](4);
@@ -200,7 +202,7 @@ contract ARLAnonymousSignal {
 
     /// @notice The scope of poll `pollId` in group `groupId`: the group id in the upper 128 bits.
     function scopeFor(uint256 groupId, uint128 pollId) external pure returns (uint256) {
-        return (groupId << 128) | pollId;
+        return (groupId << SCOPE_GROUP_SHIFT) | pollId;
     }
 
     function groupAdmin(uint256 groupId) external view returns (address) {

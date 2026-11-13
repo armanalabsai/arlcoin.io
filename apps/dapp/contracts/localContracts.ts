@@ -35,6 +35,19 @@ const localContracts = {
         },
         {
           type: "function",
+          name: "SCOPE_GROUP_SHIFT",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
           name: "SNARK_FIELD",
           inputs: [],
           outputs: [
