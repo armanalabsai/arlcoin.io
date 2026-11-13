@@ -4,7 +4,6 @@ import type { Metadata, Viewport } from "next";
 
 import { organizationJsonLd } from "@/content/seo.ts";
 import { SITE } from "@/content/site.ts";
-import { NucleusField } from "@/core/NucleusField.tsx";
 import { InfrastructureStrip } from "@/site/InfrastructureStrip.tsx";
 import { JsonLd } from "@/site/JsonLd.tsx";
 import { SmoothScroll } from "@/site/SmoothScroll.tsx";
@@ -57,7 +56,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#050b1e",
+  themeColor: "#0a1226",
   colorScheme: "dark",
   width: "device-width",
   initialScale: 1,
@@ -68,7 +67,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <JsonLd data={organizationJsonLd} />
-        <NucleusField />
         {children}
         <InfrastructureStrip />
         <SoftNavigation />

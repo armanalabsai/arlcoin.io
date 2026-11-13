@@ -3,29 +3,29 @@
   themes: false;
 }
 
-/* ARL night blue with ice blue (same palette as the website, apps/web: white text, ice-blue accents). */
+/* ARL midnight navy with champagne gold (same palette as the website, apps/web: pearl text, gold accents). */
 @plugin "daisyui/theme" {
   name: "arl";
   default: true;
   color-scheme: dark;
-  --color-base-100: #050b1e;
-  --color-base-200: #0a1430;
-  --color-base-300: #142147;
-  --color-base-content: #f5f7fa;
-  --color-primary: #9fd8ff;
-  --color-primary-content: #050b1e;
-  --color-secondary: #0f1a3b;
-  --color-secondary-content: #f5f7fa;
-  --color-accent: #c8ebff;
-  --color-accent-content: #050b1e;
-  --color-neutral: #142147;
-  --color-neutral-content: #f5f7fa;
+  --color-base-100: #0a1226;
+  --color-base-200: #0f1a33;
+  --color-base-300: #1a2a4d;
+  --color-base-content: #efe9df;
+  --color-primary: #d9b77a;
+  --color-primary-content: #0a1226;
+  --color-secondary: #13203d;
+  --color-secondary-content: #efe9df;
+  --color-accent: #efd9ab;
+  --color-accent-content: #0a1226;
+  --color-neutral: #1a2a4d;
+  --color-neutral-content: #efe9df;
   --color-info: #7aa7ff;
-  --color-info-content: #050b1e;
+  --color-info-content: #0a1226;
   --color-success: #4cc38a;
   --color-success-content: #04140c;
-  --color-warning: #c8ebff;
-  --color-warning-content: #050b1e;
+  --color-warning: #efd9ab;
+  --color-warning-content: #0a1226;
   --color-error: #f87171;
   --color-error-content: #1d0404;
   --radius-selector: 0.5rem;
@@ -38,8 +38,8 @@
 
 @theme {
   --font-mono: "Source Code Pro", ui-monospace, monospace;
-  --color-muted: #a7b3c7;
-  --color-subtle: #8290a8;
+  --color-muted: #c2b6a7;
+  --color-subtle: #a0958a;
   --color-line: rgb(255 255 255 / 0.08);
 }
 
@@ -143,7 +143,7 @@ body {
 
 .glass-field:focus,
 .glass-field:focus-within {
-  border-color: rgb(159 216 255 / 0.6);
+  border-color: rgb(217 183 122 / 0.6);
   outline: none;
 }
 
@@ -176,7 +176,7 @@ body {
 .btn.btn-primary {
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.45),
-    0 8px 22px -10px rgb(159 216 255 / 0.7);
+    0 8px 22px -10px rgb(217 183 122 / 0.7);
 }
 
 .btn.btn-primary:disabled {
@@ -201,7 +201,7 @@ body {
     background: #0c1634;
   }
   .glass-bar {
-    background: #050b1e;
+    background: #0a1226;
   }
 }
 
@@ -215,7 +215,7 @@ body {
     backdrop-filter: none;
   }
   .glass-bar {
-    background: #050b1e;
+    background: #0a1226;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }

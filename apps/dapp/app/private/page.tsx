@@ -13,9 +13,9 @@ import type { CompiledCircuit } from "@noir-lang/noir_js";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { createWalletClient, http } from "viem";
-import { useAccount, usePublicClient, useSignMessage } from "wagmi";
+import { usePublicClient, useSignMessage } from "wagmi";
 
-import { Facts, PageTitle, RequireWallet, Stat } from "~~/components/arl/ui";
+import { Facts, NotLiveYet, PageTitle, RequireWallet, Stat } from "~~/components/arl/ui";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import {
   DEMO_GROUP,
@@ -25,12 +25,12 @@ import {
   optionMessage,
   tally,
 } from "~~/lib/poll";
-import { ARL, IS_LOCAL, REFRESH_MS, deployBlock } from "~~/lib/contracts";
-import { callOperator } from "~~/lib/operatorClient";
-import { joinMessage } from "~~/lib/operatorRules";
+import localContracts from "~~/contracts/localContracts";
+import { IS_LOCAL, REFRESH_MS, deployBlock } from "~~/lib/contracts";
 import { eventsSince } from "~~/lib/logs";
 
-const SIGNAL = ARL.ARLAnonymousSignal;
+// Anonymous signals run on the local chain only; they are not on Base Mainnet yet.
+const SIGNAL = localContracts[31337].ARLAnonymousSignal;
 const circuit = circuitJson as unknown as CompiledCircuit;
 
 type Status =
@@ -47,9 +47,13 @@ export default function PrivatePage() {
         membership with a zero-knowledge proof; the contract checks the proof and accepts one vote
         per member per poll.
       </PageTitle>
-      <RequireWallet>
-        <Private />
-      </RequireWallet>
+      {IS_LOCAL ? (
+        <RequireWallet>
+          <Private />
+        </RequireWallet>
+      ) : (
+        <NotLiveYet />
+      )}
     </>
   );
 }
@@ -109,7 +113,6 @@ function Private() {
   const { targetNetwork } = useTargetNetwork();
   const client = usePublicClient();
   const { signMessageAsync } = useSignMessage();
-  const { address } = useAccount();
   const { data: g, refetch } = useGroup();
   const [secret, setSecret] = useState<bigint>();
   const [status, setStatus] = useState<Status>({ kind: "idle" });
@@ -142,7 +145,7 @@ function Private() {
     if (mine === undefined || !g || !client) return;
     setStatus({ kind: "busy", text: "Adding you to the group" });
     try {
-      if (IS_LOCAL) {
+      {
         const next = createGroup([...g.members, mine]);
         const hash = await localWallet(DEMO_GROUP_ADMIN).writeContract({
           address: SIGNAL.address,
@@ -151,13 +154,6 @@ function Private() {
           args: [DEMO_GROUP, [mine], next.root],
         });
         await client.waitForTransactionReceipt({ hash });
-      } else {
-        // The operator administers the testnet group; the wallet signs the request.
-        if (!address) throw new Error("Connect a wallet first.");
-        const signature = await signMessageAsync({
-          message: joinMessage(mine, targetNetwork.id),
-        });
-        await callOperator("join", { account: address, commitment: mine, signature });
       }
       await refetch();
       setStatus({
@@ -191,7 +187,7 @@ function Private() {
       if (used) return setStatus({ kind: "error", text: "You have already voted in this poll." });
       const proof = await proveSignal(circuit, inputs);
       setStatus({ kind: "busy", text: "Submitting through the relayer" });
-      if (IS_LOCAL) {
+      {
         const hash = await localWallet(DEMO_RELAYER).writeContract({
           address: SIGNAL.address,
           abi: SIGNAL.abi,
@@ -199,15 +195,6 @@ function Private() {
           args: [DEMO_GROUP, proof.scope, proof.message, proof.root, proof.nullifier, proof.proof],
         });
         await client.waitForTransactionReceipt({ hash });
-      } else {
-        // The operator relays: the vote is sent from its account, not from this wallet.
-        await callOperator("relay", {
-          scope: proof.scope,
-          message: proof.message,
-          root: proof.root,
-          nullifier: proof.nullifier,
-          proof: proof.proof,
-        });
       }
       await refetch();
       setStatus({

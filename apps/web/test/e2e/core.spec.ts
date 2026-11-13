@@ -113,7 +113,7 @@ test("detail content is in the server-rendered HTML", async ({ request }) => {
 test("sitemap lists every route and robots points to it", async ({ request }) => {
   const sitemap = await (await request.get("/sitemap.xml")).text();
   expect(sitemap.match(/<loc>/g)).toHaveLength(
-    // + 1 for the testnet app under /app/.
+    // + 1 for the app under /app/.
     1 + allPaths().length + SITE_PAGES.length + SOLUTION_PATHS.length + DOCS.length + 1,
   );
   expect(sitemap).toContain("<loc>https://arlcoin.io/app/</loc>");

@@ -1,6 +1,6 @@
 // Adapted from Scaffold-ETH 2 (MIT, BuidlGuidl): packages/nextjs/scaffold.config.ts.
 // ARL: one target chain, chosen at build time by NEXT_PUBLIC_ARL_CHAIN: the local Anvil chain
-// (default) or Base Sepolia. No hosted RPC keys, no burner wallet.
+// (default) or Base Mainnet. No hosted RPC keys, no burner wallet.
 import type { Chain } from "viem";
 
 import { appChain, assertAllowedChain } from "~~/lib/network";

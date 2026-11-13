@@ -19,7 +19,7 @@ export const wagmiConfig = createConfig({
   client({ chain }) {
     return createClient({
       chain,
-      // Several endpoints (Base Sepolia's public ones): try each in order.
+      // Several endpoints (the public Base Mainnet ones): try each in order.
       transport:
         chain.id === base.id
           ? http(BASE_RPC)

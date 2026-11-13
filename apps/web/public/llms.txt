@@ -9,8 +9,6 @@ Key facts:
 - Maximum supply: 21,000,000 ARL, minted once at deployment into 11 allocations. The token
   contract has no owner, no mint function after deployment, no pause and no upgrade path.
 - Standard: ERC-20 with EIP-2612 permit, 18 decimals, on Base (Ethereum layer 2).
-- Testnet: Base Sepolia (chain 84532), token 0x244312b619127B6458154F3467eFD7c87CD28500,
-  source-verified on Basescan, Blockscout and Sourcify.
 - Mainnet: Base (chain 8453), token 0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4, deployed 24 October 2026
   (block 53,023,206) and source-verified on Basescan. Any other address presented as ARL is not
   official.
@@ -22,9 +20,14 @@ Key facts:
   ARL (0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9) or USDC
   (0xc833140D2eE8607fd41662cffFAc557f3D535bE6); validators who stake ARL check the work and vote,
   disputes go to a 2-of-3 arbiter Safe, and outcomes are written to ERC-8004 reputation.
-- Planned on Base Mainnet: AI services paid per use in ARL (x402, live on the Base Sepolia
-  testnet), GPU and CPU compute paid per second, zero-knowledge anonymous signals, and staking
-  funded from existing allocations, never from new issuance.
+  Evaluator v4 is live since 12 November 2026.
+- Also on Base Mainnet since 12 November 2026: the compute payment contract
+  (0x1bFE932896fdd32175836a7364dcaf53d49EE464) and the staking contract
+  (0x15e257009BE9B1875fbfa69D291320aaFE3fa102, 180-day reward periods funded from the Community
+  & Staking allocation, never from new issuance; opens when the first period is funded).
+- The ARL app at https://arlcoin.io/app runs on Base Mainnet.
+- Next on Base Mainnet: AI services paid per use in ARL (x402), the GPU and CPU provider
+  marketplace, and zero-knowledge anonymous signals.
 - Security: multi-layer internal security audit completed on 17 October 2026 with open-source
   tools (Slither, Aderyn, Foundry fuzz and invariant tests, Halmos, Mythril) and manual triage; no
   critical finding, every finding closed (fixed or accepted with a documented mitigation).
@@ -32,7 +35,8 @@ Key facts:
   were deployed. A bug bounty paid in ARL is open (report to team@arlcoin.io). Treasury actions
   pass a Safe multisig and a 48-hour timelock.
 - Roadmap: foundation and token contracts complete, internal security audit complete, Base
-  Sepolia testnet live since 4 October 2026, Base Mainnet live since 24 October 2026.
+  Mainnet live since 24 October 2026, verified jobs, compute payments and staking deployed on
+  12 November 2026.
 - Trading: Uniswap v3 on Base, pools ARL/USDC, ARL/USDT, ARL/WETH and ARL/cbBTC (1% fee),
   opened from 0.20 USD per ARL with 5,000,000 ARL (2,000,000 Liquidity, 3,000,000 Public Launch).
   There is no airdrop at the launch; an airdrop of 500,000 ARL is planned for a later date.

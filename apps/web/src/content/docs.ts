@@ -72,10 +72,10 @@ export const DOCS: readonly DocEntry[] = [
     description: "How the deployment chain is being evaluated.",
   },
   {
-    slug: "deployment",
-    source: "docs/deployment.md",
-    title: "Deployment",
-    description: "The deployment tooling and runbook.",
+    slug: "mainnet-services",
+    source: "docs/mainnet-services.md",
+    title: "Mainnet services",
+    description: "The ARL network services deployed on Base Mainnet, with their addresses.",
   },
   {
     slug: "app",

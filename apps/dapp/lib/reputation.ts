@@ -16,9 +16,12 @@ import type { Address, Hex } from "viem";
 import { IDENTITY_REGISTRY } from "./registry.ts";
 import type { JobStatus } from "./jobs.ts";
 
-/** Canonical ERC-8004 ReputationRegistry on the testnets (Base Sepolia among them); the local
- *  chain setup installs the same code at the same address. */
-export const REPUTATION_REGISTRY: Address = "0x8004B663056A597Dffe9eCcC1965A193B7388713";
+/** Canonical ERC-8004 ReputationRegistry: the Base Mainnet deployment for a Base Mainnet build,
+ *  otherwise the address the local chain setup installs it at. */
+export const REPUTATION_REGISTRY: Address =
+  process.env.NEXT_PUBLIC_ARL_CHAIN === "8453"
+    ? "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63"
+    : "0x8004B663056A597Dffe9eCcC1965A193B7388713";
 
 export const RATING_TAG = "starred";
 export const JOB_TAG = "arl-job";

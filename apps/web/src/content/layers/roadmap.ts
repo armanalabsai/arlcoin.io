@@ -6,7 +6,7 @@ import type { Layer } from "../types.ts";
 export const roadmap: Layer = {
   id: "roadmap",
   title: "Roadmap",
-  description: "Token live on Base Mainnet; services on testnet.",
+  description: "Live on Base Mainnet: token, verified jobs and compute payments.",
   cards: [
     {
       id: "phase-0",
@@ -29,7 +29,7 @@ export const roadmap: Layer = {
       metric: { kind: "static", value: "Complete" },
       detail: {
         summary:
-          "The ARL token, vesting wallets and the treasury timelock, with tests. Written, tested and deployed on the Base Sepolia testnet.",
+          "The ARL token, vesting wallets and the treasury timelock, with unit, fuzz and invariant tests.",
       },
     },
     {
@@ -43,31 +43,6 @@ export const roadmap: Layer = {
         summary:
           "Security audit of the contracts and the deployment process. The multi-layer internal audit was completed on 17 October 2026: tests, fuzzing, invariants, Slither and Aderyn, Halmos proofs, Mythril and a reproducible build, with every finding closed. A bug bounty paid in ARL is open.",
       },
-    },
-    {
-      id: "testnet",
-      title: "Testnet",
-      shortDescription: "Public test deployment",
-      progress: "done",
-      weight: "tertiary",
-      metric: { kind: "static", value: "Live on Base Sepolia" },
-      detail: {
-        summary:
-          "Deployed on the Base Sepolia testnet on 4 October 2026: 12 Safes, the token, two vesting wallets and the treasury timelock, source-verified on Basescan, Blockscout and Sourcify. Testnet tokens have no value.",
-      },
-    },
-    {
-      id: "ecosystem",
-      title: "Testnet Ecosystem",
-      shortDescription: "Staking, jobs, anonymous polls and the app",
-      progress: "active",
-      weight: "tertiary",
-      metric: { kind: "static", value: "Live on Base Sepolia" },
-      detail: {
-        summary:
-          "Deployed on Base Sepolia on 11 October 2026 and source-verified on Basescan: the staking contract, the ERC-8183 jobs escrow, the zero-knowledge verifier and the anonymous-poll contract. The ARL app at arlcoin.io/app runs against them, with a testnet ARL faucet, a relayer for anonymous votes and x402 per-use payments to a demo AI service registered on ERC-8004. The testnet reward period starts once the Community & Staking Safe funds it. Testnet tokens have no value.",
-      },
-      links: [{ label: "Open the app (testnet)", href: "https://arlcoin.io/app/" }],
     },
     {
       id: "mainnet",
@@ -88,15 +63,28 @@ export const roadmap: Layer = {
       ],
     },
     {
-      id: "services",
-      title: "AI Payments and Compute",
-      shortDescription: "The first services on ARL",
-      progress: "active",
+      id: "verified-jobs",
+      title: "Verified Jobs",
+      shortDescription: "Escrowed AI jobs checked by staked validators",
+      progress: "done",
       weight: "tertiary",
-      metric: { kind: "static", value: "Testnet live" },
+      metric: { kind: "static", value: "Live on Base Mainnet" },
       detail: {
         summary:
-          'The first services that settle in ARL: AI service payments and the compute marketplace. Per-use payments (x402 "upto"), job escrow (ERC-8183) and a reference compute provider run on the Base Sepolia testnet in the ARL app. They move to Base Mainnet one by one, each after its own deployment and verification.',
+          "ERC-8183 job escrows paid in ARL or USDC, with a verified evaluator: a committee of staked ARL validators votes on each delivery, a challenge window follows, and a 2-of-3 arbiter Safe rules on disputed jobs only. Evaluator v4, with approvals counted per delivery and settlement after the deadline, went live on 12 November 2026. The ARL app at arlcoin.io/app runs against these contracts.",
+      },
+      links: [{ label: "Open the app", href: "https://arlcoin.io/app/verified/" }],
+    },
+    {
+      id: "services",
+      title: "Compute, Staking and AI Payments",
+      shortDescription: "The next services on ARL",
+      progress: "active",
+      weight: "tertiary",
+      metric: { kind: "static", value: "Rolling out on Base Mainnet" },
+      detail: {
+        summary:
+          'The compute payment contract and the staking contract were deployed on Base Mainnet on 12 November 2026. Staking runs 180-day reward periods funded by the Community & Staking Safe and opens when the first period is funded. Per-use AI payments (x402 "upto"), the provider marketplace and anonymous polls follow, each after its own deployment and verification.',
       },
     },
   ],

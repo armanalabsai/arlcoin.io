@@ -1,14 +1,13 @@
 # Bug bounty
 
-Status: **live since 2026-10-05**, with the public Base Sepolia test period and the public
+Status: **live since 2026-10-05**, with the public
 repository (https://github.com/armanalabsai/arlcoin.io). Scope commit: `00d9056`. The amounts below are paid only when a valid report
 is accepted; nothing is paid up front.
 
 ## Coverage
 
 The contracts are covered by the checks in [review-scope.md](review-scope.md) (tests at 100% line
-and function coverage, fuzzing, invariants, Halmos proofs, Slither, Aderyn, Mythril), a public test
-period on Base Sepolia, and this bounty.
+and function coverage, fuzzing, invariants, Halmos proofs, Slither, Aderyn, Mythril) and this bounty.
 
 ## Funding
 
@@ -31,7 +30,7 @@ Bounty allocation never exceed its 400,000 ARL.
 ## Rules
 
 - In scope: the contracts in `contracts/src` at the commit named in the program announcement, as
-  deployed on Base Sepolia during the test period and on Base Mainnet afterwards.
+  deployed on Base Mainnet.
 - Out of scope: third-party code (OpenZeppelin, Safe, forge-std; report those upstream), the
   website, the dApp front end, social engineering, and denial of service against RPC providers.
 - Report privately to team@arlcoin.io (see `SECURITY.md`); do not disclose publicly before a fix is deployed or 90 days have passed.

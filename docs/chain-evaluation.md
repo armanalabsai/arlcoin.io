@@ -1,7 +1,6 @@
 # Chain Evaluation
 
-Status: **network decision approved.** Testnet: **Base Sepolia (84532)**, the only
-deployable public network. Production: **Base Mainnet (8453)**, opened by the network gate at the TGE
+Status: **network decision approved.** ARL runs on **Base Mainnet (8453)**, opened by the network gate at the TGE
 (2026-10-23T00:00:00Z, see [`deployment.md`](deployment.md#network-gate)); the token was deployed
 there on 2026-10-24. Contracts must stay chain-agnostic: no chain IDs, addresses or
 chain-specific precompiles in contract code.
@@ -31,7 +30,7 @@ Each candidate is scored on the same criteria, with sources recorded:
 4. **Ecosystem maturity** — wallet, custodian and exchange support; years in
    production.
 5. **Developer tooling** — Foundry and Hardhat support, explorer verification
-   APIs, testnets and faucets.
+   APIs, public test networks.
 6. **RPC and indexing** — number of independent RPC providers, archive node
    availability, The Graph / Ponder / Envio support.
 7. **Listing readiness** — support by CoinGecko, CoinMarketCap and major

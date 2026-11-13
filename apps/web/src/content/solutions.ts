@@ -102,7 +102,7 @@ export const SOLUTIONS: readonly Solution[] = [
       "The facilitator settles the seconds used in ARL; the answer carries the receipt and the output.",
     ],
     status: [
-      "Provider listing and per-second payments run on the Base Sepolia testnet in the ARL app.",
+      "The compute payment contract is deployed on Base Mainnet; provider listing opens in the ARL app next.",
       "The ARL token is live on Base Mainnet; the jobs escrow is live on Base Mainnet, paid in ARL or USDC.",
       "The per-second streaming contract is tested on a local chain with 100% coverage and is in development.",
     ],
@@ -163,8 +163,8 @@ export const SOLUTIONS: readonly Solution[] = [
     ],
     status: [
       "The jobs escrow (ERC-8183) is live on Base Mainnet, paid in ARL or USDC.",
-      "Usage-based payments, provider registration and verified jobs run on the Base Sepolia testnet in the ARL app.",
-      "Three validators re-execute Base Sepolia jobs every 10 minutes.",
+      "Verified jobs run on Base Mainnet: staked ARL validators vote, with a challenge window and a 2-of-3 arbiter Safe.",
+      "Usage-based payments and provider registration open on Base Mainnet next.",
     ],
     faq: [
       {
@@ -228,7 +228,7 @@ export const SOLUTIONS: readonly Solution[] = [
     ],
     status: [
       "The ARL token and the jobs escrow (paid in ARL or USDC) are live on Base Mainnet.",
-      "Per-use payments run on the Base Sepolia testnet in the ARL app.",
+      "The compute payment contract is live on Base Mainnet; per-use x402 payments follow.",
       "Every contract is open source under Apache-2.0 and tested at 100% line and function coverage.",
     ],
     faq: [
@@ -284,8 +284,8 @@ export const SOLUTIONS: readonly Solution[] = [
       "The model runs for the paid time; the seconds used are settled in ARL and returned with the output.",
     ],
     status: [
-      "Per-second settlement over x402 upto runs on the Base Sepolia testnet.",
-      "The reference provider software is open source and tested end to end on a Base Sepolia fork.",
+      "The compute payment contract is deployed on Base Mainnet; per-second settlement over x402 upto opens next.",
+      "The reference provider software is open source and tested end to end.",
       "The ARL token is live on Base Mainnet.",
     ],
     faq: [
@@ -342,7 +342,7 @@ export const SOLUTIONS: readonly Solution[] = [
     ],
     status: [
       "The ARL token and the jobs escrow (paid in ARL or USDC) are live on Base Mainnet.",
-      "The provider registry, per-second payments and verified jobs run on the Base Sepolia testnet in the ARL app.",
+      "Verified jobs and the compute payment contract run on Base Mainnet; the provider registry opens in the ARL app next.",
       "Early providers are eligible for the Early Users program.",
     ],
     faq: [
@@ -359,7 +359,7 @@ export const SOLUTIONS: readonly Solution[] = [
       {
         question: "How do I join as a provider?",
         answer:
-          "Open the ARL app, connect a wallet on Base Sepolia and register your capacity on the Network page. Questions go to team@arlcoin.io.",
+          "Write to team@arlcoin.io: provider registration opens in the ARL app on Base Mainnet next, and early providers are eligible for the Early Users program.",
       },
     ],
     links: [DOC.verified, DOC.provider, DOC.jobs, DOC.architecture],

@@ -75,6 +75,15 @@ export function RequireWallet({ children }: { children: ReactNode }) {
   );
 }
 
+/** A screen whose contracts are not on Base Mainnet yet. */
+export function NotLiveYet() {
+  return (
+    <p className="glass-strong p-5 text-sm text-muted">
+      Not live on Base Mainnet yet. It opens here once its contracts are deployed and verified.
+    </p>
+  );
+}
+
 /** An ARL amount field with a Max button and a submit action. */
 export function AmountForm({
   label,

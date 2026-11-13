@@ -4,18 +4,24 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
+import { IS_LOCAL } from "~~/lib/contracts";
 
+// Payments, Network and Private use contracts that are not on Base Mainnet yet: local builds only.
 const NAV = [
   { href: "/", label: "Wallet" },
   { href: "/vesting", label: "Vesting" },
   { href: "/trade", label: "Trade" },
   { href: "/claim", label: "Claim" },
   { href: "/staking", label: "Staking" },
-  { href: "/payments", label: "Payments" },
-  { href: "/network", label: "Network" },
+  ...(IS_LOCAL
+    ? [
+        { href: "/payments", label: "Payments" },
+        { href: "/network", label: "Network" },
+      ]
+    : []),
   { href: "/jobs", label: "Jobs" },
   { href: "/verified", label: "Verified" },
-  { href: "/private", label: "Private" },
+  ...(IS_LOCAL ? [{ href: "/private", label: "Private" }] : []),
 ];
 
 export function Header() {

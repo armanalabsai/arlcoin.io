@@ -1,17 +1,18 @@
 # Base Mainnet network services
 
-Status: **step 1 done: the jobs escrows with the deadline fix are on Base Mainnet (nonces 23 and 25), with the evaluators that carry the acceptance fix (security report 2026-10-31) at nonces 27 and 28.** The ARL token, its Safes, vesting wallets and
-timelock are on Base Mainnet ([mainnet-plan.md](mainnet-plan.md)). The network services still
-run on the Base Sepolia testnet and move to Base Mainnet one at a time, each after its own
-rehearsal, signatures and on-chain check.
+Status: **the network services run on Base Mainnet.** The jobs escrows (nonces 23 and 25) work
+with the v4 verified evaluators (nonces 29 and 30, 2026-11-12); the compute payment contract and
+the staking contract followed (nonces 31 and 32). The ARL app at arlcoin.io/app runs on Base
+Mainnet. The ARL token, its Safes, vesting wallets and timelock are on Base Mainnet since
+2026-10-24 ([mainnet-plan.md](mainnet-plan.md)).
 
-| Step | Service                                          | Status                                                |
-| ---- | ------------------------------------------------ | ----------------------------------------------------- |
-| 1    | Jobs escrows (ARL, USDC) and verified evaluators | Deployed (evaluators at nonces 27 and 28, 2026-11-01) |
-| 2    | Validators: keys, ETH for gas, staked ARL        | Not started                                           |
-| 3    | Operator API (x402 per-use payments) on 8453     | Not started                                           |
-| 4    | Staking rewards contract and its reward budget   | Not started                                           |
-| 5    | App and site switched to Base Mainnet            | Not started                                           |
+| Step | Service                                          | Status                                                    |
+| ---- | ------------------------------------------------ | --------------------------------------------------------- |
+| 1    | Jobs escrows (ARL, USDC) and verified evaluators | Deployed (evaluators v4 at nonces 29 and 30, 2026-11-12)  |
+| 2    | Validators: keys, ETH for gas, staked ARL        | Not started                                               |
+| 3    | x402 per-use payments facilitator on 8453        | Not started                                               |
+| 4    | Staking rewards contract and its reward budget   | Deployed (nonce 32); the first 300,000 ARL period is next |
+| 5    | App and site on Base Mainnet                     | Done (2026-11-13)                                         |
 
 ## Step 1: jobs escrow and verified evaluator
 

@@ -15,7 +15,7 @@ import {
   Stat,
   useChainTime,
 } from "~~/components/arl/ui";
-import { ARL, IS_TESTNET, REFRESH_MS } from "~~/lib/contracts";
+import { ARL, IS_MAINNET, REFRESH_MS } from "~~/lib/contracts";
 import {
   ARBITER_SAFE,
   EVALUATOR,
@@ -40,18 +40,18 @@ export default function VerifiedPage() {
       <PageTitle title="Verified jobs">
         A staked validator committee decides whether an ERC-8183 job is paid. After the vote there
         is a challenge window; a 2-of-3 arbiter Safe rules on disputed jobs only and cannot receive
-        escrow or slashed funds. Base Sepolia testnet only. The evaluator was added after the 17
-        October 2026 internal security audit and is checked by its own tests, fuzzing, invariants
-        and static analysis.
+        escrow or slashed funds. Live on Base Mainnet with the ARL escrow. The evaluator was added
+        after the 17 October 2026 internal security audit and is checked by its own tests, fuzzing,
+        invariants and static analysis.
       </PageTitle>
-      {IS_TESTNET ? <NetworkStats /> : null}
-      {IS_TESTNET ? (
+      {IS_MAINNET ? <NetworkStats /> : null}
+      {IS_MAINNET ? (
         <RequireWallet>
           <Verified />
         </RequireWallet>
       ) : (
         <p className="glass-strong p-5 text-sm text-muted">
-          The verified evaluator is deployed on Base Sepolia only.
+          The verified evaluator runs on Base Mainnet; this build targets another chain.
         </p>
       )}
     </>

@@ -9,9 +9,12 @@
 import { getAddress, isAddress } from "viem";
 import type { Address } from "viem";
 
-/** Canonical ERC-8004 IdentityRegistry on the testnets it is deployed to (Base Sepolia among
- *  them); the local chain setup installs the same code at the same address. */
-export const IDENTITY_REGISTRY: Address = "0x8004A818BFB912233c491871b3d84c89A494BD9e";
+/** Canonical ERC-8004 IdentityRegistry: the Base Mainnet deployment for a Base Mainnet build,
+ *  otherwise the address the local chain setup installs it at. */
+export const IDENTITY_REGISTRY: Address =
+  process.env.NEXT_PUBLIC_ARL_CHAIN === "8453"
+    ? "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432"
+    : "0x8004A818BFB912233c491871b3d84c89A494BD9e";
 
 export const REGISTRATION_TYPE = "https://eips.ethereum.org/EIPS/eip-8004#registration-v1";
 const DATA_URI_PREFIX = "data:application/json;base64,";

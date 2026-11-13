@@ -13,7 +13,7 @@ import {
   recordCommand,
   publishedPlanPath,
 } from "../../lib/deploySteps.ts";
-import { NetworkLocked, TGE_DATE } from "../../lib/network.ts";
+import { NetworkLocked, NetworkUnsupported, TGE_DATE } from "../../lib/network.ts";
 import { RELEASE_ARTIFACTS } from "../fixtures/deploy/releaseArtifacts.ts";
 
 // The fixtures and published plans were made from the released build (see releaseArtifacts.ts).
@@ -125,11 +125,11 @@ describe("deployment run file", () => {
     refused({ chain: 31337, transactions: [] }, /no transactions/);
   });
 
-  it("on Base Sepolia, accepts only the canonical Safe factory", () => {
+  it("refuses a run for Base Sepolia", () => {
     const r = load("CreateSafes");
     r.chain = 84532;
     for (const t of r.transactions) t.transaction.chainId = "0x14a34";
-    refused(r, /not the Safe factory/);
+    assert.throws(() => parse(r), NetworkUnsupported);
   });
 });
 
@@ -140,7 +140,7 @@ describe("before each signature", () => {
 
   it("needs the planned wallet, chain and nonce", () => {
     assert.equal(checkBeforeSend(step, ok, run.chainId), undefined);
-    assert.match(checkBeforeSend(step, { ...ok, chainId: 84532 }, run.chainId) ?? "", /switch/);
+    assert.match(checkBeforeSend(step, { ...ok, chainId: 8453 }, run.chainId) ?? "", /switch/);
     assert.match(
       checkBeforeSend(step, { ...ok, account: SAFE_FACTORY_V150 }, run.chainId) ?? "",
       /prepared for that address/,
@@ -154,50 +154,27 @@ describe("before each signature", () => {
 
 describe("published plans", () => {
   it("accepts only plain names under the site's plans folder", () => {
-    assert.equal(publishedPlanPath("84532-safes"), "/plans/84532-safes.json");
-    assert.equal(publishedPlanPath("84532-safes", "/app"), "/app/plans/84532-safes.json");
+    assert.equal(publishedPlanPath("8453-services"), "/plans/8453-services.json");
+    assert.equal(publishedPlanPath("8453-services", "/app"), "/app/plans/8453-services.json");
     for (const bad of ["", "../secret", "a/b", "https://evil.example/x", "A", "x".repeat(65)]) {
       assert.throws(() => publishedPlanPath(bad), /not valid/);
-    }
-  });
-
-  it("the published Base Sepolia Safe plan is accepted and creates twelve 1-of-1 Safes", () => {
-    const run = parse(
-      JSON.parse(
-        readFileSync(new URL("../../public/plans/84532-safes.json", import.meta.url), "utf8"),
-      ),
-    );
-    assert.equal(run.chainId, 84532);
-    assert.equal(run.steps.length, 12);
-    for (const step of run.steps) {
-      assert.equal(step.kind, "safe");
-      if (step.kind === "safe") assert.equal(step.threshold, 1n);
     }
   });
 });
 
 describe("after signing", () => {
   it("points to the verified-record tool; Safe addresses come only from its record", () => {
-    const safes = parse(
-      JSON.parse(
-        readFileSync(new URL("../../public/plans/84532-safes.json", import.meta.url), "utf8"),
-      ),
-    );
-    assert.deepEqual(recordCommand(safes, "apps/dapp/public/plans/84532-safes.json"), {
-      kind: "safes",
-      command:
-        "node packages/deploy/src/record-cli.ts safes apps/dapp/public/plans/84532-safes.json https://sepolia.base.org contracts/deploy/deployments/84532-safes.json",
-    });
-    const deploy = parse(
-      JSON.parse(
-        readFileSync(new URL("../../public/plans/84532-deploy.json", import.meta.url), "utf8"),
-      ),
-    );
-    assert.equal(
-      recordCommand(deploy, "run.json").command,
-      "node packages/deploy/src/record-cli.ts arl run.json https://sepolia.base.org contracts/deploy/deployments/84532.json",
-    );
     const local = parse(load("DeployARL"));
     assert.match(recordCommand(local, "x.json").command, /--local-anvil/);
+    assert.equal(
+      recordCommand({ ...local, chainId: 8453 }, "run.json").command,
+      "node packages/deploy/src/record-cli.ts arl run.json https://mainnet.base.org contracts/deploy/deployments/8453.json",
+    );
+    const safes = parse(load("CreateSafes"));
+    assert.ok(
+      recordCommand({ ...safes, chainId: 8453 }, "safes.json").command.includes(
+        "safes safes.json https://mainnet.base.org contracts/deploy/deployments/8453-safes.json",
+      ),
+    );
   });
 });

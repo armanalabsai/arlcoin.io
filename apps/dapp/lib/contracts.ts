@@ -1,5 +1,5 @@
 // The ARL contracts of the chain this build targets (scaffold.config.ts): the local fixture or the
-// Base Sepolia record, both generated into contracts/deployedContracts.ts. A build for a chain
+// Base Mainnet records, both generated into contracts/deployedContracts.ts. A build for a chain
 // without a record fails here instead of showing addresses of another chain.
 
 import deployedContracts from "~~/contracts/deployedContracts";
@@ -25,8 +25,8 @@ export function deployBlock(contract: { address: string }): bigint {
 /** Whether this build runs on the local Anvil chain, where development accounts are unlocked. */
 export const IS_LOCAL = ARL_CHAIN_ID === 31_337;
 
-/** Whether this build runs on Base Sepolia, where the testnet operator (faucet, relayer) exists. */
-export const IS_TESTNET = ARL_CHAIN_ID === 84_532;
+/** Whether this build runs on Base Mainnet. */
+export const IS_MAINNET = ARL_CHAIN_ID === 8_453;
 
 /** How often screens re-read chain state: every few seconds locally, gently on public RPCs. */
 export const REFRESH_MS = IS_LOCAL ? 3_000 : 15_000;

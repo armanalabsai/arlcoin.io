@@ -15,7 +15,7 @@ export const FAQ: readonly FaqEntry[] = [
   {
     question: "What is ARL for?",
     answer:
-      "ARL is the native utility token for decentralized AI and compute services: AI services paid per use, GPU and CPU capacity paid per second, and staking. The token and the verified jobs escrows (paid in ARL or USDC, with staked ARL validators) are live on Base Mainnet; staking, per-use payments and anonymous polls run on the Base Sepolia testnet in the ARL app (arlcoin.io/app).",
+      "ARL is the native utility token for decentralized AI and compute services: AI services paid per use, GPU and CPU capacity paid per second, and staking. The token, the verified jobs escrows (paid in ARL or USDC, with staked ARL validators) and the compute payment contract are live on Base Mainnet, and the ARL app runs at arlcoin.io/app. Staking is deployed and opens when its first reward period is funded.",
   },
   {
     question: "What is the maximum supply?",
@@ -30,7 +30,7 @@ export const FAQ: readonly FaqEntry[] = [
   {
     question: "Why would an AI developer pay with ARL instead of existing payment methods?",
     answer:
-      "Because of what happens to the money, not the token itself. A job paid through ARL sits in an on-chain escrow (ERC-8183) and is released only after a staked validator committee has checked the result, with a challenge window before payout; compute is paid per second and stops when the work stops. There are no chargebacks, no accounts to open with each provider and no intermediary holding the funds. ARL does not replace card payments for everything: it fits paying agents and providers you do not know. Today this runs on the Base Sepolia testnet only.",
+      "Because of what happens to the money, not the token itself. A job paid through ARL sits in an on-chain escrow (ERC-8183) and is released only after a staked validator committee has checked the result, with a challenge window before payout; compute is paid per second and stops when the work stops. There are no chargebacks, no accounts to open with each provider and no intermediary holding the funds. ARL does not replace card payments for everything: it fits paying agents and providers you do not know. Escrowed, verified jobs run on Base Mainnet today.",
   },
   {
     question: "Why would a GPU provider accept ARL for capacity?",
@@ -55,7 +55,7 @@ export const FAQ: readonly FaqEntry[] = [
   {
     question: "Which blockchain will ARL use?",
     answer:
-      "Base. ARL is an ERC-20 token on Base Mainnet (chain 8453). The app runs on the Base Sepolia testnet (chain 84532).",
+      "Base. ARL is an ERC-20 token on Base Mainnet (chain 8453), and the ARL app at arlcoin.io/app runs on Base Mainnet too.",
   },
   {
     question: "When is the launch?",
@@ -66,11 +66,6 @@ export const FAQ: readonly FaqEntry[] = [
     question: "After the launch, can I sell ARL on a DEX?",
     answer:
       "Yes, the token has no transfer tax, blacklist or pause. The launch pools on Uniswap start with ARL only, priced from 0.20 USD: buyers pay USDC, USDT, ETH or BTC into them, and a seller can sell back only as much as buyers have paid in, never below 0.20 USD. Right after the launch a pool may therefore have little to pay sellers until buying starts.",
-  },
-  {
-    question: "Do testnet tokens have any value?",
-    answer:
-      "No. ARL on the Base Sepolia testnet has no value and cannot be exchanged for anything. The ARL app at arlcoin.io/app hands out testnet ARL from a faucet so the staking, jobs, payments and anonymous polls can be tried for free.",
   },
   {
     question: "Is ARL Protocol the same as other tokens called ARL?",

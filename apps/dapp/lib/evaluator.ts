@@ -1,13 +1,13 @@
-// The verified evaluator on Base Sepolia (contracts/deploy/base-sepolia.json, verifiedEvaluator):
-// a staked validator committee that acts as the evaluator of ERC-8183 jobs, with a challenge
-// window and a 2-of-3 arbiter Safe for disputed jobs (docs/verifiable-execution.md). Only the
-// functions the app reads or calls are listed here.
+// The verified evaluator of the ARL escrow on Base Mainnet (contracts/deploy/base-mainnet-jobs.json,
+// arl.evaluator; evaluator v4): a staked validator committee that acts as the evaluator of
+// ERC-8183 jobs, with a challenge window and a 2-of-3 arbiter Safe for disputed jobs
+// (docs/verifiable-execution.md). Only the functions the app reads or calls are listed here.
 
 import type { Address } from "viem";
 
-export const EVALUATOR: Address = "0x6808F80Eb11538543d31cf4b50332B268dDd4d14";
+export const EVALUATOR: Address = "0x5cA6dab18E6b9a5Cd44a4FfFBdf2c5BA3Cd87DfF";
 export const ARBITER_SAFE: Address = "0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f";
-export const EXPLORER = "https://base-sepolia.blockscout.com";
+export const EXPLORER = "https://basescan.org";
 
 export const PHASES = [
   "Not configured",
@@ -111,6 +111,7 @@ export const evaluatorAbi = [
           { name: "providerApproved", type: "bool" },
           { name: "approvals", type: "uint8" },
           { name: "rejections", type: "uint8" },
+          { name: "topApprovals", type: "uint8" },
           { name: "voteEnds", type: "uint64" },
           { name: "challengeEnds", type: "uint64" },
           { name: "challenger", type: "address" },
@@ -124,7 +125,7 @@ export const evaluatorAbi = [
 ] as const;
 
 /** The block the evaluator was deployed in: its event history starts there. */
-export const EVALUATOR_DEPLOY_BLOCK = 48_277_116n;
+export const EVALUATOR_DEPLOY_BLOCK = 56_647_959n;
 
 /** Events the public statistics are counted from. */
 export const evaluatorEvents = [

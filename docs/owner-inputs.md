@@ -75,7 +75,7 @@ Not needed for the Base Sepolia deployment and not chosen here: the TGE date (a 
 is used), staking reward amount and duration, Public Launch eligibility, claim duration and
 per-address cap, liquidity size and listing price.
 
-Once items 1–9 arrive, the runbook in [deployment.md](deployment.md#base-sepolia-runbook) is
+Once items 1–9 arrive, the runbook in [deployment.md](deployment.md) is
 followed step by step. Each transaction is explained before it is signed.
 
 ## Hosting and accounts

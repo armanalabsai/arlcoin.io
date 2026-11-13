@@ -1,5 +1,5 @@
 // How one paid AI job moves through Base, in five steps: the x402 upto payment flow as built
-// and tested on Base Sepolia. A light travels the steps and a row of Base blocks slides past;
+// and tested end to end. A light travels the steps and a row of Base blocks slides past;
 // both stop when the visitor prefers reduced motion. Horizontal on wide screens, vertical on
 // phones.
 
@@ -63,7 +63,7 @@ function Icon({ i }: { i: number }) {
 
 const icon = {
   fill: "none",
-  stroke: "#c8ebff",
+  stroke: "#efd9ab",
   strokeWidth: 2,
   strokeLinecap: "round",
   strokeLinejoin: "round",
@@ -162,7 +162,7 @@ function Narrow() {
       <path
         id="arl-flow-rail-v"
         d={`M${x} ${ys[0]} V${ys[4]}`}
-        stroke="#9fd8ff"
+        stroke="#d9b77a"
         strokeOpacity="0.45"
         strokeWidth="2"
         fill="none"
@@ -203,14 +203,14 @@ export function ChainFlow() {
       <svg width="0" height="0" className="absolute" aria-hidden="true" focusable="false">
         <defs>
           <linearGradient id="arl-flow-line" x1="0" x2="1">
-            <stop offset="0" stopColor="#9fd8ff" stopOpacity=".15" />
-            <stop offset=".5" stopColor="#9fd8ff" stopOpacity=".6" />
-            <stop offset="1" stopColor="#9fd8ff" stopOpacity=".15" />
+            <stop offset="0" stopColor="#d9b77a" stopOpacity=".15" />
+            <stop offset=".5" stopColor="#d9b77a" stopOpacity=".6" />
+            <stop offset="1" stopColor="#d9b77a" stopOpacity=".15" />
           </linearGradient>
           <radialGradient id="arl-flow-packet">
             <stop offset="0" stopColor="#fff" />
             <stop offset=".45" stopColor="#bfe9ff" />
-            <stop offset="1" stopColor="#9fd8ff" stopOpacity="0" />
+            <stop offset="1" stopColor="#d9b77a" stopOpacity="0" />
           </radialGradient>
         </defs>
       </svg>
@@ -225,7 +225,7 @@ export function ChainFlow() {
           ))}
         </ol>
         <span className="mt-4 block text-[13px] text-fg-subtle">
-          The design as built and tested on Base Sepolia. Not running on Base Mainnet yet.
+          The design as built and tested end to end; it opens on Base Mainnet with per-use payments.
         </span>
       </figcaption>
     </figure>

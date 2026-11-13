@@ -26,12 +26,6 @@ export const SITE = {
     devto: "https://dev.to/armanalabs_b86b3803a4445c",
     productHunt: "https://www.producthunt.com/products/arl-protocol",
   },
-  /** Base Sepolia (testnet) deployment, source-verified on Basescan, Blockscout and Sourcify. */
-  testnet: {
-    chain: "Base Sepolia",
-    token: "0x244312b619127B6458154F3467eFD7c87CD28500",
-    explorer: "https://sepolia.basescan.org/token/0x244312b619127B6458154F3467eFD7c87CD28500",
-  },
   /**
    * Base Mainnet deployment, deployed on 2026-10-24 (block 53,023,206) and source-verified on
    * Basescan. Setting `token` shows "Add ARL to your wallet" and the Uniswap link.
