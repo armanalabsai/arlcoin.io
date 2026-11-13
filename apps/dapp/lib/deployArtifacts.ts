@@ -123,8 +123,8 @@ export const DEPLOY_ARTIFACTS = {
     ],
   },
   ARLJobs: {
-    creationHash: "0x8dba7980824476029d0f955e1accfba000594f8783852a2128b7087a35a9354f",
-    creationSize: 5298,
+    creationHash: "0x0530e7ba499454d8b173b7eb4585a952103c119d0fdfcd82193df607d67f7775",
+    creationSize: 5927,
     constructorInputs: [
       {
         name: "paymentToken_",

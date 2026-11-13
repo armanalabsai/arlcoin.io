@@ -26,8 +26,9 @@ interface IARLSignalVerifier {
 ///
 /// The proof does not commit to a group, only to a root, and anyone can create a group with any
 /// root. Nullifiers are therefore recorded once for the whole contract, not per group: a proof
-/// replayed into a group that republishes the same root is refused. A scope is global, so a
-/// consumer that runs separate polls per group derives each poll's scope from its group id.
+/// replayed into a group that republishes the same root is refused. A scope also names its group:
+/// its upper 128 bits must equal the group id (`scopeFor`), so a proof made for one group's scope
+/// cannot be spent in a clone of that group.
 ///
 /// The protocol follows Semaphore. The proof checks (current or recently replaced root, unused
 /// nullifier, scope and message hashed into the field, public input order) are adapted from
@@ -41,6 +42,8 @@ interface IARLSignalVerifier {
 /// @dev The verifier is immutable and the contract has no owner; nullifiers live in one mapping
 /// shared by every group.
 contract ARLAnonymousSignal {
+    /// @notice A scope carries its group id above this bit (`scopeFor`).
+    uint256 public constant SCOPE_GROUP_SHIFT = 128;
     /// @notice BN254 scalar field order; roots and nullifiers are field elements.
     uint256 public constant SNARK_FIELD =
         21_888_242_871_839_275_222_246_405_745_257_275_088_548_364_400_416_034_343_698_204_186_575_808_495_617;
@@ -84,6 +87,7 @@ contract ARLAnonymousSignal {
     error SignalRootExpired(uint256 root);
     error SignalNullifierUsed(uint256 nullifier);
     error SignalInvalidProof();
+    error SignalScopeNotForGroup(uint256 scope, uint256 groupId);
 
     constructor(IARLSignalVerifier verifier_) {
         if (address(verifier_) == address(0)) revert SignalZeroAddress();
@@ -180,6 +184,7 @@ contract ARLAnonymousSignal {
             // slither-disable-next-line timestamp
             if (block.timestamp > replacedAt + ROOT_GRACE_PERIOD) revert SignalRootExpired(root);
         }
+        if (scope >> SCOPE_GROUP_SHIFT != groupId) revert SignalScopeNotForGroup(scope, groupId);
         if (_nullifiers[nullifier]) revert SignalNullifierUsed(nullifier);
 
         bytes32[] memory publicInputs = new bytes32[](4);
@@ -194,6 +199,11 @@ contract ARLAnonymousSignal {
     }
 
     // ---------------------------------------------------------------- views
+
+    /// @notice The scope of poll `pollId` in group `groupId`: the group id in the upper 128 bits.
+    function scopeFor(uint256 groupId, uint128 pollId) external pure returns (uint256) {
+        return (groupId << SCOPE_GROUP_SHIFT) | pollId;
+    }
 
     function groupAdmin(uint256 groupId) external view returns (address) {
         return _groups[groupId].admin;
