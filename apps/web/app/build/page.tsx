@@ -43,34 +43,18 @@ await setBudget(clients, ESCROWS.ARL, BigInt(jobId), "10");   // 10 ARL
 await fundJob(clients, ESCROWS.ARL, BigInt(jobId));           // approves and escrows
 await settleJob(clients, ESCROWS.ARL, BigInt(jobId), "complete", "checked"); // pays`;
 
-const PY = `pip install web3
+const PY = `pip install "git+https://github.com/armanalabsai/arlcoin.io#subdirectory=packages/python-sdk"
 
-import os, time
-from web3 import Web3
+import os
+from arl_protocol import Arl
 
-w3 = Web3(Web3.HTTPProvider("https://mainnet.base.org"))
-me = w3.eth.account.from_key(os.environ["ARL_WALLET_KEY"])
-ESCROW = "${ESCROW_ARL}"
-ABI = [
-  {"name": "createJob", "type": "function", "stateMutability": "nonpayable",
-   "inputs": [{"name": "provider", "type": "address"}, {"name": "evaluator", "type": "address"},
-              {"name": "expiredAt", "type": "uint256"}, {"name": "description", "type": "string"},
-              {"name": "hook", "type": "address"}],
-   "outputs": [{"name": "", "type": "uint256"}]},
-  {"name": "fund", "type": "function", "stateMutability": "nonpayable",
-   "inputs": [{"name": "jobId", "type": "uint256"}, {"name": "expectedBudget", "type": "uint256"},
-              {"name": "optParams", "type": "bytes"}], "outputs": []},
-]
-jobs = w3.eth.contract(address=ESCROW, abi=ABI)
+arl = Arl(private_key=os.environ["ARL_WALLET_KEY"])   # token="USDC" to pay in USDC
 
-def send(fn):
-    tx = fn.build_transaction({"from": me.address, "nonce": w3.eth.get_transaction_count(me.address)})
-    signed = me.sign_transaction(tx)
-    return w3.eth.wait_for_transaction_receipt(w3.eth.send_raw_transaction(signed.raw_transaction))
-
-deadline = int(time.time()) + 24 * 3600
-send(jobs.functions.createJob("0xProvider", me.address, deadline, "Summarise 10 documents",
-                              "0x0000000000000000000000000000000000000000"))`;
+job = arl.create_job(provider="0xProvider", hours=24, description="Summarise 10 documents")
+arl.set_budget(job, "10")      # 10 ARL
+arl.fund(job)                  # approves and escrows
+arl.complete(job, "checked")   # pays the provider
+print(arl.get_job(job))`;
 
 const CLI = `# Any language: the escrows are plain contracts. With Foundry's cast:
 cast send ${ESCROW_ARL} \\
@@ -136,7 +120,7 @@ export default function BuildPage() {
           <a href="#python" className={link}>
             Python
           </a>{" "}
-          · web3.py, no extra package
+          · <code>arl_protocol</code>, one class
         </li>
         <li className="glass rounded-[16px] p-4">
           <a href="#any-language" className={link}>
@@ -185,9 +169,12 @@ export default function BuildPage() {
       <Path id="python" name="Python" who="For data and AI teams.">
         <Code>{PY}</Code>
         <p className="mt-3">
-          Budget, submit and settle follow the same pattern with <code>setBudget</code>,{" "}
-          <code>submit</code>, <code>complete</code>, <code>reject</code> and{" "}
-          <code>claimRefund</code>. Approve the token for the escrow before <code>fund</code>.
+          The provider hands in work with <code>arl.submit(job, link)</code>; <code>reject</code>{" "}
+          refunds the client and <code>claim_refund</code> returns an unfinished job&rsquo;s escrow
+          after the deadline. Every call is checked before it is sent, so a mistake costs no gas.{" "}
+          <a href={`${SITE.repository}/tree/main/packages/python-sdk`} {...ext} className={link}>
+            arl_protocol on GitHub
+          </a>
         </p>
       </Path>
 
