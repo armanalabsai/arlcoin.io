@@ -197,7 +197,7 @@ test("no horizontal overflow on any layer", async ({ page }) => {
 test("token values that change on chain are never given a number", async ({ page }) => {
   for (const [id, label] of [
     ["circulating-supply", "Live at /api/supply"],
-    ["staked", "Not on Base Mainnet yet"],
+    ["staked", "Opens when the first period is funded"],
   ] as const) {
     await page.goto(`/core/token/${id}`);
     await expect(surface(page)).toContainText(label);
