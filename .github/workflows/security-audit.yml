@@ -23,7 +23,7 @@ concurrency:
 jobs:
   static:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 40
     permissions:
       contents: read
       security-events: write
@@ -46,7 +46,8 @@ jobs:
           node-version: 22
 
       - run: pip install slither-analyzer==0.11.6
-      - run: npm install --global @cyfrin/aderyn@0.6.8
+      # The Aderyn release binaries are no longer downloadable (404), so build the pinned tag.
+      - run: cargo install --git https://github.com/cyfrin/aderyn --tag aderyn-v0.6.8 --locked aderyn
 
       - run: mkdir -p out-security
 
