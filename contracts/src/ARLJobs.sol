@@ -24,7 +24,11 @@ import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/Reentrancy
 ///   accepted for interface compatibility and ignored;
 /// - `fund` takes the expected budget (front-running protection, as the specification requires);
 /// - a provider can only submit, and the evaluator only complete or reject a funded job, before
-///   the job expires.
+///   the job expires;
+/// - `fund` checks that the escrow received exactly the budget, so a token that takes a fee on
+///   transfer can never leave the escrow short of what it owes;
+/// - after expiry the client can also take the refund to another address (`claimRefundTo`), so a
+///   client the token refuses to pay (for example an address on USDC's deny list) is never stuck.
 /// @dev The payment token is immutable; every function that moves tokens is `nonReentrant` and
 /// updates state before the transfer.
 contract ARLJobs is ReentrancyGuardTransient {
@@ -94,6 +98,7 @@ contract ARLJobs is ReentrancyGuardTransient {
     error JobExpiredAlready();
     error HooksUnsupported();
     error DescriptionTooLong();
+    error AmountReceivedMismatch();
 
     constructor(IERC20 paymentToken_) {
         if (address(paymentToken_) == address(0)) revert ZeroAddress();
@@ -163,7 +168,12 @@ contract ARLJobs is ReentrancyGuardTransient {
 
         job.status = JobStatus.Funded;
         emit JobFunded(jobId, msg.sender, budget);
+        uint256 before = paymentToken.balanceOf(address(this));
         paymentToken.safeTransferFrom(msg.sender, address(this), budget);
+        // A fee-on-transfer token would leave the escrow short: refuse it instead.
+        if (paymentToken.balanceOf(address(this)) - before != budget) {
+            revert AmountReceivedMismatch();
+        }
     }
 
     /// @notice Provider only, while Funded and before expiry: hands the work in for evaluation.
@@ -215,21 +225,25 @@ contract ARLJobs is ReentrancyGuardTransient {
 
         job.status = JobStatus.Rejected;
         emit JobRejected(jobId, msg.sender, reason);
-        if (status != JobStatus.Open) _refund(jobId, job);
+        if (status != JobStatus.Open) _refund(jobId, job.client, job.budget);
     }
 
     /// @notice Anyone, once a Funded or Submitted job has expired: returns the escrow to the
     /// client. Nothing can block it.
     function claimRefund(uint256 jobId) external nonReentrant {
+        Job storage job = _expire(jobId);
+        _refund(jobId, job.client, job.budget);
+    }
+
+    /// @notice The client only, once a Funded or Submitted job has expired: returns the escrow to
+    /// `recipient` instead of the client. For a client the token refuses to pay, which would make
+    /// claimRefund revert.
+    function claimRefundTo(uint256 jobId, address recipient) external nonReentrant {
+        if (recipient == address(0)) revert ZeroAddress();
         Job storage job = _job(jobId);
-        if (job.status != JobStatus.Funded && job.status != JobStatus.Submitted) {
-            revert WrongStatus();
-        }
-        // slither-disable-next-line timestamp
-        if (block.timestamp < job.expiredAt) revert WrongStatus();
-        job.status = JobStatus.Expired;
-        emit JobExpired(jobId);
-        _refund(jobId, job);
+        if (msg.sender != job.client) revert Unauthorized();
+        _expire(jobId);
+        _refund(jobId, recipient, job.budget);
     }
 
     // ---------------------------------------------------------------- views
@@ -250,10 +264,20 @@ contract ARLJobs is ReentrancyGuardTransient {
         if (job.status != JobStatus.Open) revert WrongStatus();
     }
 
-    function _refund(uint256 jobId, Job storage job) private {
-        uint256 amount = job.budget;
-        address client = job.client;
-        emit Refunded(jobId, client, amount);
-        paymentToken.safeTransfer(client, amount);
+    /// @dev Marks a Funded or Submitted job that has reached its deadline as Expired.
+    function _expire(uint256 jobId) private returns (Job storage job) {
+        job = _job(jobId);
+        if (job.status != JobStatus.Funded && job.status != JobStatus.Submitted) {
+            revert WrongStatus();
+        }
+        // slither-disable-next-line timestamp
+        if (block.timestamp < job.expiredAt) revert WrongStatus();
+        job.status = JobStatus.Expired;
+        emit JobExpired(jobId);
+    }
+
+    function _refund(uint256 jobId, address to, uint256 amount) private {
+        emit Refunded(jobId, to, amount);
+        paymentToken.safeTransfer(to, amount);
     }
 }

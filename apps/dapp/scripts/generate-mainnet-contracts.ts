@@ -3,7 +3,8 @@
 // (history reads start there).
 //
 // - ARLToken, ARLVestingWallet (the investors' wallet): docs/mainnet-plan.md (2026-10-24)
-// - ARLJobs (the ARL escrow): contracts/deploy/base-mainnet-jobs.json
+// - ARLJobs (the ARL escrow): contracts/deploy/base-mainnet-jobs.json, with the ABI of the version
+//   deployed there (contracts/deploy/abi/ARLJobs-v2.json), not of the current source
 // - ARLStakingRewards: contracts/deploy/base-mainnet-services.json
 //
 //   node scripts/generate-mainnet-contracts.ts [--check]
@@ -43,8 +44,14 @@ const CONTRACTS = {
   ARLJobs: { address: jobs.arl.jobs, deployedOnBlock: 53_315_381 },
 } as const;
 
-const abi = (name: string): unknown =>
-  read<{ abi: unknown }>(join(contractsDir, "out", `${name}.sol`, `${name}.json`)).abi;
+// Contracts whose deployed version is older than the current source keep that version's ABI.
+const FROZEN_ABI: Record<string, string> = { ARLJobs: "ARLJobs-v2.json" };
+
+const abi = (name: string): unknown => {
+  const frozen = FROZEN_ABI[name];
+  if (frozen) return read<unknown>(join(contractsDir, "deploy", "abi", frozen));
+  return read<{ abi: unknown }>(join(contractsDir, "out", `${name}.sol`, `${name}.json`)).abi;
+};
 
 function normalise(text: string): string {
   return text
