@@ -6,8 +6,7 @@
 //   const jobId = await openVerifiedJob({ publicClient, walletClient }, {
 //     provider, specUri, specHash, committee: [v1, v2, v3], threshold: 2 });
 //
-// Base Mainnet, Base Sepolia and the local chain. On Base Mainnet the prepared addresses are used
-// only once they hold code (docs/mainnet-services.md).
+// Base Mainnet and the local chain (docs/mainnet-services.md).
 
 import {
   parseAbi,
@@ -20,14 +19,6 @@ import {
   type PublicClient,
   type WalletClient,
 } from "viem";
-
-/** Base Sepolia deployment (contracts/deploy/base-sepolia.json). */
-export const BASE_SEPOLIA_VERIFIED = {
-  chainId: 84_532,
-  jobs: "0xec79a897105aEd6daFBbB2a904E5bcFF71455644",
-  evaluator: "0x6808F80Eb11538543d31cf4b50332B268dDd4d14",
-  arbiterSafe: "0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f",
-} as const satisfies Record<string, unknown>;
 
 /**
  * Base Mainnet deployment as prepared in docs/mainnet-services.md: the escrow paid in ARL with the
@@ -44,14 +35,13 @@ export const BASE_MAINNET_VERIFIED = {
   arbiterSafe: "0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f",
 } as const satisfies Record<string, unknown>;
 
-const ALLOWED = [8453, 84_532, 31_337];
+const ALLOWED = [8453, 31_337];
 
 /** The jobs escrow and evaluator of a chain, or undefined on the local chain. */
 export function verifiedDeployment(
   chainId: number,
 ): { jobs: Address; evaluator: Address } | undefined {
   if (chainId === BASE_MAINNET_VERIFIED.chainId) return BASE_MAINNET_VERIFIED;
-  if (chainId === BASE_SEPOLIA_VERIFIED.chainId) return BASE_SEPOLIA_VERIFIED;
   return undefined;
 }
 

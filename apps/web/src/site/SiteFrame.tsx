@@ -34,6 +34,15 @@ export function SiteHeader({ current }: { current?: "whitelist" | "contact" | "f
             ))}
             <li>
               <Link
+                href="/build"
+                prefetch={false}
+                className="inline-flex min-h-11 items-center transition-colors hover:text-fg"
+              >
+                Build
+              </Link>
+            </li>
+            <li>
+              <Link
                 href="/docs"
                 prefetch={false}
                 className="inline-flex min-h-11 items-center transition-colors hover:text-fg"

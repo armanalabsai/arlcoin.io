@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { BASE_SEPOLIA_VERIFIED, VERDICT_PHASES, checkOpenParams } from "../src/index.ts";
+import { BASE_MAINNET_VERIFIED, VERDICT_PHASES, checkOpenParams } from "../src/index.ts";
 
 const ok = {
   provider: "0x00000000000000000000000000000000000000aa",
@@ -37,9 +37,9 @@ describe("verified jobs", () => {
       });
   });
 
-  it("names the eight verdict phases and the Base Sepolia deployment", () => {
+  it("names the eight verdict phases and the Base Mainnet deployment", () => {
     assert.equal(VERDICT_PHASES.length, 8);
     assert.equal(VERDICT_PHASES[5], "Finalized");
-    assert.equal(BASE_SEPOLIA_VERIFIED.chainId, 84_532);
+    assert.equal(BASE_MAINNET_VERIFIED.chainId, 8453);
   });
 });
