@@ -2306,6 +2306,24 @@ const localContracts = {
         },
         {
           type: "function",
+          name: "claimRefundTo",
+          inputs: [
+            {
+              name: "jobId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "recipient",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
           name: "complete",
           inputs: [
             {
@@ -2816,6 +2834,11 @@ const localContracts = {
             },
           ],
           anonymous: false,
+        },
+        {
+          type: "error",
+          name: "AmountReceivedMismatch",
+          inputs: [],
         },
         {
           type: "error",

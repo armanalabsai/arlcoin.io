@@ -48,6 +48,7 @@ const ROADMAP = cards("roadmap", [
   "phase-2",
   "mainnet",
   "verified-jobs",
+  "compute-staking",
   "services",
 ]);
 
@@ -284,7 +285,7 @@ export default function Home() {
         <Section
           alt
           heading="Where ARL is today."
-          sub="ARL is live on Base Mainnet since 24 October 2026. Verified jobs, compute payments and staking followed on 12 November; every service runs on Base Mainnet."
+          sub="ARL is live on Base Mainnet since 24 October 2026. Verified jobs, compute payments and staking followed on 12 November; AI payments and the marketplace are next."
         >
           <Reveal delay={120} className="glass mt-14 rounded-[28px] p-6 sm:p-10">
             <ol className="landing-road text-left">
