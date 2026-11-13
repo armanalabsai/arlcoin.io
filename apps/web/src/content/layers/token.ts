@@ -155,26 +155,23 @@ export const token: Layer = {
         value: `${SITE.mainnet.token.slice(0, 6)}…${SITE.mainnet.token.slice(-4)}`,
       },
       detail: {
-        summary: `The official ARL contract on Base Mainnet is ${SITE.mainnet.token}, deployed on ${SITE.mainnet.deployedOn} and source-verified on Basescan. Any other address presented as ARL is not official. The Base Sepolia testnet token (${SITE.testnet.token}) has no value.`,
+        summary: `The official ARL contract on Base Mainnet is ${SITE.mainnet.token}, deployed on ${SITE.mainnet.deployedOn} and source-verified on Basescan. Any other address presented as ARL is not official.`,
       },
-      links: [
-        { label: "ARL on Basescan", href: SITE.mainnet.explorer },
-        { label: "Testnet token on Basescan", href: SITE.testnet.explorer },
-      ],
+      links: [{ label: "ARL on Basescan", href: SITE.mainnet.explorer }],
     },
     {
       id: "staked",
       title: "Staked",
-      shortDescription: "Staking live on Base Sepolia testnet",
-      status: "PLANNED",
+      shortDescription: "Deployed on Base Mainnet; opens when funded",
+      status: "IN DEVELOPMENT",
       weight: "tertiary",
       metric: {
         kind: "unavailable",
-        label: "Not on Base Mainnet yet",
+        label: "Opens when the first period is funded",
         source: "chain.stakedSupply",
       },
       detail: {
-        summary: `The staking contract is deployed on Base Sepolia (testnet), where staked tokens have no value; there is no staking on Base Mainnet yet. Rewards are planned to come from the Community & Staking allocation (${formatArl(allocation("community-staking").amount)}) or from protocol revenue. Staking never creates new ARL.`,
+        summary: `The staking contract is deployed on Base Mainnet (12 November 2026) with 180-day reward periods; staking opens when the Community & Staking Safe funds the first period. Rewards are planned to come from the Community & Staking allocation (${formatArl(allocation("community-staking").amount)}) or from protocol revenue. Staking never creates new ARL.`,
       },
     },
     {
@@ -226,7 +223,7 @@ export const token: Layer = {
       metric: { kind: "static", value: "Base" },
       detail: {
         summary:
-          "ARL is an ERC-20 token on Base, an Ethereum layer 2. It is live on Base Mainnet (chain 8453) since 24 October 2026; the testnet deployment on Base Sepolia (chain 84532) keeps running for the app. The evaluation that selected Base is documented in the repository.",
+          "ARL is an ERC-20 token on Base, an Ethereum layer 2. It is live on Base Mainnet (chain 8453) since 24 October 2026, and the ARL app runs on Base Mainnet. The evaluation that selected Base is documented in the repository.",
       },
       links: [{ label: "Chain evaluation", href: repoDoc("docs/chain-evaluation.md") }],
     },

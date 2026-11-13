@@ -8,9 +8,9 @@
 // - a contract creation whose code is exactly the ARL build (`DEPLOY_ARTIFACTS`), with its
 //   constructor arguments decoded for display;
 // - a Safe creation through the canonical Safe v1.5.0 SafeProxyFactory with a canonical
-//   singleton (on Base Sepolia), with its owners and threshold decoded for display.
-// Anything else is refused. The chain must be Base Sepolia, Base Mainnet (from the TGE) or the
-// local Anvil chain (`assertAllowedChain`).
+//   singleton, with its owners and threshold decoded for display.
+// Anything else is refused. The chain must be Base Mainnet (from the TGE) or the local Anvil chain
+// (`assertAllowedChain`).
 
 import {
   decodeAbiParameters,
@@ -27,7 +27,7 @@ import {
 } from "viem";
 
 import { DEPLOY_ARTIFACTS } from "./deployArtifacts.ts";
-import { BASE_MAINNET_CHAIN_ID, LOCAL_CHAIN_ID, assertAllowedChain } from "./network.ts";
+import { LOCAL_CHAIN_ID, assertAllowedChain } from "./network.ts";
 
 /** The creation code a run may contain, per contract. */
 export type DeployArtifacts = {
@@ -302,11 +302,7 @@ export function recordCommand(
   runFile: string,
 ): { kind: "safes" | "arl" | "jobs" | "services" | "arbiter"; command: string } {
   const rpc =
-    run.chainId === LOCAL_CHAIN_ID
-      ? "<local-rpc-url> --local-anvil"
-      : run.chainId === BASE_MAINNET_CHAIN_ID
-        ? "https://mainnet.base.org"
-        : "https://sepolia.base.org";
+    run.chainId === LOCAL_CHAIN_ID ? "<local-rpc-url> --local-anvil" : "https://mainnet.base.org";
   const isJobs = (s: DeployStep) =>
     s.kind === "create" && (s.contract === "ARLJobs" || s.contract === "ARLVerifiedEvaluator");
   if (run.steps.some(isJobs)) {
@@ -366,7 +362,7 @@ export function checkBeforeSend(
   runChainId: number,
 ): string | undefined {
   if (wallet.chainId !== runChainId) {
-    return `switch the wallet to ${runChainId === LOCAL_CHAIN_ID ? "the local chain" : runChainId === BASE_MAINNET_CHAIN_ID ? "Base" : "Base Sepolia"}`;
+    return `switch the wallet to ${runChainId === LOCAL_CHAIN_ID ? "the local chain" : "Base"}`;
   }
   if (getAddress(wallet.account) !== step.from) {
     return `connect ${short(step.from)}: this plan was prepared for that address`;

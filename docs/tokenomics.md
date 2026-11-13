@@ -18,8 +18,7 @@ replacement). It supersedes the 10-allocation Phase 1 table. The former
   inflation, emission or hidden reserve.
 - The token is deployed on Base Mainnet at `0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4` (2026-10-24, block
   53,023,206, source-verified on Basescan); circulating supply is published at
-  arlcoin.io/api/supply. The testnet token on Base Sepolia is
-  `0x244312b619127B6458154F3467eFD7c87CD28500`.
+  arlcoin.io/api/supply.
 
 ## Allocation
 
@@ -94,8 +93,8 @@ The approved vesting durations are enforced: the planner (`packages/deploy`)
 and `ARLDeployPlan` reject any schedule whose cliff is not 12 calendar months or
 whose linear period is not 36 calendar months. Every vesting schedule starts at
 the TGE (`VESTING_START = TGE_TIMESTAMP`, decided 2026-09-29): the config has a
-single `tge` date. The TGE date is not confirmed, so only local Anvil and Base
-Sepolia may use a placeholder TGE; Base Mainnet opens only at the TGE (2026-10-23T00:00:00Z).
+single `tge` date. Base Mainnet accepts no placeholder TGE and opened only at the TGE
+(2026-10-23T00:00:00Z); local Anvil rehearsals may use a placeholder.
 
 Future reward programs (staking, referral, onboarding, early users) must be
 compatible with eligibility rules, Sybil resistance, abuse prevention, rate

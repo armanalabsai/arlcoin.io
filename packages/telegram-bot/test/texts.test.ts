@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { parseOperator, parseUint } from "../src/chain.ts";
+import { parseArl, parseUint } from "../src/chain.ts";
 import * as texts from "../src/texts.ts";
 
 const ALL = [
@@ -12,10 +12,9 @@ const ALL = [
   texts.welcome("Ada"),
   texts.SCAM_NOTICE,
   texts.APP_TEXT,
-  texts.FAUCET_TEXT,
   texts.WHITELIST_TEXT,
   texts.LAUNCH,
-  texts.status(200_000, 1_000, 1_800_000_000, 1_790_000_000),
+  texts.status(200_000, 1_800_000_000, 1_790_000_000),
 ];
 
 describe("texts", () => {
@@ -44,7 +43,8 @@ describe("texts", () => {
     assert.ok(texts.SCAM_WARNING.includes(texts.MAINNET_TOKEN));
     assert.ok(texts.START.includes("No airdrop at launch"));
     assert.ok(texts.HELP.includes("x.com/arlprotocol"));
-    assert.ok(texts.START.includes(texts.APP) && texts.START.includes("no value"));
+    assert.ok(texts.START.includes(texts.APP));
+    for (const t of ALL) assert.ok(!/testnet|sepolia|faucet/i.test(t), t);
     assert.ok(texts.SCAM_WARNING.includes("seed phrase"));
     assert.ok(texts.START.includes("t.me/arlprotocol_community"));
   });
@@ -60,10 +60,10 @@ describe("texts", () => {
 
   it("render the status", () => {
     const now = 1_800_000_000;
-    assert.ok(texts.status(0, 1_000, now + 10, now).includes("empty"));
-    assert.ok(texts.status(5_000, 1_000, now - 1, now).includes("not running"));
-    assert.ok(texts.status(null, null, null, now).includes("unknown"));
-    assert.ok(texts.status(200_000, 1_000, now + 10, now).includes("200,000 testnet ARL left"));
+    assert.ok(texts.status(0, 0, now).includes("not funded yet"));
+    assert.ok(texts.status(5_000, now - 1, now).includes("not running"));
+    assert.ok(texts.status(null, null, now).includes("unknown"));
+    assert.ok(texts.status(200_000, now + 10, now).includes("Staked: 200,000 ARL"));
   });
 
   it("name the mainnet contract in /launch", () => {
@@ -74,11 +74,10 @@ describe("texts", () => {
 });
 
 describe("chain parsing", () => {
-  it("reads the operator status", () => {
-    const body = { arl: String(200_000n * 10n ** 18n), faucetAmount: String(1_000n * 10n ** 18n) };
-    assert.deepEqual(parseOperator(body), [200_000, 1_000]);
-    assert.deepEqual(parseOperator({}), [null, null]);
-    assert.deepEqual(parseOperator({ arl: "x", faucetAmount: "1" }), [null, null]);
+  it("reads whole ARL from eth_call", () => {
+    assert.equal(parseArl(`0x${(200_000n * 10n ** 18n).toString(16)}`), 200_000);
+    assert.equal(parseArl("0x"), null);
+    assert.equal(parseArl(undefined), null);
   });
 
   it("reads a uint from eth_call", () => {

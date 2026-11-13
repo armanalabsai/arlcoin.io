@@ -1,9 +1,9 @@
 # ARL Payments (x402 `upto`)
 
-Status: **IN DEVELOPMENT.** Integration code and tests only. No payment component is deployed and no facilitator
-runs. The ARL token is deployed on Base Sepolia (`0x244312b619127B6458154F3467eFD7c87CD28500`);
-the token is also on Base Mainnet (`0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4`), but the payment components are not, and the
-payments code refuses Base Mainnet.
+Status: **IN DEVELOPMENT; not live on Base Mainnet yet.** Integration code and tests only. No
+facilitator runs. The ARL token is on Base Mainnet (`0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4`),
+but the per-use payments facilitator is not, and the payments code does not open Base Mainnet
+(8453) yet. The app's Payments screen runs on the local chain only.
 
 ARL payments let an AI or compute service charge per use in ARL. They use the `upto` scheme of
 the x402 protocol: the payer signs a **ceiling**, the service meters actual usage, and the
@@ -28,13 +28,12 @@ itself is always the Permit2 witness transfer.
 
 | Item                   | Value                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Network                | Base Sepolia, CAIP-2 `eip155:84532`. Base Mainnet (8453) refused by `paymentNetwork`                                                                                                                                                                                                                                                                                                                                                                                           |
-| Permit2                | `0x000000000022D473030F116dDEE9F6B43aC78BA3`, Base Sepolia code hash `0xdcde65555316946c298e4c60c6213eb5c3aeab4354d1f3fac5427236bcbb9ebe`                                                                                                                                                                                                                                                                                                                                      |
-| x402UptoPermit2Proxy   | `0x4020A4f3b7b90ccA423B9fabCc0CE57C6C240002`, code hash `0x4662dc27323421a3698be49ac95f7b0dba141c238d31ef543248d1a11f8d8eec` (same on Base Sepolia and Base Mainnet; identical to a build of the source below)                                                                                                                                                                                                                                                                 |
+| Network                | Not open on Base Mainnet (8453) yet: `paymentNetwork` refuses it until the facilitator goes live                                                                                                                                                                                                                                                                                                                                                                               |
+| Permit2                | `0x000000000022D473030F116dDEE9F6B43aC78BA3`, pinned code hash `0xdcde65555316946c298e4c60c6213eb5c3aeab4354d1f3fac5427236bcbb9ebe`                                                                                                                                                                                                                                                                                                                                            |
+| x402UptoPermit2Proxy   | `0x4020A4f3b7b90ccA423B9fabCc0CE57C6C240002`, code hash `0x4662dc27323421a3698be49ac95f7b0dba141c238d31ef543248d1a11f8d8eec` (same on Base Mainnet; identical to a build of the source below)                                                                                                                                                                                                                                                                                  |
 | x402 source            | x402-foundation/x402 @ `71eb9a55e081e7b81ba3046d0bd17c3eb9c7bf81` (contracts); SDK npm `@x402/core` and `@x402/evm` 2.29.0. Apache-2.0; contracts MIT                                                                                                                                                                                                                                                                                                                          |
 | Reviews of the proxies | Cantina, Feb 2026 (commit `c0a80b76`: 3 low, 4 informational, all fixed) and Mar 2026 (commit `79136b97`: 1 informational on the _exact_ proxy, acknowledged). The May 2026 report covers only the separate batch-settlement contract. Reports are published in the x402 repository                                                                                                                                                                                            |
 | Review coverage check  | `79136b97` is the first commit of x402 PR #1322 (`refs/pull/1322/head`), squash-merged as `713907fc`. The proxy sources and `ISignatureTransfer.sol` have the same git blob hashes at `79136b97` and at `71eb9a55` (base `46c6c886`, upto `236e9e85`), and the library pins match. `foundry.toml` changed only in metadata settings (`cbor_metadata`, `bytecode_hash`), a pinned `evm_version = "cancun"` and RPC entries; the deployed bytecode matches a build at `71eb9a55` |
-| Fork block             | Base Sepolia 47,419,967                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 
 `assertPinnedCode` checks both code hashes before use.
 
@@ -51,7 +50,7 @@ Enforced by the proxy and Permit2 (tested on the fork, `contracts/test-fork/`):
 
 Added by `@arl/payments` (`packages/payments`):
 
-- **Network gate**: Base Sepolia only; Base Mainnet refused, no override.
+- **Network gate**: Base Mainnet not open yet; no override.
 - **Asset and spender pin**: only ARL, only through the pinned upto proxy.
 - **One settlement per authorization**: a shared `AuthorizationStore` records every
   authorization (payer + nonce) as `settling`, `settled`, `retired` or `failed`, claimed before
@@ -99,11 +98,11 @@ units × price, so a wrong charge is signed evidence against the service.
 That is the API the SDK's `HTTPFacilitatorClient` calls, so any x402 resource server can use
 it, including `@arl/provider`:
 
-| Endpoint         | Does                                                                              |
-| ---------------- | --------------------------------------------------------------------------------- |
-| `GET /supported` | The one kind ARL settles (x402 v2, `upto`, Base Sepolia) and the settling address |
-| `POST /verify`   | `{ x402Version, paymentPayload, paymentRequirements }` → `VerifyResponse`         |
-| `POST /settle`   | The same body → `SettleResponse`                                                  |
+| Endpoint         | Does                                                                      |
+| ---------------- | ------------------------------------------------------------------------- |
+| `GET /supported` | The one kind ARL settles (x402 v2, `upto`) and the settling address       |
+| `POST /verify`   | `{ x402Version, paymentPayload, paymentRequirements }` → `VerifyResponse` |
+| `POST /settle`   | The same body → `SettleResponse`                                          |
 
 - Every request goes through `ArlUptoFacilitator`.
 - Bodies are shape-checked with the SDK's own schemas.
@@ -136,16 +135,17 @@ below).
   restarts of one process. Several facilitator instances must share a durable store with
   compare-and-set semantics, for example a database row with a unique key.
 - **Facilitator key and gas.** Running a facilitator needs a signing key with ETH for gas on Base
-  Sepolia. Not created; an owner decision.
-- `arlToken` must come from the deployment manifest (Base Sepolia: `0x244312b619127B6458154F3467eFD7c87CD28500`).
+  Mainnet. Not created; an owner decision.
+- `arlToken` must come from the deployment manifest (Base Mainnet:
+  `0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4`).
 
 ## Tests
 
-| Suite               | Command                                                                                                | Covers                                                                                                                                                                                                                                                                                                                                                                                 |
-| ------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unit                | `npm test -w @arl/payments`                                                                            | network gate, usage receipts (signing, recovery, every mismatch, malformed receipts, the facilitator gate), pinned-code check, requirements, metering, settlement policy, facilitator wrapper (with a stand-in SDK scheme), file store across restarts and crashes, the HTTP service through the SDK's `HTTPFacilitatorClient` (bearer token, malformed bodies)                        |
-| Contract fork       | `FOUNDRY_PROFILE=fork ARL_FORK_RPC=<Base Sepolia RPC> forge test` in `contracts/`                      | the 15 agreed cases against the real Permit2 and proxy, fuzzing both sides of the ceiling, EIP-2612 → Permit2 (gasless, front-run, value mismatch), pinned code                                                                                                                                                                                                                        |
-| SDK end-to-end fork | `ARL_FORK_RPC=<Base Sepolia RPC> npm run test:fork -w @arl/payments` (needs `forge build` and `anvil`) | real `@x402/evm` client and facilitator through `ArlUptoFacilitator` on a local Anvil fork: verify, metered settlement, replay refusal, ceiling, zero retirement, tampered payee                                                                                                                                                                                                       |
-| Provider fork       | `ARL_FORK_RPC=<Base Sepolia RPC> npm run test:fork -w @arl/provider` (needs `forge build` and `anvil`) | the reference compute provider over HTTP, paid by the real SDK client and settled through the facilitator service (bearer token, file store): a job billed for seconds used and settled on-chain, a job killed at the paid time and settled at the ceiling, a replayed payment refused before it runs, and a signed usage receipt checked by the payer against the on-chain settlement |
+| Suite               | Command                                                                                        | Covers                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit                | `npm test -w @arl/payments`                                                                    | network gate, usage receipts (signing, recovery, every mismatch, malformed receipts, the facilitator gate), pinned-code check, requirements, metering, settlement policy, facilitator wrapper (with a stand-in SDK scheme), file store across restarts and crashes, the HTTP service through the SDK's `HTTPFacilitatorClient` (bearer token, malformed bodies)                        |
+| Contract fork       | `FOUNDRY_PROFILE=fork ARL_FORK_RPC=<fork RPC> forge test` in `contracts/`                      | the 15 agreed cases against the real Permit2 and proxy, fuzzing both sides of the ceiling, EIP-2612 → Permit2 (gasless, front-run, value mismatch), pinned code                                                                                                                                                                                                                        |
+| SDK end-to-end fork | `ARL_FORK_RPC=<fork RPC> npm run test:fork -w @arl/payments` (needs `forge build` and `anvil`) | real `@x402/evm` client and facilitator through `ArlUptoFacilitator` on a local Anvil fork: verify, metered settlement, replay refusal, ceiling, zero retirement, tampered payee                                                                                                                                                                                                       |
+| Provider fork       | `ARL_FORK_RPC=<fork RPC> npm run test:fork -w @arl/provider` (needs `forge build` and `anvil`) | the reference compute provider over HTTP, paid by the real SDK client and settled through the facilitator service (bearer token, file store): a job billed for seconds used and settled on-chain, a job killed at the paid time and settled at the ceiling, a replayed payment refused before it runs, and a signed usage receipt checked by the payer against the on-chain settlement |
 
-Fork tests read chain state only; every transaction stays in the local fork.
+Fork tests read chain state at a pinned block only; every transaction stays in the local fork.

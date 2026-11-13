@@ -83,7 +83,7 @@ export const ecosystem: Layer = {
       links: [
         { label: "Architecture", href: repoDoc("docs/architecture.md") },
         { label: "Tokenomics", href: repoDoc("docs/tokenomics.md") },
-        { label: "Deployment", href: repoDoc("docs/deployment.md") },
+        { label: "Mainnet services", href: repoDoc("docs/mainnet-services.md") },
       ],
     },
   ],

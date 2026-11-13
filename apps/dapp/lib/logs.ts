@@ -1,15 +1,18 @@
-// Event history that works on public RPCs. Public endpoints cap eth_getLogs ranges (Base Sepolia's
-// own endpoint at 200 blocks, others at 10,000 or 50,000), so a history read starts at the
-// contract's deployment block, not 0, and a range the endpoint refuses is split in halves until
-// it is accepted. Results keep chain order. On the local chain one request covers everything.
+// Event history that works on public RPCs. Public endpoints cap eth_getLogs ranges (Base Mainnet's
+// publicnode endpoint at 50,000 blocks, others lower), so a history read starts at the contract's
+// deployment block, not 0, is read in ranges of at most MAX_SPAN blocks, and a range the endpoint
+// still refuses is split in halves until it is accepted. Results keep chain order. On the local
+// chain one request covers everything.
 
 export interface BlockRange {
   fromBlock: bigint;
   toBlock: bigint;
 }
 
-/** The smallest range ever requested; Base Sepolia's public endpoint accepts 200 blocks. */
+/** The smallest range ever requested. */
 export const MIN_SPAN = 200n;
+/** The largest range requested at once: the widest the public Base endpoints accept. */
+export const MAX_SPAN = 50_000n;
 /** Ranges read at the same time once a range has to be split. */
 export const CONCURRENCY = 4;
 
@@ -75,5 +78,7 @@ export async function eventsSince<T>(
   fromBlock: bigint,
   read: (range: BlockRange) => Promise<T[]>,
 ): Promise<T[]> {
-  return readRange({ fromBlock, toBlock: await client.getBlockNumber() }, read);
+  const parts = splitRange({ fromBlock, toBlock: await client.getBlockNumber() }, MAX_SPAN);
+  const results = await inBatches(parts, CONCURRENCY, (part) => readRange(part, read));
+  return results.flat();
 }

@@ -6,7 +6,7 @@ export function Footer() {
       <p>
         {IS_LOCAL
           ? "Local test chain only. Amounts and schedules on this chain are development values. The official ARL contract on Base Mainnet is published on arlcoin.io."
-          : "This app runs on the Base Sepolia testnet; testnet ARL has no value. ARL on Base Mainnet: 0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4."}
+          : "ARL on Base Mainnet: 0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4. Transactions are real and final; check every address before you sign."}
       </p>
       <p className="mt-2">
         <a className="link" href="https://arlcoin.io">

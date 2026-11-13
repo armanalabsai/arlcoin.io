@@ -9,6 +9,7 @@ import type { Card } from "@/content/types.ts";
 import { AddToWallet } from "@/site/AddToWallet.tsx";
 import { ChainFlow } from "@/site/ChainFlow.tsx";
 import { FaqList } from "@/site/FaqList.tsx";
+import { HeroLogo } from "@/site/HeroLogo.tsx";
 import { JsonLd } from "@/site/JsonLd.tsx";
 import { LaunchSteps } from "@/site/LaunchSteps.tsx";
 import { Reveal } from "@/site/Reveal.tsx";
@@ -45,8 +46,8 @@ const ROADMAP = cards("roadmap", [
   "phase-0",
   "phase-1",
   "phase-2",
-  "testnet",
   "mainnet",
+  "verified-jobs",
   "services",
 ]);
 
@@ -130,8 +131,10 @@ export default function Home() {
             href={pathFor()}
             prefetch={false}
             aria-label="Open the ARL Core"
-            className="landing-logo mx-auto mb-8 block size-[200px] rounded-full sm:size-[260px]"
-          />
+            className="landing-logo mx-auto mb-8 size-[260px] rounded-full sm:size-[360px]"
+          >
+            <HeroLogo />
+          </Link>
           {/* The paid-job flow sits right under the logo, so visitors see what ARL does first. */}
           <div
             aria-label="How ARL works on Base"
@@ -206,10 +209,10 @@ export default function Home() {
             className="glass mt-4 flex flex-col items-start gap-1 rounded-[18px] px-5 py-3 text-left sm:flex-row sm:items-center sm:justify-between sm:gap-4"
           >
             <span className="font-mono text-[12px] break-all text-fg sm:text-[14px]">
-              {SITE.testnet.chain} token · {SITE.testnet.token}
+              {SITE.mainnet.chain} token · {SITE.mainnet.token}
             </span>
             <a
-              href={SITE.testnet.explorer}
+              href={SITE.mainnet.explorer}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex min-h-11 shrink-0 items-center text-[15px] font-semibold text-accent hover:underline"
@@ -243,7 +246,7 @@ export default function Home() {
         <Section
           alt
           heading="Built for AI and compute."
-          sub="Swipe through how each one is meant to work. The token and the verified jobs escrows are live on Base Mainnet; the other services run on the Base Sepolia testnet."
+          sub="Swipe through how each one works. The token, the verified jobs escrows and the compute payment contract are live on Base Mainnet; the rest follow one by one."
         >
           <Reveal delay={120} className="mt-12">
             <TechShowcase />
@@ -281,7 +284,7 @@ export default function Home() {
         <Section
           alt
           heading="Where ARL is today."
-          sub="The ARL token is live on Base Mainnet since 24 October 2026. The network services (AI payments, compute, escrowed jobs, staking) run on the Base Sepolia testnet until each is deployed on Base Mainnet."
+          sub="ARL is live on Base Mainnet since 24 October 2026. Verified jobs, compute payments and staking followed on 12 November; every service runs on Base Mainnet."
         >
           <Reveal delay={120} className="glass mt-14 rounded-[28px] p-6 sm:p-10">
             <ol className="landing-road text-left">

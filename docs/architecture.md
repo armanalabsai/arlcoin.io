@@ -2,8 +2,12 @@
 
 Status: Phase 1 (token, vesting, treasury contracts), the Public Launch
 Merkle claim distributor (not deployed at TGE; kept for the later airdrop) and the staking
-rewards contract are implemented and tested. The Phase 1 contracts are deployed on Base Sepolia (testnet) only; see
-[`README.md`](../README.md). The ARL token, its 12 Safes, both vesting wallets and the treasury timelock are deployed on Base Mainnet (2026-10-24, token `0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4`, see [mainnet-plan.md](mainnet-plan.md)); the other contracts run on Base Sepolia only.
+rewards contract are implemented and tested. The ARL token, its 12 Safes, both vesting wallets
+and the treasury timelock are deployed on Base Mainnet (2026-10-24, token
+`0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4`, see [mainnet-plan.md](mainnet-plan.md) and
+[`README.md`](../README.md)). The verified jobs escrows and evaluators, `ComputePayment` and
+`ARLStakingRewards` are also on Base Mainnet. The x402 payments facilitator, the provider
+marketplace and anonymous signals are not on Base Mainnet yet.
 
 ## Repository
 
@@ -28,13 +32,13 @@ ARLCOIN/
 │   ├── tokenomics/        Allocation table, validation, share math
 │   ├── deploy/            Deployment plan builder, manifest, circulating supply, claim lists
 │   ├── monetary/          ARL Core monetary standard: reference implementation and test vectors
-│   ├── payments/          ARL usage-based payments over x402 upto (Permit2), Base Sepolia only
+│   ├── payments/          ARL usage-based payments over x402 upto (Permit2), not on Base Mainnet yet
 │   ├── provider/          Reference compute provider: runs paid jobs, settles seconds used
 │   └── verifier/          Reference validator: re-executes arl-reexec/1 jobs, votes on the evaluator
 ├── contracts/             Foundry project (solc 0.8.36)
 │   ├── src/               ARL-specific contracts only
 │   ├── test/              unit, fuzz, invariant and deployment tests
-│   ├── test-fork/         Base Sepolia fork tests against deployed Permit2 and x402 contracts
+│   ├── test-fork/         fork tests against deployed Permit2, x402, Uniswap and evaluator contracts
 │   ├── script/            deployment, plan validation and post-deployment verification
 │   ├── deploy/config/     public deployment configs (local only so far)
 │   └── lib/               OpenZeppelin v5.6.1, forge-std v1.16.2, solidity-datetime v2.2.0 (pinned submodules)
@@ -56,16 +60,16 @@ Rules:
 
 ## Approved decisions
 
-| Area         | Decision                                                                                  | Detail                                       |
-| ------------ | ----------------------------------------------------------------------------------------- | -------------------------------------------- |
-| Chain        | Base: Base Sepolia for testnet, Base Mainnet for production (token live since 2026-10-24) | [`chain-evaluation.md`](chain-evaluation.md) |
-| License      | Apache-2.0                                                                                | `LICENSE`, `NOTICE`                          |
-| Token        | ERC-20, 18 decimals, 21,000,000 ARL minted once, no mint function, no owner, no pause     | [`token-design.md`](token-design.md)         |
-| Allocation   | 11 allocations totalling 21,000,000 ARL (approved 2026-09-27)                             | [`tokenomics.md`](tokenomics.md)             |
-| Custody      | Vesting wallets, timelock or a dedicated Safe per allocation (approved 2026-09-27)        | [`tokenomics.md`](tokenomics.md#custody)     |
-| Treasury     | Safe 2-of-3, minimum 48-hour timelock, guardian Safe that can only cancel (no sunset)     | [`token-design.md`](token-design.md)         |
-| Dependencies | Open source first, provenance recorded                                                    | [`open-source.md`](open-source.md)           |
-| Content      | English only; no unverified claims; no implied partnerships                               | [`content-standard.md`](content-standard.md) |
+| Area         | Decision                                                                              | Detail                                       |
+| ------------ | ------------------------------------------------------------------------------------- | -------------------------------------------- |
+| Chain        | Base Mainnet (8453); token live since 2026-10-24                                      | [`chain-evaluation.md`](chain-evaluation.md) |
+| License      | Apache-2.0                                                                            | `LICENSE`, `NOTICE`                          |
+| Token        | ERC-20, 18 decimals, 21,000,000 ARL minted once, no mint function, no owner, no pause | [`token-design.md`](token-design.md)         |
+| Allocation   | 11 allocations totalling 21,000,000 ARL (approved 2026-09-27)                         | [`tokenomics.md`](tokenomics.md)             |
+| Custody      | Vesting wallets, timelock or a dedicated Safe per allocation (approved 2026-09-27)    | [`tokenomics.md`](tokenomics.md#custody)     |
+| Treasury     | Safe 2-of-3, minimum 48-hour timelock, guardian Safe that can only cancel (no sunset) | [`token-design.md`](token-design.md)         |
+| Dependencies | Open source first, provenance recorded                                                | [`open-source.md`](open-source.md)           |
+| Content      | English only; no unverified claims; no implied partnerships                           | [`content-standard.md`](content-standard.md) |
 
 ## Decisions still open
 

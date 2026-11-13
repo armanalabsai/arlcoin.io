@@ -34,10 +34,10 @@ export default function TermsPage() {
     >
       <Section heading="What this site is">
         <p>
-          The site describes ARL Protocol, which is in development. The ARL token, its vesting
-          wallets and its treasury timelock are deployed on Base Mainnet (token
-          0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4). The other ARL contracts run on the Base
-          Sepolia test network, where tokens have no value. There is no token sale on this site.
+          The site describes ARL Protocol, which runs on Base Mainnet: the ARL token (token
+          0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4), its vesting wallets and treasury timelock,
+          the verified jobs escrows, the compute payment contract and the staking contract. Other
+          services are in development. There is no token sale on this site.
         </p>
       </Section>
 

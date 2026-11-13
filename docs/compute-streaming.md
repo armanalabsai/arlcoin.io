@@ -107,7 +107,7 @@ ARL_TOKEN=<token from deploy/deployments/31337-dapp.json> \
 ```
 
 Base Sepolia. ARL is deployed there at `0x244312b619127B6458154F3467eFD7c87CD28500` (see
-[deployment.md](deployment.md#base-sepolia-deployment)). Simulate first (no `--broadcast`, no key),
+[deployment.md](deployment.md)). Simulate first (no `--broadcast`, no key),
 then broadcast with the deployer's own keystore, then write the verified record (above):
 
 ```sh

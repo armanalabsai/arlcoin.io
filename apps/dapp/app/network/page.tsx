@@ -6,7 +6,8 @@ import { isAddress } from "viem";
 import type { Address } from "viem";
 import { useAccount, useWriteContract } from "wagmi";
 
-import { Facts, PageTitle, RequireWallet, Stat } from "~~/components/arl/ui";
+import { Facts, NotLiveYet, PageTitle, RequireWallet, Stat } from "~~/components/arl/ui";
+import { IS_LOCAL } from "~~/lib/contracts";
 import { useArlServices } from "~~/hooks/arl/useArlServices";
 import type { ListedService } from "~~/hooks/arl/useArlServices";
 import { useJobRatings } from "~~/hooks/arl/useJobRatings";
@@ -32,9 +33,13 @@ export default function NetworkPage() {
         registry for agents and services; each one states its price per unit and who settles its
         payments.
       </PageTitle>
-      <RequireWallet>
-        <Network />
-      </RequireWallet>
+      {IS_LOCAL ? (
+        <RequireWallet>
+          <Network />
+        </RequireWallet>
+      ) : (
+        <NotLiveYet />
+      )}
     </>
   );
 }

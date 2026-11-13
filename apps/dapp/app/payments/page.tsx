@@ -15,6 +15,7 @@ import {
   AmountForm,
   Facts,
   Arl,
+  NotLiveYet,
   PageTitle,
   RequireWallet,
   Stat,
@@ -34,7 +35,6 @@ import { PERMIT2, meter, nonceBitmap, permit2Abi, uptoRequirements } from "~~/li
 import type { SignedCeiling } from "~~/lib/payments";
 import { notification } from "~~/utils/scaffold-eth";
 import { IS_LOCAL } from "~~/lib/contracts";
-import { callOperator } from "~~/lib/operatorClient";
 
 const WINDOW_SECONDS = 300;
 
@@ -51,11 +51,15 @@ export default function PaymentsPage() {
         Pay for usage in ARL with x402. You sign a ceiling once; the service charges what you
         actually used, never more than the ceiling, and the contracts enforce it.
       </PageTitle>
-      <RequireWallet>
-        <Suspense>
-          <Payments />
-        </Suspense>
-      </RequireWallet>
+      {IS_LOCAL ? (
+        <RequireWallet>
+          <Suspense>
+            <Payments />
+          </Suspense>
+        </RequireWallet>
+      ) : (
+        <NotLiveYet />
+      )}
     </>
   );
 }
@@ -228,13 +232,13 @@ function UsageDemo({
   };
 
   // The service side. On the local chain the facilitator settles from this page as Anvil
-  // development account 4; on Base Sepolia the testnet operator settles for its demo service.
+  // development account 4.
   const settle = async () => {
     if (!signed || !metered) return;
     setBusy(true);
     try {
       let result: SettleResponse;
-      if (IS_LOCAL) {
+      {
         const wallet = createWalletClient({
           account: service.terms.facilitator,
           chain: targetNetwork,
@@ -255,12 +259,6 @@ function UsageDemo({
         result = await facilitator.settle(signed.payload, {
           ...signed.requirements,
           amount: metered.amount.toString(),
-        });
-      } else {
-        result = await callOperator<SettleResponse>("settle", {
-          payload: signed.payload,
-          requirements: signed.requirements,
-          amount: metered.amount,
         });
       }
       if (!result.success)
@@ -302,8 +300,7 @@ function UsageDemo({
         <h2 className="text-sm font-extrabold">2 · Pay a service for what you use</h2>
         <p className="mt-1 text-sm text-muted">
           Services come from the ERC-8004 registry (Network screen). On the local chain the
-          service&rsquo;s facilitator settles from this page, as a local development account; on
-          Base Sepolia the ARL testnet operator settles for its demo service.
+          service&rsquo;s facilitator settles from this page, as a local development account.
         </p>
       </div>
       <label className="flex flex-col gap-1 text-sm text-muted">

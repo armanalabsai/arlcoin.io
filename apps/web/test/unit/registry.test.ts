@@ -151,11 +151,16 @@ describe("content accuracy", () => {
     }
   });
 
-  it("marks as LIVE only what Base Mainnet shows: the contract, the network and the pools", () => {
-    const live = new Set(["contract-address", "network", "liquidity"]);
+  it("marks as LIVE only what Base Mainnet shows: the contracts, the network and the pools", () => {
+    const live = new Set([
+      "token/contract-address",
+      "token/network",
+      "token/liquidity",
+      "technology/token-contracts",
+    ]);
     for (const layer of LAYERS) {
       for (const card of layer.cards) {
-        if (card.status === "LIVE") assert.ok(layer.id === "token" && live.has(card.id), card.id);
+        if (card.status === "LIVE") assert.ok(live.has(`${layer.id}/${card.id}`), card.id);
       }
     }
   });
@@ -170,13 +175,13 @@ describe("content accuracy", () => {
     const roadmap = LAYERS.find((l) => l.id === "roadmap");
     const progress = Object.fromEntries((roadmap?.cards ?? []).map((c) => [c.id, c.progress]));
     // Only phases with evidence are done; Base Mainnet was deployed and verified on 2026-10-24.
-    assert.equal(progress.testnet, "done");
+    assert.equal(progress["verified-jobs"], "done");
     assert.equal(progress.mainnet, "done");
   });
 
   it("contains no addresses other than the official contracts, and no prices or market data", () => {
     const official = new Set(
-      [SITE.mainnet.token, SITE.mainnet.timelock, SITE.testnet.token].map((a) => a.toLowerCase()),
+      [SITE.mainnet.token, SITE.mainnet.timelock].map((a) => a.toLowerCase()),
     );
     for (const layer of LAYERS) {
       for (const text of texts(layer)) {

@@ -15,8 +15,8 @@ import { BlockieAvatar } from "~~/components/scaffold-eth";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 
 const base = darkTheme({
-  accentColor: "#9fd8ff",
-  accentColorForeground: "#050b1e",
+  accentColor: "#d9b77a",
+  accentColorForeground: "#0a1226",
   overlayBlur: "small",
 });
 // The wallet sheet is glass too: translucent over a blurred, dimmed page.
@@ -51,7 +51,7 @@ export function Providers({ children }: { children: ReactNode }) {
                 background: "rgba(10, 20, 48, 0.85)",
                 backdropFilter: "blur(20px)",
                 border: "1px solid rgba(255,255,255,0.14)",
-                color: "#f5f7fa",
+                color: "#efe9df",
               },
             }}
           />

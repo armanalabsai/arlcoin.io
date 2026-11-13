@@ -239,12 +239,9 @@ jobs:
       # Builds against the local chain, deploys the fixture, checks the committed contract
       # addresses and drives the app in Chromium. Local Anvil only.
       - run: npm run test:e2e
-      # The committed Base Sepolia contracts match the record, and the app builds for Base Sepolia.
-      - run: node scripts/generate-sepolia-contracts.ts --check
-      - run: |
-          if grep -q 84532 contracts/baseSepoliaContracts.ts; then
-            NEXT_PUBLIC_ARL_CHAIN=84532 npm run build
-          fi
+      # The committed Base Mainnet contracts match the records, and the app builds for Base Mainnet.
+      - run: node scripts/generate-mainnet-contracts.ts --check
+      - run: NEXT_PUBLIC_ARL_CHAIN=8453 npm run build
       # The site as arlcoin.io serves it (scripts/build-site.sh): the website with the app under
       # /app, Claim and Trade closed before the launch, the deploy screen working.
       - run: npm ci

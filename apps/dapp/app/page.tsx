@@ -6,7 +6,6 @@ import { isAddress } from "viem";
 import type { Address } from "viem";
 import { useAccount } from "wagmi";
 
-import { Faucet } from "~~/components/arl/Faucet";
 import { AmountForm, Arl, Facts, PageTitle, RequireWallet, Stat } from "~~/components/arl/ui";
 import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 
@@ -55,7 +54,6 @@ function Wallet() {
 
   return (
     <div className="flex flex-col gap-6">
-      {address ? <Faucet account={address} /> : null}
       <Facts>
         <Stat label="Balance" value={<Arl value={balance} />} testId="wallet-balance" />
         <Stat

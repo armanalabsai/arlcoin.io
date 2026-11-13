@@ -1,8 +1,8 @@
 # ARL Token, Vesting and Treasury
 
 Status: **implemented and tested; deployed and source-verified on Base Mainnet (2026-10-24,
-token `0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4`) and on the Base Sepolia testnet.** Addresses are in [`contracts/deploy/base-sepolia.json`](../contracts/deploy/base-sepolia.json).
-Base Mainnet addresses are in [`mainnet-plan.md`](mainnet-plan.md).
+token `0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4`).** Base Mainnet addresses are in
+[`mainnet-plan.md`](mainnet-plan.md).
 
 Source: [`contracts/src/`](../contracts/src). Upstream: OpenZeppelin Contracts
 v5.6.1 (`5fd1781b1454fd1ef8e722282f86f9293cacf256`). Compiler: solc 0.8.36,
@@ -90,7 +90,7 @@ deployment configuration supplies explicit UTC timestamps; the planner and
 `ARLDeployPlan` reject any schedule with other durations, checking calendar
 months with `DateTime.addMonths` from solidity-datetime (MIT). Every schedule
 starts at the TGE (`VESTING_START = TGE_TIMESTAMP`); the TGE date is not confirmed
-(`VESTING_SCHEDULES_APPROVED = false`); local Anvil and Base Sepolia may use a
+(`VESTING_SCHEDULES_APPROVED = false`); local Anvil rehearsals may use a
 placeholder TGE, and Base Mainnet opens only at the TGE by the
 network gate (see [`deployment.md`](deployment.md#network-gate)). The verifier asserts that each
 deployed wallet matches its planned beneficiary and timestamps, and that the

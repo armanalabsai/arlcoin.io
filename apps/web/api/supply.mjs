@@ -18,7 +18,6 @@ const RPC = {
     "https://base.drpc.org",
     "https://base-mainnet.public.blastapi.io",
   ],
-  84532: ["https://sepolia.base.org", "https://base-sepolia-rpc.publicnode.com"],
 };
 const TOTAL_SUPPLY = "0x18160ddd";
 const BALANCE_OF = "0x70a08231";

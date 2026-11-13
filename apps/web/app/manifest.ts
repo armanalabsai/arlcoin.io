@@ -12,8 +12,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: SITE.description,
     start_url: "/",
     display: "standalone",
-    background_color: "#050b1e",
-    theme_color: "#050b1e",
+    background_color: "#0a1226",
+    theme_color: "#0a1226",
     icons: [
       { src: "/icon.svg", sizes: "any", type: "image/svg+xml" },
       { src: "/arl-token-200.png", sizes: "200x200", type: "image/png" },
