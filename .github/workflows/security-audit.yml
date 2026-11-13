@@ -47,7 +47,10 @@ jobs:
 
       - run: pip install slither-analyzer==0.11.6
       # The Aderyn release binaries are no longer downloadable (404), so build the pinned tag.
-      - run: cargo install --git https://github.com/cyfrin/aderyn --tag aderyn-v0.6.8 --locked aderyn
+      # Aderyn's tag pins nightly-2025-09-20 in its rust-toolchain.toml.
+      - run: |
+          rustup toolchain install nightly-2025-09-20 --profile minimal
+          cargo +nightly-2025-09-20 install --git https://github.com/cyfrin/aderyn --tag aderyn-v0.6.8 --locked aderyn
 
       - run: mkdir -p out-security
 
