@@ -154,7 +154,8 @@ contract ARLAnonymousSignalTest is Test {
     }
 
     /// Audit F-1: the proof does not commit to a group, so republishing a root in new groups used
-    /// to give a member one more signal per clone in the same scope. Nullifiers are now global.
+    /// to give a member one more signal per clone in the same scope. A scope now names its group,
+    /// so a proof cannot be spent in a clone at all, before or after the original.
     function test_clonedGroupsCannotReplayAProof() public {
         _signal(p[0]);
         address attacker = makeAddr("attacker");
@@ -164,27 +165,31 @@ contract ARLAnonymousSignalTest is Test {
             vm.prank(attacker);
             vm.expectRevert(
                 abi.encodeWithSelector(
-                    ARLAnonymousSignal.SignalNullifierUsed.selector, p[0].nullifier
+                    ARLAnonymousSignal.SignalScopeNotForGroup.selector, p[0].scope, clone
                 )
             );
             signals.signal(clone, p[0].scope, p[0].message, p[0].root, p[0].nullifier, p[0].proof);
         }
     }
 
-    function test_proofSpentInACloneIsSpentEverywhere() public {
-        // Signalling first in a clone does not leave a second signal in the original group.
+    /// A front-run copy of a member's proof in a clone group cannot spend their nullifier.
+    function test_proofCannotBeSpentInACloneFirst() public {
         uint256 clone = signals.createGroup(root);
-        signals.signal(clone, p[0].scope, p[0].message, p[0].root, p[0].nullifier, p[0].proof);
-        assertTrue(signals.isNullifierUsed(0, p[0].nullifier));
-        assertTrue(signals.isNullifierUsed(clone, p[0].nullifier));
         vm.expectRevert(
-            abi.encodeWithSelector(ARLAnonymousSignal.SignalNullifierUsed.selector, p[0].nullifier)
+            abi.encodeWithSelector(
+                ARLAnonymousSignal.SignalScopeNotForGroup.selector, p[0].scope, clone
+            )
         );
+        signals.signal(clone, p[0].scope, p[0].message, p[0].root, p[0].nullifier, p[0].proof);
+        assertFalse(signals.isNullifierUsed(0, p[0].nullifier));
         _signal(p[0]);
-
-        // Other members and other scopes are unaffected.
         _signal(p[1]);
         _signal(p[2]);
+    }
+
+    function test_scopeForPutsTheGroupInTheUpperBits() public view {
+        assertEq(signals.scopeFor(0, 1), 1);
+        assertEq(signals.scopeFor(3, 7), (uint256(3) << 128) | 7);
     }
 
     function test_hashToFieldMatchesTheProver() public view {

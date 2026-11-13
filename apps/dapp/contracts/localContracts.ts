@@ -35,6 +35,19 @@ const localContracts = {
         },
         {
           type: "function",
+          name: "SCOPE_GROUP_SHIFT",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
           name: "SNARK_FIELD",
           inputs: [],
           outputs: [
@@ -223,6 +236,30 @@ const localContracts = {
             },
           ],
           stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "scopeFor",
+          inputs: [
+            {
+              name: "groupId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "pollId",
+              type: "uint128",
+              internalType: "uint128",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "pure",
         },
         {
           type: "function",
@@ -484,6 +521,22 @@ const localContracts = {
           inputs: [
             {
               name: "root",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "SignalScopeNotForGroup",
+          inputs: [
+            {
+              name: "scope",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "groupId",
               type: "uint256",
               internalType: "uint256",
             },
