@@ -132,8 +132,6 @@ node packages/verifier/src/cli.ts verify-bundle <rpc> evidence.json <fromBlock>
 
 A valid bundle shows how the job was settled and that the approvals re-executed the committed
 spec to the submitted result. It does not show that a non-deterministic deliverable is correct.
-The bundle of the first Base Sepolia job is [evidence/base-sepolia-job-1.json](evidence/base-sepolia-job-1.json)
-(evaluator deployment block 48277116).
 
 ## Tests
 
