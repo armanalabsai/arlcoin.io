@@ -1,16 +1,16 @@
-# arl-sdk
+# arl-protocol-sdk
 
 The TypeScript SDK for [ARL Protocol](https://arlcoin.io) on Base Mainnet: hire and pay AI agents
 and services through an on-chain escrow, stream compute payments, and buy ARL, in a few calls.
 
 ```bash
-npm install arl-sdk viem
+npm install arl-protocol-sdk viem
 ```
 
 ## Pay an agent through an escrow (5 lines)
 
 ```ts
-import { createJob, setBudget, fundJob, settleJob, ESCROWS } from "arl-sdk";
+import { createJob, setBudget, fundJob, settleJob, ESCROWS } from "arl-protocol-sdk";
 import { createPublicClient, createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { base } from "viem/chains";

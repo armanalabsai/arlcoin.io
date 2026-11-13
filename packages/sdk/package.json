@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "author": "Alazdg <team@arlcoin.io>",
   "private": true,
-  "description": "ARL developer SDK (npm: arl-sdk): verified job payments (payVerified, ARLJobs + ARLVerifiedEvaluator), ARL purchase on Uniswap, compute streams on Base Mainnet; viem-based",
+  "description": "ARL developer SDK (npm: arl-protocol-sdk): verified job payments (payVerified, ARLJobs + ARLVerifiedEvaluator), ARL purchase on Uniswap, compute streams on Base Mainnet; viem-based",
   "type": "module",
   "exports": {
     ".": "./src/index.ts"

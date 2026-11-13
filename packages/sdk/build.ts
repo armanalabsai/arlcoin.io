@@ -1,4 +1,4 @@
-// Builds the npm package `arl-sdk` into dist/package: compiled JavaScript with type declarations,
+// Builds the npm package `arl-protocol-sdk` into dist/package: compiled JavaScript with type declarations,
 // a package.json for npm and the README. Publish from that folder:
 //
 //   node build.ts && cd dist/package && npm publish --access public
@@ -22,7 +22,7 @@ const source = JSON.parse(readFileSync(join(here, "package.json"), "utf8")) as {
   dependencies: Record<string, string>;
 };
 const pkg = {
-  name: "arl-sdk",
+  name: "arl-protocol-sdk",
   version: source.version,
   description:
     "ARL Protocol SDK: escrowed and verified jobs for AI agents, compute payments and ARL purchase on Base Mainnet",

@@ -23,9 +23,9 @@ const ESCROW_ARL = "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9";
 const ESCROW_USDC = "0xc833140D2eE8607fd41662cffFAc557f3D535bE6";
 const COMPUTE = "0x1bFE932896fdd32175836a7364dcaf53d49EE464";
 
-const TS = `npm install arl-sdk viem
+const TS = `npm install arl-protocol-sdk viem
 
-import { createJob, setBudget, fundJob, settleJob, ESCROWS } from "arl-sdk";
+import { createJob, setBudget, fundJob, settleJob, ESCROWS } from "arl-protocol-sdk";
 import { createPublicClient, createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { base } from "viem/chains";
@@ -130,7 +130,7 @@ export default function BuildPage() {
           <a href="#typescript" className={link}>
             TypeScript
           </a>{" "}
-          · <code>npm install arl-sdk</code>
+          · <code>npm install arl-protocol-sdk</code>
         </li>
         <li className="glass rounded-[16px] p-4">
           <a href="#python" className={link}>
@@ -176,8 +176,8 @@ export default function BuildPage() {
         <p className="mt-3">
           The SDK also streams compute payments per second, buys ARL in the official pools and runs
           verified jobs.{" "}
-          <a href="https://www.npmjs.com/package/arl-sdk" {...ext} className={link}>
-            arl-sdk on npm
+          <a href="https://www.npmjs.com/package/arl-protocol-sdk" {...ext} className={link}>
+            arl-protocol-sdk on npm
           </a>
         </p>
       </Path>
