@@ -2,7 +2,7 @@
 // every ARL contract the app uses on Base Mainnet, with its ABI and the block it was deployed in
 // (history reads start there).
 //
-// - ARLToken, ARLVestingWallet (the investors' wallet): contracts/deploy/deployments/8453.json
+// - ARLToken, ARLVestingWallet (the investors' wallet): docs/mainnet-plan.md (2026-10-24)
 // - ARLJobs (the ARL escrow): contracts/deploy/base-mainnet-jobs.json
 // - ARLStakingRewards: contracts/deploy/base-mainnet-services.json
 //
@@ -20,9 +20,11 @@ const check = process.argv.includes("--check");
 const outPath = join(here, "..", "contracts", "baseMainnetContracts.ts");
 
 const read = <T>(path: string): T => JSON.parse(readFileSync(path, "utf8")) as T;
-const token = read<{ chainId: number; token: string; investorsVesting: string }>(
-  join(contractsDir, "deploy", "deployments", "8453.json"),
-);
+const token = {
+  chainId: 8_453,
+  token: "0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4",
+  investorsVesting: "0x8E2CC3a5F39038836475650f63A91d107BabA643",
+};
 const jobs = read<{ chainId: number; arl: { jobs: string } }>(
   join(contractsDir, "deploy", "base-mainnet-jobs.json"),
 );
