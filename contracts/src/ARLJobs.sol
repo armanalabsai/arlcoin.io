@@ -240,9 +240,8 @@ contract ARLJobs is ReentrancyGuardTransient {
     /// claimRefund revert.
     function claimRefundTo(uint256 jobId, address recipient) external nonReentrant {
         if (recipient == address(0)) revert ZeroAddress();
-        Job storage job = _job(jobId);
+        Job storage job = _expire(jobId);
         if (msg.sender != job.client) revert Unauthorized();
-        _expire(jobId);
         _refund(jobId, recipient, job.budget);
     }
 
