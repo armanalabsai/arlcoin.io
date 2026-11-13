@@ -63,7 +63,7 @@ on chain. The stamp is a process guard, not a signature: anyone can edit a file,
 and `bytecode-cli.ts verify` remain the proof of a deployment.
 
 **No Git history rewrite while others work** (owner decision, 2026-10-10): no force-push to any
-branch while another Claude session or the PC is working on the repository.
+branch while another session or the PC is working on the repository.
 
 ## Configuration
 

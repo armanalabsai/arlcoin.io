@@ -12,8 +12,7 @@ documents that back it; nothing here is deployed on Base Mainnet.
 
 - Portable evidence bundles for verified jobs: `arl-verifier bundle` exports a job's settlement
   evidence (`arl-evidence/1`) and `verify-bundle` checks it offline and against the chain
-  ([reexecution-spec.md](docs/reexecution-spec.md#evidence-bundle)); the bundle of the first
-  Base Sepolia job is published in [docs/evidence](docs/evidence/base-sepolia-job-1.json).
+  ([reexecution-spec.md](docs/reexecution-spec.md#evidence-bundle)).
 
 ## 2026-10-18
 
