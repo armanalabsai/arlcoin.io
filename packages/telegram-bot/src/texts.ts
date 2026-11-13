@@ -36,8 +36,8 @@ export const START =
   `- Live on Base Mainnet since 2026-10-24: ${MAINNET_TOKEN}\n` +
   `- Trade in the official Uniswap v3 pools on Base: ${BUY}\n` +
   "- Verified jobs for AI agents on Base Mainnet: escrows paid in ARL or USDC, checked by staked ARL validators.\n" +
-  `- Try the testnet app (faucet, staking, jobs, x402 per-use payments, anonymous polls): ${APP}\n` +
-  "  Testnet ARL has no value.\n" +
+  "- Compute payments and staking are deployed on Base Mainnet too.\n" +
+  `- The ARL app on Base Mainnet (wallet, trade, vesting, staking, jobs, verified jobs): ${APP}\n` +
   "- No airdrop at launch. An airdrop of 500,000 ARL is planned for a later date; " +
   "date, eligibility and rules will be announced later on the official channels.\n" +
   "- A bug bounty paid in ARL is open.\n\n" +
@@ -53,13 +53,12 @@ export const HELP =
   "Commands\n" +
   "/start - what ARL is and where things stand\n" +
   "/rules - group rules and the security notice\n" +
-  "/app - open the testnet app\n" +
-  "/faucet - how to get testnet ARL\n" +
-  "/status - faucet and staking status, read live from the testnet\n" +
+  "/app - open the ARL app\n" +
+  "/status - staking status, read live from Base Mainnet\n" +
   "/launch - the Base Mainnet contract and where to buy\n" +
   "/whitelist - whitelist registration\n" +
   "/help - this list\n\n" +
-  `App (testnet): ${APP}\n` +
+  `App: ${APP}\n` +
   `Community: ${COMMUNITY}\n` +
   `Updates: ${X_ACCOUNT}`;
 
@@ -78,17 +77,10 @@ export function floodNotice(name: string, minutes: number): string {
 export const SCAM_NOTICE = "A message was removed: it matched a known scam pattern. Read /rules.";
 
 export const APP_TEXT =
-  `ARL testnet app: ${APP}\n\n` +
-  "Faucet, staking, escrowed jobs, x402 per-use payments and anonymous polls on Base Sepolia.\n" +
-  "Testnet ARL has no value.";
-
-export const FAUCET_TEXT =
-  "Get testnet ARL\n" +
-  "1. Add the Base Sepolia network to your wallet.\n" +
-  `2. Open ${APP} and connect your wallet.\n` +
-  "3. Press Faucet: 1,000 testnet ARL, once per address about every 24 hours.\n\n" +
-  "You need a little Base Sepolia ETH for gas; public Base Sepolia faucets provide it.\n" +
-  "Testnet ARL has no value and cannot be sold.";
+  `ARL app: ${APP}\n\n` +
+  "On Base Mainnet: your ARL wallet, trading in the official pools, vesting, staking, escrowed " +
+  "jobs and verified jobs checked by staked ARL validators.\n" +
+  "Transactions are real: check every address before you sign.";
 
 export const WHITELIST_TEXT =
   `Whitelist registration: ${WHITELIST}\n\n` +
@@ -106,23 +98,19 @@ export const LAUNCH =
 const fmt = (n: number) => n.toLocaleString("en-US");
 
 export function status(
-  faucetArl: number | null,
-  faucetAmount: number | null,
+  totalStaked: number | null,
   periodFinish: number | null,
   nowUnix: number,
 ): string {
-  const lines = ["ARL testnet status (Base Sepolia)"];
-  if (faucetArl === null) lines.push("- Faucet: unknown right now");
-  else if (faucetAmount && faucetArl >= faucetAmount)
-    lines.push(
-      `- Faucet: open, ${fmt(faucetArl)} testnet ARL left (${fmt(faucetAmount)} per claim)`,
-    );
-  else lines.push("- Faucet: empty, waiting for a refill");
+  const lines = ["ARL staking status (Base Mainnet)"];
+  if (totalStaked === null) lines.push("- Staked: unknown right now");
+  else lines.push(`- Staked: ${fmt(totalStaked)} ARL`);
   if (periodFinish === null) lines.push("- Staking rewards: unknown right now");
+  else if (periodFinish === 0) lines.push("- Staking rewards: the first period is not funded yet");
   else if (periodFinish > nowUnix) {
     const end = new Date(periodFinish * 1000).toISOString().slice(0, 16).replace("T", " ");
     lines.push(`- Staking rewards: running until ${end} UTC`);
   } else lines.push("- Staking rewards: not running");
-  lines.push(`\nTry it: ${APP}\nTestnet ARL has no value.`);
+  lines.push(`\nApp: ${APP}`);
   return lines.join("\n");
 }

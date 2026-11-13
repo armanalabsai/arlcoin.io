@@ -66,7 +66,6 @@ export const COMMANDS: Record<string, () => string | Promise<string>> = {
   help: () => texts.HELP,
   rules: () => texts.RULES,
   app: () => texts.APP_TEXT,
-  faucet: () => texts.FAUCET_TEXT,
   launch: () => texts.LAUNCH,
   whitelist: () => texts.WHITELIST_TEXT,
   status: () => "",
@@ -94,13 +93,8 @@ async function adminIds(api: TelegramApi, st: State, chatId: number): Promise<Se
 
 async function statusText(st: State): Promise<string> {
   const s = await st.status.read();
-  if (s.faucetArl === null && s.rewardPeriodFinish === null) return texts.STATUS_UNAVAILABLE;
-  return texts.status(
-    s.faucetArl,
-    s.faucetAmount,
-    s.rewardPeriodFinish,
-    Math.floor(Date.now() / 1000),
-  );
+  if (s.totalStaked === null && s.rewardPeriodFinish === null) return texts.STATUS_UNAVAILABLE;
+  return texts.status(s.totalStaked, s.rewardPeriodFinish, Math.floor(Date.now() / 1000));
 }
 
 /** Handles one update. Errors from Telegram are swallowed: a webhook must always answer 200. */

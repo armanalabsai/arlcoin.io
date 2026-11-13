@@ -156,13 +156,12 @@ describe("commands", () => {
     st.status = {
       read: (): Promise<Status> =>
         Promise.resolve({
-          faucetArl: 200_000,
-          faucetAmount: 1_000,
+          totalStaked: 200_000,
           rewardPeriodFinish: 4_000_000_000,
         }),
     } as never;
     await handleUpdate(message("/status"), api, st);
-    assert.ok(api.sent[0]?.text.includes("200,000 testnet ARL left"));
+    assert.ok(api.sent[0]?.text.includes("Staked: 200,000 ARL"));
     assert.ok(api.sent[0]?.text.includes("running until"));
   });
 
@@ -172,8 +171,7 @@ describe("commands", () => {
     st.status = {
       read: (): Promise<Status> =>
         Promise.resolve({
-          faucetArl: null,
-          faucetAmount: null,
+          totalStaked: null,
           rewardPeriodFinish: null,
         }),
     } as never;
