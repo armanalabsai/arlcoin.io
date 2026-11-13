@@ -1,7 +1,7 @@
 // Per-second compute payments over ComputePayment (contracts/src/ComputePayment.sol).
 //
 //   const stream = await streamComputePayment({ publicClient, walletClient }, {
-//     chain: baseSepolia, contractAddress, providerAddress, tokenAddress,
+//     chain: base, contractAddress, providerAddress, tokenAddress,
 //     ratePerSecond: parseUnits("0.01", 18), maxDurationSeconds: 3600, maxCap: parseUnits("36", 18) });
 //
 // The client escrows `ratePerSecond * maxDurationSeconds`, which must not exceed `maxCap`. The
@@ -29,6 +29,9 @@ import { computePaymentAbi } from "./abi.ts";
 
 /** Base Mainnet is locked: the contract is not deployed there and no option unlocks it. */
 export const BASE_MAINNET_CHAIN_ID = 8453;
+
+/** The ComputePayment contract on Base Mainnet (docs/mainnet-services.md), paid in ARL. */
+export const COMPUTE_PAYMENT = "0x1bFE932896fdd32175836a7364dcaf53d49EE464" as const;
 /** Mirrors `ComputePayment.MAX_DURATION`. */
 export const MAX_STREAM_DURATION_SECONDS = 365 * 24 * 60 * 60;
 const MAX_UINT128 = 2n ** 128n - 1n;
@@ -67,7 +70,7 @@ export interface StreamingClients {
 }
 
 export interface StreamComputePaymentParams {
-  /** Chain the contract is deployed on. Base Mainnet (8453) is refused. */
+  /** Chain the contract is deployed on: Base Mainnet (8453) for COMPUTE_PAYMENT. */
   chain: Chain;
   /** The ComputePayment contract. */
   contractAddress: Address;
@@ -117,9 +120,6 @@ export interface StreamSettlement {
  * `StreamingError` before anything is sent.
  */
 export function planStream(params: StreamComputePaymentParams): { deposit: bigint } {
-  if (params.chain.id === BASE_MAINNET_CHAIN_ID) {
-    throw new StreamingError("NETWORK_LOCKED", "Base Mainnet (8453) is locked for ARL streaming");
-  }
   for (const [name, value] of [
     ["contractAddress", params.contractAddress],
     ["providerAddress", params.providerAddress],
@@ -264,9 +264,6 @@ export async function stopComputeStream(
   clients: StreamingClients,
   params: StopComputeStreamParams,
 ): Promise<StreamSettlement> {
-  if (params.chain.id === BASE_MAINNET_CHAIN_ID) {
-    throw new StreamingError("NETWORK_LOCKED", "Base Mainnet (8453) is locked for ARL streaming");
-  }
   if (!isAddress(params.contractAddress, { strict: false })) {
     throw new StreamingError("INVALID_PARAMS", "contractAddress is not an address");
   }

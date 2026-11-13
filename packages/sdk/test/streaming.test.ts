@@ -78,8 +78,8 @@ describe("planStream", () => {
     });
   });
 
-  it("refuses Base Mainnet unconditionally", () => {
-    assert.throws(() => planStream(params({ chain: base })), { code: "NETWORK_LOCKED" });
+  it("plans a stream on Base Mainnet", () => {
+    assert.ok(planStream(params({ chain: base })).deposit > 0n);
   });
 
   it("refuses invalid parameters", () => {
@@ -132,12 +132,8 @@ describe("streamComputePayment", () => {
 });
 
 describe("stopComputeStream", () => {
-  it("refuses Base Mainnet and a bad contract address", async () => {
+  it("refuses a bad contract address", async () => {
     const c = clients(baseSepolia.id);
-    await assert.rejects(
-      stopComputeStream(c, { chain: base, contractAddress: CONTRACT, streamId: 1n }),
-      rejectsWith("NETWORK_LOCKED"),
-    );
     await assert.rejects(
       stopComputeStream(c, { chain: baseSepolia, contractAddress: "0x12", streamId: 1n }),
       rejectsWith("INVALID_PARAMS"),
