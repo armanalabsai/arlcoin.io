@@ -168,9 +168,12 @@ before(async () => {
   ]);
   jobs = await deploy("ARLJobs", [token]);
   const zero = "0x0000000000000000000000000000000000000000";
+  // The arbiter cannot be a party of a job (evaluator v5); no test here disputes, so any other
+  // address serves.
+  const arbiter = "0x000000000000000000000000000000000000A4b1";
   evaluator = await deploy("ARLVerifiedEvaluator", [
     jobs,
-    client.address,
+    arbiter,
     3600n,
     parseUnits("1", 18),
     zero,

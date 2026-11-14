@@ -21,6 +21,12 @@ to 36 deploy exactly the current build (checked against `contracts/out`); the ex
 hold only if the deployer signs nothing else first. After signing, the record CLI writes the new
 addresses and the app, SDKs and site switch to them.
 
+The evaluators in these plans are v5 (2026-11-14, bug bounty reports of that day): a refund the
+token refuses no longer blocks the bond settlement (`RefundDeferred`, the client uses
+`claimRefundTo`), and `expireDispute` closes a dispute the arbiter has not ruled on within 30 days
+after the challenge window. The plans were regenerated on a Base Mainnet fork; the addresses are
+unchanged because they depend only on the deployer and the nonce.
+
 Transactions from the deployer `0xe033104AE32fc7e13263B7AED577Ab20d6E47eAA`, signed on the app's
 Deploy screen (`arlcoin.io/app/deploy/?plan=…`):
 
@@ -45,9 +51,9 @@ Deploy screen (`arlcoin.io/app/deploy/?plan=…`):
 |    31 | `8453-services`                           | `ComputePayment`, paid in ARL                                   | `0x1bFE932896fdd32175836a7364dcaf53d49EE464`            | Deployed                   |
 |    32 | `8453-services`                           | `ARLStakingRewards`, ARL, 180-day periods                       | `0x15e257009BE9B1875fbfa69D291320aaFE3fa102`            | Deployed                   |
 |    33 | `8453-verified-jobs-arl-v3`               | `ARLJobs` v3, paid in ARL (fund balance check, `claimRefundTo`) | `0x9aE99bF9a59aF47E81346B7c0b93Cd2B610455fC` (expected) | Plan ready, to sign        |
-|    34 | `8453-verified-jobs-arl-v3`               | `ARLVerifiedEvaluator` v4 for it, bonds in ARL                  | `0x6648e141cb7473822ddBd8bC039b91e5af3259B4` (expected) | Plan ready, to sign        |
+|    34 | `8453-verified-jobs-arl-v3`               | `ARLVerifiedEvaluator` v5 for it, bonds in ARL                  | `0x6648e141cb7473822ddBd8bC039b91e5af3259B4` (expected) | Plan ready, to sign        |
 |    35 | `8453-verified-jobs-usdc-v3`              | `ARLJobs` v3, paid in USDC                                      | `0xE3eA0EAEc3Cf9DA2d0856A0f784A4B1671AeFD04` (expected) | Plan ready, to sign        |
-|    36 | `8453-verified-jobs-usdc-v3`              | `ARLVerifiedEvaluator` v4 for it, bonds in ARL                  | `0x6bFfdEace7d0B2F7711f604F0A5D2545be2961AF` (expected) | Plan ready, to sign        |
+|    36 | `8453-verified-jobs-usdc-v3`              | `ARLVerifiedEvaluator` v5 for it, bonds in ARL                  | `0x6bFfdEace7d0B2F7711f604F0A5D2545be2961AF` (expected) | Plan ready, to sign        |
 
 `8453-verified-jobs-usdc` and `8453-verified-jobs-arl` are invalid, do not use: they hold pre-audit
 bytecode (before the audit fixes of 2026-10-28) and the deploy screen refuses them. Their `-v2`
