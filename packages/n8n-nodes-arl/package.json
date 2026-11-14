@@ -37,6 +37,6 @@
     "test:fork": "node --test \"test-fork/**/*.test.ts\""
   },
   "devDependencies": {
-    "viem": "2.56.9"
+    "viem": "2.57.18"
   }
 }
