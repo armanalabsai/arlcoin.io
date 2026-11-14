@@ -71,6 +71,9 @@ export class StatusReader {
 
 export const SUPPLY_URL = "https://arlcoin.io/api/supply";
 const SUPPLY_CACHE_MS = 300_000;
+// A failed read is retried after 30 seconds, not cached for five minutes.
+const SUPPLY_FAILURE_CACHE_MS = 30_000;
+const SUPPLY_TIMEOUT_MS = 15_000;
 
 /** Circulating ARL from the website's supply endpoint (a plain decimal number), cached. */
 export class SupplyReader {
@@ -81,10 +84,13 @@ export class SupplyReader {
   }
 
   async read(): Promise<number | null> {
-    if (this.cached && Date.now() - this.cached.at < SUPPLY_CACHE_MS) return this.cached.value;
+    const ttl = this.cached?.value === null ? SUPPLY_FAILURE_CACHE_MS : SUPPLY_CACHE_MS;
+    if (this.cached && Date.now() - this.cached.at < ttl) return this.cached.value;
     let value: number | null = null;
     try {
-      const res = await this.fetchFn(SUPPLY_URL, { signal: AbortSignal.timeout(TIMEOUT_MS) });
+      const res = await this.fetchFn(SUPPLY_URL, {
+        signal: AbortSignal.timeout(SUPPLY_TIMEOUT_MS),
+      });
       if (res.ok) {
         const text = (await res.text()).trim();
         const n = Number(text);
