@@ -52,3 +52,5 @@ export {
   reputationScore,
 } from "./reputation.ts";
 export type { Outcome, OutcomeKind, Score, ScoreParams } from "./reputation.ts";
+export { EVIDENCE_VERSION, EvidenceError, checkEvidence } from "./evidence.ts";
+export type { EvidenceResult, EvidenceV2, SettlementRecord } from "./evidence.ts";

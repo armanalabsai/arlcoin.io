@@ -1,0 +1,1960 @@
+{
+  "version": "arl-evidence/2",
+  "valid": [
+    {
+      "name": "reexec-completed",
+      "evidence": {
+        "version": "arl-evidence/2",
+        "settlement": {
+          "version": "arl-evidence/1",
+          "chainId": 8453,
+          "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+          "evaluator": "0x5cA6dab18E6b9a5Cd44a4FfFBdf2c5BA3Cd87DfF",
+          "jobId": "1",
+          "job": {
+            "client": "0x1111111111111111111111111111111111111111",
+            "provider": "0x2222222222222222222222222222222222222222",
+            "budget": "10000000000000000000",
+            "status": 3,
+            "description": "arl-task:0x601d4b1310d81b01b18230160ae718d806f1efd04eaf17a8034ed840f6e631e2 ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"
+          },
+          "config": {
+            "tier": 1,
+            "threshold": 2,
+            "specHash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f",
+            "committee": [
+              "0x3333333333333333333333333333333333333333",
+              "0x4444444444444444444444444444444444444444",
+              "0x5555555555555555555555555555555555555555"
+            ]
+          },
+          "submitted": {
+            "block": "57300000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000001",
+            "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330"
+          },
+          "votes": [
+            {
+              "block": "57300100",
+              "tx": "0x0000000000000000000000000000000000000000000000000000000000000002",
+              "validator": "0x3333333333333333333333333333333333333333",
+              "approve": true,
+              "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330",
+              "evidence": "0x000000000000000000000000000000000000000000000000000000000000000a"
+            },
+            {
+              "block": "57300101",
+              "tx": "0x0000000000000000000000000000000000000000000000000000000000000003",
+              "validator": "0x4444444444444444444444444444444444444444",
+              "approve": true,
+              "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330",
+              "evidence": "0x000000000000000000000000000000000000000000000000000000000000000b"
+            }
+          ],
+          "decided": {
+            "block": "57300101",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000003",
+            "approved": true
+          },
+          "finalized": {
+            "block": "57350000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000004",
+            "approved": true,
+            "voteHash": "0x000000000000000000000000000000000000000000000000000000000000000c"
+          },
+          "settlement": {
+            "block": "57350000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000004",
+            "outcome": "completed"
+          }
+        },
+        "task": {
+          "version": "arl-task/1",
+          "title": "Summarise a log file",
+          "description": "Count the lines of the input and write a JSON summary.",
+          "acceptance": [
+            {
+              "id": "exit-zero",
+              "rule": "The command exits with code 0."
+            },
+            {
+              "id": "matches-spec",
+              "rule": "The result hash equals a re-execution of the pinned spec."
+            }
+          ],
+          "deliverable": {
+            "media_type": "application/json",
+            "max_bytes": 65536
+          },
+          "payment": {
+            "token": "ARL",
+            "budget": "10000000000000000000",
+            "deadline_hours": 72
+          },
+          "evidence": ["result-manifest", "logs"],
+          "workload": {
+            "class": "reexec",
+            "spec_uri": "https://raw.githubusercontent.com/armanalabsai/arlcoin.io/main/packages/verifier/examples/busybox-summary.json",
+            "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f"
+          },
+          "verification": {
+            "policy": "arl-policy/1:reexec-standard",
+            "tier": "reexecution",
+            "committee_size": 3,
+            "threshold": 2,
+            "vote_window_seconds": 21600,
+            "challenge_window_seconds": 86400,
+            "bond_floor": "100000000000000000000"
+          }
+        },
+        "proof": {
+          "version": "arl-proof/1",
+          "task_hash": "0x601d4b1310d81b01b18230160ae718d806f1efd04eaf17a8034ed840f6e631e2",
+          "chain_id": 8453,
+          "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+          "job_id": "1",
+          "deliverable": {
+            "uri": "ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+            "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "media_type": "application/json",
+            "bytes": 512
+          },
+          "result_manifest": {
+            "version": "arl-reexec-result/1",
+            "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f",
+            "exit_code": 0,
+            "timed_out": false,
+            "outputs": [
+              {
+                "path": "summary.json",
+                "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            ]
+          },
+          "evidence": [
+            {
+              "kind": "logs",
+              "uri": "ipfs://bafybeihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku",
+              "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "media_type": "text/plain"
+            }
+          ]
+        },
+        "policy": {
+          "version": "arl-policy/1",
+          "id": "reexec-standard",
+          "workload_classes": ["reexec"],
+          "tiers": ["reexecution"],
+          "committee": {
+            "min_size": 3,
+            "max_size": 7
+          },
+          "vote_window_seconds": [3600, 86400],
+          "challenge_window_seconds": [86400, 259200],
+          "min_bond_floor": "100000000000000000000",
+          "bond_covers_budget": true,
+          "required_evidence": ["result-manifest"],
+          "model": {
+            "allowed": false,
+            "max_budget": {},
+            "models": []
+          }
+        },
+        "policy_hash": "0xb8208e1ad8b4640a0bd862b0f32a50af3f4361b12392f222725b743b2b1244fa"
+      },
+      "result": {
+        "outcome": "completed",
+        "approvals": 2,
+        "rejections": 0,
+        "overturned": false
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "name": "policy-hash",
+      "evidence": {
+        "version": "arl-evidence/2",
+        "settlement": {
+          "version": "arl-evidence/1",
+          "chainId": 8453,
+          "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+          "evaluator": "0x5cA6dab18E6b9a5Cd44a4FfFBdf2c5BA3Cd87DfF",
+          "jobId": "1",
+          "job": {
+            "client": "0x1111111111111111111111111111111111111111",
+            "provider": "0x2222222222222222222222222222222222222222",
+            "budget": "10000000000000000000",
+            "status": 3,
+            "description": "arl-task:0x601d4b1310d81b01b18230160ae718d806f1efd04eaf17a8034ed840f6e631e2 ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"
+          },
+          "config": {
+            "tier": 1,
+            "threshold": 2,
+            "specHash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f",
+            "committee": [
+              "0x3333333333333333333333333333333333333333",
+              "0x4444444444444444444444444444444444444444",
+              "0x5555555555555555555555555555555555555555"
+            ]
+          },
+          "submitted": {
+            "block": "57300000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000001",
+            "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330"
+          },
+          "votes": [
+            {
+              "block": "57300100",
+              "tx": "0x0000000000000000000000000000000000000000000000000000000000000002",
+              "validator": "0x3333333333333333333333333333333333333333",
+              "approve": true,
+              "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330",
+              "evidence": "0x000000000000000000000000000000000000000000000000000000000000000a"
+            },
+            {
+              "block": "57300101",
+              "tx": "0x0000000000000000000000000000000000000000000000000000000000000003",
+              "validator": "0x4444444444444444444444444444444444444444",
+              "approve": true,
+              "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330",
+              "evidence": "0x000000000000000000000000000000000000000000000000000000000000000b"
+            }
+          ],
+          "decided": {
+            "block": "57300101",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000003",
+            "approved": true
+          },
+          "finalized": {
+            "block": "57350000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000004",
+            "approved": true,
+            "voteHash": "0x000000000000000000000000000000000000000000000000000000000000000c"
+          },
+          "settlement": {
+            "block": "57350000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000004",
+            "outcome": "completed"
+          }
+        },
+        "task": {
+          "version": "arl-task/1",
+          "title": "Summarise a log file",
+          "description": "Count the lines of the input and write a JSON summary.",
+          "acceptance": [
+            {
+              "id": "exit-zero",
+              "rule": "The command exits with code 0."
+            },
+            {
+              "id": "matches-spec",
+              "rule": "The result hash equals a re-execution of the pinned spec."
+            }
+          ],
+          "deliverable": {
+            "media_type": "application/json",
+            "max_bytes": 65536
+          },
+          "payment": {
+            "token": "ARL",
+            "budget": "10000000000000000000",
+            "deadline_hours": 72
+          },
+          "evidence": ["result-manifest", "logs"],
+          "workload": {
+            "class": "reexec",
+            "spec_uri": "https://raw.githubusercontent.com/armanalabsai/arlcoin.io/main/packages/verifier/examples/busybox-summary.json",
+            "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f"
+          },
+          "verification": {
+            "policy": "arl-policy/1:reexec-standard",
+            "tier": "reexecution",
+            "committee_size": 3,
+            "threshold": 2,
+            "vote_window_seconds": 21600,
+            "challenge_window_seconds": 86400,
+            "bond_floor": "100000000000000000000"
+          }
+        },
+        "proof": {
+          "version": "arl-proof/1",
+          "task_hash": "0x601d4b1310d81b01b18230160ae718d806f1efd04eaf17a8034ed840f6e631e2",
+          "chain_id": 8453,
+          "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+          "job_id": "1",
+          "deliverable": {
+            "uri": "ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+            "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "media_type": "application/json",
+            "bytes": 512
+          },
+          "result_manifest": {
+            "version": "arl-reexec-result/1",
+            "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f",
+            "exit_code": 0,
+            "timed_out": false,
+            "outputs": [
+              {
+                "path": "summary.json",
+                "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            ]
+          },
+          "evidence": [
+            {
+              "kind": "logs",
+              "uri": "ipfs://bafybeihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku",
+              "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "media_type": "text/plain"
+            }
+          ]
+        },
+        "policy": {
+          "version": "arl-policy/1",
+          "id": "reexec-standard",
+          "workload_classes": ["reexec"],
+          "tiers": ["reexecution"],
+          "committee": {
+            "min_size": 3,
+            "max_size": 7
+          },
+          "vote_window_seconds": [3600, 86400],
+          "challenge_window_seconds": [86400, 259200],
+          "min_bond_floor": "100000000000000000000",
+          "bond_covers_budget": true,
+          "required_evidence": ["result-manifest"],
+          "model": {
+            "allowed": false,
+            "max_budget": {},
+            "models": []
+          }
+        },
+        "policy_hash": "0x0000000000000000000000000000000000000000000000000000000000000063"
+      },
+      "error": "policy_hash"
+    },
+    {
+      "name": "other-job",
+      "evidence": {
+        "version": "arl-evidence/2",
+        "settlement": {
+          "version": "arl-evidence/1",
+          "chainId": 8453,
+          "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+          "evaluator": "0x5cA6dab18E6b9a5Cd44a4FfFBdf2c5BA3Cd87DfF",
+          "jobId": "2",
+          "job": {
+            "client": "0x1111111111111111111111111111111111111111",
+            "provider": "0x2222222222222222222222222222222222222222",
+            "budget": "10000000000000000000",
+            "status": 3,
+            "description": "arl-task:0x601d4b1310d81b01b18230160ae718d806f1efd04eaf17a8034ed840f6e631e2 ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"
+          },
+          "config": {
+            "tier": 1,
+            "threshold": 2,
+            "specHash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f",
+            "committee": [
+              "0x3333333333333333333333333333333333333333",
+              "0x4444444444444444444444444444444444444444",
+              "0x5555555555555555555555555555555555555555"
+            ]
+          },
+          "submitted": {
+            "block": "57300000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000001",
+            "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330"
+          },
+          "votes": [
+            {
+              "block": "57300100",
+              "tx": "0x0000000000000000000000000000000000000000000000000000000000000002",
+              "validator": "0x3333333333333333333333333333333333333333",
+              "approve": true,
+              "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330",
+              "evidence": "0x000000000000000000000000000000000000000000000000000000000000000a"
+            },
+            {
+              "block": "57300101",
+              "tx": "0x0000000000000000000000000000000000000000000000000000000000000003",
+              "validator": "0x4444444444444444444444444444444444444444",
+              "approve": true,
+              "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330",
+              "evidence": "0x000000000000000000000000000000000000000000000000000000000000000b"
+            }
+          ],
+          "decided": {
+            "block": "57300101",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000003",
+            "approved": true
+          },
+          "finalized": {
+            "block": "57350000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000004",
+            "approved": true,
+            "voteHash": "0x000000000000000000000000000000000000000000000000000000000000000c"
+          },
+          "settlement": {
+            "block": "57350000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000004",
+            "outcome": "completed"
+          }
+        },
+        "task": {
+          "version": "arl-task/1",
+          "title": "Summarise a log file",
+          "description": "Count the lines of the input and write a JSON summary.",
+          "acceptance": [
+            {
+              "id": "exit-zero",
+              "rule": "The command exits with code 0."
+            },
+            {
+              "id": "matches-spec",
+              "rule": "The result hash equals a re-execution of the pinned spec."
+            }
+          ],
+          "deliverable": {
+            "media_type": "application/json",
+            "max_bytes": 65536
+          },
+          "payment": {
+            "token": "ARL",
+            "budget": "10000000000000000000",
+            "deadline_hours": 72
+          },
+          "evidence": ["result-manifest", "logs"],
+          "workload": {
+            "class": "reexec",
+            "spec_uri": "https://raw.githubusercontent.com/armanalabsai/arlcoin.io/main/packages/verifier/examples/busybox-summary.json",
+            "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f"
+          },
+          "verification": {
+            "policy": "arl-policy/1:reexec-standard",
+            "tier": "reexecution",
+            "committee_size": 3,
+            "threshold": 2,
+            "vote_window_seconds": 21600,
+            "challenge_window_seconds": 86400,
+            "bond_floor": "100000000000000000000"
+          }
+        },
+        "proof": {
+          "version": "arl-proof/1",
+          "task_hash": "0x601d4b1310d81b01b18230160ae718d806f1efd04eaf17a8034ed840f6e631e2",
+          "chain_id": 8453,
+          "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+          "job_id": "1",
+          "deliverable": {
+            "uri": "ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+            "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "media_type": "application/json",
+            "bytes": 512
+          },
+          "result_manifest": {
+            "version": "arl-reexec-result/1",
+            "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f",
+            "exit_code": 0,
+            "timed_out": false,
+            "outputs": [
+              {
+                "path": "summary.json",
+                "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            ]
+          },
+          "evidence": [
+            {
+              "kind": "logs",
+              "uri": "ipfs://bafybeihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku",
+              "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "media_type": "text/plain"
+            }
+          ]
+        },
+        "policy": {
+          "version": "arl-policy/1",
+          "id": "reexec-standard",
+          "workload_classes": ["reexec"],
+          "tiers": ["reexecution"],
+          "committee": {
+            "min_size": 3,
+            "max_size": 7
+          },
+          "vote_window_seconds": [3600, 86400],
+          "challenge_window_seconds": [86400, 259200],
+          "min_bond_floor": "100000000000000000000",
+          "bond_covers_budget": true,
+          "required_evidence": ["result-manifest"],
+          "model": {
+            "allowed": false,
+            "max_budget": {},
+            "models": []
+          }
+        },
+        "policy_hash": "0xb8208e1ad8b4640a0bd862b0f32a50af3f4361b12392f222725b743b2b1244fa"
+      },
+      "error": "job id differs"
+    },
+    {
+      "name": "other-description",
+      "evidence": {
+        "version": "arl-evidence/2",
+        "settlement": {
+          "version": "arl-evidence/1",
+          "chainId": 8453,
+          "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+          "evaluator": "0x5cA6dab18E6b9a5Cd44a4FfFBdf2c5BA3Cd87DfF",
+          "jobId": "1",
+          "job": {
+            "client": "0x1111111111111111111111111111111111111111",
+            "provider": "0x2222222222222222222222222222222222222222",
+            "budget": "10000000000000000000",
+            "status": 3,
+            "description": "arl-task:0x0000000000000000000000000000000000000000000000000000000000000005 ipfs://x"
+          },
+          "config": {
+            "tier": 1,
+            "threshold": 2,
+            "specHash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f",
+            "committee": [
+              "0x3333333333333333333333333333333333333333",
+              "0x4444444444444444444444444444444444444444",
+              "0x5555555555555555555555555555555555555555"
+            ]
+          },
+          "submitted": {
+            "block": "57300000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000001",
+            "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330"
+          },
+          "votes": [
+            {
+              "block": "57300100",
+              "tx": "0x0000000000000000000000000000000000000000000000000000000000000002",
+              "validator": "0x3333333333333333333333333333333333333333",
+              "approve": true,
+              "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330",
+              "evidence": "0x000000000000000000000000000000000000000000000000000000000000000a"
+            },
+            {
+              "block": "57300101",
+              "tx": "0x0000000000000000000000000000000000000000000000000000000000000003",
+              "validator": "0x4444444444444444444444444444444444444444",
+              "approve": true,
+              "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330",
+              "evidence": "0x000000000000000000000000000000000000000000000000000000000000000b"
+            }
+          ],
+          "decided": {
+            "block": "57300101",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000003",
+            "approved": true
+          },
+          "finalized": {
+            "block": "57350000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000004",
+            "approved": true,
+            "voteHash": "0x000000000000000000000000000000000000000000000000000000000000000c"
+          },
+          "settlement": {
+            "block": "57350000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000004",
+            "outcome": "completed"
+          }
+        },
+        "task": {
+          "version": "arl-task/1",
+          "title": "Summarise a log file",
+          "description": "Count the lines of the input and write a JSON summary.",
+          "acceptance": [
+            {
+              "id": "exit-zero",
+              "rule": "The command exits with code 0."
+            },
+            {
+              "id": "matches-spec",
+              "rule": "The result hash equals a re-execution of the pinned spec."
+            }
+          ],
+          "deliverable": {
+            "media_type": "application/json",
+            "max_bytes": 65536
+          },
+          "payment": {
+            "token": "ARL",
+            "budget": "10000000000000000000",
+            "deadline_hours": 72
+          },
+          "evidence": ["result-manifest", "logs"],
+          "workload": {
+            "class": "reexec",
+            "spec_uri": "https://raw.githubusercontent.com/armanalabsai/arlcoin.io/main/packages/verifier/examples/busybox-summary.json",
+            "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f"
+          },
+          "verification": {
+            "policy": "arl-policy/1:reexec-standard",
+            "tier": "reexecution",
+            "committee_size": 3,
+            "threshold": 2,
+            "vote_window_seconds": 21600,
+            "challenge_window_seconds": 86400,
+            "bond_floor": "100000000000000000000"
+          }
+        },
+        "proof": {
+          "version": "arl-proof/1",
+          "task_hash": "0x601d4b1310d81b01b18230160ae718d806f1efd04eaf17a8034ed840f6e631e2",
+          "chain_id": 8453,
+          "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+          "job_id": "1",
+          "deliverable": {
+            "uri": "ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+            "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "media_type": "application/json",
+            "bytes": 512
+          },
+          "result_manifest": {
+            "version": "arl-reexec-result/1",
+            "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f",
+            "exit_code": 0,
+            "timed_out": false,
+            "outputs": [
+              {
+                "path": "summary.json",
+                "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            ]
+          },
+          "evidence": [
+            {
+              "kind": "logs",
+              "uri": "ipfs://bafybeihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku",
+              "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "media_type": "text/plain"
+            }
+          ]
+        },
+        "policy": {
+          "version": "arl-policy/1",
+          "id": "reexec-standard",
+          "workload_classes": ["reexec"],
+          "tiers": ["reexecution"],
+          "committee": {
+            "min_size": 3,
+            "max_size": 7
+          },
+          "vote_window_seconds": [3600, 86400],
+          "challenge_window_seconds": [86400, 259200],
+          "min_bond_floor": "100000000000000000000",
+          "bond_covers_budget": true,
+          "required_evidence": ["result-manifest"],
+          "model": {
+            "allowed": false,
+            "max_budget": {},
+            "models": []
+          }
+        },
+        "policy_hash": "0xb8208e1ad8b4640a0bd862b0f32a50af3f4361b12392f222725b743b2b1244fa"
+      },
+      "error": "does not name this task"
+    },
+    {
+      "name": "other-budget",
+      "evidence": {
+        "version": "arl-evidence/2",
+        "settlement": {
+          "version": "arl-evidence/1",
+          "chainId": 8453,
+          "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+          "evaluator": "0x5cA6dab18E6b9a5Cd44a4FfFBdf2c5BA3Cd87DfF",
+          "jobId": "1",
+          "job": {
+            "client": "0x1111111111111111111111111111111111111111",
+            "provider": "0x2222222222222222222222222222222222222222",
+            "budget": "1",
+            "status": 3,
+            "description": "arl-task:0x601d4b1310d81b01b18230160ae718d806f1efd04eaf17a8034ed840f6e631e2 ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"
+          },
+          "config": {
+            "tier": 1,
+            "threshold": 2,
+            "specHash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f",
+            "committee": [
+              "0x3333333333333333333333333333333333333333",
+              "0x4444444444444444444444444444444444444444",
+              "0x5555555555555555555555555555555555555555"
+            ]
+          },
+          "submitted": {
+            "block": "57300000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000001",
+            "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330"
+          },
+          "votes": [
+            {
+              "block": "57300100",
+              "tx": "0x0000000000000000000000000000000000000000000000000000000000000002",
+              "validator": "0x3333333333333333333333333333333333333333",
+              "approve": true,
+              "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330",
+              "evidence": "0x000000000000000000000000000000000000000000000000000000000000000a"
+            },
+            {
+              "block": "57300101",
+              "tx": "0x0000000000000000000000000000000000000000000000000000000000000003",
+              "validator": "0x4444444444444444444444444444444444444444",
+              "approve": true,
+              "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330",
+              "evidence": "0x000000000000000000000000000000000000000000000000000000000000000b"
+            }
+          ],
+          "decided": {
+            "block": "57300101",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000003",
+            "approved": true
+          },
+          "finalized": {
+            "block": "57350000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000004",
+            "approved": true,
+            "voteHash": "0x000000000000000000000000000000000000000000000000000000000000000c"
+          },
+          "settlement": {
+            "block": "57350000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000004",
+            "outcome": "completed"
+          }
+        },
+        "task": {
+          "version": "arl-task/1",
+          "title": "Summarise a log file",
+          "description": "Count the lines of the input and write a JSON summary.",
+          "acceptance": [
+            {
+              "id": "exit-zero",
+              "rule": "The command exits with code 0."
+            },
+            {
+              "id": "matches-spec",
+              "rule": "The result hash equals a re-execution of the pinned spec."
+            }
+          ],
+          "deliverable": {
+            "media_type": "application/json",
+            "max_bytes": 65536
+          },
+          "payment": {
+            "token": "ARL",
+            "budget": "10000000000000000000",
+            "deadline_hours": 72
+          },
+          "evidence": ["result-manifest", "logs"],
+          "workload": {
+            "class": "reexec",
+            "spec_uri": "https://raw.githubusercontent.com/armanalabsai/arlcoin.io/main/packages/verifier/examples/busybox-summary.json",
+            "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f"
+          },
+          "verification": {
+            "policy": "arl-policy/1:reexec-standard",
+            "tier": "reexecution",
+            "committee_size": 3,
+            "threshold": 2,
+            "vote_window_seconds": 21600,
+            "challenge_window_seconds": 86400,
+            "bond_floor": "100000000000000000000"
+          }
+        },
+        "proof": {
+          "version": "arl-proof/1",
+          "task_hash": "0x601d4b1310d81b01b18230160ae718d806f1efd04eaf17a8034ed840f6e631e2",
+          "chain_id": 8453,
+          "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+          "job_id": "1",
+          "deliverable": {
+            "uri": "ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+            "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "media_type": "application/json",
+            "bytes": 512
+          },
+          "result_manifest": {
+            "version": "arl-reexec-result/1",
+            "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f",
+            "exit_code": 0,
+            "timed_out": false,
+            "outputs": [
+              {
+                "path": "summary.json",
+                "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            ]
+          },
+          "evidence": [
+            {
+              "kind": "logs",
+              "uri": "ipfs://bafybeihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku",
+              "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "media_type": "text/plain"
+            }
+          ]
+        },
+        "policy": {
+          "version": "arl-policy/1",
+          "id": "reexec-standard",
+          "workload_classes": ["reexec"],
+          "tiers": ["reexecution"],
+          "committee": {
+            "min_size": 3,
+            "max_size": 7
+          },
+          "vote_window_seconds": [3600, 86400],
+          "challenge_window_seconds": [86400, 259200],
+          "min_bond_floor": "100000000000000000000",
+          "bond_covers_budget": true,
+          "required_evidence": ["result-manifest"],
+          "model": {
+            "allowed": false,
+            "max_budget": {},
+            "models": []
+          }
+        },
+        "policy_hash": "0xb8208e1ad8b4640a0bd862b0f32a50af3f4361b12392f222725b743b2b1244fa"
+      },
+      "error": "budget differs"
+    },
+    {
+      "name": "other-spec-hash",
+      "evidence": {
+        "version": "arl-evidence/2",
+        "settlement": {
+          "version": "arl-evidence/1",
+          "chainId": 8453,
+          "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+          "evaluator": "0x5cA6dab18E6b9a5Cd44a4FfFBdf2c5BA3Cd87DfF",
+          "jobId": "1",
+          "job": {
+            "client": "0x1111111111111111111111111111111111111111",
+            "provider": "0x2222222222222222222222222222222222222222",
+            "budget": "10000000000000000000",
+            "status": 3,
+            "description": "arl-task:0x601d4b1310d81b01b18230160ae718d806f1efd04eaf17a8034ed840f6e631e2 ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"
+          },
+          "config": {
+            "tier": 1,
+            "threshold": 2,
+            "specHash": "0x0000000000000000000000000000000000000000000000000000000000000006",
+            "committee": [
+              "0x3333333333333333333333333333333333333333",
+              "0x4444444444444444444444444444444444444444",
+              "0x5555555555555555555555555555555555555555"
+            ]
+          },
+          "submitted": {
+            "block": "57300000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000001",
+            "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330"
+          },
+          "votes": [
+            {
+              "block": "57300100",
+              "tx": "0x0000000000000000000000000000000000000000000000000000000000000002",
+              "validator": "0x3333333333333333333333333333333333333333",
+              "approve": true,
+              "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330",
+              "evidence": "0x000000000000000000000000000000000000000000000000000000000000000a"
+            },
+            {
+              "block": "57300101",
+              "tx": "0x0000000000000000000000000000000000000000000000000000000000000003",
+              "validator": "0x4444444444444444444444444444444444444444",
+              "approve": true,
+              "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330",
+              "evidence": "0x000000000000000000000000000000000000000000000000000000000000000b"
+            }
+          ],
+          "decided": {
+            "block": "57300101",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000003",
+            "approved": true
+          },
+          "finalized": {
+            "block": "57350000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000004",
+            "approved": true,
+            "voteHash": "0x000000000000000000000000000000000000000000000000000000000000000c"
+          },
+          "settlement": {
+            "block": "57350000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000004",
+            "outcome": "completed"
+          }
+        },
+        "task": {
+          "version": "arl-task/1",
+          "title": "Summarise a log file",
+          "description": "Count the lines of the input and write a JSON summary.",
+          "acceptance": [
+            {
+              "id": "exit-zero",
+              "rule": "The command exits with code 0."
+            },
+            {
+              "id": "matches-spec",
+              "rule": "The result hash equals a re-execution of the pinned spec."
+            }
+          ],
+          "deliverable": {
+            "media_type": "application/json",
+            "max_bytes": 65536
+          },
+          "payment": {
+            "token": "ARL",
+            "budget": "10000000000000000000",
+            "deadline_hours": 72
+          },
+          "evidence": ["result-manifest", "logs"],
+          "workload": {
+            "class": "reexec",
+            "spec_uri": "https://raw.githubusercontent.com/armanalabsai/arlcoin.io/main/packages/verifier/examples/busybox-summary.json",
+            "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f"
+          },
+          "verification": {
+            "policy": "arl-policy/1:reexec-standard",
+            "tier": "reexecution",
+            "committee_size": 3,
+            "threshold": 2,
+            "vote_window_seconds": 21600,
+            "challenge_window_seconds": 86400,
+            "bond_floor": "100000000000000000000"
+          }
+        },
+        "proof": {
+          "version": "arl-proof/1",
+          "task_hash": "0x601d4b1310d81b01b18230160ae718d806f1efd04eaf17a8034ed840f6e631e2",
+          "chain_id": 8453,
+          "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+          "job_id": "1",
+          "deliverable": {
+            "uri": "ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+            "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "media_type": "application/json",
+            "bytes": 512
+          },
+          "result_manifest": {
+            "version": "arl-reexec-result/1",
+            "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f",
+            "exit_code": 0,
+            "timed_out": false,
+            "outputs": [
+              {
+                "path": "summary.json",
+                "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            ]
+          },
+          "evidence": [
+            {
+              "kind": "logs",
+              "uri": "ipfs://bafybeihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku",
+              "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "media_type": "text/plain"
+            }
+          ]
+        },
+        "policy": {
+          "version": "arl-policy/1",
+          "id": "reexec-standard",
+          "workload_classes": ["reexec"],
+          "tiers": ["reexecution"],
+          "committee": {
+            "min_size": 3,
+            "max_size": 7
+          },
+          "vote_window_seconds": [3600, 86400],
+          "challenge_window_seconds": [86400, 259200],
+          "min_bond_floor": "100000000000000000000",
+          "bond_covers_budget": true,
+          "required_evidence": ["result-manifest"],
+          "model": {
+            "allowed": false,
+            "max_budget": {},
+            "models": []
+          }
+        },
+        "policy_hash": "0xb8208e1ad8b4640a0bd862b0f32a50af3f4361b12392f222725b743b2b1244fa"
+      },
+      "error": "specHash differs"
+    },
+    {
+      "name": "other-deliverable",
+      "evidence": {
+        "version": "arl-evidence/2",
+        "settlement": {
+          "version": "arl-evidence/1",
+          "chainId": 8453,
+          "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+          "evaluator": "0x5cA6dab18E6b9a5Cd44a4FfFBdf2c5BA3Cd87DfF",
+          "jobId": "1",
+          "job": {
+            "client": "0x1111111111111111111111111111111111111111",
+            "provider": "0x2222222222222222222222222222222222222222",
+            "budget": "10000000000000000000",
+            "status": 3,
+            "description": "arl-task:0x601d4b1310d81b01b18230160ae718d806f1efd04eaf17a8034ed840f6e631e2 ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"
+          },
+          "config": {
+            "tier": 1,
+            "threshold": 2,
+            "specHash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f",
+            "committee": [
+              "0x3333333333333333333333333333333333333333",
+              "0x4444444444444444444444444444444444444444",
+              "0x5555555555555555555555555555555555555555"
+            ]
+          },
+          "submitted": {
+            "block": "57300000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000001",
+            "deliverable": "0x0000000000000000000000000000000000000000000000000000000000000007"
+          },
+          "votes": [
+            {
+              "block": "57300100",
+              "tx": "0x0000000000000000000000000000000000000000000000000000000000000002",
+              "validator": "0x3333333333333333333333333333333333333333",
+              "approve": true,
+              "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330",
+              "evidence": "0x000000000000000000000000000000000000000000000000000000000000000a"
+            },
+            {
+              "block": "57300101",
+              "tx": "0x0000000000000000000000000000000000000000000000000000000000000003",
+              "validator": "0x4444444444444444444444444444444444444444",
+              "approve": true,
+              "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330",
+              "evidence": "0x000000000000000000000000000000000000000000000000000000000000000b"
+            }
+          ],
+          "decided": {
+            "block": "57300101",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000003",
+            "approved": true
+          },
+          "finalized": {
+            "block": "57350000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000004",
+            "approved": true,
+            "voteHash": "0x000000000000000000000000000000000000000000000000000000000000000c"
+          },
+          "settlement": {
+            "block": "57350000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000004",
+            "outcome": "completed"
+          }
+        },
+        "task": {
+          "version": "arl-task/1",
+          "title": "Summarise a log file",
+          "description": "Count the lines of the input and write a JSON summary.",
+          "acceptance": [
+            {
+              "id": "exit-zero",
+              "rule": "The command exits with code 0."
+            },
+            {
+              "id": "matches-spec",
+              "rule": "The result hash equals a re-execution of the pinned spec."
+            }
+          ],
+          "deliverable": {
+            "media_type": "application/json",
+            "max_bytes": 65536
+          },
+          "payment": {
+            "token": "ARL",
+            "budget": "10000000000000000000",
+            "deadline_hours": 72
+          },
+          "evidence": ["result-manifest", "logs"],
+          "workload": {
+            "class": "reexec",
+            "spec_uri": "https://raw.githubusercontent.com/armanalabsai/arlcoin.io/main/packages/verifier/examples/busybox-summary.json",
+            "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f"
+          },
+          "verification": {
+            "policy": "arl-policy/1:reexec-standard",
+            "tier": "reexecution",
+            "committee_size": 3,
+            "threshold": 2,
+            "vote_window_seconds": 21600,
+            "challenge_window_seconds": 86400,
+            "bond_floor": "100000000000000000000"
+          }
+        },
+        "proof": {
+          "version": "arl-proof/1",
+          "task_hash": "0x601d4b1310d81b01b18230160ae718d806f1efd04eaf17a8034ed840f6e631e2",
+          "chain_id": 8453,
+          "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+          "job_id": "1",
+          "deliverable": {
+            "uri": "ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+            "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "media_type": "application/json",
+            "bytes": 512
+          },
+          "result_manifest": {
+            "version": "arl-reexec-result/1",
+            "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f",
+            "exit_code": 0,
+            "timed_out": false,
+            "outputs": [
+              {
+                "path": "summary.json",
+                "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            ]
+          },
+          "evidence": [
+            {
+              "kind": "logs",
+              "uri": "ipfs://bafybeihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku",
+              "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "media_type": "text/plain"
+            }
+          ]
+        },
+        "policy": {
+          "version": "arl-policy/1",
+          "id": "reexec-standard",
+          "workload_classes": ["reexec"],
+          "tiers": ["reexecution"],
+          "committee": {
+            "min_size": 3,
+            "max_size": 7
+          },
+          "vote_window_seconds": [3600, 86400],
+          "challenge_window_seconds": [86400, 259200],
+          "min_bond_floor": "100000000000000000000",
+          "bond_covers_budget": true,
+          "required_evidence": ["result-manifest"],
+          "model": {
+            "allowed": false,
+            "max_budget": {},
+            "models": []
+          }
+        },
+        "policy_hash": "0xb8208e1ad8b4640a0bd862b0f32a50af3f4361b12392f222725b743b2b1244fa"
+      },
+      "error": "not this proof's"
+    },
+    {
+      "name": "outsider-vote",
+      "evidence": {
+        "version": "arl-evidence/2",
+        "settlement": {
+          "version": "arl-evidence/1",
+          "chainId": 8453,
+          "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+          "evaluator": "0x5cA6dab18E6b9a5Cd44a4FfFBdf2c5BA3Cd87DfF",
+          "jobId": "1",
+          "job": {
+            "client": "0x1111111111111111111111111111111111111111",
+            "provider": "0x2222222222222222222222222222222222222222",
+            "budget": "10000000000000000000",
+            "status": 3,
+            "description": "arl-task:0x601d4b1310d81b01b18230160ae718d806f1efd04eaf17a8034ed840f6e631e2 ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"
+          },
+          "config": {
+            "tier": 1,
+            "threshold": 2,
+            "specHash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f",
+            "committee": [
+              "0x3333333333333333333333333333333333333333",
+              "0x4444444444444444444444444444444444444444",
+              "0x5555555555555555555555555555555555555555"
+            ]
+          },
+          "submitted": {
+            "block": "57300000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000001",
+            "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330"
+          },
+          "votes": [
+            {
+              "block": "57300100",
+              "tx": "0x0000000000000000000000000000000000000000000000000000000000000002",
+              "validator": "0x3333333333333333333333333333333333333333",
+              "approve": true,
+              "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330",
+              "evidence": "0x000000000000000000000000000000000000000000000000000000000000000a"
+            },
+            {
+              "block": "57300101",
+              "tx": "0x0000000000000000000000000000000000000000000000000000000000000003",
+              "validator": "0x6666666666666666666666666666666666666666",
+              "approve": true,
+              "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330",
+              "evidence": "0x000000000000000000000000000000000000000000000000000000000000000b"
+            }
+          ],
+          "decided": {
+            "block": "57300101",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000003",
+            "approved": true
+          },
+          "finalized": {
+            "block": "57350000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000004",
+            "approved": true,
+            "voteHash": "0x000000000000000000000000000000000000000000000000000000000000000c"
+          },
+          "settlement": {
+            "block": "57350000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000004",
+            "outcome": "completed"
+          }
+        },
+        "task": {
+          "version": "arl-task/1",
+          "title": "Summarise a log file",
+          "description": "Count the lines of the input and write a JSON summary.",
+          "acceptance": [
+            {
+              "id": "exit-zero",
+              "rule": "The command exits with code 0."
+            },
+            {
+              "id": "matches-spec",
+              "rule": "The result hash equals a re-execution of the pinned spec."
+            }
+          ],
+          "deliverable": {
+            "media_type": "application/json",
+            "max_bytes": 65536
+          },
+          "payment": {
+            "token": "ARL",
+            "budget": "10000000000000000000",
+            "deadline_hours": 72
+          },
+          "evidence": ["result-manifest", "logs"],
+          "workload": {
+            "class": "reexec",
+            "spec_uri": "https://raw.githubusercontent.com/armanalabsai/arlcoin.io/main/packages/verifier/examples/busybox-summary.json",
+            "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f"
+          },
+          "verification": {
+            "policy": "arl-policy/1:reexec-standard",
+            "tier": "reexecution",
+            "committee_size": 3,
+            "threshold": 2,
+            "vote_window_seconds": 21600,
+            "challenge_window_seconds": 86400,
+            "bond_floor": "100000000000000000000"
+          }
+        },
+        "proof": {
+          "version": "arl-proof/1",
+          "task_hash": "0x601d4b1310d81b01b18230160ae718d806f1efd04eaf17a8034ed840f6e631e2",
+          "chain_id": 8453,
+          "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+          "job_id": "1",
+          "deliverable": {
+            "uri": "ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+            "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "media_type": "application/json",
+            "bytes": 512
+          },
+          "result_manifest": {
+            "version": "arl-reexec-result/1",
+            "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f",
+            "exit_code": 0,
+            "timed_out": false,
+            "outputs": [
+              {
+                "path": "summary.json",
+                "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            ]
+          },
+          "evidence": [
+            {
+              "kind": "logs",
+              "uri": "ipfs://bafybeihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku",
+              "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "media_type": "text/plain"
+            }
+          ]
+        },
+        "policy": {
+          "version": "arl-policy/1",
+          "id": "reexec-standard",
+          "workload_classes": ["reexec"],
+          "tiers": ["reexecution"],
+          "committee": {
+            "min_size": 3,
+            "max_size": 7
+          },
+          "vote_window_seconds": [3600, 86400],
+          "challenge_window_seconds": [86400, 259200],
+          "min_bond_floor": "100000000000000000000",
+          "bond_covers_budget": true,
+          "required_evidence": ["result-manifest"],
+          "model": {
+            "allowed": false,
+            "max_budget": {},
+            "models": []
+          }
+        },
+        "policy_hash": "0xb8208e1ad8b4640a0bd862b0f32a50af3f4361b12392f222725b743b2b1244fa"
+      },
+      "error": "outside the committee"
+    },
+    {
+      "name": "double-vote",
+      "evidence": {
+        "version": "arl-evidence/2",
+        "settlement": {
+          "version": "arl-evidence/1",
+          "chainId": 8453,
+          "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+          "evaluator": "0x5cA6dab18E6b9a5Cd44a4FfFBdf2c5BA3Cd87DfF",
+          "jobId": "1",
+          "job": {
+            "client": "0x1111111111111111111111111111111111111111",
+            "provider": "0x2222222222222222222222222222222222222222",
+            "budget": "10000000000000000000",
+            "status": 3,
+            "description": "arl-task:0x601d4b1310d81b01b18230160ae718d806f1efd04eaf17a8034ed840f6e631e2 ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"
+          },
+          "config": {
+            "tier": 1,
+            "threshold": 2,
+            "specHash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f",
+            "committee": [
+              "0x3333333333333333333333333333333333333333",
+              "0x4444444444444444444444444444444444444444",
+              "0x5555555555555555555555555555555555555555"
+            ]
+          },
+          "submitted": {
+            "block": "57300000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000001",
+            "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330"
+          },
+          "votes": [
+            {
+              "block": "57300100",
+              "tx": "0x0000000000000000000000000000000000000000000000000000000000000002",
+              "validator": "0x3333333333333333333333333333333333333333",
+              "approve": true,
+              "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330",
+              "evidence": "0x000000000000000000000000000000000000000000000000000000000000000a"
+            },
+            {
+              "block": "57300101",
+              "tx": "0x0000000000000000000000000000000000000000000000000000000000000003",
+              "validator": "0x3333333333333333333333333333333333333333",
+              "approve": true,
+              "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330",
+              "evidence": "0x000000000000000000000000000000000000000000000000000000000000000b"
+            }
+          ],
+          "decided": {
+            "block": "57300101",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000003",
+            "approved": true
+          },
+          "finalized": {
+            "block": "57350000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000004",
+            "approved": true,
+            "voteHash": "0x000000000000000000000000000000000000000000000000000000000000000c"
+          },
+          "settlement": {
+            "block": "57350000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000004",
+            "outcome": "completed"
+          }
+        },
+        "task": {
+          "version": "arl-task/1",
+          "title": "Summarise a log file",
+          "description": "Count the lines of the input and write a JSON summary.",
+          "acceptance": [
+            {
+              "id": "exit-zero",
+              "rule": "The command exits with code 0."
+            },
+            {
+              "id": "matches-spec",
+              "rule": "The result hash equals a re-execution of the pinned spec."
+            }
+          ],
+          "deliverable": {
+            "media_type": "application/json",
+            "max_bytes": 65536
+          },
+          "payment": {
+            "token": "ARL",
+            "budget": "10000000000000000000",
+            "deadline_hours": 72
+          },
+          "evidence": ["result-manifest", "logs"],
+          "workload": {
+            "class": "reexec",
+            "spec_uri": "https://raw.githubusercontent.com/armanalabsai/arlcoin.io/main/packages/verifier/examples/busybox-summary.json",
+            "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f"
+          },
+          "verification": {
+            "policy": "arl-policy/1:reexec-standard",
+            "tier": "reexecution",
+            "committee_size": 3,
+            "threshold": 2,
+            "vote_window_seconds": 21600,
+            "challenge_window_seconds": 86400,
+            "bond_floor": "100000000000000000000"
+          }
+        },
+        "proof": {
+          "version": "arl-proof/1",
+          "task_hash": "0x601d4b1310d81b01b18230160ae718d806f1efd04eaf17a8034ed840f6e631e2",
+          "chain_id": 8453,
+          "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+          "job_id": "1",
+          "deliverable": {
+            "uri": "ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+            "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "media_type": "application/json",
+            "bytes": 512
+          },
+          "result_manifest": {
+            "version": "arl-reexec-result/1",
+            "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f",
+            "exit_code": 0,
+            "timed_out": false,
+            "outputs": [
+              {
+                "path": "summary.json",
+                "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            ]
+          },
+          "evidence": [
+            {
+              "kind": "logs",
+              "uri": "ipfs://bafybeihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku",
+              "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "media_type": "text/plain"
+            }
+          ]
+        },
+        "policy": {
+          "version": "arl-policy/1",
+          "id": "reexec-standard",
+          "workload_classes": ["reexec"],
+          "tiers": ["reexecution"],
+          "committee": {
+            "min_size": 3,
+            "max_size": 7
+          },
+          "vote_window_seconds": [3600, 86400],
+          "challenge_window_seconds": [86400, 259200],
+          "min_bond_floor": "100000000000000000000",
+          "bond_covers_budget": true,
+          "required_evidence": ["result-manifest"],
+          "model": {
+            "allowed": false,
+            "max_budget": {},
+            "models": []
+          }
+        },
+        "policy_hash": "0xb8208e1ad8b4640a0bd862b0f32a50af3f4361b12392f222725b743b2b1244fa"
+      },
+      "error": "double vote"
+    },
+    {
+      "name": "approval-other-deliverable",
+      "evidence": {
+        "version": "arl-evidence/2",
+        "settlement": {
+          "version": "arl-evidence/1",
+          "chainId": 8453,
+          "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+          "evaluator": "0x5cA6dab18E6b9a5Cd44a4FfFBdf2c5BA3Cd87DfF",
+          "jobId": "1",
+          "job": {
+            "client": "0x1111111111111111111111111111111111111111",
+            "provider": "0x2222222222222222222222222222222222222222",
+            "budget": "10000000000000000000",
+            "status": 3,
+            "description": "arl-task:0x601d4b1310d81b01b18230160ae718d806f1efd04eaf17a8034ed840f6e631e2 ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"
+          },
+          "config": {
+            "tier": 1,
+            "threshold": 2,
+            "specHash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f",
+            "committee": [
+              "0x3333333333333333333333333333333333333333",
+              "0x4444444444444444444444444444444444444444",
+              "0x5555555555555555555555555555555555555555"
+            ]
+          },
+          "submitted": {
+            "block": "57300000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000001",
+            "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330"
+          },
+          "votes": [
+            {
+              "block": "57300100",
+              "tx": "0x0000000000000000000000000000000000000000000000000000000000000002",
+              "validator": "0x3333333333333333333333333333333333333333",
+              "approve": true,
+              "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330",
+              "evidence": "0x000000000000000000000000000000000000000000000000000000000000000a"
+            },
+            {
+              "block": "57300101",
+              "tx": "0x0000000000000000000000000000000000000000000000000000000000000003",
+              "validator": "0x4444444444444444444444444444444444444444",
+              "approve": true,
+              "deliverable": "0x0000000000000000000000000000000000000000000000000000000000000008",
+              "evidence": "0x000000000000000000000000000000000000000000000000000000000000000b"
+            }
+          ],
+          "decided": {
+            "block": "57300101",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000003",
+            "approved": true
+          },
+          "finalized": {
+            "block": "57350000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000004",
+            "approved": true,
+            "voteHash": "0x000000000000000000000000000000000000000000000000000000000000000c"
+          },
+          "settlement": {
+            "block": "57350000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000004",
+            "outcome": "completed"
+          }
+        },
+        "task": {
+          "version": "arl-task/1",
+          "title": "Summarise a log file",
+          "description": "Count the lines of the input and write a JSON summary.",
+          "acceptance": [
+            {
+              "id": "exit-zero",
+              "rule": "The command exits with code 0."
+            },
+            {
+              "id": "matches-spec",
+              "rule": "The result hash equals a re-execution of the pinned spec."
+            }
+          ],
+          "deliverable": {
+            "media_type": "application/json",
+            "max_bytes": 65536
+          },
+          "payment": {
+            "token": "ARL",
+            "budget": "10000000000000000000",
+            "deadline_hours": 72
+          },
+          "evidence": ["result-manifest", "logs"],
+          "workload": {
+            "class": "reexec",
+            "spec_uri": "https://raw.githubusercontent.com/armanalabsai/arlcoin.io/main/packages/verifier/examples/busybox-summary.json",
+            "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f"
+          },
+          "verification": {
+            "policy": "arl-policy/1:reexec-standard",
+            "tier": "reexecution",
+            "committee_size": 3,
+            "threshold": 2,
+            "vote_window_seconds": 21600,
+            "challenge_window_seconds": 86400,
+            "bond_floor": "100000000000000000000"
+          }
+        },
+        "proof": {
+          "version": "arl-proof/1",
+          "task_hash": "0x601d4b1310d81b01b18230160ae718d806f1efd04eaf17a8034ed840f6e631e2",
+          "chain_id": 8453,
+          "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+          "job_id": "1",
+          "deliverable": {
+            "uri": "ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+            "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "media_type": "application/json",
+            "bytes": 512
+          },
+          "result_manifest": {
+            "version": "arl-reexec-result/1",
+            "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f",
+            "exit_code": 0,
+            "timed_out": false,
+            "outputs": [
+              {
+                "path": "summary.json",
+                "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            ]
+          },
+          "evidence": [
+            {
+              "kind": "logs",
+              "uri": "ipfs://bafybeihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku",
+              "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "media_type": "text/plain"
+            }
+          ]
+        },
+        "policy": {
+          "version": "arl-policy/1",
+          "id": "reexec-standard",
+          "workload_classes": ["reexec"],
+          "tiers": ["reexecution"],
+          "committee": {
+            "min_size": 3,
+            "max_size": 7
+          },
+          "vote_window_seconds": [3600, 86400],
+          "challenge_window_seconds": [86400, 259200],
+          "min_bond_floor": "100000000000000000000",
+          "bond_covers_budget": true,
+          "required_evidence": ["result-manifest"],
+          "model": {
+            "allowed": false,
+            "max_budget": {},
+            "models": []
+          }
+        },
+        "policy_hash": "0xb8208e1ad8b4640a0bd862b0f32a50af3f4361b12392f222725b743b2b1244fa"
+      },
+      "error": "another deliverable"
+    },
+    {
+      "name": "approved-without-threshold",
+      "evidence": {
+        "version": "arl-evidence/2",
+        "settlement": {
+          "version": "arl-evidence/1",
+          "chainId": 8453,
+          "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+          "evaluator": "0x5cA6dab18E6b9a5Cd44a4FfFBdf2c5BA3Cd87DfF",
+          "jobId": "1",
+          "job": {
+            "client": "0x1111111111111111111111111111111111111111",
+            "provider": "0x2222222222222222222222222222222222222222",
+            "budget": "10000000000000000000",
+            "status": 3,
+            "description": "arl-task:0x601d4b1310d81b01b18230160ae718d806f1efd04eaf17a8034ed840f6e631e2 ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"
+          },
+          "config": {
+            "tier": 1,
+            "threshold": 2,
+            "specHash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f",
+            "committee": [
+              "0x3333333333333333333333333333333333333333",
+              "0x4444444444444444444444444444444444444444",
+              "0x5555555555555555555555555555555555555555"
+            ]
+          },
+          "submitted": {
+            "block": "57300000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000001",
+            "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330"
+          },
+          "votes": [
+            {
+              "block": "57300100",
+              "tx": "0x0000000000000000000000000000000000000000000000000000000000000002",
+              "validator": "0x3333333333333333333333333333333333333333",
+              "approve": true,
+              "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330",
+              "evidence": "0x000000000000000000000000000000000000000000000000000000000000000a"
+            }
+          ],
+          "decided": {
+            "block": "57300101",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000003",
+            "approved": true
+          },
+          "finalized": {
+            "block": "57350000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000004",
+            "approved": true,
+            "voteHash": "0x000000000000000000000000000000000000000000000000000000000000000c"
+          },
+          "settlement": {
+            "block": "57350000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000004",
+            "outcome": "completed"
+          }
+        },
+        "task": {
+          "version": "arl-task/1",
+          "title": "Summarise a log file",
+          "description": "Count the lines of the input and write a JSON summary.",
+          "acceptance": [
+            {
+              "id": "exit-zero",
+              "rule": "The command exits with code 0."
+            },
+            {
+              "id": "matches-spec",
+              "rule": "The result hash equals a re-execution of the pinned spec."
+            }
+          ],
+          "deliverable": {
+            "media_type": "application/json",
+            "max_bytes": 65536
+          },
+          "payment": {
+            "token": "ARL",
+            "budget": "10000000000000000000",
+            "deadline_hours": 72
+          },
+          "evidence": ["result-manifest", "logs"],
+          "workload": {
+            "class": "reexec",
+            "spec_uri": "https://raw.githubusercontent.com/armanalabsai/arlcoin.io/main/packages/verifier/examples/busybox-summary.json",
+            "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f"
+          },
+          "verification": {
+            "policy": "arl-policy/1:reexec-standard",
+            "tier": "reexecution",
+            "committee_size": 3,
+            "threshold": 2,
+            "vote_window_seconds": 21600,
+            "challenge_window_seconds": 86400,
+            "bond_floor": "100000000000000000000"
+          }
+        },
+        "proof": {
+          "version": "arl-proof/1",
+          "task_hash": "0x601d4b1310d81b01b18230160ae718d806f1efd04eaf17a8034ed840f6e631e2",
+          "chain_id": 8453,
+          "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+          "job_id": "1",
+          "deliverable": {
+            "uri": "ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+            "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "media_type": "application/json",
+            "bytes": 512
+          },
+          "result_manifest": {
+            "version": "arl-reexec-result/1",
+            "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f",
+            "exit_code": 0,
+            "timed_out": false,
+            "outputs": [
+              {
+                "path": "summary.json",
+                "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            ]
+          },
+          "evidence": [
+            {
+              "kind": "logs",
+              "uri": "ipfs://bafybeihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku",
+              "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "media_type": "text/plain"
+            }
+          ]
+        },
+        "policy": {
+          "version": "arl-policy/1",
+          "id": "reexec-standard",
+          "workload_classes": ["reexec"],
+          "tiers": ["reexecution"],
+          "committee": {
+            "min_size": 3,
+            "max_size": 7
+          },
+          "vote_window_seconds": [3600, 86400],
+          "challenge_window_seconds": [86400, 259200],
+          "min_bond_floor": "100000000000000000000",
+          "bond_covers_budget": true,
+          "required_evidence": ["result-manifest"],
+          "model": {
+            "allowed": false,
+            "max_budget": {},
+            "models": []
+          }
+        },
+        "policy_hash": "0xb8208e1ad8b4640a0bd862b0f32a50af3f4361b12392f222725b743b2b1244fa"
+      },
+      "error": "without enough approvals"
+    },
+    {
+      "name": "finalize-settlement-mismatch",
+      "evidence": {
+        "version": "arl-evidence/2",
+        "settlement": {
+          "version": "arl-evidence/1",
+          "chainId": 8453,
+          "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+          "evaluator": "0x5cA6dab18E6b9a5Cd44a4FfFBdf2c5BA3Cd87DfF",
+          "jobId": "1",
+          "job": {
+            "client": "0x1111111111111111111111111111111111111111",
+            "provider": "0x2222222222222222222222222222222222222222",
+            "budget": "10000000000000000000",
+            "status": 3,
+            "description": "arl-task:0x601d4b1310d81b01b18230160ae718d806f1efd04eaf17a8034ed840f6e631e2 ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"
+          },
+          "config": {
+            "tier": 1,
+            "threshold": 2,
+            "specHash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f",
+            "committee": [
+              "0x3333333333333333333333333333333333333333",
+              "0x4444444444444444444444444444444444444444",
+              "0x5555555555555555555555555555555555555555"
+            ]
+          },
+          "submitted": {
+            "block": "57300000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000001",
+            "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330"
+          },
+          "votes": [
+            {
+              "block": "57300100",
+              "tx": "0x0000000000000000000000000000000000000000000000000000000000000002",
+              "validator": "0x3333333333333333333333333333333333333333",
+              "approve": true,
+              "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330",
+              "evidence": "0x000000000000000000000000000000000000000000000000000000000000000a"
+            },
+            {
+              "block": "57300101",
+              "tx": "0x0000000000000000000000000000000000000000000000000000000000000003",
+              "validator": "0x4444444444444444444444444444444444444444",
+              "approve": true,
+              "deliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330",
+              "evidence": "0x000000000000000000000000000000000000000000000000000000000000000b"
+            }
+          ],
+          "decided": {
+            "block": "57300101",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000003",
+            "approved": true
+          },
+          "finalized": {
+            "block": "57350000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000004",
+            "approved": true,
+            "voteHash": "0x000000000000000000000000000000000000000000000000000000000000000c"
+          },
+          "settlement": {
+            "block": "57350000",
+            "tx": "0x0000000000000000000000000000000000000000000000000000000000000004",
+            "outcome": "rejected"
+          }
+        },
+        "task": {
+          "version": "arl-task/1",
+          "title": "Summarise a log file",
+          "description": "Count the lines of the input and write a JSON summary.",
+          "acceptance": [
+            {
+              "id": "exit-zero",
+              "rule": "The command exits with code 0."
+            },
+            {
+              "id": "matches-spec",
+              "rule": "The result hash equals a re-execution of the pinned spec."
+            }
+          ],
+          "deliverable": {
+            "media_type": "application/json",
+            "max_bytes": 65536
+          },
+          "payment": {
+            "token": "ARL",
+            "budget": "10000000000000000000",
+            "deadline_hours": 72
+          },
+          "evidence": ["result-manifest", "logs"],
+          "workload": {
+            "class": "reexec",
+            "spec_uri": "https://raw.githubusercontent.com/armanalabsai/arlcoin.io/main/packages/verifier/examples/busybox-summary.json",
+            "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f"
+          },
+          "verification": {
+            "policy": "arl-policy/1:reexec-standard",
+            "tier": "reexecution",
+            "committee_size": 3,
+            "threshold": 2,
+            "vote_window_seconds": 21600,
+            "challenge_window_seconds": 86400,
+            "bond_floor": "100000000000000000000"
+          }
+        },
+        "proof": {
+          "version": "arl-proof/1",
+          "task_hash": "0x601d4b1310d81b01b18230160ae718d806f1efd04eaf17a8034ed840f6e631e2",
+          "chain_id": 8453,
+          "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+          "job_id": "1",
+          "deliverable": {
+            "uri": "ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+            "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "media_type": "application/json",
+            "bytes": 512
+          },
+          "result_manifest": {
+            "version": "arl-reexec-result/1",
+            "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f",
+            "exit_code": 0,
+            "timed_out": false,
+            "outputs": [
+              {
+                "path": "summary.json",
+                "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            ]
+          },
+          "evidence": [
+            {
+              "kind": "logs",
+              "uri": "ipfs://bafybeihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku",
+              "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "media_type": "text/plain"
+            }
+          ]
+        },
+        "policy": {
+          "version": "arl-policy/1",
+          "id": "reexec-standard",
+          "workload_classes": ["reexec"],
+          "tiers": ["reexecution"],
+          "committee": {
+            "min_size": 3,
+            "max_size": 7
+          },
+          "vote_window_seconds": [3600, 86400],
+          "challenge_window_seconds": [86400, 259200],
+          "min_bond_floor": "100000000000000000000",
+          "bond_covers_budget": true,
+          "required_evidence": ["result-manifest"],
+          "model": {
+            "allowed": false,
+            "max_budget": {},
+            "models": []
+          }
+        },
+        "policy_hash": "0xb8208e1ad8b4640a0bd862b0f32a50af3f4361b12392f222725b743b2b1244fa"
+      },
+      "error": "disagree"
+    }
+  ]
+}
