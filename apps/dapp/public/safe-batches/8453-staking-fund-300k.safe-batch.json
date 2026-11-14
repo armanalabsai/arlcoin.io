@@ -1,0 +1,28 @@
+{
+  "version": "1.0",
+  "chainId": "8453",
+  "createdAt": 1794668084803,
+  "meta": {
+    "name": "ARL staking: fund the first reward period (300,000 ARL)",
+    "description": "1. Allow the ARLStakingRewards contract to take exactly 300,000 ARL from the Community & Staking Safe 2. notifyRewardAmount(300,000 ARL): starts a 180-day reward period (0.01929 ARL per second). Rehearsed on a Base Mainnet fork on 2026-11-14.",
+    "txBuilderVersion": "1.18.0",
+    "createdFromSafeAddress": "0xfF12597A671ebAF0cAe37999EE659e03c4f444B5",
+    "createdFromOwnerAddress": ""
+  },
+  "transactions": [
+    {
+      "to": "0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4",
+      "value": "0",
+      "data": "0x095ea7b300000000000000000000000015e257009be9b1875fbfa69d291320aafe3fa102000000000000000000000000000000000000000000003f870857a3e0e3800000",
+      "contractMethod": null,
+      "contractInputsValues": null
+    },
+    {
+      "to": "0x15e257009BE9B1875fbfa69D291320aaFE3fa102",
+      "value": "0",
+      "data": "0x3c6b16ab000000000000000000000000000000000000000000003f870857a3e0e3800000",
+      "contractMethod": null,
+      "contractInputsValues": null
+    }
+  ]
+}
