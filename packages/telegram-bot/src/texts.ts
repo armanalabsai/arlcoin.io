@@ -47,17 +47,26 @@ export const START =
 ` +
   `Contact: ${EMAIL}\n` +
   `Source code: ${SOURCE}\n\n` +
-  "Type /help for commands.";
+  "Ask me anything with /ask, or type /help for commands.";
 
 export const HELP =
   "Commands\n" +
+  "/ask <question> - ask the ARL assistant anything about the project\n" +
   "/start - what ARL is and where things stand\n" +
+  "/roadmap - where we are and what comes next\n" +
+  "/build - build on ARL: n8n, TypeScript, Python\n" +
+  "/contracts - every ARL contract on Base Mainnet\n" +
+  "/verified - how a verified job works\n" +
+  "/supply - circulating supply, live\n" +
+  "/bounty - the bug bounty\n" +
+  "/links - official links\n" +
   "/rules - group rules and the security notice\n" +
   "/app - open the ARL app\n" +
   "/status - staking status, read live from Base Mainnet\n" +
   "/launch - the Base Mainnet contract and where to buy\n" +
   "/whitelist - whitelist registration\n" +
   "/help - this list\n\n" +
+  "In a private chat, just type your question. In the group, reply to the bot or mention it.\n\n" +
   `App: ${APP}\n` +
   `Community: ${COMMUNITY}\n` +
   `Updates: ${X_ACCOUNT}`;
@@ -114,3 +123,20 @@ export function status(
   lines.push(`\nApp: ${APP}`);
   return lines.join("\n");
 }
+
+export function supply(circulating: number | null): string {
+  if (circulating === null)
+    return "Circulating supply is unavailable right now. Try again in a minute.";
+  return (
+    `ARL circulating supply: ${fmt(circulating)} ARL of 21,000,000 (fixed, no mint).\n` +
+    "Source: https://arlcoin.io/api/supply"
+  );
+}
+
+export const ASK_HELP =
+  "Ask me about ARL: what it is, the contracts, staking, verified jobs, building with the " +
+  "SDKs, the roadmap or staying safe. Example: /ask how does a verified job work?";
+
+export const ASK_FALLBACK =
+  "I don't have an answer for that yet. Try /roadmap, /build, /contracts, /verified or " +
+  `/links, or write to ${EMAIL}.`;

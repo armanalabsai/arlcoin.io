@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import {
   COMMANDS,
+  COMMAND_MENU,
   State,
   commandOf,
   handleUpdate,
@@ -238,12 +239,17 @@ describe("worker", () => {
     const res = await handleRequest(new Request("https://bot.example/setup"), env, telegram);
     assert.equal(res.status, 200);
     assert.equal(await res.text(), "webhook set");
-    assert.equal(calls.length, 1);
-    const [call] = calls;
-    assert.ok(call);
+    assert.equal(calls.length, 2);
+    const [call, menu] = calls;
+    assert.ok(call && menu);
     assert.ok(call.url.endsWith("/setWebhook"));
     assert.equal(call.body.url, "https://bot.example/telegram");
     assert.equal(call.body.secret_token, SECRET);
+    // Then the command menu, with every entry a real command.
+    assert.ok(menu.url.endsWith("/setMyCommands"));
+    const commands = menu.body.commands as { command: string }[];
+    assert.equal(commands.length, COMMAND_MENU.length);
+    for (const c of commands) assert.ok(c.command in COMMANDS, c.command);
     const refused: typeof fetch = () => Promise.resolve(Response.json({ ok: false }));
     assert.equal(
       (await handleRequest(new Request("https://bot.example/setup"), env, refused)).status,

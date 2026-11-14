@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "author": "Alazdg <team@arlcoin.io>",
   "private": true,
-  "description": "ARL community Telegram bot on a Cloudflare Worker: commands, live Base Mainnet staking status, scam filter, new-member link limits, flood control",
+  "description": "ARL community Telegram bot on a Cloudflare Worker: an assistant with sourced answers, commands, live Base Mainnet staking and supply, scam filter, new-member link limits, flood control",
   "type": "module",
   "scripts": {
     "test": "node --test \"test/**/*.test.ts\""

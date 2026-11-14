@@ -9,17 +9,22 @@
 //                       so the token is the only value the owner has to enter.
 //   ALLOWED_CHAT_IDS    optional, comma-separated group ids; the bot leaves any other group
 //   MUTE_MINUTES        optional, default 10
+//   NVIDIA_API_KEY      optional secret; when set, the assistant answers questions the knowledge
+//                       base does not cover with an open NVIDIA Nemotron model (src/ai.ts)
+//   NEMOTRON_MODEL      optional, the model id (default in src/ai.ts)
 //
 // Endpoints: POST /telegram (the webhook), GET /setup (points Telegram's webhook at this Worker
 // with the secret; answers only whether Telegram accepted it), GET / (health, no data).
 
-import { State, botApi, handleUpdate, type TgUpdate } from "./bot.ts";
+import { COMMAND_MENU, State, botApi, handleUpdate, type TgUpdate } from "./bot.ts";
 
 export interface Env {
   TELEGRAM_BOT_TOKEN?: string;
   WEBHOOK_SECRET?: string;
   ALLOWED_CHAT_IDS?: string;
   MUTE_MINUTES?: string;
+  NVIDIA_API_KEY?: string;
+  NEMOTRON_MODEL?: string;
 }
 
 const SECRET_RE = /^[A-Za-z0-9_-]{32,256}$/;
@@ -80,6 +85,14 @@ export async function handleRequest(
       }),
     });
     const ok = res.ok && ((await res.json()) as { ok?: boolean }).ok === true;
+    if (ok) {
+      // The command menu Telegram shows next to the message box; best effort.
+      await fetchFn(`https://api.telegram.org/bot${token}/setMyCommands`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ commands: COMMAND_MENU }),
+      }).catch(() => undefined);
+    }
     return new Response(ok ? "webhook set" : "telegram refused", { status: ok ? 200 : 502 });
   }
 
@@ -99,6 +112,10 @@ export async function handleRequest(
   state ??= new State(
     parseChatIds(env.ALLOWED_CHAT_IDS),
     Math.max(1, Math.min(1440, Number(env.MUTE_MINUTES ?? "10") || 10)),
+    {
+      apiKey: env.NVIDIA_API_KEY?.trim() || undefined,
+      model: env.NEMOTRON_MODEL?.trim() || undefined,
+    },
   );
   try {
     await handleUpdate(update, botApi(token, fetchFn), state);
