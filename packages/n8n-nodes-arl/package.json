@@ -1,0 +1,42 @@
+{
+  "name": "n8n-nodes-arl",
+  "version": "0.1.0",
+  "description": "n8n node for ARL Protocol: escrowed AI and agent jobs on Base Mainnet, paid in ARL or USDC (ERC-8183)",
+  "keywords": [
+    "n8n-community-node-package",
+    "arl",
+    "base",
+    "escrow",
+    "erc-8183",
+    "ai-agents"
+  ],
+  "license": "Apache-2.0",
+  "homepage": "https://arlcoin.io",
+  "author": "Alazdg <team@arlcoin.io>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/armanalabsai/arlcoin.io.git",
+    "directory": "packages/n8n-nodes-arl"
+  },
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/ArlWalletApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/Arl/Arl.node.js"
+    ]
+  },
+  "scripts": {
+    "build": "node build.ts",
+    "test": "node --test \"test/**/*.test.ts\"",
+    "test:fork": "node --test \"test-fork/**/*.test.ts\""
+  },
+  "devDependencies": {
+    "viem": "2.56.9"
+  }
+}

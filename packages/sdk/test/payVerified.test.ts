@@ -57,9 +57,9 @@ describe("arl-escrow offers", () => {
       });
   });
 
-  it("knows the Base Mainnet and Base Sepolia deployments, none locally", () => {
+  it("knows the Base Mainnet deployment, none on other chains", () => {
     assert.equal(verifiedDeployment(8453)?.jobs, BASE_MAINNET_VERIFIED.jobs);
-    assert.ok(verifiedDeployment(84_532));
+    assert.equal(verifiedDeployment(84_532), undefined);
     assert.equal(verifiedDeployment(31_337), undefined);
   });
 });

@@ -1,10 +1,43 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity 0.8.36;
 
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import {ARLJobs} from "../src/ARLJobs.sol";
 import {ARLTestBase} from "./ARLTestBase.sol";
+
+/// Takes 1% of every transfer, like a fee-on-transfer token.
+contract JobsFeeToken is ERC20 {
+    constructor() ERC20("Fee", "FEE") {
+        _mint(msg.sender, 1_000_000 ether);
+    }
+
+    function _update(address from, address to, uint256 value) internal override {
+        if (from == address(0) || to == address(0)) return super._update(from, to, value);
+        uint256 fee = value / 100;
+        super._update(from, address(0xdead), fee);
+        super._update(from, to, value - fee);
+    }
+}
+
+/// Refuses transfers to denied addresses, like USDC's deny list.
+contract DenyListToken is ERC20 {
+    mapping(address => bool) public denied;
+
+    constructor() ERC20("Deny", "DNY") {
+        _mint(msg.sender, 1_000_000 ether);
+    }
+
+    function deny(address account) external {
+        denied[account] = true;
+    }
+
+    function _update(address from, address to, uint256 value) internal override {
+        require(!denied[to], "denied");
+        super._update(from, to, value);
+    }
+}
 
 contract ARLJobsTest is ARLTestBase {
     ARLJobs internal jobs;
@@ -528,5 +561,73 @@ contract ARLJobsTest is ARLTestBase {
             assertEq(token.balanceOf(client), clientBefore + budget);
         }
         assertEq(token.balanceOf(address(jobs)), 0);
+    }
+
+    // ---------------------------------------------------------------- v3: received amount, refund to
+
+    function test_fundRefusesAFeeOnTransferToken() public {
+        JobsFeeToken fee = new JobsFeeToken();
+        ARLJobs feeJobs = new ARLJobs(IERC20(address(fee)));
+        fee.approve(address(feeJobs), type(uint256).max);
+        uint256 id =
+            feeJobs.createJob(provider, evaluator, block.timestamp + 1 days, "job", address(0));
+        feeJobs.setBudget(id, BUDGET, "");
+        vm.expectRevert(ARLJobs.AmountReceivedMismatch.selector);
+        feeJobs.fund(id, BUDGET, "");
+    }
+
+    function test_deniedClientTakesTheRefundToAnotherAddress() public {
+        DenyListToken deny = new DenyListToken();
+        ARLJobs denyJobs = new ARLJobs(IERC20(address(deny)));
+        deny.transfer(client, BUDGET);
+        vm.startPrank(client);
+        deny.approve(address(denyJobs), BUDGET);
+        uint256 id =
+            denyJobs.createJob(provider, evaluator, block.timestamp + 1 days, "job", address(0));
+        denyJobs.setBudget(id, BUDGET, "");
+        denyJobs.fund(id, BUDGET, "");
+        vm.stopPrank();
+        deny.deny(client);
+
+        // The evaluator cannot reject and nobody can refund to the client...
+        vm.prank(evaluator);
+        vm.expectRevert("denied");
+        denyJobs.reject(id, REASON, "");
+        vm.warp(block.timestamp + 1 days);
+        vm.expectRevert("denied");
+        denyJobs.claimRefund(id);
+
+        // ...but the client takes the escrow to another address.
+        address fresh = makeAddr("fresh");
+        vm.expectEmit(address(denyJobs));
+        emit ARLJobs.Refunded(id, fresh, BUDGET);
+        vm.prank(client);
+        denyJobs.claimRefundTo(id, fresh);
+        assertEq(deny.balanceOf(fresh), BUDGET);
+        assertEq(deny.balanceOf(address(denyJobs)), 0);
+        assertEq(uint256(denyJobs.getJob(id).status), uint256(ARLJobs.JobStatus.Expired));
+    }
+
+    function test_claimRefundToRules() public {
+        uint256 id = _submitted();
+        address fresh = makeAddr("fresh");
+        vm.prank(client);
+        vm.expectRevert(ARLJobs.WrongStatus.selector);
+        jobs.claimRefundTo(id, fresh); // before expiry
+        vm.warp(block.timestamp + 1 days);
+        vm.prank(stranger);
+        vm.expectRevert(ARLJobs.Unauthorized.selector);
+        jobs.claimRefundTo(id, fresh);
+        vm.prank(client);
+        vm.expectRevert(ARLJobs.ZeroAddress.selector);
+        jobs.claimRefundTo(id, address(0));
+        vm.prank(client);
+        jobs.claimRefundTo(id, fresh);
+        assertEq(token.balanceOf(fresh), BUDGET);
+        vm.prank(client);
+        vm.expectRevert(ARLJobs.WrongStatus.selector);
+        jobs.claimRefundTo(id, fresh); // once only
+        vm.expectRevert(ARLJobs.WrongStatus.selector);
+        jobs.claimRefund(id);
     }
 }

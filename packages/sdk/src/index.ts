@@ -1,6 +1,7 @@
 export { computePaymentAbi } from "./abi.ts";
 export {
   BASE_MAINNET_CHAIN_ID,
+  COMPUTE_PAYMENT,
   MAX_STREAM_DURATION_SECONDS,
   StreamingError,
   planStream,
@@ -15,7 +16,6 @@ export {
 } from "./streaming.ts";
 export {
   BASE_MAINNET_VERIFIED,
-  BASE_SEPOLIA_VERIFIED,
   VERDICT_PHASES,
   VerifiedJobError,
   checkEvaluationFits,
@@ -56,3 +56,19 @@ export {
   waitForAcceptance,
   type EscrowOfferInput,
 } from "./escrowProvider.ts";
+export {
+  ArlJobError,
+  ESCROWS,
+  STATUS as JOB_STATUS,
+  createJob,
+  fundJob,
+  getJob,
+  setBudget,
+  settleJob,
+  submitWork,
+  toBytes32,
+  type Clients as JobClients,
+  type CreateJobInput,
+  type Escrow,
+  type JobView,
+} from "./jobs.ts";
