@@ -200,7 +200,12 @@ export async function verifyBundle(
 ): Promise<string[]> {
   const problems = checkBundle(b);
   const fresh = await buildBundle(client, b.evaluator, BigInt(b.jobId), fromBlock, window);
-  const norm = (x: unknown) => JSON.stringify(x).toLowerCase();
+  // Hex strings (addresses, hashes) compare case-insensitively; every other string, such as the
+  // job description (the spec URI, where case matters), must match exactly.
+  const norm = (x: unknown) =>
+    JSON.stringify(x, (_k, v: unknown) =>
+      typeof v === "string" && /^0x[0-9a-fA-F]*$/.test(v) ? v.toLowerCase() : v,
+    );
   for (const k of Object.keys(fresh) as (keyof EvidenceBundle)[]) {
     if (norm(fresh[k]) !== norm(b[k])) problems.push(`${k} does not match the chain`);
   }

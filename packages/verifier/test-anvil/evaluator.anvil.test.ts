@@ -278,6 +278,14 @@ describe("validator flow on Anvil", () => {
     assert.ok(
       (await verifyBundle(publicClient, tampered, 0n)).includes("job does not match the chain"),
     );
+    // Letter case matters in the spec URI (an HTTP path), so it is not normalised away.
+    const recased = {
+      ...bundle,
+      job: { ...bundle.job, description: bundle.job.description.toUpperCase() },
+    };
+    assert.ok(
+      (await verifyBundle(publicClient, recased, 0n)).includes("job does not match the chain"),
+    );
   });
 
   it("rejects a forged deliverable", async () => {
