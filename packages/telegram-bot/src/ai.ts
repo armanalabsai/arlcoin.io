@@ -53,7 +53,9 @@ const hostOf = (s: string) =>
 export function sanitize(raw: string): string {
   const tagged = [...raw.matchAll(/<answer>([\s\S]*?)<\/answer>/g)].map((m) => m[1]?.trim() ?? "");
   let text = tagged.filter((t) => t.length > 0).pop() ?? raw;
-  text = text.replace(/<think>[\s\S]*?<\/think>/g, "").replace(/<\/?[a-z]+>/gi, "");
+  // Drop a reasoning block, then every angle bracket: the answer is plain text, so no tag
+  // (or tag fragment left by a partial match) can survive.
+  text = text.replace(/<think>[\s\S]*?<\/think>/g, "").replace(/[<>]/g, "");
   text = text.replace(ADDRESS, (a) =>
     ALLOWED_ADDRESSES.has(a.toLowerCase()) ? a : "[see /contracts]",
   );

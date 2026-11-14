@@ -135,8 +135,9 @@ describe("model answers", () => {
     assert.ok(out.includes(texts.MAINNET_TOKEN));
     assert.ok(!out.includes(fake));
     assert.ok(!out.includes("evil"));
-    assert.ok(out.includes("https://arlcoin.io/build/"));
-    assert.ok(!out.includes("<"));
+    assert.ok(out.endsWith("or https://arlcoin.io/build/"), out);
+    assert.ok(!/[<>]/.test(out));
+    assert.equal(sanitize("<answer>a <<b>scr<i>ipt> c</answer>"), "a bscriipt c");
     assert.ok(sanitize(`<answer>${"a".repeat(5000)}</answer>`).length <= MAX_ANSWER);
   });
 
