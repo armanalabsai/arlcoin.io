@@ -140,6 +140,9 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
     string public constant FEEDBACK_TAG = "arl-verified";
     /// @notice Gas forwarded to each ERC-8004 registry call.
     uint256 public constant REGISTRY_GAS = 300_000;
+    /// @notice Time the arbiter has to rule on a dispute, counted from the end of the challenge
+    /// window. After it anyone can close the dispute with `expireDispute`: the decision stands.
+    uint64 public constant ARBITER_WINDOW = 30 days;
 
     /// Committee member states in `_votes`.
     uint8 private constant MEMBER = 1;
@@ -205,6 +208,11 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
     event Finalized(uint256 indexed jobId, bool approved, bytes32 voteHash);
     event Released(uint256 indexed jobId);
     event FeedbackFailed(uint256 indexed jobId, uint256 agentId);
+    /// The escrow token refused the refund to the client (for example a USDC deny list). The
+    /// bonds are settled anyway; the client recovers the escrow with `ARLJobs.claimRefundTo`.
+    event RefundDeferred(uint256 indexed jobId);
+    /// The arbiter did not rule within `ARBITER_WINDOW`; the decision stood.
+    event DisputeExpired(uint256 indexed jobId);
 
     error ZeroAddress();
     error Unauthorized();
@@ -224,6 +232,7 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
     error ChallengeWindowOpen();
     error ChallengeWindowClosed();
     error ZeroAmount();
+    error ArbiterWindowOpen();
 
     constructor(
         ARLJobs jobs_,
@@ -430,8 +439,7 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         ARLJobs.Job memory job = jobs.getJob(jobId);
         if (job.status == ARLJobs.JobStatus.Submitted) {
             // slither-disable-next-line timestamp
-            if (block.timestamp < job.expiredAt) jobs.reject(jobId, v.voteHash, "");
-            else jobs.claimRefund(jobId);
+            _refund(jobId, v.voteHash, block.timestamp < job.expiredAt);
         }
         if (burned != 0) stakeToken.safeTransfer(SLASH_SINK, burned);
     }
@@ -490,10 +498,39 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
             // After the deadline the escrow can only go back to the client.
             v.phase = Phase.Finalized;
             emit Finalized(jobId, false, v.voteHash);
-            if (job.status == ARLJobs.JobStatus.Submitted) jobs.claimRefund(jobId);
+            if (job.status == ARLJobs.JobStatus.Submitted) _refund(jobId, v.voteHash, false);
         }
         if (burned != 0) stakeToken.safeTransfer(SLASH_SINK, burned);
         if (overturned) stakeToken.safeTransfer(challenger, bond);
+    }
+
+    /// @notice Anyone, when the arbiter has not ruled within `ARBITER_WINDOW` after the challenge
+    /// window: closes the dispute as if the decision stood, without slashing anyone (the
+    /// challenger did not lose the dispute, the arbiter did not rule), returns the challenger's
+    /// bond and settles the escrow like `resolve` would. Bonds can never stay locked for good.
+    function expireDispute(uint256 jobId) external nonReentrant {
+        Verdict storage v = _verdicts[jobId];
+        if (v.phase != Phase.Disputed) revert WrongPhase();
+        // slither-disable-next-line timestamp
+        if (block.timestamp < uint256(v.challengeEnds) + ARBITER_WINDOW) {
+            revert ArbiterWindowOpen();
+        }
+
+        bool decidedApproved = v.topApprovals == _configs[jobId].threshold;
+        emit DisputeExpired(jobId);
+        uint256 bond = v.bond;
+        address challenger = v.challenger;
+        _unlock(jobId, 0, false);
+        ARLJobs.Job memory job = jobs.getJob(jobId);
+        // slither-disable-next-line timestamp
+        if (job.status == ARLJobs.JobStatus.Submitted && block.timestamp < job.expiredAt) {
+            _settle(jobId, v, decidedApproved);
+        } else {
+            v.phase = Phase.Finalized;
+            emit Finalized(jobId, false, v.voteHash);
+            if (job.status == ARLJobs.JobStatus.Submitted) _refund(jobId, v.voteHash, false);
+        }
+        stakeToken.safeTransfer(challenger, bond);
     }
 
     /// @notice Anyone, once the job has left `ARLJobs` without this contract settling it (expired
@@ -621,8 +658,36 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         bytes32 voteHash = v.voteHash;
         emit Finalized(jobId, approved, voteHash);
         if (approved) jobs.complete(jobId, voteHash, "");
-        else jobs.reject(jobId, voteHash, "");
+        else _refund(jobId, voteHash, true);
         _feedback(jobId, approved);
+    }
+
+    /// Refunds the client: `reject` before the job's deadline, `claimRefund` after it. A token
+    /// can refuse the transfer to the client (a USDC deny list); the bond settlement around this
+    /// call must not depend on it, so a refusal by the token is recorded and the client recovers
+    /// the escrow with `ARLJobs.claimRefundTo` after the deadline. Errors of the escrow itself
+    /// (four-byte custom errors) and empty reverts (out of gas) are not a refusal and revert.
+    function _refund(uint256 jobId, bytes32 voteHash, bool beforeDeadline) private {
+        if (beforeDeadline) {
+            try jobs.reject(jobId, voteHash, "") {}
+            catch (bytes memory reason) {
+                _deferRefund(jobId, reason);
+            }
+        } else {
+            try jobs.claimRefund(jobId) {}
+            catch (bytes memory reason) {
+                _deferRefund(jobId, reason);
+            }
+        }
+    }
+
+    function _deferRefund(uint256 jobId, bytes memory reason) private {
+        if (reason.length <= 4) {
+            assembly ("memory-safe") {
+                revert(add(reason, 32), mload(reason))
+            }
+        }
+        emit RefundDeferred(jobId);
     }
 
     /// Writes the outcome to the provider's ERC-8004 reputation: 100 for an approved job, 0 for a

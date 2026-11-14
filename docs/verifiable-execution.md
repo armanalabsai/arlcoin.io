@@ -127,7 +127,19 @@ function dispute(uint256 jobId, bytes32 evidence) external;      // escrows the 
 function finalize(uint256 jobId) external;                       // anyone, after the challenge window
 function resolve(uint256 jobId, bool approve, bytes32 reason) external; // arbiter Safe, disputed only
 function release(uint256 jobId) external;                        // anyone, after expiry or cancel
+function expireDispute(uint256 jobId) external;                  // anyone, 30 days after the challenge window
 ```
+
+Two guarantees added on 2026-11-14 (bug bounty reports of that day; deployed with the `ARLJobs` v3
+escrows, nonces 34 and 36):
+
+- **Bonds never depend on the client being payable.** When the escrow token refuses a refund to the
+  client (a USDC deny list), `closeUndecided`, `finalize` and `resolve` still settle the bonds and
+  emit `RefundDeferred`; the client recovers the escrow with `ARLJobs.claimRefundTo` after the
+  deadline. Errors of the escrow itself and empty reverts (out of gas) still revert.
+- **A dispute cannot lock bonds for good.** If the arbiter has not ruled `ARBITER_WINDOW` (30 days)
+  after the challenge window, anyone calls `expireDispute`: the decision stands, nobody is slashed,
+  the challenger gets its bond back and the escrow settles as `resolve` would.
 
 Arbiter: a Safe v1.5.0 with at least 3 signers and a majority threshold ≥ 2, created by
 [`CreateArbiterSafe.s.sol`](../contracts/script/CreateArbiterSafe.s.sol) and required by the
