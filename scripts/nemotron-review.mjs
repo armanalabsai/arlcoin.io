@@ -37,7 +37,11 @@ export function truncateDiff(diff, max = MAX_DIFF_CHARS) {
 
 /** Remove a model's reasoning block, if it returns one. */
 export function stripThinking(text) {
-  return text.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
+  // Some models stream the reasoning without the opening tag; keep only what
+  // follows the last closing tag.
+  const end = text.lastIndexOf("</think>");
+  const answer = end >= 0 ? text.slice(end + "</think>".length) : text;
+  return answer.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
 }
 
 /** Chat Nemotron models from a model list, the "super" size first. */
@@ -55,7 +59,7 @@ function chat(apiKey, model, diff) {
     body: JSON.stringify({
       model,
       temperature: 0.2,
-      max_tokens: 1500,
+      max_tokens: 4000,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: `Review this diff:\n\n\`\`\`diff\n${diff}\n\`\`\`` },
