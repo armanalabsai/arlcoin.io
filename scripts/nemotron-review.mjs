@@ -17,6 +17,8 @@ const ENDPOINT = "https://integrate.api.nvidia.com/v1";
 const DEFAULT_MODEL = "nvidia/nemotron-3-super-120b-a12b";
 const MAX_DIFF_CHARS = 60_000;
 const MAX_MODEL_TRIES = 5;
+// The model sometimes repeats our heading; it is printed once below.
+const HEADING = /^#+\s*Nemotron review[^\n]*\n+/i;
 
 const SYSTEM_PROMPT = `You review pull requests for ARL Protocol: Solidity contracts on Base
 Mainnet (escrow, evaluator, staking), TypeScript packages and a Next.js app.
@@ -124,7 +126,7 @@ async function main() {
     throw new Error(`NVIDIA API ${res.status}: ${(await res.text()).slice(0, 300)}`);
   }
   const body = await res.json();
-  const review = stripThinking(body.choices?.[0]?.message?.content ?? "");
+  const review = stripThinking(body.choices?.[0]?.message?.content ?? "").replace(HEADING, "");
 
   process.stdout.write(
     [
