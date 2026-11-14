@@ -1,67 +1,70 @@
-# Baseline, 31 October 2026
+# Baseline, 14 November 2026
 
-A read-only snapshot of what ARL Protocol has, what is proven, and where it runs. Status words:
+A read-only snapshot of what ARL Protocol has, what is proven, and where it runs (Phase 0 of the
+[master architecture and roadmap](architecture/MASTER-ARCHITECTURE-ROADMAP.md)). Status words:
 **LIVE** (deployed and checked on chain or online), **BUILDING** (code and tests exist, not deployed
-for production), **PLANNED** (designed, no deployed code), **UNVERIFIED** (claimed, not checked for
-this baseline).
+or not operated in production), **PLANNED** (designed, no deployed code), **UNVERIFIED** (claimed,
+not checked for this baseline). The previous baseline (31 October 2026) is in the git history.
+
+On-chain reads: Base Mainnet (8453), block 57,249,534 (2026-11-14 07:11 UTC), public RPC
+`base-rpc.publicnode.com`. Nothing was written to any contract.
 
 ## Capabilities
 
-| Capability                                                      | Status     | Evidence                                                                                                      |
-| --------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------- |
-| ARL token, 21,000,000 fixed supply, no owner                    | LIVE       | Base Mainnet `0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4`; runtime code matches tag `v1.0.0-release-00d9056`  |
-| Vesting wallets, timelock, allocation Safes                     | LIVE       | [mainnet-plan.md](mainnet-plan.md)                                                                            |
-| Liquidity: four Uniswap v3 pools (USDC, USDT, WETH, cbBTC)      | LIVE       | Pool addresses in [mainnet-plan.md](mainnet-plan.md)                                                          |
-| Jobs escrow (ERC-8183), paid in ARL and in USDC                 | LIVE       | Base Mainnet `0x4664…98f9` (ARL) and `0xc833…5bE6` (USDC); `jobs-record-cli.ts` 9/9 checks each on 2026-10-31 |
-| Verified evaluator (staked ARL validators, 2-of-3 arbiter Safe) | LIVE       | Base Mainnet v4 `0x5cA6…7DfF` (ARL) and `0x8C01…0CFC` (USDC), nonces 29 and 30, 9/9 checks each on 2026-11-12 |
-| Website and the app under `/app`                                | LIVE       | `https://arlcoin.io` on Cloudflare Pages; `/`, `/faq/`, `/app/` answer 200                                    |
-| Supply API                                                      | LIVE       | `https://arlcoin.io/api/supply` (circulating); `?q=total` returns 21000000                                    |
-| App on Base Sepolia: faucet, staking, jobs, payments, polls     | LIVE       | Base Sepolia contracts in the README; app at arlcoin.io/app                                                   |
-| Testnet operator API (faucet, joins, relay, x402 settlement)    | BUILDING   | Moving from Vercel to a Cloudflare Pages Function (PR #110); `app.arlcoin.io` answers 402 until it lands      |
-| x402 `upto` payments with usage receipts                        | BUILDING   | `packages/payments`, spec v0.1.0 with test vectors; settles on Base Sepolia only                              |
-| SDK: `payVerified`, `acquireArl`, escrow provider helpers       | BUILDING   | `packages/sdk`, unit and Anvil tests; mainnet addresses point to the live ARL pair                            |
-| Validators re-executing jobs (`arl-reexec/1`)                   | BUILDING   | `packages/verifier`; three Base Sepolia validators on GitHub runners                                          |
-| Staking rewards on Base Mainnet                                 | BUILDING   | Deployed `0x15e2…a102` (nonce 32), 10/10 checks; first 300,000 ARL period not funded yet                      |
-| Compute payment on Base Mainnet                                 | LIVE       | `0x1bFE…E464` (nonce 31), paid in ARL, no owner; 10/10 checks on 2026-11-12                                   |
-| Operator API for x402 on Base Mainnet                           | PLANNED    | [mainnet-services.md](mainnet-services.md), step 3                                                            |
-| Base Sepolia staking, signal and jobs with the 2026-10-28 fixes | PLANNED    | Rehearsal passed on a fork on 2026-10-30; the testnet operator key signs                                      |
-| Auditor confirmation of the 2026-10-28 fixes                    | UNVERIFIED | Fixes merged (#105); the auditor's proofs of concept have not been run against them                           |
+| Capability                                                     | Status     | Evidence                                                                                                                                          |
+| -------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ARL token, 21,000,000 fixed supply, no owner                   | LIVE       | `0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4`; `totalSupply()` = 21,000,000; runtime size 3,775 bytes = the release build                          |
+| Vesting wallets, timelock, allocation Safes                    | LIVE       | Investors `0x8E2C…A643`, partnerships `0x36C9…a95B` (2,256 bytes each); timelock `0xF382…B1c2` runtime hash equal to the manifest                 |
+| Liquidity: Uniswap v3 pools                                    | LIVE       | GeckoTerminal lists ARL/USDT, ARL/WETH and ARL/cbBTC (1 % fee) on Base; addresses in [mainnet-plan.md](mainnet-plan.md)                           |
+| Jobs escrow (ERC-8183), paid in ARL and in USDC                | LIVE       | `0x4664…98f9` (ARL) and `0xc833…5bE6` (USDC), 5,107 bytes each; **`jobCounter()` = 0 on both**                                                    |
+| Verified evaluator v4 (staked ARL validators, arbiter Safe)    | LIVE       | `0x5cA6…7DfF` (ARL) and `0x8C01…0CFC` (USDC), 14,885 bytes each; **ARL held = 0** (no validator stake, no bonds)                                  |
+| Arbiter Safe, 2 of 3                                           | LIVE       | `0x8FF6…466f` (Safe proxy, code present)                                                                                                          |
+| Compute payment                                                | LIVE       | `0x1bFE…E464`, 4,120 bytes = the manifest size; holds no ARL (no stream open)                                                                     |
+| Staking rewards                                                | BUILDING   | `0x15e2…a102`, 4,335 bytes = the manifest size; **about 6.11 ARL staked by users**, `rewardRate` = 0, `periodFinish` = 0: no reward period funded |
+| Website, app under `/app`, developer page `/build`             | LIVE       | `https://arlcoin.io`, `/app/`, `/build/` answer 200 (Cloudflare Pages)                                                                            |
+| Supply API                                                     | LIVE       | `/api/supply` answers 7,099,999.99… (circulating); `?q=total` answers 21000000                                                                    |
+| TypeScript SDK `arl-protocol-sdk`, n8n node `n8n-nodes-arl`    | LIVE       | Published on npm (0.1.0 each)                                                                                                                     |
+| Python package `arl_protocol`                                  | LIVE       | Installable from GitHub (`pip install "git+…#subdirectory=packages/python-sdk"`); not on PyPI                                                     |
+| Telegram bot                                                   | LIVE       | Cloudflare Worker `arl-telegram-bot`; setup endpoint merged (#151)                                                                                |
+| Validators re-executing jobs (`arl-reexec/1`), evidence bundle | BUILDING   | `packages/verifier`; **no validator runs on Base Mainnet**                                                                                        |
+| x402 `upto` payments with usage receipts                       | BUILDING   | `packages/payments`; does not open 8453; no facilitator runs                                                                                      |
+| x402 `arl-escrow` scheme                                       | PLANNED    | `spec/x402-arl-escrow/v0.2.0-draft` (draft for review)                                                                                            |
+| `ARLX402JobGateway`, `IExecutionVerifier`                      | PLANNED    | Interfaces in [verifiable-execution.md](verifiable-execution.md); no source                                                                       |
+| Anonymous signals                                              | BUILDING   | Local chain only ([zk-privacy.md](zk-privacy.md))                                                                                                 |
+| Auditor confirmation of the 2026-10-28 fixes                   | UNVERIFIED | Fixes merged (#105); no confirmation from the auditor in the repository                                                                           |
+
+## Deployed code vs repository code
+
+| Contract               | Deployed runtime | Repository build (`contracts/deploy/bytecode.json`) | Finding                                                                                                                                                        |
+| ---------------------- | ---------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ARLJobs`              | 5,107 bytes (v2) | 5,722 bytes (v3, #153)                              | **Mainnet runs v2.** v3 (balance-delta check in `fund`, `claimRefundTo`) is merged but not deployed; decision D-1 of the roadmap                               |
+| `ARLToken`             | 3,775 bytes      | 3,775 bytes                                         | Same size; the raw runtime hash differs because of immutables (EIP-712 domain cache), as expected                                                              |
+| `ARLVestingWallet`     | 2,256 bytes      | 2,256 bytes                                         | Same size; raw hash differs because of immutables                                                                                                              |
+| `ARLTimelock`          | 6,599 bytes      | 6,599 bytes                                         | Runtime hash equal                                                                                                                                             |
+| `ARLStakingRewards`    | 4,335 bytes      | 4,335 bytes                                         | Same size; raw hash differs because of immutables                                                                                                              |
+| `ComputePayment`       | 4,120 bytes      | 4,120 bytes                                         | Same size; raw hash differs because of immutables                                                                                                              |
+| `ARLVerifiedEvaluator` | 14,885 bytes     | not in the manifest                                 | The record `contracts/deploy/base-mainnet-jobs.json` was verified on chain at deployment (`jobs-record-cli.ts`); the manifest does not cover this contract yet |
 
 ## Tests run for this baseline
 
-Only commands run on this machine on 2026-10-30 and 2026-10-31:
+Commands run on 2026-11-14 on the owner's Windows machine:
 
-| Command                                                                                 | Result                                          |
-| --------------------------------------------------------------------------------------- | ----------------------------------------------- |
-| `forge test` (Foundry 1.8.3, `contracts/`, after merging the audit fixes)               | 371 passed, 0 failed                            |
-| `npm run check:bytecode`                                                                | the build reproduces the manifest (7 contracts) |
-| `node --test "test/unit/**/*.test.ts"` in `apps/dapp`                                   | 96 passed, 0 failed                             |
-| `node --test "test/**/*.test.ts"` in `packages/zk`                                      | 7 passed, 0 failed                              |
-| `npm run test:anvil` in `packages/verifier`                                             | 5 passed, 0 failed                              |
-| `node packages/deploy/src/jobs-record-cli.ts` for both `-v2` plans against Base Mainnet | 9 of 9 checks, each                             |
-| `bash scripts/rehearse-sepolia-ecosystem.sh` (Base Sepolia fork)                        | passed                                          |
-
-CI on GitHub runs the full set (contracts, coverage, Slither, Aderyn, Halmos, zk, dApp, web, e2e,
-rehearsal) on every pull request; #105 was green on all required checks.
-
-## Deployment evidence by network
-
-- **Base Mainnet (8453):** token, vesting, timelock and Safes ([mainnet-plan.md](mainnet-plan.md));
-  jobs escrows and evaluators at deployer nonces 23 to 28, record in
-  `contracts/deploy/base-mainnet-jobs.json`; arbiter Safe `0x8FF6…466f` (2 of 3). The pair at
-  nonces 21 and 22 is retired; it never held a job.
-- **Base Sepolia (84532):** token, vesting, treasury, staking, jobs, evaluator and anonymous
-  signals, recorded in `contracts/deploy/base-sepolia.json` and source-verified.
-- **Web:** Cloudflare Pages project `arlcoin-io`; DNS on Cloudflare since 2026-10-30.
+| Command                              | Result                                                                                                                                                                        |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `forge test` (Foundry, `contracts/`) | 391 passed, 0 failed, 24 suites                                                                                                                                               |
+| `npm test` (all workspaces)          | All pass except 3 tests in `packages/verifier` that need symlinks and Docker paths on Windows (`EPERM: operation not permitted, symlink`); the same tests pass in CI on Linux |
+| CI on `main` (`b63a7b0`, #161)       | 19 checks: all success or skipped                                                                                                                                             |
 
 ## Risks, ranked
 
-1. **Testnet operator offline.** Until PR #110 merges and `ARL_OPERATOR_KEY` is set in Cloudflare,
-   the app's faucet, poll joins and paid demo do not work.
-2. **Base Sepolia contracts run pre-fix code.** Staking, signal and jobs on the testnet lack the
-   2026-10-28 fixes; redeploying needs the testnet operator key.
-3. **One signer for deployments.** Every mainnet deployment depends on one deployer wallet; the
+1. **The verified flow has never run on mainnet.** No jobs, no validator stake. Phase 9 (pilot)
+   needs an operator-run validator set first.
+2. **Mainnet escrow is v2, repository is v3.** Documentation of `ARLJobs` in `main` describes code
+   that is not live; decision D-1 (redeploy or keep v2 with policy limits).
+3. **Staking holds user funds without rewards.** About 6.11 ARL is staked while no reward period is
+   funded; the first 300,000 ARL period is the owner's action.
+4. **One signer for deployments.** Every mainnet deployment depends on one deployer wallet; the
    deployed contracts themselves have no owner.
-4. **Audit loop not closed.** The auditor has not yet confirmed the fixes; the request is drafted.
-5. **Distribution channels.** The Medium account is suspended pending an appeal; announcements go
-   out on X, Telegram, dev.to and Product Hunt.
+5. **Audit loop not closed.** The auditor has not confirmed the 2026-10-28 fixes.
+6. **Evaluator not in the bytecode manifest.** `npm run check:bytecode` does not cover
+   `ARLVerifiedEvaluator`.
