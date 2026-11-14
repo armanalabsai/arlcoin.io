@@ -35,15 +35,15 @@ On-chain reads: Base Mainnet (8453), block 57,249,534 (2026-11-14 07:11 UTC), pu
 
 ## Deployed code vs repository code
 
-| Contract               | Deployed runtime | Repository build (`contracts/deploy/bytecode.json`) | Finding                                                                                                                                                        |
-| ---------------------- | ---------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ARLJobs`              | 5,107 bytes (v2) | 5,722 bytes (v3, #153)                              | **Mainnet runs v2.** v3 (balance-delta check in `fund`, `claimRefundTo`) is merged but not deployed; decision D-1 of the roadmap                               |
-| `ARLToken`             | 3,775 bytes      | 3,775 bytes                                         | Same size; the raw runtime hash differs because of immutables (EIP-712 domain cache), as expected                                                              |
-| `ARLVestingWallet`     | 2,256 bytes      | 2,256 bytes                                         | Same size; raw hash differs because of immutables                                                                                                              |
-| `ARLTimelock`          | 6,599 bytes      | 6,599 bytes                                         | Runtime hash equal                                                                                                                                             |
-| `ARLStakingRewards`    | 4,335 bytes      | 4,335 bytes                                         | Same size; raw hash differs because of immutables                                                                                                              |
-| `ComputePayment`       | 4,120 bytes      | 4,120 bytes                                         | Same size; raw hash differs because of immutables                                                                                                              |
-| `ARLVerifiedEvaluator` | 14,885 bytes     | not in the manifest                                 | The record `contracts/deploy/base-mainnet-jobs.json` was verified on chain at deployment (`jobs-record-cli.ts`); the manifest does not cover this contract yet |
+| Contract               | Deployed runtime | Repository build (`contracts/deploy/bytecode.json`) | Finding                                                                                                                          |
+| ---------------------- | ---------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `ARLJobs`              | 5,107 bytes (v2) | 5,722 bytes (v3, #153)                              | **Mainnet runs v2.** v3 (balance-delta check in `fund`, `claimRefundTo`) is merged but not deployed; decision D-1 of the roadmap |
+| `ARLToken`             | 3,775 bytes      | 3,775 bytes                                         | **Matches** the release build with immutables masked (`compareRuntime`)                                                          |
+| `ARLVestingWallet`     | 2,256 bytes      | 2,256 bytes                                         | **Matches** the build with immutables masked (both)                                                                              |
+| `ARLTimelock`          | 6,599 bytes      | 6,599 bytes                                         | Runtime hash equal                                                                                                               |
+| `ARLStakingRewards`    | 4,335 bytes      | 4,335 bytes                                         | **Matches** the build with immutables masked                                                                                     |
+| `ComputePayment`       | 4,120 bytes      | 4,120 bytes                                         | **Matches** the build with immutables masked                                                                                     |
+| `ARLVerifiedEvaluator` | 14,885 bytes     | not in the manifest                                 | **Both v4 evaluators match** the build with immutables masked; added to the manifest (finding S-7)                               |
 
 ## Tests run for this baseline
 
@@ -66,5 +66,5 @@ Commands run on 2026-11-14 on the owner's Windows machine:
 4. **One signer for deployments.** Every mainnet deployment depends on one deployer wallet; the
    deployed contracts themselves have no owner.
 5. **Audit loop not closed.** The auditor has not confirmed the 2026-10-28 fixes.
-6. **Evaluator not in the bytecode manifest.** `npm run check:bytecode` does not cover
-   `ARLVerifiedEvaluator`.
+6. ~~Evaluator not in the bytecode manifest.~~ Fixed: `ARLVerifiedEvaluator` is in the manifest and
+   both mainnet v4 evaluators match the build.
