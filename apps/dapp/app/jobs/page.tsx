@@ -223,6 +223,7 @@ function PostJob({
   const [description, setDescription] = useState("");
   const [budget, setBudget] = useState("");
   const [hours, setHours] = useState("24");
+  const [fundNow, setFundNow] = useState(true);
   const [error, setError] = useState<string>();
 
   const post = async () => {
@@ -268,8 +269,33 @@ function PostJob({
       await client.waitForTransactionReceipt({ hash: priced });
       setDescription("");
       setBudget("");
+      if (!fundNow) {
+        onPosted();
+        onStatus({ kind: "done", text: `Job ${String(id)} posted. Fund it to start the work.` });
+        return;
+      }
+      onStatus({ kind: "busy", text: "Approving exactly the budget" });
+      // Approve the budget only; no standing allowance for the escrow.
+      const approved = await writeContractAsync({
+        address: TOKEN.address,
+        abi: TOKEN.abi,
+        functionName: "approve",
+        args: [JOBS.address, input.value.budget],
+      });
+      await client.waitForTransactionReceipt({ hash: approved });
+      onStatus({ kind: "busy", text: "Escrowing the budget" });
+      const funded = await writeContractAsync({
+        address: JOBS.address,
+        abi: JOBS.abi,
+        functionName: "fund",
+        args: [id, input.value.budget, "0x"],
+      });
+      await client.waitForTransactionReceipt({ hash: funded });
       onPosted();
-      onStatus({ kind: "done", text: `Job ${String(id)} posted. Fund it to start the work.` });
+      onStatus({
+        kind: "done",
+        text: `Job ${String(id)} posted and funded. The budget is in escrow until you accept the result.`,
+      });
     } catch (e) {
       onStatus({ kind: "error", text: firstLine(e, "Could not post the job") });
     }
@@ -280,6 +306,13 @@ function PostJob({
       <h2 id="post-heading" className="text-sm font-extrabold">
         Post a job
       </h2>
+      <ol className="flex flex-wrap gap-2 text-xs text-muted" aria-label="How a job works">
+        <li className="glass-chip px-2 py-1">1. Post and fund: the budget goes into escrow</li>
+        <li className="glass-chip px-2 py-1">2. The provider delivers the result</li>
+        <li className="glass-chip px-2 py-1">
+          3. You accept and the provider is paid, or you reject and get it back
+        </li>
+      </ol>
       <label className="flex flex-col gap-1 text-sm">
         <span className="text-muted">Provider</span>
         <select
@@ -348,6 +381,16 @@ function PostJob({
           data-testid="job-evaluator"
         />
       </label>
+      <label className="flex items-center gap-2 text-sm">
+        <input
+          type="checkbox"
+          className="checkbox checkbox-sm"
+          checked={fundNow}
+          onChange={(e) => setFundNow(e.target.checked)}
+          data-testid="job-fund-now"
+        />
+        <span>Fund it now, so the provider can start (you approve the budget once)</span>
+      </label>
       {error ? (
         <p className="text-sm text-error" data-testid="job-error">
           {error}
@@ -360,7 +403,7 @@ function PostJob({
         onClick={() => void post()}
         data-testid="job-post"
       >
-        Post job
+        {fundNow ? "Post and fund" : "Post job"}
       </button>
     </section>
   );
@@ -590,6 +633,9 @@ function JobCard({
         </span>
       </div>
       <p className="whitespace-pre-wrap break-words text-sm">{job.description}</p>
+      <p className="text-xs text-muted" data-testid={`job-${id}-next`}>
+        {nextStep(job, mine, t)}
+      </p>
       <Facts inset>
         <Stat label="Budget" value={<Arl value={job.budget} />} testId={`job-${id}-budget`} />
         <Stat
@@ -617,6 +663,36 @@ function JobCard({
       {rate}
     </article>
   );
+}
+
+/** One plain sentence on what happens next for this job, from the connected wallet's side. */
+function nextStep(job: Job, mine: readonly Role[], now: bigint): string {
+  const expired = now > 0n && now >= job.expiredAt; // as lib/jobs actions(): live = now < expiredAt
+  switch (job.status) {
+    case "Open":
+      if (expired)
+        return "The deadline passed before funding; nothing is held. The client can cancel.";
+      return mine.includes("client")
+        ? "Next: fund the job so the provider can start."
+        : "Next: waiting for the client to fund the job.";
+    case "Funded":
+      if (expired) return "Next: the deadline passed; anyone can return the budget to the client.";
+      return mine.includes("provider")
+        ? "Next: deliver the result before the deadline."
+        : "Next: waiting for the provider to deliver. The budget is safe in escrow.";
+    case "Submitted":
+      if (expired)
+        return "Next: the deadline passed; the evaluator can still accept, or anyone can refund the client.";
+      return mine.includes("evaluator")
+        ? "Next: check the result, then accept and pay or reject and refund."
+        : "Next: waiting for the evaluator to accept or reject the result.";
+    case "Completed":
+      return "Done: the provider was paid.";
+    case "Rejected":
+      return "Done: the budget went back to the client.";
+    case "Expired":
+      return "Done: the deadline passed and the client was refunded.";
+  }
 }
 
 /**
