@@ -320,11 +320,12 @@ test("jobs: post, fund, deliver, accept and pay; reject and refund; refund after
   await connect(page, "/jobs");
   await expect(page.getByTestId("jobs-empty")).toBeVisible();
 
-  const post = async (description: string, budget: string) => {
+  const post = async (description: string, budget: string, fundNow = true) => {
     await page.getByTestId("job-provider").selectOption(SERVICE);
     await page.getByTestId("job-description").fill(description);
     await page.getByTestId("job-budget").fill(budget);
     await page.getByTestId("job-hours").fill("24");
+    await page.getByTestId("job-fund-now").setChecked(fundNow);
     await page.getByTestId("job-post").click();
   };
 
@@ -340,15 +341,13 @@ test("jobs: post, fund, deliver, accept and pay; reject and refund; refund after
   );
   await expect(page.getByTestId("jobs-empty")).toBeVisible();
 
-  // Job 1: accepted, the provider is paid the budget.
-  await post("Summarise ten reports", "250");
-  await expect(page.getByTestId("jobs-status")).toHaveText(
-    "Job 1 posted. Fund it to start the work.",
-  );
-  await expect(page.getByTestId("job-1-status")).toHaveText("Open");
+  // Job 1: posted and funded in one click, accepted, the provider is paid the budget.
   const clientBefore = await arlBalance(CLIENT);
   const serviceBefore = await arlBalance(SERVICE);
-  await page.getByTestId("job-1-fund").click();
+  await post("Summarise ten reports", "250");
+  await expect(page.getByTestId("jobs-status")).toHaveText(
+    "Job 1 posted and funded. The budget is in escrow until you accept the result.",
+  );
   await expect(page.getByTestId("job-1-status")).toHaveText("Funded");
   expect(await arlBalance(ESCROW)).toBe(250n * 10n ** 18n);
   expect(await arlBalance(CLIENT)).toBe(clientBefore - 250n * 10n ** 18n);
@@ -367,8 +366,12 @@ test("jobs: post, fund, deliver, accept and pay; reject and refund; refund after
   await page.getByTestId("job-1-rate-0-4").click();
   await expect(page.getByTestId("job-1-rated-0")).toHaveText("You rated 4 of 5");
 
-  // Job 2: the evaluator rejects the funded job, the client gets the budget back.
-  await post("Translate a contract", "40");
+  // Job 2: posted first and funded separately; the evaluator rejects it, the client gets the
+  // budget back.
+  await post("Translate a contract", "40", false);
+  await expect(page.getByTestId("jobs-status")).toHaveText(
+    "Job 2 posted. Fund it to start the work.",
+  );
   await expect(page.getByTestId("job-2-status")).toHaveText("Open");
   await page.getByTestId("job-2-fund").click();
   await expect(page.getByTestId("job-2-status")).toHaveText("Funded");
@@ -382,8 +385,6 @@ test("jobs: post, fund, deliver, accept and pay; reject and refund; refund after
 
   // Job 3: nobody delivers before the deadline; anyone can return the budget to the client.
   await post("Label 500 images", "15");
-  await expect(page.getByTestId("job-3-status")).toHaveText("Open");
-  await page.getByTestId("job-3-fund").click();
   await expect(page.getByTestId("job-3-status")).toHaveText("Funded");
   await expect(page.getByTestId("job-3-refund")).toHaveCount(0);
   await rpc("evm_increaseTime", [25 * 3600]);
