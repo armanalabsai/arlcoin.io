@@ -6,6 +6,7 @@ import { getContractAddress } from "viem";
 
 import { parseRun, recordCommand } from "../../lib/deploySteps.ts";
 import { TGE_DATE } from "../../lib/network.ts";
+import { EVALUATOR_V4_ARTIFACTS } from "../fixtures/deploy/evaluatorV4Artifacts.ts";
 import { JOBS_V2_ARTIFACTS } from "../fixtures/deploy/jobsV2Artifacts.ts";
 import { JOBS_V3_ARTIFACTS } from "../fixtures/deploy/jobsV3Artifacts.ts";
 import { RELEASE_ARTIFACTS } from "../fixtures/deploy/releaseArtifacts.ts";
@@ -160,7 +161,8 @@ describe("Base Mainnet plans for the verified jobs", () => {
       record: "8453-jobs-usdc.json",
     },
     // Evaluator v4 (bug bounty reports of 2026-11-03): approvals per deliverable, release and
-    // rulings after the deadline. The current build accepts them.
+    // rulings after the deadline. The 2026-11-14 fixes replace its code in the current build, so
+    // these are read against the build they were made from too.
     {
       name: "8453-verified-evaluator-arl-v4",
       nonce: 29,
@@ -180,7 +182,7 @@ describe("Base Mainnet plans for the verified jobs", () => {
   ];
   for (const p of evaluators) {
     it(`creates ${p.name}: only the evaluator, at nonce ${String(p.nonce)}`, () => {
-      const artifacts = p.name.endsWith("-v3") ? JOBS_V3_ARTIFACTS : undefined;
+      const artifacts = p.name.endsWith("-v3") ? JOBS_V3_ARTIFACTS : EVALUATOR_V4_ARTIFACTS;
       if (artifacts) {
         assert.throws(
           () => afterTge(() => parseRun(plan(p.name))),

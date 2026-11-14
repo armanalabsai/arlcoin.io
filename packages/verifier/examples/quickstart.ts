@@ -155,9 +155,10 @@ try {
   ]);
   const jobs = await deploy("ARLJobs", [token]);
   const zero = "0x0000000000000000000000000000000000000000";
+  // The arbiter rules disputes and cannot be a party of a job; this walkthrough never disputes.
   const evaluator = await deploy("ARLVerifiedEvaluator", [
     jobs,
-    client.address,
+    "0x000000000000000000000000000000000000A4b1",
     3600n,
     parseUnits("1", 18),
     zero,
