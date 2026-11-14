@@ -33,6 +33,7 @@ async function rpc(url, calls) {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
+    signal: AbortSignal.timeout(RPC_TIMEOUT_MS),
   });
   const out = await res.json();
   if (!Array.isArray(out)) throw new Error("rpc: unexpected response");
@@ -50,18 +51,15 @@ export function formatArl(units) {
   return frac ? `${whole.toString()}.${frac}` : whole.toString();
 }
 
+// A public endpoint can hang instead of failing; every request to it gives up after this.
+const RPC_TIMEOUT_MS = 4000;
+
 export async function supply(config, which) {
   const urls = RPC[config.chainId];
   if (!urls) throw new Error("unsupported chain");
-  let failure;
-  for (const url of urls) {
-    try {
-      return await supplyFrom(url, config, which);
-    } catch (e) {
-      failure = e;
-    }
-  }
-  throw failure;
+  // All endpoints at once: the first complete answer wins, so one slow or hanging endpoint
+  // never delays the response.
+  return Promise.any(urls.map((url) => supplyFrom(url, config, which)));
 }
 
 async function supplyFrom(url, config, which) {
@@ -69,6 +67,7 @@ async function supplyFrom(url, config, which) {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_blockNumber", params: [] }),
+    signal: AbortSignal.timeout(RPC_TIMEOUT_MS),
   });
   const block = (await blockRes.json()).result;
   if (typeof block !== "string") throw new Error("rpc: no block");
