@@ -2,7 +2,7 @@
 
 What happens when a security problem is reported or found. ARL contracts have **no pause, no
 upgrade and no owner** (by design), so a contract bug cannot be patched in place: the response is
-to warn users, stop the parts that are run by people (Safes, the testnet operator, the website),
+to warn users, stop the parts that are run by people (Safes, validators, the arbiter Safe, the website),
 and, if needed, deploy a fixed version and move to it.
 
 ## Who acts
@@ -14,10 +14,11 @@ Safe actions need the signers of the Safe concerned (see [mainnet-plan.md](mainn
 ## Detection
 
 The [Uptime](../.github/workflows/uptime.yml) workflow checks every 10 minutes that the website,
-the app page, the testnet operator API and the Base Sepolia RPC answer, that the faucet holds at
-least 20 claims and that staking rewards run for at least 3 more days. A failed check fails the run
-and GitHub notifies the owner by email and in the mobile app. The [Monitor mainnet](../.github/workflows/monitor.yml)
-workflow does the same for the Base Mainnet deployment once it is recorded.
+the app page and `security.txt` answer, that Base Mainnet produces blocks and that a funded staking
+reward period runs for at least 3 more days. A failed check fails the run and GitHub notifies the
+owner by email and in the mobile app. The [Monitor mainnet](../.github/workflows/monitor.yml)
+workflow checks the recorded Base Mainnet deployment. Alerts on protocol events (jobs, votes,
+disputes, slashes) are planned in [security-hardening.md](protocol/security-hardening.md) (S-4).
 
 ## Steps
 
@@ -28,8 +29,9 @@ workflow does the same for the Base Mainnet deployment once it is recorded.
 3. **Contain** what people control:
    - Treasury: the guardian cancels any queued timelock operation that the issue affects.
    - Safes: signers stop signing transactions that touch the affected contract.
-   - Testnet operator: remove `ARL_OPERATOR_KEY` from the Cloudflare Pages project's variables
-     and redeploy; the contracts keep working without it ([operator-api.md](operator-api.md)).
+   - Validators: operator-run validators stop accepting new jobs; jobs they already accepted still
+     need their vote within the vote window, or their bonds are burned.
+   - Arbiter Safe: signers rule only on disputes they have checked with `checkEvidence`.
    - Website: publish a warning banner and remove links to the affected feature.
 4. **Fix**: write the fix with a failing test first, run the full CI, and deploy a new contract
    version when a contract is affected. Existing contracts cannot be changed.
