@@ -27,6 +27,39 @@ contract MockUsd is ERC20 {
     }
 }
 
+/// A dollar token with a deny list, like USDC: transfers to a denied address revert, with a
+/// reason (`loud`) or without one.
+contract MockDenyUsd is ERC20 {
+    mapping(address => bool) public denied;
+    bool public loud = true;
+
+    constructor() ERC20("Deny USD", "DUSD") {}
+
+    function decimals() public pure override returns (uint8) {
+        return 6;
+    }
+
+    function mint(address to, uint256 amount) external {
+        _mint(to, amount);
+    }
+
+    function deny(address account, bool on) external {
+        denied[account] = on;
+    }
+
+    function setLoud(bool on) external {
+        loud = on;
+    }
+
+    function _update(address from, address to, uint256 value) internal override {
+        if (denied[to]) {
+            if (loud) revert("Blacklistable: account is blacklisted");
+            revert();
+        }
+        super._update(from, to, value);
+    }
+}
+
 contract MockIdentity is IERC8004Identity {
     mapping(uint256 => address) public owners;
     uint8 public mode; // 0: normal, 1: revert, 2: short return data
@@ -1450,5 +1483,172 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         assertTrue(paid == 0 || refunded == 0);
         assertEq(token.balanceOf(address(ev)), ev.stakeOf(v1) + ev.stakeOf(v2) + ev.stakeOf(v3));
         assertEq(_lockedTotal(), 0);
+    }
+
+    // ---------------------------------------------------------------- refused refunds, arbiter liveness
+
+    MockDenyUsd internal dusd;
+    uint256 internal constant USD_BUDGET = 1_000e6;
+
+    /// A USDC-like escrow with validator bonds in ARL; returns a submitted job of `duration`.
+    function _denySetup(uint256 duration) internal returns (uint256 id) {
+        dusd = new MockDenyUsd();
+        jobs = new ARLJobs(IERC20(address(dusd)));
+        ev = new ARLVerifiedEvaluator(
+            jobs, arbiter, MIN_WINDOW, MIN_BOND, identity, rep, IERC20(address(token))
+        );
+        address[3] memory validators = [v1, v2, v3];
+        for (uint256 i; i < validators.length; ++i) {
+            vm.startPrank(validators[i]);
+            token.approve(address(ev), type(uint256).max);
+            ev.stake(STAKE);
+            vm.stopPrank();
+        }
+        vm.prank(challenger);
+        token.approve(address(ev), type(uint256).max);
+        id = _denyJob(duration);
+    }
+
+    function _denyJob(uint256 duration) internal returns (uint256 id) {
+        dusd.mint(client, USD_BUDGET);
+        vm.prank(client);
+        dusd.approve(address(jobs), USD_BUDGET);
+        id = _create(address(ev), duration);
+        vm.prank(client);
+        ev.configure(id, _reexec());
+        _approveCommittee(id);
+        _fund(id, USD_BUDGET);
+        _acceptAll(id);
+        _submit(id);
+    }
+
+    function test_closeUndecidedSettlesBondsWhenTheTokenRefusesTheClient() public {
+        uint256 id = _denySetup(7 days);
+        _vote(id, v1, true);
+        vm.warp(block.timestamp + VOTE_WINDOW);
+        dusd.deny(client, true);
+
+        vm.expectEmit(address(ev));
+        emit ARLVerifiedEvaluator.RefundDeferred(id);
+        ev.closeUndecided(id);
+        // Bonds settled: absentees slashed, nothing locked; the escrow still holds the budget.
+        assertEq(uint256(_phase(id)), uint256(ARLVerifiedEvaluator.Phase.Failed));
+        assertEq(_lockedTotal(), 0);
+        assertEq(ev.stakeOf(v2), STAKE - BOND);
+        assertEq(uint256(_status(id)), uint256(ARLJobs.JobStatus.Submitted));
+
+        // After the deadline the client recovers the escrow to another address.
+        address other = makeAddr("clientOther");
+        vm.warp(block.timestamp + 7 days);
+        vm.prank(client);
+        jobs.claimRefundTo(id, other);
+        assertEq(dusd.balanceOf(other), USD_BUDGET);
+    }
+
+    function test_finalizeRejectedSettlesBondsWhenTheTokenRefuses() public {
+        uint256 id = _denySetup(7 days);
+        _vote(id, v1, false);
+        _vote(id, v2, false);
+        dusd.deny(client, true);
+        vm.warp(block.timestamp + WINDOW);
+        vm.expectEmit(address(ev));
+        emit ARLVerifiedEvaluator.RefundDeferred(id);
+        ev.finalize(id);
+        assertEq(uint256(_phase(id)), uint256(ARLVerifiedEvaluator.Phase.Finalized));
+        assertEq(_lockedTotal(), 0);
+        assertEq(uint256(_status(id)), uint256(ARLJobs.JobStatus.Submitted));
+    }
+
+    function test_resolveAfterTheDeadlineSettlesBondsWhenTheTokenRefuses() public {
+        uint256 id = _denySetup(7 days);
+        _vote(id, v1, true);
+        _vote(id, v2, true);
+        vm.prank(challenger);
+        ev.dispute(id, EVIDENCE);
+        dusd.deny(client, true);
+        vm.warp(block.timestamp + 7 days);
+        vm.expectEmit(address(ev));
+        emit ARLVerifiedEvaluator.RefundDeferred(id);
+        vm.prank(arbiter);
+        ev.resolve(id, true, bytes32(0));
+        assertEq(uint256(_phase(id)), uint256(ARLVerifiedEvaluator.Phase.Finalized));
+        assertEq(_lockedTotal(), 0);
+    }
+
+    function test_RevertWhen_RefundFailsWithoutAReason() public {
+        // An empty revert is not a token refusal (it can be out of gas): the call reverts and
+        // nothing is settled.
+        uint256 id = _denySetup(7 days);
+        _vote(id, v1, true);
+        vm.warp(block.timestamp + VOTE_WINDOW);
+        dusd.deny(client, true);
+        dusd.setLoud(false);
+        vm.expectRevert(bytes(""));
+        ev.closeUndecided(id);
+        assertEq(uint256(_phase(id)), uint256(ARLVerifiedEvaluator.Phase.Configured));
+        assertEq(_lockedTotal(), 3 * uint256(BOND));
+    }
+
+    function test_expireDisputeAfterTheArbiterWindow() public {
+        uint256 id = _approved();
+        vm.prank(challenger);
+        ev.dispute(id, EVIDENCE);
+        uint256 challengerAfterDispute = token.balanceOf(challenger);
+        uint256 challengeEnds = ev.getVerdict(id).challengeEnds;
+        uint256 window = ev.ARBITER_WINDOW();
+
+        vm.warp(challengeEnds + window - 1);
+        vm.expectRevert(ARLVerifiedEvaluator.ArbiterWindowOpen.selector);
+        ev.expireDispute(id);
+
+        vm.warp(challengeEnds + window);
+        uint256 clientBefore = token.balanceOf(client);
+        vm.expectEmit(address(ev));
+        emit ARLVerifiedEvaluator.DisputeExpired(id);
+        vm.prank(stranger);
+        ev.expireDispute(id);
+
+        // Nobody is slashed, the challenger gets its bond back, and the job (past its deadline)
+        // can only go back to the client.
+        assertEq(_lockedTotal(), 0);
+        assertEq(ev.stakeOf(v1), STAKE);
+        assertEq(ev.stakeOf(v2), STAKE);
+        assertEq(token.balanceOf(SINK), 0);
+        assertEq(token.balanceOf(challenger), challengerAfterDispute + BOND);
+        assertEq(token.balanceOf(client), clientBefore + BUDGET);
+        assertEq(uint256(_phase(id)), uint256(ARLVerifiedEvaluator.Phase.Finalized));
+        vm.expectRevert(ARLVerifiedEvaluator.WrongPhase.selector);
+        ev.expireDispute(id);
+        vm.prank(arbiter);
+        vm.expectRevert(ARLVerifiedEvaluator.WrongPhase.selector);
+        ev.resolve(id, true, bytes32(0));
+    }
+
+    function test_expireDisputeBeforeTheDeadlineSettlesTheDecision() public {
+        // A job long enough that the arbiter window ends before its deadline: the approval stands.
+        uint256 id = _create(address(ev), 60 days);
+        vm.prank(client);
+        ev.configure(id, _reexec());
+        _approveCommittee(id);
+        _fund(id, BUDGET);
+        _acceptAll(id);
+        _submit(id);
+        _vote(id, v1, true);
+        _vote(id, v2, true);
+        vm.prank(challenger);
+        ev.dispute(id, EVIDENCE);
+        vm.warp(uint256(ev.getVerdict(id).challengeEnds) + ev.ARBITER_WINDOW());
+        uint256 providerBefore = token.balanceOf(provider);
+        ev.expireDispute(id);
+        assertEq(token.balanceOf(provider), providerBefore + BUDGET);
+        assertEq(uint256(_status(id)), uint256(ARLJobs.JobStatus.Completed));
+        assertEq(_lockedTotal(), 0);
+    }
+
+    function test_RevertWhen_ExpireDisputeNotDisputed() public {
+        uint256 id = _approved();
+        vm.warp(block.timestamp + 60 days);
+        vm.expectRevert(ARLVerifiedEvaluator.WrongPhase.selector);
+        ev.expireDispute(id);
     }
 }
