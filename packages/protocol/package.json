@@ -1,0 +1,17 @@
+{
+  "name": "@arl/protocol",
+  "version": "0.1.0",
+  "author": "Alazdg <team@arlcoin.io>",
+  "private": true,
+  "description": "ARL protocol documents: arl-task/1 parsing, hashing and mapping to the deployed contracts",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "viem": "2.56.9"
+  },
+  "scripts": {
+    "test": "node --test \"test/**/*.test.ts\""
+  }
+}

@@ -1,0 +1,688 @@
+{
+  "version": "arl-task/1",
+  "reexecSpecHash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f",
+  "valid": [
+    {
+      "name": "reexec-arl",
+      "task": {
+        "version": "arl-task/1",
+        "title": "Summarise a log file",
+        "description": "Count the lines of the input and write a JSON summary.",
+        "acceptance": [
+          {
+            "id": "exit-zero",
+            "rule": "The command exits with code 0."
+          },
+          {
+            "id": "matches-spec",
+            "rule": "The result hash equals a re-execution of the pinned spec."
+          }
+        ],
+        "deliverable": {
+          "media_type": "application/json",
+          "max_bytes": 65536
+        },
+        "payment": {
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "deadline_hours": 72
+        },
+        "evidence": ["result-manifest", "logs"],
+        "workload": {
+          "class": "reexec",
+          "spec_uri": "https://raw.githubusercontent.com/armanalabsai/arlcoin.io/main/packages/verifier/examples/busybox-summary.json",
+          "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f"
+        },
+        "verification": {
+          "policy": "arl-policy/1:reexec-standard",
+          "tier": "reexecution",
+          "committee_size": 3,
+          "threshold": 2,
+          "vote_window_seconds": 21600,
+          "challenge_window_seconds": 86400,
+          "bond_floor": "100000000000000000000"
+        }
+      },
+      "taskHash": "0x601d4b1310d81b01b18230160ae718d806f1efd04eaf17a8034ed840f6e631e2",
+      "committedSpecHash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f"
+    },
+    {
+      "name": "model-assisted-usdc",
+      "task": {
+        "version": "arl-task/1",
+        "title": "Translate a contract into Turkish",
+        "description": "Translate the attached contract; keep clause numbering.",
+        "acceptance": [
+          {
+            "id": "complete",
+            "rule": "Every clause of the source is translated."
+          },
+          {
+            "id": "numbering",
+            "rule": "Clause numbers match the source."
+          }
+        ],
+        "deliverable": {
+          "media_type": "text/markdown"
+        },
+        "payment": {
+          "token": "USDC",
+          "budget": "25000000",
+          "deadline_hours": 96
+        },
+        "evidence": ["artifact", "model-verdict"],
+        "workload": {
+          "class": "model-assisted"
+        },
+        "verification": {
+          "policy": "arl-policy/1:model-assisted-review",
+          "tier": "attested",
+          "committee_size": 3,
+          "threshold": 2,
+          "vote_window_seconds": 43200,
+          "challenge_window_seconds": 86400,
+          "bond_floor": "100000000000000000000"
+        }
+      },
+      "taskHash": "0xdd94cefb77971ba644330ec2da4e8144cb7f7f37bf0d49be4e03114760d4a99f",
+      "committedSpecHash": "0xdd94cefb77971ba644330ec2da4e8144cb7f7f37bf0d49be4e03114760d4a99f"
+    },
+    {
+      "name": "review-fallback",
+      "task": {
+        "version": "arl-task/1",
+        "title": "Review a pull request",
+        "description": "",
+        "acceptance": [
+          {
+            "id": "comments",
+            "rule": "At least one actionable comment or an explicit approval."
+          }
+        ],
+        "deliverable": {
+          "media_type": "text/plain"
+        },
+        "payment": {
+          "token": "ARL",
+          "budget": "1",
+          "deadline_hours": 49
+        },
+        "evidence": ["artifact"],
+        "workload": {
+          "class": "review"
+        },
+        "verification": {
+          "policy": "arl-policy/1:fallback-review",
+          "tier": "fallback",
+          "committee_size": 1,
+          "threshold": 1,
+          "vote_window_seconds": 600,
+          "challenge_window_seconds": 86400,
+          "bond_floor": "1"
+        }
+      },
+      "taskHash": "0x678fdd88358dc98158eaffb544b1cc4cbc275fd09681de5aabd1ee3d9717361d",
+      "committedSpecHash": "0x678fdd88358dc98158eaffb544b1cc4cbc275fd09681de5aabd1ee3d9717361d"
+    }
+  ],
+  "invalid": [
+    {
+      "name": "unknown-field",
+      "task": {
+        "version": "arl-task/1",
+        "title": "Summarise a log file",
+        "description": "Count the lines of the input and write a JSON summary.",
+        "acceptance": [
+          {
+            "id": "exit-zero",
+            "rule": "The command exits with code 0."
+          },
+          {
+            "id": "matches-spec",
+            "rule": "The result hash equals a re-execution of the pinned spec."
+          }
+        ],
+        "deliverable": {
+          "media_type": "application/json",
+          "max_bytes": 65536
+        },
+        "payment": {
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "deadline_hours": 72
+        },
+        "evidence": ["result-manifest", "logs"],
+        "workload": {
+          "class": "reexec",
+          "spec_uri": "https://raw.githubusercontent.com/armanalabsai/arlcoin.io/main/packages/verifier/examples/busybox-summary.json",
+          "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f"
+        },
+        "verification": {
+          "policy": "arl-policy/1:reexec-standard",
+          "tier": "reexecution",
+          "committee_size": 3,
+          "threshold": 2,
+          "vote_window_seconds": 21600,
+          "challenge_window_seconds": 86400,
+          "bond_floor": "100000000000000000000"
+        },
+        "extra": 1
+      },
+      "error": "unknown field extra"
+    },
+    {
+      "name": "reexec-without-spec",
+      "task": {
+        "version": "arl-task/1",
+        "title": "Summarise a log file",
+        "description": "Count the lines of the input and write a JSON summary.",
+        "acceptance": [
+          {
+            "id": "exit-zero",
+            "rule": "The command exits with code 0."
+          },
+          {
+            "id": "matches-spec",
+            "rule": "The result hash equals a re-execution of the pinned spec."
+          }
+        ],
+        "deliverable": {
+          "media_type": "application/json",
+          "max_bytes": 65536
+        },
+        "payment": {
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "deadline_hours": 72
+        },
+        "evidence": ["result-manifest", "logs"],
+        "workload": {
+          "class": "reexec"
+        },
+        "verification": {
+          "policy": "arl-policy/1:reexec-standard",
+          "tier": "reexecution",
+          "committee_size": 3,
+          "threshold": 2,
+          "vote_window_seconds": 21600,
+          "challenge_window_seconds": 86400,
+          "bond_floor": "100000000000000000000"
+        }
+      },
+      "error": "needs spec_uri and spec_hash"
+    },
+    {
+      "name": "threshold-not-majority",
+      "task": {
+        "version": "arl-task/1",
+        "title": "Summarise a log file",
+        "description": "Count the lines of the input and write a JSON summary.",
+        "acceptance": [
+          {
+            "id": "exit-zero",
+            "rule": "The command exits with code 0."
+          },
+          {
+            "id": "matches-spec",
+            "rule": "The result hash equals a re-execution of the pinned spec."
+          }
+        ],
+        "deliverable": {
+          "media_type": "application/json",
+          "max_bytes": 65536
+        },
+        "payment": {
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "deadline_hours": 72
+        },
+        "evidence": ["result-manifest", "logs"],
+        "workload": {
+          "class": "reexec",
+          "spec_uri": "https://raw.githubusercontent.com/armanalabsai/arlcoin.io/main/packages/verifier/examples/busybox-summary.json",
+          "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f"
+        },
+        "verification": {
+          "policy": "arl-policy/1:reexec-standard",
+          "tier": "reexecution",
+          "committee_size": 3,
+          "threshold": 1,
+          "vote_window_seconds": 21600,
+          "challenge_window_seconds": 86400,
+          "bond_floor": "100000000000000000000"
+        }
+      },
+      "error": "strict majority"
+    },
+    {
+      "name": "committee-too-large",
+      "task": {
+        "version": "arl-task/1",
+        "title": "Summarise a log file",
+        "description": "Count the lines of the input and write a JSON summary.",
+        "acceptance": [
+          {
+            "id": "exit-zero",
+            "rule": "The command exits with code 0."
+          },
+          {
+            "id": "matches-spec",
+            "rule": "The result hash equals a re-execution of the pinned spec."
+          }
+        ],
+        "deliverable": {
+          "media_type": "application/json",
+          "max_bytes": 65536
+        },
+        "payment": {
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "deadline_hours": 72
+        },
+        "evidence": ["result-manifest", "logs"],
+        "workload": {
+          "class": "reexec",
+          "spec_uri": "https://raw.githubusercontent.com/armanalabsai/arlcoin.io/main/packages/verifier/examples/busybox-summary.json",
+          "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f"
+        },
+        "verification": {
+          "policy": "arl-policy/1:reexec-standard",
+          "tier": "reexecution",
+          "committee_size": 8,
+          "threshold": 5,
+          "vote_window_seconds": 21600,
+          "challenge_window_seconds": 86400,
+          "bond_floor": "100000000000000000000"
+        }
+      },
+      "error": "committee_size"
+    },
+    {
+      "name": "challenge-window-too-short",
+      "task": {
+        "version": "arl-task/1",
+        "title": "Summarise a log file",
+        "description": "Count the lines of the input and write a JSON summary.",
+        "acceptance": [
+          {
+            "id": "exit-zero",
+            "rule": "The command exits with code 0."
+          },
+          {
+            "id": "matches-spec",
+            "rule": "The result hash equals a re-execution of the pinned spec."
+          }
+        ],
+        "deliverable": {
+          "media_type": "application/json",
+          "max_bytes": 65536
+        },
+        "payment": {
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "deadline_hours": 72
+        },
+        "evidence": ["result-manifest", "logs"],
+        "workload": {
+          "class": "reexec",
+          "spec_uri": "https://raw.githubusercontent.com/armanalabsai/arlcoin.io/main/packages/verifier/examples/busybox-summary.json",
+          "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f"
+        },
+        "verification": {
+          "policy": "arl-policy/1:reexec-standard",
+          "tier": "reexecution",
+          "committee_size": 3,
+          "threshold": 2,
+          "vote_window_seconds": 21600,
+          "challenge_window_seconds": 3600,
+          "bond_floor": "100000000000000000000"
+        }
+      },
+      "error": "challenge_window_seconds"
+    },
+    {
+      "name": "deadline-too-short",
+      "task": {
+        "version": "arl-task/1",
+        "title": "Summarise a log file",
+        "description": "Count the lines of the input and write a JSON summary.",
+        "acceptance": [
+          {
+            "id": "exit-zero",
+            "rule": "The command exits with code 0."
+          },
+          {
+            "id": "matches-spec",
+            "rule": "The result hash equals a re-execution of the pinned spec."
+          }
+        ],
+        "deliverable": {
+          "media_type": "application/json",
+          "max_bytes": 65536
+        },
+        "payment": {
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "deadline_hours": 24
+        },
+        "evidence": ["result-manifest", "logs"],
+        "workload": {
+          "class": "reexec",
+          "spec_uri": "https://raw.githubusercontent.com/armanalabsai/arlcoin.io/main/packages/verifier/examples/busybox-summary.json",
+          "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f"
+        },
+        "verification": {
+          "policy": "arl-policy/1:reexec-standard",
+          "tier": "reexecution",
+          "committee_size": 3,
+          "threshold": 2,
+          "vote_window_seconds": 21600,
+          "challenge_window_seconds": 86400,
+          "bond_floor": "100000000000000000000"
+        }
+      },
+      "error": "deadline_hours must cover"
+    },
+    {
+      "name": "budget-float",
+      "task": {
+        "version": "arl-task/1",
+        "title": "Summarise a log file",
+        "description": "Count the lines of the input and write a JSON summary.",
+        "acceptance": [
+          {
+            "id": "exit-zero",
+            "rule": "The command exits with code 0."
+          },
+          {
+            "id": "matches-spec",
+            "rule": "The result hash equals a re-execution of the pinned spec."
+          }
+        ],
+        "deliverable": {
+          "media_type": "application/json",
+          "max_bytes": 65536
+        },
+        "payment": {
+          "token": "ARL",
+          "budget": "1.5",
+          "deadline_hours": 72
+        },
+        "evidence": ["result-manifest", "logs"],
+        "workload": {
+          "class": "reexec",
+          "spec_uri": "https://raw.githubusercontent.com/armanalabsai/arlcoin.io/main/packages/verifier/examples/busybox-summary.json",
+          "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f"
+        },
+        "verification": {
+          "policy": "arl-policy/1:reexec-standard",
+          "tier": "reexecution",
+          "committee_size": 3,
+          "threshold": 2,
+          "vote_window_seconds": 21600,
+          "challenge_window_seconds": 86400,
+          "bond_floor": "100000000000000000000"
+        }
+      },
+      "error": "decimal string"
+    },
+    {
+      "name": "budget-zero",
+      "task": {
+        "version": "arl-task/1",
+        "title": "Summarise a log file",
+        "description": "Count the lines of the input and write a JSON summary.",
+        "acceptance": [
+          {
+            "id": "exit-zero",
+            "rule": "The command exits with code 0."
+          },
+          {
+            "id": "matches-spec",
+            "rule": "The result hash equals a re-execution of the pinned spec."
+          }
+        ],
+        "deliverable": {
+          "media_type": "application/json",
+          "max_bytes": 65536
+        },
+        "payment": {
+          "token": "ARL",
+          "budget": "0",
+          "deadline_hours": 72
+        },
+        "evidence": ["result-manifest", "logs"],
+        "workload": {
+          "class": "reexec",
+          "spec_uri": "https://raw.githubusercontent.com/armanalabsai/arlcoin.io/main/packages/verifier/examples/busybox-summary.json",
+          "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f"
+        },
+        "verification": {
+          "policy": "arl-policy/1:reexec-standard",
+          "tier": "reexecution",
+          "committee_size": 3,
+          "threshold": 2,
+          "vote_window_seconds": 21600,
+          "challenge_window_seconds": 86400,
+          "bond_floor": "100000000000000000000"
+        }
+      },
+      "error": "above zero"
+    },
+    {
+      "name": "reexec-attested",
+      "task": {
+        "version": "arl-task/1",
+        "title": "Summarise a log file",
+        "description": "Count the lines of the input and write a JSON summary.",
+        "acceptance": [
+          {
+            "id": "exit-zero",
+            "rule": "The command exits with code 0."
+          },
+          {
+            "id": "matches-spec",
+            "rule": "The result hash equals a re-execution of the pinned spec."
+          }
+        ],
+        "deliverable": {
+          "media_type": "application/json",
+          "max_bytes": 65536
+        },
+        "payment": {
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "deadline_hours": 72
+        },
+        "evidence": ["result-manifest", "logs"],
+        "workload": {
+          "class": "reexec",
+          "spec_uri": "https://raw.githubusercontent.com/armanalabsai/arlcoin.io/main/packages/verifier/examples/busybox-summary.json",
+          "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f"
+        },
+        "verification": {
+          "policy": "arl-policy/1:reexec-standard",
+          "tier": "attested",
+          "committee_size": 3,
+          "threshold": 2,
+          "vote_window_seconds": 21600,
+          "challenge_window_seconds": 86400,
+          "bond_floor": "100000000000000000000"
+        }
+      },
+      "error": "reexecution or fallback"
+    },
+    {
+      "name": "reexec-without-manifest",
+      "task": {
+        "version": "arl-task/1",
+        "title": "Summarise a log file",
+        "description": "Count the lines of the input and write a JSON summary.",
+        "acceptance": [
+          {
+            "id": "exit-zero",
+            "rule": "The command exits with code 0."
+          },
+          {
+            "id": "matches-spec",
+            "rule": "The result hash equals a re-execution of the pinned spec."
+          }
+        ],
+        "deliverable": {
+          "media_type": "application/json",
+          "max_bytes": 65536
+        },
+        "payment": {
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "deadline_hours": 72
+        },
+        "evidence": ["logs"],
+        "workload": {
+          "class": "reexec",
+          "spec_uri": "https://raw.githubusercontent.com/armanalabsai/arlcoin.io/main/packages/verifier/examples/busybox-summary.json",
+          "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f"
+        },
+        "verification": {
+          "policy": "arl-policy/1:reexec-standard",
+          "tier": "reexecution",
+          "committee_size": 3,
+          "threshold": 2,
+          "vote_window_seconds": 21600,
+          "challenge_window_seconds": 86400,
+          "bond_floor": "100000000000000000000"
+        }
+      },
+      "error": "result-manifest"
+    },
+    {
+      "name": "duplicate-rule-id",
+      "task": {
+        "version": "arl-task/1",
+        "title": "Summarise a log file",
+        "description": "Count the lines of the input and write a JSON summary.",
+        "acceptance": [
+          {
+            "id": "a",
+            "rule": "x"
+          },
+          {
+            "id": "a",
+            "rule": "y"
+          }
+        ],
+        "deliverable": {
+          "media_type": "application/json",
+          "max_bytes": 65536
+        },
+        "payment": {
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "deadline_hours": 72
+        },
+        "evidence": ["result-manifest", "logs"],
+        "workload": {
+          "class": "reexec",
+          "spec_uri": "https://raw.githubusercontent.com/armanalabsai/arlcoin.io/main/packages/verifier/examples/busybox-summary.json",
+          "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f"
+        },
+        "verification": {
+          "policy": "arl-policy/1:reexec-standard",
+          "tier": "reexecution",
+          "committee_size": 3,
+          "threshold": 2,
+          "vote_window_seconds": 21600,
+          "challenge_window_seconds": 86400,
+          "bond_floor": "100000000000000000000"
+        }
+      },
+      "error": "repeats"
+    },
+    {
+      "name": "bad-policy",
+      "task": {
+        "version": "arl-task/1",
+        "title": "Summarise a log file",
+        "description": "Count the lines of the input and write a JSON summary.",
+        "acceptance": [
+          {
+            "id": "exit-zero",
+            "rule": "The command exits with code 0."
+          },
+          {
+            "id": "matches-spec",
+            "rule": "The result hash equals a re-execution of the pinned spec."
+          }
+        ],
+        "deliverable": {
+          "media_type": "application/json",
+          "max_bytes": 65536
+        },
+        "payment": {
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "deadline_hours": 72
+        },
+        "evidence": ["result-manifest", "logs"],
+        "workload": {
+          "class": "reexec",
+          "spec_uri": "https://raw.githubusercontent.com/armanalabsai/arlcoin.io/main/packages/verifier/examples/busybox-summary.json",
+          "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f"
+        },
+        "verification": {
+          "policy": "anything",
+          "tier": "reexecution",
+          "committee_size": 3,
+          "threshold": 2,
+          "vote_window_seconds": 21600,
+          "challenge_window_seconds": 86400,
+          "bond_floor": "100000000000000000000"
+        }
+      },
+      "error": "arl-policy/1"
+    },
+    {
+      "name": "http-spec-uri",
+      "task": {
+        "version": "arl-task/1",
+        "title": "Summarise a log file",
+        "description": "Count the lines of the input and write a JSON summary.",
+        "acceptance": [
+          {
+            "id": "exit-zero",
+            "rule": "The command exits with code 0."
+          },
+          {
+            "id": "matches-spec",
+            "rule": "The result hash equals a re-execution of the pinned spec."
+          }
+        ],
+        "deliverable": {
+          "media_type": "application/json",
+          "max_bytes": 65536
+        },
+        "payment": {
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "deadline_hours": 72
+        },
+        "evidence": ["result-manifest", "logs"],
+        "workload": {
+          "class": "reexec",
+          "spec_uri": "http://example.com/s.json",
+          "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f"
+        },
+        "verification": {
+          "policy": "arl-policy/1:reexec-standard",
+          "tier": "reexecution",
+          "committee_size": 3,
+          "threshold": 2,
+          "vote_window_seconds": 21600,
+          "challenge_window_seconds": 86400,
+          "bond_floor": "100000000000000000000"
+        }
+      },
+      "error": "https or ipfs"
+    }
+  ]
+}
