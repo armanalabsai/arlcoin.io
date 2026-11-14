@@ -85,6 +85,7 @@ Every tool and action is pinned by version, commit or SHA-256.
 | `secrets`                | Any secret in the full git history ([gitleaks](.gitleaks.toml))                                                  |
 | `sbom`                   | CycloneDX SBOMs of the npm dependency trees, kept as an artifact                                                 |
 | CodeQL                   | Security findings in TypeScript/JavaScript ([codeql.yml](.github/workflows/codeql.yml))                          |
+| Nemotron review          | Advisory only, never blocks: an open NVIDIA Nemotron model comments on each pull request ([nemotron-review.yml](.github/workflows/nemotron-review.yml)) |
 
 Outside pull requests: [Uptime](.github/workflows/uptime.yml) every 10 minutes and
 [Monitor mainnet](.github/workflows/monitor.yml) every 6 hours once the deployment is recorded.

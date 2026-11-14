@@ -1,0 +1,68 @@
+name: Nemotron review
+
+# Advisory review of each pull request by an open NVIDIA Nemotron model.
+# It posts (and then updates) one comment; it never blocks a merge.
+# Pull requests from forks get no secrets, so they are skipped.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: nemotron-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    if: github.event.pull_request.head.repo.full_name == github.repository && !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Diff against the base branch
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          git diff "$BASE_SHA...$HEAD_SHA" -- . \
+            ':(exclude)package-lock.json' ':(exclude)**/*.lock' \
+            ':(exclude)contracts/deploy/bytecode.json' ':(exclude)apps/dapp/public/plans/**' \
+            > "$RUNNER_TEMP/pr.diff"
+          wc -c "$RUNNER_TEMP/pr.diff"
+
+      - name: Review
+        env:
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          NEMOTRON_MODEL: ${{ vars.NEMOTRON_MODEL }}
+        run: |
+          if [ -z "$NVIDIA_API_KEY" ]; then
+            echo "::notice::No NVIDIA_API_KEY secret; skipping the review."
+            exit 0
+          fi
+          # Advisory: an API problem is a warning, never a failed check.
+          if node scripts/nemotron-review.mjs "$RUNNER_TEMP/pr.diff" > "$RUNNER_TEMP/review.md" 2> "$RUNNER_TEMP/review.err"; then
+            cat "$RUNNER_TEMP/review.md"
+          else
+            echo "::warning::Nemotron review unavailable: $(head -c 300 "$RUNNER_TEMP/review.err")"
+            rm -f "$RUNNER_TEMP/review.md"
+          fi
+
+      - name: Comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          [ -s "$RUNNER_TEMP/review.md" ] || exit 0
+          gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/review.md" --edit-last --create-if-none
