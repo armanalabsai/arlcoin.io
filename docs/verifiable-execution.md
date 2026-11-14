@@ -130,7 +130,7 @@ function release(uint256 jobId) external;                        // anyone, afte
 function expireDispute(uint256 jobId) external;                  // anyone, 30 days after the challenge window
 ```
 
-Two guarantees added on 2026-11-14 (bug bounty reports of that day; deployed with the `ARLJobs` v3
+Three guarantees added on 2026-11-14 (bug bounty reports of that day; deployed with the `ARLJobs` v3
 escrows, nonces 34 and 36):
 
 - **Bonds never depend on the client being payable.** When the escrow token refuses a refund to the
@@ -140,6 +140,9 @@ escrows, nonces 34 and 36):
 - **A dispute cannot lock bonds for good.** If the arbiter has not ruled `ARBITER_WINDOW` (30 days)
   after the challenge window, anyone calls `expireDispute`: the decision stands, nobody is slashed,
   the challenger gets its bond back and the escrow settles as `resolve` would.
+- **No conflicts of interest.** The arbiter can be neither the client nor the provider of a job,
+  nor a committee member, and the provider cannot be named on the committee (`configure` refuses
+  it, so a job can no longer be configured in a way it can never be evaluated).
 
 Arbiter: a Safe v1.5.0 with at least 3 signers and a majority threshold ≥ 2, created by
 [`CreateArbiterSafe.s.sol`](../contracts/script/CreateArbiterSafe.s.sol) and required by the

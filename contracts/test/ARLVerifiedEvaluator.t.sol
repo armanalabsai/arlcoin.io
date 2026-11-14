@@ -550,12 +550,63 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
     }
 
     function test_RevertWhen_ProviderOnItsOwnCommittee() public {
+        // Named at configure: refused there, so the job never becomes unevaluable.
         address[] memory c = _committee3();
         c[2] = provider;
-        uint256 id = _configured(_cfg(ARLVerifiedEvaluator.Tier.Reexecution, c, 2));
-        vm.prank(provider);
+        uint256 id = _create(address(ev), 7 days);
+        vm.prank(client);
+        vm.expectRevert(ARLVerifiedEvaluator.BadCommittee.selector);
+        ev.configure(id, _cfg(ARLVerifiedEvaluator.Tier.Reexecution, c, 2));
+
+        // A provider set after configure that is a member cannot approve the committee.
+        vm.prank(client);
+        uint256 open =
+            jobs.createJob(address(0), address(ev), block.timestamp + 7 days, "job", address(0));
+        vm.prank(client);
+        ev.configure(open, _reexec());
+        vm.prank(client);
+        jobs.setProvider(open, v3, "");
+        vm.prank(v3);
         vm.expectRevert(ARLVerifiedEvaluator.ConflictOfInterest.selector);
-        ev.approveCommittee(id);
+        ev.approveCommittee(open);
+    }
+
+    function test_RevertWhen_ArbiterIsAPartyOrOnTheCommittee() public {
+        // The arbiter as provider could rule a dispute in its own favour.
+        vm.prank(client);
+        uint256 id =
+            jobs.createJob(arbiter, address(ev), block.timestamp + 7 days, "job", address(0));
+        vm.prank(client);
+        vm.expectRevert(ARLVerifiedEvaluator.ConflictOfInterest.selector);
+        ev.configure(id, _reexec());
+
+        // The arbiter as client.
+        vm.prank(arbiter);
+        uint256 id2 =
+            jobs.createJob(provider, address(ev), block.timestamp + 7 days, "job", address(0));
+        vm.prank(arbiter);
+        vm.expectRevert(ARLVerifiedEvaluator.ConflictOfInterest.selector);
+        ev.configure(id2, _reexec());
+
+        // The arbiter on the committee.
+        address[] memory c = _committee3();
+        c[1] = arbiter;
+        uint256 id3 = _create(address(ev), 7 days);
+        vm.prank(client);
+        vm.expectRevert(ARLVerifiedEvaluator.BadCommittee.selector);
+        ev.configure(id3, _cfg(ARLVerifiedEvaluator.Tier.Reexecution, c, 2));
+
+        // The arbiter set as provider after configure cannot approve.
+        vm.prank(client);
+        uint256 id4 =
+            jobs.createJob(address(0), address(ev), block.timestamp + 7 days, "job", address(0));
+        vm.prank(client);
+        ev.configure(id4, _reexec());
+        vm.prank(client);
+        jobs.setProvider(id4, arbiter, "");
+        vm.prank(arbiter);
+        vm.expectRevert(ARLVerifiedEvaluator.ConflictOfInterest.selector);
+        ev.approveCommittee(id4);
     }
 
     // ---------------------------------------------------------------- accept

@@ -294,12 +294,19 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
             revert WrongJobStatus();
         }
         if (_verdicts[jobId].phase != Phase.None) revert WrongPhase();
+        // The arbiter rules on disputes, so it can neither be paid by the job nor pay it.
+        if (job.provider == arbiter || job.client == arbiter) revert ConflictOfInterest();
         _checkWindows(cfg.voteWindow, cfg.challengeWindow, job.expiredAt);
         if (cfg.bond < minBond) revert BondTooLow();
         _checkThreshold(cfg.tier, cfg.threshold, cfg.committee.length);
         for (uint256 i; i < cfg.committee.length; ++i) {
             address v = cfg.committee[i];
-            if (v == address(0) || v == job.client || _votes[jobId][v] != 0) revert BadCommittee();
+            // Neither party nor the arbiter can sit on the committee; a provider named here could
+            // never approve it (approveCommittee), which would leave the job unevaluable.
+            if (
+                v == address(0) || v == job.client || v == job.provider || v == arbiter
+                    || _votes[jobId][v] != 0
+            ) revert BadCommittee();
             _votes[jobId][v] = MEMBER;
         }
 
@@ -320,12 +327,13 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
 
     /// @notice Job provider only, while configured: approves the committee and the terms. No
     /// member can accept before this, so the client cannot fill the committee alone. A provider
-    /// cannot sit on the committee of its own job.
+    /// cannot sit on the committee of its own job, and the arbiter cannot be the provider.
     function approveCommittee(uint256 jobId) external {
         Verdict storage v = _verdicts[jobId];
         if (v.phase != Phase.Configured || v.providerApproved) revert WrongPhase();
         if (msg.sender != jobs.getJob(jobId).provider) revert Unauthorized();
-        if (_votes[jobId][msg.sender] != 0) revert ConflictOfInterest();
+        // A provider set after configure may still be a member or the arbiter.
+        if (_votes[jobId][msg.sender] != 0 || msg.sender == arbiter) revert ConflictOfInterest();
         v.providerApproved = true;
         emit CommitteeApproved(jobId, msg.sender);
     }
