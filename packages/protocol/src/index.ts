@@ -25,3 +25,13 @@ export type {
   Workload,
   WorkloadClass,
 } from "./task.ts";
+export {
+  PROOF_VERSION,
+  ProofError,
+  REEXEC_RESULT_VERSION,
+  checkProofAgainstTask,
+  parseProof,
+  proofHash,
+  submittedDeliverable,
+} from "./proof.ts";
+export type { ContentRef, EvidenceItem, ModelRef, Proof, ReexecResult } from "./proof.ts";

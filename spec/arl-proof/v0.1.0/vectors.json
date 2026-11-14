@@ -1,0 +1,488 @@
+{
+  "version": "arl-proof/1",
+  "valid": [
+    {
+      "name": "reexec",
+      "task": "reexec-arl",
+      "proof": {
+        "version": "arl-proof/1",
+        "task_hash": "0x601d4b1310d81b01b18230160ae718d806f1efd04eaf17a8034ed840f6e631e2",
+        "chain_id": 8453,
+        "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+        "job_id": "1",
+        "deliverable": {
+          "uri": "ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "media_type": "application/json",
+          "bytes": 512
+        },
+        "result_manifest": {
+          "version": "arl-reexec-result/1",
+          "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f",
+          "exit_code": 0,
+          "timed_out": false,
+          "outputs": [
+            {
+              "path": "summary.json",
+              "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            }
+          ]
+        },
+        "evidence": [
+          {
+            "kind": "logs",
+            "uri": "ipfs://bafybeihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku",
+            "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "media_type": "text/plain"
+          }
+        ]
+      },
+      "proofHash": "0x4e84d98f8450366a8619323b4cbf710a2c123051dc96af523abcef1e0503161d",
+      "submittedDeliverable": "0xbf31f464010ea1b6905d32a060ba43b78874cff1b345d6d4ad8940d56caab330"
+    },
+    {
+      "name": "model-assisted",
+      "task": "model-assisted-usdc",
+      "proof": {
+        "version": "arl-proof/1",
+        "task_hash": "0xdd94cefb77971ba644330ec2da4e8144cb7f7f37bf0d49be4e03114760d4a99f",
+        "chain_id": 8453,
+        "jobs": "0xc833140D2eE8607fd41662cffFAc557f3D535bE6",
+        "job_id": "7",
+        "deliverable": {
+          "uri": "https://example.com/translation.md",
+          "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "media_type": "text/markdown",
+          "bytes": 20480
+        },
+        "evidence": [
+          {
+            "kind": "artifact",
+            "uri": "https://example.com/source.pdf",
+            "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+            "media_type": "application/pdf"
+          },
+          {
+            "kind": "model-verdict",
+            "uri": "https://example.com/verdict.json",
+            "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "media_type": "application/json",
+            "model": {
+              "name": "nvidia/nemotron (pinned checkpoint)",
+              "weights_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+              "runtime": "vllm"
+            }
+          }
+        ]
+      },
+      "proofHash": "0xf6c4c061a6a077bdbcd4456e283cd8c6f6516d2e64b62e6523ded73ece1d167b",
+      "submittedDeliverable": "0xf6c4c061a6a077bdbcd4456e283cd8c6f6516d2e64b62e6523ded73ece1d167b"
+    }
+  ],
+  "invalid": [
+    {
+      "name": "unknown-field",
+      "proof": {
+        "version": "arl-proof/1",
+        "task_hash": "0xdd94cefb77971ba644330ec2da4e8144cb7f7f37bf0d49be4e03114760d4a99f",
+        "chain_id": 8453,
+        "jobs": "0xc833140D2eE8607fd41662cffFAc557f3D535bE6",
+        "job_id": "7",
+        "deliverable": {
+          "uri": "https://example.com/translation.md",
+          "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "media_type": "text/markdown",
+          "bytes": 20480
+        },
+        "evidence": [
+          {
+            "kind": "artifact",
+            "uri": "https://example.com/source.pdf",
+            "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+            "media_type": "application/pdf"
+          },
+          {
+            "kind": "model-verdict",
+            "uri": "https://example.com/verdict.json",
+            "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "media_type": "application/json",
+            "model": {
+              "name": "nvidia/nemotron (pinned checkpoint)",
+              "weights_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+              "runtime": "vllm"
+            }
+          }
+        ],
+        "x": 1
+      },
+      "error": "unknown field x"
+    },
+    {
+      "name": "model-verdict-without-model",
+      "proof": {
+        "version": "arl-proof/1",
+        "task_hash": "0xdd94cefb77971ba644330ec2da4e8144cb7f7f37bf0d49be4e03114760d4a99f",
+        "chain_id": 8453,
+        "jobs": "0xc833140D2eE8607fd41662cffFAc557f3D535bE6",
+        "job_id": "7",
+        "deliverable": {
+          "uri": "https://example.com/translation.md",
+          "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "media_type": "text/markdown",
+          "bytes": 20480
+        },
+        "evidence": [
+          {
+            "kind": "model-verdict",
+            "uri": "https://example.com/verdict.json",
+            "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "media_type": "application/json"
+          }
+        ]
+      },
+      "error": "must name the model"
+    },
+    {
+      "name": "model-on-artifact",
+      "proof": {
+        "version": "arl-proof/1",
+        "task_hash": "0xdd94cefb77971ba644330ec2da4e8144cb7f7f37bf0d49be4e03114760d4a99f",
+        "chain_id": 8453,
+        "jobs": "0xc833140D2eE8607fd41662cffFAc557f3D535bE6",
+        "job_id": "7",
+        "deliverable": {
+          "uri": "https://example.com/translation.md",
+          "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "media_type": "text/markdown",
+          "bytes": 20480
+        },
+        "evidence": [
+          {
+            "kind": "artifact",
+            "uri": "https://example.com/source.pdf",
+            "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+            "media_type": "application/pdf",
+            "model": {
+              "name": "nvidia/nemotron (pinned checkpoint)",
+              "weights_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+              "runtime": "vllm"
+            }
+          }
+        ]
+      },
+      "error": "only model-verdict"
+    },
+    {
+      "name": "job-id-zero",
+      "proof": {
+        "version": "arl-proof/1",
+        "task_hash": "0xdd94cefb77971ba644330ec2da4e8144cb7f7f37bf0d49be4e03114760d4a99f",
+        "chain_id": 8453,
+        "jobs": "0xc833140D2eE8607fd41662cffFAc557f3D535bE6",
+        "job_id": "0",
+        "deliverable": {
+          "uri": "https://example.com/translation.md",
+          "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "media_type": "text/markdown",
+          "bytes": 20480
+        },
+        "evidence": [
+          {
+            "kind": "artifact",
+            "uri": "https://example.com/source.pdf",
+            "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+            "media_type": "application/pdf"
+          },
+          {
+            "kind": "model-verdict",
+            "uri": "https://example.com/verdict.json",
+            "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "media_type": "application/json",
+            "model": {
+              "name": "nvidia/nemotron (pinned checkpoint)",
+              "weights_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+              "runtime": "vllm"
+            }
+          }
+        ]
+      },
+      "error": "job_id"
+    },
+    {
+      "name": "http-uri",
+      "proof": {
+        "version": "arl-proof/1",
+        "task_hash": "0xdd94cefb77971ba644330ec2da4e8144cb7f7f37bf0d49be4e03114760d4a99f",
+        "chain_id": 8453,
+        "jobs": "0xc833140D2eE8607fd41662cffFAc557f3D535bE6",
+        "job_id": "7",
+        "deliverable": {
+          "uri": "http://example.com/x",
+          "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "media_type": "text/markdown",
+          "bytes": 20480
+        },
+        "evidence": [
+          {
+            "kind": "artifact",
+            "uri": "https://example.com/source.pdf",
+            "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+            "media_type": "application/pdf"
+          },
+          {
+            "kind": "model-verdict",
+            "uri": "https://example.com/verdict.json",
+            "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "media_type": "application/json",
+            "model": {
+              "name": "nvidia/nemotron (pinned checkpoint)",
+              "weights_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+              "runtime": "vllm"
+            }
+          }
+        ]
+      },
+      "error": "https or ipfs"
+    },
+    {
+      "name": "bad-sha256",
+      "proof": {
+        "version": "arl-proof/1",
+        "task_hash": "0xdd94cefb77971ba644330ec2da4e8144cb7f7f37bf0d49be4e03114760d4a99f",
+        "chain_id": 8453,
+        "jobs": "0xc833140D2eE8607fd41662cffFAc557f3D535bE6",
+        "job_id": "7",
+        "deliverable": {
+          "uri": "https://example.com/translation.md",
+          "sha256": "ABC",
+          "media_type": "text/markdown",
+          "bytes": 20480
+        },
+        "evidence": [
+          {
+            "kind": "artifact",
+            "uri": "https://example.com/source.pdf",
+            "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+            "media_type": "application/pdf"
+          },
+          {
+            "kind": "model-verdict",
+            "uri": "https://example.com/verdict.json",
+            "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "media_type": "application/json",
+            "model": {
+              "name": "nvidia/nemotron (pinned checkpoint)",
+              "weights_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+              "runtime": "vllm"
+            }
+          }
+        ]
+      },
+      "error": "64 lowercase hex"
+    }
+  ],
+  "mismatch": [
+    {
+      "name": "wrong-task-hash",
+      "task": "model-assisted-usdc",
+      "proof": {
+        "version": "arl-proof/1",
+        "task_hash": "0x1111111111111111111111111111111111111111111111111111111111111111",
+        "chain_id": 8453,
+        "jobs": "0xc833140D2eE8607fd41662cffFAc557f3D535bE6",
+        "job_id": "7",
+        "deliverable": {
+          "uri": "https://example.com/translation.md",
+          "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "media_type": "text/markdown",
+          "bytes": 20480
+        },
+        "evidence": [
+          {
+            "kind": "artifact",
+            "uri": "https://example.com/source.pdf",
+            "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+            "media_type": "application/pdf"
+          },
+          {
+            "kind": "model-verdict",
+            "uri": "https://example.com/verdict.json",
+            "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "media_type": "application/json",
+            "model": {
+              "name": "nvidia/nemotron (pinned checkpoint)",
+              "weights_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+              "runtime": "vllm"
+            }
+          }
+        ]
+      },
+      "error": "task_hash does not match"
+    },
+    {
+      "name": "missing-required-evidence",
+      "task": "model-assisted-usdc",
+      "proof": {
+        "version": "arl-proof/1",
+        "task_hash": "0xdd94cefb77971ba644330ec2da4e8144cb7f7f37bf0d49be4e03114760d4a99f",
+        "chain_id": 8453,
+        "jobs": "0xc833140D2eE8607fd41662cffFAc557f3D535bE6",
+        "job_id": "7",
+        "deliverable": {
+          "uri": "https://example.com/translation.md",
+          "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "media_type": "text/markdown",
+          "bytes": 20480
+        },
+        "evidence": [
+          {
+            "kind": "artifact",
+            "uri": "https://example.com/source.pdf",
+            "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+            "media_type": "application/pdf"
+          }
+        ]
+      },
+      "error": "required evidence missing: model-verdict"
+    },
+    {
+      "name": "wrong-media-type",
+      "task": "model-assisted-usdc",
+      "proof": {
+        "version": "arl-proof/1",
+        "task_hash": "0xdd94cefb77971ba644330ec2da4e8144cb7f7f37bf0d49be4e03114760d4a99f",
+        "chain_id": 8453,
+        "jobs": "0xc833140D2eE8607fd41662cffFAc557f3D535bE6",
+        "job_id": "7",
+        "deliverable": {
+          "uri": "https://example.com/translation.md",
+          "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "media_type": "text/plain",
+          "bytes": 20480
+        },
+        "evidence": [
+          {
+            "kind": "artifact",
+            "uri": "https://example.com/source.pdf",
+            "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+            "media_type": "application/pdf"
+          },
+          {
+            "kind": "model-verdict",
+            "uri": "https://example.com/verdict.json",
+            "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "media_type": "application/json",
+            "model": {
+              "name": "nvidia/nemotron (pinned checkpoint)",
+              "weights_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+              "runtime": "vllm"
+            }
+          }
+        ]
+      },
+      "error": "media type"
+    },
+    {
+      "name": "reexec-without-manifest",
+      "task": "reexec-arl",
+      "proof": {
+        "version": "arl-proof/1",
+        "task_hash": "0x601d4b1310d81b01b18230160ae718d806f1efd04eaf17a8034ed840f6e631e2",
+        "chain_id": 8453,
+        "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+        "job_id": "1",
+        "deliverable": {
+          "uri": "ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "media_type": "application/json",
+          "bytes": 512
+        },
+        "evidence": [
+          {
+            "kind": "logs",
+            "uri": "ipfs://bafybeihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku",
+            "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "media_type": "text/plain"
+          }
+        ]
+      },
+      "error": "result-manifest"
+    },
+    {
+      "name": "reexec-other-spec",
+      "task": "reexec-arl",
+      "proof": {
+        "version": "arl-proof/1",
+        "task_hash": "0x601d4b1310d81b01b18230160ae718d806f1efd04eaf17a8034ed840f6e631e2",
+        "chain_id": 8453,
+        "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+        "job_id": "1",
+        "deliverable": {
+          "uri": "ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "media_type": "application/json",
+          "bytes": 512
+        },
+        "result_manifest": {
+          "version": "arl-reexec-result/1",
+          "spec_hash": "0x9999999999999999999999999999999999999999999999999999999999999999",
+          "exit_code": 0,
+          "timed_out": false,
+          "outputs": [
+            {
+              "path": "summary.json",
+              "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            }
+          ]
+        },
+        "evidence": [
+          {
+            "kind": "logs",
+            "uri": "ipfs://bafybeihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku",
+            "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "media_type": "text/plain"
+          }
+        ]
+      },
+      "error": "spec_hash differs"
+    },
+    {
+      "name": "too-large",
+      "task": "reexec-arl",
+      "proof": {
+        "version": "arl-proof/1",
+        "task_hash": "0x601d4b1310d81b01b18230160ae718d806f1efd04eaf17a8034ed840f6e631e2",
+        "chain_id": 8453,
+        "jobs": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+        "job_id": "1",
+        "deliverable": {
+          "uri": "ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "media_type": "application/json",
+          "bytes": 70000
+        },
+        "result_manifest": {
+          "version": "arl-reexec-result/1",
+          "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f",
+          "exit_code": 0,
+          "timed_out": false,
+          "outputs": [
+            {
+              "path": "summary.json",
+              "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            }
+          ]
+        },
+        "evidence": [
+          {
+            "kind": "logs",
+            "uri": "ipfs://bafybeihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku",
+            "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "media_type": "text/plain"
+          }
+        ]
+      },
+      "error": "larger than"
+    }
+  ]
+}
