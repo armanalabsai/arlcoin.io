@@ -1719,6 +1719,29 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         jobs.claimRefund(id);
     }
 
+    function test_expireDisputeAfterTheJobDeadlineRefundsTheClient() public {
+        // Nobody closes the dispute in time: past the job's deadline the escrow can only go back
+        // to the client, whether expireDispute refunds it or the client already claimed it.
+        uint256 a = _approved();
+        vm.prank(challenger);
+        ev.dispute(a, EVIDENCE);
+        uint256 b = _approved();
+        vm.prank(challenger);
+        ev.dispute(b, EVIDENCE);
+        vm.warp(jobs.getJob(a).expiredAt);
+
+        uint256 clientBefore = token.balanceOf(client);
+        ev.expireDispute(a);
+        assertEq(token.balanceOf(client), clientBefore + BUDGET);
+        assertEq(uint256(_status(a)), uint256(ARLJobs.JobStatus.Expired));
+
+        jobs.claimRefund(b);
+        ev.expireDispute(b);
+        assertEq(token.balanceOf(client), clientBefore + 2 * BUDGET);
+        assertEq(uint256(_phase(b)), uint256(ARLVerifiedEvaluator.Phase.Finalized));
+        assertEq(_lockedTotal(), 0);
+    }
+
     function test_RevertWhen_ExpireDisputeNotDisputed() public {
         uint256 id = _approved();
         vm.warp(block.timestamp + 60 days);
