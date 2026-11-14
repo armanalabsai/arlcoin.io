@@ -3,12 +3,13 @@
     "security/2026-10-17/triage.md",
     "security/2026-10-18-evaluator-triage.md",
     "security/2026-10-28-audit-triage.md",
-    "security/2026-11-12-evaluator-v4-triage.md"
+    "security/2026-11-12-evaluator-v4-triage.md",
+    "security/2026-11-14-evaluator-v5-triage.md"
   ],
   "results": [
     "contract-locks-ether src/ARLVestingWallet.sol:23",
-    "costly-loop src/ARLVerifiedEvaluator.sol:291",
-    "costly-loop src/ARLVerifiedEvaluator.sol:604",
+    "costly-loop src/ARLVerifiedEvaluator.sol:302",
+    "costly-loop src/ARLVerifiedEvaluator.sol:649",
     "large-numeric-literal src/ARLAllocation.sol:13",
     "large-numeric-literal src/ARLAllocation.sol:15",
     "large-numeric-literal src/ARLAllocation.sol:16",
@@ -22,19 +23,21 @@
     "large-numeric-literal src/ARLAllocation.sol:25",
     "large-numeric-literal src/ARLAllocation.sol:26",
     "large-numeric-literal src/ARLVerifiedEvaluator.sol:142",
-    "large-numeric-literal src/ARLVerifiedEvaluator.sol:348",
+    "large-numeric-literal src/ARLVerifiedEvaluator.sol:365",
     "redundant-statement src/ARLAnonymousSignal.sol:220",
     "reentrancy-state-change src/ARLAnonymousSignal.sol:195",
-    "reentrancy-state-change src/ARLVerifiedEvaluator.sol:245",
-    "reentrancy-state-change src/ARLVerifiedEvaluator.sol:282",
-    "reentrancy-state-change src/ARLVerifiedEvaluator.sol:318",
-    "reentrancy-state-change src/ARLVerifiedEvaluator.sol:335",
-    "reentrancy-state-change src/ARLVerifiedEvaluator.sol:380",
-    "reentrancy-state-change src/ARLVerifiedEvaluator.sol:485",
-    "reentrancy-state-change src/ARLVerifiedEvaluator.sol:511",
+    "reentrancy-state-change src/ARLVerifiedEvaluator.sol:254",
+    "reentrancy-state-change src/ARLVerifiedEvaluator.sol:291",
+    "reentrancy-state-change src/ARLVerifiedEvaluator.sol:334",
+    "reentrancy-state-change src/ARLVerifiedEvaluator.sol:352",
+    "reentrancy-state-change src/ARLVerifiedEvaluator.sol:397",
+    "reentrancy-state-change src/ARLVerifiedEvaluator.sol:501",
+    "reentrancy-state-change src/ARLVerifiedEvaluator.sol:532",
+    "reentrancy-state-change src/ARLVerifiedEvaluator.sol:556",
     "require-revert-in-loop src/ARLAnonymousSignal.sol:230",
-    "require-revert-in-loop src/ARLVerifiedEvaluator.sol:291",
+    "require-revert-in-loop src/ARLVerifiedEvaluator.sol:302",
     "unchecked-return src/ARLTimelock.sol:44",
-    "unchecked-return src/ARLVerifiedEvaluator.sol:461"
+    "unchecked-return src/ARLVerifiedEvaluator.sol:477",
+    "unchecked-return src/ARLVerifiedEvaluator.sol:531"
   ]
 }
