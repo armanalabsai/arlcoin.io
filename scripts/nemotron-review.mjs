@@ -38,13 +38,16 @@ export function truncateDiff(diff, max = MAX_DIFF_CHARS) {
 
 /** Remove a model's reasoning block, if it returns one. */
 export function stripThinking(text) {
-  // Prefer the tagged final answer; reasoning models may print their
-  // reasoning before it, with or without <think> tags.
+  // Prefer the tagged final answer. Reasoning models may print their reasoning
+  // first, and that reasoning can quote the tags, so take the last tagged block
+  // with real content.
+  const blocks = [...text.matchAll(/<review>([\s\S]*?)<\/review>/g)]
+    .map((m) => m[1].trim())
+    .filter((b) => b.length >= 20);
+  if (blocks.length > 0) return blocks[blocks.length - 1];
   const open = text.lastIndexOf("<review>");
-  if (open >= 0) {
-    const close = text.indexOf("</review>", open);
-    return text.slice(open + "<review>".length, close >= 0 ? close : undefined).trim();
-  }
+  const tail = open >= 0 ? text.slice(open + "<review>".length).trim() : "";
+  if (tail.length >= 20) return tail;
   return text.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
 }
 
