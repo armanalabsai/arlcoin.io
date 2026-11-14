@@ -21,7 +21,6 @@ jobs:
     if: github.event.pull_request.head.repo.full_name == github.repository && !github.event.pull_request.draft
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    continue-on-error: true
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -45,15 +44,20 @@ jobs:
 
       - name: Review
         env:
-          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY || secrets.API_KEY }}
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
           NEMOTRON_MODEL: ${{ vars.NEMOTRON_MODEL }}
         run: |
           if [ -z "$NVIDIA_API_KEY" ]; then
-            echo "No NVIDIA API key secret; skipping."
+            echo "::notice::No NVIDIA_API_KEY secret; skipping the review."
             exit 0
           fi
-          node scripts/nemotron-review.mjs "$RUNNER_TEMP/pr.diff" > "$RUNNER_TEMP/review.md"
-          cat "$RUNNER_TEMP/review.md"
+          # Advisory: an API problem is a warning, never a failed check.
+          if node scripts/nemotron-review.mjs "$RUNNER_TEMP/pr.diff" > "$RUNNER_TEMP/review.md" 2> "$RUNNER_TEMP/review.err"; then
+            cat "$RUNNER_TEMP/review.md"
+          else
+            echo "::warning::Nemotron review unavailable: $(head -c 300 "$RUNNER_TEMP/review.err")"
+            rm -f "$RUNNER_TEMP/review.md"
+          fi
 
       - name: Comment
         env:
