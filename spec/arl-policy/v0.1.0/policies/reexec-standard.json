@@ -1,0 +1,20 @@
+{
+  "version": "arl-policy/1",
+  "id": "reexec-standard",
+  "workload_classes": ["reexec"],
+  "tiers": ["reexecution"],
+  "committee": {
+    "min_size": 3,
+    "max_size": 7
+  },
+  "vote_window_seconds": [3600, 86400],
+  "challenge_window_seconds": [86400, 259200],
+  "min_bond_floor": "100000000000000000000",
+  "bond_covers_budget": true,
+  "required_evidence": ["result-manifest"],
+  "model": {
+    "allowed": false,
+    "max_budget": {},
+    "models": []
+  }
+}
