@@ -17,7 +17,7 @@ import {
 
 import { acceptJob, castVote, checkChain, JobStatus, MemberState, readJob } from "./chain.ts";
 import type { Fetcher } from "./inputs.ts";
-import { parseSpec, type ReexecSpec } from "./spec.ts";
+import { parseSpec, specHash, type ReexecSpec } from "./spec.ts";
 import { decide, type ExecuteOptions } from "./verify.ts";
 
 /** Largest spec document accepted, in bytes. */
@@ -59,6 +59,26 @@ export async function fetchSpec(uri: string, fetcher: Pick<Fetcher, "file">): Pr
   const body = await fetcher.file(uri);
   if (body.length > MAX_SPEC_BYTES) throw new Error(`spec at ${uri} is too large`);
   return parseSpec(JSON.parse(body.toString("utf8")) as unknown);
+}
+
+/**
+ * Specs fetched and checked before accepting, by job id: the vote reuses them if the spec's host
+ * stops answering after the bond is locked.
+ */
+const checkedSpecs = new Map<string, ReexecSpec>();
+
+/** The job's spec if it can be fetched and matches the committed hash; otherwise null. */
+async function usableSpec(
+  uri: string,
+  committed: string,
+  fetcher: Pick<Fetcher, "file">,
+): Promise<ReexecSpec | null> {
+  try {
+    const spec = await fetchSpec(uri, fetcher);
+    return specHash(spec).toLowerCase() === committed.toLowerCase() ? spec : null;
+  } catch {
+    return null;
+  }
 }
 
 /** Adds the jobs configured since `state.fromBlock` whose committee names `me`. */
@@ -106,6 +126,15 @@ export async function step(deps: WatchDeps, state: WatchState): Promise<WatchSta
         job.memberState === MemberState.Member &&
         (job.status === JobStatus.Funded || job.status === JobStatus.Submitted)
       ) {
+        // Accepting locks a bond that is burned if this validator does not vote, so it accepts
+        // only a job whose spec it can fetch and that matches the committed hash. A spec that
+        // never resolves (or is the wrong one) is skipped and retried next pass, never accepted.
+        const spec = await usableSpec(job.description, job.specHash, deps.specFetcher);
+        if (!spec) {
+          log({ jobId: id, event: "spec-unusable", reason: "spec not fetchable or hash differs" });
+          continue;
+        }
+        checkedSpecs.set(id, spec);
         // A job can go from Funded to Submitted between two passes; the contract still accepts
         // it until the vote window ends. accept() also requires the provider's committee
         // approval; a revert here just means "not yet" and the job is tried again next pass.
@@ -121,7 +150,10 @@ export async function step(deps: WatchDeps, state: WatchState): Promise<WatchSta
         );
         if (tx) log({ jobId: id, event: "accepted", tx });
       } else if (job.memberState === MemberState.Accepted && job.deliverable !== null) {
-        const spec = await fetchSpec(job.description, deps.specFetcher);
+        const spec =
+          (await usableSpec(job.description, job.specHash, deps.specFetcher)) ??
+          checkedSpecs.get(id) ??
+          (await fetchSpec(job.description, deps.specFetcher));
         const decision = await decide(spec, job.specHash, job.deliverable, deps.exec);
         const tx = await castVote(
           deps.wallet,
