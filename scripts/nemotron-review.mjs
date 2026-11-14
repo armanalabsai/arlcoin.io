@@ -16,6 +16,7 @@ const { fetch, AbortSignal } = globalThis;
 const ENDPOINT = "https://integrate.api.nvidia.com/v1";
 const DEFAULT_MODEL = "nvidia/nemotron-3-super-120b-a12b";
 const MAX_DIFF_CHARS = 60_000;
+const MAX_MODEL_TRIES = 5;
 
 const SYSTEM_PROMPT = `You review pull requests for ARL Protocol: Solidity contracts on Base
 Mainnet (escrow, evaluator, staking), TypeScript packages and a Next.js app.
@@ -39,12 +40,12 @@ export function stripThinking(text) {
   return text.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
 }
 
-/** Choose a chat Nemotron model from a model list, preferring the "super" size. */
-export function pickNemotron(ids) {
+/** Chat Nemotron models from a model list, the "super" size first. */
+export function nemotronCandidates(ids) {
   const chat = ids.filter(
     (id) => /nemotron/i.test(id) && !/embed|safety|guard|parse|reward|vl|omni/i.test(id),
   );
-  return chat.find((id) => /super/i.test(id)) ?? chat[0];
+  return [...chat.filter((id) => /super/i.test(id)), ...chat.filter((id) => !/super/i.test(id))];
 }
 
 function chat(apiKey, model, diff) {
@@ -89,14 +90,19 @@ async function main() {
     return;
   }
 
+  // A model can be unknown (404), retired (410) or not enabled for this key
+  // (404). Try the configured model, then other current chat Nemotrons.
   let model = process.env.NEMOTRON_MODEL || DEFAULT_MODEL;
   let res = await chat(apiKey, model, diff);
-  // 404: unknown model; 410: model retired. Fall back to a current Nemotron.
   if (res.status === 404 || res.status === 410) {
-    const other = pickNemotron(await listModels(apiKey));
-    if (other && other !== model) {
+    const tried = new Set([model]);
+    for (const other of nemotronCandidates(await listModels(apiKey))) {
+      if (tried.size >= MAX_MODEL_TRIES) break;
+      if (tried.has(other)) continue;
+      tried.add(other);
       model = other;
       res = await chat(apiKey, model, diff);
+      if (res.status !== 404 && res.status !== 410) break;
     }
   }
   if (!res.ok) {
