@@ -240,9 +240,10 @@ describe("worker", () => {
     assert.equal(await res.text(), "webhook set");
     assert.equal(calls.length, 1);
     const [call] = calls;
-    assert.ok(call?.url.endsWith("/setWebhook"));
-    assert.equal(call?.body.url, "https://bot.example/telegram");
-    assert.equal(call?.body.secret_token, SECRET);
+    assert.ok(call);
+    assert.ok(call.url.endsWith("/setWebhook"));
+    assert.equal(call.body.url, "https://bot.example/telegram");
+    assert.equal(call.body.secret_token, SECRET);
     const refused: typeof fetch = () => Promise.resolve(Response.json({ ok: false }));
     assert.equal(
       (await handleRequest(new Request("https://bot.example/setup"), env, refused)).status,
