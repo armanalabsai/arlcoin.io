@@ -32,6 +32,24 @@ Answer in English Markdown, at most 400 words. Put the final answer, and
 nothing else, between <review> and </review>.`;
 
 /** Cut the diff to a size the model accepts, on a line boundary. */
+// Credentials that must never leave the runner, even if one is committed by
+// mistake: PEM private keys, assignments to *_KEY / *SECRET / *TOKEN /
+// *PASSWORD names, and well-known token prefixes.
+const SECRET_PATTERNS = [
+  /-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----/g,
+  /\b([A-Z0-9_]*(?:_KEY|SECRET|TOKEN|PASSWORD)[A-Z0-9_]*\s*[=:]\s*)["']?[^\s"']{8,}["']?/gi,
+  /\b(?:nvapi-|ghp_|gho_|ghs_|github_pat_|sk-|xox[abp]-)[A-Za-z0-9_-]{16,}/g,
+];
+
+/** Replace anything that looks like a credential before the diff is sent out. */
+export function redactSecrets(diff) {
+  let out = diff;
+  for (const re of SECRET_PATTERNS) {
+    out = out.replace(re, (_m, name) => `${typeof name === "string" ? name : ""}[REDACTED]`);
+  }
+  return out;
+}
+
 export function truncateDiff(diff, max = MAX_DIFF_CHARS) {
   if (diff.length <= max) return { text: diff, truncated: false };
   const cut = diff.lastIndexOf("\n", max);
@@ -99,7 +117,7 @@ async function main() {
     );
     process.exit(2);
   }
-  const { text: diff, truncated } = truncateDiff(readFileSync(file, "utf8"));
+  const { text: diff, truncated } = truncateDiff(redactSecrets(readFileSync(file, "utf8")));
   if (diff.trim() === "") {
     process.stdout.write("Nothing to review: the diff is empty.\n");
     return;
