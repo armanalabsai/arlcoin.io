@@ -39,12 +39,15 @@ async function openUp(dir: string): Promise<void> {
 async function outputEntry(outDir: string, path: string): Promise<OutputEntry> {
   const full = inside(outDir, path);
   // One handle for the check and the read, so the file cannot be swapped in between; O_NOFOLLOW
-  // refuses a symlink where the platform supports it.
+  // refuses a symlink and O_NONBLOCK keeps a named pipe (FIFO) from blocking the open, where the
+  // platform supports them. Anything that is not a regular file is then refused by the stat.
   let handle;
   try {
     handle = await open(
       full,
-      constants.O_RDONLY | ((constants.O_NOFOLLOW as number | undefined) ?? 0),
+      constants.O_RDONLY |
+        ((constants.O_NOFOLLOW as number | undefined) ?? 0) |
+        ((constants.O_NONBLOCK as number | undefined) ?? 0),
     );
   } catch {
     return { path, sha256: null };

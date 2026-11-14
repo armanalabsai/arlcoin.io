@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { mkdir, mkdtemp, readdir, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
+import process from "node:process";
 import { join } from "node:path";
 import { describe, it } from "node:test";
 
@@ -364,6 +365,25 @@ describe("execute and decide", () => {
       [null, null],
     );
   });
+
+  it(
+    "does not block on a named pipe declared as an output",
+    { skip: process.platform === "win32" && "named pipes are POSIX only" },
+    async () => {
+      // A FIFO with no writer would block a plain open() for reading forever.
+      const piping = fakeRunner((_w, out) => {
+        execFileSync("mkfifo", [join(out, "result.json")]);
+        return Promise.resolve(0);
+      });
+      const started = Date.now();
+      const { result } = await execute(fileSpec(), { runner: piping, fetcher: files });
+      assert.ok(Date.now() - started < 5_000);
+      assert.deepEqual(
+        result.outputs.map((o) => o.sha256),
+        [null, null],
+      );
+    },
+  );
 
   it("approves the matching deliverable", async () => {
     const { hash } = await execute(fileSpec(), { runner: job, fetcher: files });
