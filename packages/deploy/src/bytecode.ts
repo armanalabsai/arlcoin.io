@@ -39,6 +39,7 @@ export const DEPLOYABLE = [
   "ARLStakingRewards",
   "ARLJobs",
   "ComputePayment",
+  "ARLVerifiedEvaluator",
 ] as const;
 export type Deployable = (typeof DEPLOYABLE)[number];
 

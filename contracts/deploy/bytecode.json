@@ -41,6 +41,11 @@
       "creationHash": "0xe8592167ebc78efa94507d6a3a6348f6dda75d027edba3e416737d3b89402461",
       "runtimeHash": "0xb8ddfa486b5d4d05cffb3d7198b1a5eeb3b6bf7830cad8feb7878f142424d100",
       "runtimeSize": 4120
+    },
+    "ARLVerifiedEvaluator": {
+      "creationHash": "0x2b584d0333c4b16f25630a6add2537167b7af258a35d379daf66642bb523f416",
+      "runtimeHash": "0xc24fe4bc1cdf84ede75644feebe46be284ca2c6dcc5e16c65a7d6a7d71853850",
+      "runtimeSize": 14885
     }
   }
 }
