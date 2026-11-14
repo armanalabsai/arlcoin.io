@@ -67,7 +67,10 @@ before them shifts the addresses, and the Deploy screen then refuses the plan.
 `0xfF12597A671ebAF0cAe37999EE659e03c4f444B5` (2 of 3) can fund a reward period; the first period
 is 300,000 ARL (owner decision of 2026-11-01), funded by the Safe afterwards with `approve` and
 `notifyRewardAmount`. Signed on 2026-11-12; `services-record-cli.ts` passed all ten checks on Base
-Mainnet (record `contracts/deploy/base-mainnet-services.json`). The reward period is not funded yet. Rehearsal (Base Mainnet fork, v4 evaluators applied first, deployer
+Mainnet (record `contracts/deploy/base-mainnet-services.json`). The reward period is not funded yet. The funding batch is published for the Safe Transaction Builder at
+[`arlcoin.io/app/safe-batches/8453-staking-fund-300k.safe-batch.json`](../apps/dapp/public/safe-batches/8453-staking-fund-300k.safe-batch.json)
+(approve exactly 300,000 ARL, then `notifyRewardAmount`; checked by `safeBatches.test.ts` and
+rehearsed on a Base Mainnet fork on 2026-11-14: rate 0.01929 ARL per second for 180 days). Rehearsal (Base Mainnet fork, v4 evaluators applied first, deployer
 impersonated, nothing sent): both contracts were created at the addresses above,
 `services-record-cli.ts` passed all ten checks, and the Safe funded 300,000 ARL (reward rate
 0.01929 ARL per second for 180 days). After signing:
