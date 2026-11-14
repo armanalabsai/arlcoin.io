@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 
 import { MAX_ANSWER, modelAnswer, sanitize } from "../src/ai.ts";
@@ -10,7 +11,7 @@ import {
   type TelegramApi,
   type TgUpdate,
 } from "../src/bot.ts";
-import { SupplyReader } from "../src/chain.ts";
+import { RPC_URLS, StatusReader, SUPPLY_LOCKED, SupplyReader, TOKEN } from "../src/chain.ts";
 import * as kb from "../src/knowledge.ts";
 import * as texts from "../src/texts.ts";
 
@@ -249,13 +250,72 @@ describe("assistant", () => {
 });
 
 describe("supply", () => {
-  it("reads the circulating supply and rejects nonsense", async () => {
-    const reader = (body: string, status = 200) =>
-      new SupplyReader(() => Promise.resolve(new Response(body, { status })));
-    assert.equal(await reader("7099999.999999999931192699").read(), 7_100_000);
-    assert.equal(await reader("99999999").read(), null);
-    assert.equal(await reader("<html>").read(), null);
-    assert.equal(await reader("1", 500).read(), null);
+  const hex = (n: bigint) => `0x${n.toString(16)}`;
+  /** An RPC that answers a batch: totalSupply, then one balance per locked address. */
+  const rpc =
+    (total: bigint, lockedEach: bigint, failFirst = false): typeof fetch =>
+    (input, init) => {
+      const url = input instanceof Request ? input.url : input.toString();
+      if (failFirst && url === RPC_URLS[0])
+        return Promise.resolve(new Response("busy", { status: 429 }));
+      const calls = JSON.parse(typeof init?.body === "string" ? init.body : "[]") as {
+        id: number;
+      }[];
+      return Promise.resolve(
+        Response.json(
+          calls.map((c) => ({ id: c.id, result: hex(c.id === 0 ? total : lockedEach) })),
+        ),
+      );
+    };
+  const ARL = 10n ** 18n;
+
+  it("computes the circulating supply from the chain, even when one endpoint refuses", async () => {
+    const n = BigInt(SUPPLY_LOCKED.length);
+    const lockedEach = (13_900_000n * ARL) / n;
+    const total = 21_000_000n * ARL;
+    const expected = Math.round(Number(total - lockedEach * n) / 1e18);
+    assert.equal(await new SupplyReader(rpc(total, lockedEach, true)).read(), expected);
     assert.ok(texts.supply(7_100_000).includes("7,100,000 ARL"));
+  });
+
+  it("refuses impossible figures and failing endpoints", async () => {
+    assert.equal(await new SupplyReader(rpc(22_000_000n * ARL, 0n)).read(), null);
+    assert.equal(await new SupplyReader(rpc(ARL, ARL)).read(), null);
+    const down: typeof fetch = () => Promise.resolve(new Response("down", { status: 500 }));
+    assert.equal(await new SupplyReader(down).read(), null);
+  });
+
+  it("excludes exactly the addresses the website's supply endpoint excludes", () => {
+    const config = JSON.parse(
+      readFileSync(new URL("../../../apps/web/api/supply-config.json", import.meta.url), "utf8"),
+    ) as { token: string; locked: string[] };
+    assert.equal(config.token, TOKEN);
+    assert.deepEqual([...SUPPLY_LOCKED], config.locked);
+  });
+});
+
+describe("status", () => {
+  it("reads staking from another endpoint when the first refuses", async () => {
+    const calls: string[] = [];
+    const f: typeof fetch = (input, init) => {
+      const url = input instanceof Request ? input.url : input.toString();
+      calls.push(url);
+      if (url === RPC_URLS[0]) return Promise.resolve(new Response("busy", { status: 429 }));
+      const batch = JSON.parse(typeof init?.body === "string" ? init.body : "[]") as {
+        id: number;
+      }[];
+      return Promise.resolve(
+        Response.json(
+          batch.map((c) => ({
+            id: c.id,
+            result: c.id === 0 ? `0x${(5_000n * 10n ** 18n).toString(16)}` : "0x0",
+          })),
+        ),
+      );
+    };
+    const s = await new StatusReader(f).read();
+    assert.equal(s.totalStaked, 5_000);
+    assert.equal(s.rewardPeriodFinish, 0);
+    assert.ok(calls.length >= 2);
   });
 });
