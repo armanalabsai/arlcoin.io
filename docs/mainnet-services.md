@@ -23,7 +23,7 @@ addresses and the app, SDKs and site switch to them.
 
 The evaluators in these plans are v5 (2026-11-14, bug bounty reports of that day): a refund the
 token refuses no longer blocks the bond settlement (`RefundDeferred`, the client uses
-`claimRefundTo`), and `expireDispute` closes a dispute the arbiter has not ruled on within 30 days
+`claimRefundTo`), and `expireDispute` closes a dispute the arbiter has not ruled on in time
 after the challenge window. The plans were regenerated on a Base Mainnet fork; the addresses are
 unchanged because they depend only on the deployer and the nonce.
 

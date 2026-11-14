@@ -137,9 +137,12 @@ escrows, nonces 34 and 36):
   client (a USDC deny list), `closeUndecided`, `finalize` and `resolve` still settle the bonds and
   emit `RefundDeferred`; the client recovers the escrow with `ARLJobs.claimRefundTo` after the
   deadline. Errors of the escrow itself and empty reverts (out of gas) still revert.
-- **A dispute cannot lock bonds for good.** If the arbiter has not ruled `ARBITER_WINDOW` (30 days)
-  after the challenge window, anyone calls `expireDispute`: the decision stands, nobody is slashed,
-  the challenger gets its bond back and the escrow settles as `resolve` would.
+- **A dispute cannot lock bonds or outlive the job.** The arbiter rules within half a challenge
+  window after the challenge window (`arbiterDeadline`). After that anyone calls `expireDispute`:
+  the decision stands, nobody is slashed, the challenger gets its bond back and the escrow settles
+  as `resolve` would. Because the job's deadline leaves two challenge windows after the vote, this
+  always happens before the deadline, so a client cannot dispute its own approved job at the last
+  moment and run it into a refund (bug bounty report of 2026-11-15).
 - **No conflicts of interest.** The arbiter can be neither the client nor the provider of a job,
   nor a committee member, and the provider cannot be named on the committee (`configure` refuses
   it, so a job can no longer be configured in a way it can never be evaluated).

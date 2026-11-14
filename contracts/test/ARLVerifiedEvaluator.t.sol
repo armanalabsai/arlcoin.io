@@ -1640,33 +1640,36 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         assertEq(_lockedTotal(), 3 * uint256(BOND));
     }
 
-    function test_expireDisputeAfterTheArbiterWindow() public {
+    function test_expireDisputeAfterTheArbiterDeadline() public {
         uint256 id = _approved();
         vm.prank(challenger);
         ev.dispute(id, EVIDENCE);
         uint256 challengerAfterDispute = token.balanceOf(challenger);
-        uint256 challengeEnds = ev.getVerdict(id).challengeEnds;
-        uint256 window = ev.ARBITER_WINDOW();
+        uint256 deadline = ev.arbiterDeadline(id);
+        assertEq(deadline, uint256(ev.getVerdict(id).challengeEnds) + WINDOW / 2);
+        // The arbiter's deadline always falls before the job's deadline.
+        assertLt(deadline, jobs.getJob(id).expiredAt);
 
-        vm.warp(challengeEnds + window - 1);
+        vm.warp(deadline - 1);
         vm.expectRevert(ARLVerifiedEvaluator.ArbiterWindowOpen.selector);
         ev.expireDispute(id);
 
-        vm.warp(challengeEnds + window);
-        uint256 clientBefore = token.balanceOf(client);
+        vm.warp(deadline);
+        uint256 providerBefore = token.balanceOf(provider);
         vm.expectEmit(address(ev));
         emit ARLVerifiedEvaluator.DisputeExpired(id);
         vm.prank(stranger);
         ev.expireDispute(id);
 
-        // Nobody is slashed, the challenger gets its bond back, and the job (past its deadline)
-        // can only go back to the client.
+        // The approval stands: the provider is paid, nobody is slashed, the challenger gets its
+        // bond back.
+        assertEq(token.balanceOf(provider), providerBefore + BUDGET);
+        assertEq(uint256(_status(id)), uint256(ARLJobs.JobStatus.Completed));
         assertEq(_lockedTotal(), 0);
         assertEq(ev.stakeOf(v1), STAKE);
         assertEq(ev.stakeOf(v2), STAKE);
         assertEq(token.balanceOf(SINK), 0);
         assertEq(token.balanceOf(challenger), challengerAfterDispute + BOND);
-        assertEq(token.balanceOf(client), clientBefore + BUDGET);
         assertEq(uint256(_phase(id)), uint256(ARLVerifiedEvaluator.Phase.Finalized));
         vm.expectRevert(ARLVerifiedEvaluator.WrongPhase.selector);
         ev.expireDispute(id);
@@ -1675,25 +1678,45 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         ev.resolve(id, true, bytes32(0));
     }
 
-    function test_expireDisputeBeforeTheDeadlineSettlesTheDecision() public {
-        // A job long enough that the arbiter window ends before its deadline: the approval stands.
-        uint256 id = _create(address(ev), 60 days);
+    /// Bug bounty report of 2026-11-14: a client disputes its own approved job at the last moment
+    /// of the challenge window to run it past its deadline into a refund. The arbiter's deadline
+    /// comes first, so the approval settles and the refund is no longer possible.
+    function test_lateSelfDisputeCannotRunTheJobIntoARefund() public {
+        // The shortest job the evaluator allows: the deadline leaves exactly the vote window and
+        // two challenge windows after the vote starts.
+        uint256 id = _create(address(ev), VOTE_WINDOW + 2 * uint256(WINDOW));
         vm.prank(client);
         ev.configure(id, _reexec());
         _approveCommittee(id);
         _fund(id, BUDGET);
         _acceptAll(id);
         _submit(id);
+        // The vote starts now and the decision comes at the last second of the vote window.
         _vote(id, v1, true);
+        vm.warp(block.timestamp + VOTE_WINDOW - 1);
         _vote(id, v2, true);
-        vm.prank(challenger);
+        uint256 challengeEnds = ev.getVerdict(id).challengeEnds;
+
+        vm.prank(client);
+        token.approve(address(ev), type(uint256).max);
+        vm.warp(challengeEnds - 1);
+        vm.prank(client);
         ev.dispute(id, EVIDENCE);
-        vm.warp(uint256(ev.getVerdict(id).challengeEnds) + ev.ARBITER_WINDOW());
+
+        vm.prank(client);
+        vm.expectRevert(ARLJobs.WrongStatus.selector);
+        jobs.claimRefund(id);
+
+        vm.warp(ev.arbiterDeadline(id));
         uint256 providerBefore = token.balanceOf(provider);
+        vm.prank(provider);
         ev.expireDispute(id);
         assertEq(token.balanceOf(provider), providerBefore + BUDGET);
-        assertEq(uint256(_status(id)), uint256(ARLJobs.JobStatus.Completed));
-        assertEq(_lockedTotal(), 0);
+
+        vm.warp(jobs.getJob(id).expiredAt);
+        vm.prank(client);
+        vm.expectRevert(ARLJobs.WrongStatus.selector);
+        jobs.claimRefund(id);
     }
 
     function test_RevertWhen_ExpireDisputeNotDisputed() public {
