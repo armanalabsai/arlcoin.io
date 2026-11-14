@@ -45,3 +45,10 @@ export {
   policyHash,
 } from "./policy.ts";
 export type { ModelAllowance, Policy, RuleOutcome, VoteDecision } from "./policy.ts";
+export {
+  DEFAULT_PARAMS,
+  REPUTATION_VERSION,
+  ReputationError,
+  reputationScore,
+} from "./reputation.ts";
+export type { Outcome, OutcomeKind, Score, ScoreParams } from "./reputation.ts";

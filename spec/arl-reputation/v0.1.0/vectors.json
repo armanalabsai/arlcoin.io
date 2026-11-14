@@ -1,0 +1,456 @@
+{
+  "version": "arl-reputation/1",
+  "now": 1800000000,
+  "cases": [
+    {
+      "name": "too-little-history",
+      "outcomes": [
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:1",
+          "client": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799913600,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:2",
+          "client": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799827200,
+          "disputed": false
+        }
+      ],
+      "score": {
+        "version": "arl-reputation/1",
+        "score_bps": null,
+        "outcomes": 2,
+        "clients": 1,
+        "completed": 2,
+        "rejected": 0,
+        "expired": 0,
+        "disputed": 0
+      }
+    },
+    {
+      "name": "all-completed",
+      "outcomes": [
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:1",
+          "client": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799913600,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:2",
+          "client": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799568000,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:3",
+          "client": "0xcccccccccccccccccccccccccccccccccccccccc",
+          "token": "USDC",
+          "budget": "25000000",
+          "outcome": "completed",
+          "final_at": 1797408000,
+          "disputed": false
+        }
+      ],
+      "score": {
+        "version": "arl-reputation/1",
+        "score_bps": 10000,
+        "outcomes": 3,
+        "clients": 3,
+        "completed": 3,
+        "rejected": 0,
+        "expired": 0,
+        "disputed": 0
+      }
+    },
+    {
+      "name": "mixed-with-expiry",
+      "outcomes": [
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:1",
+          "client": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799913600,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:2",
+          "client": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "outcome": "rejected",
+          "final_at": 1799740800,
+          "disputed": true
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:3",
+          "client": "0xcccccccccccccccccccccccccccccccccccccccc",
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "outcome": "expired",
+          "final_at": 1799136000,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:4",
+          "client": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "outcome": "completed",
+          "final_at": 1796544000,
+          "disputed": false
+        }
+      ],
+      "score": {
+        "version": "arl-reputation/1",
+        "score_bps": 2564,
+        "outcomes": 4,
+        "clients": 3,
+        "completed": 2,
+        "rejected": 1,
+        "expired": 1,
+        "disputed": 1
+      }
+    },
+    {
+      "name": "failed-excluded",
+      "outcomes": [
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:1",
+          "client": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799913600,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:2",
+          "client": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799827200,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:3",
+          "client": "0xcccccccccccccccccccccccccccccccccccccccc",
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799740800,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:4",
+          "client": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "outcome": "failed",
+          "final_at": 1799654400,
+          "disputed": false
+        }
+      ],
+      "score": {
+        "version": "arl-reputation/1",
+        "score_bps": 10000,
+        "outcomes": 3,
+        "clients": 3,
+        "completed": 3,
+        "rejected": 0,
+        "expired": 0,
+        "disputed": 0
+      }
+    },
+    {
+      "name": "wash-client-capped",
+      "outcomes": [
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:100",
+          "client": "0xdddddddddddddddddddddddddddddddddddddddd",
+          "token": "ARL",
+          "budget": "100000000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799913600,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:101",
+          "client": "0xdddddddddddddddddddddddddddddddddddddddd",
+          "token": "ARL",
+          "budget": "100000000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799913600,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:102",
+          "client": "0xdddddddddddddddddddddddddddddddddddddddd",
+          "token": "ARL",
+          "budget": "100000000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799913600,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:103",
+          "client": "0xdddddddddddddddddddddddddddddddddddddddd",
+          "token": "ARL",
+          "budget": "100000000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799913600,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:104",
+          "client": "0xdddddddddddddddddddddddddddddddddddddddd",
+          "token": "ARL",
+          "budget": "100000000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799913600,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:105",
+          "client": "0xdddddddddddddddddddddddddddddddddddddddd",
+          "token": "ARL",
+          "budget": "100000000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799913600,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:106",
+          "client": "0xdddddddddddddddddddddddddddddddddddddddd",
+          "token": "ARL",
+          "budget": "100000000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799913600,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:107",
+          "client": "0xdddddddddddddddddddddddddddddddddddddddd",
+          "token": "ARL",
+          "budget": "100000000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799913600,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:108",
+          "client": "0xdddddddddddddddddddddddddddddddddddddddd",
+          "token": "ARL",
+          "budget": "100000000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799913600,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:109",
+          "client": "0xdddddddddddddddddddddddddddddddddddddddd",
+          "token": "ARL",
+          "budget": "100000000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799913600,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:110",
+          "client": "0xdddddddddddddddddddddddddddddddddddddddd",
+          "token": "ARL",
+          "budget": "100000000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799913600,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:111",
+          "client": "0xdddddddddddddddddddddddddddddddddddddddd",
+          "token": "ARL",
+          "budget": "100000000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799913600,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:112",
+          "client": "0xdddddddddddddddddddddddddddddddddddddddd",
+          "token": "ARL",
+          "budget": "100000000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799913600,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:113",
+          "client": "0xdddddddddddddddddddddddddddddddddddddddd",
+          "token": "ARL",
+          "budget": "100000000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799913600,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:114",
+          "client": "0xdddddddddddddddddddddddddddddddddddddddd",
+          "token": "ARL",
+          "budget": "100000000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799913600,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:115",
+          "client": "0xdddddddddddddddddddddddddddddddddddddddd",
+          "token": "ARL",
+          "budget": "100000000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799913600,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:116",
+          "client": "0xdddddddddddddddddddddddddddddddddddddddd",
+          "token": "ARL",
+          "budget": "100000000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799913600,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:117",
+          "client": "0xdddddddddddddddddddddddddddddddddddddddd",
+          "token": "ARL",
+          "budget": "100000000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799913600,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:118",
+          "client": "0xdddddddddddddddddddddddddddddddddddddddd",
+          "token": "ARL",
+          "budget": "100000000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799913600,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:119",
+          "client": "0xdddddddddddddddddddddddddddddddddddddddd",
+          "token": "ARL",
+          "budget": "100000000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799913600,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:1",
+          "client": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "outcome": "rejected",
+          "final_at": 1799913600,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:2",
+          "client": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "outcome": "rejected",
+          "final_at": 1799913600,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:3",
+          "client": "0xcccccccccccccccccccccccccccccccccccccccc",
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "outcome": "rejected",
+          "final_at": 1799913600,
+          "disputed": false
+        }
+      ],
+      "score": {
+        "version": "arl-reputation/1",
+        "score_bps": 2500,
+        "outcomes": 23,
+        "clients": 4,
+        "completed": 20,
+        "rejected": 3,
+        "expired": 0,
+        "disputed": 0
+      }
+    },
+    {
+      "name": "old-failures-fade",
+      "outcomes": [
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:1",
+          "client": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "outcome": "rejected",
+          "final_at": 1737792000,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:2",
+          "client": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "outcome": "rejected",
+          "final_at": 1737792000,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:3",
+          "client": "0xcccccccccccccccccccccccccccccccccccccccc",
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799913600,
+          "disputed": false
+        },
+        {
+          "job": "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9:4",
+          "client": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "token": "ARL",
+          "budget": "10000000000000000000",
+          "outcome": "completed",
+          "final_at": 1799827200,
+          "disputed": false
+        }
+      ],
+      "score": {
+        "version": "arl-reputation/1",
+        "score_bps": 8941,
+        "outcomes": 4,
+        "clients": 3,
+        "completed": 2,
+        "rejected": 2,
+        "expired": 0,
+        "disputed": 0
+      }
+    }
+  ]
+}
