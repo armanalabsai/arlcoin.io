@@ -35,3 +35,13 @@ export {
   submittedDeliverable,
 } from "./proof.ts";
 export type { ContentRef, EvidenceItem, ModelRef, Proof, ReexecResult } from "./proof.ts";
+export {
+  POLICY_VERSION,
+  PolicyError,
+  checkTaskAgainstPolicy,
+  decideVote,
+  effectiveBond,
+  parsePolicy,
+  policyHash,
+} from "./policy.ts";
+export type { ModelAllowance, Policy, RuleOutcome, VoteDecision } from "./policy.ts";

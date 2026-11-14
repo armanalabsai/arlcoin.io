@@ -1,0 +1,20 @@
+{
+  "version": "arl-policy/1",
+  "id": "fallback-review",
+  "workload_classes": ["review"],
+  "tiers": ["fallback"],
+  "committee": {
+    "min_size": 1,
+    "max_size": 1
+  },
+  "vote_window_seconds": [600, 86400],
+  "challenge_window_seconds": [86400, 172800],
+  "min_bond_floor": "100000000000000000000",
+  "bond_covers_budget": true,
+  "required_evidence": ["artifact"],
+  "model": {
+    "allowed": false,
+    "max_budget": {},
+    "models": []
+  }
+}

@@ -1,0 +1,150 @@
+{
+  "version": "arl-policy/1",
+  "policies": [
+    {
+      "id": "reexec-standard",
+      "file": "policies/reexec-standard.json",
+      "policyHash": "0xb8208e1ad8b4640a0bd862b0f32a50af3f4361b12392f222725b743b2b1244fa"
+    },
+    {
+      "id": "model-assisted-review",
+      "file": "policies/model-assisted-review.json",
+      "policyHash": "0x63242b1034ff322be4bf77919874160afe0f1f99d9b950268c3dff763df5a9ec"
+    },
+    {
+      "id": "fallback-review",
+      "file": "policies/fallback-review.json",
+      "policyHash": "0xbc37a36f6e8b5ed22c8ccd2421cbed15b608eba03b16a4552d542ce8d9a69f15"
+    }
+  ],
+  "fits": [
+    {
+      "task": "reexec-arl",
+      "policy": "reexec-standard"
+    },
+    {
+      "task": "model-assisted-usdc",
+      "policy": "model-assisted-review"
+    }
+  ],
+  "misfits": [
+    {
+      "task": "review-fallback",
+      "policy": "fallback-review",
+      "error": "bond floor below the policy minimum"
+    },
+    {
+      "task": "reexec-arl",
+      "policy": "model-assisted-review",
+      "error": "names another policy"
+    }
+  ],
+  "votes": [
+    {
+      "name": "reexec-all-checked",
+      "task": "reexec-arl",
+      "policy": "reexec-standard",
+      "outcomes": [
+        {
+          "id": "exit-zero",
+          "passed": true,
+          "by": "check"
+        },
+        {
+          "id": "matches-spec",
+          "passed": true,
+          "by": "check"
+        }
+      ],
+      "approve": true
+    },
+    {
+      "name": "reexec-one-failed",
+      "task": "reexec-arl",
+      "policy": "reexec-standard",
+      "outcomes": [
+        {
+          "id": "exit-zero",
+          "passed": true,
+          "by": "check"
+        },
+        {
+          "id": "matches-spec",
+          "passed": false,
+          "by": "check"
+        }
+      ],
+      "approve": false
+    },
+    {
+      "name": "reexec-model-not-admissible",
+      "task": "reexec-arl",
+      "policy": "reexec-standard",
+      "outcomes": [
+        {
+          "id": "exit-zero",
+          "passed": true,
+          "by": "check"
+        },
+        {
+          "id": "matches-spec",
+          "passed": true,
+          "by": "model",
+          "weights_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        }
+      ],
+      "approve": false
+    },
+    {
+      "name": "reexec-missing-rule",
+      "task": "reexec-arl",
+      "policy": "reexec-standard",
+      "outcomes": [
+        {
+          "id": "exit-zero",
+          "passed": true,
+          "by": "check"
+        }
+      ],
+      "approve": false
+    },
+    {
+      "name": "model-within-cap",
+      "task": "model-assisted-usdc",
+      "policy": "model-assisted-review",
+      "outcomes": [
+        {
+          "id": "complete",
+          "passed": true,
+          "by": "model",
+          "weights_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        },
+        {
+          "id": "numbering",
+          "passed": true,
+          "by": "check"
+        }
+      ],
+      "approve": true
+    },
+    {
+      "name": "model-says-fail",
+      "task": "model-assisted-usdc",
+      "policy": "model-assisted-review",
+      "outcomes": [
+        {
+          "id": "complete",
+          "passed": false,
+          "by": "model",
+          "weights_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        },
+        {
+          "id": "numbering",
+          "passed": true,
+          "by": "check"
+        }
+      ],
+      "approve": false
+    }
+  ]
+}
