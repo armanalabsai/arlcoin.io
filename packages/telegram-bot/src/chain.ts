@@ -68,3 +68,33 @@ export class StatusReader {
     }
   }
 }
+
+export const SUPPLY_URL = "https://arlcoin.io/api/supply";
+const SUPPLY_CACHE_MS = 300_000;
+
+/** Circulating ARL from the website's supply endpoint (a plain decimal number), cached. */
+export class SupplyReader {
+  private cached: { at: number; value: number | null } | null = null;
+  private readonly fetchFn: Fetch;
+  constructor(fetchFn: Fetch = fetch) {
+    this.fetchFn = fetchFn;
+  }
+
+  async read(): Promise<number | null> {
+    if (this.cached && Date.now() - this.cached.at < SUPPLY_CACHE_MS) return this.cached.value;
+    let value: number | null = null;
+    try {
+      const res = await this.fetchFn(SUPPLY_URL, { signal: AbortSignal.timeout(TIMEOUT_MS) });
+      if (res.ok) {
+        const text = (await res.text()).trim();
+        const n = Number(text);
+        if (/^\d+(\.\d+)?$/.test(text) && Number.isFinite(n) && n >= 0 && n <= 21_000_000)
+          value = Math.round(n);
+      }
+    } catch {
+      value = null;
+    }
+    this.cached = { at: Date.now(), value };
+    return value;
+  }
+}

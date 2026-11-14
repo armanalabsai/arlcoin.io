@@ -1,7 +1,9 @@
 // ARL community bot: commands, welcome messages and spam protection, on Telegram webhook
 // updates. Kept free of the hosting runtime: the Worker (worker.ts) passes each update in.
 
-import { StatusReader } from "./chain.ts";
+import { modelAnswer } from "./ai.ts";
+import { StatusReader, SupplyReader } from "./chain.ts";
+import * as kb from "./knowledge.ts";
 import { Cooldown, FloodLimiter, NewMembers, decide } from "./spam.ts";
 import * as texts from "./texts.ts";
 
@@ -10,6 +12,7 @@ export interface TgUser {
   id: number;
   is_bot?: boolean;
   first_name?: string;
+  username?: string;
 }
 export interface TgChat {
   id: number;
@@ -26,6 +29,7 @@ export interface TgMessage {
   text?: string;
   caption?: string;
   entities?: TgEntity[];
+  reply_to_message?: { from?: TgUser };
   caption_entities?: TgEntity[];
   forward_origin?: unknown;
   new_chat_members?: TgUser[];
@@ -43,6 +47,15 @@ export interface TelegramApi {
   restrictMember(chatId: number, userId: number, untilUnix: number): Promise<boolean>;
   leaveChat(chatId: number): Promise<void>;
   adminIds(chatId: number): Promise<number[]>;
+  /** The bot's own account (getMe); used to see when a group message is addressed to it. */
+  me?(): Promise<TgUser>;
+}
+
+/** Optional model answers (ai.ts); off unless the Worker has an NVIDIA_API_KEY secret. */
+export interface ModelConfig {
+  apiKey?: string | undefined;
+  model?: string | undefined;
+  fetchFn?: typeof fetch | undefined;
 }
 
 const ADMIN_CACHE_MS = 600_000;
@@ -52,12 +65,18 @@ export class State {
   readonly members = new NewMembers();
   readonly cooldown = new Cooldown();
   readonly admins = new Map<number, { at: number; ids: Set<number> }>();
+  /** One assistant answer per user per 20 seconds in groups, against spam and model cost. */
+  readonly askCooldown = new Cooldown(20);
   status = new StatusReader();
+  supply = new SupplyReader();
+  self: TgUser | null = null;
   readonly allowedChats: Set<number> | null;
   readonly muteMinutes: number;
-  constructor(allowedChats: Set<number> | null, muteMinutes: number) {
+  readonly model: ModelConfig;
+  constructor(allowedChats: Set<number> | null, muteMinutes: number, model: ModelConfig = {}) {
     this.allowedChats = allowedChats;
     this.muteMinutes = muteMinutes;
+    this.model = model;
   }
 }
 
@@ -69,7 +88,34 @@ export const COMMANDS: Record<string, () => string | Promise<string>> = {
   launch: () => texts.LAUNCH,
   whitelist: () => texts.WHITELIST_TEXT,
   status: () => "",
+  supply: () => "",
+  ask: () => "",
+  roadmap: () => kb.ROADMAP,
+  build: () => kb.BUILD_TEXT,
+  contracts: () => kb.CONTRACTS_TEXT,
+  verified: () => kb.VERIFIED_TEXT,
+  bounty: () => kb.BOUNTY_TEXT,
+  links: () => kb.LINKS_TEXT,
 };
+
+/** The menu Telegram shows for the bot (setMyCommands); every entry is a command above. */
+export const COMMAND_MENU: readonly { command: string; description: string }[] = [
+  { command: "ask", description: "Ask the ARL assistant a question" },
+  { command: "start", description: "What ARL is and where things stand" },
+  { command: "roadmap", description: "Where we are and what comes next" },
+  { command: "build", description: "Build on ARL: n8n, TypeScript, Python" },
+  { command: "contracts", description: "ARL contracts on Base Mainnet" },
+  { command: "verified", description: "How a verified job works" },
+  { command: "status", description: "Staking status, live" },
+  { command: "supply", description: "Circulating supply, live" },
+  { command: "app", description: "Open the ARL app" },
+  { command: "launch", description: "The token contract and where to buy" },
+  { command: "bounty", description: "The bug bounty" },
+  { command: "links", description: "Official links" },
+  { command: "rules", description: "Group rules and safety" },
+  { command: "whitelist", description: "Whitelist registration" },
+  { command: "help", description: "All commands" },
+];
 
 /** "/status@ArlBot args" → "status"; anything else → null. */
 export function commandOf(text: string | undefined): string | null {
@@ -97,6 +143,49 @@ async function statusText(st: State): Promise<string> {
   return texts.status(s.totalStaked, s.rewardPeriodFinish, Math.floor(Date.now() / 1000));
 }
 
+async function supplyText(st: State): Promise<string> {
+  const circulating = await st.supply.read();
+  return texts.supply(circulating);
+}
+
+/**
+ * The assistant's answer to a free-text question: the knowledge base first, then a grounded
+ * model answer when one is configured, then the list of topics.
+ */
+export async function assistantAnswer(question: string, st: State): Promise<string> {
+  const q = question.trim();
+  if (q === "") return texts.ASK_HELP;
+  const entry = kb.answerFor(q);
+  if (entry) return entry.answer;
+  const ai = await modelAnswer(q, st.model.apiKey, st.model.model, st.model.fetchFn);
+  return ai ?? texts.ASK_FALLBACK;
+}
+
+/** The question in "/ask question", or in a message that mentions the bot. */
+export function questionOf(text: string, username: string | undefined): string {
+  let q = text.replace(/^\/ask(@\w+)?/i, "");
+  if (username) q = q.replace(new RegExp(`@${username}\\b`, "gi"), "");
+  return q.trim();
+}
+
+async function selfOf(api: TelegramApi, st: State): Promise<TgUser | null> {
+  if (st.self || !api.me) return st.self;
+  try {
+    st.self = await api.me();
+  } catch {
+    return null;
+  }
+  return st.self;
+}
+
+/** Whether a group message speaks to the bot: a reply to it, or an @mention of it. */
+function addressedToBot(msg: TgMessage, self: TgUser | null): boolean {
+  if (!self) return false;
+  if (msg.reply_to_message?.from?.id === self.id) return true;
+  const text = (msg.text ?? "").toLowerCase();
+  return !!self.username && text.includes(`@${self.username.toLowerCase()}`);
+}
+
 /** Handles one update. Errors from Telegram are swallowed: a webhook must always answer 200. */
 export async function handleUpdate(update: TgUpdate, api: TelegramApi, st: State): Promise<void> {
   const msg = update.message ?? update.edited_message;
@@ -112,14 +201,29 @@ export async function handleUpdate(update: TgUpdate, api: TelegramApi, st: State
 
   const command = update.message ? commandOf(msg.text) : null;
   if (command) {
-    if (isGroup && !st.cooldown.ready(chat.id, command)) return;
+    const userKey = `ask:${String(msg.from?.id ?? 0)}`;
+    if (isGroup && command === "ask" && !st.askCooldown.ready(chat.id, userKey)) return;
+    if (isGroup && command !== "ask" && !st.cooldown.ready(chat.id, command)) return;
     const reply = COMMANDS[command];
     if (!reply) return;
-    const text = command === "status" ? await statusText(st) : await reply();
+    let text: string;
+    if (command === "status") text = await statusText(st);
+    else if (command === "supply") text = await supplyText(st);
+    else if (command === "ask") {
+      const self = await selfOf(api, st);
+      text = await assistantAnswer(questionOf(msg.text ?? "", self?.username), st);
+    } else text = await reply();
     await api.sendMessage(chat.id, text, msg.message_id).catch(() => undefined);
     return;
   }
-  if (!isGroup) return;
+  if (!isGroup) {
+    // A private chat is a conversation with the assistant.
+    if (update.message && chat.type === "private" && msg.text && !msg.text.startsWith("/"))
+      await api
+        .sendMessage(chat.id, await assistantAnswer(msg.text, st), msg.message_id)
+        .catch(() => undefined);
+    return;
+  }
 
   if (msg.new_chat_members?.length) {
     for (const user of msg.new_chat_members) {
@@ -146,7 +250,17 @@ export async function handleUpdate(update: TgUpdate, api: TelegramApi, st: State
     onProbation: st.members.onProbation(chat.id, user.id),
     flooding: isAdmin ? false : st.flood.hit(chat.id, user.id),
   });
-  if (action === null) return;
+  if (action === null) {
+    // Answer questions addressed to the bot (a reply to it or an @mention), once per user per
+    // cooldown, after moderation has let the message through.
+    if (!update.message || !msg.text) return;
+    const self = await selfOf(api, st);
+    if (!addressedToBot(msg, self)) return;
+    if (!st.askCooldown.ready(chat.id, `ask:${String(user.id)}`)) return;
+    const answer = await assistantAnswer(questionOf(msg.text, self?.username), st);
+    await api.sendMessage(chat.id, answer, msg.message_id).catch(() => undefined);
+    return;
+  }
   const deleted = await api.deleteMessage(chat.id, msg.message_id).catch(() => false);
   if (!deleted) return;
   if (action === "flood") {
@@ -199,6 +313,9 @@ export function botApi(token: string, fetchFn: typeof fetch = fetch): TelegramAp
     },
     async leaveChat(chatId) {
       await call("leaveChat", { chat_id: chatId });
+    },
+    async me() {
+      return call<TgUser>("getMe", {});
     },
     async adminIds(chatId) {
       const admins = await call<{ user: { id: number } }[]>("getChatAdministrators", {
