@@ -23,6 +23,10 @@ Status: **plan**, 14 November 2026. Phase 6 of the
 token), `openTask` and the protocol re-export in `arl-protocol-sdk` 0.2.0 (tested end to end on
 Anvil), and `arl-verifier` resolving `arl-task:` job descriptions to the task's workload spec.
 
+**Built (Python and n8n), 15 November 2026:** `arl_protocol` 0.2.0 `open_task`, which sends the
+Agent API's prepared transactions only after checking each one against the task and the known
+Base Mainnet addresses, and the n8n node's "Open Task" operation, which runs the SDK's `openTask`.
+
 - `arl-protocol-sdk`: re-export `@arl/protocol` and add `openTask(clients, task, opts)` that
   validates the task, checks it against its policy and performs `createJob`, `configure`,
   `setBudget` and `fund` from `onchainTerms`; `submitProof(clients, proof)`; `getEvidence(jobId)`.
@@ -63,7 +67,9 @@ API (6.2).
 - **MCP server** (`@arl/mcp`): tools `arl_check_task`, `arl_task_hash`, `arl_get_job`,
   `arl_get_reputation`, `arl_check_evidence`, and `arl_prepare_job`, which returns unsigned
   transactions for the user's own wallet to sign. The server never holds a key.
-- **Coinbase AgentKit action provider**: the same actions for AgentKit agents.
+- **Coinbase AgentKit action provider**: built 15 November 2026 as `packages/agentkit`, the MCP
+  server's checks and reads for AgentKit agents plus `arl_open_task`, which signs the prepared
+  transactions through the agent's own wallet provider.
 - **x402**: release `arl-escrow` v0.2.0 after decision D-4.
 
 ### 6.4 Onboarding
