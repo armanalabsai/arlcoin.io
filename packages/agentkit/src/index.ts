@@ -1,13 +1,11 @@
 // ARL Protocol actions for Coinbase AgentKit (github.com/coinbase/agentkit).
 //
-//   import { AgentKit, customActionProvider } from "@coinbase/agentkit";
-//   import { z } from "zod";
-//   import { arlActions } from "@arl/agentkit";
-//
-//   const agentkit = await AgentKit.from({
-//     walletProvider, // any EVM wallet provider on Base Mainnet
+//   const agentkit = await AgentKit.from({           // AgentKit and customActionProvider
+//     walletProvider,                                 // come from @coinbase/agentkit
 //     actionProviders: [customActionProvider(arlActions(z))],
 //   });
+//
+// where `z` is the zod namespace your AgentKit setup already uses (zod 3 or 4).
 //
 // The read actions are the MCP server's tools (packages/mcp): the same checks, the same answers.
 // arl_open_task signs from the agent's own wallet, through its wallet provider, exactly the

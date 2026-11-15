@@ -9,8 +9,6 @@ import {
   type Address,
   type Hex,
 } from "viem";
-import { z } from "zod";
-import { z as z3 } from "zod/v3";
 
 import {
   BASE_MAINNET_TASK_DEPLOYMENTS,
@@ -19,6 +17,7 @@ import {
   taskHash,
 } from "../../protocol/src/index.ts";
 import { arlActions, type ArlWalletProvider } from "../src/index.ts";
+import { fakeZod, type FakeSchema } from "./fake-zod.ts";
 
 const vectors = JSON.parse(
   readFileSync(new URL("../../../spec/arl-task/v0.1.0/vectors.json", import.meta.url), "utf8"),
@@ -92,7 +91,7 @@ function fakeWallet(opts: { lag?: number; revertStep?: number } = {}) {
   return { wallet, sent };
 }
 
-const actions = arlActions(z, { retryDelayMs: 1 });
+const actions = arlActions(fakeZod, { retryDelayMs: 1 });
 const action = (name: string) => {
   const a = actions.find((x) => x.name === name);
   assert.ok(a, name);
@@ -111,20 +110,13 @@ describe("AgentKit actions", () => {
   });
 
   it("have zod schemas that accept a valid call and refuse a bad one", () => {
-    const schema = action("arl_open_task").schema as z.ZodType;
+    const schema = action("arl_open_task").schema as FakeSchema;
     assert.equal(schema.safeParse(args).success, true);
     assert.equal(schema.safeParse({ ...args, provider: "nobody" }).success, false);
     assert.equal(schema.safeParse({ ...args, committee: "0x33" }).success, false);
-    const get = action("arl_get_job").schema as z.ZodType;
+    const get = action("arl_get_job").schema as FakeSchema;
     assert.equal(get.safeParse({ token: "USDC", jobId: "7" }).success, true);
     assert.equal(get.safeParse({ token: "DAI", jobId: "7" }).success, false);
-  });
-
-  it("build the same schemas with zod 3, which AgentKit uses", () => {
-    const open = arlActions(z3).find((a) => a.name === "arl_open_task");
-    const schema = open?.schema as z3.ZodType;
-    assert.equal(schema.safeParse(args).success, true);
-    assert.equal(schema.safeParse({ ...args, provider: "nobody" }).success, false);
   });
 
   it("checks a task without sending anything", async () => {

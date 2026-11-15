@@ -13,8 +13,5 @@
   },
   "scripts": {
     "test": "node --test \"test/**/*.test.ts\""
-  },
-  "devDependencies": {
-    "zod": "4.6.7"
   }
 }
