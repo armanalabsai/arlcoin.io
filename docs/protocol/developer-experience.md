@@ -48,6 +48,12 @@ Every answer carries the block number it was read at, so clients can re-check it
 
 ### 6.3 Agent integrations
 
+**Built, 15 November 2026:** the MCP server (`packages/mcp`, npm name `arl-protocol-mcp`) with
+`arl_check_task`, `arl_list_policies`, `arl_get_job`, `arl_check_evidence`, `arl_prepare_job` and
+`arl_prepare_funding`. It speaks MCP over stdio with no dependency beyond viem, reads the chain at
+one block per answer and holds no key. `arl_get_reputation` waits for the indexer behind the read
+API (6.2).
+
 - **MCP server** (`@arl/mcp`): tools `arl_check_task`, `arl_task_hash`, `arl_get_job`,
   `arl_get_reputation`, `arl_check_evidence`, and `arl_prepare_job`, which returns unsigned
   transactions for the user's own wallet to sign. The server never holds a key.
