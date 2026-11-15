@@ -63,7 +63,7 @@ API (6.2).
 - **MCP server** (`@arl/mcp`): tools `arl_check_task`, `arl_task_hash`, `arl_get_job`,
   `arl_get_reputation`, `arl_check_evidence`, and `arl_prepare_job`, which returns unsigned
   transactions for the user's own wallet to sign. The server never holds a key.
-- **Coinbase AgentKit action provider**: the same actions for AgentKit agents.
+- **Coinbase AgentKit action provider** (`packages/agentkit`): the same checks and reads for AgentKit agents, plus `arl_open_task`, which signs the prepared transactions through the agent's own wallet provider.
 - **x402**: release `arl-escrow` v0.2.0 after decision D-4.
 
 ### 6.4 Onboarding

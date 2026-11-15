@@ -1,0 +1,20 @@
+{
+  "name": "@arl/agentkit",
+  "version": "0.1.0",
+  "author": "Alazdg <team@arlcoin.io>",
+  "private": true,
+  "description": "ARL Protocol actions for Coinbase AgentKit: check arl-task/1 tasks, read verified jobs and open a task as a verified job on Base Mainnet from the agent's own wallet",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "viem": "2.56.9"
+  },
+  "scripts": {
+    "test": "node --test \"test/**/*.test.ts\""
+  },
+  "devDependencies": {
+    "zod": "4.6.7"
+  }
+}
