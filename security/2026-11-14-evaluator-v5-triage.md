@@ -2,7 +2,7 @@
 
 `ARLVerifiedEvaluator.sol` changed for evaluator v5 (bug bounty reports of 2026-11-14): a refund
 the escrow token refuses no longer blocks the bond settlement (`_refund`, `RefundDeferred`),
-`expireDispute` closes a dispute the arbiter has not ruled on within `ARBITER_WINDOW`, and the
+`expireDispute` closes a dispute the arbiter has not ruled on in time, and the
 arbiter and the provider can no longer be a party or a committee member where they would have a
 conflict. Aderyn reports fifteen results in the file (CI run of 3a7fc1f). Each was read against
 the new code.
@@ -41,3 +41,8 @@ own call, re-reverts errors of four bytes or fewer (the escrow's custom errors a
 a caller cannot skip a refund by starving it of gas, and records any other token refusal with
 `RefundDeferred`. Covered by `test_RevertWhen_RefundFailsWithoutAReason` and the three
 deny-list tests in `ARLVerifiedEvaluator.t.sol`.
+
+Update 2026-11-15: `ARBITER_WINDOW` was replaced by `arbiterDeadline` (half a challenge window
+after the challenge window, so a dispute always settles before the job's deadline). The results
+above moved by a few lines; the code on each line and every verdict are unchanged
+(`security/aderyn-baseline.json`).
