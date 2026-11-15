@@ -54,3 +54,18 @@ export {
 export type { Outcome, OutcomeKind, Score, ScoreParams } from "./reputation.ts";
 export { EVIDENCE_VERSION, EvidenceError, checkEvidence } from "./evidence.ts";
 export type { EvidenceResult, EvidenceV2, SettlementRecord } from "./evidence.ts";
+export {
+  BASE_MAINNET_TASK_DEPLOYMENTS,
+  taskDeployment,
+  type TaskDeployment,
+} from "./deployments.ts";
+export { BUILTIN_POLICIES, builtinPolicy } from "./policies.ts";
+export {
+  fundingTransactions,
+  openTaskAbi,
+  prepareTask,
+  type OpenStep,
+  type PrepareTaskInput,
+  type PreparedTask,
+  type UnsignedTx,
+} from "./prepare.ts";

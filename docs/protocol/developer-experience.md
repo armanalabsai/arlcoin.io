@@ -18,6 +18,11 @@ Status: **plan**, 14 November 2026. Phase 6 of the
 
 ### 6.1 SDK support for the protocol documents
 
+**Built (TypeScript), 15 November 2026:** `@arl/protocol` `prepareTask` and `fundingTransactions`
+(the unsigned transactions, with the built-in policies and the Base Mainnet deployments per
+token), `openTask` and the protocol re-export in `arl-protocol-sdk` 0.2.0 (tested end to end on
+Anvil), and `arl-verifier` resolving `arl-task:` job descriptions to the task's workload spec.
+
 - `arl-protocol-sdk`: re-export `@arl/protocol` and add `openTask(clients, task, opts)` that
   validates the task, checks it against its policy and performs `createJob`, `configure`,
   `setBudget` and `fund` from `onchainTerms`; `submitProof(clients, proof)`; `getEvidence(jobId)`.

@@ -35,6 +35,26 @@ await settleJob(clients, ESCROWS.ARL, BigInt(jobId), "complete", "checked"); // 
 `ESCROWS.USDC` does the same in USDC. `settleJob(…, "reject")` refunds the client, and after the
 deadline `settleJob(…, "claimRefund")` returns an unfinished job's escrow. `getJob` reads a job.
 
+## Open a verified task (arl-task/1)
+
+An [`arl-task/1`](https://github.com/armanalabsai/arlcoin.io/tree/main/spec/arl-task/v0.1.0)
+document says what the work is, how it is accepted, paid and checked. `openTask` validates it,
+checks it against its verification policy, and only then creates, configures and funds the job:
+
+```ts
+import { openTask } from "arl-protocol-sdk";
+
+const { jobId, taskHash } = await openTask(clients, task, {
+  taskUri: "https://example.com/task.json", // where validators fetch the task
+  provider: "0xProviderAddress",
+  committee: ["0xValidator1", "0xValidator2", "0xValidator3"],
+});
+```
+
+A task that fails validation sends no transaction. `prepareTask` and `fundingTransactions` return
+the same calls unsigned, for wallets that sign elsewhere. `parseTask`, `taskHash`,
+`checkTaskAgainstPolicy` and the other protocol functions are exported too.
+
 ## Also in the SDK
 
 | Function                                   | What it does                                                              |

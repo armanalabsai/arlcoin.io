@@ -36,9 +36,10 @@ const pkg = {
     directory: "packages/sdk",
   },
   type: "module",
-  main: "./index.js",
-  types: "./index.d.ts",
-  exports: { ".": { types: "./index.d.ts", default: "./index.js" } },
+  // The SDK and the protocol documents it re-exports (packages/protocol) compile side by side.
+  main: "./sdk/src/index.js",
+  types: "./sdk/src/index.d.ts",
+  exports: { ".": { types: "./sdk/src/index.d.ts", default: "./sdk/src/index.js" } },
   dependencies: source.dependencies,
 };
 writeFileSync(join(out, "package.json"), `${JSON.stringify(pkg, null, 2)}\n`);

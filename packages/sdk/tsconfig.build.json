@@ -4,10 +4,10 @@
     "lib": ["ES2022", "DOM"],
     "noEmit": false,
     "declaration": true,
-    "rootDir": "src",
+    "rootDir": "..",
     "outDir": "dist/package",
     "rewriteRelativeImportExtensions": true,
     "skipLibCheck": true
   },
-  "include": ["src"]
+  "include": ["src", "../protocol/src"]
 }
