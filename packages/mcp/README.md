@@ -32,6 +32,10 @@ endpoints and the first answer wins. Requires Node.js 22 or later.
 `arl_prepare_funding` checks that the job is the one step 1 created for the same task (client,
 provider, evaluator and on-chain description) before preparing anything that moves funds.
 
+The same tools answer over HTTP at `https://arlcoin.io/api/v1` (`GET /policies`,
+`POST /tasks/check`, `GET /jobs/ARL/{id}`, `POST /evidence/check`, `POST /jobs/prepare`,
+`POST /jobs/prepare-funding`), for agents that do not speak MCP.
+
 The task format is specified in
 [spec/arl-task](https://github.com/armanalabsai/arlcoin.io/tree/main/spec/arl-task/v0.1.0). The same
 transactions are sent by `openTask` in [`arl-protocol-sdk`](https://www.npmjs.com/package/arl-protocol-sdk).
