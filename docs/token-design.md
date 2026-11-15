@@ -155,7 +155,11 @@ Guardian Safe ─────────── cancel only ──────�
 `ARLTimelock` is OpenZeppelin `TimelockController` with:
 
 - admin fixed to `address(0)`: only the timelock holds `DEFAULT_ADMIN_ROLE`,
-  so role changes must themselves wait the delay;
+  so granting or revoking a role must itself wait the delay. A holder can still
+  renounce its own role at once (OpenZeppelin `renounceRole`); the Treasury Safe
+  never renounces `PROPOSER_ROLE` or `EXECUTOR_ROLE`, because the timelock could
+  not be operated again (see the Safe operating rules in
+  [mainnet-runbook.md](mainnet-runbook.md));
 - a 48-hour floor in the constructor and in `updateDelay`. Upstream
   `updateDelay` accepts any value, so a scheduled call could otherwise reduce
   the delay to zero;
