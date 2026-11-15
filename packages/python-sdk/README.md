@@ -42,6 +42,27 @@ The evaluator is the client's wallet unless `create_job(..., evaluator="0x...")`
 Every write is simulated first: a call that would fail raises `ArlError` with the reason before
 any gas is spent.
 
+## Open a verified task (arl-task/1)
+
+An [arl-task/1](https://github.com/armanalabsai/arlcoin.io/tree/main/spec/arl-task/v0.1.0) task
+says what the work is and how it is paid and checked. `open_task` asks the Agent API at
+arlcoin.io/api/v1 to validate it and prepare the transactions, checks every transaction against
+the task and the Base Mainnet addresses, and only then signs: createJob, configure, setBudget,
+approve and fund.
+
+```python
+opened = arl.open_task(
+    task,                                     # the arl-task/1 document (a dict)
+    task_uri="https://example.com/task.json", # where validators fetch it
+    provider="0xProvider",
+    committee=["0xValidator1", "0xValidator2", "0xValidator3"],
+)
+print(opened["job_id"], opened["task_hash"])
+```
+
+A prepared transaction that does not match the task (another provider, escrow, budget or job) is
+refused with `ArlError` and nothing is sent.
+
 ## Contracts on Base Mainnet
 
 | Contract           | Address                                      |

@@ -12,6 +12,7 @@ Amounts are plain token units ("10" is 10 ARL, or 10 USDC with token="USDC").
 """
 
 from .client import ESCROWS, STATUS, Arl, ArlError
+from .open_task import EVALUATORS, open_task
 
-__all__ = ["Arl", "ArlError", "ESCROWS", "STATUS"]
-__version__ = "0.1.0"
+__all__ = ["Arl", "ArlError", "ESCROWS", "EVALUATORS", "STATUS", "open_task"]
+__version__ = "0.2.0"
