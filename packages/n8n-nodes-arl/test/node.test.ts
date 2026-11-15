@@ -8,6 +8,7 @@ import {
   ArlJobError,
   ESCROWS,
   checkAddress,
+  openArlTask,
   parseAmount,
   parseJobId,
   toBytes32,
@@ -48,6 +49,42 @@ describe("inputs", () => {
   });
 });
 
+describe("open task", () => {
+  // Every input is checked before the RPC is touched: this client throws if it is used.
+  const offline = new Proxy(
+    {},
+    {
+      get() {
+        throw new Error("the RPC was used");
+      },
+    },
+  );
+  const c = { publicClient: offline, walletClient: offline } as never;
+  const task = { spec: "arl-task/1", payment: { token: "ARL", budget: "1" } };
+  const base = {
+    task: JSON.stringify(task),
+    taskUri: "https://example.com/task.json",
+    provider: "0x2222222222222222222222222222222222222222",
+    committee: "0x3333333333333333333333333333333333333333",
+  };
+
+  it("refuses bad input before sending anything", async () => {
+    for (const [bad, why] of [
+      [{ task: "{not json" }, /not valid JSON/],
+      [{ task: JSON.stringify({ ...task, payment: { token: "DAI" } }) }, /ARL" or "USDC/],
+      [{ taskUri: "http://example.com/task.json" }, /https/],
+      [{ committee: "0x1234" }, /committee member 1/],
+      [{ provider: "nobody" }, /the provider/],
+    ] as const) {
+      await assert.rejects(openArlTask(c, { ...base, ...bad }), why);
+    }
+  });
+
+  it("accepts the task as an object too", async () => {
+    await assert.rejects(openArlTask(c, { ...base, task }), /the RPC was used/);
+  });
+});
+
 describe("node description", () => {
   const node = new Arl();
   const ops = node.description.properties.find((p) => p.name === "operation")?.options ?? [];
@@ -56,7 +93,17 @@ describe("node description", () => {
   it("offers the job lifecycle", () => {
     assert.deepEqual(
       [...values],
-      ["create", "setBudget", "fund", "submit", "complete", "reject", "claimRefund", "get"],
+      [
+        "create",
+        "openTask",
+        "setBudget",
+        "fund",
+        "submit",
+        "complete",
+        "reject",
+        "claimRefund",
+        "get",
+      ],
     );
     for (const o of ops) assert.ok(o.action && o.description, o.value);
   });
