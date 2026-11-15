@@ -29,8 +29,11 @@ Bounty allocation never exceed its 400,000 ARL.
 
 ## Rules
 
-- In scope: the contracts in `contracts/src` at the commit named in the program announcement, as
-  deployed on Base Mainnet.
+- In scope: the contracts in `contracts/src` as deployed on Base Mainnet, reviewed at the commit
+  their deployed bytecode matches: `00d9056` for the token, vesting, distributor, timelock and
+  `ARLJobs`; `99d41b4` for the contracts deployed on 12 November 2026 (`ARLVerifiedEvaluator` v4,
+  `ComputePayment` and `ARLStakingRewards`). Contracts in the repository that are not deployed
+  (for example `ARLAnonymousSignal`) are out of scope.
 - Out of scope: third-party code (OpenZeppelin, Safe, forge-std; report those upstream), the
   website, the dApp front end, social engineering, and denial of service against RPC providers.
 - Report privately to team@arlcoin.io (see `SECURITY.md`); do not disclose publicly before a fix is deployed or 90 days have passed.

@@ -183,9 +183,11 @@ contract ARLVerifiedEvaluatorHandler is Test {
     function finalize(uint256 j) external {
         uint256 id = _id(j);
         if (id == 0) return;
-        uint256 budget = jobs.getJob(id).budget;
+        ARLJobs.Job memory job = jobs.getJob(id);
+        // A late finalize after the client's own refund settles only the bonds.
+        bool escrowed = job.status == ARLJobs.JobStatus.Submitted;
         try ev.finalize(id) {
-            ghostSettled += budget;
+            if (escrowed) ghostSettled += job.budget;
         } catch {}
     }
 
