@@ -174,6 +174,19 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
 
     mapping(uint256 jobId => Config) private _configs;
     mapping(uint256 jobId => Verdict) private _verdicts;
+    /// Whether the job's agent was the provider's when the provider approved the committee: only
+    /// then is the outcome recorded, and later transfers of the agent cannot change that.
+    mapping(uint256 jobId => bool) private _agentBound;
+
+    /// Outcomes recorded for an ERC-8004 agent by this evaluator, kept here as well so that a
+    /// registry refusing the write cannot erase them.
+    struct Outcomes {
+        uint64 approved;
+        uint64 rejected;
+    }
+
+    /// @notice Verified outcomes per agent id, independent of the reputation registry.
+    mapping(uint256 agentId => Outcomes) public outcomesOf;
     mapping(uint256 jobId => mapping(address validator => uint8)) private _votes;
     /// Approvals per deliverable hash: a decision needs `threshold` approvals of the same hash.
     mapping(uint256 jobId => mapping(bytes32 deliverable => uint8)) private _approvalsFor;
@@ -338,6 +351,15 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         if (_votes[jobId][msg.sender] != 0 || msg.sender == arbiter) revert ConflictOfInterest();
         v.providerApproved = true;
         emit CommitteeApproved(jobId, msg.sender);
+        // Security report 2026-11-15: the agent is bound here, once, so a provider cannot move its
+        // agent away at settlement to keep a rejection off its record.
+        uint256 agentId = _configs[jobId].providerAgentId;
+        if (agentId != 0 && address(reputation) != address(0) && address(identity) != address(0)) {
+            if (gasleft() < REGISTRY_GAS_RESERVE) revert InsufficientGas();
+            (bool ok, bool owned) = _ownedBy(agentId, msg.sender);
+            if (!ok) emit FeedbackFailed(jobId, agentId);
+            _agentBound[jobId] = owned;
+        }
     }
 
     /// @notice Committee member only, once the committee is approved and the job is funded, until
@@ -720,21 +742,16 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
     }
 
     /// Writes the outcome to the provider's ERC-8004 reputation: 100 for an approved job, 0 for a
-    /// rejected one; the feedback hash is the job's vote hash (also in `Finalized`). Skipped
-    /// without a registry, without an agent id, or when the agent is not owned by the job's
-    /// provider. A failing registry never blocks settlement.
+    /// rejected one; the feedback hash is the job's vote hash (also in `Finalized`), and counts it
+    /// in `outcomesOf`. Skipped without a registry, without an agent id, or when the agent was not
+    /// the provider's when it approved the committee. A failing registry never blocks settlement.
     function _feedback(uint256 jobId, bool approved) private {
+        if (!_agentBound[jobId]) return;
         uint256 agentId = _configs[jobId].providerAgentId;
-        if (agentId == 0 || address(reputation) == address(0) || address(identity) == address(0)) {
-            return;
-        }
-        address provider = jobs.getJob(jobId).provider;
+        if (approved) ++outcomesOf[agentId].approved;
+        else ++outcomesOf[agentId].rejected;
         // A registry may fail on its own; it may not be made to fail by the caller's gas limit.
-        // Both calls below are capped at REGISTRY_GAS, so one check covers the two.
-        if (gasleft() < 2 * REGISTRY_GAS_RESERVE) revert InsufficientGas();
-        (bool ok, bool owned) = _ownedBy(agentId, provider);
-        if (!ok) emit FeedbackFailed(jobId, agentId);
-        if (!owned) return;
+        if (gasleft() < REGISTRY_GAS_RESERVE) revert InsufficientGas();
         try reputation.giveFeedback{gas: REGISTRY_GAS}(
             agentId,
             approved ? int128(100) : int128(0),

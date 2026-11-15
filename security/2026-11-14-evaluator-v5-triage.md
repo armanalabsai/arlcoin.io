@@ -60,3 +60,9 @@ the client already claimed the refund), instead of reverting forever. One new re
 `reentrancy-state-change` at the `jobs.getJob` call in `finalize` (line 480), is a false positive
 for the same reason as in `expireDispute`: a view call on the immutable escrow in a
 `nonReentrant` function. The results below it moved by ten lines; verdicts unchanged.
+
+Update 2026-11-16 (bug bounty report, reputation dodge): the provider's agent is now bound when
+the provider approves the committee, not re-read at settlement, so moving the agent away cannot
+keep a rejection off its record; every recorded outcome is also counted in `outcomesOf`, so a
+registry that refuses the write (for example after the provider approves the evaluator as an
+operator) cannot erase it. The results below line 176 moved by 13 or 22 lines; verdicts unchanged.

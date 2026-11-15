@@ -1070,6 +1070,30 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
 
     // ---------------------------------------------------------------- reputation edge cases
 
+    /// Security report 2026-11-15: the provider moved its agent away before settlement (or made
+    /// the registry refuse) to keep a rejection off its record.
+    function test_providerCannotDodgeARejection() public {
+        uint256 id = _rejected();
+        vm.prank(provider);
+        identity.setOwner(AGENT, stranger);
+        vm.warp(block.timestamp + WINDOW);
+        ev.finalize(id);
+        assertEq(reputation.count(), 1);
+        assertEq(reputation.lastValue(), int128(0));
+        (uint64 approvedCount, uint64 rejectedCount) = ev.outcomesOf(AGENT);
+        assertEq(approvedCount, 0);
+        assertEq(rejectedCount, 1);
+    }
+
+    function test_approveCommitteeRevertsWithTooLittleGas() public {
+        uint256 id = _configured(_reexec());
+        vm.prank(provider);
+        vm.expectRevert(ARLVerifiedEvaluator.InsufficientGas.selector);
+        ev.approveCommittee{gas: 200_000}(id);
+        _approveCommittee(id);
+        assertTrue(ev.getVerdict(id).providerApproved);
+    }
+
     function test_feedbackSkippedWhenAgentNotProviders() public {
         identity.setOwner(AGENT, stranger);
         uint256 id = _approved();
@@ -1138,18 +1162,27 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
     }
 
     function test_feedbackFailureNeverBlocksSettlement() public {
-        uint8[3] memory identityModes = [1, 2, 0];
-        uint8[3] memory reputationModes = [0, 0, 1];
-        for (uint256 i; i < 3; ++i) {
-            identity.setMode(identityModes[i]);
-            reputation.setMode(reputationModes[i]);
+        // A broken identity registry is seen when the provider approves the committee: the agent
+        // is not bound, and settlement writes nothing.
+        for (uint8 mode = 1; mode <= 2; ++mode) {
+            identity.setMode(mode);
             uint256 id = _approved();
             vm.warp(block.timestamp + WINDOW);
-            vm.expectEmit(address(ev));
-            emit ARLVerifiedEvaluator.FeedbackFailed(id, AGENT);
             ev.finalize(id);
             assertEq(uint256(_status(id)), uint256(ARLJobs.JobStatus.Completed));
+            assertEq(reputation.count(), 0);
         }
+        // A refusing reputation registry: settlement goes on, and the outcome stays counted here.
+        identity.setMode(0);
+        reputation.setMode(1);
+        uint256 refused = _approved();
+        vm.warp(block.timestamp + WINDOW);
+        vm.expectEmit(address(ev));
+        emit ARLVerifiedEvaluator.FeedbackFailed(refused, AGENT);
+        ev.finalize(refused);
+        assertEq(uint256(_status(refused)), uint256(ARLJobs.JobStatus.Completed));
+        (uint64 approvedCount,) = ev.outcomesOf(AGENT);
+        assertEq(approvedCount, 1);
         // A registry that burns all its gas is cut off at the cap.
         reputation.setMode(2);
         identity.setMode(0);
@@ -1209,7 +1242,7 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         uint256 id = _approved();
         vm.warp(block.timestamp + WINDOW);
         vm.expectRevert(ARLVerifiedEvaluator.InsufficientGas.selector);
-        ev.finalize{gas: 500_000}(id);
+        ev.finalize{gas: 350_000}(id);
         assertEq(uint256(_status(id)), uint256(ARLJobs.JobStatus.Submitted));
     }
 
