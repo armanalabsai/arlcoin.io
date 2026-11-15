@@ -1178,6 +1178,33 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         assertEq(reputation.lastValue(), int128(100));
     }
 
+    /// Security report 2026-11-15: a decided job nobody finalized before its deadline could never
+    /// be finalized; now it settles the way the escrow allows, back to the client.
+    function test_finalizeAfterTheDeadlineRefunds() public {
+        uint256 rejected = _rejected();
+        uint256 approved = _approved();
+        vm.warp(jobs.getJob(approved).expiredAt);
+        for (uint256 i; i < 2; ++i) {
+            uint256 id = i == 0 ? rejected : approved;
+            vm.expectEmit(address(ev));
+            emit ARLVerifiedEvaluator.Finalized(id, false, ev.getVerdict(id).voteHash);
+            ev.finalize(id);
+            assertEq(uint256(_status(id)), uint256(ARLJobs.JobStatus.Expired));
+            assertEq(
+                uint256(ev.getVerdict(id).phase), uint256(ARLVerifiedEvaluator.Phase.Finalized)
+            );
+        }
+    }
+
+    function test_finalizeAfterTheClientClaimedTheRefund() public {
+        uint256 id = _approved();
+        vm.warp(jobs.getJob(id).expiredAt);
+        jobs.claimRefund(id);
+        ev.finalize(id);
+        assertEq(uint256(ev.getVerdict(id).phase), uint256(ARLVerifiedEvaluator.Phase.Finalized));
+        assertEq(uint256(_status(id)), uint256(ARLJobs.JobStatus.Expired));
+    }
+
     function test_feedbackRevertsWithTooLittleGas() public {
         uint256 id = _approved();
         vm.warp(block.timestamp + WINDOW);

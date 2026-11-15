@@ -9,7 +9,7 @@
   "results": [
     "contract-locks-ether src/ARLVestingWallet.sol:23",
     "costly-loop src/ARLVerifiedEvaluator.sol:304",
-    "costly-loop src/ARLVerifiedEvaluator.sol:660",
+    "costly-loop src/ARLVerifiedEvaluator.sol:670",
     "large-numeric-literal src/ARLAllocation.sol:13",
     "large-numeric-literal src/ARLAllocation.sol:15",
     "large-numeric-literal src/ARLAllocation.sol:16",
@@ -32,13 +32,14 @@
     "reentrancy-state-change src/ARLVerifiedEvaluator.sol:336",
     "reentrancy-state-change src/ARLVerifiedEvaluator.sol:354",
     "reentrancy-state-change src/ARLVerifiedEvaluator.sol:399",
-    "reentrancy-state-change src/ARLVerifiedEvaluator.sol:503",
-    "reentrancy-state-change src/ARLVerifiedEvaluator.sol:537",
-    "reentrancy-state-change src/ARLVerifiedEvaluator.sol:561",
+    "reentrancy-state-change src/ARLVerifiedEvaluator.sol:480",
+    "reentrancy-state-change src/ARLVerifiedEvaluator.sol:513",
+    "reentrancy-state-change src/ARLVerifiedEvaluator.sol:547",
+    "reentrancy-state-change src/ARLVerifiedEvaluator.sol:571",
     "require-revert-in-loop src/ARLAnonymousSignal.sol:230",
     "require-revert-in-loop src/ARLVerifiedEvaluator.sol:304",
     "unchecked-return src/ARLTimelock.sol:44",
     "unchecked-return src/ARLVerifiedEvaluator.sol:479",
-    "unchecked-return src/ARLVerifiedEvaluator.sol:536"
+    "unchecked-return src/ARLVerifiedEvaluator.sol:546"
   ]
 }

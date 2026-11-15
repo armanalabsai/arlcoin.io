@@ -477,7 +477,17 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         // slither-disable-next-line timestamp
         if (block.timestamp < v.challengeEnds) revert ChallengeWindowOpen();
         _unlock(jobId, 0, false);
-        _settle(jobId, v, phase == Phase.Approved);
+        ARLJobs.Job memory job = jobs.getJob(jobId);
+        // slither-disable-next-line timestamp
+        if (job.status == ARLJobs.JobStatus.Submitted && block.timestamp < job.expiredAt) {
+            _settle(jobId, v, phase == Phase.Approved);
+        } else {
+            // Finalized late (security report 2026-11-15): after the deadline the escrow can
+            // only go back to the client, as in `resolve` and `expireDispute`.
+            v.phase = Phase.Finalized;
+            emit Finalized(jobId, false, v.voteHash);
+            if (job.status == ARLJobs.JobStatus.Submitted) _refund(jobId, v.voteHash, false);
+        }
     }
 
     /// @notice Arbiter only, on a disputed job. If the ruling overturns the decision, the bonds of

@@ -43,9 +43,9 @@
       "runtimeSize": 4120
     },
     "ARLVerifiedEvaluator": {
-      "creationHash": "0x7eb9d307238a5a8d30488c8801e478eb5e7b736cd06873af95353cda10440aee",
-      "runtimeHash": "0x3c93cef031abb757a937ec1b41ba9cb47b44cd9c4c3f176b7431127d7eb9bb1d",
-      "runtimeSize": 15980
+      "creationHash": "0x686540ac500dde5792e9e6381d77b30d660b1438e1b156ed73b6425541038b97",
+      "runtimeHash": "0xfe98efa35d44e56cd7f6db6d7b893cd705979c5b4f0b7a28a6e5b7b20c525c16",
+      "runtimeSize": 16238
     }
   }
 }

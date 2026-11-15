@@ -53,3 +53,10 @@ so a caller cannot settle a job while starving its reputation feedback. One new 
 `large-numeric-literal` at the `REGISTRY_GAS_RESERVE` constant (line 146, the `10_000` margin), is a
 false positive like the one at line 142. The other results moved by a few lines; the code on each
 line and every verdict are unchanged.
+
+Update 2026-11-15 (bug bounty report, late finalize): `finalize` now settles a decided job after
+its deadline the way `resolve` and `expireDispute` do (back to the client, or nothing to move if
+the client already claimed the refund), instead of reverting forever. One new result,
+`reentrancy-state-change` at the `jobs.getJob` call in `finalize` (line 480), is a false positive
+for the same reason as in `expireDispute`: a view call on the immutable escrow in a
+`nonReentrant` function. The results below it moved by ten lines; verdicts unchanged.

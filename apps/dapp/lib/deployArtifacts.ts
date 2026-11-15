@@ -134,8 +134,8 @@ export const DEPLOY_ARTIFACTS = {
     ],
   },
   ARLVerifiedEvaluator: {
-    creationHash: "0x7eb9d307238a5a8d30488c8801e478eb5e7b736cd06873af95353cda10440aee",
-    creationSize: 16969,
+    creationHash: "0x686540ac500dde5792e9e6381d77b30d660b1438e1b156ed73b6425541038b97",
+    creationSize: 17234,
     constructorInputs: [
       {
         name: "jobs_",
