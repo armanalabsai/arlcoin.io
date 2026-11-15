@@ -13,15 +13,16 @@ no bandwidth fair-use pause.
 The Pages project `arlcoin-io` is connected to this repository. Every push builds; `main` is
 production and other branches get preview URLs (`<branch>.arlcoin-io.pages.dev`).
 
-| Piece              | Where                                                                                    |
-| ------------------ | ---------------------------------------------------------------------------------------- |
-| Project settings   | [`wrangler.toml`](../wrangler.toml): output directory `dist`                             |
-| Build command      | `bash scripts/build-cloudflare.sh` (installs, runs `scripts/build-site.sh`, writes dist) |
-| Website and `/app` | Static exports of `apps/web` and `apps/dapp` (`scripts/build-site.sh`)                   |
-| Headers            | [`apps/web/public/_headers`](../apps/web/public/_headers)                                |
-| Redirects          | [`apps/web/public/_redirects`](../apps/web/public/_redirects)                            |
-| `/api/supply`      | Pages Function [`functions/api/supply.js`](../functions/api/supply.js)                   |
-| Analytics          | None (Vercel Web Analytics was removed)                                                  |
+| Piece              | Where                                                                                                                               |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Project settings   | [`wrangler.toml`](../wrangler.toml): output directory `dist`                                                                        |
+| Build command      | `bash scripts/build-cloudflare.sh` (installs, runs `scripts/build-site.sh`, writes dist)                                            |
+| Website and `/app` | Static exports of `apps/web` and `apps/dapp` (`scripts/build-site.sh`)                                                              |
+| Headers            | [`apps/web/public/_headers`](../apps/web/public/_headers)                                                                           |
+| Redirects          | [`apps/web/public/_redirects`](../apps/web/public/_redirects)                                                                       |
+| `/api/supply`      | Pages Function [`functions/api/supply.js`](../functions/api/supply.js)                                                              |
+| `/api/v1/*`        | Pages Function [`functions/api/v1/[[path]].js`](../functions/api/v1/%5B%5Bpath%5D%5D.js) (Agent API v1, `packages/mcp/src/http.ts`) |
+| Analytics          | None (Vercel Web Analytics was removed)                                                                                             |
 
 Checked on the preview deployment of 2026-10-30: pages answer 200, `/about` redirects to
 `/about/`, `/core/team/...` redirects to `/core/`, unknown paths answer 404, the site and the app
