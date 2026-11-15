@@ -43,7 +43,49 @@ export const evaluatorAbi = parseAbi([
   "function voteOf(uint256 jobId, address validator) view returns (uint8)",
   "function accept(uint256 jobId)",
   "function vote(uint256 jobId, bool approve, bytes32 deliverable, bytes32 evidence)",
+  "function finalize(uint256 jobId)",
+  "function expireDispute(uint256 jobId)",
+  "function arbiterDeadline(uint256 jobId) view returns (uint256)",
 ]);
+
+/** ARLVerifiedEvaluator.Phase values the keeper acts on. */
+export const Phase = { Configured: 1, Approved: 2, Rejected: 3, Disputed: 4 } as const;
+
+/**
+ * The settlement call a decided job is due for, or null: `finalize` once the challenge window
+ * has passed on an approved or rejected job, `expireDispute` once the arbiter's deadline has
+ * passed on a disputed one. Anyone may make either call; a validator makes them so a provider
+ * whose work was approved does not have to watch the deadline itself (security report
+ * 2026-11-15). An evaluator without `arbiterDeadline` (v4) never reports `expireDispute`.
+ */
+export async function settlementDue(
+  client: PublicClient,
+  evaluator: Address,
+  jobId: bigint,
+): Promise<"finalize" | "expireDispute" | null> {
+  const v = await client.readContract({
+    address: evaluator,
+    abi: evaluatorAbi,
+    functionName: "getVerdict",
+    args: [jobId],
+  });
+  const { timestamp } = await client.getBlock();
+  if (v.phase === Phase.Approved || v.phase === Phase.Rejected) {
+    return timestamp >= v.challengeEnds ? "finalize" : null;
+  }
+  if (v.phase === Phase.Disputed) {
+    const deadline = await client
+      .readContract({
+        address: evaluator,
+        abi: evaluatorAbi,
+        functionName: "arbiterDeadline",
+        args: [jobId],
+      })
+      .catch(() => null);
+    return deadline !== null && timestamp >= deadline ? "expireDispute" : null;
+  }
+  return null;
+}
 
 /** ARLJobs.JobStatus. */
 export const JobStatus = {
@@ -183,6 +225,26 @@ export async function castVote(
     abi: evaluatorAbi,
     functionName: "vote",
     args: [jobId, approve, deliverable, evidence],
+  });
+  const receipt = await client.waitForTransactionReceipt({ hash });
+  if (receipt.status !== "success") throw new Error(`transaction ${hash} reverted`);
+  return hash;
+}
+
+/** Sends the settlement call `settlementDue` reported. */
+export async function settle(
+  wallet: Wallet,
+  client: PublicClient,
+  evaluator: Address,
+  jobId: bigint,
+  call: "finalize" | "expireDispute",
+): Promise<Hex> {
+  checkChain(await client.getChainId());
+  const hash = await wallet.writeContract({
+    address: evaluator,
+    abi: evaluatorAbi,
+    functionName: call,
+    args: [jobId],
   });
   const receipt = await client.waitForTransactionReceipt({ hash });
   if (receipt.status !== "success") throw new Error(`transaction ${hash} reverted`);
