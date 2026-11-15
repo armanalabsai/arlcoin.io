@@ -1,7 +1,14 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { actions, deliverableHash, rolesOf, statusName, validateJob } from "../../lib/jobs.ts";
+import {
+  actions,
+  checkParties,
+  deliverableHash,
+  rolesOf,
+  statusName,
+  validateJob,
+} from "../../lib/jobs.ts";
 import type { Job } from "../../lib/jobs.ts";
 
 const CLIENT = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
@@ -78,5 +85,23 @@ describe("jobs", () => {
     bad({ description: "a", budget: "1", hours: "1.5" });
     bad({ description: "a", budget: "1", hours: "2161" });
     assert.equal(validateJob({ description: "a\nb", budget: "1", hours: "2160" }).ok, true);
+  });
+});
+
+describe("checkParties", () => {
+  it("refuses a provider that evaluates its own work or a client hiring itself", () => {
+    assert.deepEqual(checkParties({ client: CLIENT, provider: PROVIDER, evaluator: CLIENT }), {
+      ok: true,
+    });
+    assert.deepEqual(checkParties({ client: CLIENT, provider: PROVIDER, evaluator: OTHER }), {
+      ok: true,
+    });
+    const own = checkParties({
+      client: CLIENT,
+      provider: PROVIDER,
+      evaluator: PROVIDER.toLowerCase(),
+    });
+    assert.equal(own.ok, false);
+    assert.equal(checkParties({ client: CLIENT, provider: CLIENT, evaluator: OTHER }).ok, false);
   });
 });

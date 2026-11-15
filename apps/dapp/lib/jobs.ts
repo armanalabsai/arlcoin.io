@@ -105,6 +105,23 @@ export function validateJob(input: {
 }
 
 /**
+ * Refuses parties that defeat the escrow: a provider that evaluates its own work can pay itself
+ * the whole budget, and a client that hires itself has nothing to escrow (security report
+ * 2026-11-15). The contract allows both, so the screen checks before anything is sent.
+ */
+export function checkParties(p: {
+  client: string;
+  provider: string;
+  evaluator: string;
+}): { ok: true } | { ok: false; error: string } {
+  const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
+  if (same(p.provider, p.evaluator))
+    return { ok: false, error: "The provider cannot evaluate its own work" };
+  if (same(p.provider, p.client)) return { ok: false, error: "You cannot hire yourself" };
+  return { ok: true };
+}
+
+/**
  * Anvil's publicly known development accounts 0 to 9 (addresses only). On the local chain the
  * node unlocks them, so the screen can play a provider or evaluator that is one of them.
  */

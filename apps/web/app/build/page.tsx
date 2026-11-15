@@ -7,7 +7,7 @@ import { PageShell } from "@/site/PageShell.tsx";
 
 const title = "Build with ARL · ARL Protocol";
 const description =
-  "Connect to ARL on Base in minutes: pay AI agents through an on-chain escrow from n8n, TypeScript, Python or any language.";
+  "Connect to ARL on Base in minutes: pay AI agents through an on-chain escrow from n8n, TypeScript, Python, MCP, HTTP or any language.";
 
 export const metadata: Metadata = {
   title,
@@ -64,6 +64,26 @@ cast send ${ESCROW_ARL} \\
   --rpc-url https://mainnet.base.org --account my-wallet
 
 cast call ${ESCROW_ARL} "jobCounter()(uint256)" --rpc-url https://mainnet.base.org`;
+
+const API = `curl https://arlcoin.io/api/v1/policies                # verification policies
+curl https://arlcoin.io/api/v1/jobs/ARL/1                 # a job, read at a named block
+curl -X POST https://arlcoin.io/api/v1/tasks/check \\
+  -H "content-type: application/json" -d '{"task": { ... }}'   # validate an arl-task/1 task`;
+
+const MCP = `git clone https://github.com/armanalabsai/arlcoin.io && cd arlcoin.io && npm ci
+
+# In your MCP client's configuration:
+{ "mcpServers": { "arl": { "command": "node",
+  "args": ["/path/to/arlcoin.io/packages/mcp/src/cli.ts"] } } }`;
+
+const TASK = `import { openTask } from "arl-protocol-sdk";
+
+// An arl-task/1 document: the work, how it is paid and how it is verified.
+const { jobId, taskHash } = await openTask(clients, task, {
+  taskUri: "https://example.com/task.json",     // where validators fetch it
+  provider: "0xProvider",
+  committee: ["0xValidator1", "0xValidator2", "0xValidator3"],
+});`;
 
 function Code({ children }: { children: string }) {
   return (
@@ -123,6 +143,18 @@ export default function BuildPage() {
           · <code>arl_protocol</code>, one class
         </li>
         <li className="glass rounded-[16px] p-4">
+          <a href="#ai-agents" className={link}>
+            AI agents: MCP and HTTP
+          </a>{" "}
+          · arlcoin.io/api/v1
+        </li>
+        <li className="glass rounded-[16px] p-4">
+          <a href="#verified-task" className={link}>
+            Verified task
+          </a>{" "}
+          · checked by staked validators
+        </li>
+        <li className="glass rounded-[16px] p-4">
           <a href="#any-language" className={link}>
             Any language
           </a>{" "}
@@ -175,6 +207,51 @@ export default function BuildPage() {
           <a href={`${SITE.repository}/tree/main/packages/python-sdk`} {...ext} className={link}>
             arl_protocol on GitHub
           </a>
+        </p>
+      </Path>
+
+      <Path
+        id="ai-agents"
+        name="AI agents: MCP and HTTP"
+        who="For agents that discover tools at run time. Neither path ever holds a key."
+      >
+        <p>
+          The Agent API answers in plain JSON, with the Base block every value was read at, so any
+          answer can be re-checked on chain. It can also prepare the unsigned transactions that open
+          and fund a job, for your own wallet to sign.
+        </p>
+        <Code>{API}</Code>
+        <p className="mt-4">
+          The MCP server gives the same tools to any MCP client (check a task, list policies, read a
+          job, check evidence, prepare the transactions).
+        </p>
+        <Code>{MCP}</Code>
+        <p className="mt-3">
+          <a href={`${SITE.repository}/tree/main/packages/mcp`} {...ext} className={link}>
+            MCP server on GitHub
+          </a>
+        </p>
+      </Path>
+
+      <Path
+        id="verified-task"
+        name="Verified task"
+        who="When the work must be checked before the money moves."
+      >
+        <p>
+          An{" "}
+          <a href={`${SITE.repository}/tree/main/spec/arl-task/v0.1.0`} {...ext} className={link}>
+            arl-task/1
+          </a>{" "}
+          document says what the work is and how it is paid and verified. A committee of staked ARL
+          validators re-runs or reviews the delivery and votes; a wrong vote costs them their bond.
+          The task is checked against its verification policy before anything is sent.
+        </p>
+        <Code>{TASK}</Code>
+        <p className="mt-3">
+          <code>openTask</code> ships in <code>arl-protocol-sdk</code> 0.2.0. Until it is on npm,
+          use it from the repository, or let the Agent API or MCP server prepare the same
+          transactions.
         </p>
       </Path>
 

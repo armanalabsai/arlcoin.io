@@ -184,6 +184,11 @@ export async function createJob(
   const evaluator = input.evaluator?.trim()
     ? checkAddress(input.evaluator, "the evaluator")
     : sender(c);
+  // The contract allows these, but they defeat the escrow (security report 2026-11-15).
+  if (provider.toLowerCase() === evaluator.toLowerCase())
+    throw new ArlJobError("the provider cannot evaluate its own work");
+  if (provider.toLowerCase() === sender(c).toLowerCase())
+    throw new ArlJobError("the client cannot hire itself");
   if (!(input.hoursUntilDeadline >= 1 && input.hoursUntilDeadline <= 24 * 365))
     throw new ArlJobError("the deadline must be between 1 hour and 365 days away");
   const { timestamp } = await c.publicClient.getBlock();

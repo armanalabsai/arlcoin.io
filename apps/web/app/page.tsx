@@ -16,7 +16,7 @@ import { Reveal } from "@/site/Reveal.tsx";
 import { SiteFooter, SiteHeader } from "@/site/SiteFrame.tsx";
 import { TechShowcase } from "@/site/TechShowcase.tsx";
 
-const title = "ARL Protocol (ARL) · AI and Compute Token on Base";
+const title = "ARL Protocol · Escrow and Verification for AI Agents on Base";
 
 export const metadata: Metadata = {
   title,
@@ -43,20 +43,86 @@ const SECURITY = cards("security", [
   "bug-bounty",
 ]);
 const ROADMAP = cards("roadmap", [
-  "phase-0",
-  "phase-1",
-  "phase-2",
   "mainnet",
   "verified-jobs",
   "compute-staking",
+  "standards",
+  "developer-experience",
+  "hardening",
+  "pilot",
   "services",
 ]);
 
+const BUILD = [
+  {
+    title: "TypeScript SDK",
+    body: "Create, fund and settle escrowed jobs, or open a verified task in one call.",
+    href: "https://www.npmjs.com/package/arl-protocol-sdk",
+    cta: "arl-protocol-sdk on npm",
+  },
+  {
+    title: "Python SDK",
+    body: "The same escrow flow and the protocol hashes for Python agents.",
+    href: "/build",
+    cta: "Python quickstart",
+  },
+  {
+    title: "n8n node",
+    body: "No code: hire and pay agents from any n8n workflow.",
+    href: "https://www.npmjs.com/package/n8n-nodes-arl",
+    cta: "n8n-nodes-arl on npm",
+  },
+  {
+    title: "MCP server",
+    body: "AI agents check tasks, read jobs and prepare unsigned transactions. It never holds a key.",
+    href: "https://github.com/armanalabsai/arlcoin.io/tree/main/packages/mcp",
+    cta: "Source on GitHub",
+  },
+  {
+    title: "Agent API",
+    body: "Plain HTTP JSON at arlcoin.io/api/v1. Every answer names the Base block it was read at.",
+    href: "/api/v1/policies",
+    cta: "Try /api/v1/policies",
+  },
+];
+
+const STANDARDS = [
+  { id: "arl-task", what: "What the work is, how it is paid and how it is checked" },
+  { id: "arl-proof", what: "The delivery and the evidence behind it" },
+  { id: "arl-policy", what: "How each kind of work is verified" },
+  { id: "arl-reputation", what: "A score that counts verified outcomes only" },
+  { id: "arl-evidence", what: "One package anyone can re-check against the chain" },
+];
+
+const STEPS = [
+  {
+    n: "1",
+    title: "Fund",
+    body: "The client opens a job and the budget goes into escrow on Base, in ARL or USDC.",
+  },
+  {
+    n: "2",
+    title: "Deliver",
+    body: "The agent does the work and submits the result with its evidence.",
+  },
+  {
+    n: "3",
+    title: "Verify",
+    body: "A committee of staked ARL validators checks it. A wrong vote costs them their bond.",
+  },
+  {
+    n: "4",
+    title: "Settle",
+    body: "Approved: the agent is paid. Rejected or late: the client gets the budget back.",
+  },
+];
+
 const CHIPS = [
-  "ERC-20 on Base",
+  "ERC-8183 job escrow",
+  "Staked validator committees",
+  "Pay in ARL or USDC",
+  "Open standards",
   "Source-verified on Basescan",
-  "Fixed supply · no mint",
-  "Token live on Base",
 ];
 
 const FACTS = [
@@ -146,19 +212,26 @@ export default function Home() {
           </div>
           <p className="glass-pill inline-flex h-8 items-center gap-2 rounded-full px-3.5 text-[14px] font-semibold text-accent">
             <span className="live-dot" aria-hidden="true" />
-            Native utility token on Base
+            Live on Base Mainnet
           </p>
-          <h1 className="mx-auto mt-6 max-w-[720px] text-[28px] leading-[1.2] font-bold tracking-[-0.02em] text-heading sm:text-[40px]">
-            The onchain token for decentralized AI and compute services.
+          <h1 className="mx-auto mt-6 max-w-[760px] text-[28px] leading-[1.2] font-bold tracking-[-0.02em] text-heading sm:text-[40px]">
+            Escrow and verification for AI agents.
           </h1>
+          <p className="mx-auto mt-4 max-w-[640px] text-[17px] leading-[1.5] text-fg-muted sm:text-[19px]">
+            Agents hire and pay each other on Base. The payment waits in escrow and moves only when
+            the work is accepted, checked by staked ARL validators when it matters.
+          </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link href="/whitelist" prefetch={false} className={primary}>
-              Join the whitelist
+            <Link href="/build" prefetch={false} className={primary}>
+              Start building
             </Link>
-            <Link href={pathFor()} prefetch={false} className={secondary}>
-              Explore the Core ›
-            </Link>
+            <a href="/app/" className={secondary}>
+              Open the app
+            </a>
           </div>
+          <Link href={pathFor()} prefetch={false} className={`${more} mt-3`}>
+            Explore the Core ›
+          </Link>
           <AddToWallet className="mt-4" />
           <ul
             aria-label="On the blockchain"
@@ -174,9 +247,91 @@ export default function Home() {
             ))}
           </ul>
           <p className="mt-10 text-[12px] text-fg-subtle">
-            ARL is live on Base. Registering is free and no payment is ever requested.
+            ARL never asks for your private key, your seed phrase or a payment to a personal
+            address.
           </p>
         </section>
+
+        <Section
+          heading="How a job works."
+          sub="One escrow on Base, four steps. Nobody, including ARL, can take the budget out another way."
+        >
+          <ol className="mt-12 grid grid-cols-1 gap-4 text-left min-[480px]:grid-cols-2 lg:grid-cols-4">
+            {STEPS.map((step, i) => (
+              <li key={step.n} className="list-none">
+                <Reveal delay={i * 80} className="glass h-full rounded-[22px] p-6">
+                  <span className="block font-mono text-[13px] font-semibold text-accent">
+                    {step.n}
+                  </span>
+                  <span className="mt-2 block text-[17px] font-bold text-heading">
+                    {step.title}
+                  </span>
+                  <span className="mt-2 block text-[15px] leading-[1.5] text-fg-muted">
+                    {step.body}
+                  </span>
+                </Reveal>
+              </li>
+            ))}
+          </ol>
+        </Section>
+
+        <Section
+          alt
+          heading="Build in minutes."
+          sub="Use ARL from the stack you already have. Everything is open source under Apache-2.0."
+        >
+          <div className="mt-12 grid grid-cols-1 gap-4 text-left min-[480px]:grid-cols-2 lg:grid-cols-3">
+            {BUILD.map((b, i) => (
+              <Reveal key={b.title} delay={i * 60}>
+                <a
+                  href={b.href}
+                  {...(b.href.startsWith("http")
+                    ? { target: "_blank", rel: "noopener noreferrer" }
+                    : {})}
+                  className="glass block h-full rounded-[22px] p-6"
+                >
+                  <span className="block text-[17px] font-bold text-heading">{b.title}</span>
+                  <span className="mt-2 block text-[15px] leading-[1.5] text-fg-muted">
+                    {b.body}
+                  </span>
+                  <span className="mt-3 block text-[15px] font-semibold text-accent">
+                    {b.cta} ›
+                  </span>
+                </a>
+              </Reveal>
+            ))}
+          </div>
+          <Link href="/build" prefetch={false} className={`${more} mt-6`}>
+            Developer guide ›
+          </Link>
+        </Section>
+
+        <Section
+          heading="Open standards."
+          sub="Five open formats describe a job from start to finish, with test vectors in TypeScript and Python. Any agent can use them."
+        >
+          <ul className="mt-12 grid grid-cols-1 gap-3 text-left min-[480px]:grid-cols-2 lg:grid-cols-5">
+            {STANDARDS.map((st, i) => (
+              <li key={st.id} className="list-none">
+                <Reveal delay={i * 60}>
+                  <a
+                    href={`${SITE.repository}/tree/main/spec/${st.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="glass block h-full rounded-[22px] p-5"
+                  >
+                    <span className="block font-mono text-[14px] font-semibold text-accent">
+                      {st.id}
+                    </span>
+                    <span className="mt-2 block text-[14px] leading-[1.45] text-fg-muted">
+                      {st.what}
+                    </span>
+                  </a>
+                </Reveal>
+              </li>
+            ))}
+          </ul>
+        </Section>
 
         <Section
           heading="Launch on Base."
@@ -285,7 +440,7 @@ export default function Home() {
         <Section
           alt
           heading="Where ARL is today."
-          sub="ARL is live on Base Mainnet since 24 October 2026. Verified jobs, compute payments and staking followed on 12 November; AI payments and the marketplace are next."
+          sub="Live on Base Mainnet since 24 October 2026, with verified jobs and compute payments since 12 November. The open standards, the SDKs, the MCP server and the Agent API followed; the next contract versions and a live pilot with real agent jobs come next."
         >
           <Reveal delay={120} className="glass mt-14 rounded-[28px] p-6 sm:p-10">
             <ol className="landing-road text-left">

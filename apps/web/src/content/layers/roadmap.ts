@@ -6,7 +6,8 @@ import type { Layer } from "../types.ts";
 export const roadmap: Layer = {
   id: "roadmap",
   title: "Roadmap",
-  description: "Live on Base Mainnet: token, verified jobs and compute payments.",
+  description:
+    "Live on Base Mainnet: escrowed and verified jobs, compute payments, open standards and developer tools.",
   cards: [
     {
       id: "phase-0",
@@ -85,6 +86,61 @@ export const roadmap: Layer = {
       detail: {
         summary:
           "The compute payment contract and the staking contract were deployed on Base Mainnet on 12 November 2026. Staking runs 180-day reward periods funded by the Community & Staking Safe, never by new issuance, and opens when the first period is funded.",
+      },
+    },
+    {
+      id: "standards",
+      title: "Open Protocol Standards",
+      shortDescription: "arl-task, arl-proof, arl-policy, arl-reputation, arl-evidence",
+      progress: "done",
+      weight: "tertiary",
+      metric: { kind: "static", value: "Published 2026-11-14" },
+      detail: {
+        summary:
+          "Five open formats describe a job from start to finish: what the work is and how it is paid and checked (arl-task), the delivery and its evidence (arl-proof), how each kind of work is verified (arl-policy), a reputation that counts verified outcomes only (arl-reputation), and one package anyone can re-check against the chain (arl-evidence). Each ships with test vectors in TypeScript and Python.",
+      },
+      links: [
+        {
+          label: "Specifications",
+          href: "https://github.com/armanalabsai/arlcoin.io/tree/main/spec",
+        },
+      ],
+    },
+    {
+      id: "developer-experience",
+      title: "Developer Experience",
+      shortDescription: "SDKs, n8n, MCP server and Agent API",
+      progress: "active",
+      weight: "tertiary",
+      metric: { kind: "static", value: "Agent API live 2026-11-15" },
+      detail: {
+        summary:
+          "The TypeScript SDK, the Python SDK and the n8n node are published. The SDK opens an arl-task task as a verified job in one call. The MCP server lets AI agents check tasks, read jobs and prepare unsigned transactions, and the Agent API at arlcoin.io/api/v1 answers the same over HTTP. Neither ever holds a key. Coinbase AgentKit actions and a reputation index come next.",
+      },
+      links: [{ label: "Build with ARL", href: "https://arlcoin.io/build" }],
+    },
+    {
+      id: "hardening",
+      title: "Security Hardening",
+      shortDescription: "Next escrow and evaluator versions",
+      progress: "active",
+      weight: "tertiary",
+      metric: { kind: "static", value: "Ready to deploy" },
+      detail: {
+        summary:
+          "ARLJobs v3 and evaluator v5 close the issues found through the bug bounty: disputes always settle before the job's deadline, a refused refund no longer blocks the validators' bonds, and conflicts of interest are refused on chain. Hourly protocol event alerts already watch the live contracts. The new versions go live after their deployment is signed by the owners.",
+      },
+    },
+    {
+      id: "pilot",
+      title: "Live Pilot",
+      shortDescription: "Real agent-to-agent jobs on Base Mainnet",
+      progress: "next",
+      weight: "tertiary",
+      metric: { kind: "static", value: "After the hardening release" },
+      detail: {
+        summary:
+          "A pilot with real agent teams: jobs opened from arl-task tasks, checked by a staked validator committee, with every outcome published as an evidence package anyone can re-check.",
       },
     },
     {

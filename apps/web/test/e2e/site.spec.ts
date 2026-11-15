@@ -15,17 +15,14 @@ const PAGES = [
   ...SOLUTIONS.map((s) => `/${s.slug}`),
 ];
 
-test("the landing page leads to the whitelist and the Core", async ({ page }) => {
+test("the landing page leads to the developer guide and the Core", async ({ page }) => {
   await page.goto("/");
   await expect(
-    page.getByRole("heading", {
-      level: 1,
-      name: "The onchain token for decentralized AI and compute services.",
-    }),
+    page.getByRole("heading", { level: 1, name: "Escrow and verification for AI agents." }),
   ).toBeVisible();
-  const cta = page.getByRole("main").getByRole("link", { name: "Join the whitelist" }).first();
+  const cta = page.getByRole("main").getByRole("link", { name: "Start building" }).first();
   await cta.click();
-  await expect(page).toHaveURL(/\/whitelist\/?$/);
+  await expect(page).toHaveURL(/\/build\/?$/);
   await page.goto("/");
   await page.getByRole("link", { name: "Explore the Core ›" }).click();
   await expect(page).toHaveURL(/\/core\/?$/);
