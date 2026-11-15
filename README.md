@@ -53,7 +53,7 @@ Reproduce: `npm run check:bytecode` proves a clean build matches
 compares that build with the code at each deployed address.
 
 Which build is live: the two job escrows on Base Mainnet are **ARLJobs v2**, deployed on
-2026-10-31 from commit `2f51d8c`, and they match that commit's build. `main` already carries
+2026-10-31 from the code of commit `2f51d8c`. `main` already carries
 **ARLJobs v3** (balance-delta funding, `claimRefundTo`) and **evaluator v5**, and
 `contracts/deploy/bytecode.json` describes those new builds; they replace the live v2 escrows and
 v4 evaluators when the owners sign the prepared deployment. To check the live escrows, build
