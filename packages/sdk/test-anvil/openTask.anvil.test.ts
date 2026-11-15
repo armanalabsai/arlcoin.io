@@ -29,7 +29,7 @@ import {
   type TaskDeployment,
 } from "../src/index.ts";
 
-const PORT = 8550;
+const PORT = 8551;
 const RPC = `http://127.0.0.1:${PORT}`;
 // Anvil's first two development keys; local chain only.
 const client = privateKeyToAccount(
