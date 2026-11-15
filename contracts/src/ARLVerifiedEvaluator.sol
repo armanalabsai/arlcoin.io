@@ -140,6 +140,10 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
     string public constant FEEDBACK_TAG = "arl-verified";
     /// @notice Gas forwarded to each ERC-8004 registry call.
     uint256 public constant REGISTRY_GAS = 300_000;
+    /// @notice Gas each registry call needs left before it starts: the EVM forwards at most 63/64
+    /// of what remains, so with less a caller could choose a gas limit that settles the job but
+    /// starves the capped call, and the outcome would never reach the provider's reputation.
+    uint256 public constant REGISTRY_GAS_RESERVE = REGISTRY_GAS + REGISTRY_GAS / 63 + 10_000;
 
     /// Committee member states in `_votes`.
     uint8 private constant MEMBER = 1;
@@ -230,6 +234,7 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
     error ChallengeWindowClosed();
     error ZeroAmount();
     error ArbiterWindowOpen();
+    error InsufficientGas();
 
     constructor(
         ARLJobs jobs_,
@@ -713,7 +718,11 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         if (agentId == 0 || address(reputation) == address(0) || address(identity) == address(0)) {
             return;
         }
-        (bool ok, bool owned) = _ownedBy(agentId, jobs.getJob(jobId).provider);
+        address provider = jobs.getJob(jobId).provider;
+        // A registry may fail on its own; it may not be made to fail by the caller's gas limit.
+        // Both calls below are capped at REGISTRY_GAS, so one check covers the two.
+        if (gasleft() < 2 * REGISTRY_GAS_RESERVE) revert InsufficientGas();
+        (bool ok, bool owned) = _ownedBy(agentId, provider);
         if (!ok) emit FeedbackFailed(jobId, agentId);
         if (!owned) return;
         try reputation.giveFeedback{gas: REGISTRY_GAS}(

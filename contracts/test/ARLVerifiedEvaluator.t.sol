@@ -1160,6 +1160,32 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         assertEq(reputation.count(), 0);
     }
 
+    /// Security report 2026-11-15: a caller could pick a gas limit that settled the job but left
+    /// the capped registry call too little gas, so the outcome never reached the reputation.
+    function test_callerCannotStarveTheFeedbackCall() public {
+        uint256 id = _approved();
+        vm.warp(block.timestamp + WINDOW);
+        uint256 gasLimit = 200_000;
+        for (; gasLimit < 1_500_000; gasLimit += 5_000) {
+            try ev.finalize{gas: gasLimit}(id) {
+                break;
+            } catch {}
+        }
+        // The first gas limit that settles the job is one that also records the outcome.
+        assertEq(uint256(_status(id)), uint256(ARLJobs.JobStatus.Completed));
+        assertEq(reputation.count(), 1);
+        assertEq(reputation.lastAgent(), AGENT);
+        assertEq(reputation.lastValue(), int128(100));
+    }
+
+    function test_feedbackRevertsWithTooLittleGas() public {
+        uint256 id = _approved();
+        vm.warp(block.timestamp + WINDOW);
+        vm.expectRevert(ARLVerifiedEvaluator.InsufficientGas.selector);
+        ev.finalize{gas: 500_000}(id);
+        assertEq(uint256(_status(id)), uint256(ARLJobs.JobStatus.Submitted));
+    }
+
     // ---------------------------------------------------------------- dispute and resolve
 
     function test_disputeEscrowsBond() public {
