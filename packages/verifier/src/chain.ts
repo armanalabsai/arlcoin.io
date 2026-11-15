@@ -76,11 +76,17 @@ export interface JobView {
   deliverable: Hex | null;
 }
 
+/** Blocks per eth_getLogs call when reading a job; public RPCs cap the range of one call. */
+const READ_WINDOW = 5_000n;
+/** How far back a job's submission is looked for: longer than any job lives (365 days on Base). */
+const SUBMISSION_LOOKBACK = 16_000_000n;
+
 export async function readJob(
   client: PublicClient,
   evaluator: Address,
   jobId: bigint,
   validator: Address,
+  window: bigint = READ_WINDOW,
 ): Promise<JobView> {
   checkChain(await client.getChainId());
   const jobs = await client.readContract({
@@ -111,15 +117,25 @@ export async function readJob(
   ]);
   let deliverable: Hex | null = null;
   if (job.status >= JobStatus.Submitted) {
-    const logs = await client.getLogs({
-      address: jobs,
-      event: parseAbiItem(
-        "event JobSubmitted(uint256 indexed jobId, address indexed provider, bytes32 deliverable)",
-      ),
-      args: { jobId },
-      fromBlock: 0n,
-    });
-    deliverable = logs.at(-1)?.args.deliverable ?? null;
+    // The latest submission, searched from the head backwards one bounded range at a time, so
+    // an RPC that caps the range of eth_getLogs (as public endpoints do) still answers.
+    const submitted = parseAbiItem(
+      "event JobSubmitted(uint256 indexed jobId, address indexed provider, bytes32 deliverable)",
+    );
+    const head = await client.getBlockNumber({ cacheTime: 0 });
+    const floor = head > SUBMISSION_LOOKBACK ? head - SUBMISSION_LOOKBACK : 0n;
+    for (let to = head; deliverable === null && to >= floor; to -= window) {
+      const from = to - window + 1n > floor ? to - window + 1n : floor;
+      const logs = await client.getLogs({
+        address: jobs,
+        event: submitted,
+        args: { jobId },
+        fromBlock: from,
+        toBlock: to,
+      });
+      deliverable = logs.at(-1)?.args.deliverable ?? null;
+      if (from === floor) break;
+    }
   }
   return {
     jobs,

@@ -116,7 +116,13 @@ export async function step(deps: WatchDeps, state: WatchState): Promise<WatchSta
   for (const id of next.jobs) {
     const jobId = BigInt(id);
     try {
-      const job = await readJob(deps.client, deps.evaluator, jobId, me);
+      const job = await readJob(
+        deps.client,
+        deps.evaluator,
+        jobId,
+        me,
+        deps.logWindow ?? LOG_WINDOW,
+      );
       if (job.phase !== OPEN_PHASE) {
         log({ jobId: id, event: "settled", phase: job.phase });
         continue;
