@@ -10,7 +10,7 @@ import { join } from "node:path";
 import type { Hex } from "viem";
 
 import type { ContainerRunner } from "./docker.ts";
-import { inside, materialize, sha256, type Fetcher } from "./inputs.ts";
+import { inside, materialize, noSymlinkOnPath, sha256, type Fetcher } from "./inputs.ts";
 import {
   acceptance,
   RESULT_VERSION,
@@ -38,6 +38,8 @@ async function openUp(dir: string): Promise<void> {
 /** SHA-256 of a declared output, or null if it is missing or not a regular file (no symlinks). */
 async function outputEntry(outDir: string, path: string): Promise<OutputEntry> {
   const full = inside(outDir, path);
+  // A job may create a symlinked directory in its output; never follow one on the way.
+  if (!(await noSymlinkOnPath(outDir, full))) return { path, sha256: null };
   // One handle for the check and the read, so the file cannot be swapped in between; O_NOFOLLOW
   // refuses a symlink and O_NONBLOCK keeps a named pipe (FIFO) from blocking the open, where the
   // platform supports them. Anything that is not a regular file is then refused by the stat.

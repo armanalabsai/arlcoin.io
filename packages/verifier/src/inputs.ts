@@ -4,7 +4,7 @@
 
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdir, rm, writeFile } from "node:fs/promises";
+import { lstat, mkdir, rm, writeFile } from "node:fs/promises";
 import { dirname, join, resolve, sep } from "node:path";
 
 import type { FileInput, GitInput, ReexecSpec } from "./spec.ts";
@@ -31,6 +31,27 @@ export function inside(root: string, path: string): string {
     throw new InputError(`${path} leaves its directory`);
   }
   return full;
+}
+
+/**
+ * True when every existing directory between `root` and `full` is a real directory, not a
+ * symlink. `inside` compares path strings and O_NOFOLLOW only guards the last component, so a
+ * symlinked directory on the way (for example one a job created in its output directory, or one
+ * checked out from a git input) would otherwise lead outside `root` (security report 2026-11-15).
+ */
+export async function noSymlinkOnPath(root: string, full: string): Promise<boolean> {
+  const base = resolve(root);
+  const parts = full.slice(base.length).split(sep).filter(Boolean);
+  let current = base;
+  for (const part of parts.slice(0, -1)) {
+    current = join(current, part);
+    try {
+      if ((await lstat(current)).isSymbolicLink()) return false;
+    } catch {
+      return true; // Not there yet: nothing below it can be followed.
+    }
+  }
+  return true;
 }
 
 function run(cmd: string, args: readonly string[]): Promise<string> {
@@ -125,6 +146,9 @@ export async function materialize(
 ): Promise<void> {
   for (const input of spec.inputs) {
     const target = inside(workDir, input.path);
+    if (!(await noSymlinkOnPath(workDir, target))) {
+      throw new InputError(`${input.path} goes through a symlinked directory`);
+    }
     if (input.kind === "file") await materializeFile(input, target, fetcher);
     else await materializeGit(input, target, fetcher);
   }
