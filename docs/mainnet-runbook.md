@@ -117,3 +117,15 @@ stamped `base-mainnet`.
 
 Stop at the first mismatch. A wrong Safe or contract address means the deployer's nonce or the
 salt changed; nothing is funded until every check passes.
+
+## Safe operating rules
+
+These hold for every signer, in addition to the steps above.
+
+- **Treasury Safe and the timelock.** Never call `renounceRole` for `PROPOSER_ROLE` or
+  `EXECUTOR_ROLE`: the role goes at once, without the delay, and the timelock (and the ARL it
+  holds) could never be operated again. Never propose an operation that grants, revokes or
+  renounces `DEFAULT_ADMIN_ROLE`; the guardian cancels any such operation.
+- **Community & Staking Safe.** Fund each staking reward period once, in full. Never top up a
+  running period with a small amount: `notifyRewardAmount` restarts the schedule at the lower
+  rate, which stretches the payout (the total is unchanged).
