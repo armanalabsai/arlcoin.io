@@ -33,7 +33,7 @@ Anvil), and `arl-verifier` resolving `arl-task:` job descriptions to the task's 
 
 ### 6.2 Read API (Agent API v1)
 
-**Built, 15 November 2026 (live once merged, as part of the arlcoin.io deployment):** the MCP
+**Live since 15 November 2026:** the MCP
 tools over HTTP at `arlcoin.io/api/v1`: `GET /policies`, `POST /tasks/check`,
 `GET /jobs/{ARL|USDC}/{id}`, `POST /evidence/check`, `POST /jobs/prepare` and
 `POST /jobs/prepare-funding` (unsigned transactions). Chain reads come straight from Base at one

@@ -16,7 +16,10 @@ export const metadata: Metadata = {
   verification: { google: "LLHEGdS5Ee4XR_Cn93c2NcdIwcAG5zJM3IZtCFuxeJg" },
   metadataBase: new URL(SITE.url),
   applicationName: SITE.brand,
-  title: { default: "ARL Protocol (ARL) · AI and Compute Token on Base", template: "%s" },
+  title: {
+    default: "ARL Protocol · Escrow and Verification for AI Agents on Base",
+    template: "%s",
+  },
   description: SITE.description,
   authors: [{ name: SITE.brand, url: SITE.url }],
   creator: SITE.brand,

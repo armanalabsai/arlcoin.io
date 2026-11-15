@@ -51,18 +51,18 @@ export const ecosystem: Layer = {
       id: "safe",
       title: "Safe",
       shortDescription: "Multisig custody software",
-      status: "PLANNED",
+      status: "LIVE",
       weight: "secondary",
       detail: {
         summary:
-          "Treasury and multisig-held allocations are planned to be held by Safe multisig accounts. ARL uses Safe as deployed software; there is no relationship with the Safe project.",
+          "The treasury and the allocations are held by Safe multisig accounts on Base Mainnet (twelve Safes, 2-of-3 for the role Safes). ARL uses Safe as deployed software; there is no relationship with the Safe project.",
       },
     },
     {
       id: "grants",
       title: "Grants / Bug Bounty",
-      shortDescription: "Program not launched",
-      status: "PLANNED",
+      shortDescription: "Bug bounty open, paid in ARL",
+      status: "LIVE",
       weight: "tertiary",
       metric: {
         kind: "static",
@@ -71,7 +71,7 @@ export const ecosystem: Layer = {
       },
       detail: {
         summary:
-          "An allocation for builder grants and security bug bounties. The program, its scope and its payout table have not been published.",
+          "An allocation for builder grants and security bug bounties. The bug bounty is open, with its scope and payout table published in docs/bug-bounty.md; rewards are paid in ARL from the Grants & Bug Bounty Safe. A builder grants program has not been published yet.",
       },
     },
     {

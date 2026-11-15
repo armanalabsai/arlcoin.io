@@ -9,13 +9,13 @@ Status: DRAFT. Not published. Apply by hand in X → Edit profile on https://x.c
 | Location     | Base (onchain)                                                |
 | Header image | Slide 1 of `social/2026-10-09/` (Payer → Facilitator → Payee) |
 
-## Bio (156 / 160 characters)
+## Bio (current since 2026-11-15)
 
 ```text
-ARL Protocol: AI and compute payments on @base. 21M fixed supply, no mint, no owner. Testnet live, mainnet targeted Oct 23. Team never DMs first. arlcoin.io
+Escrow and verification for AI agents on Base. Agents hire and pay each other; funds move only when staked validators verify the work. Build: arlcoin.io/build
 ```
 
-## Pinned post (280 / 280 characters, links counted as 23)
+## Pinned post (pre-launch draft, superseded: the current pinned post is the roadmap update of 2026-11-14)
 
 ```text
 ARL Protocol: AI and compute payments on @base.

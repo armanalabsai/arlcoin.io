@@ -112,20 +112,20 @@ links. "About" and "Roadmap" are Core layers on the site (/core/technology, /cor
 is no "Blog" yet, and its template is below (if Mirror.xyz is the canonical source, the copy on the
 site gets a `canonical`).
 
-| Page                     | Title (applied / proposed)                        | Meta description                                                                                                                                           | Schema                                  |
-| ------------------------ | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| Home `/`                 | ARL Protocol (ARL) · AI and Compute Token on Base | ARL Protocol: the utility token for AI and compute payments on Base. 21,000,000 ARL fixed supply, no mint or upgrade. Base Mainnet launch 23 October 2026. | Organization, WebSite, FAQPage          |
-| About `/core/technology` | Technology · ARL Protocol                         | How ARL pays for AI and compute on Base: x402 payments, ERC-8004 registry, ERC-8183 job escrow and zero-knowledge anonymous signals.                       | BreadcrumbList                          |
-| Roadmap `/core/roadmap`  | Roadmap · ARL Protocol                            | Where ARL Protocol is today: Base Sepolia testnet live since 4 October 2026, Base Mainnet launch on 23 October 2026, services next.                        | BreadcrumbList                          |
-| FAQ `/faq`               | ARL Token FAQ · ARL Protocol                      | ARL token FAQ: maximum supply, launch date, Base network, Uniswap trading, whitelist and airdrop timing, answered by ARL Protocol.                         | FAQPage, BreadcrumbList                 |
-| Blog `/blog` (proposed)  | ARL Protocol Blog: AI Payments on Base            | Guides on paying for AI and compute with ARL on Base: x402, Permit2, token design and launch updates from ARL Protocol.                                    | Blog, BlogPosting, BreadcrumbList       |
-| Contact `/contact`       | Contact · ARL Protocol                            | Contact ARL Protocol: email team@arlcoin.io, X @arlprotocol or the Telegram community for partnerships, press and listings.                                | Organization (contactPoint), Breadcrumb |
-| Buy `/buy`               | How to Buy ARL on Uniswap on Base · ARL Protocol  | How to buy ARL: the official ARL/USDC, ARL/USDT, ARL/ETH and ARL/BTC pools on Uniswap on Base, from 0.20 USD, opening 23 October 2026.                     | BreadcrumbList                          |
-| Documents `/docs/<slug>` | `<Doc title> · ARL Protocol`                      | The document's own `description` field                                                                                                                     | TechArticle, BreadcrumbList             |
+| Page                     | Title (applied / proposed)                                   | Meta description                                                                                                                                 | Schema                                  |
+| ------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------- |
+| Home `/`                 | ARL Protocol · Escrow and Verification for AI Agents on Base | ARL Protocol: escrow and verification for AI agents on Base. The payment moves only when the work is accepted, checked by staked ARL validators. | Organization, WebSite, FAQPage          |
+| About `/core/technology` | Technology · ARL Protocol                                    | How ARL pays for AI and compute on Base: x402 payments, ERC-8004 registry, ERC-8183 job escrow and zero-knowledge anonymous signals.             | BreadcrumbList                          |
+| Roadmap `/core/roadmap`  | Roadmap · ARL Protocol                                       | Live on Base Mainnet: escrowed and verified jobs, compute payments, open standards and developer tools.                                          | BreadcrumbList                          |
+| FAQ `/faq`               | ARL Token FAQ · ARL Protocol                                 | ARL token FAQ: maximum supply, launch date, Base network, Uniswap trading, whitelist and airdrop timing, answered by ARL Protocol.               | FAQPage, BreadcrumbList                 |
+| Blog `/blog` (proposed)  | ARL Protocol Blog: AI Payments on Base                       | Guides on paying for AI and compute with ARL on Base: x402, Permit2, token design and launch updates from ARL Protocol.                          | Blog, BlogPosting, BreadcrumbList       |
+| Contact `/contact`       | Contact · ARL Protocol                                       | Contact ARL Protocol: email team@arlcoin.io, X @arlprotocol or the Telegram community for partnerships, press and listings.                      | Organization (contactPoint), Breadcrumb |
+| Buy `/buy`               | How to Buy ARL on Uniswap on Base · ARL Protocol             | How to buy ARL: the official ARL/USDC, ARL/USDT, ARL/ETH and ARL/BTC pools on Uniswap on Base, from 0.20 USD, opening 23 October 2026.           | BreadcrumbList                          |
+| Documents `/docs/<slug>` | `<Doc title> · ARL Protocol`                                 | The document's own `description` field                                                                                                           | TechArticle, BreadcrumbList             |
 
 **H1/H2 templates**
 
-- Home: H1 "The onchain token for decentralized AI and compute services." · H2s:
+- Home: H1 "Escrow and verification for AI agents." · H2s:
   "Launch on Base." / "Onchain. Verifiable." / "Fixed. Forever." / "Built for AI and compute." /
   "Where ARL is today." / "Questions."
 - FAQ: H1 "Questions" · every question is a `<summary>` (matches FAQPage).

@@ -17,6 +17,52 @@ export const technology: Layer = {
   description: "What ARL is for. Token, verified jobs and compute payments live on Base.",
   cards: [
     {
+      id: "verified-jobs",
+      title: "Escrow and Verification",
+      shortDescription: "Jobs for AI agents, live on Base Mainnet",
+      status: "LIVE",
+      weight: "primary",
+      detail: {
+        summary:
+          "An agent hires another and the budget waits in an ERC-8183 escrow on Base Mainnet, paid in ARL or USDC. The provider is paid only when the work is accepted; otherwise the client is refunded. For work that must be checked, a committee of staked ARL validators re-runs or reviews the delivery and votes, a challenge window follows, and an arbiter Safe rules on disputed jobs only. A wrong vote costs the validator its bond.",
+        sections: [
+          {
+            heading: "Live",
+            items: [
+              "Job escrows paid in ARL and in USDC, and the verified evaluator v4 for each, since 12 November 2026",
+              "The ARL app: post, fund, deliver and settle jobs, and follow verified jobs",
+              "Hourly alerts on disputes, slashes and refused refunds",
+            ],
+          },
+          {
+            heading: "Next",
+            items: [
+              "ARLJobs v3 and evaluator v5 (disputes always settle before the deadline, refused refunds no longer block bonds, conflict checks on chain): merged and tested, deployment waiting for the owners' signatures",
+            ],
+          },
+        ],
+      },
+      links: [
+        { label: "Open the app", href: "https://arlcoin.io/app/verified/" },
+        {
+          label: "How it works",
+          href: "https://github.com/armanalabsai/arlcoin.io/blob/main/docs/verifiable-execution.md",
+        },
+      ],
+    },
+    {
+      id: "agent-tools",
+      title: "Standards and Agent Tools",
+      shortDescription: "Open formats, SDKs, MCP server, Agent API",
+      status: "LIVE",
+      weight: "secondary",
+      detail: {
+        summary:
+          "Five open formats describe a job from start to finish: arl-task, arl-proof, arl-policy, arl-reputation and arl-evidence, with test vectors in TypeScript and Python. Developers use them through the TypeScript SDK, the Python SDK, the n8n node, the MCP server and the Agent API at arlcoin.io/api/v1, which reads the chain at a named block and prepares unsigned transactions. None of these tools ever holds a key.",
+      },
+      links: [{ label: "Build with ARL", href: "https://arlcoin.io/build" }],
+    },
+    {
       id: "ai-payments",
       title: "AI Payments",
       shortDescription: "AI services settle usage in ARL",
