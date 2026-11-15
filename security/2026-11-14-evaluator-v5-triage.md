@@ -46,3 +46,10 @@ Update 2026-11-15: `ARBITER_WINDOW` was replaced by `arbiterDeadline` (half a ch
 after the challenge window, so a dispute always settles before the job's deadline). The results
 above moved by a few lines; the code on each line and every verdict are unchanged
 (`security/aderyn-baseline.json`).
+
+Update 2026-11-15 (bug bounty report, registry gas): `_feedback` now reverts with
+`InsufficientGas` unless `2 * REGISTRY_GAS_RESERVE` gas is left before the capped ERC-8004 calls,
+so a caller cannot settle a job while starving its reputation feedback. One new result,
+`large-numeric-literal` at the `REGISTRY_GAS_RESERVE` constant (line 146, the `10_000` margin), is a
+false positive like the one at line 142. The other results moved by a few lines; the code on each
+line and every verdict are unchanged.
