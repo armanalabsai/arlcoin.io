@@ -179,6 +179,33 @@ class Arl:
             raise ArlError(f"transaction {tx_hash.hex()} reverted")
         return receipt
 
+    def _send_raw(self, to: str, data: str):
+        """Sends prepared calldata (checked by the caller) after simulating it."""
+        tx = {"from": self.address, "to": Web3.to_checksum_address(to), "data": data, "value": 0}
+        try:
+            self.w3.eth.call(tx)
+        except Exception as error:  # the revert reason, before any gas is spent
+            raise ArlError(str(error)) from error
+        tx["nonce"] = self.w3.eth.get_transaction_count(self.address)
+        tx["chainId"] = BASE_MAINNET_CHAIN_ID
+        tx["gas"] = self.w3.eth.estimate_gas(tx)
+        tx["maxFeePerGas"] = self.w3.eth.gas_price * 2
+        tx["maxPriorityFeePerGas"] = self.w3.eth.max_priority_fee
+        signed = self.account.sign_transaction(tx)
+        tx_hash = self.w3.eth.send_raw_transaction(signed.raw_transaction)
+        receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
+        if receipt.status != 1:
+            raise ArlError(f"transaction {tx_hash.hex()} reverted")
+        return receipt
+
+    # ------------------------------------------------------------------ verified tasks
+
+    def open_task(self, task: dict, task_uri: str, provider: str, committee: list, **kwargs) -> dict:
+        """Opens and funds an arl-task/1 task as a verified job (arl_protocol.open_task)."""
+        from .open_task import open_task
+
+        return open_task(self, task, task_uri, provider, committee, **kwargs)
+
     # ------------------------------------------------------------------ jobs
 
     def create_job(
