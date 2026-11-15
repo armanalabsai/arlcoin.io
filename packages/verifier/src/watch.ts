@@ -16,6 +16,7 @@ import {
 } from "viem";
 
 import { acceptJob, castVote, checkChain, JobStatus, MemberState, readJob } from "./chain.ts";
+import { canonicalHash } from "./canonical.ts";
 import type { Fetcher } from "./inputs.ts";
 import { parseSpec, specHash, type ReexecSpec } from "./spec.ts";
 import { decide, type ExecuteOptions } from "./verify.ts";
@@ -61,6 +62,41 @@ export async function fetchSpec(uri: string, fetcher: Pick<Fetcher, "file">): Pr
   return parseSpec(JSON.parse(body.toString("utf8")) as unknown);
 }
 
+/** An arl-task/1 job's description: `arl-task:<task hash> <task URI>` (spec/arl-task/v0.1.0). */
+const TASK_DESCRIPTION = /^arl-task:(0x[0-9a-f]{64}) ((?:https|ipfs):\/\/\S+)$/;
+
+/**
+ * Where a job's spec lives. A job opened from an arl-task/1 task points at the task: the task is
+ * fetched, checked against the hash in the description, and its reexec workload's spec_uri is the
+ * spec (whose hash the evaluator holds as specHash). Any other description is the spec URI itself.
+ */
+export async function specUriOf(
+  description: string,
+  fetcher: Pick<Fetcher, "file">,
+): Promise<string> {
+  const m = TASK_DESCRIPTION.exec(description);
+  if (!m) return description;
+  const [, hash, uri] = m as unknown as [string, string, string];
+  const body = await fetcher.file(uri);
+  if (body.length > MAX_SPEC_BYTES) throw new Error(`task at ${uri} is too large`);
+  const task = JSON.parse(body.toString("utf8")) as unknown;
+  if (canonicalHash(task) !== hash) throw new Error(`task at ${uri} does not match its hash`);
+  const t = task as { version?: unknown; workload?: { class?: unknown; spec_uri?: unknown } };
+  if (t.version !== "arl-task/1" || t.workload?.class !== "reexec") {
+    throw new Error(`task at ${uri} is not a reexec arl-task/1 task`);
+  }
+  if (typeof t.workload.spec_uri !== "string") throw new Error(`task at ${uri} has no spec_uri`);
+  return t.workload.spec_uri;
+}
+
+/** The spec of a job, from its description (see specUriOf). */
+export async function fetchJobSpec(
+  description: string,
+  fetcher: Pick<Fetcher, "file">,
+): Promise<ReexecSpec> {
+  return fetchSpec(await specUriOf(description, fetcher), fetcher);
+}
+
 /**
  * Specs fetched and checked before accepting, by job id: the vote reuses them if the spec's host
  * stops answering after the bond is locked.
@@ -69,12 +105,12 @@ const checkedSpecs = new Map<string, ReexecSpec>();
 
 /** The job's spec if it can be fetched and matches the committed hash; otherwise null. */
 async function usableSpec(
-  uri: string,
+  description: string,
   committed: string,
   fetcher: Pick<Fetcher, "file">,
 ): Promise<ReexecSpec | null> {
   try {
-    const spec = await fetchSpec(uri, fetcher);
+    const spec = await fetchJobSpec(description, fetcher);
     return specHash(spec).toLowerCase() === committed.toLowerCase() ? spec : null;
   } catch {
     return null;
@@ -159,7 +195,7 @@ export async function step(deps: WatchDeps, state: WatchState): Promise<WatchSta
         const spec =
           (await usableSpec(job.description, job.specHash, deps.specFetcher)) ??
           checkedSpecs.get(id) ??
-          (await fetchSpec(job.description, deps.specFetcher));
+          (await fetchJobSpec(job.description, deps.specFetcher));
         const decision = await decide(spec, job.specHash, job.deliverable, deps.exec);
         const tx = await castVote(
           deps.wallet,

@@ -2,7 +2,9 @@
 
 Status: **v0.1.0**, 14 November 2026. Phase 2A of the
 [master architecture and roadmap](../../../docs/architecture/MASTER-ARCHITECTURE-ROADMAP.md).
-Reference implementation: [`@arl/protocol`](../../../packages/protocol/src/task.ts) (TypeScript)
+Reference implementation: [`@arl/protocol`](../../../packages/protocol/src/task.ts) (TypeScript;
+`prepareTask` returns the unsigned transactions that open a task, `openTask` in
+`arl-protocol-sdk` sends them)
 and [`arl_protocol.task`](../../../packages/python-sdk/src/arl_protocol/task.py) (hashing, Python).
 Test vectors: [`vectors.json`](vectors.json).
 
@@ -68,7 +70,10 @@ provider approves it (`approveCommittee`), as today.
 
 ## Compatibility
 
-An `arl-reexec/1` spec is not replaced: a `reexec` task points to it and commits its hash, so the
-reference validator (`arl-verifier`) runs unchanged. The vectors include a task over the
+An `arl-reexec/1` spec is not replaced: a `reexec` task points to it and commits its hash. The
+reference validator (`arl-verifier`) reads an `arl-task:<taskHash> <task URI>` description by
+fetching the task, refusing it unless it hashes to `taskHash` and is a `reexec` task, and then
+re-running the spec at `workload.spec_uri`, which must match the committed `specHash`. Any other
+description is the spec URI itself, as before. The vectors include a task over the
 repository's example spec (`packages/verifier/examples/busybox-summary.json`) and check that
 `@arl/protocol` and `@arl/verifier` canonicalize it to the same hash.

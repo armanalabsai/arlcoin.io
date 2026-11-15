@@ -72,3 +72,6 @@ export {
   type Escrow,
   type JobView,
 } from "./jobs.ts";
+// arl-task/1 and the other protocol documents (packages/protocol), and opening a task on chain.
+export * from "../../protocol/src/index.ts";
+export { openTask, type OpenTaskOptions, type OpenedTask } from "./openTask.ts";
