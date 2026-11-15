@@ -87,7 +87,9 @@ Every tool and action is pinned by version, commit or SHA-256.
 | CodeQL                   | Security findings in TypeScript/JavaScript ([codeql.yml](.github/workflows/codeql.yml))                          |
 
 Outside pull requests: [Uptime](.github/workflows/uptime.yml) every 10 minutes and
-[Monitor mainnet](.github/workflows/monitor.yml) every 6 hours once the deployment is recorded.
+[Monitor mainnet](.github/workflows/monitor.yml) every 6 hours once the deployment is recorded, and
+[Protocol events](.github/workflows/events.yml) every hour (disputes, slashes, refused refunds and
+failed reputation writes alert the owner).
 `main` is protected by a ruleset: pull requests only, every gate above required, no force push
 or deletion ([branch-protection.md](docs/branch-protection.md)).
 
