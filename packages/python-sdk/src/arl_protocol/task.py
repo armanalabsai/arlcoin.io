@@ -55,3 +55,11 @@ def task_hash(task: dict) -> str:
     if not isinstance(task, dict) or task.get("version") != TASK_VERSION:
         raise CanonicalError(f"version must be {TASK_VERSION}")
     return "0x" + Web3.keccak(text=canonicalize(task)).hex().removeprefix("0x")
+
+
+def committed_spec_hash(task: dict) -> str:
+    """The specHash the evaluator commits to: a re-execution task's spec_hash, else its task hash."""
+    workload = task.get("workload") or {}
+    if workload.get("class") == "reexec" and workload.get("spec_hash") is not None:
+        return workload["spec_hash"]
+    return task_hash(task)
