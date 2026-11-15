@@ -366,6 +366,26 @@ describe("execute and decide", () => {
     );
   });
 
+  it("does not follow a symlinked directory on the way to an output", async () => {
+    // Report 2026-11-15: O_NOFOLLOW guards only the last component, so out/coverage -> a host
+    // directory made the verifier hash a file outside the output directory.
+    const host = await mkdtemp(join(tmpdir(), "arl-host-"));
+    await writeFile(join(host, "lcov.info"), "host file");
+    const linking = fakeRunner(async (_w, out) => {
+      await writeFile(join(out, "result.json"), '{"passed":3,"failed":0}');
+      await symlink(host, join(out, "coverage"), "junction");
+      return 0;
+    });
+    const { result } = await execute(fileSpec(), { runner: linking, fetcher: files });
+    assert.deepEqual(
+      result.outputs.map((o) => [o.path, o.sha256 === null]),
+      [
+        ["coverage/lcov.info", true],
+        ["result.json", false],
+      ],
+    );
+  });
+
   it(
     "does not block on a named pipe declared as an output",
     { skip: process.platform === "win32" && "named pipes are POSIX only" },
