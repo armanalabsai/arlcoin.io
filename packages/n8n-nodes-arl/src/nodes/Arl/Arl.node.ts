@@ -1,6 +1,7 @@
 // The ARL node for n8n: escrowed jobs on Base Mainnet, paid in ARL or USDC. A workflow creates a
 // job, agrees the budget, funds it (the approval is automatic), hands in the work and settles it,
-// each as one operation. See packages/n8n-nodes-arl/README.md.
+// each as one operation; Open Task does all of it for an arl-task/1 task with a validator
+// committee. See packages/n8n-nodes-arl/README.md.
 
 import { createPublicClient, createWalletClient, http, type Hex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
@@ -12,6 +13,7 @@ import {
   createJob,
   fundJob,
   getJob,
+  openArlTask,
   parseJobId,
   setBudget,
   settleJob,
@@ -62,6 +64,13 @@ export class Arl implements INodeType {
             value: "create",
             action: "Create a job",
             description: "Post a job for a provider",
+          },
+          {
+            name: "Open Task",
+            value: "openTask",
+            action: "Open a task as a verified job",
+            description:
+              "Validate an arl-task/1 task, then create, configure and fund it with a validator committee",
           },
           {
             name: "Set Budget",
@@ -117,6 +126,7 @@ export class Arl implements INodeType {
           { name: "USDC", value: "USDC" },
         ],
         description: "Which escrow holds the job: paid in ARL or in USDC",
+        displayOptions: { show: { operation: ["create", ...withJobId] } },
       },
       {
         displayName: "Job ID",
@@ -134,7 +144,38 @@ export class Arl implements INodeType {
         required: true,
         placeholder: "0x…",
         description: "The wallet that does the work and is paid",
-        displayOptions: { show: { operation: ["create"] } },
+        displayOptions: { show: { operation: ["create", "openTask"] } },
+      },
+      {
+        displayName: "Task",
+        name: "task",
+        type: "string",
+        default: "",
+        required: true,
+        placeholder: '{ "spec": "arl-task/1", … }',
+        description:
+          "The arl-task/1 task as JSON. Its payment token picks the escrow; its policy sets the checks.",
+        displayOptions: { show: { operation: ["openTask"] } },
+      },
+      {
+        displayName: "Task URI",
+        name: "taskUri",
+        type: "string",
+        default: "",
+        required: true,
+        placeholder: "https://example.com/task.json",
+        description: "Where anyone can fetch the same task document (https or ipfs)",
+        displayOptions: { show: { operation: ["openTask"] } },
+      },
+      {
+        displayName: "Committee",
+        name: "committee",
+        type: "string",
+        default: "",
+        required: true,
+        placeholder: "0x…, 0x…, 0x…",
+        description: "Staked validator addresses, as many as the task's committee size",
+        displayOptions: { show: { operation: ["openTask"] } },
       },
       {
         displayName: "Evaluator Address",
@@ -209,12 +250,20 @@ export class Arl implements INodeType {
     for (let i = 0; i < items.length; i++) {
       try {
         const operation = String(this.getNodeParameter("operation", i));
-        const token = String(this.getNodeParameter("escrow", i, "ARL"));
+        const token =
+          operation === "openTask" ? "ARL" : String(this.getNodeParameter("escrow", i, "ARL"));
         if (token !== "ARL" && token !== "USDC") throw new ArlJobError("unknown payment token");
         const escrow = ESCROWS[token];
         const param = (name: string) => String(this.getNodeParameter(name, i, ""));
         let json: Record<string, unknown>;
-        if (operation === "create") {
+        if (operation === "openTask") {
+          json = await openArlTask(clients, {
+            task: this.getNodeParameter("task", i, "") as string | object,
+            taskUri: param("taskUri"),
+            provider: param("provider"),
+            committee: param("committee"),
+          });
+        } else if (operation === "create") {
           json = await createJob(clients, escrow, {
             provider: param("provider"),
             evaluator: param("evaluator"),

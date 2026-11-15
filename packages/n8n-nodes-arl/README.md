@@ -16,6 +16,7 @@ step:
 | Reject Job   | evaluator         | Rejects it: the escrow refunds the client                            |
 | Claim Refund | anyone            | After the deadline, returns the escrow to the client                 |
 | Get Job      | anyone            | Reads the job and its status                                         |
+| Open Task    | client            | Opens an [arl-task/1](https://github.com/armanalabsai/arlcoin.io/tree/main/spec/arl-task) task as a verified job, in one step |
 
 The evaluator is the wallet that creates the job unless you name another address.
 
@@ -50,6 +51,14 @@ ARL_FORK_RPC=http://127.0.0.1:18546 npm run test:fork   # the full job lifecycle
 npm run build                              # dist/ with viem bundled: no runtime dependencies
 ```
 
-Verified jobs, where a committee of staked validators checks the work, come in a later version.
+## Verified jobs: Open Task
+
+Open Task takes a task written as an arl-task/1 document, the link where anyone can fetch it, the
+provider and a committee of staked validators. It checks the task against its policy first, so a
+task the policy refuses sends nothing. Then the wallet creates the job on the task's escrow (ARL or
+USDC, from the task's payment token), configures the committee, sets the budget, approves and funds
+it. These are the same transactions the SDK, the MCP server and the Agent API
+(`https://arlcoin.io/api/v1`) prepare. The provider approves the committee next, and the
+validators check the work against the task.
 
 License: Apache-2.0.
