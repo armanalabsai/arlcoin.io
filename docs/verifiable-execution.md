@@ -112,8 +112,9 @@ struct Config {
 }
 
 constructor(ARLJobs jobs, address arbiter, uint64 minChallengeWindow, uint96 minBond,
-            IERC8004Identity identity, IERC8004Reputation reputation);
-// stakeToken = jobs.paymentToken(): stakes and bonds are in the escrow's own token.
+            IERC8004Identity identity, IERC8004Reputation reputation, IERC20 stakeToken);
+// stakeToken: the token stakes and bonds are in; address(0) means the escrow's own token.
+// Every Base Mainnet evaluator stakes ARL, including the one beside the USDC escrow.
 
 function stake(uint256 amount) external;
 function unstake(uint256 amount) external;                       // only unlocked stake
@@ -275,7 +276,7 @@ escrow token has a market price, the economic part of the bond is the tenth of t
 | I5  | The arbiter can neither receive the escrow nor slashed funds (burned to `0x…dEaD`), and cannot act on undisputed jobs      | `test_RevertWhen_ResolveNotArbiterOrNotDisputed`, resolve tests                      |
 | I6  | Only accepted members of a committee the provider approved vote, once each; neither the client nor the provider sits on it | configure, approve, accept and vote revert tests                                     |
 | I9  | A member that accepted and did not vote within the vote window loses its bond; one that never accepted loses nothing       | `test_closeUndecidedBurnsAbsenteesAndRefunds`, `test_closeUndecidedWithoutAbsentees` |
-| I10 | Stakes and bonds are in the escrow's own token                                                                             | `test_stakeTokenIsTheEscrowToken`                                                    |
+| I10 | Stakes and bonds are in the stake token (the escrow's own token when none is given; ARL on Base Mainnet)                   | `test_stakeTokenIsTheEscrowToken`                                                    |
 | I7  | A failing, reverting or gas-burning ERC-8004 registry never blocks settlement                                              | `test_feedbackFailureNeverBlocksSettlement`                                          |
 | I8  | No owner, no upgrade, no mutable parameter                                                                                 | contract has no privileged setter (review)                                           |
 
