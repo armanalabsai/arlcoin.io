@@ -20,7 +20,14 @@ import {
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
-import { TaskError, openTask, taskHash, parseTask, type TaskDeployment } from "../src/index.ts";
+import {
+  TaskError,
+  getVerdict,
+  openTask,
+  taskHash,
+  parseTask,
+  type TaskDeployment,
+} from "../src/index.ts";
 
 const PORT = 8550;
 const RPC = `http://127.0.0.1:${PORT}`;
@@ -182,6 +189,15 @@ describe("openTask", () => {
       args: [jobs],
     });
     assert.equal(after - before, budget);
+    // getVerdict decodes the evaluator's Verdict field by field (topApprovals included).
+    const v = await getVerdict(publicClient, jobId, evaluator);
+    assert.equal(v.phaseName, "Configured");
+    assert.equal(v.providerApproved, false);
+    assert.equal(v.topApprovals, 0);
+    assert.equal(v.voteEnds, 0n);
+    assert.equal(v.challenger, "0x0000000000000000000000000000000000000000");
+    assert.equal(v.deliverable, `0x${"00".repeat(32)}`);
+    assert.equal(v.voteHash, `0x${"00".repeat(32)}`);
   });
 
   it("sends nothing for a task that fails validation or names the arbiter", async () => {

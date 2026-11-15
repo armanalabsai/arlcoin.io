@@ -36,7 +36,7 @@ export const jobsAbi = parseAbi([
 
 export const evaluatorAbi = parseAbi([
   "struct Config { uint8 tier; uint8 threshold; uint64 voteWindow; uint64 challengeWindow; uint96 bond; uint256 providerAgentId; bytes32 specHash; address[] committee; }",
-  "struct Verdict { uint8 phase; bool providerApproved; uint8 approvals; uint8 rejections; uint64 voteEnds; uint64 challengeEnds; address challenger; uint256 bond; bytes32 deliverable; bytes32 voteHash; }",
+  "struct Verdict { uint8 phase; bool providerApproved; uint8 approvals; uint8 rejections; uint8 topApprovals; uint64 voteEnds; uint64 challengeEnds; address challenger; uint256 bond; bytes32 deliverable; bytes32 voteHash; }",
   "function jobs() view returns (address)",
   "function getConfig(uint256 jobId) view returns (Config)",
   "function getVerdict(uint256 jobId) view returns (Verdict)",
