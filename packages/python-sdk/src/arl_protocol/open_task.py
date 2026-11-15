@@ -23,7 +23,7 @@ from typing import Any, Callable
 from web3 import Web3
 
 from .client import ERC20_ABI, ESCROWS, JOBS_ABI, ArlError
-from .task import task_hash
+from .task import committed_spec_hash, task_hash
 
 AGENT_API = "https://arlcoin.io/api/v1"
 
@@ -61,6 +61,10 @@ CONFIGURE_ABI = [
 
 Post = Callable[[str, dict], dict]
 
+TIER_INDEX = {"fallback": 0, "reexecution": 1, "attested": 2}
+#: How far the API's createJob deadline may sit from now + deadline_hours (block-time drift).
+DEADLINE_TOLERANCE = 600
+
 
 def http_post(url: str, body: dict) -> dict:
     """POST JSON, return JSON; an API refusal (4xx/5xx) becomes ArlError with its reason."""
@@ -85,8 +89,13 @@ def _same(a: str, b: str) -> bool:
     return Web3.to_checksum_address(a) == Web3.to_checksum_address(b)
 
 
-def check_create(task: dict, token: str, provider: str, answer: dict) -> dict:
-    """The createJob transaction, after checking it opens exactly this task on the ARL escrow."""
+def check_create(
+    task: dict, token: str, provider: str, answer: dict, now: int | None = None
+) -> dict:
+    """The createJob transaction, after checking it opens exactly this task on its escrow.
+
+    With `now` (the latest block's timestamp), the deadline must also be the task's
+    deadline_hours from now, within DEADLINE_TOLERANCE seconds."""
     txs = answer.get("transactions") or []
     if answer.get("chainId") != 8453 or len(txs) != 1 or txs[0].get("step") != "createJob":
         raise ArlError("the API did not return one createJob transaction for Base Mainnet")
@@ -101,11 +110,55 @@ def check_create(task: dict, token: str, provider: str, answer: dict) -> dict:
         raise ArlError("createJob names another provider or evaluator")
     if not args["description"].startswith(f"arl-task:{task_hash(task)} "):
         raise ArlError("createJob does not carry this task's hash")
+    if now is not None:
+        expected = now + int(task["payment"]["deadline_hours"]) * 3600
+        if abs(int(args["expiredAt"]) - expected) > DEADLINE_TOLERANCE:
+            raise ArlError("createJob's deadline is not the task's deadline_hours")
     return tx
 
 
-def check_funding(task: dict, token: str, token_address: str, job_id: int, answer: dict) -> list:
-    """configure, setBudget, approve and fund for `job_id`, checked against the task."""
+def _check_config(task: dict, committee: list, cfg: Any) -> None:
+    """The committee's terms must be the task's, with the caller's own committee."""
+    v = task["verification"]
+    if isinstance(cfg, dict):  # web3 decodes the struct by field name
+        cfg = tuple(
+            cfg[k]
+            for k in (
+                "tier",
+                "threshold",
+                "voteWindow",
+                "challengeWindow",
+                "bond",
+                "providerAgentId",
+                "specHash",
+                "committee",
+            )
+        )
+    tier, threshold, vote_window, challenge_window, bond, agent_id, spec_hash, members = cfg
+    expected = (
+        TIER_INDEX[v["tier"]],
+        int(v["threshold"]),
+        int(v["vote_window_seconds"]),
+        int(v["challenge_window_seconds"]),
+        int(v["bond_floor"]),
+        0,
+    )
+    got = (tier, threshold, vote_window, challenge_window, bond, agent_id)
+    if got != expected:
+        raise ArlError("configure's tier, threshold, windows or bond differ from the task")
+    if "0x" + bytes(spec_hash).hex() != committed_spec_hash(task).lower():
+        raise ArlError("configure commits to another spec hash than the task")
+    if len(members) != len(committee) or not all(
+        _same(a, b) for a, b in zip(members, committee)
+    ):
+        raise ArlError("configure names another committee than the one you chose")
+
+
+def check_funding(
+    task: dict, token: str, token_address: str, job_id: int, answer: dict, committee: list
+) -> list:
+    """configure, setBudget, approve and fund for `job_id`, checked against the task and the
+    caller's committee."""
     txs = answer.get("transactions") or []
     steps = [t.get("step") for t in txs]
     if answer.get("chainId") != 8453 or steps != ["configure", "setBudget", "approve", "fund"]:
@@ -133,6 +186,8 @@ def check_funding(task: dict, token: str, token_address: str, job_id: int, answe
                 raise ArlError("approve is not exactly the budget for ARL's escrow")
         elif args["jobId"] != job_id:
             raise ArlError(f"{tx['step']} is for another job")
+        elif tx["step"] == "configure":
+            _check_config(task, committee, args["cfg"])
         elif tx["step"] in ("setBudget", "fund"):
             amount = args["amount"] if tx["step"] == "setBudget" else args["expectedBudget"]
             if amount != budget:
@@ -163,7 +218,8 @@ def open_task(
         "provider": provider,
         "committee": committee,
     }
-    create = check_create(task, token, provider, post(f"{api_url}/jobs/prepare", body))
+    now = int(arl.w3.eth.get_block("latest")["timestamp"])
+    create = check_create(task, token, provider, post(f"{api_url}/jobs/prepare", body), now)
     receipt = arl._send_raw(create["to"], create["data"])
     events = arl.jobs.events.JobCreated().process_receipt(receipt)
     if not events:
@@ -178,7 +234,7 @@ def open_task(
             if attempt == 4 or "does not exist" not in str(error):
                 raise
             time.sleep(3)
-    txs = check_funding(task, token, arl.token.address, job_id, answer)
+    txs = check_funding(task, token, arl.token.address, job_id, answer, committee)
     hashes = {"createJob": receipt.transactionHash.hex()}
     for tx in txs:
         hashes[tx["step"]] = arl._send_raw(tx["to"], tx["data"]).transactionHash.hex()

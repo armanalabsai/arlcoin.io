@@ -19,6 +19,8 @@ import {
   type WalletClient,
 } from "viem";
 
+import { openTask } from "../../sdk/src/openTask.ts";
+
 /** The ARL escrows on Base Mainnet (contracts/deploy/base-mainnet-jobs.json). */
 export const ESCROWS = {
   ARL: "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
@@ -297,4 +299,56 @@ export async function settleJob(
   await checkChain(c);
   if (outcome === "claimRefund") return { txHash: await send(c, escrow, "claimRefund", [jobId]) };
   return { txHash: await send(c, escrow, outcome, [jobId, toBytes32(reason || outcome), "0x"]) };
+}
+
+export interface OpenTaskInput {
+  /** The arl-task/1 document, as JSON text or an object. */
+  task: string | object;
+  /** Where anyone can fetch the task document (https or ipfs). */
+  taskUri: string;
+  provider: string;
+  /** Staked validators, comma or space separated, as many as the task's committee_size. */
+  committee: string;
+}
+
+/**
+ * Opens an arl-task/1 task as a verified job: the task is validated against its policy, then the
+ * wallet creates the job, configures the committee, sets the budget, approves and funds it. These
+ * are the same transactions the SDK, the MCP server and the Agent API prepare.
+ */
+export async function openArlTask(
+  c: Clients,
+  input: OpenTaskInput,
+): Promise<{ jobId: string; taskHash: Hex; token: string; txs: Record<string, Hash> }> {
+  let task: unknown = input.task;
+  if (typeof task === "string") {
+    try {
+      task = JSON.parse(task);
+    } catch {
+      throw new ArlJobError("the task is not valid JSON");
+    }
+  }
+  const token = (task as { payment?: { token?: unknown } } | null)?.payment?.token;
+  if (token !== "ARL" && token !== "USDC")
+    throw new ArlJobError('the task must be paid in "ARL" or "USDC"');
+  const committee = input.committee
+    .split(/[\s,]+/)
+    .filter(Boolean)
+    .map((a, i) => checkAddress(a, `committee member ${String(i + 1)}`));
+  const taskUri = input.taskUri.trim();
+  if (!/^(https|ipfs):\/\/\S+$/.test(taskUri))
+    throw new ArlJobError("the task URI must be an https:// or ipfs:// link");
+  const provider = checkAddress(input.provider, "the provider");
+  await checkChain(c);
+  const opened = await openTask(c, task, {
+    taskUri,
+    provider,
+    committee,
+  });
+  return {
+    jobId: opened.jobId.toString(),
+    taskHash: opened.taskHash,
+    token,
+    txs: opened.txs,
+  };
 }
