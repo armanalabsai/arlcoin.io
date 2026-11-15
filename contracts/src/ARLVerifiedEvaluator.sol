@@ -140,9 +140,6 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
     string public constant FEEDBACK_TAG = "arl-verified";
     /// @notice Gas forwarded to each ERC-8004 registry call.
     uint256 public constant REGISTRY_GAS = 300_000;
-    /// @notice Time the arbiter has to rule on a dispute, counted from the end of the challenge
-    /// window. After it anyone can close the dispute with `expireDispute`: the decision stands.
-    uint64 public constant ARBITER_WINDOW = 30 days;
 
     /// Committee member states in `_votes`.
     uint8 private constant MEMBER = 1;
@@ -211,7 +208,7 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
     /// The escrow token refused the refund to the client (for example a USDC deny list). The
     /// bonds are settled anyway; the client recovers the escrow with `ARLJobs.claimRefundTo`.
     event RefundDeferred(uint256 indexed jobId);
-    /// The arbiter did not rule within `ARBITER_WINDOW`; the decision stood.
+    /// The arbiter did not rule in time (`expireDispute`); the decision stood.
     event DisputeExpired(uint256 indexed jobId);
 
     error ZeroAddress();
@@ -512,15 +509,18 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         if (overturned) stakeToken.safeTransfer(challenger, bond);
     }
 
-    /// @notice Anyone, when the arbiter has not ruled within `ARBITER_WINDOW` after the challenge
-    /// window: closes the dispute as if the decision stood, without slashing anyone (the
-    /// challenger did not lose the dispute, the arbiter did not rule), returns the challenger's
-    /// bond and settles the escrow like `resolve` would. Bonds can never stay locked for good.
+    /// @notice Anyone, once the arbiter has let half a challenge window pass after the challenge
+    /// window without ruling: closes the dispute as if the decision stood, without slashing anyone
+    /// (the challenger did not lose the dispute, the arbiter did not rule), returns the
+    /// challenger's bond and settles the escrow like `resolve` would. The job's deadline leaves at
+    /// least two challenge windows after the vote (`_checkFits`), so this is always possible before
+    /// the deadline: a dispute can neither lock the bonds for good nor run the job past its
+    /// deadline into a refund that would take the payment from a provider whose work was approved.
     function expireDispute(uint256 jobId) external nonReentrant {
         Verdict storage v = _verdicts[jobId];
         if (v.phase != Phase.Disputed) revert WrongPhase();
         // slither-disable-next-line timestamp
-        if (block.timestamp < uint256(v.challengeEnds) + ARBITER_WINDOW) {
+        if (block.timestamp < arbiterDeadline(jobId)) {
             revert ArbiterWindowOpen();
         }
 
@@ -567,6 +567,12 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
     }
 
     // ---------------------------------------------------------------- views
+
+    /// @notice When the arbiter's time to rule on a disputed job ends: half a challenge window after
+    /// the challenge window. From then `expireDispute` is open.
+    function arbiterDeadline(uint256 jobId) public view returns (uint256) {
+        return uint256(_verdicts[jobId].challengeEnds) + _configs[jobId].challengeWindow / 2;
+    }
 
     function getConfig(uint256 jobId) external view returns (Config memory) {
         return _configs[jobId];
