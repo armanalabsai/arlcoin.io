@@ -15,7 +15,17 @@ import {
   type WalletClient,
 } from "viem";
 
-import { acceptJob, castVote, checkChain, JobStatus, MemberState, readJob } from "./chain.ts";
+import {
+  acceptJob,
+  castVote,
+  checkChain,
+  JobStatus,
+  MemberState,
+  Phase,
+  readJob,
+  settle,
+  settlementDue,
+} from "./chain.ts";
 import { canonicalHash } from "./canonical.ts";
 import type { Fetcher } from "./inputs.ts";
 import { parseSpec, specHash, type ReexecSpec } from "./spec.ts";
@@ -160,7 +170,31 @@ export async function step(deps: WatchDeps, state: WatchState): Promise<WatchSta
         deps.logWindow ?? LOG_WINDOW,
       );
       if (job.phase !== OPEN_PHASE) {
-        log({ jobId: id, event: "settled", phase: job.phase });
+        const decided =
+          job.phase === Phase.Approved ||
+          job.phase === Phase.Rejected ||
+          job.phase === Phase.Disputed;
+        if (!decided) {
+          log({ jobId: id, event: "settled", phase: job.phase });
+          continue;
+        }
+        // Decided but not paid out yet: keep watching, and make the settlement call once it is
+        // due, so the outcome never waits for the provider or the client to act in time.
+        keep.push(id);
+        const due = await settlementDue(deps.client, deps.evaluator, jobId);
+        if (due) {
+          const tx = await settle(deps.wallet, deps.client, deps.evaluator, jobId, due).catch(
+            (e: unknown) => {
+              log({
+                jobId: id,
+                event: `${due}-pending`,
+                reason: e instanceof Error ? e.message : String(e),
+              });
+              return null;
+            },
+          );
+          if (tx) log({ jobId: id, event: due, tx });
+        }
         continue;
       }
       keep.push(id);

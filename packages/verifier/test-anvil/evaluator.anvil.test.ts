@@ -391,7 +391,14 @@ describe("validator flow on Anvil", () => {
     assert.equal(after.phase, 2); // Approved
     assert.equal(after.memberState, MemberState.Approved);
 
-    // Settled jobs drop out of the watch list.
+    // Decided jobs stay watched until paid out: once the challenge window has passed, the
+    // watcher finalizes the job itself, and only then does it drop out of the list.
+    await pass();
+    assert.equal(states.get(v1)?.jobs.includes("3"), true);
+    await testClient.increaseTime({ seconds: 3601 });
+    await testClient.mine({ blocks: 1 });
+    await pass();
+    assert.equal((await readJob(publicClient, evaluator, jobId, v1.address)).phase, 5); // Finalized
     await pass();
     assert.equal(states.get(v1)?.jobs.includes("3"), false);
   });
