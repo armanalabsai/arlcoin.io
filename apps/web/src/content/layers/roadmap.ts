@@ -6,43 +6,18 @@ import type { Layer } from "../types.ts";
 export const roadmap: Layer = {
   id: "roadmap",
   title: "Roadmap",
-  description:
-    "Live on Base Mainnet: escrowed and verified jobs, compute payments, open standards and developer tools.",
+  description: "Live on Base Mainnet: verified jobs, payments, standards and tools.",
   cards: [
     {
-      id: "phase-0",
-      title: "Phase 0 · Foundation",
-      shortDescription: "Repository, licensing, standards",
-      progress: "done",
-      weight: "secondary",
-      metric: { kind: "static", value: "Complete" },
-      detail: {
-        summary:
-          "Repository structure, Apache-2.0 licensing, CI, the content standard and the chain evaluation.",
-      },
-    },
-    {
-      id: "phase-1",
-      title: "Phase 1 · Token Contracts",
-      shortDescription: "Token, vesting and treasury",
-      progress: "done",
-      weight: "secondary",
-      metric: { kind: "static", value: "Complete" },
-      detail: {
-        summary:
-          "The ARL token, vesting wallets and the treasury timelock, with unit, fuzz and invariant tests.",
-      },
-    },
-    {
       id: "phase-2",
-      title: "Phase 2 · Security Audit",
-      shortDescription: "Audit and remediation",
+      title: "Foundation and Audit",
+      shortDescription: "Token contracts and audit",
       progress: "done",
-      weight: "primary",
+      weight: "secondary",
       metric: { kind: "static", value: "Audit complete, findings closed" },
       detail: {
         summary:
-          "Security audit of the contracts and the deployment process. The multi-layer internal audit was completed on 17 October 2026: tests, fuzzing, invariants, Slither and Aderyn, Halmos proofs, Mythril and a reproducible build, with every finding closed. A bug bounty paid in ARL is open.",
+          "Repository, Apache-2.0 licensing and CI; the ARL token, vesting wallets and treasury timelock with unit, fuzz and invariant tests; and a security audit of the contracts and the deployment process. The multi-layer internal audit was completed on 17 October 2026: tests, fuzzing, invariants, Slither and Aderyn, Halmos proofs, Mythril and a reproducible build, with every finding closed. A bug bounty paid in ARL is open.",
       },
     },
     {
@@ -90,8 +65,8 @@ export const roadmap: Layer = {
     },
     {
       id: "standards",
-      title: "Open Protocol Standards",
-      shortDescription: "arl-task, arl-proof, arl-policy, arl-reputation, arl-evidence",
+      title: "Open Standards",
+      shortDescription: "Five open formats for agent jobs",
       progress: "done",
       weight: "tertiary",
       metric: { kind: "static", value: "Published 2026-11-14" },
@@ -109,7 +84,7 @@ export const roadmap: Layer = {
     {
       id: "developer-experience",
       title: "Developer Experience",
-      shortDescription: "SDKs, n8n, MCP server and Agent API",
+      shortDescription: "SDKs, MCP server, Agent API",
       progress: "active",
       weight: "tertiary",
       metric: { kind: "static", value: "Agent API live 2026-11-15" },
@@ -134,7 +109,7 @@ export const roadmap: Layer = {
     {
       id: "pilot",
       title: "Live Pilot",
-      shortDescription: "Real agent-to-agent jobs on Base Mainnet",
+      shortDescription: "Real agent-to-agent jobs",
       progress: "next",
       weight: "tertiary",
       metric: { kind: "static", value: "After the hardening release" },
