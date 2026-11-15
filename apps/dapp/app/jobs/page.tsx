@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import {
@@ -23,6 +24,7 @@ import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { formatDate, timeLeft } from "~~/lib/format";
 import {
   actions,
+  checkParties,
   deliverableHash,
   isAnvilAccount,
   rolesOf,
@@ -61,11 +63,32 @@ export default function JobsPage() {
   return (
     <>
       <PageTitle title="Jobs">
-        Hire a service for a piece of work and pay in ARL through escrow. The budget is held by the
-        contract until the evaluator you choose accepts the result (the provider is paid) or rejects
-        it (you are refunded). If nobody acts before the deadline, anyone can return the budget to
-        you.
+        Hire an AI agent or a service for a piece of work and pay in ARL through escrow on Base. The
+        budget is held by the contract until the evaluator you choose accepts the result (the
+        provider is paid) or rejects it (you are refunded). If nobody acts before the deadline, the
+        budget goes back to you.
       </PageTitle>
+      <div className="mb-6 grid gap-3 sm:grid-cols-2">
+        <Link href="/verified" className="glass-chip flex flex-col gap-1 px-4 py-3 text-sm">
+          <span className="font-extrabold">Need the work checked?</span>
+          <span className="text-muted">
+            Verified jobs: a committee of staked ARL validators checks the delivery before the
+            escrow pays.
+          </span>
+        </Link>
+        <a
+          href="https://arlcoin.io/build"
+          className="glass-chip flex flex-col gap-1 px-4 py-3 text-sm"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span className="font-extrabold">Building an agent?</span>
+          <span className="text-muted">
+            Open the same jobs from code: TypeScript and Python SDKs, n8n, the MCP server and the
+            Agent API.
+          </span>
+        </a>
+      </div>
       <RequireWallet>
         <Jobs />
       </RequireWallet>
@@ -235,6 +258,13 @@ function PostJob({
     const evaluatorText = evaluator.trim() === "" ? address : evaluator.trim();
     if (!evaluatorText || !isAddress(evaluatorText))
       return setError("The evaluator is not an address");
+    if (!address) return;
+    const parties = checkParties({
+      client: address,
+      provider: providerText,
+      evaluator: evaluatorText,
+    });
+    if (!parties.ok) return setError(parties.error);
     if (!client) return;
     try {
       onStatus({ kind: "busy", text: "Posting the job" });

@@ -10,7 +10,7 @@ export const security: Layer = {
       id: "fixed-supply",
       title: "Fixed Supply",
       shortDescription: "No mint, owner, pause or upgrade",
-      status: "IN DEVELOPMENT",
+      status: "LIVE",
       weight: "primary",
       detail: {
         summary:
@@ -27,7 +27,7 @@ export const security: Layer = {
       id: "review-status",
       title: "Security Audit",
       shortDescription: "Completed 17 Oct 2026, findings closed",
-      status: "IN DEVELOPMENT",
+      status: "LIVE",
       weight: "primary",
       detail: {
         summary:
@@ -47,7 +47,7 @@ export const security: Layer = {
       id: "bug-bounty",
       title: "Bug Bounty",
       shortDescription: "Open, paid in ARL",
-      status: "IN DEVELOPMENT",
+      status: "LIVE",
       weight: "secondary",
       metric: { kind: "static", value: "Up to 40,000 ARL" },
       detail: {
@@ -60,7 +60,7 @@ export const security: Layer = {
       id: "treasury-timelock",
       title: "Treasury Timelock",
       shortDescription: "48-hour minimum delay",
-      status: "IN DEVELOPMENT",
+      status: "LIVE",
       weight: "secondary",
       detail: {
         summary:
@@ -71,7 +71,7 @@ export const security: Layer = {
       id: "vesting-contracts",
       title: "Vesting Contracts",
       shortDescription: "Beneficiary fixed at deployment",
-      status: "IN DEVELOPMENT",
+      status: "LIVE",
       weight: "secondary",
       detail: {
         summary:
@@ -82,7 +82,7 @@ export const security: Layer = {
       id: "testing",
       title: "Testing",
       shortDescription: "Unit, fuzz, invariant, static analysis",
-      status: "IN DEVELOPMENT",
+      status: "LIVE",
       weight: "tertiary",
       detail: {
         summary:
@@ -99,7 +99,7 @@ export const security: Layer = {
       id: "open-source",
       title: "Open Source Foundation",
       shortDescription: "OpenZeppelin libraries, pinned",
-      status: "IN DEVELOPMENT",
+      status: "LIVE",
       weight: "tertiary",
       detail: {
         summary:

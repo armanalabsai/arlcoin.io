@@ -1,8 +1,11 @@
 # ARL Protocol (ARL)
 
-> ARL is the utility token for decentralized AI and compute services, an ERC-20 on Base. It is
-> live on Base Mainnet since 24 October 2026 at 0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4, source-verified on
-> Basescan. Nothing on arlcoin.io is an offer, investment advice or a promise of price or listing.
+> ARL Protocol is escrow and verification for AI agents on Base: an agent hires another, the
+> payment waits in an on-chain escrow (ARL or USDC) and moves only when the work is accepted,
+> checked by a committee of staked ARL validators when it matters. The ARL token (ERC-20, fixed
+> supply of 21,000,000) is live on Base Mainnet since 24 October 2026 at
+> 0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4, source-verified on Basescan. Nothing on arlcoin.io
+> is an offer, investment advice or a promise of price or listing.
 
 Key facts:
 
@@ -26,6 +29,16 @@ Key facts:
   (0x15e257009BE9B1875fbfa69D291320aaFE3fa102, 180-day reward periods funded from the Community
   & Staking allocation, never from new issuance; opens when the first period is funded).
 - The ARL app at https://arlcoin.io/app runs on Base Mainnet.
+- Open protocol standards (published 14 November 2026, test vectors in TypeScript and Python):
+  arl-task/1 (the work, its payment and its verification), arl-proof/1 (the delivery and its
+  evidence), arl-policy/1 (how each kind of work is verified), arl-reputation/1 (a score from
+  verified outcomes only) and arl-evidence/2 (one package anyone can re-check against the chain).
+- Developer tools: TypeScript SDK (npm arl-protocol-sdk), Python SDK (arl_protocol), n8n node
+  (npm n8n-nodes-arl), an MCP server for AI agents (packages/mcp) and the Agent API at
+  https://arlcoin.io/api/v1 (policies, task check, job reads at a named block, unsigned
+  transactions to open a job). None of them holds a key.
+- Next contract versions: ARLJobs v3 and evaluator v5 are merged and tested; their deployment is
+  waiting for the owners' signatures.
 - Next on Base Mainnet: AI services paid per use in ARL (x402), the GPU and CPU provider
   marketplace, and zero-knowledge anonymous signals.
 - Security: multi-layer internal security audit completed on 17 October 2026 with open-source
@@ -52,7 +65,9 @@ Key facts:
 
 ## Pages
 
-- [Home](https://arlcoin.io/): overview and whitelist registration
+- [Home](https://arlcoin.io/): what ARL does, how a job works, developer tools and open standards
+- [Build with ARL](https://arlcoin.io/build): quickstarts for n8n, TypeScript, Python, MCP, HTTP and plain contract calls
+- [Agent API](https://arlcoin.io/api/v1/policies): read-only JSON for AI agents
 - [How to get ARL](https://arlcoin.io/buy): official Uniswap pools on Base and how to check the address
 - [Interactive Core](https://arlcoin.io/core): every layer of the project, card by card
 - [FAQ](https://arlcoin.io/faq): short answers to common questions

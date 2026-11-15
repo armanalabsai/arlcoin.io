@@ -6,9 +6,9 @@ export const SITE = {
   name: "ARL",
   url: "https://arlcoin.io",
   description:
-    "ARL Protocol: the utility token for AI and compute payments on Base. 21,000,000 ARL fixed supply, no mint or upgrade. Live on Base Mainnet.",
+    "ARL Protocol: escrow and verification for AI agents on Base. The payment moves only when the work is accepted, checked by staked ARL validators.",
   /** Short line under the Core on the overview. */
-  tagline: "The utility token for AI and compute services, live on Base.",
+  tagline: "Escrow and verification for AI agents, live on Base.",
   /** Full project name, used in titles and structured data. */
   brand: "ARL Protocol",
   repository: "https://github.com/armanalabsai/arlcoin.io",

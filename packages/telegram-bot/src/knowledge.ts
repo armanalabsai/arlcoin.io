@@ -44,12 +44,13 @@ export const ROADMAP =
   "- Escrowed jobs in ARL or USDC, verified by staked validators, compute payments, staking\n" +
   "- SDKs: n8n node, TypeScript (arl-protocol-sdk), Python (arl_protocol)\n" +
   "- Open protocol standards: arl-task, arl-proof, arl-policy, arl-reputation, arl-evidence/2\n" +
+  "- Agent API (arlcoin.io/api/v1) and the MCP server for AI agents\n" +
   "Now:\n" +
-  "- Security hardening, the next jobs escrow version (v3), a 3-validator committee\n" +
+  "- Security hardening: ARLJobs v3 and evaluator v5 ready, deployment waiting for the owners' signatures\n" +
+  "- A 3-validator committee, AgentKit actions\n" +
   "Next:\n" +
-  "1. Developer experience: agent API, MCP server, AgentKit\n" +
-  "2. A live pilot with real agent-to-agent jobs\n" +
-  "3. An open validator set and decentralized disputes\n\n" +
+  "1. A live pilot with real agent-to-agent jobs\n" +
+  "2. An open validator set and decentralized disputes\n\n" +
   `Full roadmap: ${ROADMAP_DOC}`;
 
 export const BUILD_TEXT =
@@ -57,6 +58,7 @@ export const BUILD_TEXT =
   "- No code: the n8n node n8n-nodes-arl\n" +
   "- TypeScript: npm install arl-protocol-sdk\n" +
   "- Python: the arl_protocol package, one Arl class\n" +
+  "- AI agents: the Agent API at arlcoin.io/api/v1 or the MCP server (no key, unsigned transactions)\n" +
   "- Any language: plain contract calls, no API key\n\n" +
   "Every path uses the same five steps: create the job, set the budget, fund it, submit the " +
   "work, settle (pay or refund).\n" +

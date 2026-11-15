@@ -51,7 +51,7 @@ export const token: Layer = {
       id: "max-supply",
       title: "Maximum Supply",
       shortDescription: "Fixed. Minted once at deployment.",
-      status: "IN DEVELOPMENT",
+      status: "LIVE",
       weight: "primary",
       metric: { kind: "static", value: MAX_SUPPLY.toLocaleString("en-US"), unit: "ARL" },
       detail: {
@@ -84,7 +84,7 @@ export const token: Layer = {
       id: "circulating-supply",
       title: "Circulating Supply",
       shortDescription: "Published live at arlcoin.io/api/supply",
-      status: "IN DEVELOPMENT",
+      status: "LIVE",
       weight: "secondary",
       metric: {
         kind: "unavailable",
@@ -122,7 +122,7 @@ export const token: Layer = {
       id: "vesting",
       title: "Vesting",
       shortDescription: "Investors and strategic partnerships",
-      status: "IN DEVELOPMENT",
+      status: "LIVE",
       weight: "secondary",
       metric: { kind: "static", value: String(vesting.length), unit: "vesting wallets" },
       detail: {
@@ -190,7 +190,7 @@ export const token: Layer = {
       id: "decimals",
       title: "Decimals",
       shortDescription: "1 ARL = 10^18 base units",
-      status: "IN DEVELOPMENT",
+      status: "LIVE",
       weight: "tertiary",
       metric: { kind: "static", value: "18" },
       detail: {
@@ -201,7 +201,7 @@ export const token: Layer = {
       id: "standard",
       title: "Standard",
       shortDescription: "ERC-20 with EIP-2612 permit",
-      status: "IN DEVELOPMENT",
+      status: "LIVE",
       weight: "tertiary",
       metric: { kind: "static", value: "ERC-20" },
       detail: {

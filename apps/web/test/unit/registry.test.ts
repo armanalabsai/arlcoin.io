@@ -151,12 +151,28 @@ describe("content accuracy", () => {
     }
   });
 
-  it("marks as LIVE only what Base Mainnet shows: the contracts, the network and the pools", () => {
+  it("marks as LIVE only what Base Mainnet and the published tools show", () => {
     const live = new Set([
+      "token/max-supply",
+      "token/circulating-supply",
+      "token/vesting",
       "token/contract-address",
-      "token/network",
       "token/liquidity",
+      "token/decimals",
+      "token/standard",
+      "token/network",
+      "technology/verified-jobs",
+      "technology/agent-tools",
       "technology/token-contracts",
+      "security/fixed-supply",
+      "security/review-status",
+      "security/bug-bounty",
+      "security/treasury-timelock",
+      "security/vesting-contracts",
+      "security/testing",
+      "security/open-source",
+      "ecosystem/safe",
+      "ecosystem/grants",
     ]);
     for (const layer of LAYERS) {
       for (const card of layer.cards) {

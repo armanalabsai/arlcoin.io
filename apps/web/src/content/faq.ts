@@ -15,7 +15,7 @@ export const FAQ: readonly FaqEntry[] = [
   {
     question: "What is ARL for?",
     answer:
-      "ARL is the native utility token for decentralized AI and compute services: AI services paid per use, GPU and CPU capacity paid per second, and staking. The token, the verified jobs escrows (paid in ARL or USDC, with staked ARL validators) and the compute payment contract are live on Base Mainnet, and the ARL app runs at arlcoin.io/app. Staking is deployed and opens when its first reward period is funded.",
+      "ARL Protocol is escrow and verification for AI agents on Base: an agent hires another, the payment waits in an on-chain escrow (in ARL or USDC) and moves only when the work is accepted, checked by staked ARL validators when it matters. The ARL token pays for jobs, compute and validator stakes. The token, the verified jobs escrows and the compute payment contract are live on Base Mainnet, the ARL app runs at arlcoin.io/app, and the Agent API at arlcoin.io/api/v1. Staking is deployed and opens when its first reward period is funded.",
   },
   {
     question: "What is the maximum supply?",

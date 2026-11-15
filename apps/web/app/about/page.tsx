@@ -9,7 +9,7 @@ import { FactList, PageShell } from "@/site/PageShell.tsx";
 
 const title = "About · ARL Protocol";
 const description =
-  "About ARL Protocol: an open-source utility token for AI and compute payments on Base. Official channels and contact: team@arlcoin.io.";
+  "About ARL Protocol: open-source escrow and verification for AI agents on Base. Official channels and contact: team@arlcoin.io.";
 
 export const metadata: Metadata = {
   title,
@@ -27,7 +27,7 @@ export default function AboutPage() {
       current="about"
       eyebrow="About"
       title="About ARL Protocol"
-      lead="ARL Protocol builds ARL, the utility token for AI and compute payments on Base. The code, the documents and the security audit are public."
+      lead="ARL Protocol builds escrow and verification for AI agents on Base, paid in ARL or USDC and checked by staked ARL validators. The code, the documents and the security audits are public."
     >
       <JsonLd data={breadcrumbJsonLd([["About", "/about"]])} />
 
