@@ -17,7 +17,7 @@ the Grants / Bug Bounty allocation.
 
 ## How it works
 
-1. Pick an open issue whose body names a reward, and comment that you are taking it.
+1. Pick an open issue that names a reward (in its title or comments), and comment that you are taking it.
 2. Open a pull request that follows [CONTRIBUTING.md](../CONTRIBUTING.md); CI must pass.
 3. Put a Base address in the pull request description.
 4. When the pull request is merged, the reward joins the next payout batch from the Grants Safe.
