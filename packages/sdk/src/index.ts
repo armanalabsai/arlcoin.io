@@ -24,6 +24,7 @@ export {
   finalizeJob,
   getVerdict,
   openVerifiedJob,
+  defaultWindows,
   verifiedEvaluatorAbi,
   verifiedDeployment,
   verifiedJobsAbi,
