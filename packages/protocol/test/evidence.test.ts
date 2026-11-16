@@ -47,4 +47,19 @@ describe("arl-evidence/2 vectors", () => {
     assert.equal(r.outcome, "completed");
     assert.equal(r.overturned, true);
   });
+
+  it("refuses a completed settlement with no decision or finalization behind it", () => {
+    const [first] = vectors.valid;
+    assert.ok(first);
+    for (const drop of ["decided", "finalized"] as const) {
+      const forged = structuredClone(first.evidence);
+      forged.settlement[drop] = null;
+      assert.throws(() => checkEvidence(forged), /needs a decision and a finalization/);
+    }
+    const bare = structuredClone(first.evidence);
+    bare.settlement.decided = null;
+    bare.settlement.finalized = null;
+    bare.settlement.votes = [];
+    assert.throws(() => checkEvidence(bare), /needs a decision and a finalization/);
+  });
 });
