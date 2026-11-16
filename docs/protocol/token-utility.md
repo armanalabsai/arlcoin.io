@@ -9,8 +9,8 @@ Nothing here changes a contract; items that would need a contract change say so.
 
 | Role                     | Where                                         | How                                                                                                                         |
 | ------------------------ | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Escrow currency          | `ARLJobs` (ARL) `0x4664…98f9`                 | The client locks the budget in ARL; it goes to the provider on approval or back to the client on rejection or expiry        |
-| Validator stake and bond | `ARLVerifiedEvaluator` v4 (ARL and USDC jobs) | Validators stake ARL; each accepted member locks `max(floor, budget / 10)`; mainnet floor 100 ARL                           |
+| Escrow currency          | `ARLJobs` (ARL) `0x9aE9…55fC`                 | The client locks the budget in ARL; it goes to the provider on approval or back to the client on rejection or expiry        |
+| Validator stake and bond | `ARLVerifiedEvaluator` v5 (ARL and USDC jobs) | Validators stake ARL; each accepted member locks `max(floor, budget / 10)`; mainnet floor 100 ARL                           |
 | Penalty                  | Same                                          | Wrong approvals overturned by a dispute, failed challenges and absences burn bonds to `0x…dEaD` (supply leaves circulation) |
 | Compute payment          | `ComputePayment` `0x1bFE…E464`                | Per-second streams paid in ARL                                                                                              |
 | Staking                  | `ARLStakingRewards` `0x15e2…a102`             | Stake ARL, earn rewards from funded periods (180 days each); no period funded yet                                           |

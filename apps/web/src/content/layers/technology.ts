@@ -29,7 +29,7 @@ export const technology: Layer = {
           {
             heading: "Live",
             items: [
-              "Job escrows paid in ARL and in USDC, and the verified evaluator v4 for each, since 12 November 2026",
+              "Job escrows paid in ARL and in USDC (v3), and the verified evaluator v5 for each, since 16 November 2026",
               "The ARL app: post, fund, deliver and settle jobs, and follow verified jobs",
               "Hourly alerts on disputes, slashes and refused refunds",
             ],
@@ -172,10 +172,7 @@ export const technology: Layer = {
           },
           {
             heading: "Not yet built",
-            items: [
-              "Staking opens when the Community & Staking Safe funds the first reward period",
-              "No liquidity has been provided on any exchange",
-            ],
+            items: ["No liquidity has been provided on any exchange"],
           },
         ],
       },

@@ -1686,7 +1686,7 @@ const baseMainnetContracts = {
       deployedOnBlock: 56649904,
     },
     ARLJobs: {
-      address: "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+      address: "0x9aE99bF9a59aF47E81346B7c0b93Cd2B610455fC",
       abi: [
         {
           type: "constructor",
@@ -1746,6 +1746,24 @@ const baseMainnetContracts = {
               name: "jobId",
               type: "uint256",
               internalType: "uint256",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "claimRefundTo",
+          inputs: [
+            {
+              name: "jobId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "recipient",
+              type: "address",
+              internalType: "address",
             },
           ],
           outputs: [],
@@ -2263,6 +2281,11 @@ const baseMainnetContracts = {
             },
           ],
           anonymous: false,
+        },
+        {
+          type: "error",
+          name: "AmountReceivedMismatch",
+          inputs: [],
         },
         {
           type: "error",

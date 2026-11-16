@@ -37,15 +37,15 @@ describe("inputs", () => {
 
   it("checks addresses", () => {
     assert.equal(
-      checkAddress(" 0x4664d58faffb6ab1cf36717c70058a323e2a98f9 ", "x"),
-      "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
+      checkAddress(" 0x9aE99bF9a59aF47E81346B7c0b93Cd2B610455fC ", "x"),
+      "0x9aE99bF9a59aF47E81346B7c0b93Cd2B610455fC",
     );
     assert.throws(() => checkAddress("0x1234", "the provider"), /the provider/);
   });
 
   it("points at the Base Mainnet escrows", () => {
-    assert.equal(ESCROWS.ARL, "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9");
-    assert.equal(ESCROWS.USDC, "0xc833140D2eE8607fd41662cffFAc557f3D535bE6");
+    assert.equal(ESCROWS.ARL, "0x9aE99bF9a59aF47E81346B7c0b93Cd2B610455fC");
+    assert.equal(ESCROWS.USDC, "0xE3eA0EAEc3Cf9DA2d0856A0f784A4B1671AeFD04");
   });
 });
 
