@@ -225,6 +225,23 @@ describe("ARL tools", () => {
       assert.equal(r.isError, true);
       assert.match(r.text, /not this task's job/);
     }
+
+    // An RPC that has not seen the createJob receipt yet reads an empty job: "does not exist",
+    // which the Python SDK's open_task retries, not "not this task's job", which it does not.
+    const empty = {
+      ...job,
+      id: 0n,
+      client: "0x0000000000000000000000000000000000000000",
+      provider: "0x0000000000000000000000000000000000000000",
+      evaluator: "0x0000000000000000000000000000000000000000",
+      description: "",
+    };
+    const lagging = await call(arlTools({ chain: fakeChain(empty) }), "arl_prepare_funding", {
+      ...open,
+      jobId: "7",
+    });
+    assert.equal(lagging.isError, true);
+    assert.match(lagging.text, /does not exist/);
   });
 
   it("refuses bad addresses, ids and tokens", async () => {

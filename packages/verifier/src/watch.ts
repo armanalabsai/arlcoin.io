@@ -29,7 +29,7 @@ import {
 import { canonicalHash } from "./canonical.ts";
 import type { Fetcher } from "./inputs.ts";
 import { parseSpec, specHash, type ReexecSpec } from "./spec.ts";
-import { decide, type ExecuteOptions } from "./verify.ts";
+import { decide, type Decision, type ExecuteOptions } from "./verify.ts";
 
 /** Largest spec document accepted, in bytes. */
 export const MAX_SPEC_BYTES = 64 * 1024;
@@ -49,6 +49,12 @@ export interface WatchState {
   fromBlock: bigint;
   /** Jobs that name this validator and are not settled yet, as decimal strings. */
   jobs: string[];
+  /**
+   * The spec each accepted job was checked against before the bond was locked, by job id. Saved
+   * with the state, so the vote after a restart or in one-shot mode uses the same spec instead of
+   * re-fetching a URL whose content may have changed since (security report 2026-11-16).
+   */
+  specs?: Record<string, ReexecSpec>;
 }
 
 export interface WatchDeps {
@@ -62,7 +68,20 @@ export interface WatchDeps {
   log?: (event: Record<string, unknown>) => void;
   /** Blocks per `eth_getLogs` call; the RPC's own limit (default LOG_WINDOW). */
   logWindow?: bigint;
+  /**
+   * Seconds before the vote window ends from which a re-execution that keeps failing is answered
+   * with a reject vote (default FAILURE_VOTE_MARGIN).
+   */
+  failureVoteMargin?: bigint;
 }
+
+/**
+ * An accepted member that never votes is slashed as absent. When re-execution keeps failing (the
+ * image or an input cannot be fetched, the container does not run), the keeper retries until this
+ * many seconds before the vote window ends and then votes to reject, with the failure as evidence:
+ * work the validator cannot reproduce is not work it can approve (security report 2026-11-16).
+ */
+export const FAILURE_VOTE_MARGIN = 300n;
 
 /** The spec at `uri` (the job's description), parsed and size-checked. */
 export async function fetchSpec(uri: string, fetcher: Pick<Fetcher, "file">): Promise<ReexecSpec> {
@@ -107,12 +126,6 @@ export async function fetchJobSpec(
   return fetchSpec(await specUriOf(description, fetcher), fetcher);
 }
 
-/**
- * Specs fetched and checked before accepting, by job id: the vote reuses them if the spec's host
- * stops answering after the bond is locked.
- */
-const checkedSpecs = new Map<string, ReexecSpec>();
-
 /** The job's spec if it can be fetched and matches the committed hash; otherwise null. */
 async function usableSpec(
   description: string,
@@ -125,6 +138,20 @@ async function usableSpec(
   } catch {
     return null;
   }
+}
+
+/**
+ * The spec a vote runs: the one saved at accept time when it still hashes to the committed
+ * specHash, otherwise a fresh fetch that does, otherwise null (never a spec that does not match).
+ */
+export async function voteSpec(
+  saved: ReexecSpec | undefined,
+  description: string,
+  committed: string,
+  fetcher: Pick<Fetcher, "file">,
+): Promise<ReexecSpec | null> {
+  if (saved && specHash(saved).toLowerCase() === committed.toLowerCase()) return saved;
+  return usableSpec(description, committed, fetcher);
 }
 
 /** Adds the jobs configured since `state.fromBlock` whose committee names `me`. */
@@ -152,12 +179,44 @@ async function discover(deps: WatchDeps, state: WatchState, me: Address): Promis
   return { fromBlock: from, jobs: [...jobs] };
 }
 
+/**
+ * `decide`, or, when there is no spec matching the job's specHash or re-execution throws: null
+ * while there is time to retry, then a reject decision whose evidence is the hash of the failure
+ * (see FAILURE_VOTE_MARGIN).
+ */
+export async function decideOrFail(
+  deps: WatchDeps,
+  voteEnds: bigint,
+  spec: ReexecSpec | null,
+  committedSpecHash: `0x${string}`,
+  deliverable: `0x${string}`,
+): Promise<Decision | null> {
+  try {
+    if (!spec) throw new Error("no spec matching the job's specHash is available");
+    return await decide(spec, committedSpecHash, deliverable, deps.exec);
+  } catch (e) {
+    const reason = e instanceof Error ? e.message : String(e);
+    const { timestamp } = await deps.client.getBlock();
+    if (voteEnds === 0n || timestamp + (deps.failureVoteMargin ?? FAILURE_VOTE_MARGIN) < voteEnds) {
+      (deps.log ?? (() => undefined))({ event: "execution-error", reason });
+      return null;
+    }
+    return {
+      approve: false,
+      reason: `re-execution failed: ${reason}`,
+      evidence: canonicalHash({ error: "re-execution failed", reason }),
+      result: null,
+    };
+  }
+}
+
 /** One pass: discover new jobs, then accept or vote where the job is ready. Returns the new state. */
 export async function step(deps: WatchDeps, state: WatchState): Promise<WatchState> {
   checkChain(await deps.client.getChainId());
   const me = deps.wallet.account.address;
   const log = deps.log ?? (() => undefined);
   const next = await discover(deps, state, me);
+  const specs: Record<string, ReexecSpec> = { ...state.specs };
   const keep: string[] = [];
   for (const id of next.jobs) {
     const jobId = BigInt(id);
@@ -198,6 +257,25 @@ export async function step(deps: WatchDeps, state: WatchState): Promise<WatchSta
         continue;
       }
       keep.push(id);
+      // The vote window ended without a decision: close the job (members who accepted and did
+      // not vote are slashed, the client is refunded) instead of re-executing it on every pass.
+      if (job.voteEnds !== 0n) {
+        const due = await settlementDue(deps.client, deps.evaluator, jobId);
+        if (due === "closeUndecided") {
+          const tx = await settle(deps.wallet, deps.client, deps.evaluator, jobId, due).catch(
+            (e: unknown) => {
+              log({
+                jobId: id,
+                event: `${due}-pending`,
+                reason: e instanceof Error ? e.message : String(e),
+              });
+              return null;
+            },
+          );
+          if (tx) log({ jobId: id, event: due, tx });
+          continue;
+        }
+      }
       if (
         job.memberState === MemberState.Member &&
         (job.status === JobStatus.Funded || job.status === JobStatus.Submitted)
@@ -210,7 +288,7 @@ export async function step(deps: WatchDeps, state: WatchState): Promise<WatchSta
           log({ jobId: id, event: "spec-unusable", reason: "spec not fetchable or hash differs" });
           continue;
         }
-        checkedSpecs.set(id, spec);
+        specs[id] = spec;
         // A job can go from Funded to Submitted between two passes; the contract still accepts
         // it until the vote window ends. accept() also requires the provider's committee
         // approval; a revert here just means "not yet" and the job is tried again next pass.
@@ -226,11 +304,20 @@ export async function step(deps: WatchDeps, state: WatchState): Promise<WatchSta
         );
         if (tx) log({ jobId: id, event: "accepted", tx });
       } else if (job.memberState === MemberState.Accepted && job.deliverable !== null) {
-        const spec =
-          (await usableSpec(job.description, job.specHash, deps.specFetcher)) ??
-          checkedSpecs.get(id) ??
-          (await fetchJobSpec(job.description, deps.specFetcher));
-        const decision = await decide(spec, job.specHash, job.deliverable, deps.exec);
+        // The spec checked at accept time first; a fresh fetch only if it is missing, and only if
+        // it still hashes to the committed specHash.
+        const spec = await voteSpec(specs[id], job.description, job.specHash, deps.specFetcher);
+        const decision = await decideOrFail(
+          deps,
+          job.voteEnds,
+          spec,
+          job.specHash,
+          job.deliverable,
+        );
+        if (!decision) {
+          log({ jobId: id, event: "execution-failed", retry: true });
+          continue;
+        }
         const tx = await castVote(
           deps.wallet,
           deps.client,
@@ -247,5 +334,11 @@ export async function step(deps: WatchDeps, state: WatchState): Promise<WatchSta
       log({ jobId: id, event: "error", error: e instanceof Error ? e.message : String(e) });
     }
   }
-  return { fromBlock: next.fromBlock, jobs: [...new Set(keep)] };
+  const kept = [...new Set(keep)];
+  const keptSpecs: Record<string, ReexecSpec> = {};
+  for (const id of kept) {
+    const spec = specs[id];
+    if (spec) keptSpecs[id] = spec;
+  }
+  return { fromBlock: next.fromBlock, jobs: kept, specs: keptSpecs };
 }

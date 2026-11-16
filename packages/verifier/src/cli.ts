@@ -151,8 +151,9 @@ async function main(argv: readonly string[]): Promise<void> {
         const saved = JSON.parse(await readFile(statePath, "utf8")) as {
           fromBlock: string;
           jobs: string[];
+          specs?: WatchState["specs"];
         };
-        state = { fromBlock: BigInt(saved.fromBlock), jobs: saved.jobs };
+        state = { fromBlock: BigInt(saved.fromBlock), jobs: saved.jobs, specs: saved.specs ?? {} };
       } catch {
         // No saved state yet: start from the given block.
       }
@@ -173,7 +174,11 @@ async function main(argv: readonly string[]): Promise<void> {
           state = await step(deps, state);
           await writeFile(
             statePath,
-            JSON.stringify({ fromBlock: state.fromBlock.toString(), jobs: state.jobs }),
+            JSON.stringify({
+              fromBlock: state.fromBlock.toString(),
+              jobs: state.jobs,
+              specs: state.specs ?? {},
+            }),
           );
         } catch (e) {
           print({ event: "error", error: e instanceof Error ? e.message : String(e) });

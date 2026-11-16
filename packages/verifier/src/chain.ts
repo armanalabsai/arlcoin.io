@@ -45,6 +45,7 @@ export const evaluatorAbi = parseAbi([
   "function vote(uint256 jobId, bool approve, bytes32 deliverable, bytes32 evidence)",
   "function finalize(uint256 jobId)",
   "function expireDispute(uint256 jobId)",
+  "function closeUndecided(uint256 jobId)",
   "function arbiterDeadline(uint256 jobId) view returns (uint256)",
 ]);
 
@@ -54,15 +55,20 @@ export const Phase = { Configured: 1, Approved: 2, Rejected: 3, Disputed: 4 } as
 /**
  * The settlement call a decided job is due for, or null: `finalize` once the challenge window
  * has passed on an approved or rejected job, `expireDispute` once the arbiter's deadline has
- * passed on a disputed one. Anyone may make either call; a validator makes them so a provider
- * whose work was approved does not have to watch the deadline itself (security report
- * 2026-11-15). An evaluator without `arbiterDeadline` (v4) never reports `expireDispute`.
+ * passed on a disputed one, `closeUndecided` once the vote window has ended without a decision.
+ * Anyone may make these calls; a validator makes them so a provider whose work was approved does
+ * not have to watch the deadline itself (security report 2026-11-15), and so a job whose vote
+ * failed is closed instead of being re-executed on every pass (security report 2026-11-16). An
+ * evaluator without `arbiterDeadline` (v4) never reports `expireDispute`.
  */
+/** The permissionless calls that move a stalled or decided job on. */
+export type SettlementCall = "finalize" | "expireDispute" | "closeUndecided";
+
 export async function settlementDue(
   client: PublicClient,
   evaluator: Address,
   jobId: bigint,
-): Promise<"finalize" | "expireDispute" | null> {
+): Promise<SettlementCall | null> {
   const v = await client.readContract({
     address: evaluator,
     abi: evaluatorAbi,
@@ -70,6 +76,9 @@ export async function settlementDue(
     args: [jobId],
   });
   const { timestamp } = await client.getBlock();
+  if (v.phase === Phase.Configured) {
+    return v.voteEnds !== 0n && timestamp >= v.voteEnds ? "closeUndecided" : null;
+  }
   if (v.phase === Phase.Approved || v.phase === Phase.Rejected) {
     return timestamp >= v.challengeEnds ? "finalize" : null;
   }
@@ -114,6 +123,8 @@ export interface JobView {
   specHash: Hex;
   phase: number;
   memberState: number;
+  /** When the vote window ends (seconds), 0 before voting has started. */
+  voteEnds: bigint;
   /** The deliverable from `JobSubmitted`, if the job was submitted. */
   deliverable: Hex | null;
 }
@@ -186,6 +197,7 @@ export async function readJob(
     specHash: config.specHash,
     phase: verdict.phase,
     memberState,
+    voteEnds: verdict.voteEnds,
     deliverable,
   };
 }
@@ -237,7 +249,7 @@ export async function settle(
   client: PublicClient,
   evaluator: Address,
   jobId: bigint,
-  call: "finalize" | "expireDispute",
+  call: SettlementCall,
 ): Promise<Hex> {
   checkChain(await client.getChainId());
   const hash = await wallet.writeContract({

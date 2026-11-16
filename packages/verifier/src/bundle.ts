@@ -183,6 +183,10 @@ export function checkBundle(b: EvidenceBundle): string[] {
   }
   if (b.finalized && b.decided && b.finalized.approved !== b.decided.approved)
     p.push("finalized outcome differs from the decision");
+  // A provider is paid only through the evaluator's settlement, which follows a decision and
+  // emits Finalized (the same rule as checkEvidence in @arl/protocol).
+  if (b.settlement?.outcome === "completed" && (!b.decided || !b.finalized))
+    p.push("a completed settlement needs a decision and a finalization");
   if (b.finalized && b.settlement) {
     const expected = b.finalized.approved ? "completed" : "rejected";
     if (b.settlement.outcome !== expected)

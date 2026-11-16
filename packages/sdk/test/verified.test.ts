@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { BASE_MAINNET_VERIFIED, VERDICT_PHASES, checkOpenParams } from "../src/index.ts";
+import {
+  BASE_MAINNET_VERIFIED,
+  VERDICT_PHASES,
+  checkOpenParams,
+  defaultWindows,
+} from "../src/index.ts";
 
 const ok = {
   provider: "0x00000000000000000000000000000000000000aa",
@@ -41,5 +46,30 @@ describe("verified jobs", () => {
     assert.equal(VERDICT_PHASES.length, 8);
     assert.equal(VERDICT_PHASES[5], "Finalized");
     assert.equal(BASE_MAINNET_VERIFIED.chainId, 8453);
+  });
+});
+
+describe("defaultWindows", () => {
+  it("uses the evaluator's minimum challenge window and leaves room for _checkFits", () => {
+    const w = defaultWindows(86_400n, {});
+    assert.equal(w.voteWindow, 3_600n);
+    assert.equal(w.challengeWindow, 86_400n);
+    // configure and voting start need expiredAt >= now + vote + 2 * challenge.
+    assert.ok(w.expiresIn >= w.voteWindow + 2n * w.challengeWindow + 86_400n);
+  });
+
+  it("keeps the old one-hour windows where the evaluator allows them", () => {
+    const w = defaultWindows(600n, {});
+    assert.equal(w.challengeWindow, 3_600n);
+    assert.equal(w.expiresIn, 3_600n + 7_200n + 86_400n);
+  });
+
+  it("keeps values the caller gives", () => {
+    const w = defaultWindows(86_400n, {
+      voteWindow: 600n,
+      challengeWindow: 172_800n,
+      expiresIn: 1n,
+    });
+    assert.deepEqual(w, { voteWindow: 600n, challengeWindow: 172_800n, expiresIn: 1n });
   });
 });
