@@ -29,7 +29,7 @@ export const technology: Layer = {
           {
             heading: "Live",
             items: [
-              "Job escrows paid in ARL and in USDC, and the verified evaluator v4 for each, since 12 November 2026",
+              "Job escrows paid in ARL and in USDC (v3), and the verified evaluator v5 for each, since 16 November 2026",
               "The ARL app: post, fund, deliver and settle jobs, and follow verified jobs",
               "Hourly alerts on disputes, slashes and refused refunds",
             ],
@@ -172,10 +172,7 @@ export const technology: Layer = {
           },
           {
             heading: "Not yet built",
-            items: [
-              "Staking opens when the Community & Staking Safe funds the first reward period",
-              "No liquidity has been provided on any exchange",
-            ],
+            items: ["No liquidity has been provided on any exchange"],
           },
         ],
       },
@@ -219,7 +216,7 @@ export const technology: Layer = {
       weight: "tertiary",
       detail: {
         summary:
-          "The token, vesting, treasury, launch claim and staking contracts are written in Solidity 0.8.36 on OpenZeppelin Contracts v5.6.1 and covered by unit, fuzz and invariant tests. On Base Mainnet: the token, vesting wallets and treasury timelock (24 October 2026), the jobs escrows with their verified evaluators, the compute payment contract and the staking contract (12 November 2026).",
+          "The token, vesting, treasury, launch claim and staking contracts are written in Solidity 0.8.36 on OpenZeppelin Contracts v5.6.1 and covered by unit, fuzz and invariant tests. On Base Mainnet: the token, vesting wallets and treasury timelock (24 October 2026), the compute payment contract and the staking contract (12 November 2026), the jobs escrows v3 with their verified evaluators v5 (16 November 2026).",
         facts: [
           { label: "Language", value: "Solidity 0.8.36", mono: true },
           { label: "Library", value: "OpenZeppelin Contracts v5.6.1" },

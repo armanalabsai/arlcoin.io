@@ -27,8 +27,8 @@ On Base Mainnet the app shows Wallet, Vesting, Trade, Claim, Staking, Jobs and V
 - **Claim** is closed: no claim list is published.
 - **Staking** uses `ARLStakingRewards` (`0x15e257009BE9B1875fbfa69D291320aaFE3fa102`, deployed
   2026-11-12). Rewards come in 180-day periods funded by the Community & Staking Safe
-  (`0xfF12597A671ebAF0cAe37999EE659e03c4f444B5`, 2 of 3); staking opens when the first period is
-  funded.
+  (`0xfF12597A671ebAF0cAe37999EE659e03c4f444B5`, 2 of 3); the first period (300,000 ARL) runs
+  from 2026-11-16 to 2027-05-15.
 - **Jobs** and **Verified** use the ERC-8183 escrows and the verified evaluators on Base Mainnet
   (see [jobs.md](jobs.md)).
 
@@ -177,14 +177,14 @@ Foundry build and the Base Mainnet records (`contracts/deploy/deployments/8453.j
 `contracts/deploy/base-mainnet-jobs.json`, `contracts/deploy/base-mainnet-services.json`); CI checks
 it with `--check`.
 
-| Item          | On Base Mainnet                                                                                                           |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| RPC           | Public endpoints in order (publicnode, `mainnet.base.org`, Tenderly gateway); a local fork URL is used alone              |
-| History reads | From each contract's deployment block; ranges an endpoint refuses are split (`lib/logs.ts`)                               |
-| Staking       | `ARLStakingRewards`; 180-day reward periods funded by the Community & Staking Safe; opens when the first period is funded |
-| Jobs          | ERC-8183 escrows in ARL and USDC with the verified evaluators; directly from the user's wallet                            |
-| Claim         | Closed; no list                                                                                                           |
-| Not live yet  | Payments, Network and Private show "Not live on Base Mainnet yet"                                                         |
+| Item          | On Base Mainnet                                                                                                    |
+| ------------- | ------------------------------------------------------------------------------------------------------------------ |
+| RPC           | Public endpoints in order (publicnode, `mainnet.base.org`, Tenderly gateway); a local fork URL is used alone       |
+| History reads | From each contract's deployment block; ranges an endpoint refuses are split (`lib/logs.ts`)                        |
+| Staking       | `ARLStakingRewards`; 180-day reward periods funded by the Community & Staking Safe; first period funded 2026-11-16 |
+| Jobs          | ERC-8183 escrows in ARL and USDC with the verified evaluators; directly from the user's wallet                     |
+| Claim         | Closed; no list                                                                                                    |
+| Not live yet  | Payments, Network and Private show "Not live on Base Mainnet yet"                                                  |
 
 Every transaction is sent from the user's own wallet. The app has no server of its own: it is a
 static export, built with the website (`scripts/build-cloudflare.sh`) and served by Cloudflare Pages

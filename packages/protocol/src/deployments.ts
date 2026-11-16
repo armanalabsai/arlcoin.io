@@ -24,15 +24,15 @@ export const BASE_MAINNET_TASK_DEPLOYMENTS: Record<Token, TaskDeployment> = {
   ARL: {
     chainId: 8453,
     token: "0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4",
-    jobs: "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
-    evaluator: "0x5cA6dab18E6b9a5Cd44a4FfFBdf2c5BA3Cd87DfF",
+    jobs: "0x9aE99bF9a59aF47E81346B7c0b93Cd2B610455fC",
+    evaluator: "0x6648e141cb7473822ddBd8bC039b91e5af3259B4",
     arbiter: ARBITER_SAFE,
   },
   USDC: {
     chainId: 8453,
     token: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-    jobs: "0xc833140D2eE8607fd41662cffFAc557f3D535bE6",
-    evaluator: "0x8C017f24615AC749Ec7297FB07b14E558B670CFC",
+    jobs: "0xE3eA0EAEc3Cf9DA2d0856A0f784A4B1671AeFD04",
+    evaluator: "0x6bFfdEace7d0B2F7711f604F0A5D2545be2961AF",
     arbiter: ARBITER_SAFE,
   },
 };

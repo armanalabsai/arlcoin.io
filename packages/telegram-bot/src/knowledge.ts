@@ -23,10 +23,10 @@ export const SUPPLY_API = "https://arlcoin.io/api/supply";
 /** Base Mainnet contracts the community may ask for (docs/mainnet-services.md). */
 export const CONTRACTS: readonly (readonly [string, string])[] = [
   ["ARL token", MAINNET_TOKEN],
-  ["Jobs escrow, paid in ARL", "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9"],
-  ["Jobs escrow, paid in USDC", "0xc833140D2eE8607fd41662cffFAc557f3D535bE6"],
-  ["Verified evaluator (ARL escrow)", "0x5cA6dab18E6b9a5Cd44a4FfFBdf2c5BA3Cd87DfF"],
-  ["Verified evaluator (USDC escrow)", "0x8C017f24615AC749Ec7297FB07b14E558B670CFC"],
+  ["Jobs escrow, paid in ARL", "0x9aE99bF9a59aF47E81346B7c0b93Cd2B610455fC"],
+  ["Jobs escrow, paid in USDC", "0xE3eA0EAEc3Cf9DA2d0856A0f784A4B1671AeFD04"],
+  ["Verified evaluator (ARL escrow)", "0x6648e141cb7473822ddBd8bC039b91e5af3259B4"],
+  ["Verified evaluator (USDC escrow)", "0x6bFfdEace7d0B2F7711f604F0A5D2545be2961AF"],
   ["Compute payments", "0x1bFE932896fdd32175836a7364dcaf53d49EE464"],
   ["Staking", "0x15e257009BE9B1875fbfa69D291320aaFE3fa102"],
 ];

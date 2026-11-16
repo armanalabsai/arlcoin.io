@@ -20,14 +20,15 @@ Key facts:
   ceiling, and the transfer is recorded on Base where anyone can verify it; ratings are kept on
   the ERC-8004 registry.
 - Live on Base Mainnet: verified jobs for AI agents. A client pays into an ERC-8183 escrow in
-  ARL (0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9) or USDC
-  (0xc833140D2eE8607fd41662cffFAc557f3D535bE6); validators who stake ARL check the work and vote,
+  ARL (0x9aE99bF9a59aF47E81346B7c0b93Cd2B610455fC) or USDC
+  (0xE3eA0EAEc3Cf9DA2d0856A0f784A4B1671AeFD04); validators who stake ARL check the work and vote,
   disputes go to a 2-of-3 arbiter Safe, and outcomes are written to ERC-8004 reputation.
-  Evaluator v4 is live since 12 November 2026.
+  Escrows v3 and evaluator v5 are live since 16 November 2026.
 - Also on Base Mainnet since 12 November 2026: the compute payment contract
   (0x1bFE932896fdd32175836a7364dcaf53d49EE464) and the staking contract
   (0x15e257009BE9B1875fbfa69D291320aaFE3fa102, 180-day reward periods funded from the Community
-  & Staking allocation, never from new issuance; opens when the first period is funded).
+  & Staking allocation, never from new issuance; the first period of 300,000 ARL runs since
+  16 November 2026).
 - The ARL app at https://arlcoin.io/app runs on Base Mainnet.
 - Open protocol standards (published 14 November 2026, test vectors in TypeScript and Python):
   arl-task/1 (the work, its payment and its verification), arl-proof/1 (the delivery and its
@@ -37,8 +38,6 @@ Key facts:
   (npm n8n-nodes-arl), an MCP server for AI agents (packages/mcp) and the Agent API at
   https://arlcoin.io/api/v1 (policies, task check, job reads at a named block, unsigned
   transactions to open a job). None of them holds a key.
-- Next contract versions: ARLJobs v3 and evaluator v5 are merged and tested; their deployment is
-  waiting for the owners' signatures.
 - Next on Base Mainnet: AI services paid per use in ARL (x402), the GPU and CPU provider
   marketplace, and zero-knowledge anonymous signals.
 - Security: multi-layer internal security audit completed on 17 October 2026 with open-source
@@ -49,7 +48,8 @@ Key facts:
   pass a Safe multisig and a 48-hour timelock.
 - Roadmap: foundation and token contracts complete, internal security audit complete, Base
   Mainnet live since 24 October 2026, verified jobs, compute payments and staking deployed on
-  12 November 2026.
+  12 November 2026, escrows v3 and evaluator v5 live and the first staking period funded on
+  16 November 2026.
 - Trading: Uniswap v3 on Base, pools ARL/USDC, ARL/USDT, ARL/WETH and ARL/cbBTC (1% fee),
   opened from 0.20 USD per ARL with 5,000,000 ARL (2,000,000 Liquidity, 3,000,000 Public Launch).
   There is no airdrop at the launch; an airdrop of 500,000 ARL is planned for a later date.

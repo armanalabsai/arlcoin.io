@@ -68,8 +68,8 @@ refused with `ArlError` and nothing is sent.
 | Contract           | Address                                      |
 | ------------------ | -------------------------------------------- |
 | ARL token          | `0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4` |
-| Jobs escrow (ARL)  | `0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9` |
-| Jobs escrow (USDC) | `0xc833140D2eE8607fd41662cffFAc557f3D535bE6` |
+| Jobs escrow (ARL)  | `0x9aE99bF9a59aF47E81346B7c0b93Cd2B610455fC` |
+| Jobs escrow (USDC) | `0xE3eA0EAEc3Cf9DA2d0856A0f784A4B1671AeFD04` |
 
 Use a dedicated wallet that holds only what your app needs. TypeScript:
 [`arl-protocol-sdk`](https://www.npmjs.com/package/arl-protocol-sdk). No code:

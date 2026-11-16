@@ -29,8 +29,8 @@ AGENT_API = "https://arlcoin.io/api/v1"
 
 #: The verified evaluator bound to each escrow on Base Mainnet (docs/mainnet-services.md).
 EVALUATORS = {
-    "ARL": "0x5cA6dab18E6b9a5Cd44a4FfFBdf2c5BA3Cd87DfF",
-    "USDC": "0x8C017f24615AC749Ec7297FB07b14E558B670CFC",
+    "ARL": "0x6648e141cb7473822ddBd8bC039b91e5af3259B4",
+    "USDC": "0x6bFfdEace7d0B2F7711f604F0A5D2545be2961AF",
 }
 
 CONFIGURE_ABI = [

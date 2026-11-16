@@ -36,8 +36,8 @@ flow (for example, Submit Work after an AI step, then Complete Job after a check
 
 | Escrow          | Address on Base Mainnet                      |
 | --------------- | -------------------------------------------- |
-| Paid in ARL     | `0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9` |
-| Paid in USDC    | `0xc833140D2eE8607fd41662cffFAc557f3D535bE6` |
+| Paid in ARL     | `0x9aE99bF9a59aF47E81346B7c0b93Cd2B610455fC` |
+| Paid in USDC    | `0xE3eA0EAEc3Cf9DA2d0856A0f784A4B1671AeFD04` |
 
 ARL token: `0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4`. Source and tests:
 [github.com/armanalabsai/arlcoin.io](https://github.com/armanalabsai/arlcoin.io).

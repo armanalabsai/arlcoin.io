@@ -1,11 +1,11 @@
 // The verified evaluator of the ARL escrow on Base Mainnet (contracts/deploy/base-mainnet-jobs.json,
-// arl.evaluator; evaluator v4): a staked validator committee that acts as the evaluator of
+// arl.evaluator; evaluator v5): a staked validator committee that acts as the evaluator of
 // ERC-8183 jobs, with a challenge window and a 2-of-3 arbiter Safe for disputed jobs
 // (docs/verifiable-execution.md). Only the functions the app reads or calls are listed here.
 
 import type { Address } from "viem";
 
-export const EVALUATOR: Address = "0x5cA6dab18E6b9a5Cd44a4FfFBdf2c5BA3Cd87DfF";
+export const EVALUATOR: Address = "0x6648e141cb7473822ddBd8bC039b91e5af3259B4";
 export const ARBITER_SAFE: Address = "0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f";
 export const EXPLORER = "https://basescan.org";
 
