@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-arl",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "n8n node for ARL Protocol: escrowed AI and agent jobs on Base Mainnet, paid in ARL or USDC (ERC-8183)",
   "keywords": [
     "n8n-community-node-package",
