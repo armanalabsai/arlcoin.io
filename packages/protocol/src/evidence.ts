@@ -139,6 +139,12 @@ export function checkEvidence(raw: EvidenceV2): EvidenceResult {
   }
   if (s.settlement === null)
     return { outcome: "pending", approvals, rejections, overturned: false };
+  // On chain a provider is paid only through the evaluator's settlement, which always follows a
+  // committee decision and emits Finalized: a "completed" record without both is not one any
+  // chain can produce.
+  if (s.settlement.outcome === "completed" && (s.decided === null || s.finalized === null)) {
+    throw new EvidenceError("a completed settlement needs a decision and a finalization");
+  }
   if (s.finalized !== null && s.finalized.approved !== (s.settlement.outcome === "completed")) {
     throw new EvidenceError("finalization and settlement disagree");
   }
