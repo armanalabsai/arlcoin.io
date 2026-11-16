@@ -23,7 +23,7 @@ const spec = parseSpec({
   outputs: ["result.json"],
   limits: { seconds: 60, memory_mb: 256, cpus: 1 },
   verifier_digest: `sha256:${"c".repeat(64)}`,
-}) as ReexecSpec;
+});
 const swapped = { ...spec, command: ["node", "-e", "2"] } as ReexecSpec;
 const HASH = specHash(spec);
 const D = `0x${"d".repeat(64)}` as const;
