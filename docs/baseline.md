@@ -6,6 +6,11 @@ A read-only snapshot of what ARL Protocol has, what is proven, and where it runs
 or not operated in production), **PLANNED** (designed, no deployed code), **UNVERIFIED** (claimed,
 not checked for this baseline). The previous baseline (31 October 2026) is in the git history.
 
+> Superseded on 16 November 2026 for the jobs contracts: Base Mainnet now runs ARLJobs v3 and
+> evaluator v5 (addresses in `contracts/deploy/base-mainnet-jobs.json`), and the first staking
+> period of 300,000 ARL is funded. The v2 escrows and v4 evaluators below are retired; no job was
+> ever created on them.
+
 On-chain reads: Base Mainnet (8453), block 57,249,534 (2026-11-14 07:11 UTC), public RPC
 `base-rpc.publicnode.com`. Nothing was written to any contract.
 

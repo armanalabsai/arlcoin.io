@@ -216,7 +216,7 @@ export const technology: Layer = {
       weight: "tertiary",
       detail: {
         summary:
-          "The token, vesting, treasury, launch claim and staking contracts are written in Solidity 0.8.36 on OpenZeppelin Contracts v5.6.1 and covered by unit, fuzz and invariant tests. On Base Mainnet: the token, vesting wallets and treasury timelock (24 October 2026), the jobs escrows with their verified evaluators, the compute payment contract and the staking contract (12 November 2026).",
+          "The token, vesting, treasury, launch claim and staking contracts are written in Solidity 0.8.36 on OpenZeppelin Contracts v5.6.1 and covered by unit, fuzz and invariant tests. On Base Mainnet: the token, vesting wallets and treasury timelock (24 October 2026), the compute payment contract and the staking contract (12 November 2026), the jobs escrows v3 with their verified evaluators v5 (16 November 2026).",
         facts: [
           { label: "Language", value: "Solidity 0.8.36", mono: true },
           { label: "Library", value: "OpenZeppelin Contracts v5.6.1" },
