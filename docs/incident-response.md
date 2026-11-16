@@ -17,8 +17,24 @@ The [Uptime](../.github/workflows/uptime.yml) workflow checks every 10 minutes t
 the app page and `security.txt` answer, that Base Mainnet produces blocks and that a funded staking
 reward period runs for at least 3 more days. A failed check fails the run and GitHub notifies the
 owner by email and in the mobile app. The [Monitor mainnet](../.github/workflows/monitor.yml)
-workflow checks the recorded Base Mainnet deployment. Alerts on protocol events (jobs, votes,
-disputes, slashes) are planned in [security-hardening.md](protocol/security-hardening.md) (S-4).
+workflow checks the recorded Base Mainnet deployment. The [Protocol events](../.github/workflows/events.yml)
+workflow (S-4 in [security-hardening.md](protocol/security-hardening.md)) scans the live ARLJobs v3
+escrows, the Verified Evaluator v5 contracts and the staking contract every hour (addresses in
+[events-8453.json](../contracts/deploy/events-8453.json)). Disputes, slashes, refused refunds,
+disputes closed without a ruling and failed reputation writes fail the run and email the owner.
+
+## Recovery checklist
+
+- **Stuck job or dispute:** anyone can call `closeUndecided` after the vote window and
+  `expireDispute` after the arbiter deadline; the validator keeper does this automatically.
+  After the job deadline the escrow returns the budget to the client (`claimRefund`, or
+  `claimRefundTo` when the client's address cannot receive the token).
+- **Validator down:** restart the validator kit; a job it accepted must still get its vote inside
+  the vote window, or its bond is burned. Keep at least two validators running per committee.
+- **Website or API down:** Cloudflare Pages keeps the previous build; roll back to it from the
+  Pages dashboard, then fix forward.
+- **Leaked validator or operator key:** move its stake out (unstake) from a safe machine, rotate the
+  key, and remove any GitHub secret that held it.
 
 ## Steps
 
