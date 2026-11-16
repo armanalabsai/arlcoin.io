@@ -47,7 +47,7 @@ export const roadmap: Layer = {
       metric: { kind: "static", value: "Live on Base Mainnet" },
       detail: {
         summary:
-          "ERC-8183 job escrows paid in ARL or USDC, with a verified evaluator: a committee of staked ARL validators votes on each delivery, a challenge window follows, and a 2-of-3 arbiter Safe rules on disputed jobs only. Evaluator v4, with approvals counted per delivery and settlement after the deadline, went live on 12 November 2026. The ARL app at arlcoin.io/app runs against these contracts.",
+          "ERC-8183 job escrows paid in ARL or USDC, with a verified evaluator: a committee of staked ARL validators votes on each delivery, a challenge window follows, and a 2-of-3 arbiter Safe rules on disputed jobs only. Escrows v3 and evaluator v5 went live on 16 November 2026: late finalization always settles, an unanswered dispute can be expired by anyone, and the agent is bound at committee approval so a rejection always reaches ERC-8004 reputation. The ARL app at arlcoin.io/app runs against these contracts.",
       },
       links: [{ label: "Open the app", href: "https://arlcoin.io/app/verified/" }],
     },

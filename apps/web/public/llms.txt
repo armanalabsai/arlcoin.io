@@ -38,8 +38,6 @@ Key facts:
   (npm n8n-nodes-arl), an MCP server for AI agents (packages/mcp) and the Agent API at
   https://arlcoin.io/api/v1 (policies, task check, job reads at a named block, unsigned
   transactions to open a job). None of them holds a key.
-- Next contract versions: ARLJobs v3 and evaluator v5 are merged and tested; their deployment is
-  waiting for the owners' signatures.
 - Next on Base Mainnet: AI services paid per use in ARL (x402), the GPU and CPU provider
   marketplace, and zero-knowledge anonymous signals.
 - Security: multi-layer internal security audit completed on 17 October 2026 with open-source
@@ -50,7 +48,8 @@ Key facts:
   pass a Safe multisig and a 48-hour timelock.
 - Roadmap: foundation and token contracts complete, internal security audit complete, Base
   Mainnet live since 24 October 2026, verified jobs, compute payments and staking deployed on
-  12 November 2026.
+  12 November 2026, escrows v3 and evaluator v5 live and the first staking period funded on
+  16 November 2026.
 - Trading: Uniswap v3 on Base, pools ARL/USDC, ARL/USDT, ARL/WETH and ARL/cbBTC (1% fee),
   opened from 0.20 USD per ARL with 5,000,000 ARL (2,000,000 Liquidity, 3,000,000 Public Launch).
   There is no airdrop at the launch; an airdrop of 500,000 ARL is planned for a later date.
