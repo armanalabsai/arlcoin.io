@@ -1,59 +1,62 @@
 # Base Mainnet network services
 
-Status: **the network services run on Base Mainnet.** The jobs escrows (nonces 23 and 25) work
-with the v4 verified evaluators (nonces 29 and 30, 2026-11-12); the compute payment contract and
-the staking contract followed (nonces 31 and 32). The ARL app at arlcoin.io/app runs on Base
+Status: **the network services run on Base Mainnet.** Since 2026-11-16 the jobs escrows are
+`ARLJobs` v3 with the v5 verified evaluators (nonces 33 to 36); the compute payment contract and
+the staking contract run since 2026-11-12 (nonces 31 and 32), and the first staking reward period
+is funded. The ARL app at arlcoin.io/app runs on Base
 Mainnet. The ARL token, its Safes, vesting wallets and timelock are on Base Mainnet since
 2026-10-24 ([mainnet-plan.md](mainnet-plan.md)).
 
-| Step | Service                                          | Status                                                    |
-| ---- | ------------------------------------------------ | --------------------------------------------------------- |
-| 1    | Jobs escrows (ARL, USDC) and verified evaluators | Deployed (evaluators v4 at nonces 29 and 30, 2026-11-12)  |
-| 2    | Validators: keys, ETH for gas, staked ARL        | Not started                                               |
-| 3    | x402 per-use payments facilitator on 8453        | Not started                                               |
-| 4    | Staking rewards contract and its reward budget   | Deployed (nonce 32); the first 300,000 ARL period is next |
-| 5    | App and site on Base Mainnet                     | Done (2026-11-13)                                         |
+| Step | Service                                          | Status                                                         |
+| ---- | ------------------------------------------------ | -------------------------------------------------------------- |
+| 1    | Jobs escrows (ARL, USDC) and verified evaluators | Deployed (v3 escrows, v5 evaluators, nonces 33-36, 2026-11-16) |
+| 2    | Validators: keys, ETH for gas, staked ARL        | Not started                                                    |
+| 3    | x402 per-use payments facilitator on 8453        | Not started                                                    |
+| 4    | Staking rewards contract and its reward budget   | Deployed (nonce 32); 300,000 ARL period funded 2026-11-16      |
+| 5    | App and site on Base Mainnet                     | Done (2026-11-13)                                              |
 
 ## Step 1: jobs escrow and verified evaluator
 
-Decision 2026-11-14 (roadmap D-1): move the jobs escrows to `ARLJobs` v3. The plans for nonces 33
-to 36 deploy exactly the current build (checked against `contracts/out`); the expected addresses
-hold only if the deployer signs nothing else first. After signing, the record CLI writes the new
-addresses and the app, SDKs and site switch to them.
+Decision 2026-11-14 (roadmap D-1): move the jobs escrows to `ARLJobs` v3. Signed on 2026-11-16 at
+nonces 33 to 36; `jobs-record-cli.ts` passed all nine checks for each pair on Base Mainnet (record
+`contracts/deploy/base-mainnet-jobs.json`), and the app, SDKs, API and site use the new addresses.
+The v2 escrows and v4 evaluators are retired; no job was ever created on them.
 
-The evaluators in these plans are v5 (2026-11-14, bug bounty reports of that day): a refund the
-token refuses no longer blocks the bond settlement (`RefundDeferred`, the client uses
-`claimRefundTo`), and `expireDispute` closes a dispute the arbiter has not ruled on in time
-after the challenge window. The plans were regenerated on a Base Mainnet fork; the addresses are
+The evaluators are v5 (bug bounty reports of 2026-11-14 to 2026-11-16): a refund the token
+refuses no longer blocks the bond settlement (`RefundDeferred`, the client uses `claimRefundTo`),
+`expireDispute` closes a dispute the arbiter has not ruled on in time after the challenge window,
+`finalize` settles a decided job after its deadline, the registry calls keep a gas reserve, and
+the provider's ERC-8004 agent is bound when it approves the committee (`outcomesOf` counts every
+recorded outcome). The plans were regenerated on a Base Mainnet fork; the addresses are
 unchanged because they depend only on the deployer and the nonce.
 
 Transactions from the deployer `0xe033104AE32fc7e13263B7AED577Ab20d6E47eAA`, signed on the app's
 Deploy screen (`arlcoin.io/app/deploy/?plan=…`):
 
-| Nonce | Plan file                                 | Creates                                                         | Address                                                 | Status                     |
-| ----: | ----------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------- | -------------------------- |
-|    19 | `8453-arbiter-safe` (`CreateArbiterSafe`) | Arbiter Safe, 2 of 3: Hakem 1, Hakem 2, Hakem 3                 | `0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f`            | Deployed                   |
-|    20 | none                                      | nothing (a plain ETH transfer by the owner)                     |                                                         |                            |
-|    21 | earlier `8453-verified-jobs`              | `ARLJobs`, paid in ARL (before the fix)                         | `0x6c8A7712010f951f5B03A11C24b46C8b18d5997F`            | Retired: audit F-2/F-3     |
-|    22 | `8453-verified-evaluator` (#94)           | `ARLVerifiedEvaluator` for it (before the fix)                  | `0x3a5dC803b84D5F150FCd2b070cb9D8a12BC35F34`            | Retired: audit F-2/F-3     |
-|    23 | `8453-verified-jobs-usdc`                 | `ARLJobs`, paid in USDC                                         | `0xc833140D2eE8607fd41662cffFAc557f3D535bE6`            | Invalid                    |
-|    24 | `8453-verified-jobs-usdc`                 | `ARLVerifiedEvaluator` for it, bonds in ARL                     | `0x4f7f61916d65ff9E7C5F62468a18E37d4Fb07FA7`            | Invalid                    |
-|    25 | `8453-verified-jobs-arl`                  | `ARLJobs`, paid in ARL                                          | `0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9`            | Invalid                    |
-|    26 | `8453-verified-jobs-arl`                  | `ARLVerifiedEvaluator` for it, bonds in ARL                     | `0xa2f8945f301C46f2649b79Cd42A7eb1102e9009E`            | Invalid                    |
-|    23 | `8453-verified-jobs-usdc-v2`              | `ARLJobs`, paid in USDC (audit fixes)                           | `0xc833140D2eE8607fd41662cffFAc557f3D535bE6`            | Deployed                   |
-|    24 | `8453-verified-jobs-usdc-v2`              | `ARLVerifiedEvaluator` for it, bonds in ARL                     | `0x4f7f61916d65ff9E7C5F62468a18E37d4Fb07FA7`            | Retired: report 2026-10-31 |
-|    25 | `8453-verified-jobs-arl-v2`               | `ARLJobs`, paid in ARL (audit fixes)                            | `0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9`            | Deployed                   |
-|    26 | `8453-verified-jobs-arl-v2`               | `ARLVerifiedEvaluator` for it, bonds in ARL                     | `0xa2f8945f301C46f2649b79Cd42A7eb1102e9009E`            | Retired: report 2026-10-31 |
-|    27 | `8453-verified-evaluator-arl-v3`          | `ARLVerifiedEvaluator` for the ARL escrow (acceptance fix)      | `0x817E13e512fF810B0ECe0EE278bf112a3947DAd6`            | Retired: v4 2026-11-12     |
-|    28 | `8453-verified-evaluator-usdc-v3`         | `ARLVerifiedEvaluator` for the USDC escrow (acceptance fix)     | `0x3F4EA7f388bcFf00267aEB21446ef005Fea784c9`            | Retired: v4 2026-11-12     |
-|    29 | `8453-verified-evaluator-arl-v4`          | `ARLVerifiedEvaluator` v4 for the ARL escrow                    | `0x5cA6dab18E6b9a5Cd44a4FfFBdf2c5BA3Cd87DfF`            | Deployed                   |
-|    30 | `8453-verified-evaluator-usdc-v4`         | `ARLVerifiedEvaluator` v4 for the USDC escrow                   | `0x8C017f24615AC749Ec7297FB07b14E558B670CFC`            | Deployed                   |
-|    31 | `8453-services`                           | `ComputePayment`, paid in ARL                                   | `0x1bFE932896fdd32175836a7364dcaf53d49EE464`            | Deployed                   |
-|    32 | `8453-services`                           | `ARLStakingRewards`, ARL, 180-day periods                       | `0x15e257009BE9B1875fbfa69D291320aaFE3fa102`            | Deployed                   |
-|    33 | `8453-verified-jobs-arl-v3`               | `ARLJobs` v3, paid in ARL (fund balance check, `claimRefundTo`) | `0x9aE99bF9a59aF47E81346B7c0b93Cd2B610455fC` (expected) | Plan ready, to sign        |
-|    34 | `8453-verified-jobs-arl-v3`               | `ARLVerifiedEvaluator` v5 for it, bonds in ARL                  | `0x6648e141cb7473822ddBd8bC039b91e5af3259B4` (expected) | Plan ready, to sign        |
-|    35 | `8453-verified-jobs-usdc-v3`              | `ARLJobs` v3, paid in USDC                                      | `0xE3eA0EAEc3Cf9DA2d0856A0f784A4B1671AeFD04` (expected) | Plan ready, to sign        |
-|    36 | `8453-verified-jobs-usdc-v3`              | `ARLVerifiedEvaluator` v5 for it, bonds in ARL                  | `0x6bFfdEace7d0B2F7711f604F0A5D2545be2961AF` (expected) | Plan ready, to sign        |
+| Nonce | Plan file                                 | Creates                                                         | Address                                      | Status                     |
+| ----: | ----------------------------------------- | --------------------------------------------------------------- | -------------------------------------------- | -------------------------- |
+|    19 | `8453-arbiter-safe` (`CreateArbiterSafe`) | Arbiter Safe, 2 of 3: Hakem 1, Hakem 2, Hakem 3                 | `0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f` | Deployed                   |
+|    20 | none                                      | nothing (a plain ETH transfer by the owner)                     |                                              |                            |
+|    21 | earlier `8453-verified-jobs`              | `ARLJobs`, paid in ARL (before the fix)                         | `0x6c8A7712010f951f5B03A11C24b46C8b18d5997F` | Retired: audit F-2/F-3     |
+|    22 | `8453-verified-evaluator` (#94)           | `ARLVerifiedEvaluator` for it (before the fix)                  | `0x3a5dC803b84D5F150FCd2b070cb9D8a12BC35F34` | Retired: audit F-2/F-3     |
+|    23 | `8453-verified-jobs-usdc`                 | `ARLJobs`, paid in USDC                                         | `0xc833140D2eE8607fd41662cffFAc557f3D535bE6` | Invalid                    |
+|    24 | `8453-verified-jobs-usdc`                 | `ARLVerifiedEvaluator` for it, bonds in ARL                     | `0x4f7f61916d65ff9E7C5F62468a18E37d4Fb07FA7` | Invalid                    |
+|    25 | `8453-verified-jobs-arl`                  | `ARLJobs`, paid in ARL                                          | `0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9` | Invalid                    |
+|    26 | `8453-verified-jobs-arl`                  | `ARLVerifiedEvaluator` for it, bonds in ARL                     | `0xa2f8945f301C46f2649b79Cd42A7eb1102e9009E` | Invalid                    |
+|    23 | `8453-verified-jobs-usdc-v2`              | `ARLJobs`, paid in USDC (audit fixes)                           | `0xc833140D2eE8607fd41662cffFAc557f3D535bE6` | Retired: v3 2026-11-16     |
+|    24 | `8453-verified-jobs-usdc-v2`              | `ARLVerifiedEvaluator` for it, bonds in ARL                     | `0x4f7f61916d65ff9E7C5F62468a18E37d4Fb07FA7` | Retired: report 2026-10-31 |
+|    25 | `8453-verified-jobs-arl-v2`               | `ARLJobs`, paid in ARL (audit fixes)                            | `0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9` | Retired: v3 2026-11-16     |
+|    26 | `8453-verified-jobs-arl-v2`               | `ARLVerifiedEvaluator` for it, bonds in ARL                     | `0xa2f8945f301C46f2649b79Cd42A7eb1102e9009E` | Retired: report 2026-10-31 |
+|    27 | `8453-verified-evaluator-arl-v3`          | `ARLVerifiedEvaluator` for the ARL escrow (acceptance fix)      | `0x817E13e512fF810B0ECe0EE278bf112a3947DAd6` | Retired: v4 2026-11-12     |
+|    28 | `8453-verified-evaluator-usdc-v3`         | `ARLVerifiedEvaluator` for the USDC escrow (acceptance fix)     | `0x3F4EA7f388bcFf00267aEB21446ef005Fea784c9` | Retired: v4 2026-11-12     |
+|    29 | `8453-verified-evaluator-arl-v4`          | `ARLVerifiedEvaluator` v4 for the ARL escrow                    | `0x5cA6dab18E6b9a5Cd44a4FfFBdf2c5BA3Cd87DfF` | Retired: v5 2026-11-16     |
+|    30 | `8453-verified-evaluator-usdc-v4`         | `ARLVerifiedEvaluator` v4 for the USDC escrow                   | `0x8C017f24615AC749Ec7297FB07b14E558B670CFC` | Retired: v5 2026-11-16     |
+|    31 | `8453-services`                           | `ComputePayment`, paid in ARL                                   | `0x1bFE932896fdd32175836a7364dcaf53d49EE464` | Deployed                   |
+|    32 | `8453-services`                           | `ARLStakingRewards`, ARL, 180-day periods                       | `0x15e257009BE9B1875fbfa69D291320aaFE3fa102` | Deployed                   |
+|    33 | `8453-verified-jobs-arl-v3`               | `ARLJobs` v3, paid in ARL (fund balance check, `claimRefundTo`) | `0x9aE99bF9a59aF47E81346B7c0b93Cd2B610455fC` | Deployed 2026-11-16        |
+|    34 | `8453-verified-jobs-arl-v3`               | `ARLVerifiedEvaluator` v5 for it, bonds in ARL                  | `0x6648e141cb7473822ddBd8bC039b91e5af3259B4` | Deployed 2026-11-16        |
+|    35 | `8453-verified-jobs-usdc-v3`              | `ARLJobs` v3, paid in USDC                                      | `0xE3eA0EAEc3Cf9DA2d0856A0f784A4B1671AeFD04` | Deployed 2026-11-16        |
+|    36 | `8453-verified-jobs-usdc-v3`              | `ARLVerifiedEvaluator` v5 for it, bonds in ARL                  | `0x6bFfdEace7d0B2F7711f604F0A5D2545be2961AF` | Deployed 2026-11-16        |
 
 `8453-verified-jobs-usdc` and `8453-verified-jobs-arl` are invalid, do not use: they hold pre-audit
 bytecode (before the audit fixes of 2026-10-28) and the deploy screen refuses them. Their `-v2`
@@ -73,7 +76,7 @@ before them shifts the addresses, and the Deploy screen then refuses the plan.
 `0xfF12597A671ebAF0cAe37999EE659e03c4f444B5` (2 of 3) can fund a reward period; the first period
 is 300,000 ARL (owner decision of 2026-11-01), funded by the Safe afterwards with `approve` and
 `notifyRewardAmount`. Signed on 2026-11-12; `services-record-cli.ts` passed all ten checks on Base
-Mainnet (record `contracts/deploy/base-mainnet-services.json`). The reward period is not funded yet. The funding batch is published for the Safe Transaction Builder at
+Mainnet (record `contracts/deploy/base-mainnet-services.json`). The first reward period was funded by the Safe on 2026-11-16 (300,000 ARL, 0.01929 ARL per second, ends 2027-05-15). The funding batch is published for the Safe Transaction Builder at
 [`arlcoin.io/app/safe-batches/8453-staking-fund-300k.safe-batch.json`](../apps/dapp/public/safe-batches/8453-staking-fund-300k.safe-batch.json)
 (approve exactly 300,000 ARL, then `notifyRewardAmount`; checked by `safeBatches.test.ts` and
 rehearsed on a Base Mainnet fork on 2026-11-14: rate 0.01929 ARL per second for 180 days). Rehearsal (Base Mainnet fork, v4 evaluators applied first, deployer

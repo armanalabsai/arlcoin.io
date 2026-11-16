@@ -60,7 +60,7 @@ export const roadmap: Layer = {
       metric: { kind: "static", value: "Deployed 2026-11-12" },
       detail: {
         summary:
-          "The compute payment contract and the staking contract were deployed on Base Mainnet on 12 November 2026. Staking runs 180-day reward periods funded by the Community & Staking Safe, never by new issuance, and opens when the first period is funded.",
+          "The compute payment contract and the staking contract were deployed on Base Mainnet on 12 November 2026. Staking runs 180-day reward periods funded by the Community & Staking Safe, never by new issuance; the first period (300,000 ARL) runs since 16 November 2026.",
       },
     },
     {

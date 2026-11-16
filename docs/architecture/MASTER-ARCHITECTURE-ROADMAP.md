@@ -83,9 +83,9 @@ reads made during this session.
 | `ARLToken`             | ERC-20, 21,000,000 fixed supply, permit, no owner                           | LIVE `0xde91…aDb4`                                                       | baseline; bytecode matches tag `v1.0.0-release-00d9056` |
 | `ARLVestingWallet`     | Investor and partnership vesting                                            | LIVE                                                                     | `docs/mainnet-plan.md`                                  |
 | `ARLTimelock`          | Treasury timelock with cancel-only guardian                                 | LIVE                                                                     | `docs/mainnet-plan.md`                                  |
-| `ARLJobs`              | ERC-8183 escrow: Open → Funded → Submitted → Completed / Rejected / Expired | LIVE (v2) `0x4664…98f9` ARL, `0xc833…5bE6` USDC                          | `base-mainnet-jobs.json`; jobs-record 9/9 checks        |
+| `ARLJobs`              | ERC-8183 escrow: Open → Funded → Submitted → Completed / Rejected / Expired | LIVE (v3) `0x9aE9…55fC` ARL, `0xE3eA…FD04` USDC                          | `base-mainnet-jobs.json`; jobs-record 9/9 checks        |
 | `ARLJobs` (repo, v3)   | Adds balance-delta check on `fund` and `claimRefundTo`                      | BUILDING: merged in `main` (#153), **not deployed**; mainnet runs v2     | `git log` #153; deployed nonce 25 predates it           |
-| `ARLVerifiedEvaluator` | Staked committee votes, challenge window, disputes, arbiter, ERC-8004 write | LIVE v4 `0x5cA6…7DfF` ARL, `0x8C01…0CFC` USDC                            | `docs/mainnet-services.md` nonces 29, 30                |
+| `ARLVerifiedEvaluator` | Staked committee votes, challenge window, disputes, arbiter, ERC-8004 write | LIVE v5 `0x6648…59B4` ARL, `0x6bFf…61AF` USDC                            | `docs/mainnet-services.md` nonces 29, 30                |
 | `ComputePayment`       | Per-second compute streams paid in ARL                                      | LIVE `0x1bFE…E464`                                                       | nonce 31, 10/10 checks                                  |
 | `ARLStakingRewards`    | ARL staking with reward periods                                             | BUILDING on mainnet: deployed `0x15e2…a102`, **first period not funded** | nonce 32; `docs/mainnet-services.md` step 4             |
 | `ARLAnonymousSignal`   | Semaphore-style anonymous signals (Noir/UltraHonk)                          | BUILDING: local chain only                                               | `docs/zk-privacy.md`                                    |
@@ -143,7 +143,7 @@ flowchart TB
   subgraph Current["Current (LIVE / BUILDING)"]
     direction TB
     C_SDK[SDKs: TS, Python, n8n]:::live --> C_JOBS[ARLJobs v2 escrow]:::live
-    C_SDK --> C_EVAL[ARLVerifiedEvaluator v4]:::live
+    C_SDK --> C_EVAL[ARLVerifiedEvaluator v5]:::live
     C_EVAL --> C_JOBS
     C_EVAL --> C_REP[ERC-8004 Reputation]:::live
     C_VER[arl-verifier: re-exec, bundle]:::building -.not running on mainnet.-> C_EVAL

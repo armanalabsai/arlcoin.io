@@ -21,8 +21,8 @@ import {
 
 /** The ARL escrows on Base Mainnet (contracts/deploy/base-mainnet-jobs.json). */
 export const ESCROWS = {
-  ARL: "0x4664d58FAFFb6ab1cf36717c70058a323E2A98f9",
-  USDC: "0xc833140D2eE8607fd41662cffFAc557f3D535bE6",
+  ARL: "0x9aE99bF9a59aF47E81346B7c0b93Cd2B610455fC",
+  USDC: "0xE3eA0EAEc3Cf9DA2d0856A0f784A4B1671AeFD04",
 } as const satisfies Record<string, Address>;
 
 export type Escrow = keyof typeof ESCROWS;
