@@ -8,11 +8,18 @@ import { settlementDue } from "../src/index.ts";
 const EVALUATOR: Address = "0x5cA6dab18E6b9a5Cd44a4FfFBdf2c5BA3Cd87DfF";
 
 /** A chain at time `now` holding one verdict; `deadline` null = an evaluator without it (v4). */
-function chain(now: bigint, phase: number, challengeEnds: bigint, deadline: bigint | null) {
+function chain(
+  now: bigint,
+  phase: number,
+  challengeEnds: bigint,
+  deadline: bigint | null,
+  voteEnds = 0n,
+) {
   return {
     getBlock: () => Promise.resolve({ timestamp: now }),
     readContract: (a: { functionName: string }) => {
-      if (a.functionName === "getVerdict") return Promise.resolve({ phase, challengeEnds });
+      if (a.functionName === "getVerdict")
+        return Promise.resolve({ phase, challengeEnds, voteEnds });
       if (deadline === null) return Promise.reject(new Error("no such function"));
       return Promise.resolve(deadline);
     },
@@ -30,6 +37,14 @@ describe("keeper: settlement calls a validator makes when they are due", () => {
     assert.equal(await settlementDue(chain(149n, 4, 100n, 150n), EVALUATOR, 1n), null);
     assert.equal(await settlementDue(chain(150n, 4, 100n, 150n), EVALUATOR, 1n), "expireDispute");
     assert.equal(await settlementDue(chain(999n, 4, 100n, null), EVALUATOR, 1n), null);
+  });
+
+  it("closes a job whose vote window ended without a decision", async () => {
+    assert.equal(await settlementDue(chain(199n, 1, 0n, null, 200n), EVALUATOR, 1n), null);
+    assert.equal(
+      await settlementDue(chain(200n, 1, 0n, null, 200n), EVALUATOR, 1n),
+      "closeUndecided",
+    );
   });
 
   it("does nothing for an open or settled job", async () => {

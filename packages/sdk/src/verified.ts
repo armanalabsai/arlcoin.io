@@ -63,6 +63,7 @@ export const verifiedEvaluatorAbi = parseAbi([
   "function configure(uint256 jobId, Config cfg)",
   "function getVerdict(uint256 jobId) view returns (Verdict)",
   "function finalize(uint256 jobId)",
+  "function minChallengeWindow() view returns (uint64)",
 ]);
 
 /** ARLVerifiedEvaluator.Phase, by index. */
@@ -172,6 +173,27 @@ export function checkOpenParams(p: OpenVerifiedJobParams): void {
     throw new VerifiedJobError("specHash must be 32 bytes");
 }
 
+/** Time left after the windows for the committee to accept before voting starts (one day). */
+const ACCEPT_SLACK = 86_400n;
+
+/**
+ * The windows and lifetime openVerifiedJob uses when the caller gives none. The challenge window
+ * defaults to the evaluator's minimum (one day on Base Mainnet) and the job lives long enough for
+ * the evaluator's own check at configure and at voting start (`_checkFits`: the vote window plus
+ * two challenge windows), with a day to spare for the committee to accept.
+ */
+export function defaultWindows(
+  minChallengeWindow: bigint,
+  p: { voteWindow?: bigint; challengeWindow?: bigint; expiresIn?: bigint },
+): { voteWindow: bigint; challengeWindow: bigint; expiresIn: bigint } {
+  const voteWindow = p.voteWindow ?? 3_600n;
+  const challengeWindow =
+    p.challengeWindow ?? (minChallengeWindow > 3_600n ? minChallengeWindow : 3_600n);
+  const needed = voteWindow + 2n * challengeWindow + ACCEPT_SLACK;
+  const expiresIn = p.expiresIn ?? (needed > 86_400n ? needed : 86_400n);
+  return { voteWindow, challengeWindow, expiresIn };
+}
+
 /**
  * Creates the job (the caller is its client) and configures the committee in two transactions.
  * The provider then approves the committee and sets the budget; the client funds the job.
@@ -188,10 +210,14 @@ export async function openVerifiedJob(
   if (!jobs || !evaluator) throw new VerifiedJobError("jobs and evaluator are required locally");
   await requireCode(publicClient, jobs, "jobs escrow");
   await requireCode(publicClient, evaluator, "evaluator");
-  const voteWindow = p.voteWindow ?? 3_600n;
-  const challengeWindow = p.challengeWindow ?? 3_600n;
+  const minChallengeWindow = await publicClient.readContract({
+    address: evaluator,
+    abi: verifiedEvaluatorAbi,
+    functionName: "minChallengeWindow",
+  });
+  const { voteWindow, challengeWindow, expiresIn } = defaultWindows(minChallengeWindow, p);
   const { timestamp } = await publicClient.getBlock();
-  const expiredAt = timestamp + (p.expiresIn ?? 86_400n);
+  const expiredAt = timestamp + expiresIn;
   const from = walletAccount(walletClient);
 
   const createTx = await walletClient.writeContract({

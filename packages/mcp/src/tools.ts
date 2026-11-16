@@ -346,7 +346,15 @@ export function arlTools(opts: ToolOptions): Tool[] {
           functionName: "getJob",
           args: [id],
           blockNumber: block,
-        })) as { client: Address; provider: Address; evaluator: Address; description: string };
+        })) as {
+          id: bigint;
+          client: Address;
+          provider: Address;
+          evaluator: Address;
+          description: string;
+        };
+        // An RPC behind the createJob receipt reads an empty job: say so, so callers can retry.
+        if (job.id === 0n) throw new ToolInputError(`job ${id.toString()} does not exist`);
         // The job must be the one step 1 created for this task, or the funds would go elsewhere.
         const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
         if (
