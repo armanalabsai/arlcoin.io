@@ -1,7 +1,9 @@
 # Bug bounty
 
-Status: **live since 2026-10-05**, with the public
-repository (https://github.com/armanalabsai/arlcoin.io). Scope commit: `00d9056`. The amounts below are paid only when a valid report
+Status: **live since 2026-10-05**, with the public repository
+(https://github.com/armanalabsai/arlcoin.io). The scope is the contracts deployed on Base Mainnet,
+listed with their addresses in `contracts/deploy/` and on [arlcoin.io/build](https://arlcoin.io/build/);
+the review commit of each is named under Rules. The amounts below are paid only when a valid report
 is accepted; nothing is paid up front.
 
 ## Coverage
@@ -30,9 +32,10 @@ Bounty allocation never exceed its 400,000 ARL.
 ## Rules
 
 - In scope: the contracts in `contracts/src` as deployed on Base Mainnet, reviewed at the commit
-  their deployed bytecode matches: `00d9056` for the token, vesting, distributor, timelock and
-  `ARLJobs`; `99d41b4` for the contracts deployed on 12 November 2026 (`ARLVerifiedEvaluator` v4,
-  `ComputePayment` and `ARLStakingRewards`). Contracts in the repository that are not deployed
+  their deployed bytecode matches: `00d9056` for the token, vesting, distributor and timelock;
+  `99d41b4` for `ComputePayment` and `ARLStakingRewards` (deployed 12 November 2026); `a7039d7` for
+  `ARLJobs` v3 and `ARLVerifiedEvaluator` v5 (deployed 16 November 2026). The retired v2 escrows and
+  v4 evaluators are out of scope; no job was ever created on them. Contracts in the repository that are not deployed
   (for example `ARLAnonymousSignal`) are out of scope.
 - Out of scope: third-party code (OpenZeppelin, Safe, forge-std; report those upstream), the
   website, the dApp front end, social engineering, and denial of service against RPC providers.
