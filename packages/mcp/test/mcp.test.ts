@@ -50,6 +50,7 @@ function fakeChain(
       });
       if (a.functionName === "getJob") return Promise.resolve(job ?? { id: 0n });
       if (a.functionName === "getConfig") return Promise.resolve({ tier: 1, threshold: 2 });
+      if (a.functionName === "outcomesOf") return Promise.resolve([3n, 1n] as const);
       return Promise.resolve({ phase: 1, approvals: 0 });
     },
   };
@@ -95,6 +96,7 @@ describe("MCP protocol", () => {
       "arl_check_task",
       "arl_list_policies",
       "arl_get_job",
+      "arl_get_agent_outcomes",
       "arl_check_evidence",
       "arl_prepare_job",
       "arl_prepare_funding",
@@ -179,6 +181,20 @@ describe("ARL tools", () => {
       jobId: "7",
     });
     assert.match(wrongChain.text, /chain 1/);
+  });
+
+  it("reads an agent's verified outcomes from both evaluators at one block", async () => {
+    const chain = fakeChain(null);
+    const r = await call(arlTools({ chain }), "arl_get_agent_outcomes", { agentId: "42" });
+    const j = r.json();
+    assert.equal(j.block, BLOCK.toString());
+    assert.equal(j.approved, "6");
+    assert.equal(j.rejected, "2");
+    assert.deepEqual(Object.keys(j.byToken as object), ["ARL", "USDC"]);
+    assert.equal(chain.reads.filter((x) => x.functionName === "outcomesOf").length, 2);
+    assert.ok(chain.reads.every((x) => x.blockNumber === BLOCK));
+    const bad = await call(arlTools({ chain }), "arl_get_agent_outcomes", { agentId: "-1" });
+    assert.equal(bad.isError, true);
   });
 
   it("prepares createJob, then funding only for this task's job", async () => {
