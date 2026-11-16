@@ -13,6 +13,11 @@
 3. Run `npm run check`, `npm run check:contracts` and `npm run rehearse:local` before pushing.
 4. Open a pull request. CI must pass and the code owner must approve.
 
+## Rewards
+
+Merged work on issues that name a reward is paid in ARL: see
+[`docs/builder-rewards.md`](docs/builder-rewards.md).
+
 ## Standards
 
 - **English only** — code, identifiers, comments, docs, commit messages and
