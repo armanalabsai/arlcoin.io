@@ -45,6 +45,8 @@ const ev = {
   rejected: parseAbiItem(
     "event JobRejected(uint256 indexed jobId, address indexed rejector, bytes32 reason)",
   ),
+  // A job settled at or after its deadline goes back to the client through claimRefund.
+  expired: parseAbiItem("event JobExpired(uint256 indexed jobId)"),
   voted: parseAbiItem(
     "event Voted(uint256 indexed jobId, address indexed validator, bool approve, bytes32 deliverable, bytes32 evidence)",
   ),
@@ -107,10 +109,11 @@ export async function buildBundle(
     }
     return out;
   };
-  const [sub, comp, rej, votes, dec, fin] = await Promise.all([
+  const [sub, comp, rej, exp, votes, dec, fin] = await Promise.all([
     logs(jobs, ev.submitted),
     logs(jobs, ev.completed),
     logs(jobs, ev.rejected),
+    logs(jobs, ev.expired),
     logs(evaluator, ev.voted),
     logs(evaluator, ev.decided),
     logs(evaluator, ev.finalized),
@@ -118,7 +121,7 @@ export async function buildBundle(
   const lastSub = sub.at(-1);
   const lastDec = dec.at(-1);
   const lastFin = fin.at(-1);
-  const settle = comp.at(-1) ?? rej.at(-1);
+  const settle = comp.at(-1) ?? rej.at(-1) ?? exp.at(-1);
   return {
     version: BUNDLE_VERSION,
     chainId,
@@ -181,8 +184,11 @@ export function checkBundle(b: EvidenceBundle): string[] {
       if (b.submitted && v.deliverable.toLowerCase() !== b.submitted.deliverable.toLowerCase())
         p.push(`${v.validator} approved a different deliverable`);
   }
-  if (b.finalized && b.decided && b.finalized.approved !== b.decided.approved)
-    p.push("finalized outcome differs from the decision");
+  // A rejection happens only once no deliverable can reach the threshold. A finalization that
+  // differs from the decision is an arbiter's ruling on a dispute, which checkEvidence accepts too.
+  const open = b.config.committee.length - b.votes.length;
+  if (b.decided?.approved === false && approvals.length + open >= b.config.threshold)
+    p.push("rejected while the threshold was still reachable");
   // A provider is paid only through the evaluator's settlement, which follows a decision and
   // emits Finalized (the same rule as checkEvidence in @arl/protocol).
   if (b.settlement?.outcome === "completed" && (!b.decided || !b.finalized))
