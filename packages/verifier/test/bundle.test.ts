@@ -63,7 +63,20 @@ describe("evidence bundle consistency", () => {
 
     const flipped = good();
     flipped.finalized = { ...r, approved: false, voteHash: X };
-    assert.ok(checkBundle(flipped).some((p) => p.includes("differs from the decision")));
+    assert.ok(checkBundle(flipped).some((p) => p.includes("expected rejected")));
+  });
+
+  it("accepts a ruled dispute and refuses a rejection the votes could still have approved", () => {
+    const overturned = good();
+    overturned.votes = overturned.votes.map((v) => ({ ...v, approve: false }));
+    overturned.decided = { ...r, approved: false };
+    assert.deepEqual(checkBundle(overturned), []);
+
+    const forged = good();
+    forged.decided = { ...r, approved: false };
+    forged.finalized = { ...r, approved: false, voteHash: X };
+    forged.settlement = { ...r, outcome: "rejected" };
+    assert.ok(checkBundle(forged).some((p) => p.includes("still reachable")));
   });
 
   it("refuses a completed settlement with no decision or finalization behind it", () => {

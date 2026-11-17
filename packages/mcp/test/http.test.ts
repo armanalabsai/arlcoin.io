@@ -84,6 +84,8 @@ describe("Agent API v1", () => {
     const j = (await r.json()) as { agentId: string; approved: string; rejected: string };
     assert.deepEqual([j.agentId, j.approved, j.rejected], ["42", "4", "0"]);
     assert.equal((await api("/api/v1/agents/x/outcomes")).status, 404);
+    assert.equal((await api(`/api/v1/agents/${"9".repeat(78)}/outcomes`)).status, 400);
+    assert.equal((await api(`/api/v1/jobs/ARL/${"9".repeat(78)}`)).status, 400);
   });
 
   it("refuses wrong methods, unknown paths, bad and oversized bodies", async () => {
