@@ -34,7 +34,9 @@ function chain(fail = false): ChainReader {
               expiredAt: 2n,
               status: 0,
             }
-          : { phase: 1 },
+          : a.functionName === "outcomesOf"
+            ? ([2n, 0n] as const)
+            : { phase: 1 },
       ),
   };
 }
@@ -73,6 +75,15 @@ describe("Agent API v1", () => {
     assert.deepEqual([j.block, j.status, j.jobId], ["100", "Open", "3"]);
     assert.equal((await api("/api/v1/jobs/ETH/3")).status, 404);
     assert.equal((await api("/api/v1/jobs/ARL/3", {}, true)).status, 502);
+  });
+
+  it("reads an agent's verified outcomes from the path", async () => {
+    const r = await api("/api/v1/agents/42/outcomes");
+    assert.equal(r.status, 200);
+    assert.equal(r.headers.get("cache-control"), "public, max-age=10");
+    const j = (await r.json()) as { agentId: string; approved: string; rejected: string };
+    assert.deepEqual([j.agentId, j.approved, j.rejected], ["42", "4", "0"]);
+    assert.equal((await api("/api/v1/agents/x/outcomes")).status, 404);
   });
 
   it("refuses wrong methods, unknown paths, bad and oversized bodies", async () => {
