@@ -7,10 +7,7 @@
       "name": "When clicking 'Execute workflow'",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
-      "position": [
-        200,
-        300
-      ]
+      "position": [200, 300]
     },
     {
       "parameters": {
@@ -25,10 +22,7 @@
       "name": "Create Job",
       "type": "n8n-nodes-arl.arl",
       "typeVersion": 1,
-      "position": [
-        420,
-        300
-      ],
+      "position": [420, 300],
       "credentials": {
         "arlWalletApi": {
           "id": "REPLACE_WITH_CREDENTIAL_ID",
@@ -47,10 +41,7 @@
       "name": "Set Budget",
       "type": "n8n-nodes-arl.arl",
       "typeVersion": 1,
-      "position": [
-        640,
-        300
-      ],
+      "position": [640, 300],
       "credentials": {
         "arlWalletApi": {
           "id": "REPLACE_WITH_CREDENTIAL_ID",
@@ -68,10 +59,7 @@
       "name": "Fund Job",
       "type": "n8n-nodes-arl.arl",
       "typeVersion": 1,
-      "position": [
-        860,
-        300
-      ],
+      "position": [860, 300],
       "credentials": {
         "arlWalletApi": {
           "id": "REPLACE_WITH_CREDENTIAL_ID",
@@ -90,10 +78,7 @@
       "name": "Provider Submits Work",
       "type": "n8n-nodes-arl.arl",
       "typeVersion": 1,
-      "position": [
-        1080,
-        300
-      ],
+      "position": [1080, 300],
       "credentials": {
         "arlWalletApi": {
           "id": "REPLACE_WITH_PROVIDER_CREDENTIAL_ID",
@@ -111,10 +96,7 @@
       "name": "Read Submitted Job",
       "type": "n8n-nodes-arl.arl",
       "typeVersion": 1,
-      "position": [
-        1300,
-        300
-      ],
+      "position": [1300, 300],
       "credentials": {
         "arlWalletApi": {
           "id": "REPLACE_WITH_CREDENTIAL_ID",
@@ -138,10 +120,7 @@
       "name": "Deliverable Accepted?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
-      "position": [
-        1520,
-        300
-      ]
+      "position": [1520, 300]
     },
     {
       "parameters": {
@@ -154,10 +133,7 @@
       "name": "Complete Job",
       "type": "n8n-nodes-arl.arl",
       "typeVersion": 1,
-      "position": [
-        1760,
-        200
-      ],
+      "position": [1760, 200],
       "credentials": {
         "arlWalletApi": {
           "id": "REPLACE_WITH_CREDENTIAL_ID",
@@ -176,10 +152,7 @@
       "name": "Reject Job",
       "type": "n8n-nodes-arl.arl",
       "typeVersion": 1,
-      "position": [
-        1760,
-        400
-      ],
+      "position": [1760, 400],
       "credentials": {
         "arlWalletApi": {
           "id": "REPLACE_WITH_CREDENTIAL_ID",
