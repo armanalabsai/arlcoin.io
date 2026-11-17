@@ -82,19 +82,26 @@ function addresses(v: unknown, what: string): Address[] {
   return v.map((a, i) => address(a, `${what}[${String(i)}]`));
 }
 
+const MAX_UINT256 = (1n << 256n) - 1n;
+
 function jobId(v: unknown): bigint {
   const s = typeof v === "number" && Number.isSafeInteger(v) ? String(v) : v;
   if (typeof s !== "string" || !/^[0-9]{1,78}$/.test(s)) {
     throw new ToolInputError("jobId must be a non-negative integer (a decimal string is safest)");
   }
-  return BigInt(s);
+  const n = BigInt(s);
+  if (n > MAX_UINT256) throw new ToolInputError("jobId exceeds uint256");
+  return n;
 }
 
 function agentId(v: unknown): bigint {
-  if ((typeof v !== "string" && typeof v !== "number") || !/^[0-9]+$/.test(String(v))) {
+  const s = typeof v === "number" && Number.isSafeInteger(v) ? String(v) : v;
+  if (typeof s !== "string" || !/^[0-9]{1,78}$/.test(s)) {
     throw new ToolInputError("agentId must be a non-negative integer (a decimal string is safest)");
   }
-  return BigInt(v);
+  const n = BigInt(s);
+  if (n > MAX_UINT256) throw new ToolInputError("agentId exceeds uint256");
+  return n;
 }
 
 function token(v: unknown): Token {
