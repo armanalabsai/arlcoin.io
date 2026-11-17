@@ -2,10 +2,13 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  BASE_MAINNET_TASK_DEPLOYMENTS,
   BASE_MAINNET_VERIFIED,
   VERDICT_PHASES,
+  VerifiedJobError,
   checkOpenParams,
   defaultWindows,
+  getOutcomes,
 } from "../src/index.ts";
 
 const ok = {
@@ -71,5 +74,43 @@ describe("defaultWindows", () => {
       expiresIn: 1n,
     });
     assert.deepEqual(w, { voteWindow: 600n, challengeWindow: 172_800n, expiresIn: 1n });
+  });
+});
+
+describe("getOutcomes", () => {
+  it("reads approved and rejected counts from outcomesOf on the evaluator", async () => {
+    const calls: { address: string; functionName: string; args: readonly unknown[] }[] = [];
+    const client = {
+      getChainId: () => Promise.resolve(8453),
+      readContract(p: { address: string; functionName: string; args: readonly unknown[] }) {
+        calls.push(p);
+        return Promise.resolve([12n, 3n] as const);
+      },
+    } as never;
+
+    const usdcEval = BASE_MAINNET_TASK_DEPLOYMENTS.USDC.evaluator;
+    const out = await getOutcomes(client, usdcEval, 42n);
+    assert.deepEqual(out, { approved: 12n, rejected: 3n });
+    assert.deepEqual(calls[0], {
+      address: usdcEval,
+      abi: calls[0]?.abi,
+      functionName: "outcomesOf",
+      args: [42n],
+    } as never);
+
+    const defOut = await getOutcomes(client, 99n);
+    assert.deepEqual(defOut, { approved: 12n, rejected: 3n });
+    assert.equal(calls[1]?.address, BASE_MAINNET_VERIFIED.evaluator);
+  });
+
+  it("rejects negative agent ids and missing local evaluator addresses", async () => {
+    const baseClient = { getChainId: () => Promise.resolve(8453) } as never;
+    await assert.rejects(
+      () => getOutcomes(baseClient, BASE_MAINNET_VERIFIED.evaluator, -1n),
+      VerifiedJobError,
+    );
+
+    const localClient = { getChainId: () => Promise.resolve(31_337) } as never;
+    await assert.rejects(() => getOutcomes(localClient, 1n), VerifiedJobError);
   });
 });

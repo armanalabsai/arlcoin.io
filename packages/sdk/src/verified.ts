@@ -62,6 +62,7 @@ export const verifiedEvaluatorAbi = parseAbi([
   "struct Verdict { uint8 phase; bool providerApproved; uint8 approvals; uint8 rejections; uint8 topApprovals; uint64 voteEnds; uint64 challengeEnds; address challenger; uint256 bond; bytes32 deliverable; bytes32 voteHash; }",
   "function configure(uint256 jobId, Config cfg)",
   "function getVerdict(uint256 jobId) view returns (Verdict)",
+  "function outcomesOf(uint256 agentId) view returns (uint64 approved, uint64 rejected)",
   "function finalize(uint256 jobId)",
   "function minChallengeWindow() view returns (uint64)",
 ]);
@@ -281,6 +282,49 @@ export async function getVerdict(publicClient: PublicClient, jobId: bigint, eval
     args: [jobId],
   });
   return { ...v, phaseName: VERDICT_PHASES[v.phase] ?? `Phase ${String(v.phase)}` };
+}
+
+export interface AgentOutcomes {
+  approved: bigint;
+  rejected: bigint;
+}
+
+/**
+ * Approved and rejected job counts recorded by `ARLVerifiedEvaluator` for an ERC-8004 agent.
+ * Accepts either `(publicClient, evaluator, agentId)` or `(publicClient, agentId, evaluator?)`.
+ */
+export async function getOutcomes(
+  publicClient: PublicClient,
+  evaluator: Address,
+  agentId: bigint,
+): Promise<AgentOutcomes>;
+export async function getOutcomes(
+  publicClient: PublicClient,
+  agentId: bigint,
+  evaluator?: Address,
+): Promise<AgentOutcomes>;
+export async function getOutcomes(
+  publicClient: PublicClient,
+  evaluatorOrAgentId: Address | bigint,
+  agentIdOrEvaluator?: bigint | Address,
+): Promise<AgentOutcomes> {
+  const chainId = await checkVerifiedChain(publicClient);
+  const [evaluator, agentId] =
+    typeof evaluatorOrAgentId === "bigint"
+      ? [agentIdOrEvaluator as Address | undefined, evaluatorOrAgentId]
+      : [evaluatorOrAgentId, agentIdOrEvaluator as bigint];
+  if (typeof agentId !== "bigint" || agentId < 0n) {
+    throw new VerifiedJobError("agentId must be a non-negative bigint");
+  }
+  const address = evaluator ?? verifiedDeployment(chainId)?.evaluator;
+  if (!address) throw new VerifiedJobError("evaluator is required locally");
+  const [approved, rejected] = await publicClient.readContract({
+    address,
+    abi: verifiedEvaluatorAbi,
+    functionName: "outcomesOf",
+    args: [agentId],
+  });
+  return { approved, rejected };
 }
 
 /** Pays out after the challenge window: anyone may call it. */
