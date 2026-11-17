@@ -39,9 +39,11 @@ Base Mainnet addresses, and the n8n node's "Open Task" operation, which runs the
 
 **Live since 15 November 2026:** the MCP
 tools over HTTP at `arlcoin.io/api/v1`: `GET /policies`, `POST /tasks/check`,
-`GET /jobs/{ARL|USDC}/{id}`, `POST /evidence/check`, `POST /jobs/prepare` and
-`POST /jobs/prepare-funding` (unsigned transactions). Chain reads come straight from Base at one
-named block; the indexer behind `/agents/{agentId}/reputation` and evidence by job id comes next.
+`GET /jobs/{ARL|USDC}/{id}`, `GET /agents/{agentId}/outcomes`, `POST /evidence/check`,
+`POST /jobs/prepare` and `POST /jobs/prepare-funding` (unsigned transactions). Chain reads come
+straight from Base at one named block. An agent's verified record needs no indexer: evaluator v5
+counts approvals and rejections per agent on chain (`outcomesOf`), and the API sums both
+evaluators. Evidence by job id comes next.
 
 Stateless, read-only HTTP JSON served by a Cloudflare Pages Function next to the existing supply
 API, backed by an indexer of `ARLJobs` and evaluator events (no private keys anywhere):
@@ -59,13 +61,13 @@ Every answer carries the block number it was read at, so clients can re-check it
 ### 6.3 Agent integrations
 
 **Built, 15 November 2026:** the MCP server (`packages/mcp`, npm name `arl-protocol-mcp`) with
-`arl_check_task`, `arl_list_policies`, `arl_get_job`, `arl_check_evidence`, `arl_prepare_job` and
-`arl_prepare_funding`. It speaks MCP over stdio with no dependency beyond viem, reads the chain at
-one block per answer and holds no key. `arl_get_reputation` waits for the indexer behind the read
-API (6.2).
+`arl_check_task`, `arl_list_policies`, `arl_get_job`, `arl_get_agent_outcomes`,
+`arl_check_evidence`, `arl_prepare_job` and `arl_prepare_funding`. It speaks MCP over stdio with no dependency beyond viem, reads the chain at
+one block per answer and holds no key. `arl_get_agent_outcomes` reads an agent's verified record
+from both evaluators (6.2).
 
 - **MCP server** (`@arl/mcp`): tools `arl_check_task`, `arl_task_hash`, `arl_get_job`,
-  `arl_get_reputation`, `arl_check_evidence`, and `arl_prepare_job`, which returns unsigned
+  `arl_get_agent_outcomes`, `arl_check_evidence`, and `arl_prepare_job`, which returns unsigned
   transactions for the user's own wallet to sign. The server never holds a key.
 - **Coinbase AgentKit action provider**: built 15 November 2026 as `packages/agentkit`, the MCP
   server's checks and reads for AgentKit agents plus `arl_open_task`, which signs the prepared

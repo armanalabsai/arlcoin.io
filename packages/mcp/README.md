@@ -25,6 +25,7 @@ endpoints and the first answer wins. Requires Node.js 22 or later.
 | `arl_check_task`      | Validates an `arl-task/1` task and checks it against its `arl-policy/1` policy; returns its hashes |
 | `arl_list_policies`   | The built-in verification policies and their hashes                                                |
 | `arl_get_job`         | A job on the ARL or USDC escrow: status, budget, committee and verdict, at one named block         |
+| `arl_get_agent_outcomes` | An agent's verified approvals and rejections, as both evaluators count them (`outcomesOf`)     |
 | `arl_check_evidence`  | Checks an `arl-evidence/2` package offline                                                         |
 | `arl_prepare_job`     | Step 1: the unsigned `createJob` transaction for a task                                            |
 | `arl_prepare_funding` | Step 2: the unsigned `configure`, `setBudget`, `approve` and `fund` transactions for that job      |
@@ -33,7 +34,7 @@ endpoints and the first answer wins. Requires Node.js 22 or later.
 provider, evaluator and on-chain description) before preparing anything that moves funds.
 
 The same tools answer over HTTP at `https://arlcoin.io/api/v1` (`GET /policies`,
-`POST /tasks/check`, `GET /jobs/ARL/{id}`, `POST /evidence/check`, `POST /jobs/prepare`,
+`POST /tasks/check`, `GET /jobs/ARL/{id}`, `GET /agents/{agentId}/outcomes`, `POST /evidence/check`, `POST /jobs/prepare`,
 `POST /jobs/prepare-funding`), for agents that do not speak MCP.
 
 The task format is specified in
