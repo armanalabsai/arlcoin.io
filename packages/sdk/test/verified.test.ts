@@ -83,7 +83,7 @@ describe("getOutcomes", () => {
     const client = {
       getChainId: () => Promise.resolve(8453),
       readContract(p: { address: string; functionName: string; args: readonly unknown[] }) {
-        calls.push(p);
+        calls.push({ address: p.address, functionName: p.functionName, args: p.args });
         return Promise.resolve([12n, 3n] as const);
       },
     } as never;
@@ -93,10 +93,9 @@ describe("getOutcomes", () => {
     assert.deepEqual(out, { approved: 12n, rejected: 3n });
     assert.deepEqual(calls[0], {
       address: usdcEval,
-      abi: calls[0]?.abi,
       functionName: "outcomesOf",
       args: [42n],
-    } as never);
+    });
 
     const defOut = await getOutcomes(client, 99n);
     assert.deepEqual(defOut, { approved: 12n, rejected: 3n });
