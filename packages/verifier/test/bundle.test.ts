@@ -66,6 +66,14 @@ describe("evidence bundle consistency", () => {
     assert.ok(checkBundle(flipped).some((p) => p.includes("differs from the decision")));
   });
 
+  it("refuses a completed settlement with no decision or finalization behind it", () => {
+    for (const drop of ["decided", "finalized"] as const) {
+      const forged = good();
+      forged[drop] = null;
+      assert.ok(checkBundle(forged).some((p) => p.includes("needs a decision and a finalization")));
+    }
+  });
+
   it("rejects an unknown version", () => {
     assert.ok(checkBundle({ ...good(), version: "x" as never }).length > 0);
   });

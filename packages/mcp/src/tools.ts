@@ -51,6 +51,7 @@ const readAbi = parseAbi([
   "function getConfig(uint256 jobId) view returns (Config)",
   "struct Verdict { uint8 phase; bool providerApproved; uint8 approvals; uint8 rejections; uint8 topApprovals; uint64 voteEnds; uint64 challengeEnds; address challenger; uint256 bond; bytes32 deliverable; bytes32 voteHash; }",
   "function getVerdict(uint256 jobId) view returns (Verdict)",
+  "function outcomesOf(uint256 agentId) view returns (uint64 approved, uint64 rejected)",
 ]);
 
 const JOB_STATUS = ["Open", "Funded", "Submitted", "Completed", "Rejected", "Expired"] as const;
@@ -89,6 +90,13 @@ function jobId(v: unknown): bigint {
   return BigInt(s);
 }
 
+function agentId(v: unknown): bigint {
+  if ((typeof v !== "string" && typeof v !== "number") || !/^[0-9]+$/.test(String(v))) {
+    throw new ToolInputError("agentId must be a non-negative integer (a decimal string is safest)");
+  }
+  return BigInt(v);
+}
+
 function token(v: unknown): Token {
   if (v !== "ARL" && v !== "USDC") throw new ToolInputError('token must be "ARL" or "USDC"');
   return v;
@@ -114,6 +122,11 @@ const POLICY = {
 };
 const ADDRESS = { type: "string", pattern: "^0x[0-9a-fA-F]{40}$" };
 const JOB_ID = { type: "string", pattern: "^[0-9]+$", description: "Job id, decimal" };
+const AGENT_ID = {
+  type: "string",
+  pattern: "^[0-9]+$",
+  description: "ERC-8004 agent id, decimal",
+};
 const TOKEN = { type: "string", enum: ["ARL", "USDC"], description: "The escrow's payment token" };
 
 const OPEN_INPUT = {
@@ -291,6 +304,43 @@ export function arlTools(opts: ToolOptions): Tool[] {
       },
     },
     {
+      name: "arl_get_agent_outcomes",
+      description:
+        "Read an agent's verified record on Base Mainnet: how many of its jobs the ARL and the USDC verified evaluators approved and rejected. The evaluators keep these counts themselves (outcomesOf), so a reputation registry refusing a write cannot erase them. Read at one block that the answer names.",
+      inputSchema: {
+        type: "object",
+        properties: { agentId: AGENT_ID },
+        required: ["agentId"],
+        additionalProperties: false,
+      },
+      async run(args) {
+        const id = agentId(args.agentId);
+        const { chainId, block } = await head();
+        const tokens: Token[] = ["ARL", "USDC"];
+        const reads = await Promise.all(
+          tokens.map((t) =>
+            opts.chain.readContract({
+              address: deployments[t].evaluator,
+              abi: readAbi,
+              functionName: "outcomesOf",
+              args: [id],
+              blockNumber: block,
+            }),
+          ),
+        );
+        let approved = 0n;
+        let rejected = 0n;
+        const byToken: Record<string, unknown> = {};
+        tokens.forEach((t, i) => {
+          const [a, r] = reads[i] as readonly [bigint, bigint];
+          approved += a;
+          rejected += r;
+          byToken[t] = { evaluator: deployments[t].evaluator, approved: a, rejected: r };
+        });
+        return { chainId, block, agentId: id, approved, rejected, byToken };
+      },
+    },
+    {
       name: "arl_check_evidence",
       description:
         "Check an arl-evidence/2 package offline: that the on-chain settlement record, the task, the proof and the policy agree. Returns the outcome and the vote counts.",
@@ -346,7 +396,15 @@ export function arlTools(opts: ToolOptions): Tool[] {
           functionName: "getJob",
           args: [id],
           blockNumber: block,
-        })) as { client: Address; provider: Address; evaluator: Address; description: string };
+        })) as {
+          id: bigint;
+          client: Address;
+          provider: Address;
+          evaluator: Address;
+          description: string;
+        };
+        // An RPC behind the createJob receipt reads an empty job: say so, so callers can retry.
+        if (job.id === 0n) throw new ToolInputError(`job ${id.toString()} does not exist`);
         // The job must be the one step 1 created for this task, or the funds would go elsewhere.
         const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
         if (

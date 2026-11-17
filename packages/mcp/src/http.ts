@@ -5,6 +5,7 @@
 //   GET  /api/v1/policies                 built-in arl-policy/1 documents and hashes
 //   POST /api/v1/tasks/check              body: { task, policy? } -> hashes and policy verdict
 //   GET  /api/v1/jobs/{ARL|USDC}/{jobId}   job, committee configuration and verdict
+//   GET  /api/v1/agents/{agentId}/outcomes verified approvals and rejections of an agent
 //   POST /api/v1/evidence/check           body: { evidence } -> outcome of an arl-evidence/2
 //   POST /api/v1/jobs/prepare             body: as arl_prepare_job -> unsigned createJob
 //   POST /api/v1/jobs/prepare-funding     body: as arl_prepare_funding -> unsigned funding calls
@@ -33,6 +34,11 @@ const ROUTES: { method: "GET" | "POST"; path: RegExp; tool: string }[] = [
   { method: "GET", path: /^\/api\/v1\/policies$/, tool: "arl_list_policies" },
   { method: "POST", path: /^\/api\/v1\/tasks\/check$/, tool: "arl_check_task" },
   { method: "GET", path: /^\/api\/v1\/jobs\/(ARL|USDC)\/([0-9]{1,78})$/, tool: "arl_get_job" },
+  {
+    method: "GET",
+    path: /^\/api\/v1\/agents\/([0-9]{1,78})\/outcomes$/,
+    tool: "arl_get_agent_outcomes",
+  },
   { method: "POST", path: /^\/api\/v1\/evidence\/check$/, tool: "arl_check_evidence" },
   { method: "POST", path: /^\/api\/v1\/jobs\/prepare$/, tool: "arl_prepare_job" },
   { method: "POST", path: /^\/api\/v1\/jobs\/prepare-funding$/, tool: "arl_prepare_funding" },
@@ -87,7 +93,12 @@ export async function handleHttp(request: Request, tools: readonly Tool[]): Prom
     let args: Record<string, unknown>;
     if (route.method === "GET") {
       const m = route.path.exec(pathname);
-      args = route.tool === "arl_get_job" && m ? { token: m[1], jobId: m[2] } : {};
+      args =
+        route.tool === "arl_get_job" && m
+          ? { token: m[1], jobId: m[2] }
+          : route.tool === "arl_get_agent_outcomes" && m
+            ? { agentId: m[1] }
+            : {};
     } else {
       args = await body(request);
     }
@@ -96,7 +107,7 @@ export async function handleHttp(request: Request, tools: readonly Tool[]): Prom
     const cache =
       route.tool === "arl_list_policies"
         ? "public, max-age=3600"
-        : route.tool === "arl_get_job"
+        : route.tool === "arl_get_job" || route.tool === "arl_get_agent_outcomes"
           ? "public, max-age=10"
           : "no-store";
     return json(200, out, cache);
