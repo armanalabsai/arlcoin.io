@@ -37,6 +37,16 @@ print(arl.get_job(job))         # Job(id=..., status='Completed', budget=Decimal
 | `reject(job, reason)`          | evaluator      | Rejects the work and refunds the client                |
 | `claim_refund(job)`            | anyone         | After the deadline, refunds an unfinished job          |
 | `get_job(job)`                 | anyone         | Reads a job                                            |
+| `outcomes_of(agent_id)`        | anyone         | Reads an agent's verified `approved` and `rejected` counts |
+
+Read an ERC-8004 agent's verified outcomes on `ARLVerifiedEvaluator` (read-only, no key needed):
+
+```python
+from arl_protocol import outcomes_of
+
+out = outcomes_of(42)  # token="USDC" for the USDC evaluator
+print(out.approved, out.rejected)
+```
 
 The evaluator is the client's wallet unless `create_job(..., evaluator="0x...")` names another.
 Every write is simulated first: a call that would fail raises `ArlError` with the reason before
