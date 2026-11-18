@@ -193,23 +193,15 @@ export default function Home() {
       <SiteHeader />
 
       <main id="content" className="page-in flex-1">
-        <section className="landing-hero px-4 pt-16 pb-16 text-center sm:px-6 sm:pt-24">
+        <section className="landing-hero px-4 pt-10 pb-16 text-center sm:px-6 sm:pt-14">
           <Link
             href={pathFor()}
             prefetch={false}
             aria-label="Open the ARL Core"
-            className="landing-logo mx-auto mb-8 size-[260px] rounded-full sm:size-[360px]"
+            className="landing-logo mx-auto mb-8 size-[168px] rounded-full sm:size-[220px]"
           >
             <HeroLogo />
           </Link>
-          {/* The paid-job flow sits right under the logo, so visitors see what ARL does first. */}
-          <div
-            aria-label="How ARL works on Base"
-            role="group"
-            className="glass mx-auto mb-10 max-w-[1100px] rounded-[28px] px-2 pt-6 pb-5 sm:px-6 sm:pt-8"
-          >
-            <ChainFlow />
-          </div>
           <p className="glass-pill inline-flex h-8 items-center gap-2 rounded-full px-3.5 text-[14px] font-semibold text-accent">
             <span className="live-dot" aria-hidden="true" />
             Live on Base Mainnet
@@ -232,6 +224,15 @@ export default function Home() {
           <Link href={pathFor()} prefetch={false} className={`${more} mt-3`}>
             Explore the Core ›
           </Link>
+          {/* The paid-job flow follows the headline and the two main actions, so a visitor reads
+              what ARL is and where to go before the diagram. */}
+          <div
+            aria-label="How ARL works on Base"
+            role="group"
+            className="glass mx-auto mt-12 max-w-[1100px] rounded-[28px] px-2 pt-6 pb-5 sm:px-6 sm:pt-8"
+          >
+            <ChainFlow />
+          </div>
           <AddToWallet className="mt-4" />
           <ul
             aria-label="On the blockchain"
