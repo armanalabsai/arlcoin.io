@@ -19,6 +19,10 @@ ESCROWS = {
     "ARL": "0x9aE99bF9a59aF47E81346B7c0b93Cd2B610455fC",
     "USDC": "0xE3eA0EAEc3Cf9DA2d0856A0f784A4B1671AeFD04",
 }
+EVALUATORS = {
+    "ARL": "0x6648e141cb7473822ddBd8bC039b91e5af3259B4",
+    "USDC": "0x6bFfdEace7d0B2F7711f604F0A5D2545be2961AF",
+}
 STATUS = ("Open", "Funded", "Submitted", "Completed", "Rejected", "Expired")
 
 
@@ -92,6 +96,10 @@ ERC20_ABI = [
     _fn("approve", [("spender", "address"), ("amount", "uint256")], ["bool"]),
 ]
 
+EVALUATOR_ABI = [
+    _fn("outcomesOf", [("agentId", "uint256")], ["uint64", "uint64"], "view"),
+]
+
 
 class ArlError(Exception):
     """A job call that cannot go through, with a reason a person can act on."""
@@ -107,6 +115,45 @@ class Job:
     budget: Decimal
     expires_at: int
     status: str
+
+
+@dataclass
+class Outcomes:
+    approved: int
+    rejected: int
+
+    def __iter__(self):
+        yield self.approved
+        yield self.rejected
+
+    def __getitem__(self, key: int | str) -> int:
+        if key in (0, "approved"):
+            return self.approved
+        if key in (1, "rejected"):
+            return self.rejected
+        raise KeyError(key)
+
+
+def outcomes_of(
+    agent_id: int,
+    token: str = "ARL",
+    rpc_url: str = DEFAULT_RPC,
+    evaluator: str | None = None,
+    w3: Web3 | None = None,
+) -> Outcomes:
+    """Reads an ERC-8004 agent's approved and rejected job counts from ARLVerifiedEvaluator (read-only, no key)."""
+    if isinstance(agent_id, bool) or not isinstance(agent_id, int) or agent_id < 0:
+        raise ArlError(f"agent_id must be a non-negative integer, not {agent_id!r}")
+    if evaluator is None:
+        if token not in EVALUATORS:
+            raise ArlError(f"token must be ARL or USDC, not {token}")
+        address = EVALUATORS[token]
+    else:
+        address = Web3.to_checksum_address(evaluator)
+    client = w3 or Web3(Web3.HTTPProvider(rpc_url))
+    contract = client.eth.contract(address=address, abi=EVALUATOR_ABI)
+    raw = contract.functions.outcomesOf(agent_id).call()
+    return Outcomes(approved=int(raw[0]), rejected=int(raw[1]))
 
 
 def to_bytes32(value: str | bytes) -> bytes:
@@ -134,13 +181,15 @@ def to_units(amount: str | int | float | Decimal, decimals: int) -> int:
 class Arl:
     """One wallet, one escrow (ARL by default, or USDC), on Base Mainnet."""
 
-    def __init__(self, private_key: str, token: str = "ARL", rpc_url: str = DEFAULT_RPC):
+    def __init__(self, private_key: str | None = None, token: str = "ARL", rpc_url: str = DEFAULT_RPC):
         if token not in ESCROWS:
             raise ArlError(f"token must be ARL or USDC, not {token}")
+        self.token_name = token
         self.w3 = Web3(Web3.HTTPProvider(rpc_url))
-        self.account = self.w3.eth.account.from_key(private_key)
-        self.address = self.account.address
+        self.account = self.w3.eth.account.from_key(private_key) if private_key is not None else None
+        self.address = self.account.address if self.account is not None else None
         self.jobs = self.w3.eth.contract(address=ESCROWS[token], abi=JOBS_ABI)
+        self.evaluator = self.w3.eth.contract(address=EVALUATORS[token], abi=EVALUATOR_ABI)
         self._token = None
         self._decimals = None
 
@@ -284,3 +333,7 @@ class Arl:
             expires_at=raw[6],
             status=STATUS[raw[7]] if raw[7] < len(STATUS) else str(raw[7]),
         )
+
+    def outcomes_of(self, agent_id: int, evaluator: str | None = None) -> Outcomes:
+        """Reads an ERC-8004 agent's approved and rejected job counts from the verified evaluator."""
+        return outcomes_of(agent_id, token=self.token_name, evaluator=evaluator, w3=self.w3)
