@@ -62,13 +62,27 @@ export interface EvidenceResult {
  * Throws EvidenceError (or the document's own error) on the first inconsistency. It does not
  * re-read the chain: run `arl-verifier verify-bundle` on `settlement` for that.
  */
+function isObject(v: unknown): v is Record<string, unknown> {
+  return typeof v === "object" && v !== null && !Array.isArray(v);
+}
+
 export function checkEvidence(raw: EvidenceV2): EvidenceResult {
-  // The bundle is untrusted input: check the versions as plain values.
-  const versions = raw as { version: unknown; settlement: { version: unknown } };
-  if (versions.version !== EVIDENCE_VERSION)
+  // The bundle is untrusted input: check its shape before reading it (security report
+  // 2026-11-17: a missing field must be the caller's EvidenceError, not a TypeError).
+  const doc = raw as unknown;
+  if (!isObject(doc) || doc.version !== EVIDENCE_VERSION)
     throw new EvidenceError("version must be arl-evidence/2");
-  if (versions.settlement.version !== "arl-evidence/1") {
+  const record = doc.settlement;
+  if (!isObject(record) || record.version !== "arl-evidence/1") {
     throw new EvidenceError("settlement must be arl-evidence/1");
+  }
+  if (
+    !isObject(record.job) ||
+    !isObject(record.config) ||
+    !Array.isArray(record.config.committee) ||
+    !Array.isArray(record.votes)
+  ) {
+    throw new EvidenceError("settlement record is incomplete");
   }
   const s = raw.settlement;
 
@@ -136,6 +150,11 @@ export function checkEvidence(raw: EvidenceV2): EvidenceResult {
   // A committee approval needs the threshold of approvals naming the deliverable.
   if (s.decided?.approved === true && approvals < task.verification.threshold) {
     throw new EvidenceError("decided approved without enough approvals");
+  }
+  // A committee rejection happens only once no deliverable can reach the threshold.
+  const open = s.config.committee.length - approvals - rejections;
+  if (s.decided?.approved === false && approvals + open >= task.verification.threshold) {
+    throw new EvidenceError("decided rejected while the threshold was still reachable");
   }
   if (s.settlement === null)
     return { outcome: "pending", approvals, rejections, overturned: false };
