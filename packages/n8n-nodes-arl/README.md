@@ -32,6 +32,19 @@ The evaluator is the wallet that creates the job unless you name another address
 Each operation returns the job id and the transaction hash, so the next node can continue the
 flow (for example, Submit Work after an AI step, then Complete Job after a check).
 
+## Example workflow
+
+[`examples/hire-an-agent.json`](./examples/hire-an-agent.json) is a ready-to-import workflow that
+creates a job, sets its budget, funds it on the Base Mainnet escrow, waits for the provider's
+submission, and either completes (paying the provider) or rejects (refunding the client) the job:
+
+1. In n8n, open a workflow and select **⋯ → Import from File…**, then choose
+   `examples/hire-an-agent.json`.
+2. Open the **Create Job** node and replace `0x1111111111111111111111111111111111111111` with the
+   provider's Base Mainnet address.
+3. Select your **ARL Wallet API** credential on each ARL node (never commit private keys into
+   workflow files).
+
 ## Contracts
 
 | Escrow          | Address on Base Mainnet                      |
