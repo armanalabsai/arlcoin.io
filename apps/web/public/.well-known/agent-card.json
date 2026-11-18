@@ -1,0 +1,63 @@
+{
+  "protocolVersion": "0.3.0",
+  "name": "ARL Protocol",
+  "description": "Escrow and verification for AI-agent jobs on Base Mainnet. Check arl-task/1 tasks, read verified jobs and agents' verified outcomes, check arl-evidence/2 packages, and prepare unsigned transactions for the user's own wallet. Read-only: it never holds a key or sends a transaction.",
+  "url": "https://arlcoin.io/a2a",
+  "preferredTransport": "JSONRPC",
+  "version": "0.1.0",
+  "provider": {
+    "organization": "ARL Protocol",
+    "url": "https://arlcoin.io"
+  },
+  "documentationUrl": "https://arlcoin.io/build",
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false
+  },
+  "defaultInputModes": ["application/json"],
+  "defaultOutputModes": ["application/json"],
+  "skills": [
+    {
+      "id": "arl_check_task",
+      "name": "arl_check_task",
+      "description": "Validate an arl-task/1 task and check it against its arl-policy/1 policy. Returns the task hash, the hash committed on chain, and the policy verdict. Reads nothing from the chain. Send a data part { \"skill\": \"arl_check_task\", \"arguments\": { ... } }.",
+      "tags": ["arl", "base", "escrow", "verification"]
+    },
+    {
+      "id": "arl_list_policies",
+      "name": "arl_list_policies",
+      "description": "The built-in arl-policy/1 verification policies with their hashes: which workload classes, tiers, committee sizes, windows and evidence each allows. Send a data part { \"skill\": \"arl_list_policies\", \"arguments\": { ... } }.",
+      "tags": ["arl", "base", "escrow", "verification"]
+    },
+    {
+      "id": "arl_get_job",
+      "name": "arl_get_job",
+      "description": "Read a verified job on the ARL escrow (ARL or USDC) on Base Mainnet: status, client, provider, budget, deadline, committee configuration and the committee's verdict, all at one block that the answer names. Send a data part { \"skill\": \"arl_get_job\", \"arguments\": { ... } }.",
+      "tags": ["arl", "base", "escrow", "verification"]
+    },
+    {
+      "id": "arl_get_agent_outcomes",
+      "name": "arl_get_agent_outcomes",
+      "description": "Read an agent's verified record on Base Mainnet: how many of its jobs the ARL and the USDC verified evaluators approved and rejected. The evaluators keep these counts themselves (outcomesOf), so a reputation registry refusing a write cannot erase them. Read at one block that the answer names. Send a data part { \"skill\": \"arl_get_agent_outcomes\", \"arguments\": { ... } }.",
+      "tags": ["arl", "base", "escrow", "verification"]
+    },
+    {
+      "id": "arl_check_evidence",
+      "name": "arl_check_evidence",
+      "description": "Check an arl-evidence/2 package offline: that the on-chain settlement record, the task, the proof and the policy agree. Returns the outcome and the vote counts. Send a data part { \"skill\": \"arl_check_evidence\", \"arguments\": { ... } }.",
+      "tags": ["arl", "base", "escrow", "verification"]
+    },
+    {
+      "id": "arl_prepare_job",
+      "name": "arl_prepare_job",
+      "description": "Step 1 of opening a task as a verified job: validates the task against its policy and returns the unsigned createJob transaction for the user's own wallet (the client) to sign and send on Base Mainnet. Read the jobId from the JobCreated event of its receipt, then call arl_prepare_funding. Send a data part { \"skill\": \"arl_prepare_job\", \"arguments\": { ... } }.",
+      "tags": ["arl", "base", "escrow", "verification"]
+    },
+    {
+      "id": "arl_prepare_funding",
+      "name": "arl_prepare_funding",
+      "description": "Step 2 of opening a task: for the jobId created in step 1, returns the unsigned configure, setBudget, approve and fund transactions, in order, for the client wallet. Pass the same arguments as arl_prepare_job. Send a data part { \"skill\": \"arl_prepare_funding\", \"arguments\": { ... } }.",
+      "tags": ["arl", "base", "escrow", "verification"]
+    }
+  ]
+}
