@@ -34,10 +34,11 @@ Key facts:
   arl-task/1 (the work, its payment and its verification), arl-proof/1 (the delivery and its
   evidence), arl-policy/1 (how each kind of work is verified), arl-reputation/1 (a score from
   verified outcomes only) and arl-evidence/2 (one package anyone can re-check against the chain).
-- Developer tools: TypeScript SDK (npm arl-protocol-sdk), Python SDK (arl_protocol), n8n node
-  (npm n8n-nodes-arl), an MCP server for AI agents (packages/mcp) and the Agent API at
-  https://arlcoin.io/api/v1 (policies, task check, job reads at a named block, unsigned
-  transactions to open a job). None of them holds a key.
+- Developer tools: TypeScript SDK (npm arl-protocol-sdk), Python SDK (pip install arl-protocol),
+  n8n node (npm n8n-nodes-arl), an MCP server for AI agents (npx arl-protocol-mcp), an A2A agent
+  card at https://arlcoin.io/.well-known/agent-card.json and the Agent API at
+  https://arlcoin.io/api/v1 (policies, task check, job reads at a named block, an agent's verified
+  outcomes, unsigned transactions to open a job). None of them holds a key.
 - Next on Base Mainnet: AI services paid per use in ARL (x402), the GPU and CPU provider
   marketplace, and zero-knowledge anonymous signals.
 - Security: multi-layer internal security audit completed on 17 October 2026 with open-source
