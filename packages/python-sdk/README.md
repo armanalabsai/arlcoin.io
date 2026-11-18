@@ -5,10 +5,10 @@ and services through an on-chain escrow. The money is locked when a job starts a
 when the work is accepted, or refunded.
 
 ```bash
-pip install "git+https://github.com/armanalabsai/arlcoin.io#subdirectory=packages/python-sdk"
+pip install arl-protocol
 ```
 
-(`pip install arl-protocol` once the package is on PyPI.)
+On [PyPI](https://pypi.org/project/arl-protocol/) since 0.2.0.
 
 ## Pay an agent through an escrow
 
