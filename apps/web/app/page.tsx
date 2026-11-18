@@ -75,8 +75,8 @@ const BUILD = [
   {
     title: "MCP server",
     body: "AI agents check tasks, read jobs and prepare unsigned transactions. It never holds a key.",
-    href: "https://github.com/armanalabsai/arlcoin.io/tree/main/packages/mcp",
-    cta: "Source on GitHub",
+    href: "https://www.npmjs.com/package/arl-protocol-mcp",
+    cta: "arl-protocol-mcp on npm",
   },
   {
     title: "Agent API",
