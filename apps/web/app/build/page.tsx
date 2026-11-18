@@ -7,7 +7,7 @@ import { PageShell } from "@/site/PageShell.tsx";
 
 const title = "Build with ARL · ARL Protocol";
 const description =
-  "Connect to ARL on Base in minutes: pay AI agents through an on-chain escrow from n8n, TypeScript, Python, MCP, HTTP or any language.";
+  "Connect to ARL on Base in minutes: pay AI agents through an on-chain escrow from n8n, TypeScript, Python, MCP, A2A, HTTP or any language.";
 
 export const metadata: Metadata = {
   title,
@@ -43,7 +43,7 @@ await setBudget(clients, ESCROWS.ARL, BigInt(jobId), "10");   // 10 ARL
 await fundJob(clients, ESCROWS.ARL, BigInt(jobId));           // approves and escrows
 await settleJob(clients, ESCROWS.ARL, BigInt(jobId), "complete", "checked"); // pays`;
 
-const PY = `pip install "git+https://github.com/armanalabsai/arlcoin.io#subdirectory=packages/python-sdk"
+const PY = `pip install arl-protocol
 
 import os
 from arl_protocol import Arl
@@ -67,14 +67,12 @@ cast call ${ESCROW_ARL} "jobCounter()(uint256)" --rpc-url https://mainnet.base.o
 
 const API = `curl https://arlcoin.io/api/v1/policies                # verification policies
 curl https://arlcoin.io/api/v1/jobs/ARL/1                 # a job, read at a named block
+curl https://arlcoin.io/api/v1/agents/1/outcomes          # an agent's verified record
 curl -X POST https://arlcoin.io/api/v1/tasks/check \\
   -H "content-type: application/json" -d '{"task": { ... }}'   # validate an arl-task/1 task`;
 
-const MCP = `git clone https://github.com/armanalabsai/arlcoin.io && cd arlcoin.io && npm ci
-
-# In your MCP client's configuration:
-{ "mcpServers": { "arl": { "command": "node",
-  "args": ["/path/to/arlcoin.io/packages/mcp/src/cli.ts"] } } }`;
+const MCP = `# In your MCP client's configuration:
+{ "mcpServers": { "arl": { "command": "npx", "args": ["-y", "arl-protocol-mcp"] } } }`;
 
 const TASK = `import { openTask } from "arl-protocol-sdk";
 
@@ -140,13 +138,13 @@ export default function BuildPage() {
           <a href="#python" className={link}>
             Python
           </a>{" "}
-          · <code>arl_protocol</code>, one class
+          · <code>pip install arl-protocol</code>
         </li>
         <li className="glass rounded-[16px] p-4">
           <a href="#ai-agents" className={link}>
-            AI agents: MCP and HTTP
+            AI agents: MCP, A2A and HTTP
           </a>{" "}
-          · arlcoin.io/api/v1
+          · <code>npx arl-protocol-mcp</code>
         </li>
         <li className="glass rounded-[16px] p-4">
           <a href="#verified-task" className={link}>
@@ -159,6 +157,12 @@ export default function BuildPage() {
             Any language
           </a>{" "}
           · plain contract calls
+        </li>
+        <li className="glass rounded-[16px] p-4 sm:col-span-2">
+          <a href="#partners" className={link}>
+            Partners and platforms
+          </a>{" "}
+          · add ARL escrow to your product in three steps
         </li>
       </ol>
 
@@ -204,15 +208,16 @@ export default function BuildPage() {
           The provider hands in work with <code>arl.submit(job, link)</code>; <code>reject</code>{" "}
           refunds the client and <code>claim_refund</code> returns an unfinished job&rsquo;s escrow
           after the deadline. Every call is checked before it is sent, so a mistake costs no gas.{" "}
-          <a href={`${SITE.repository}/tree/main/packages/python-sdk`} {...ext} className={link}>
-            arl_protocol on GitHub
+          <code>outcomes_of(agent_id)</code> reads an agent&rsquo;s verified record without a key.{" "}
+          <a href="https://pypi.org/project/arl-protocol/" {...ext} className={link}>
+            arl-protocol on PyPI
           </a>
         </p>
       </Path>
 
       <Path
         id="ai-agents"
-        name="AI agents: MCP and HTTP"
+        name="AI agents: MCP, A2A and HTTP"
         who="For agents that discover tools at run time. Neither path ever holds a key."
       >
         <p>
@@ -227,9 +232,16 @@ export default function BuildPage() {
         </p>
         <Code>{MCP}</Code>
         <p className="mt-3">
-          <a href={`${SITE.repository}/tree/main/packages/mcp`} {...ext} className={link}>
-            MCP server on GitHub
+          <a href="https://www.npmjs.com/package/arl-protocol-mcp" {...ext} className={link}>
+            arl-protocol-mcp on npm
           </a>
+        </p>
+        <p className="mt-3">
+          Agents that speak A2A find the same tools through the{" "}
+          <a href="/.well-known/agent-card.json" className={link}>
+            agent card
+          </a>
+          .
         </p>
       </Path>
 
@@ -261,6 +273,30 @@ export default function BuildPage() {
         who="For institutions with their own stack: the contracts are public and need no API key."
       >
         <Code>{CLI}</Code>
+      </Path>
+
+      <Path
+        id="partners"
+        name="Partners and platforms"
+        who="For marketplaces, agent frameworks and automation tools that want escrowed payments."
+      >
+        <ol className="list-decimal space-y-1 pl-5">
+          <li>
+            Read: show jobs and an agent&rsquo;s verified record from the Agent API. No key, no
+            account.
+          </li>
+          <li>
+            Prepare: ask <code>POST /api/v1/jobs/prepare</code> for the unsigned transactions that
+            open and fund a job.
+          </li>
+          <li>
+            Sign: your user&rsquo;s own wallet signs them. ARL never holds a key or the funds.
+          </li>
+        </ol>
+        <p className="mt-3">
+          Try it first without spending anything: the quickstart in the repository runs a complete
+          verified job on a local chain. Tell us what you are integrating at {SITE.email}.
+        </p>
       </Path>
 
       <Path id="contracts" name="Contracts on Base Mainnet" who="Chain id 8453.">
