@@ -38,6 +38,7 @@ export const evaluatorAbi = parseAbi([
   "struct Config { uint8 tier; uint8 threshold; uint64 voteWindow; uint64 challengeWindow; uint96 bond; uint256 providerAgentId; bytes32 specHash; address[] committee; }",
   "struct Verdict { uint8 phase; bool providerApproved; uint8 approvals; uint8 rejections; uint8 topApprovals; uint64 voteEnds; uint64 challengeEnds; address challenger; uint256 bond; bytes32 deliverable; bytes32 voteHash; }",
   "function jobs() view returns (address)",
+  "function bondFollowsBudget() view returns (bool)",
   "function getConfig(uint256 jobId) view returns (Config)",
   "function getVerdict(uint256 jobId) view returns (Verdict)",
   "function voteOf(uint256 jobId, address validator) view returns (uint8)",
@@ -127,6 +128,21 @@ export interface JobView {
   voteEnds: bigint;
   /** The deliverable from `JobSubmitted`, if the job was submitted. */
   deliverable: Hex | null;
+  /** Who pays for the job. */
+  client: Address;
+  /** The escrowed amount, in the escrow token's smallest unit (0 until the budget is set). */
+  budget: bigint;
+  /** The job's deadline (seconds): an accepted bond can stay locked until then. */
+  expiredAt: bigint;
+  /** Length of the vote window (seconds). */
+  voteWindow: bigint;
+  /**
+   * The bond a member locks by accepting, in the stake token's smallest unit: the job's floor, or
+   * a tenth of the budget when that is larger and stakes are in the escrow's token.
+   */
+  bond: bigint;
+  /** True when stakes are in the escrow's payment token, so bond and budget compare. */
+  bondFollowsBudget: boolean;
 }
 
 /** Blocks per eth_getLogs call when reading a job; public RPCs cap the range of one call. */
@@ -147,7 +163,7 @@ export async function readJob(
     abi: evaluatorAbi,
     functionName: "jobs",
   });
-  const [job, config, verdict, memberState] = await Promise.all([
+  const [job, config, verdict, memberState, bondFollowsBudget] = await Promise.all([
     client.readContract({ address: jobs, abi: jobsAbi, functionName: "getJob", args: [jobId] }),
     client.readContract({
       address: evaluator,
@@ -166,6 +182,11 @@ export async function readJob(
       abi: evaluatorAbi,
       functionName: "voteOf",
       args: [jobId, validator],
+    }),
+    client.readContract({
+      address: evaluator,
+      abi: evaluatorAbi,
+      functionName: "bondFollowsBudget",
     }),
   ]);
   let deliverable: Hex | null = null;
@@ -199,6 +220,17 @@ export async function readJob(
     memberState,
     voteEnds: verdict.voteEnds,
     deliverable,
+    client: job.client,
+    budget: job.budget,
+    expiredAt: job.expiredAt,
+    voteWindow: config.voteWindow,
+    bond:
+      verdict.bond !== 0n
+        ? verdict.bond
+        : bondFollowsBudget && job.budget / 10n > config.bond
+          ? job.budget / 10n
+          : config.bond,
+    bondFollowsBudget,
   };
 }
 
