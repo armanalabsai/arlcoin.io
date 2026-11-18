@@ -37,7 +37,7 @@ const pkg = {
     directory: "packages/mcp",
   },
   type: "module",
-  bin: { "arl-mcp": "./mcp/src/cli.js" },
+  bin: { "arl-mcp": "mcp/src/cli.js" },
   main: "./mcp/src/index.js",
   types: "./mcp/src/index.d.ts",
   exports: { ".": { types: "./mcp/src/index.d.ts", default: "./mcp/src/index.js" } },
