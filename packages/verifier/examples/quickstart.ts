@@ -36,6 +36,7 @@ import { openVerifiedJob } from "@arl/sdk";
 
 import {
   buildBundle,
+  DEFAULT_ACCEPT_POLICY,
   DockerRunner,
   execute,
   parseSpec,
@@ -200,7 +201,18 @@ try {
       const s = states.get(v.address) ?? { fromBlock: 0n, jobs: [] };
       states.set(
         v.address,
-        await step({ client: publicClient, wallet: wallet(v), evaluator, exec, specFetcher }, s),
+        await step(
+          {
+            client: publicClient,
+            wallet: wallet(v),
+            evaluator,
+            exec,
+            specFetcher,
+            // The demo job is small and its windows are short; a real validator keeps the defaults.
+            acceptPolicy: { ...DEFAULT_ACCEPT_POLICY, minBudget: 0n, minVoteWindow: 0n },
+          },
+          s,
+        ),
       );
     }
   };
