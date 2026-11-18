@@ -74,4 +74,4 @@ it. These are the same transactions the SDK, the MCP server and the Agent API
 (`https://arlcoin.io/api/v1`) prepare. The provider approves the committee next, and the
 validators check the work against the task.
 
-License: Apache-2.0.
+License: MIT (this package only; the rest of the ARL repository is Apache-2.0).
