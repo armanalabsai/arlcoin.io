@@ -1,0 +1,41 @@
+name: Publish n8n node
+
+# Builds packages/n8n-nodes-arl and publishes it to npm as `n8n-nodes-arl` with a provenance
+# statement, which n8n requires to verify a community node. Started by hand only (Actions tab,
+# "Run workflow"). It uses npm Trusted Publishing: npm accepts the upload because this workflow,
+# in this repository, asks for it through GitHub's OIDC token, so no npm token is stored anywhere.
+# The npm package must list this workflow as a trusted publisher (organization or user
+# armanalabsai, repository arlcoin.io, workflow publish-n8n.yml, environment npm).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Actions are pinned to full commit SHAs; the tag is noted for review.
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          registry-url: https://registry.npmjs.org
+      - name: Install, test and build
+        run: |
+          npm ci
+          npm test -w n8n-nodes-arl
+          npm run build -w n8n-nodes-arl
+      - name: Publish with provenance
+        working-directory: packages/n8n-nodes-arl
+        run: |
+          npm install -g npm@11
+          npm publish --provenance --access public
