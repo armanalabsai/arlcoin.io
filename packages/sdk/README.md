@@ -61,7 +61,7 @@ the same calls unsigned, for wallets that sign elsewhere. `parseTask`, `taskHash
 | ------------------------------------------ | ------------------------------------------------------------------------- |
 | `streamComputePayment`, `stopComputeStream` | Pay a compute provider per second (`COMPUTE_PAYMENT` on Base Mainnet)     |
 | `quoteArl`, `acquireArl`                   | Buy exact ARL in the official Uniswap v3 pools, paying USDC, USDT or ETH |
-| `openVerifiedJob`, `getVerdict`, `finalizeJob` | Verified jobs: a committee of staked ARL validators checks the work   |
+| `openVerifiedJob`, `getVerdict`, `getOutcomes`, `finalizeJob` | Verified jobs: a committee of staked ARL validators checks the work, and `getOutcomes` reads an agent's verified `outcomesOf` counts |
 | `payVerified`                              | Pay a service that answers HTTP 402 with an ARL escrow offer              |
 
 ## Contracts on Base Mainnet

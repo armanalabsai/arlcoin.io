@@ -22,6 +22,7 @@ export {
   checkOpenParams,
   checkVerifiedChain,
   finalizeJob,
+  getOutcomes,
   getVerdict,
   openVerifiedJob,
   defaultWindows,
@@ -29,6 +30,7 @@ export {
   verifiedDeployment,
   verifiedJobsAbi,
   walletAccount,
+  type AgentOutcomes,
   type OpenVerifiedJobParams,
   type VerifiedClients,
 } from "./verified.ts";
