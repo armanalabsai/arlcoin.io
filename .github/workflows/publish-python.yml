@@ -1,0 +1,40 @@
+name: Publish Python package
+
+# Builds packages/python-sdk and publishes it to PyPI as `arl-protocol`. Started by hand only
+# (Actions tab, "Run workflow"). It uses PyPI Trusted Publishing: PyPI accepts the upload because
+# this workflow, in this repository, asks for it through GitHub's OIDC token, so no PyPI password
+# or API token is stored anywhere. The PyPI project must list this workflow as a trusted publisher
+# (owner armanalabsai, repository arlcoin.io, workflow publish-python.yml, environment pypi).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Actions are pinned to full commit SHAs; the tag is noted for review.
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Test, build and check
+        working-directory: packages/python-sdk
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install . pytest build twine
+          python -m pytest -q tests
+          python -m build
+          python -m twine check dist/*
+      - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
+        with:
+          packages-dir: packages/python-sdk/dist

@@ -5,8 +5,8 @@ from decimal import Decimal
 import pytest
 from web3 import Web3
 
-from arl_protocol import ESCROWS, STATUS, Arl, ArlError
-from arl_protocol.client import JOBS_ABI, to_bytes32, to_units
+from arl_protocol import ESCROWS, EVALUATORS, STATUS, Arl, ArlError, Outcomes, outcomes_of
+from arl_protocol.client import EVALUATOR_ABI, JOBS_ABI, to_bytes32, to_units
 
 # A throwaway key used only to build the client offline; it holds nothing.
 TEST_KEY = "0x" + "11" * 32
@@ -61,3 +61,54 @@ def test_client_rejects_unknown_tokens():
         Arl(private_key=TEST_KEY, token="DAI")
     arl = Arl(private_key=TEST_KEY)
     assert Web3.is_checksum_address(arl.address)
+
+
+def test_outcomes_of_reads_evaluator_without_private_key():
+    w3 = Web3()
+    evaluator = w3.eth.contract(address=EVALUATORS["ARL"], abi=EVALUATOR_ABI)
+    assert evaluator.get_function_by_name("outcomesOf").signature == "outcomesOf(uint256)"
+
+    called = {}
+
+    class DummyFn:
+        def call(self):
+            return (14, 2)
+
+    class DummyFunctions:
+        def outcomesOf(self, agent_id):
+            called["agent_id"] = agent_id
+            return DummyFn()
+
+    class DummyContract:
+        functions = DummyFunctions()
+
+    class DummyEth:
+        chain_id = 8453
+
+        def contract(self, address, abi):
+            called["address"] = address
+            called["abi"] = abi
+            return DummyContract()
+
+    class DummyW3:
+        eth = DummyEth()
+
+    out = outcomes_of(42, token="USDC", w3=DummyW3())
+    assert out == Outcomes(approved=14, rejected=2)
+    assert tuple(out) == (14, 2)
+    assert out["approved"] == 14 and out["rejected"] == 2
+    assert called["agent_id"] == 42
+    assert called["address"] == EVALUATORS["USDC"]
+
+    arl = Arl(token="ARL")
+    arl.w3 = DummyW3()
+    assert arl.address is None
+    assert arl.outcomes_of(7) == Outcomes(approved=14, rejected=2)
+    assert called["address"] == EVALUATORS["ARL"]
+
+    for bad_id in (-1, True, "7"):
+        with pytest.raises(ArlError):
+            outcomes_of(bad_id, w3=DummyW3())
+    with pytest.raises(ArlError):
+        outcomes_of(1, token="DAI", w3=DummyW3())
+
