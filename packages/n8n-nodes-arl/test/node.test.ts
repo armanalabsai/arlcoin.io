@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { describe, it } from "node:test";
+import { fileURLToPath } from "node:url";
 
 import { keccak256, stringToHex } from "viem";
 
@@ -124,5 +127,31 @@ describe("node description", () => {
       cred.properties.find((p) => p.name === "rpcUrl")?.default,
       "https://mainnet.base.org",
     );
+  });
+
+  it("ships a valid hire-an-agent example workflow with placeholder credentials", () => {
+    const here = dirname(fileURLToPath(import.meta.url));
+    const raw = readFileSync(join(here, "../examples/hire-an-agent.json"), "utf8");
+    const wf = JSON.parse(raw) as {
+      name: string;
+      nodes: {
+        name: string;
+        type: string;
+        typeVersion: number;
+        parameters: Record<string, unknown>;
+        credentials?: Record<string, { id: string; name: string }>;
+      }[];
+    };
+    const arlNodes = wf.nodes.filter((n) => n.type === "n8n-nodes-arl.arl");
+    assert.ok(arlNodes.length >= 6);
+    const seenOps = new Set(arlNodes.map((n) => String(n.parameters.operation)));
+    for (const op of ["create", "setBudget", "fund", "submit", "complete", "reject"]) {
+      assert.ok(seenOps.has(op), op);
+      assert.ok(values.has(op), op);
+    }
+    for (const n of arlNodes) {
+      assert.equal(n.typeVersion, 1);
+      assert.ok(n.credentials?.arlWalletApi?.id.startsWith("REPLACE_WITH_"));
+    }
   });
 });
