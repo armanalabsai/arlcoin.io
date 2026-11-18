@@ -38,7 +38,7 @@ import { validatorKey } from "./key.ts";
 import { parseSpec, specHash } from "./spec.ts";
 import { decide, execute } from "./verify.ts";
 import { buildBundle, verifyBundle, type EvidenceBundle } from "./bundle.ts";
-import { step, type WatchState } from "./watch.ts";
+import { DEFAULT_ACCEPT_POLICY, step, type AcceptPolicy, type WatchState } from "./watch.ts";
 
 /** viem chain for signing: Base Mainnet as is, otherwise Base Sepolia's settings with the id. */
 const chainFor = (id: number) => (id === base.id ? base : { ...baseSepolia, id });
@@ -133,6 +133,38 @@ async function main(argv: readonly string[]): Promise<void> {
       ) {
         fail("usage: watch <rpc> <evaluator> <fromBlock> [state.json]");
       }
+      // What this validator accepts (see AcceptPolicy). Amounts are in the token's smallest unit.
+      //   ARL_MIN_BUDGET        smallest job budget (default: at least the bond; required when
+      //                         stakes are in another token than the escrow's)
+      //   ARL_MAX_BOND          largest bond locked for one job (default 100 ARL)
+      //   ARL_MAX_DEADLINE_DAYS longest time until the job's deadline (default 30)
+      //   ARL_MIN_VOTE_MINUTES  shortest vote window (default 60)
+      //   ARL_CLIENTS           comma-separated client addresses; when set, only their jobs
+      let acceptPolicy: AcceptPolicy;
+      try {
+        const env = process.env;
+        const clients = (env.ARL_CLIENTS ?? "")
+          .split(",")
+          .map((c) => c.trim())
+          .filter((c) => c !== "");
+        const bad = clients.find((c) => !isAddress(c));
+        if (bad !== undefined) throw new Error(`ARL_CLIENTS: ${bad} is not an address`);
+        acceptPolicy = {
+          minBudget: env.ARL_MIN_BUDGET
+            ? BigInt(env.ARL_MIN_BUDGET)
+            : DEFAULT_ACCEPT_POLICY.minBudget,
+          maxBond: env.ARL_MAX_BOND ? BigInt(env.ARL_MAX_BOND) : DEFAULT_ACCEPT_POLICY.maxBond,
+          maxSecondsToDeadline: env.ARL_MAX_DEADLINE_DAYS
+            ? BigInt(env.ARL_MAX_DEADLINE_DAYS) * 86_400n
+            : DEFAULT_ACCEPT_POLICY.maxSecondsToDeadline,
+          minVoteWindow: env.ARL_MIN_VOTE_MINUTES
+            ? BigInt(env.ARL_MIN_VOTE_MINUTES) * 60n
+            : DEFAULT_ACCEPT_POLICY.minVoteWindow,
+          clients: clients.length > 0 ? (clients as `0x${string}`[]) : null,
+        };
+      } catch (error) {
+        fail(`accept policy: ${(error as Error).message}`);
+      }
       let key: `0x${string}`;
       try {
         key = validatorKey(process.env.ARL_VALIDATOR_KEY);
@@ -165,6 +197,7 @@ async function main(argv: readonly string[]): Promise<void> {
         specFetcher: networkFetcher,
         // ARL_LOG_WINDOW: blocks per eth_getLogs call, up to the RPC's limit.
         logWindow: BigInt(process.env.ARL_LOG_WINDOW ?? "5000"),
+        acceptPolicy,
         log: (e: Record<string, unknown>) => {
           print({ at: new Date().toISOString(), ...e });
         },

@@ -25,6 +25,7 @@ import {
   readJob,
   settle,
   settlementDue,
+  type JobView,
 } from "./chain.ts";
 import { canonicalHash } from "./canonical.ts";
 import type { Fetcher } from "./inputs.ts";
@@ -57,6 +58,58 @@ export interface WatchState {
   specs?: Record<string, ReexecSpec>;
 }
 
+/**
+ * What a validator is willing to accept. Accepting locks a bond until the job is settled or its
+ * deadline passes, and the bond is burned if the validator misses the vote window, so a validator
+ * accepts only jobs inside limits its operator chose (security report 2026-11-18): a client could
+ * otherwise name it on a near-empty job with a far deadline or a very short vote window.
+ */
+export interface AcceptPolicy {
+  /**
+   * Smallest job budget accepted, in the escrow token's smallest unit. When null, the budget must
+   * be at least the bond, which only compares when stakes are in the escrow's token; with another
+   * stake token the operator must set it, and until then nothing is accepted.
+   */
+  minBudget: bigint | null;
+  /** Largest bond this validator locks for one job, in the stake token's smallest unit. */
+  maxBond: bigint;
+  /** Longest time until the job's deadline (seconds): how long a bond may stay locked. */
+  maxSecondsToDeadline: bigint;
+  /** Shortest vote window (seconds): the time the validator has to re-execute and vote. */
+  minVoteWindow: bigint;
+  /** When set, only jobs from these clients are accepted. */
+  clients: readonly Address[] | null;
+}
+
+export const DEFAULT_ACCEPT_POLICY: AcceptPolicy = {
+  minBudget: null,
+  maxBond: 100n * 10n ** 18n,
+  maxSecondsToDeadline: 30n * 24n * 60n * 60n,
+  minVoteWindow: 60n * 60n,
+  clients: null,
+};
+
+/** Why `policy` refuses the job at time `now` (seconds), or null when it may be accepted. */
+export function acceptProblem(
+  job: Pick<
+    JobView,
+    "client" | "budget" | "expiredAt" | "voteWindow" | "bond" | "bondFollowsBudget"
+  >,
+  policy: AcceptPolicy,
+  now: bigint,
+): string | null {
+  if (policy.clients && !policy.clients.some((c) => c.toLowerCase() === job.client.toLowerCase()))
+    return "client is not on this validator's list";
+  if (job.expiredAt > now + policy.maxSecondsToDeadline)
+    return "deadline is further away than this validator locks a bond for";
+  if (job.voteWindow < policy.minVoteWindow) return "vote window is shorter than the minimum";
+  if (job.bond > policy.maxBond) return "bond is larger than the maximum";
+  const minBudget = policy.minBudget ?? (job.bondFollowsBudget ? job.bond : null);
+  if (minBudget === null) return "no minimum budget is set for this evaluator";
+  if (job.budget < minBudget) return "budget is below the minimum";
+  return null;
+}
+
 export interface WatchDeps {
   client: PublicClient;
   wallet: WalletClient<Transport, Chain, Account>;
@@ -73,6 +126,8 @@ export interface WatchDeps {
    * with a reject vote (default FAILURE_VOTE_MARGIN).
    */
   failureVoteMargin?: bigint;
+  /** The jobs this validator accepts (default DEFAULT_ACCEPT_POLICY). */
+  acceptPolicy?: AcceptPolicy;
 }
 
 /**
@@ -283,6 +338,12 @@ export async function step(deps: WatchDeps, state: WatchState): Promise<WatchSta
         // Accepting locks a bond that is burned if this validator does not vote, so it accepts
         // only a job whose spec it can fetch and that matches the committed hash. A spec that
         // never resolves (or is the wrong one) is skipped and retried next pass, never accepted.
+        const { timestamp } = await deps.client.getBlock();
+        const refused = acceptProblem(job, deps.acceptPolicy ?? DEFAULT_ACCEPT_POLICY, timestamp);
+        if (refused) {
+          log({ jobId: id, event: "not-accepted", reason: refused });
+          continue;
+        }
         const spec = await usableSpec(job.description, job.specHash, deps.specFetcher);
         if (!spec) {
           log({ jobId: id, event: "spec-unusable", reason: "spec not fetchable or hash differs" });
