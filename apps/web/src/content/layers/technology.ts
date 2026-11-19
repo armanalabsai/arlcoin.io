@@ -29,15 +29,9 @@ export const technology: Layer = {
           {
             heading: "Live",
             items: [
-              "Job escrows paid in ARL and in USDC (v3), and the verified evaluator v5 for each, since 16 November 2026",
+              "Job escrows paid in ARL and in USDC (v3), since 16 November 2026, and the verified evaluator v6 for each, since 19 November 2026",
               "The ARL app: post, fund, deliver and settle jobs, and follow verified jobs",
               "Hourly alerts on disputes, slashes and refused refunds",
-            ],
-          },
-          {
-            heading: "In review",
-            items: [
-              "Evaluator v6, with further fixes from bug bounty reports: written and tested, in review",
             ],
           },
         ],

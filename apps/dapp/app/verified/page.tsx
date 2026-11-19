@@ -22,6 +22,7 @@ import {
   EXPLORER,
   TIERS,
   EVALUATOR_DEPLOY_BLOCK,
+  RETIRED_EVALUATOR,
   countStats,
   evaluatorAbi,
   evaluatorEvents,
@@ -281,6 +282,8 @@ function Verified() {
         />
       </section>
 
+      <RetiredStake />
+
       <section className="glass-strong flex flex-col gap-4 p-5" aria-labelledby="verdict-heading">
         <h2 id="verdict-heading" className="text-sm font-extrabold">
           Look up a job&apos;s verdict
@@ -350,5 +353,84 @@ function Verified() {
         </p>
       ) : null}
     </div>
+  );
+}
+
+/** Shown only to a wallet that still has stake on the retired v5 evaluator: one tap withdraws it. */
+function RetiredStake() {
+  const { address } = useAccount();
+  const client = usePublicClient();
+  const { writeContractAsync } = useWriteContract();
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState("");
+  const old = useQuery({
+    queryKey: ["evaluator-retired", address],
+    enabled: client !== undefined && address !== undefined && IS_MAINNET,
+    refetchInterval: REFRESH_MS,
+    queryFn: async () => {
+      if (!client || !address) throw new Error("no wallet");
+      const [staked, locked] = await Promise.all([
+        client.readContract({
+          address: RETIRED_EVALUATOR,
+          abi: evaluatorAbi,
+          functionName: "stakeOf",
+          args: [address],
+        }),
+        client.readContract({
+          address: RETIRED_EVALUATOR,
+          abi: evaluatorAbi,
+          functionName: "lockedOf",
+          args: [address],
+        }),
+      ]);
+      return staked - locked;
+    },
+  });
+  const free = old.data;
+  if (!free) return null;
+  return (
+    <section className="glass-strong flex flex-col gap-3 p-5" data-testid="retired-stake">
+      <h2 className="text-sm font-extrabold">Stake on the earlier evaluator</h2>
+      <p className="text-sm text-muted">
+        You have <Arl value={free} /> on the evaluator that was replaced on 19 November 2026.
+        Withdraw it, then stake above on the current one.
+      </p>
+      <div>
+        <button
+          type="button"
+          className="btn btn-primary"
+          data-testid="retired-withdraw"
+          disabled={busy}
+          onClick={() => {
+            setBusy(true);
+            setNote("");
+            void (async () => {
+              try {
+                const hash = await writeContractAsync({
+                  address: RETIRED_EVALUATOR,
+                  abi: evaluatorAbi,
+                  functionName: "unstake",
+                  args: [free],
+                });
+                await client?.waitForTransactionReceipt({ hash });
+                await old.refetch();
+                setNote("Withdrawn.");
+              } catch (e) {
+                setNote(e instanceof Error ? (e.message.split("\n")[0] ?? e.message) : String(e));
+              } finally {
+                setBusy(false);
+              }
+            })();
+          }}
+        >
+          Withdraw from the earlier evaluator
+        </button>
+      </div>
+      {note ? (
+        <p className="text-sm text-muted" role="status">
+          {note}
+        </p>
+      ) : null}
+    </section>
   );
 }

@@ -23,7 +23,7 @@ Key facts:
   ARL (0x9aE99bF9a59aF47E81346B7c0b93Cd2B610455fC) or USDC
   (0xE3eA0EAEc3Cf9DA2d0856A0f784A4B1671AeFD04); validators who stake ARL check the work and vote,
   disputes go to a 2-of-3 arbiter Safe, and outcomes are written to ERC-8004 reputation.
-  Escrows v3 and evaluator v5 are live since 16 November 2026.
+  Escrows v3 are live since 16 November 2026 and evaluator v6 since 19 November 2026.
 - Also on Base Mainnet since 12 November 2026: the compute payment contract
   (0x1bFE932896fdd32175836a7364dcaf53d49EE464) and the staking contract
   (0x15e257009BE9B1875fbfa69D291320aaFE3fa102, 180-day reward periods funded from the Community
@@ -49,8 +49,8 @@ Key facts:
   pass a Safe multisig and a 48-hour timelock.
 - Roadmap: foundation and token contracts complete, internal security audit complete, Base
   Mainnet live since 24 October 2026, verified jobs, compute payments and staking deployed on
-  12 November 2026, escrows v3 and evaluator v5 live and the first staking period funded on
-  16 November 2026.
+  12 November 2026, escrows v3 live and the first staking period funded on 16 November 2026,
+  evaluator v6 live on 19 November 2026.
 - Trading: Uniswap v3 on Base, pools ARL/USDC, ARL/USDT, ARL/WETH and ARL/cbBTC (1% fee),
   opened from 0.20 USD per ARL with 5,000,000 ARL (2,000,000 Liquidity, 3,000,000 Public Launch).
   There is no airdrop at the launch; an airdrop of 500,000 ARL is planned for a later date.
