@@ -49,7 +49,7 @@ describe("Agent API v1", () => {
     assert.equal(r.status, 200);
     assert.equal(r.headers.get("access-control-allow-origin"), "*");
     assert.equal(r.headers.get("cache-control"), "public, max-age=3600");
-    assert.equal(((await r.json()) as unknown[]).length, 3);
+    assert.equal(((await r.json()) as unknown[]).length, 7);
   });
 
   it("checks a task posted as JSON", async () => {

@@ -46,7 +46,15 @@ const input = {
 
 describe("built-in policies", () => {
   it("equal the spec's policy documents", () => {
-    for (const id of ["reexec-standard", "fallback-review", "model-assisted-review"]) {
+    for (const id of [
+      "reexec-standard",
+      "fallback-review",
+      "model-assisted-review",
+      "code-tests",
+      "data-recompute",
+      "gpu-inference",
+      "research-sources",
+    ]) {
       const file = parsePolicy(
         JSON.parse(
           readFileSync(
@@ -58,7 +66,7 @@ describe("built-in policies", () => {
       assert.deepEqual(BUILTIN_POLICIES.get(id), file);
       assert.deepEqual(builtinPolicy(`arl-policy/1:${id}`), file);
     }
-    assert.equal(BUILTIN_POLICIES.size, 3);
+    assert.equal(BUILTIN_POLICIES.size, 7);
     assert.equal(builtinPolicy("arl-policy/1:nope"), undefined);
     assert.equal(builtinPolicy("reexec-standard"), undefined);
   });

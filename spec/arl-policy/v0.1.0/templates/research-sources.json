@@ -1,0 +1,40 @@
+{
+  "version": "arl-task/1",
+  "title": "Write a sourced research brief",
+  "description": "Answer the research question with a brief in which every factual claim cites a public source.",
+  "workload": {
+    "class": "model-assisted"
+  },
+  "acceptance": [
+    {
+      "id": "sources-resolve",
+      "rule": "Every cited URL resolves and the fetch log records its content hash."
+    },
+    {
+      "id": "claims-supported",
+      "rule": "Each cited source contains the claim it is cited for."
+    },
+    {
+      "id": "answers-question",
+      "rule": "The brief answers the question as asked."
+    }
+  ],
+  "deliverable": {
+    "media_type": "text/markdown"
+  },
+  "payment": {
+    "token": "USDC",
+    "budget": "25000000",
+    "deadline_hours": 96
+  },
+  "verification": {
+    "policy": "arl-policy/1:research-sources",
+    "tier": "attested",
+    "committee_size": 3,
+    "threshold": 2,
+    "vote_window_seconds": 43200,
+    "challenge_window_seconds": 86400,
+    "bond_floor": "100000000000000000000"
+  },
+  "evidence": ["artifact", "model-verdict", "logs"]
+}

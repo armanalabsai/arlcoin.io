@@ -133,3 +133,29 @@ describe("policy rules", () => {
     assert.throws(() => parsePolicy({ ...base, extra: true }), PolicyError);
   });
 });
+
+describe("job-type templates", () => {
+  const ids = ["code-tests", "data-recompute", "gpu-inference", "research-sources"];
+  for (const id of ids) {
+    it(`${id}: the template is a valid task that fits its policy`, () => {
+      const task = parseTask(read(`../../../spec/arl-policy/v0.1.0/templates/${id}.json`));
+      const policy = parsePolicy(read(`../../../spec/arl-policy/v0.1.0/policies/${id}.json`));
+      assert.equal(task.verification.policy, `arl-policy/1:${id}`);
+      checkTaskAgainstPolicy(task, policy);
+      const checked = task.acceptance.map((r) => ({
+        id: r.id,
+        passed: true,
+        by: "check" as const,
+      }));
+      assert.equal(decideVote(task, policy, checked).approve, true);
+      const oneFailed = checked.map((o, i) => (i === 0 ? { ...o, passed: false } : o));
+      assert.equal(decideVote(task, policy, oneFailed).approve, false);
+      const byModel = checked.map((o) => ({
+        ...o,
+        by: "model" as const,
+        weights_sha256: "a".repeat(64),
+      }));
+      assert.equal(decideVote(task, policy, byModel).approve, policy.model.allowed);
+    });
+  }
+});

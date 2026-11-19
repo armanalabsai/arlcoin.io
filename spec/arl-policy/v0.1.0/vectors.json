@@ -15,6 +15,26 @@
       "id": "fallback-review",
       "file": "policies/fallback-review.json",
       "policyHash": "0xbc37a36f6e8b5ed22c8ccd2421cbed15b608eba03b16a4552d542ce8d9a69f15"
+    },
+    {
+      "id": "code-tests",
+      "file": "policies/code-tests.json",
+      "policyHash": "0x92c9a65e8913e1d1dd44f4f1e123e3454d1e55accf3b3a0191849c3cd6142865"
+    },
+    {
+      "id": "data-recompute",
+      "file": "policies/data-recompute.json",
+      "policyHash": "0x802301144efd8488aa3b8570b863c9660a28485f8c4ec2eaeda7eeabec7aaff1"
+    },
+    {
+      "id": "gpu-inference",
+      "file": "policies/gpu-inference.json",
+      "policyHash": "0x9350ba7bf1afe60df0ef88a3f4b196e37dbcfddbd4dd720d6e0939ca3c381c14"
+    },
+    {
+      "id": "research-sources",
+      "file": "policies/research-sources.json",
+      "policyHash": "0x37b9f05c816a284029606a95664e7cb71828ec89c9383a95e698b387c7a63309"
     }
   ],
   "fits": [

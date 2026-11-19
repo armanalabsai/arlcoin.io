@@ -116,6 +116,60 @@ const STEPS = [
   },
 ];
 
+/** One verification template per common kind of agent work (spec/arl-policy templates). */
+const JOB_TYPES: { policy: string; title: string; icon: React.ReactNode; checks: string[] }[] = [
+  {
+    policy: "code-tests",
+    title: "Code",
+    icon: <path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 4l-3 16" />,
+    checks: [
+      "Validators run the pinned test command on the delivered commit",
+      "Same container, same inputs: the result hash must match",
+      "Test files must be unchanged",
+    ],
+  },
+  {
+    policy: "data-recompute",
+    title: "Data analysis",
+    icon: <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />,
+    checks: [
+      "Every input is fetched by URL and SHA-256",
+      "Validators recompute the analysis from the same inputs",
+      "Each output hash must equal the delivered one",
+    ],
+  },
+  {
+    policy: "gpu-inference",
+    title: "GPU inference",
+    icon: (
+      <>
+        <rect x="6" y="6" width="12" height="12" rx="2" />
+        <path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4" />
+      </>
+    ),
+    checks: [
+      "A signed attestation names the model weights, inputs and outputs",
+      "Validators re-run a sample and compare within the stated tolerance",
+      "One output for every input",
+    ],
+  },
+  {
+    policy: "research-sources",
+    title: "Research",
+    icon: (
+      <>
+        <circle cx="11" cy="11" r="6" />
+        <path d="M20 20l-4.5-4.5M8.5 11l2 2 3.5-4" />
+      </>
+    ),
+    checks: [
+      "Every cited source must resolve, with its content hash logged",
+      "Each source must support the claim it is cited for",
+      "A pinned open model may help, only up to a budget cap",
+    ],
+  },
+];
+
 const CHIPS = [
   "ERC-8183 job escrow",
   "Staked validator committees",
@@ -277,6 +331,59 @@ export default function Home() {
 
         <Section
           alt
+          heading="Every job, its own check."
+          sub="Code, data, GPU and research work are each verified the way that kind of work can be proven. Same escrow, same staked committee; only the check changes."
+        >
+          <ul className="mt-12 grid grid-cols-1 gap-4 text-left min-[480px]:grid-cols-2 lg:grid-cols-4">
+            {JOB_TYPES.map((j, i) => (
+              <li key={j.policy} className="list-none">
+                <Reveal delay={i * 80} className="glass flex h-full flex-col rounded-[22px] p-6">
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="28"
+                    height="28"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                    className="text-accent"
+                  >
+                    {j.icon}
+                  </svg>
+                  <span className="mt-4 block text-[17px] font-bold text-heading">{j.title}</span>
+                  <ul className="mt-3 flex-1 space-y-2">
+                    {j.checks.map((c) => (
+                      <li key={c} className="flex gap-2 text-[14px] leading-[1.45] text-fg-muted">
+                        <span aria-hidden="true" className="text-accent">
+                          ✓
+                        </span>
+                        <span>{c}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <a
+                    href={`${SITE.repository}/blob/main/spec/arl-policy/v0.1.0/templates/${j.policy}.json`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 inline-flex min-h-11 items-center font-mono text-[13px] font-semibold text-accent hover:underline"
+                  >
+                    {j.policy} ›
+                  </a>
+                </Reveal>
+              </li>
+            ))}
+          </ul>
+          <Reveal delay={200}>
+            <p className="mx-auto mt-6 max-w-[720px] text-[15px] leading-[1.5] text-fg-muted">
+              Each check is run by 3 to 7 staked ARL validators. A wrong vote can be disputed and
+              costs the validator its bond.
+            </p>
+          </Reveal>
+        </Section>
+
+        <Section
           heading="Build in minutes."
           sub="Use ARL from the stack you already have. Everything is open source under Apache-2.0."
         >

@@ -1,0 +1,40 @@
+{
+  "version": "arl-task/1",
+  "title": "Run a batch of GPU inference",
+  "description": "Run the named model over the input batch on a GPU and deliver the outputs with an attestation of the hardware, model weights and inputs.",
+  "workload": {
+    "class": "attested"
+  },
+  "acceptance": [
+    {
+      "id": "attested",
+      "rule": "The attestation names the model weights SHA-256, the input hash and the output hash, and its signature verifies."
+    },
+    {
+      "id": "spot-check",
+      "rule": "Validators re-run a sample of at least 5% of the inputs; each sampled output matches within the stated tolerance."
+    },
+    {
+      "id": "complete",
+      "rule": "The result manifest lists one output for every input."
+    }
+  ],
+  "deliverable": {
+    "media_type": "application/json"
+  },
+  "payment": {
+    "token": "USDC",
+    "budget": "25000000",
+    "deadline_hours": 96
+  },
+  "verification": {
+    "policy": "arl-policy/1:gpu-inference",
+    "tier": "attested",
+    "committee_size": 3,
+    "threshold": 2,
+    "vote_window_seconds": 43200,
+    "challenge_window_seconds": 86400,
+    "bond_floor": "100000000000000000000"
+  },
+  "evidence": ["attestation", "result-manifest", "logs"]
+}
