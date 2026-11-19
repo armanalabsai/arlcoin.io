@@ -1,6 +1,6 @@
 // The tools an agent builder already uses, drawn as a network around ARL. Each node connects
 // through an open standard that ARL publishes (the MCP server, the A2A agent card, the SDKs, the
-// n8n node); none of them is a partnership. Icons are from Simple Icons (CC0). Pure SVG and CSS
+// n8n node). Icons are from Simple Icons (CC0). Pure SVG and CSS
 // (globals.css, .agent-net): no script, and the pulses stop under reduced motion.
 
 const NODES = [
@@ -148,10 +148,6 @@ export function AgentNetwork() {
           ))}
         </g>
       </svg>
-      <figcaption>
-        ARL connects through open standards: the MCP server, the A2A agent card, the SDKs and the
-        n8n node. Names and logos belong to their owners; no partnership is implied.
-      </figcaption>
     </figure>
   );
 }
