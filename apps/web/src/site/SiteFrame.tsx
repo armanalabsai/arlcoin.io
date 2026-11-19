@@ -146,6 +146,9 @@ export function FooterLinks() {
       <a href={SITE.social.farcaster} rel="me noopener noreferrer" target="_blank" className={link}>
         Farcaster
       </a>
+      <a href={SITE.social.linkedin} rel="me noopener noreferrer" target="_blank" className={link}>
+        LinkedIn
+      </a>
       <a href={SITE.social.devto} rel="me noopener noreferrer" target="_blank" className={link}>
         DEV
       </a>
