@@ -25,8 +25,8 @@ export const CONTRACTS: readonly (readonly [string, string])[] = [
   ["ARL token", MAINNET_TOKEN],
   ["Jobs escrow, paid in ARL", "0x9aE99bF9a59aF47E81346B7c0b93Cd2B610455fC"],
   ["Jobs escrow, paid in USDC", "0xE3eA0EAEc3Cf9DA2d0856A0f784A4B1671AeFD04"],
-  ["Verified evaluator (ARL escrow)", "0xcF87CF8751648919b5A7F3b45795999dFDeE5861"],
-  ["Verified evaluator (USDC escrow)", "0xc121c4fE9460c55d85dE0175C1C7045235f94c07"],
+  ["Verified evaluator (ARL escrow)", "0x0D160C869bd2a7AaEDd29e11fc60fdAEf21c3E28"],
+  ["Verified evaluator (USDC escrow)", "0x7A00D45598Da7C13feEA8962fc1110FC4Db4D850"],
   ["Compute payments", "0x1bFE932896fdd32175836a7364dcaf53d49EE464"],
   ["Staking", "0x15e257009BE9B1875fbfa69D291320aaFE3fa102"],
 ];
@@ -46,7 +46,7 @@ export const ROADMAP =
   "- Open protocol standards: arl-task, arl-proof, arl-policy, arl-reputation, arl-evidence/2\n" +
   "- Agent API (arlcoin.io/api/v1) and the MCP server for AI agents\n" +
   "Now:\n" +
-  "- Security hardening: ARLJobs v3 (live 16 November 2026) and evaluator v6 (live 19 November 2026)\n" +
+  "- Security hardening: ARLJobs v3 (live 16 November 2026) and evaluator v7 (live 19 November 2026)\n" +
   "- A 3-validator committee, AgentKit actions\n" +
   "Next:\n" +
   "1. A live pilot with real agent-to-agent jobs\n" +

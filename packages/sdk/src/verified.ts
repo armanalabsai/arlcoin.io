@@ -31,7 +31,7 @@ export const BASE_MAINNET_VERIFIED = {
   chainId: 8453,
   token: "0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4",
   jobs: "0x9aE99bF9a59aF47E81346B7c0b93Cd2B610455fC",
-  evaluator: "0xcF87CF8751648919b5A7F3b45795999dFDeE5861",
+  evaluator: "0x0D160C869bd2a7AaEDd29e11fc60fdAEf21c3E28",
   arbiterSafe: "0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f",
 } as const satisfies Record<string, unknown>;
 

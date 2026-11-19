@@ -312,6 +312,9 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
             revert WrongJobStatus();
         }
         if (_verdicts[jobId].phase != Phase.None) revert WrongPhase();
+        // The provider is named first: the checks below compare the committee and the arbiter with
+        // it, and a provider set afterwards (ARLJobs.setProvider) would pass none of them.
+        if (job.provider == address(0)) revert WrongJobStatus();
         // The arbiter rules on disputes, so it can neither be paid by the job nor pay it.
         if (job.provider == arbiter || job.client == arbiter) revert ConflictOfInterest();
         _checkWindows(cfg.voteWindow, cfg.challengeWindow, job.expiredAt);
@@ -326,6 +329,18 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
                     || _votes[jobId][v] != 0
             ) revert BadCommittee();
             _votes[jobId][v] = MEMBER;
+        }
+        // Security report 2026-11-19: approveCommittee refuses a provider that does not own the
+        // agent named here, so the same check runs now, while the client can still correct the
+        // id, instead of leaving a funded job unevaluable. It fails open, as approveCommittee does,
+        // when the registry does not answer.
+        if (
+            cfg.providerAgentId != 0 && address(reputation) != address(0)
+                && address(identity) != address(0)
+        ) {
+            if (gasleft() < REGISTRY_GAS_RESERVE) revert InsufficientGas();
+            (bool ok, bool owned) = _ownedBy(cfg.providerAgentId, job.provider);
+            if (ok && !owned) revert Unauthorized();
         }
 
         _configs[jobId] = cfg;
@@ -350,7 +365,7 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         Verdict storage v = _verdicts[jobId];
         if (v.phase != Phase.Configured || v.providerApproved) revert WrongPhase();
         if (msg.sender != jobs.getJob(jobId).provider) revert Unauthorized();
-        // A provider set after configure may still be a member or the arbiter.
+        // configure names the provider first, so this cannot happen; kept as a second check.
         if (_votes[jobId][msg.sender] != 0 || msg.sender == arbiter) revert ConflictOfInterest();
         v.providerApproved = true;
         emit CommitteeApproved(jobId, msg.sender);
@@ -618,6 +633,9 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         else emit Released(jobId);
         uint256 burned = _unlock(jobId, ABSENT, undecided);
         if (burned != 0) stakeToken.safeTransfer(SLASH_SINK, burned);
+        // A decided rejection that was refunded without `finalize` still reaches the provider's
+        // record, as on the late paths of `finalize`, `resolve` and `expireDispute`.
+        if (phase == Phase.Rejected) _feedback(jobId, false);
     }
 
     // ---------------------------------------------------------------- views

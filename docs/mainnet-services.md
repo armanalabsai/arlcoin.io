@@ -60,6 +60,8 @@ Deploy screen (`arlcoin.io/app/deploy/?plan=…`):
 |    37 | none                                      | nothing from a plan (the deployer's nonce read 38 on 2026-11-19) |                                              |                            |
 |    38 | `8453-verified-evaluator-arl-v6`          | `ARLVerifiedEvaluator` v6 for the ARL escrow at nonce 33         | `0xcF87CF8751648919b5A7F3b45795999dFDeE5861` | Deployed 2026-11-19        |
 |    39 | `8453-verified-evaluator-usdc-v6`         | `ARLVerifiedEvaluator` v6 for the USDC escrow at nonce 35        | `0xc121c4fE9460c55d85dE0175C1C7045235f94c07` | Deployed 2026-11-19        |
+|    40 | `8453-verified-evaluator-arl-v7`          | `ARLVerifiedEvaluator` v7 for the ARL escrow at nonce 33         | `0x0D160C869bd2a7AaEDd29e11fc60fdAEf21c3E28` | Deployed 2026-11-19        |
+|    41 | `8453-verified-evaluator-usdc-v7`         | `ARLVerifiedEvaluator` v7 for the USDC escrow at nonce 35        | `0x7A00D45598Da7C13feEA8962fc1110FC4Db4D850` | Deployed 2026-11-19        |
 
 `8453-verified-jobs-usdc` and `8453-verified-jobs-arl` are invalid, do not use: they hold pre-audit
 bytecode (before the audit fixes of 2026-10-28) and the deploy screen refuses them. Their `-v2`
@@ -119,6 +121,32 @@ Deployed on 2026-11-19 from the deployer at nonces 38 and 39, at the planned add
 blocks 59,461,386 and 59,461,475). `jobs-record-cli.ts` passed all nine checks for each on Base
 Mainnet, and the app, SDKs, API and record point at v6 from this change on. The v5 evaluators stay
 on the event watch list until the pilot validators have withdrawn their stakes from them.
+
+### Evaluator v7
+
+`8453-verified-evaluator-arl-v7` (nonce 40) and `8453-verified-evaluator-usdc-v7` (nonce 41)
+replace the v6 evaluators for the same `ARLJobs` v3 escrows, with the same parameters. They carry
+three fixes from the bug bounty reports of 2026-11-19:
+
+- a rejection that is refunded with `claimRefund` and closed with `release`, instead of
+  `finalize`, still reaches the provider's ERC-8004 record;
+- `configure` needs the job's provider to be named, so a committee member or the arbiter cannot
+  be named provider afterwards and leave the job without a way to be evaluated;
+- `configure` refuses an ERC-8004 agent id the provider does not own (when the registry answers),
+  so a mistyped id is caught while the client can still correct it, instead of `approveCommittee`
+  refusing it after the job is funded.
+
+Rehearsal (Base Mainnet fork at block 59,562,506, deployer impersonated at nonce 40, nothing
+sent): both evaluators were created at the addresses above and `jobs-record-cli.ts` passed all
+nine checks for each. Sign the ARL plan first, then the USDC plan; any other transaction from the
+deployer before them shifts the addresses, and the Deploy screen then refuses the plans. No job
+was ever created on the v6 evaluators (`jobCounter() == 0` on both escrows, read on 2026-11-19),
+so no job migrates; the pilot validators stake on v7 after the deployment.
+
+Signed on 2026-11-19 at nonces 40 and 41 (blocks 59,577,368 and 59,579,724);
+`jobs-record-cli.ts` passed all nine checks for each on Base Mainnet. The app, SDKs, API, record
+and event watch point at v7 from this change on; the v6 evaluators are retired (no job was ever
+created on them).
 
 ### Evaluator v4
 

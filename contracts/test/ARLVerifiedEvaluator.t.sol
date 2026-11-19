@@ -558,17 +558,20 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         vm.expectRevert(ARLVerifiedEvaluator.BadCommittee.selector);
         ev.configure(id, _cfg(ARLVerifiedEvaluator.Tier.Reexecution, c, 2));
 
-        // A provider set after configure that is a member cannot approve the committee.
+        // Security report 2026-11-19: a job with no provider yet cannot be configured, so a member
+        // cannot be named provider afterwards and leave the job unevaluable.
         vm.prank(client);
         uint256 open =
             jobs.createJob(address(0), address(ev), block.timestamp + 7 days, "job", address(0));
         vm.prank(client);
+        vm.expectRevert(ARLVerifiedEvaluator.WrongJobStatus.selector);
         ev.configure(open, _reexec());
+        // Once the provider is named, a committee that includes it is refused as before.
         vm.prank(client);
         jobs.setProvider(open, v3, "");
-        vm.prank(v3);
-        vm.expectRevert(ARLVerifiedEvaluator.ConflictOfInterest.selector);
-        ev.approveCommittee(open);
+        vm.prank(client);
+        vm.expectRevert(ARLVerifiedEvaluator.BadCommittee.selector);
+        ev.configure(open, _reexec());
     }
 
     function test_RevertWhen_ArbiterIsAPartyOrOnTheCommittee() public {
@@ -596,17 +599,15 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         vm.expectRevert(ARLVerifiedEvaluator.BadCommittee.selector);
         ev.configure(id3, _cfg(ARLVerifiedEvaluator.Tier.Reexecution, c, 2));
 
-        // The arbiter set as provider after configure cannot approve.
+        // The arbiter named provider after the job was created is refused at configure too.
         vm.prank(client);
         uint256 id4 =
             jobs.createJob(address(0), address(ev), block.timestamp + 7 days, "job", address(0));
         vm.prank(client);
-        ev.configure(id4, _reexec());
-        vm.prank(client);
         jobs.setProvider(id4, arbiter, "");
-        vm.prank(arbiter);
+        vm.prank(client);
         vm.expectRevert(ARLVerifiedEvaluator.ConflictOfInterest.selector);
-        ev.approveCommittee(id4);
+        ev.configure(id4, _reexec());
     }
 
     // ---------------------------------------------------------------- accept
@@ -1097,11 +1098,28 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
     /// Security report 2026-11-16: a provider that does not own the named agent cannot approve the
     /// committee, so it cannot hand the agent away first and keep the outcome off its record.
     function test_RevertWhen_ApproveCommitteeWithoutOwningTheAgent() public {
-        identity.setOwner(AGENT, stranger);
         uint256 id = _configured(_reexec());
+        // The agent changes hands after configure, so only approveCommittee can catch it.
+        vm.prank(provider);
+        identity.setOwner(AGENT, stranger);
         vm.prank(provider);
         vm.expectRevert(ARLVerifiedEvaluator.Unauthorized.selector);
         ev.approveCommittee(id);
+    }
+
+    /// Security report 2026-11-19: configure refuses an agent id the provider does not own, while
+    /// the client can still correct it, instead of leaving a funded job unevaluable.
+    function test_RevertWhen_ConfigureNamesAnAgentTheProviderDoesNotOwn() public {
+        identity.setOwner(AGENT, stranger);
+        uint256 id = _create(address(ev), 7 days);
+        vm.prank(client);
+        vm.expectRevert(ARLVerifiedEvaluator.Unauthorized.selector);
+        ev.configure(id, _reexec());
+        identity.setOwner(AGENT, provider);
+        vm.prank(client);
+        ev.configure(id, _reexec());
+        _approveCommittee(id);
+        assertTrue(ev.getVerdict(id).providerApproved);
     }
 
     /// Security report 2026-11-16 (F02): the arbiter cannot challenge a decision it would rule on.
@@ -1126,6 +1144,34 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         (, uint64 rejected) = ev.outcomesOf(AGENT);
         assertEq(rejected, 1);
         assertEq(uint256(_status(id)), uint256(ARLJobs.JobStatus.Expired));
+    }
+
+    /// Security report 2026-11-19: a rejection that is refunded with `claimRefund` and closed with
+    /// `release` instead of `finalize` still reaches the provider's reputation.
+    function test_releaseOfRejectionWritesFeedback() public {
+        uint256 id = _rejected();
+        vm.warp(block.timestamp + 8 days);
+        jobs.claimRefund(id);
+        ev.release(id);
+        assertEq(reputation.count(), 1);
+        (uint64 approvedCount, uint64 rejected) = ev.outcomesOf(AGENT);
+        assertEq(approvedCount, 0);
+        assertEq(rejected, 1);
+        vm.expectRevert(ARLVerifiedEvaluator.WrongPhase.selector);
+        ev.finalize(id);
+    }
+
+    /// The approved side stays as designed: a refund without `finalize` pays nobody, so `release`
+    /// records no approval.
+    function test_releaseOfApprovalWritesNoFeedback() public {
+        uint256 id = _approved();
+        vm.warp(block.timestamp + 8 days);
+        jobs.claimRefund(id);
+        ev.release(id);
+        assertEq(reputation.count(), 0);
+        (uint64 approvedCount, uint64 rejected) = ev.outcomesOf(AGENT);
+        assertEq(approvedCount, 0);
+        assertEq(rejected, 0);
     }
 
     /// Security report 2026-11-16: approvals split across deliverable hashes reject the job without a

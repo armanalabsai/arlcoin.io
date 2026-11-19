@@ -146,7 +146,11 @@ escrows, nonces 34 and 36):
   moment and run it into a refund (bug bounty report of 2026-11-15).
 - **No conflicts of interest.** The arbiter can be neither the client nor the provider of a job,
   nor a committee member, and the provider cannot be named on the committee (`configure` refuses
-  it, so a job can no longer be configured in a way it can never be evaluated).
+  it, so a job can no longer be configured in a way it can never be evaluated). From evaluator v7
+  `configure` also needs the provider to be named first, so it cannot be set afterwards to a
+  member or the arbiter, and it checks that the provider owns the ERC-8004 agent the client
+  names, which `approveCommittee` would otherwise refuse after funding (bug bounty reports of
+  2026-11-19).
 
 Arbiter: a Safe v1.5.0 with at least 3 signers and a majority threshold ≥ 2, created by
 [`CreateArbiterSafe.s.sol`](../contracts/script/CreateArbiterSafe.s.sol) and required by the
