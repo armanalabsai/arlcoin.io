@@ -618,6 +618,9 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         else emit Released(jobId);
         uint256 burned = _unlock(jobId, ABSENT, undecided);
         if (burned != 0) stakeToken.safeTransfer(SLASH_SINK, burned);
+        // A decided rejection that was refunded without `finalize` still reaches the provider's
+        // record, as on the late paths of `finalize`, `resolve` and `expireDispute`.
+        if (phase == Phase.Rejected) _feedback(jobId, false);
     }
 
     // ---------------------------------------------------------------- views

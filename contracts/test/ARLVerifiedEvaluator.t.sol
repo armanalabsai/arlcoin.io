@@ -1128,6 +1128,34 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         assertEq(uint256(_status(id)), uint256(ARLJobs.JobStatus.Expired));
     }
 
+    /// Security report 2026-11-19: a rejection that is refunded with `claimRefund` and closed with
+    /// `release` instead of `finalize` still reaches the provider's reputation.
+    function test_releaseOfRejectionWritesFeedback() public {
+        uint256 id = _rejected();
+        vm.warp(block.timestamp + 8 days);
+        jobs.claimRefund(id);
+        ev.release(id);
+        assertEq(reputation.count(), 1);
+        (uint64 approvedCount, uint64 rejected) = ev.outcomesOf(AGENT);
+        assertEq(approvedCount, 0);
+        assertEq(rejected, 1);
+        vm.expectRevert(ARLVerifiedEvaluator.WrongPhase.selector);
+        ev.finalize(id);
+    }
+
+    /// The approved side stays as designed: a refund without `finalize` pays nobody, so `release`
+    /// records no approval.
+    function test_releaseOfApprovalWritesNoFeedback() public {
+        uint256 id = _approved();
+        vm.warp(block.timestamp + 8 days);
+        jobs.claimRefund(id);
+        ev.release(id);
+        assertEq(reputation.count(), 0);
+        (uint64 approvedCount, uint64 rejected) = ev.outcomesOf(AGENT);
+        assertEq(approvedCount, 0);
+        assertEq(rejected, 0);
+    }
+
     /// Security report 2026-11-16: approvals split across deliverable hashes reject the job without a
     /// single rejection vote. When the arbiter overturns that and names the upheld deliverable, the
     /// approvals of any other hash are slashed.
