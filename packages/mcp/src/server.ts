@@ -3,7 +3,7 @@
 // rather than taken from an SDK so the server has no dependency beyond viem: it only exposes
 // tools, never resources, prompts or sampling, and never runs anything a message names.
 
-export const SERVER_INFO = { name: "arl-protocol", version: "0.1.0" } as const;
+export const SERVER_INFO = { name: "arl-protocol", version: "0.1.1" } as const;
 
 /** Protocol revisions this server speaks, newest first. */
 export const PROTOCOL_VERSIONS = ["2025-06-18", "2025-03-26", "2024-11-05"] as const;
