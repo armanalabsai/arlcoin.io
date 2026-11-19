@@ -60,8 +60,8 @@ Deploy screen (`arlcoin.io/app/deploy/?plan=…`):
 |    37 | none                                      | nothing from a plan (the deployer's nonce read 38 on 2026-11-19) |                                              |                            |
 |    38 | `8453-verified-evaluator-arl-v6`          | `ARLVerifiedEvaluator` v6 for the ARL escrow at nonce 33         | `0xcF87CF8751648919b5A7F3b45795999dFDeE5861` | Deployed 2026-11-19        |
 |    39 | `8453-verified-evaluator-usdc-v6`         | `ARLVerifiedEvaluator` v6 for the USDC escrow at nonce 35        | `0xc121c4fE9460c55d85dE0175C1C7045235f94c07` | Deployed 2026-11-19        |
-|    40 | `8453-verified-evaluator-arl-v7`          | `ARLVerifiedEvaluator` v7 for the ARL escrow at nonce 33         | `0x0D160C869bd2a7AaEDd29e11fc60fdAEf21c3E28` | Planned                    |
-|    41 | `8453-verified-evaluator-usdc-v7`         | `ARLVerifiedEvaluator` v7 for the USDC escrow at nonce 35        | `0x7A00D45598Da7C13feEA8962fc1110FC4Db4D850` | Planned                    |
+|    40 | `8453-verified-evaluator-arl-v7`          | `ARLVerifiedEvaluator` v7 for the ARL escrow at nonce 33         | `0x0D160C869bd2a7AaEDd29e11fc60fdAEf21c3E28` | Deployed 2026-11-19        |
+|    41 | `8453-verified-evaluator-usdc-v7`         | `ARLVerifiedEvaluator` v7 for the USDC escrow at nonce 35        | `0x7A00D45598Da7C13feEA8962fc1110FC4Db4D850` | Deployed 2026-11-19        |
 
 `8453-verified-jobs-usdc` and `8453-verified-jobs-arl` are invalid, do not use: they hold pre-audit
 bytecode (before the audit fixes of 2026-10-28) and the deploy screen refuses them. Their `-v2`
@@ -141,8 +141,12 @@ sent): both evaluators were created at the addresses above and `jobs-record-cli.
 nine checks for each. Sign the ARL plan first, then the USDC plan; any other transaction from the
 deployer before them shifts the addresses, and the Deploy screen then refuses the plans. No job
 was ever created on the v6 evaluators (`jobCounter() == 0` on both escrows, read on 2026-11-19),
-so no job migrates; the pilot validators stake on v7 after the deployment, and the app, SDKs and
-API move to the new addresses in a follow-up change.
+so no job migrates; the pilot validators stake on v7 after the deployment.
+
+Signed on 2026-11-19 at nonces 40 and 41 (blocks 59,577,368 and 59,579,724);
+`jobs-record-cli.ts` passed all nine checks for each on Base Mainnet. The app, SDKs, API, record
+and event watch point at v7 from this change on; the v6 evaluators are retired (no job was ever
+created on them).
 
 ### Evaluator v4
 

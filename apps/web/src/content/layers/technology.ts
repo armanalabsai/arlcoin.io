@@ -29,7 +29,7 @@ export const technology: Layer = {
           {
             heading: "Live",
             items: [
-              "Job escrows paid in ARL and in USDC (v3), since 16 November 2026, and the verified evaluator v6 for each, since 19 November 2026",
+              "Job escrows paid in ARL and in USDC (v3), since 16 November 2026, and the verified evaluator v7 for each, since 19 November 2026",
               "The ARL app: post, fund, deliver and settle jobs, and follow verified jobs",
               "Hourly alerts on disputes, slashes and refused refunds",
             ],

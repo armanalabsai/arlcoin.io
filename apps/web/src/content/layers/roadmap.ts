@@ -47,7 +47,7 @@ export const roadmap: Layer = {
       metric: { kind: "static", value: "Live on Base Mainnet" },
       detail: {
         summary:
-          "ERC-8183 job escrows paid in ARL or USDC, with a verified evaluator: a committee of staked ARL validators votes on each delivery, a challenge window follows, and a 2-of-3 arbiter Safe rules on disputed jobs only. Escrows v3 went live on 16 November 2026 and evaluator v6 on 19 November 2026: late finalization always settles, an unanswered dispute can be expired by anyone, and the agent is bound at committee approval so a rejection always reaches ERC-8004 reputation. The ARL app at arlcoin.io/app runs against these contracts.",
+          "ERC-8183 job escrows paid in ARL or USDC, with a verified evaluator: a committee of staked ARL validators votes on each delivery, a challenge window follows, and a 2-of-3 arbiter Safe rules on disputed jobs only. Escrows v3 went live on 16 November 2026 and evaluator v7 on 19 November 2026: late finalization always settles, an unanswered dispute can be expired by anyone, and the agent is bound at committee approval so a rejection always reaches ERC-8004 reputation. The ARL app at arlcoin.io/app runs against these contracts.",
       },
       links: [{ label: "Open the app", href: "https://arlcoin.io/app/verified/" }],
     },
@@ -97,13 +97,13 @@ export const roadmap: Layer = {
     {
       id: "hardening",
       title: "Security Hardening",
-      shortDescription: "Bug bounty fixes, evaluator v6 live",
+      shortDescription: "Bug bounty fixes, evaluator v7 live",
       progress: "active",
       weight: "tertiary",
-      metric: { kind: "static", value: "Evaluator v6 live 2026-11-19" },
+      metric: { kind: "static", value: "Evaluator v7 live 2026-11-19" },
       detail: {
         summary:
-          "ARLJobs v3 and evaluator v5 went live on 16 November 2026 and close the issues found through the bug bounty: disputes always settle before the job's deadline, a refused refund no longer blocks the validators' bonds, and conflicts of interest are refused on chain. Hourly protocol event alerts watch the live contracts. Evaluator v6 went live on 19 November 2026 with further fixes from bounty reports: the arbiter cannot open a dispute it would rule on, late rejections still reach the ERC-8004 record, the provider must own the agent it is hired as, and rulings name the upheld deliverable. Hardening continues with every report.",
+          "ARLJobs v3 and evaluator v5 went live on 16 November 2026 and close the issues found through the bug bounty: disputes always settle before the job's deadline, a refused refund no longer blocks the validators' bonds, and conflicts of interest are refused on chain. Hourly protocol event alerts watch the live contracts. Evaluator v6 went live on 19 November 2026 with further fixes from bounty reports: the arbiter cannot open a dispute it would rule on, late rejections still reach the ERC-8004 record, the provider must own the agent it is hired as, and rulings name the upheld deliverable. Evaluator v7 followed the same day: a rejection closed with release still reaches the record, and a job can only be configured with its provider named and with an agent that provider owns. Hardening continues with every report.",
       },
     },
   ],
