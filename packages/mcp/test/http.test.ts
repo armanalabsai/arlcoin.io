@@ -19,7 +19,6 @@ const CLIENT: Address = "0x1111111111111111111111111111111111111111";
 function chain(fail = false): ChainReader {
   return {
     getChainId: () => (fail ? Promise.reject(new Error("rpc down")) : Promise.resolve(8453)),
-    getBlockNumber: () => Promise.resolve(100n),
     getBlock: () => Promise.resolve({ number: 100n, timestamp: 1_800_000_000n }),
     readContract: (a) =>
       Promise.resolve(

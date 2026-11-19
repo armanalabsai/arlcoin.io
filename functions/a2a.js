@@ -8,11 +8,12 @@ import { arlTools } from "../packages/mcp/src/tools.ts";
 
 const chain = createPublicClient({
   chain: base,
-  transport: fallback([
-    http("https://base-rpc.publicnode.com", { timeout: 4000 }),
-    http("https://base.drpc.org", { timeout: 4000 }),
-    http("https://mainnet.base.org", { timeout: 4000 }),
-  ]),
+  // retryCount 0: the fallback moves on to the next endpoint (see functions/api/v1).
+  transport: fallback(
+    ["https://base.drpc.org", "https://base-rpc.publicnode.com", "https://mainnet.base.org"].map(
+      (url) => http(url, { timeout: 3000, retryCount: 0 }),
+    ),
+  ),
 });
 const tools = arlTools({ chain });
 

@@ -27,8 +27,8 @@ import type { Tool } from "./server.ts";
 /** The chain reads the tools need (a viem PublicClient satisfies it). */
 export interface ChainReader {
   getChainId(): Promise<number>;
-  getBlock(args: { blockNumber: bigint }): Promise<{ number: bigint; timestamp: bigint }>;
-  getBlockNumber(): Promise<bigint>;
+  /** The block at `blockNumber`, or the latest block when called without arguments. */
+  getBlock(args?: { blockNumber: bigint }): Promise<{ number: bigint; timestamp: bigint }>;
   readContract(args: {
     address: Address;
     abi: readonly unknown[];
@@ -162,15 +162,13 @@ export function arlTools(opts: ToolOptions): Tool[] {
 
   /** Chain id and latest block, read once per call so every answer names its block. */
   async function head(): Promise<{ chainId: number; block: bigint; timestamp: bigint }> {
-    const [chainId, number] = await Promise.all([
-      opts.chain.getChainId(),
-      opts.chain.getBlockNumber(),
-    ]);
+    // One round trip: the chain id and the latest block are asked for together. Asking for the
+    // block number first and its block second cost every read a third of its time.
+    const [chainId, b] = await Promise.all([opts.chain.getChainId(), opts.chain.getBlock()]);
     const deploymentChain = deployments.ARL.chainId;
     if (chainId !== deploymentChain) {
       throw new Error(`the RPC is on chain ${String(chainId)}, not ${String(deploymentChain)}`);
     }
-    const b = await opts.chain.getBlock({ blockNumber: number });
     return { chainId, block: b.number, timestamp: b.timestamp };
   }
 
