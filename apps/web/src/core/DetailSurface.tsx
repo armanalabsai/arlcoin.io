@@ -424,7 +424,7 @@ function StepButton({
 const STATUS_STYLE: Record<string, string> = {
   PLANNED: "border-line-strong text-fg-muted",
   "IN DEVELOPMENT": "border-accent/40 text-accent",
-  LIVE: "border-fg text-fg",
+  LIVE: "border-[#7ee0a6]/60 text-[#7ee0a6]",
 };
 
 export function StatusBadge({ status }: { status: string }) {

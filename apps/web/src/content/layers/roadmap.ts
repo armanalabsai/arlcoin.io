@@ -1,7 +1,7 @@
 import type { Layer } from "../types.ts";
 
-// Phases are listed in order without dates. A date appears only once it is
-// decided.
+// Only work that is finished (done) or under way (active) is listed. Nothing that has not
+// started appears here.
 
 export const roadmap: Layer = {
   id: "roadmap",
@@ -84,50 +84,26 @@ export const roadmap: Layer = {
     {
       id: "developer-experience",
       title: "Developer Experience",
-      shortDescription: "SDKs, MCP server, Agent API",
+      shortDescription: "SDKs, MCP server, Agent API, n8n node",
       progress: "active",
       weight: "tertiary",
-      metric: { kind: "static", value: "Agent API live 2026-11-15" },
+      metric: { kind: "static", value: "On npm and PyPI" },
       detail: {
         summary:
-          "The TypeScript SDK, the Python SDK and the n8n node are published. The SDK opens an arl-task task as a verified job in one call. The MCP server lets AI agents check tasks, read jobs and prepare unsigned transactions, and the Agent API at arlcoin.io/api/v1 answers the same over HTTP. Neither ever holds a key. Coinbase AgentKit actions and a reputation index come next.",
+          "The TypeScript SDK (arl-protocol-sdk) and the MCP server (arl-protocol-mcp) are on npm, the Python SDK (arl-protocol) is on PyPI, and the n8n node (n8n-nodes-arl, MIT) is on npm and in n8n's review. The SDK opens an arl-task task as a verified job in one call. The MCP server lets AI agents check tasks, read jobs and prepare unsigned transactions; the Agent API at arlcoin.io/api/v1 and the A2A agent card answer the same over HTTP. None of them ever holds a key.",
       },
       links: [{ label: "Build with ARL", href: "https://arlcoin.io/build" }],
     },
     {
       id: "hardening",
       title: "Security Hardening",
-      shortDescription: "Next escrow and evaluator versions",
+      shortDescription: "Bug bounty fixes and evaluator v6",
       progress: "active",
       weight: "tertiary",
-      metric: { kind: "static", value: "Ready to deploy" },
+      metric: { kind: "static", value: "Evaluator v6 in review" },
       detail: {
         summary:
-          "ARLJobs v3 and evaluator v5 close the issues found through the bug bounty: disputes always settle before the job's deadline, a refused refund no longer blocks the validators' bonds, and conflicts of interest are refused on chain. Hourly protocol event alerts already watch the live contracts. The new versions go live after their deployment is signed by the owners.",
-      },
-    },
-    {
-      id: "pilot",
-      title: "Live Pilot",
-      shortDescription: "Real agent-to-agent jobs",
-      progress: "next",
-      weight: "tertiary",
-      metric: { kind: "static", value: "After the hardening release" },
-      detail: {
-        summary:
-          "A pilot with real agent teams: jobs opened from arl-task tasks, checked by a staked validator committee, with every outcome published as an evidence package anyone can re-check.",
-      },
-    },
-    {
-      id: "services",
-      title: "AI Payments and Marketplace",
-      shortDescription: "The next services on ARL",
-      progress: "next",
-      weight: "tertiary",
-      metric: { kind: "static", value: "Next on Base Mainnet" },
-      detail: {
-        summary:
-          'Per-use AI payments (x402 "upto"), the GPU and CPU provider marketplace and anonymous polls are built and tested. Each goes live on Base Mainnet after its own deployment and verification.',
+          "ARLJobs v3 and evaluator v5 went live on 16 November 2026 and close the issues found through the bug bounty: disputes always settle before the job's deadline, a refused refund no longer blocks the validators' bonds, and conflicts of interest are refused on chain. Hourly protocol event alerts watch the live contracts. Evaluator v6, with further fixes from bounty reports, is written and tested and is in review.",
       },
     },
   ],

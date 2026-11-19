@@ -3,7 +3,7 @@ import "@fontsource-variable/jetbrains-mono";
 import type { Metadata, Viewport } from "next";
 
 import { organizationJsonLd } from "@/content/seo.ts";
-import { SITE } from "@/content/site.ts";
+import { OG_IMAGE, SITE } from "@/content/site.ts";
 import { InfrastructureStrip } from "@/site/InfrastructureStrip.tsx";
 import { JsonLd } from "@/site/JsonLd.tsx";
 import { SmoothScroll } from "@/site/SmoothScroll.tsx";
@@ -25,8 +25,13 @@ export const metadata: Metadata = {
   creator: SITE.brand,
   publisher: SITE.brand,
   alternates: { languages: { en: "/", "x-default": "/" } },
-  openGraph: { type: "website", siteName: SITE.brand, locale: "en_US" },
-  twitter: { card: "summary_large_image", site: SITE.social.xHandle, creator: SITE.social.xHandle },
+  openGraph: { type: "website", siteName: SITE.brand, locale: "en_US", images: [OG_IMAGE] },
+  twitter: {
+    card: "summary_large_image",
+    site: SITE.social.xHandle,
+    creator: SITE.social.xHandle,
+    images: [OG_IMAGE],
+  },
   keywords: [
     "ARL",
     "ARL token",

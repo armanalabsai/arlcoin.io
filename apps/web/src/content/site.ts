@@ -25,6 +25,15 @@ export const SITE = {
     telegramChat: "https://t.me/arlprotocol_chat",
     devto: "https://dev.to/armanalabs_b86b3803a4445c",
     productHunt: "https://www.producthunt.com/products/arl-protocol",
+    farcaster: "https://farcaster.xyz/arlprotocol",
+  },
+  /** Published packages. */
+  packages: {
+    npmSdk: "https://www.npmjs.com/package/arl-protocol-sdk",
+    npmMcp: "https://www.npmjs.com/package/arl-protocol-mcp",
+    n8n: "https://www.npmjs.com/package/n8n-nodes-arl",
+    n8nRepository: "https://github.com/armanalabsai/n8n-nodes-arl",
+    pypi: "https://pypi.org/project/arl-protocol/",
   },
   /**
    * Base Mainnet deployment, deployed on 2026-10-24 (block 53,023,206) and source-verified on
@@ -61,11 +70,12 @@ export const SITE_PAGES = [
   "/terms",
 ] as const;
 
-/** Social preview image (app/opengraph-image.png). Pages that set `openGraph` repeat it,
- * because a page-level `openGraph` object replaces the inherited one. */
+/** Social preview image (public/). Pages that set `openGraph` repeat it, because a page-level
+ * `openGraph` object replaces the inherited one. The file name carries a date: chat apps cache
+ * a preview by its address for a long time, so a new image needs a new name. */
 export const OG_IMAGE = {
-  url: "/opengraph-image.png",
+  url: "/arl-share-2026-11.png",
   width: 1200,
   height: 630,
-  alt: "ARL · 21,000,000 ARL maximum supply",
+  alt: "ARL Protocol: escrow and verification for AI agents, live on Base Mainnet",
 } as const;

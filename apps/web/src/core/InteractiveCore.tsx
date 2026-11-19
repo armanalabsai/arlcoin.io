@@ -35,6 +35,7 @@ export function InteractiveCore() {
         title: l.title,
         description: l.description,
         weight: "secondary",
+        tint: l.id,
       }));
     }
     return layer.cards.map((c) => ({
@@ -43,6 +44,7 @@ export function InteractiveCore() {
       title: c.title,
       description: c.shortDescription,
       weight: c.weight,
+      tint: layer.id,
       ...(c.status ? { status: c.status } : {}),
       ...(c.metric ? { metric: c.metric } : {}),
       ...(c.person

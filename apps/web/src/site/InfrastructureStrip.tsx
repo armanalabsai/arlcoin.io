@@ -1,7 +1,8 @@
-// ARL's partners, as a scrolling band at the very bottom of every page. The owner states that
-// a partnership with each listed company is in place (2026-10-05).
+// ARL's partners, as a scrolling band at the very bottom of every page. A company is listed only
+// once the owner states that the partnership is in place. The list is empty for now (2026-11-19),
+// and the band is not rendered while it is.
 
-const PROVIDERS = [{ name: "Supabase", role: "Database", href: "https://supabase.com" }] as const;
+const PROVIDERS: readonly { name: string; role: string; href: string }[] = [];
 
 /** Enough copies to fill a wide screen; the track holds two runs of them. */
 const COPIES = 4;
@@ -29,6 +30,7 @@ function Run({ hidden }: { hidden?: boolean }) {
 }
 
 export function InfrastructureStrip() {
+  if (PROVIDERS.length === 0) return null;
   return (
     <section aria-label="Partnership" className="infra-strip">
       <p className="infra-label">Partnership</p>

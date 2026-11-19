@@ -35,9 +35,9 @@ export const technology: Layer = {
             ],
           },
           {
-            heading: "Next",
+            heading: "In review",
             items: [
-              "ARLJobs v3 and evaluator v5 (disputes always settle before the deadline, refused refunds no longer block bonds, conflict checks on chain): merged and tested, deployment waiting for the owners' signatures",
+              "Evaluator v6, with further fixes from bug bounty reports: written and tested, in review",
             ],
           },
         ],
@@ -53,12 +53,12 @@ export const technology: Layer = {
     {
       id: "agent-tools",
       title: "Standards and Agent Tools",
-      shortDescription: "Open formats, SDKs, MCP server, Agent API",
+      shortDescription: "Open formats, SDKs, MCP, A2A, Agent API",
       status: "LIVE",
       weight: "secondary",
       detail: {
         summary:
-          "Five open formats describe a job from start to finish: arl-task, arl-proof, arl-policy, arl-reputation and arl-evidence, with test vectors in TypeScript and Python. Developers use them through the TypeScript SDK, the Python SDK, the n8n node, the MCP server and the Agent API at arlcoin.io/api/v1, which reads the chain at a named block and prepares unsigned transactions. None of these tools ever holds a key.",
+          "Five open formats describe a job from start to finish: arl-task, arl-proof, arl-policy, arl-reputation and arl-evidence, with test vectors in TypeScript and Python. Developers use them through the TypeScript SDK and the MCP server on npm, the Python SDK on PyPI, the n8n node, the A2A agent card and the Agent API at arlcoin.io/api/v1, which reads the chain at a named block and prepares unsigned transactions. None of these tools ever holds a key.",
       },
       links: [{ label: "Build with ARL", href: "https://arlcoin.io/build" }],
     },
@@ -152,12 +152,12 @@ export const technology: Layer = {
     {
       id: "defi",
       title: "DeFi",
-      shortDescription: "Staking and staged liquidity",
-      status: "IN DEVELOPMENT",
+      shortDescription: "Staking and Uniswap v3 liquidity",
+      status: "LIVE",
       weight: "secondary",
       detail: {
         summary:
-          "Staking rewards will come from the Community & Staking allocation or protocol revenue, never from new issuance. DEX and CEX liquidity will come from the Liquidity allocation.",
+          "Staking rewards come from the Community & Staking allocation, never from new issuance. Exchange liquidity comes from the Liquidity allocation.",
         facts: [
           { label: "Community & Staking", value: arlAmount("community-staking"), mono: true },
           { label: "Liquidity", value: arlAmount("liquidity"), mono: true },
@@ -165,14 +165,11 @@ export const technology: Layer = {
         ],
         sections: [
           {
-            heading: "Built",
+            heading: "Live",
             items: [
-              "Staking contract: stake ARL, earn ARL from a funded pool over fixed periods. Adapted from the Synthetix staking rewards contract (MIT). No owner, minting or upgrade; one funding role, the Community & Staking holder, which cannot touch staked tokens. Deployed on Base Mainnet on 12 November 2026 with 180-day reward periods",
+              "Staking contract: stake ARL, earn ARL from a funded pool over fixed periods. Adapted from the Synthetix staking rewards contract (MIT). No owner, minting or upgrade; one funding role, the Community & Staking holder, which cannot touch staked tokens. Deployed on Base Mainnet on 12 November 2026 with 180-day reward periods; the first period (300,000 ARL) runs since 16 November 2026",
+              "The official Uniswap v3 pools on Base, opened with 5,000,000 ARL from the Liquidity allocation",
             ],
-          },
-          {
-            heading: "Not yet built",
-            items: ["No liquidity has been provided on any exchange"],
           },
         ],
       },

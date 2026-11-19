@@ -1,4 +1,4 @@
-import { SITE } from "./site.ts";
+import { OG_IMAGE, SITE } from "./site.ts";
 
 // Structured data shared by every page (schema.org JSON-LD). Only facts that are stated
 // elsewhere on the site: names, the domain, the official channels and the source code.
@@ -15,6 +15,7 @@ export const organizationJsonLd = {
   alternateName: ["ARL", "ARL token", "arlcoin"],
   url: SITE.url,
   logo: { "@type": "ImageObject", url: `${SITE.url}/arl-token-512.png`, width: 512, height: 512 },
+  image: `${SITE.url}${OG_IMAGE.url}`,
   email: SITE.email,
   sameAs: [
     SITE.social.x,
@@ -22,7 +23,12 @@ export const organizationJsonLd = {
     SITE.social.telegramChat,
     SITE.social.devto,
     SITE.social.productHunt,
+    SITE.social.farcaster,
     SITE.repository,
+    SITE.packages.npmSdk,
+    SITE.packages.npmMcp,
+    SITE.packages.n8n,
+    SITE.packages.pypi,
     SITE.mainnet.explorer,
   ],
   contactPoint: {

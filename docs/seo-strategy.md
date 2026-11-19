@@ -153,7 +153,7 @@ site gets a `canonical`).
   "author": { "@id": "https://arlcoin.io/#organization" },
   "publisher": { "@id": "https://arlcoin.io/#organization" },
   "mainEntityOfPage": "https://arlcoin.io/blog/pay-for-ai-with-crypto-on-base/",
-  "image": "https://arlcoin.io/opengraph-image.png"
+  "image": "https://arlcoin.io/arl-share-2026-11.png"
 }
 ```
 

@@ -72,7 +72,12 @@ describe("seo: structured data", () => {
       "https://t.me/arlprotocol_chat",
       "https://dev.to/armanalabs_b86b3803a4445c",
       "https://www.producthunt.com/products/arl-protocol",
+      "https://farcaster.xyz/arlprotocol",
       "https://github.com/armanalabsai/arlcoin.io",
+      "https://www.npmjs.com/package/arl-protocol-sdk",
+      "https://www.npmjs.com/package/arl-protocol-mcp",
+      "https://www.npmjs.com/package/n8n-nodes-arl",
+      "https://pypi.org/project/arl-protocol/",
       "https://basescan.org/token/0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4",
     ]);
     assert.equal(organizationJsonLd.email, "team@arlcoin.io");
