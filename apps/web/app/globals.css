@@ -1301,13 +1301,6 @@ html.lenis body {
   height: auto;
   overflow: visible;
 }
-.agent-net figcaption {
-  margin: 20px auto 0;
-  max-width: 560px;
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--color-fg-subtle);
-}
 .agent-net-ring {
   fill: none;
   stroke: rgb(255 255 255 / 0.08);
