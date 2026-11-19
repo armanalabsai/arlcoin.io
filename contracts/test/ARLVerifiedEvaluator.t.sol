@@ -1098,11 +1098,28 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
     /// Security report 2026-11-16: a provider that does not own the named agent cannot approve the
     /// committee, so it cannot hand the agent away first and keep the outcome off its record.
     function test_RevertWhen_ApproveCommitteeWithoutOwningTheAgent() public {
-        identity.setOwner(AGENT, stranger);
         uint256 id = _configured(_reexec());
+        // The agent changes hands after configure, so only approveCommittee can catch it.
+        vm.prank(provider);
+        identity.setOwner(AGENT, stranger);
         vm.prank(provider);
         vm.expectRevert(ARLVerifiedEvaluator.Unauthorized.selector);
         ev.approveCommittee(id);
+    }
+
+    /// Security report 2026-11-19: configure refuses an agent id the provider does not own, while
+    /// the client can still correct it, instead of leaving a funded job unevaluable.
+    function test_RevertWhen_ConfigureNamesAnAgentTheProviderDoesNotOwn() public {
+        identity.setOwner(AGENT, stranger);
+        uint256 id = _create(address(ev), 7 days);
+        vm.prank(client);
+        vm.expectRevert(ARLVerifiedEvaluator.Unauthorized.selector);
+        ev.configure(id, _reexec());
+        identity.setOwner(AGENT, provider);
+        vm.prank(client);
+        ev.configure(id, _reexec());
+        _approveCommittee(id);
+        assertTrue(ev.getVerdict(id).providerApproved);
     }
 
     /// Security report 2026-11-16 (F02): the arbiter cannot challenge a decision it would rule on.

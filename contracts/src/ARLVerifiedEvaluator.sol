@@ -330,6 +330,18 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
             ) revert BadCommittee();
             _votes[jobId][v] = MEMBER;
         }
+        // Security report 2026-11-19: approveCommittee refuses a provider that does not own the
+        // agent named here, so the same check runs now, while the client can still correct the
+        // id, instead of leaving a funded job unevaluable. It fails open, as approveCommittee does,
+        // when the registry does not answer.
+        if (
+            cfg.providerAgentId != 0 && address(reputation) != address(0)
+                && address(identity) != address(0)
+        ) {
+            if (gasleft() < REGISTRY_GAS_RESERVE) revert InsufficientGas();
+            (bool ok, bool owned) = _ownedBy(cfg.providerAgentId, job.provider);
+            if (ok && !owned) revert Unauthorized();
+        }
 
         _configs[jobId] = cfg;
         _verdicts[jobId].phase = Phase.Configured;

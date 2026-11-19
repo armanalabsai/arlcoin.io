@@ -126,14 +126,17 @@ on the event watch list until the pilot validators have withdrawn their stakes f
 
 `8453-verified-evaluator-arl-v7` (nonce 40) and `8453-verified-evaluator-usdc-v7` (nonce 41)
 replace the v6 evaluators for the same `ARLJobs` v3 escrows, with the same parameters. They carry
-two fixes from the bug bounty reports of 2026-11-19:
+three fixes from the bug bounty reports of 2026-11-19:
 
 - a rejection that is refunded with `claimRefund` and closed with `release`, instead of
   `finalize`, still reaches the provider's ERC-8004 record;
 - `configure` needs the job's provider to be named, so a committee member or the arbiter cannot
-  be named provider afterwards and leave the job without a way to be evaluated.
+  be named provider afterwards and leave the job without a way to be evaluated;
+- `configure` refuses an ERC-8004 agent id the provider does not own (when the registry answers),
+  so a mistyped id is caught while the client can still correct it, instead of `approveCommittee`
+  refusing it after the job is funded.
 
-Rehearsal (Base Mainnet fork at block 59,515,444, deployer impersonated at nonce 40, nothing
+Rehearsal (Base Mainnet fork at block 59,562,506, deployer impersonated at nonce 40, nothing
 sent): both evaluators were created at the addresses above and `jobs-record-cli.ts` passed all
 nine checks for each. Sign the ARL plan first, then the USDC plan; any other transaction from the
 deployer before them shifts the addresses, and the Deploy screen then refuses the plans. No job
