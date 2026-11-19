@@ -47,9 +47,8 @@ function fakeWallet(opts: { lag?: number; revertStep?: number } = {}) {
   let lag = opts.lag ?? 0;
   const chain = {
     getChainId: () => Promise.resolve(8453),
-    getBlockNumber: () => Promise.resolve(40_000_000n),
-    getBlock: ({ blockNumber }: { blockNumber: bigint }) =>
-      Promise.resolve({ number: blockNumber, timestamp: NOW }),
+    getBlock: (args?: { blockNumber: bigint }) =>
+      Promise.resolve({ number: args?.blockNumber ?? 40_000_000n, timestamp: NOW }),
     readContract: (a: { functionName: string }) => {
       if (a.functionName !== "getJob") return Promise.resolve({ phase: 1 });
       if (!created || lag-- > 0) return Promise.resolve({ id: 0n });

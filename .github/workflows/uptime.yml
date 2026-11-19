@@ -1,7 +1,7 @@
 name: Uptime
 
 # Read-only uptime check of the public services every 10 minutes: the website, the app page, the
-# Base Mainnet RPC and the staking reward window (once the first period is funded). Any failed
+# Agent API and A2A card, the Base Mainnet RPC and the staking reward window (once the first period is funded). Any failed
 # check fails the run, and GitHub notifies the owner by email and in the GitHub mobile app.
 # Nothing is signed or sent.
 on:
@@ -36,6 +36,11 @@ jobs:
           check https://arlcoin.io/ "ARL Protocol"
           check https://arlcoin.io/app/ "ARL"
           check https://arlcoin.io/.well-known/security.txt "team@arlcoin.io"
+          # The Agent API, its chain reads (health answers 503 when no RPC endpoint answers) and
+          # the A2A agent card.
+          check https://arlcoin.io/api/v1/policies "arl-policy/1"
+          check https://arlcoin.io/api/v1/health '"ok": true'
+          check https://arlcoin.io/.well-known/agent-card.json "ARL Protocol"
           exit $fail
 
       - name: Base Mainnet RPC and staking rewards
