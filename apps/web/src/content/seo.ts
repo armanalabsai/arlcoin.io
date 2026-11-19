@@ -24,6 +24,7 @@ export const organizationJsonLd = {
     SITE.social.devto,
     SITE.social.productHunt,
     SITE.social.farcaster,
+    SITE.social.linkedin,
     SITE.repository,
     SITE.packages.npmSdk,
     SITE.packages.npmMcp,

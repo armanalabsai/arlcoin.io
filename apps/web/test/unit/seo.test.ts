@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync, statSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 import { describe, it } from "node:test";
 
@@ -18,7 +19,8 @@ import { SOLUTION_PATHS, SOLUTIONS } from "../../src/content/solutions.ts";
 // Search snippets: titles up to 60 characters and descriptions up to 155 are shown in full.
 
 const MAX_TITLE = 60;
-const app = new URL("../../app/", import.meta.url).pathname;
+// fileURLToPath, not URL.pathname: on Windows the pathname keeps a leading slash before the drive.
+const app = fileURLToPath(new URL("../../app/", import.meta.url));
 
 function pages(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {
@@ -73,6 +75,7 @@ describe("seo: structured data", () => {
       "https://dev.to/armanalabs_b86b3803a4445c",
       "https://www.producthunt.com/products/arl-protocol",
       "https://farcaster.xyz/arlprotocol",
+      "https://www.linkedin.com/in/arl-protocol-305061450",
       "https://github.com/armanalabsai/arlcoin.io",
       "https://www.npmjs.com/package/arl-protocol-sdk",
       "https://www.npmjs.com/package/arl-protocol-mcp",

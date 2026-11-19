@@ -26,6 +26,7 @@ export const SITE = {
     devto: "https://dev.to/armanalabs_b86b3803a4445c",
     productHunt: "https://www.producthunt.com/products/arl-protocol",
     farcaster: "https://farcaster.xyz/arlprotocol",
+    linkedin: "https://www.linkedin.com/in/arl-protocol-305061450",
   },
   /** Published packages. */
   packages: {
