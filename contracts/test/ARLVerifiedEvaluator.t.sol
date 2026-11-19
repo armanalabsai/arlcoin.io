@@ -1094,13 +1094,62 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         assertTrue(ev.getVerdict(id).providerApproved);
     }
 
-    function test_feedbackSkippedWhenAgentNotProviders() public {
+    /// Security report 2026-11-16: a provider that does not own the named agent cannot approve the
+    /// committee, so it cannot hand the agent away first and keep the outcome off its record.
+    function test_RevertWhen_ApproveCommitteeWithoutOwningTheAgent() public {
         identity.setOwner(AGENT, stranger);
+        uint256 id = _configured(_reexec());
+        vm.prank(provider);
+        vm.expectRevert(ARLVerifiedEvaluator.Unauthorized.selector);
+        ev.approveCommittee(id);
+    }
+
+    /// Security report 2026-11-16 (F02): the arbiter cannot challenge a decision it would rule on.
+    function test_RevertWhen_ArbiterDisputes() public {
         uint256 id = _approved();
-        vm.warp(block.timestamp + WINDOW);
+        vm.prank(launchSafe);
+        token.transfer(arbiter, BOND);
+        vm.startPrank(arbiter);
+        token.approve(address(ev), BOND);
+        vm.expectRevert(ARLVerifiedEvaluator.ConflictOfInterest.selector);
+        ev.dispute(id, EVIDENCE);
+        vm.stopPrank();
+    }
+
+    /// Security report 2026-11-16 (F03): a rejection finalized after the deadline still reaches the
+    /// provider's reputation.
+    function test_lateFinalizeOfRejectionWritesFeedback() public {
+        uint256 id = _rejected();
+        vm.warp(block.timestamp + 8 days);
         ev.finalize(id);
-        assertEq(reputation.count(), 0);
+        assertEq(reputation.count(), 1);
+        (, uint64 rejected) = ev.outcomesOf(AGENT);
+        assertEq(rejected, 1);
+        assertEq(uint256(_status(id)), uint256(ARLJobs.JobStatus.Expired));
+    }
+
+    /// Security report 2026-11-16: approvals split across deliverable hashes reject the job without a
+    /// single rejection vote. When the arbiter overturns that and names the upheld deliverable, the
+    /// approvals of any other hash are slashed.
+    function test_resolveSlashesApprovalsOfAnotherDeliverable() public {
+        uint256 id = _submitted();
+        vm.prank(v1);
+        ev.vote(id, true, WORK, EVIDENCE);
+        vm.prank(v2);
+        ev.vote(id, true, keccak256("other"), EVIDENCE);
+        vm.prank(v3);
+        ev.vote(id, true, keccak256("third"), EVIDENCE);
+        assertEq(uint256(_phase(id)), uint256(ARLVerifiedEvaluator.Phase.Rejected));
+        vm.prank(provider);
+        ev.dispute(id, EVIDENCE);
+        vm.prank(arbiter);
+        ev.resolve(id, true, WORK);
         assertEq(uint256(_status(id)), uint256(ARLJobs.JobStatus.Completed));
+        assertEq(ev.stakeOf(v1), STAKE);
+        assertEq(ev.stakeOf(v2), STAKE - BOND);
+        assertEq(ev.stakeOf(v3), STAKE - BOND);
+        assertEq(token.balanceOf(SINK), 2 * uint256(BOND));
+        assertEq(_lockedTotal(), 0);
     }
 
     function test_feedbackSkippedWithoutAgentId() public {

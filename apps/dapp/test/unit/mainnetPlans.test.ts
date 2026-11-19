@@ -179,10 +179,32 @@ describe("Base Mainnet plans for the verified jobs", () => {
       stake: "0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4",
       record: "8453-jobs-usdc.json",
     },
+    // Evaluator v6 (bug bounty reports of 2026-11-16 to 2026-11-18), for the ARLJobs v3 escrows
+    // already on chain (nonces 33 and 35). The current build accepts them.
+    {
+      name: "8453-verified-evaluator-arl-v6",
+      nonce: 38,
+      jobs: "0x9aE99bF9a59aF47E81346B7c0b93Cd2B610455fC",
+      evaluator: "0xcF87CF8751648919b5A7F3b45795999dFDeE5861",
+      stake: "0x0000000000000000000000000000000000000000",
+      record: "8453-jobs.json",
+    },
+    {
+      name: "8453-verified-evaluator-usdc-v6",
+      nonce: 39,
+      jobs: "0xE3eA0EAEc3Cf9DA2d0856A0f784A4B1671AeFD04",
+      evaluator: "0xc121c4fE9460c55d85dE0175C1C7045235f94c07",
+      stake: "0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4",
+      record: "8453-jobs-usdc.json",
+    },
   ];
   for (const p of evaluators) {
     it(`creates ${p.name}: only the evaluator, at nonce ${String(p.nonce)}`, () => {
-      const artifacts = p.name.endsWith("-v3") ? JOBS_V3_ARTIFACTS : EVALUATOR_V4_ARTIFACTS;
+      const artifacts = p.name.endsWith("-v3")
+        ? JOBS_V3_ARTIFACTS
+        : p.name.endsWith("-v4")
+          ? EVALUATOR_V4_ARTIFACTS
+          : undefined;
       if (artifacts) {
         assert.throws(
           () => afterTge(() => parseRun(plan(p.name))),

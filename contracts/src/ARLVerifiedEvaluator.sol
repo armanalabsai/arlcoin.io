@@ -190,6 +190,9 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
     mapping(uint256 jobId => mapping(address validator => uint8)) private _votes;
     /// Approvals per deliverable hash: a decision needs `threshold` approvals of the same hash.
     mapping(uint256 jobId => mapping(bytes32 deliverable => uint8)) private _approvalsFor;
+    /// The deliverable hash each member approved, so a ruling that names the upheld deliverable
+    /// can slash approvals of any other hash.
+    mapping(uint256 jobId => mapping(address validator => bytes32)) private _approvedHash;
 
     event Staked(address indexed validator, uint256 amount);
     event Unstaked(address indexed validator, uint256 amount);
@@ -357,6 +360,9 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         if (agentId != 0 && address(reputation) != address(0) && address(identity) != address(0)) {
             if (gasleft() < REGISTRY_GAS_RESERVE) revert InsufficientGas();
             (bool ok, bool owned) = _ownedBy(agentId, msg.sender);
+            // A provider that does not own the agent the client named cannot approve: otherwise it
+            // could hand the agent away before approving and keep every outcome off its record.
+            if (ok && !owned) revert Unauthorized();
             if (!ok) emit FeedbackFailed(jobId, agentId);
             _agentBound[jobId] = owned;
         }
@@ -436,6 +442,7 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
             }
             ++v.approvals;
             _votes[jobId][msg.sender] = APPROVED;
+            _approvedHash[jobId][msg.sender] = deliverable;
         } else {
             ++v.rejections;
             _votes[jobId][msg.sender] = REJECTED;
@@ -483,6 +490,8 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         if (v.phase != Phase.Approved && v.phase != Phase.Rejected) revert WrongPhase();
         // slither-disable-next-line timestamp
         if (block.timestamp >= v.challengeEnds) revert ChallengeWindowClosed();
+        // The arbiter rules on disputes, so it cannot open one and then rule on its own challenge.
+        if (msg.sender == arbiter) revert ConflictOfInterest();
         v.challenger = msg.sender;
         // The phase before the dispute stays readable from `approvals` versus the threshold.
         v.phase = Phase.Disputed;
@@ -509,6 +518,8 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
             v.phase = Phase.Finalized;
             emit Finalized(jobId, false, v.voteHash);
             if (job.status == ARLJobs.JobStatus.Submitted) _refund(jobId, v.voteHash, false);
+            // A rejection settled late is still a rejection on the provider's record.
+            if (phase == Phase.Rejected) _feedback(jobId, false);
         }
     }
 
@@ -516,6 +527,9 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
     /// the validators who voted for it are burned and the challenger gets its bond back; if it
     /// stands, the challenger's bond is burned. The ruling stays possible after the job's deadline:
     /// the bonds are then settled the same way, and the escrow can only go back to the client.
+    /// When the ruling approves a decision that was rejected, `reason` names the deliverable hash
+    /// the arbiter upheld: members who rejected, and members who approved any other hash, lose
+    /// their bonds, so splitting approvals across hashes cannot reject good work without risk.
     function resolve(uint256 jobId, bool approve, bytes32 reason) external nonReentrant {
         if (msg.sender != arbiter) revert Unauthorized();
         Verdict storage v = _verdicts[jobId];
@@ -528,6 +542,7 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         uint256 bond = v.bond;
         address challenger = v.challenger;
         uint256 burned = _unlock(jobId, decidedApproved ? APPROVED : REJECTED, overturned);
+        if (overturned && approve) burned += _slashOffHash(jobId, reason);
         if (!overturned) {
             emit Slashed(jobId, challenger, bond);
             burned += bond;
@@ -541,6 +556,7 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
             v.phase = Phase.Finalized;
             emit Finalized(jobId, false, v.voteHash);
             if (job.status == ARLJobs.JobStatus.Submitted) _refund(jobId, v.voteHash, false);
+            if (!approve) _feedback(jobId, false);
         }
         if (burned != 0) stakeToken.safeTransfer(SLASH_SINK, burned);
         if (overturned) stakeToken.safeTransfer(challenger, bond);
@@ -574,6 +590,7 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
             v.phase = Phase.Finalized;
             emit Finalized(jobId, false, v.voteHash);
             if (job.status == ARLJobs.JobStatus.Submitted) _refund(jobId, v.voteHash, false);
+            if (!decidedApproved) _feedback(jobId, false);
         }
         stakeToken.safeTransfer(challenger, bond);
     }
@@ -701,6 +718,23 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
                 if (absent) _votes[jobId][member] = ABSENT;
                 emit Slashed(jobId, member, bond);
             }
+        }
+    }
+
+    /// Burns the bonds of members who approved a deliverable other than `upheld`. Their bonds were
+    /// already unlocked by `_unlock`, so only the stake is taken here.
+    function _slashOffHash(uint256 jobId, bytes32 upheld) private returns (uint256 burned) {
+        Config storage cfg = _configs[jobId];
+        uint256 bond = _verdicts[jobId].bond;
+        uint256 n = cfg.committee.length;
+        for (uint256 i; i < n; ++i) {
+            address member = cfg.committee[i];
+            if (_votes[jobId][member] != APPROVED || _approvedHash[jobId][member] == upheld) {
+                continue;
+            }
+            stakeOf[member] -= bond;
+            burned += bond;
+            emit Slashed(jobId, member, bond);
         }
     }
 
