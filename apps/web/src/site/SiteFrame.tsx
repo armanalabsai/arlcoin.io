@@ -115,16 +115,63 @@ export function FooterLinks() {
         Security
       </Link>
       <Link href="/docs" prefetch={false} className={link}>
-        Docs · Apache-2.0
+        Docs
       </Link>
+      <a href={SITE.repository} rel="me noopener noreferrer" target="_blank" className={link}>
+        GitHub
+      </a>
+      <a href={SITE.packages.npmSdk} rel="noopener noreferrer" target="_blank" className={link}>
+        npm
+      </a>
+      <a href={SITE.packages.pypi} rel="noopener noreferrer" target="_blank" className={link}>
+        PyPI
+      </a>
+      <a href={SITE.packages.n8n} rel="noopener noreferrer" target="_blank" className={link}>
+        n8n node
+      </a>
       <a href={SITE.social.x} rel="me noopener noreferrer" target="_blank" className={link}>
         X @arlprotocol
       </a>
       <a href={SITE.social.telegram} rel="me noopener noreferrer" target="_blank" className={link}>
         Telegram
       </a>
-      <a href={SITE.repository} rel="me noopener noreferrer" target="_blank" className={link}>
-        GitHub
+      <a
+        href={SITE.social.telegramChat}
+        rel="me noopener noreferrer"
+        target="_blank"
+        className={link}
+      >
+        Telegram chat
+      </a>
+      <a href={SITE.social.farcaster} rel="me noopener noreferrer" target="_blank" className={link}>
+        Farcaster
+      </a>
+      <a href={SITE.social.devto} rel="me noopener noreferrer" target="_blank" className={link}>
+        DEV
+      </a>
+      <a
+        href={SITE.social.productHunt}
+        rel="me noopener noreferrer"
+        target="_blank"
+        className={link}
+      >
+        Product Hunt
+      </a>
+      <a
+        href={`${SITE.repository}/blob/main/LICENSE`}
+        rel="noopener noreferrer"
+        target="_blank"
+        className={link}
+      >
+        Apache-2.0
+      </a>
+      <a
+        href={`${SITE.packages.n8nRepository}/blob/main/LICENSE`}
+        rel="noopener noreferrer"
+        target="_blank"
+        className={link}
+      >
+        MIT (n8n node)
       </a>
     </nav>
   );

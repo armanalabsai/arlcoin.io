@@ -128,6 +128,54 @@
     border-color: var(--color-accent-edge);
   }
 
+  /* One vivid tint per layer: a coloured top edge and a wash of the same colour. */
+  .material-card[data-tint] {
+    --tint: var(--color-accent);
+    position: relative;
+    border-top-color: color-mix(in srgb, var(--tint) 85%, transparent);
+    background:
+      radial-gradient(
+        120% 80% at 0% 0%,
+        color-mix(in srgb, var(--tint) 26%, transparent),
+        transparent 60%
+      ),
+      rgb(12 22 50 / 0.5);
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, var(--tint) 55%, transparent),
+      0 10px 32px -18px var(--tint);
+  }
+  .material-card[data-tint]:hover,
+  .material-card[data-tint][data-selected="true"] {
+    border-color: color-mix(in srgb, var(--tint) 70%, transparent);
+  }
+  .material-card[data-tint="token"] {
+    --tint: #f2c56b;
+  }
+  .material-card[data-tint="technology"] {
+    --tint: #4fc3ff;
+  }
+  .material-card[data-tint="security"] {
+    --tint: #7ee0a6;
+  }
+  .material-card[data-tint="roadmap"] {
+    --tint: #b79bff;
+  }
+  .material-card[data-tint="ecosystem"] {
+    --tint: #ff9a76;
+  }
+  /* Live cards carry the green live dot. */
+  .material-card[data-status="LIVE"]::after {
+    content: "";
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #7ee0a6;
+    box-shadow: 0 0 8px rgb(126 224 166 / 0.8);
+  }
+
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .material-bar,
     .material-card {
@@ -853,18 +901,33 @@
   border-radius: 50%;
   background: var(--color-fg-subtle);
 }
-/* Done phases light green (the hero's live dot); phases under way show a pulsing green ring. */
+/* Done phases light green (the hero's live dot); phases under way blink green. */
 .landing-road li[data-progress="done"]::before {
   background: #7ee0a6;
   box-shadow: 0 0 8px rgb(126 224 166 / 0.7);
 }
-.landing-road li[data-progress="done"] .road-state {
+.landing-road li[data-progress="done"] .road-state,
+.landing-road li[data-progress="active"] .road-state {
   color: #7ee0a6;
 }
+/* Work under way: the same green dot, blinking on and off. */
 .landing-road li[data-progress="active"]::before {
-  background: var(--color-page);
-  border: 2px solid #7ee0a6;
-  animation: live-ping 2s infinite;
+  background: #7ee0a6;
+  box-shadow: 0 0 8px rgb(126 224 166 / 0.7);
+  animation: road-blink 1.4s ease-in-out infinite;
+}
+@keyframes road-blink {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  70%,
+  85% {
+    opacity: 0.12;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .landing-road li[data-progress="active"]::before {

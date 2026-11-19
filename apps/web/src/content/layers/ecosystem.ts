@@ -16,11 +16,11 @@ export const ecosystem: Layer = {
     {
       id: "repository",
       title: "Open Source",
-      shortDescription: "Apache-2.0 licensed",
+      shortDescription: "Apache-2.0 and MIT licensed",
       weight: "primary",
       detail: {
         summary:
-          "All ARL code, documentation and decisions are public. The code is licensed under Apache-2.0.",
+          "All ARL code, documentation and decisions are public. The protocol repository is licensed under Apache-2.0; the n8n node (n8n-nodes-arl) is licensed under MIT.",
       },
       links: [
         { label: "Documents", href: "/docs" },
