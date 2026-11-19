@@ -558,17 +558,20 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         vm.expectRevert(ARLVerifiedEvaluator.BadCommittee.selector);
         ev.configure(id, _cfg(ARLVerifiedEvaluator.Tier.Reexecution, c, 2));
 
-        // A provider set after configure that is a member cannot approve the committee.
+        // Security report 2026-11-19: a job with no provider yet cannot be configured, so a member
+        // cannot be named provider afterwards and leave the job unevaluable.
         vm.prank(client);
         uint256 open =
             jobs.createJob(address(0), address(ev), block.timestamp + 7 days, "job", address(0));
         vm.prank(client);
+        vm.expectRevert(ARLVerifiedEvaluator.WrongJobStatus.selector);
         ev.configure(open, _reexec());
+        // Once the provider is named, a committee that includes it is refused as before.
         vm.prank(client);
         jobs.setProvider(open, v3, "");
-        vm.prank(v3);
-        vm.expectRevert(ARLVerifiedEvaluator.ConflictOfInterest.selector);
-        ev.approveCommittee(open);
+        vm.prank(client);
+        vm.expectRevert(ARLVerifiedEvaluator.BadCommittee.selector);
+        ev.configure(open, _reexec());
     }
 
     function test_RevertWhen_ArbiterIsAPartyOrOnTheCommittee() public {
@@ -596,17 +599,15 @@ contract ARLVerifiedEvaluatorTest is ARLTestBase {
         vm.expectRevert(ARLVerifiedEvaluator.BadCommittee.selector);
         ev.configure(id3, _cfg(ARLVerifiedEvaluator.Tier.Reexecution, c, 2));
 
-        // The arbiter set as provider after configure cannot approve.
+        // The arbiter named provider after the job was created is refused at configure too.
         vm.prank(client);
         uint256 id4 =
             jobs.createJob(address(0), address(ev), block.timestamp + 7 days, "job", address(0));
         vm.prank(client);
-        ev.configure(id4, _reexec());
-        vm.prank(client);
         jobs.setProvider(id4, arbiter, "");
-        vm.prank(arbiter);
+        vm.prank(client);
         vm.expectRevert(ARLVerifiedEvaluator.ConflictOfInterest.selector);
-        ev.approveCommittee(id4);
+        ev.configure(id4, _reexec());
     }
 
     // ---------------------------------------------------------------- accept

@@ -312,6 +312,9 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
             revert WrongJobStatus();
         }
         if (_verdicts[jobId].phase != Phase.None) revert WrongPhase();
+        // The provider is named first: the checks below compare the committee and the arbiter with
+        // it, and a provider set afterwards (ARLJobs.setProvider) would pass none of them.
+        if (job.provider == address(0)) revert WrongJobStatus();
         // The arbiter rules on disputes, so it can neither be paid by the job nor pay it.
         if (job.provider == arbiter || job.client == arbiter) revert ConflictOfInterest();
         _checkWindows(cfg.voteWindow, cfg.challengeWindow, job.expiredAt);
@@ -350,7 +353,7 @@ contract ARLVerifiedEvaluator is ReentrancyGuardTransient {
         Verdict storage v = _verdicts[jobId];
         if (v.phase != Phase.Configured || v.providerApproved) revert WrongPhase();
         if (msg.sender != jobs.getJob(jobId).provider) revert Unauthorized();
-        // A provider set after configure may still be a member or the arbiter.
+        // configure names the provider first, so this cannot happen; kept as a second check.
         if (_votes[jobId][msg.sender] != 0 || msg.sender == arbiter) revert ConflictOfInterest();
         v.providerApproved = true;
         emit CommitteeApproved(jobId, msg.sender);
