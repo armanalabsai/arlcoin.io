@@ -1286,3 +1286,125 @@ html.lenis body {
 .lenis.lenis-stopped {
   overflow: clip;
 }
+
+/*
+ * Agent network (AgentNetwork.tsx): ARL at the centre, the tools around it. A coloured pulse runs
+ * along each link from ARL to the tool, one after another, and each node lights as it arrives.
+ */
+.agent-net {
+  margin: 0 auto;
+  max-width: 820px;
+}
+.agent-net svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.agent-net figcaption {
+  margin: 20px auto 0;
+  max-width: 560px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-fg-subtle);
+}
+.agent-net-ring {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.08);
+  stroke-width: 1;
+}
+.agent-net-link {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.14);
+  stroke-width: 1;
+}
+.agent-net-pulse {
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 14 100;
+  stroke-dashoffset: 14;
+  filter: drop-shadow(0 0 5px currentColor);
+  animation: agent-net-pulse 3.7s linear infinite;
+}
+.agent-net-node {
+  fill: #0d1830;
+  stroke-width: 1.5;
+  animation: agent-net-node 3.7s ease-in-out infinite;
+}
+.agent-net-halo {
+  animation: agent-net-halo 3.7s ease-in-out infinite;
+  transform-origin: 380px 250px;
+}
+.agent-net-label {
+  fill: var(--color-heading);
+  font-size: 15px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+.agent-net-via {
+  fill: var(--color-fg-subtle);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-anchor: middle;
+}
+@keyframes agent-net-pulse {
+  0% {
+    stroke-dashoffset: 14;
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  45% {
+    stroke-dashoffset: -100;
+    opacity: 1;
+  }
+  50%,
+  100% {
+    stroke-dashoffset: -100;
+    opacity: 0;
+  }
+}
+@keyframes agent-net-node {
+  0%,
+  35%,
+  75%,
+  100% {
+    stroke-opacity: 0.45;
+    filter: none;
+  }
+  48% {
+    stroke-opacity: 1;
+    filter: drop-shadow(0 0 10px rgb(242 197 107 / 0.8));
+  }
+}
+@keyframes agent-net-halo {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.94);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+}
+@media (max-width: 640px) {
+  .agent-net-label {
+    font-size: 19px;
+  }
+  .agent-net-via {
+    font-size: 14px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .agent-net-pulse {
+    display: none;
+  }
+  .agent-net-node,
+  .agent-net-halo {
+    animation: none;
+  }
+}

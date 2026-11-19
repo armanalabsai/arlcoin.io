@@ -7,6 +7,7 @@ import { getCard, getLayer, pathFor } from "@/content/registry.ts";
 import { OG_IMAGE, SITE } from "@/content/site.ts";
 import type { Card } from "@/content/types.ts";
 import { AddToWallet } from "@/site/AddToWallet.tsx";
+import { AgentNetwork } from "@/site/AgentNetwork.tsx";
 import { ChainFlow } from "@/site/ChainFlow.tsx";
 import { FaqList } from "@/site/FaqList.tsx";
 import { HeroLogo } from "@/site/HeroLogo.tsx";
@@ -467,6 +468,19 @@ export default function Home() {
             <FaqList limit={5} />
             <Link href="/faq" prefetch={false} className={`${more} mt-4`}>
               All questions ›
+            </Link>
+          </Reveal>
+        </Section>
+
+        <Section
+          alt
+          heading="Works where your agents work."
+          sub="Use ARL from the AI tools you already build with, through the MCP server, the A2A agent card, the SDKs and the n8n node."
+        >
+          <Reveal delay={120} className="mt-10">
+            <AgentNetwork />
+            <Link href="/build" prefetch={false} className={`${more} mt-6`}>
+              Connect in minutes ›
             </Link>
           </Reveal>
         </Section>
