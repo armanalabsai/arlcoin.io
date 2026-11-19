@@ -40,7 +40,7 @@ apps/web
 │   ├── (core)/layout.tsx        mounts <InteractiveCore/> once for every route below
 │   ├── (core)/page.tsx          /                      metadata + JSON-LD
 │   ├── (core)/core/[layer]/…    /core/<layer>[/<card>] metadata, static params, 404 otherwise
-│   ├── sitemap.ts, robots.ts, opengraph-image.png, icon.svg, not-found.tsx
+│   ├── sitemap.ts, robots.ts, icon.svg, not-found.tsx
 │   └── globals.css              design tokens, materials, orbit layout
 └── src/
     ├── content/                 data only; no components
