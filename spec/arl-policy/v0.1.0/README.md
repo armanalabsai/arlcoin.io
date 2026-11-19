@@ -50,6 +50,28 @@ non-deterministic work up to a budget cap, with the model and weights pinned in 
 | `reexec-standard`       | `reexec`         | `reexecution` | 3–7       | 1–24 h      | 24–72 h          | 100 ARL        | no                                   |
 | `model-assisted-review` | `model-assisted` | `attested`    | 3–7       | 1–48 h      | 24–72 h          | 100 ARL        | yes, up to 100 ARL or 100 USDC       |
 | `fallback-review`       | `review`         | `fallback`    | 1         | 10 min–24 h | 24–48 h          | 100 ARL        | no                                   |
+| `code-tests`            | `reexec`         | `reexecution` | 3–7       | 1–24 h      | 24–72 h          | 100 ARL        | no                                   |
+| `data-recompute`        | `reexec`         | `reexecution` | 3–7       | 1–24 h      | 24–72 h          | 100 ARL        | no                                   |
+| `gpu-inference`         | `attested`       | `attested`    | 3–7       | 1–48 h      | 24–72 h          | 100 ARL        | no                                   |
+| `research-sources`      | `model-assisted` | `attested`    | 3–7       | 1–48 h      | 24–72 h          | 100 ARL        | yes, up to 100 ARL or 100 USDC       |
 
 The `model-assisted-review` model list is empty until the owner pins the model (decision D-6 of
 the roadmap); until then any model pinned by its weights hash is admissible within the cap.
+
+## Job-type templates
+
+The last four policies are one per common kind of agent work. Each comes with a task template in
+[`templates/`](templates): a valid `arl-task/1` that fits its policy, with acceptance rules a
+client can keep, tighten or extend. The templates change nothing on chain; they run on the same
+`ARLJobs` and `ARLVerifiedEvaluator` contracts, committees, bonds, windows and disputes as every
+other task. What differs is what a validator checks before it votes:
+
+| Template | Evidence the provider submits | What each validator checks before voting |
+| --- | --- | --- |
+| `code-tests` | result manifest, logs | Runs the pinned test command on the delivered commit in the pinned container (`arl-reexec/1`); confirms exit code 0, that test files are unchanged, and that the result hash matches. |
+| `data-recompute` | result manifest, output artifact | Fetches every input by URL and SHA-256, re-runs the pinned analysis, and compares each output hash with the delivered manifest. |
+| `gpu-inference` | attestation, result manifest, logs | Verifies the attestation signature and that it names the model weights, input and output hashes; re-runs a sample of the inputs and compares within the tolerance the task states. |
+| `research-sources` | brief, model verdict, fetch log | Resolves every cited URL, checks the logged content hash, and confirms each source supports its claim. A pinned open model may decide a rule only up to the budget cap. |
+
+A validator records one outcome per acceptance rule and votes with `decideVote`: approve only if
+every rule passed by an admissible check. A wrong vote can be disputed and its bond slashed.

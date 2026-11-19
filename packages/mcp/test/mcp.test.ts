@@ -146,6 +146,10 @@ describe("ARL tools", () => {
         "arl-policy/1:reexec-standard",
         "arl-policy/1:fallback-review",
         "arl-policy/1:model-assisted-review",
+        "arl-policy/1:code-tests",
+        "arl-policy/1:data-recompute",
+        "arl-policy/1:gpu-inference",
+        "arl-policy/1:research-sources",
       ],
     );
     for (const p of list) assert.match(p.hash, /^0x[0-9a-f]{64}$/);

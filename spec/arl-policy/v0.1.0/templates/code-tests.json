@@ -1,0 +1,43 @@
+{
+  "version": "arl-task/1",
+  "title": "Make the test suite pass",
+  "description": "Change the code so that the pinned test command passes. Validators check out the delivered commit and run the same command in the pinned container.",
+  "workload": {
+    "class": "reexec",
+    "spec_uri": "https://raw.githubusercontent.com/armanalabsai/arlcoin.io/main/packages/verifier/examples/busybox-summary.json",
+    "spec_hash": "0x06fb69bdc79a7b606079c84133d60ed72922ad8befb01e48d340b512ced8fc0f"
+  },
+  "acceptance": [
+    {
+      "id": "tests-pass",
+      "rule": "The pinned test command exits with code 0 on the delivered commit."
+    },
+    {
+      "id": "no-test-edits",
+      "rule": "Files under the pinned test directory are unchanged from the base commit."
+    },
+    {
+      "id": "matches-spec",
+      "rule": "The result hash equals a re-execution of the pinned spec."
+    }
+  ],
+  "deliverable": {
+    "media_type": "application/json",
+    "max_bytes": 65536
+  },
+  "payment": {
+    "token": "ARL",
+    "budget": "10000000000000000000",
+    "deadline_hours": 72
+  },
+  "verification": {
+    "policy": "arl-policy/1:code-tests",
+    "tier": "reexecution",
+    "committee_size": 3,
+    "threshold": 2,
+    "vote_window_seconds": 21600,
+    "challenge_window_seconds": 86400,
+    "bond_floor": "100000000000000000000"
+  },
+  "evidence": ["result-manifest", "logs"]
+}
