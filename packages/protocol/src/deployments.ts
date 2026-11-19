@@ -25,14 +25,14 @@ export const BASE_MAINNET_TASK_DEPLOYMENTS: Record<Token, TaskDeployment> = {
     chainId: 8453,
     token: "0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4",
     jobs: "0x9aE99bF9a59aF47E81346B7c0b93Cd2B610455fC",
-    evaluator: "0x6648e141cb7473822ddBd8bC039b91e5af3259B4",
+    evaluator: "0xcF87CF8751648919b5A7F3b45795999dFDeE5861",
     arbiter: ARBITER_SAFE,
   },
   USDC: {
     chainId: 8453,
     token: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
     jobs: "0xE3eA0EAEc3Cf9DA2d0856A0f784A4B1671AeFD04",
-    evaluator: "0x6bFfdEace7d0B2F7711f604F0A5D2545be2961AF",
+    evaluator: "0xc121c4fE9460c55d85dE0175C1C7045235f94c07",
     arbiter: ARBITER_SAFE,
   },
 };

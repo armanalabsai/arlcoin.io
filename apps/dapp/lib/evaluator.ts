@@ -5,7 +5,7 @@
 
 import type { Address } from "viem";
 
-export const EVALUATOR: Address = "0x6648e141cb7473822ddBd8bC039b91e5af3259B4";
+export const EVALUATOR: Address = "0xcF87CF8751648919b5A7F3b45795999dFDeE5861";
 export const ARBITER_SAFE: Address = "0x8FF6c3aD0991Ac848BFf5d0acD78BBc5e190466f";
 export const EXPLORER = "https://basescan.org";
 

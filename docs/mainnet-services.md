@@ -58,8 +58,8 @@ Deploy screen (`arlcoin.io/app/deploy/?plan=…`):
 |    35 | `8453-verified-jobs-usdc-v3`              | `ARLJobs` v3, paid in USDC                                       | `0xE3eA0EAEc3Cf9DA2d0856A0f784A4B1671AeFD04` | Deployed 2026-11-16        |
 |    36 | `8453-verified-jobs-usdc-v3`              | `ARLVerifiedEvaluator` v5 for it, bonds in ARL                   | `0x6bFfdEace7d0B2F7711f604F0A5D2545be2961AF` | Deployed 2026-11-16        |
 |    37 | none                                      | nothing from a plan (the deployer's nonce read 38 on 2026-11-19) |                                              |                            |
-|    38 | `8453-verified-evaluator-arl-v6`          | `ARLVerifiedEvaluator` v6 for the ARL escrow at nonce 33         | `0xcF87CF8751648919b5A7F3b45795999dFDeE5861` | Planned                    |
-|    39 | `8453-verified-evaluator-usdc-v6`         | `ARLVerifiedEvaluator` v6 for the USDC escrow at nonce 35        | `0xc121c4fE9460c55d85dE0175C1C7045235f94c07` | Planned                    |
+|    38 | `8453-verified-evaluator-arl-v6`          | `ARLVerifiedEvaluator` v6 for the ARL escrow at nonce 33         | `0xcF87CF8751648919b5A7F3b45795999dFDeE5861` | Deployed 2026-11-19        |
+|    39 | `8453-verified-evaluator-usdc-v6`         | `ARLVerifiedEvaluator` v6 for the USDC escrow at nonce 35        | `0xc121c4fE9460c55d85dE0175C1C7045235f94c07` | Deployed 2026-11-19        |
 
 `8453-verified-jobs-usdc` and `8453-verified-jobs-arl` are invalid, do not use: they hold pre-audit
 bytecode (before the audit fixes of 2026-10-28) and the deploy screen refuses them. Their `-v2`
@@ -114,6 +114,11 @@ deployer before them shifts the addresses, and the Deploy screen then refuses th
 was ever created on the v5 evaluators (`jobCounter() == 0` on both escrows, read on 2026-11-19),
 so no job migrates; the three pilot validators unstake from v5 and stake on v6 after the
 deployment, and the app, SDKs and API move to the new addresses in a follow-up change.
+
+Deployed on 2026-11-19 from the deployer at nonces 38 and 39, at the planned addresses (creation
+blocks 59,461,386 and 59,461,475). `jobs-record-cli.ts` passed all nine checks for each on Base
+Mainnet, and the app, SDKs, API and record point at v6 from this change on. The v5 evaluators stay
+on the event watch list until the pilot validators have withdrawn their stakes from them.
 
 ### Evaluator v4
 
