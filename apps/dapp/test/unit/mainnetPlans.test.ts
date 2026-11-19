@@ -7,6 +7,7 @@ import { getContractAddress } from "viem";
 import { parseRun, recordCommand } from "../../lib/deploySteps.ts";
 import { TGE_DATE } from "../../lib/network.ts";
 import { EVALUATOR_V4_ARTIFACTS } from "../fixtures/deploy/evaluatorV4Artifacts.ts";
+import { EVALUATOR_V6_ARTIFACTS } from "../fixtures/deploy/evaluatorV6Artifacts.ts";
 import { JOBS_V2_ARTIFACTS } from "../fixtures/deploy/jobsV2Artifacts.ts";
 import { JOBS_V3_ARTIFACTS } from "../fixtures/deploy/jobsV3Artifacts.ts";
 import { RELEASE_ARTIFACTS } from "../fixtures/deploy/releaseArtifacts.ts";
@@ -180,7 +181,7 @@ describe("Base Mainnet plans for the verified jobs", () => {
       record: "8453-jobs-usdc.json",
     },
     // Evaluator v6 (bug bounty reports of 2026-11-16 to 2026-11-18), for the ARLJobs v3 escrows
-    // already on chain (nonces 33 and 35). The current build accepts them.
+    // already on chain (nonces 33 and 35). Deployed on 2026-11-19; read against their own build.
     {
       name: "8453-verified-evaluator-arl-v6",
       nonce: 38,
@@ -197,6 +198,24 @@ describe("Base Mainnet plans for the verified jobs", () => {
       stake: "0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4",
       record: "8453-jobs-usdc.json",
     },
+    // Evaluator v7 (bug bounty reports of 2026-11-19), for the same escrows. The current build
+    // accepts them.
+    {
+      name: "8453-verified-evaluator-arl-v7",
+      nonce: 40,
+      jobs: "0x9aE99bF9a59aF47E81346B7c0b93Cd2B610455fC",
+      evaluator: "0x0D160C869bd2a7AaEDd29e11fc60fdAEf21c3E28",
+      stake: "0x0000000000000000000000000000000000000000",
+      record: "8453-jobs.json",
+    },
+    {
+      name: "8453-verified-evaluator-usdc-v7",
+      nonce: 41,
+      jobs: "0xE3eA0EAEc3Cf9DA2d0856A0f784A4B1671AeFD04",
+      evaluator: "0x7A00D45598Da7C13feEA8962fc1110FC4Db4D850",
+      stake: "0xde91E6f39D50bBd875f831dcc1134A3D7f3aaDb4",
+      record: "8453-jobs-usdc.json",
+    },
   ];
   for (const p of evaluators) {
     it(`creates ${p.name}: only the evaluator, at nonce ${String(p.nonce)}`, () => {
@@ -204,7 +223,9 @@ describe("Base Mainnet plans for the verified jobs", () => {
         ? JOBS_V3_ARTIFACTS
         : p.name.endsWith("-v4")
           ? EVALUATOR_V4_ARTIFACTS
-          : undefined;
+          : p.name.endsWith("-v6")
+            ? EVALUATOR_V6_ARTIFACTS
+            : undefined;
       if (artifacts) {
         assert.throws(
           () => afterTge(() => parseRun(plan(p.name))),
