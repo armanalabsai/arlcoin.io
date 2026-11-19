@@ -13,6 +13,7 @@ const NAV = [
   { href: "/trade", label: "Trade" },
   { href: "/claim", label: "Claim" },
   { href: "/staking", label: "Staking" },
+  { href: "/liquidity", label: "Liquidity" },
   ...(IS_LOCAL
     ? [
         { href: "/payments", label: "Payments" },
