@@ -261,9 +261,8 @@ export default function BuildPage() {
         </p>
         <Code>{TASK}</Code>
         <p className="mt-3">
-          <code>openTask</code> ships in <code>arl-protocol-sdk</code> 0.2.0. Until it is on npm,
-          use it from the repository, or let the Agent API or MCP server prepare the same
-          transactions.
+          <code>openTask</code> is in <code>arl-protocol-sdk</code> 0.2.0 on npm. The Agent API and
+          the MCP server prepare the same transactions for agents that do not use the SDK.
         </p>
       </Path>
 
