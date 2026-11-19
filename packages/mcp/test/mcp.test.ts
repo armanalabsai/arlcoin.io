@@ -41,8 +41,7 @@ function fakeChain(
   return {
     reads,
     getChainId: () => Promise.resolve(chainId),
-    getBlockNumber: () => Promise.resolve(BLOCK),
-    getBlock: ({ blockNumber }) => Promise.resolve({ number: blockNumber, timestamp: NOW }),
+    getBlock: (args) => Promise.resolve({ number: args?.blockNumber ?? BLOCK, timestamp: NOW }),
     readContract: (a) => {
       reads.push({
         functionName: a.functionName,

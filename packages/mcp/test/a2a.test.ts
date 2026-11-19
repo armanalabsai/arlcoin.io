@@ -6,7 +6,6 @@ import { agentCard, arlTools, handleA2a, type ChainReader } from "../src/index.t
 
 const chain: ChainReader = {
   getChainId: () => Promise.resolve(8453),
-  getBlockNumber: () => Promise.resolve(100n),
   getBlock: () => Promise.resolve({ number: 100n, timestamp: 1_800_000_000n }),
   readContract: (a) =>
     Promise.resolve(a.functionName === "outcomesOf" ? ([1n, 2n] as const) : { phase: 1 }),
