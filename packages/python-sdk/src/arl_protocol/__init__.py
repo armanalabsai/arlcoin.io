@@ -15,4 +15,4 @@ from .client import ESCROWS, EVALUATORS, STATUS, Arl, ArlError, Outcomes, outcom
 from .open_task import open_task
 
 __all__ = ["Arl", "ArlError", "ESCROWS", "EVALUATORS", "Outcomes", "STATUS", "open_task", "outcomes_of"]
-__version__ = "0.2.1"
+__version__ = "0.2.2"

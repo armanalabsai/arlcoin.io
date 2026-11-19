@@ -1,6 +1,6 @@
 {
   "name": "@arl/mcp",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": "Alazdg <team@arlcoin.io>",
   "private": true,
   "description": "ARL Protocol MCP server: check arl-task/1 tasks, read verified jobs on Base Mainnet and prepare unsigned transactions for the user's own wallet; never holds a key",
