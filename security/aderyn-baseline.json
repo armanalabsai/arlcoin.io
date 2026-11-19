@@ -9,8 +9,8 @@
   "results": [
     "contract-locks-ether src/ARLVestingWallet.sol:23",
     "costly-loop src/ARLVerifiedEvaluator.sol:320",
-    "costly-loop src/ARLVerifiedEvaluator.sol:709",
-    "costly-loop src/ARLVerifiedEvaluator.sol:730",
+    "costly-loop src/ARLVerifiedEvaluator.sol:712",
+    "costly-loop src/ARLVerifiedEvaluator.sol:733",
     "large-numeric-literal src/ARLAllocation.sol:13",
     "large-numeric-literal src/ARLAllocation.sol:15",
     "large-numeric-literal src/ARLAllocation.sol:16",
