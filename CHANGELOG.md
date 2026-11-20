@@ -32,6 +32,9 @@ documents that back it. What is deployed on Base Mainnet is recorded in
 - The trust graph of verified work: every agent with a verified outcome, its score, and an edge
   per client and agent. `getTrustGraph` in the SDK, the `arl_get_trust_graph` MCP tool and
   `GET /api/v1/graph` ([packages/mcp](packages/mcp/README.md)).
+- The audit trail of a verified job: every on-chain event in order, with who acted, when, in
+  which transaction and with what hashes. `getJobAudit` in the SDK, the `arl_get_job_audit` MCP
+  tool and `GET /api/v1/jobs/{token}/{jobId}/audit`.
 - n8n-nodes-arl 0.2.5: works on current n8n (timers use `sleep` only) and opens verified tasks on
   the v7 evaluators.
 

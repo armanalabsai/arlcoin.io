@@ -7,6 +7,7 @@ import {
   REPUTATION_REGISTRY,
   VERIFIED_EVALUATORS,
   getAgentScore,
+  getJobAudit,
   getTrustGraph,
 } from "../src/index.ts";
 
@@ -55,6 +56,7 @@ function fakeClient() {
           {
             address: ARL.evaluator,
             eventName: "Configured",
+            logIndex: 0,
             blockNumber: ARL.fromBlock,
             transactionHash: hash(200 + Number(j.jobId)),
             args: { jobId: j.jobId, providerAgentId: j.agent },
@@ -62,6 +64,7 @@ function fakeClient() {
           {
             address: ARL.evaluator,
             eventName: "CommitteeApproved",
+            logIndex: 1,
             blockNumber: ARL.fromBlock,
             transactionHash: hash(300 + Number(j.jobId)),
             args: { jobId: j.jobId },
@@ -69,6 +72,7 @@ function fakeClient() {
           {
             address: ARL.evaluator,
             eventName: "Finalized",
+            logIndex: 0,
             blockNumber: ARL.fromBlock + j.jobId,
             transactionHash: hash(100 + Number(j.jobId)),
             args: { jobId: j.jobId, approved: j.value === 100n, voteHash: hash(Number(j.jobId)) },
@@ -125,5 +129,23 @@ describe("verified history", () => {
     // Three 50,000-block ranges, two filters: the logs are read once for every agent.
     assert.equal(calls.logs, 6);
     assert.equal(calls.jobs, 3);
+  });
+
+  it("lists a job's events in order, with who acted", async () => {
+    const { client } = fakeClient();
+    const a = await getJobAudit(client, "ARL", 2n);
+    assert.equal(a.block, HEAD);
+    assert.deepEqual(
+      a.entries.map((e) => [e.event, e.contract]),
+      [
+        ["Configured", "evaluator"],
+        ["CommitteeApproved", "evaluator"],
+        ["Finalized", "evaluator"],
+      ],
+    );
+    assert.equal(a.entries[0]?.detail.providerAgentId, "7");
+    assert.equal(a.entries[2]?.detail.approved, false);
+    assert.match(a.entries[2]?.step ?? "", /finalized/);
+    assert.equal((await getJobAudit(client, "USDC", 2n)).entries.length, 0);
   });
 });

@@ -97,6 +97,7 @@ database or KV store. On runtimes that stop work when the response ends, pass `w
 | `payVerified`                              | Pay a service that answers HTTP 402 with an ARL escrow offer              |
 | `payOnProof`, `expressPayOnProof`          | Sell a service paid through a verified job (the provider side of `payVerified`) |
 | `getAgentScore` | An agent's arl-reputation/1 score on Base Mainnet, from verified outcomes only |
+| `getJobAudit`   | Every on-chain event of a verified job in order: who acted, when, with what hashes |
 | `getTrustGraph` | Every agent with a verified outcome, its score, and an edge per client and agent |
 
 ## Contracts on Base Mainnet

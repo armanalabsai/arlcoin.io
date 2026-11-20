@@ -36,6 +36,12 @@
       "tags": ["arl", "base", "escrow", "verification"]
     },
     {
+      "id": "arl_get_job_audit",
+      "name": "arl_get_job_audit",
+      "description": "Read the audit trail of a verified job on Base Mainnet (ARL or USDC escrow): every on-chain event of the job in order (opened, configured, funded, committee approved and accepted, deliverable submitted, votes, verdict, dispute, finalization, payment or refund), each with who acted, the time, the transaction and the hashes it carried. Read at one block that the answer names; an empty trail means the job has no events on the verified evaluator's escrow. Send a data part { \"skill\": \"arl_get_job_audit\", \"arguments\": { ... } }.",
+      "tags": ["arl", "base", "escrow", "verification"]
+    },
+    {
       "id": "arl_get_agent_outcomes",
       "name": "arl_get_agent_outcomes",
       "description": "Read an agent's verified record on Base Mainnet: how many of its jobs the ARL and the USDC verified evaluators approved and rejected. The evaluators keep these counts themselves (outcomesOf), so a reputation registry refusing a write cannot erase them. Read at one block that the answer names. Send a data part { \"skill\": \"arl_get_agent_outcomes\", \"arguments\": { ... } }.",

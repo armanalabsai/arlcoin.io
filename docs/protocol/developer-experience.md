@@ -39,7 +39,7 @@ Base Mainnet addresses, and the n8n node's "Open Task" operation, which runs the
 
 **Live since 15 November 2026:** the MCP
 tools over HTTP at `arlcoin.io/api/v1`: `GET /policies`, `POST /tasks/check`,
-`GET /jobs/{ARL|USDC}/{id}`, `GET /agents/{agentId}/outcomes`, `GET /agents/{agentId}/score`,
+`GET /jobs/{ARL|USDC}/{id}`, `GET /jobs/{ARL|USDC}/{id}/audit`, `GET /agents/{agentId}/outcomes`, `GET /agents/{agentId}/score`,
 `GET /agents/{agentId}/badge.svg`, `GET /graph`, `POST /evidence/check`,
 `POST /jobs/prepare` and `POST /jobs/prepare-funding` (unsigned transactions). Chain reads come
 straight from Base at one named block. An agent's verified record needs no indexer: the evaluator
@@ -62,7 +62,7 @@ Every answer carries the block number it was read at, so clients can re-check it
 ### 6.3 Agent integrations
 
 **Built, 15 November 2026:** the MCP server (`packages/mcp`, npm name `arl-protocol-mcp`) with
-`arl_check_task`, `arl_list_policies`, `arl_get_job`, `arl_get_agent_outcomes`, `arl_get_agent_score`, `arl_get_trust_graph`,
+`arl_check_task`, `arl_list_policies`, `arl_get_job`, `arl_get_job_audit`, `arl_get_agent_outcomes`, `arl_get_agent_score`, `arl_get_trust_graph`,
 `arl_check_evidence`, `arl_prepare_job` and `arl_prepare_funding`. It speaks MCP over stdio with no dependency beyond viem, reads the chain at
 one block per answer and holds no key. `arl_get_agent_outcomes` reads an agent's verified record
 from both evaluators (6.2).

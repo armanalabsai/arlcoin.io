@@ -12,7 +12,6 @@ import {
   getAddress,
   isAddressEqual,
   parseAbi,
-  parseAbiItem,
   type Address,
   type Hex,
   type PublicClient,
@@ -55,15 +54,34 @@ export const VERIFIED_EVALUATORS = [
 const registryEvents = parseAbi([
   "event NewFeedback(uint256 indexed agentId, address indexed clientAddress, uint64 feedbackIndex, int128 value, uint8 valueDecimals, string indexed indexedTag1, string tag1, string tag2, string endpoint, string feedbackURI, bytes32 feedbackHash)",
 ]);
-const evaluatorEvents = parseAbi([
+/** Every event of the escrow and the verified evaluator: all carry the job id as first topic. */
+export const protocolEvents = parseAbi([
+  "event JobCreated(uint256 indexed jobId, address indexed client, address indexed provider, address evaluator, uint256 expiredAt, address hook)",
+  "event ProviderSet(uint256 indexed jobId, address indexed provider)",
+  "event BudgetSet(uint256 indexed jobId, uint256 amount)",
+  "event JobFunded(uint256 indexed jobId, address indexed client, uint256 amount)",
+  "event JobSubmitted(uint256 indexed jobId, address indexed provider, bytes32 deliverable)",
+  "event JobCompleted(uint256 indexed jobId, address indexed evaluator, bytes32 reason)",
+  "event JobRejected(uint256 indexed jobId, address indexed rejector, bytes32 reason)",
+  "event JobExpired(uint256 indexed jobId)",
+  "event PaymentReleased(uint256 indexed jobId, address indexed provider, uint256 amount)",
+  "event Refunded(uint256 indexed jobId, address indexed client, uint256 amount)",
   "event Configured(uint256 indexed jobId, uint8 tier, uint8 threshold, uint64 voteWindow, uint64 challengeWindow, uint96 bond, uint256 providerAgentId, bytes32 specHash, address[] committee)",
   "event CommitteeApproved(uint256 indexed jobId, address indexed provider)",
-  "event FeedbackFailed(uint256 indexed jobId, uint256 agentId)",
-  "event Finalized(uint256 indexed jobId, bool approved, bytes32 voteHash)",
+  "event Accepted(uint256 indexed jobId, address indexed validator, uint256 bond)",
+  "event VotingStarted(uint256 indexed jobId, uint64 voteEnds)",
+  "event Voted(uint256 indexed jobId, address indexed validator, bool approve, bytes32 deliverable, bytes32 evidence)",
+  "event Decided(uint256 indexed jobId, bool approved, uint64 challengeEnds)",
   "event Disputed(uint256 indexed jobId, address indexed challenger, bytes32 evidence)",
+  "event Resolved(uint256 indexed jobId, bool approved, bool overturned, bytes32 reason)",
+  "event Slashed(uint256 indexed jobId, address indexed account, uint256 amount)",
   "event Failed(uint256 indexed jobId)",
+  "event Finalized(uint256 indexed jobId, bool approved, bytes32 voteHash)",
+  "event Released(uint256 indexed jobId)",
+  "event FeedbackFailed(uint256 indexed jobId, uint256 agentId)",
+  "event RefundDeferred(uint256 indexed jobId)",
+  "event DisputeExpired(uint256 indexed jobId)",
 ]);
-const jobExpired = parseAbiItem("event JobExpired(uint256 indexed jobId)");
 
 const MAX_SPAN = 50_000n;
 const MIN_SPAN = 500n;
@@ -84,7 +102,7 @@ const CONCURRENCY = 2;
  * read two at a time; the answer keeps block order. Once the endpoint rate-limits a request the
  * rest are read one after another.
  */
-async function logsInRange<T>(
+export async function logsInRange<T>(
   from: bigint,
   to: bigint,
   read: (fromBlock: bigint, toBlock: bigint) => Promise<T[]>,
@@ -157,14 +175,33 @@ export interface AgentScore {
   skipped: { what: string; reason: string }[];
 }
 
+/** The first block any verified evaluator has code at: where every scan starts. */
+export const HISTORY_START = VERIFIED_EVALUATORS.reduce<bigint>(
+  (min, e) => (e.fromBlock < min ? e.fromBlock : min),
+  VERIFIED_EVALUATORS[0].fromBlock,
+);
+
+/**
+ * The events of every escrow and evaluator in [from, to], in one request per range. The filter is
+ * the same for every caller, so a provider that stores finished ranges serves the score, the
+ * trust graph and the audit trail from one store.
+ */
+export function readProtocolLogs(client: PublicClient, from: bigint, to: bigint) {
+  return logsInRange(from, to, (fromBlock, toBlock) =>
+    client.getLogs({
+      address: VERIFIED_EVALUATORS.flatMap((e) => [e.evaluator, e.escrow]),
+      events: protocolEvents,
+      fromBlock,
+      toBlock,
+    }),
+  );
+}
+
 /** Everything the verified evaluators recorded, read once and used for any number of agents. */
 async function readHistory(client: PublicClient) {
   const head = await client.getBlock();
   const to = head.number;
-  const from = VERIFIED_EVALUATORS.reduce<bigint>(
-    (min, e) => (e.fromBlock < min ? e.fromBlock : min),
-    VERIFIED_EVALUATORS[0].fromBlock,
-  );
+  const from = HISTORY_START;
 
   // Two reads per block range: the feedback the evaluators wrote to the registry, and the
   // evaluators' and escrows' events (few, for every job) in one request. Neither filter names the
@@ -179,14 +216,7 @@ async function readHistory(client: PublicClient) {
         toBlock,
       }),
     ),
-    logsInRange(from, to, (fromBlock, toBlock) =>
-      client.getLogs({
-        address: VERIFIED_EVALUATORS.flatMap((e) => [e.evaluator, e.escrow]),
-        events: [...evaluatorEvents, jobExpired],
-        fromBlock,
-        toBlock,
-      }),
-    ),
+    readProtocolLogs(client, from, to),
   ]);
 
   return { head, to, feedbackLogs, protocolLogs };
@@ -380,7 +410,7 @@ export async function getTrustGraph(
 }
 
 const times = new Map<bigint, number>();
-async function blockTime(client: PublicClient, block: bigint): Promise<number> {
+export async function blockTime(client: PublicClient, block: bigint): Promise<number> {
   const known = times.get(block);
   if (known !== undefined) return known;
   const t = Number((await client.getBlock({ blockNumber: block })).timestamp);

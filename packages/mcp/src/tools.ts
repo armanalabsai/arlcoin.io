@@ -23,6 +23,7 @@ import {
   type Token,
 } from "../../protocol/src/index.ts";
 import { getAgentScore, getTrustGraph } from "../../sdk/src/agentScore.ts";
+import { getJobAudit } from "../../sdk/src/audit.ts";
 import type { Tool } from "./server.ts";
 
 /** The chain reads the tools need (a viem PublicClient satisfies it). */
@@ -313,6 +314,27 @@ export function arlTools(opts: ToolOptions): Tool[] {
           out.verdict = { ...v, phaseName: PHASES[v.phase] ?? `Phase ${String(v.phase)}` };
         }
         return out;
+      },
+    },
+    {
+      name: "arl_get_job_audit",
+      description:
+        "Read the audit trail of a verified job on Base Mainnet (ARL or USDC escrow): every on-chain event of the job in order (opened, configured, funded, committee approved and accepted, deliverable submitted, votes, verdict, dispute, finalization, payment or refund), each with who acted, the time, the transaction and the hashes it carried. Read at one block that the answer names; an empty trail means the job has no events on the verified evaluator's escrow.",
+      inputSchema: {
+        type: "object",
+        properties: { token: TOKEN, jobId: JOB_ID },
+        required: ["token", "jobId"],
+        additionalProperties: false,
+      },
+      async run(args) {
+        const t = token(args.token);
+        const id = jobId(args.jobId);
+        const reader = opts.logReader ?? (opts.chain as unknown as PublicClient);
+        if (typeof (reader as { getLogs?: unknown }).getLogs !== "function") {
+          throw new ToolInputError("this server's chain reader cannot read logs");
+        }
+        const a = await getJobAudit(reader, t, id);
+        return { chainId: 8453, ...a };
       },
     },
     {

@@ -5,6 +5,7 @@
 //   GET  /api/v1/policies                 built-in arl-policy/1 documents and hashes
 //   POST /api/v1/tasks/check              body: { task, policy? } -> hashes and policy verdict
 //   GET  /api/v1/jobs/{ARL|USDC}/{jobId}   job, committee configuration and verdict
+//   GET  /api/v1/jobs/{ARL|USDC}/{jobId}/audit every on-chain event of the job, in order
 //   GET  /api/v1/agents/{agentId}/outcomes verified approvals and rejections of an agent
 //   GET  /api/v1/agents/{agentId}/score    the agent's arl-reputation/1 score and its outcomes
 //   GET  /api/v1/graph                    the trust graph: agents, scores and client-agent edges
@@ -100,6 +101,11 @@ const ROUTES: { method: "GET" | "POST"; path: RegExp; tool: string }[] = [
   { method: "GET", path: /^\/api\/v1\/jobs\/(ARL|USDC)\/([0-9]{1,78})$/, tool: "arl_get_job" },
   {
     method: "GET",
+    path: /^\/api\/v1\/jobs\/(ARL|USDC)\/([0-9]{1,78})\/audit$/,
+    tool: "arl_get_job_audit",
+  },
+  {
+    method: "GET",
     path: /^\/api\/v1\/agents\/([0-9]{1,78})\/outcomes$/,
     tool: "arl_get_agent_outcomes",
   },
@@ -169,7 +175,7 @@ export async function handleHttp(request: Request, tools: readonly Tool[]): Prom
     if (route.method === "GET") {
       const m = route.path.exec(pathname);
       args =
-        route.tool === "arl_get_job" && m
+        (route.tool === "arl_get_job" || route.tool === "arl_get_job_audit") && m
           ? { token: m[1], jobId: m[2] }
           : (route.tool === "arl_get_agent_outcomes" || route.tool === "arl_get_agent_score") && m
             ? { agentId: m[1] }
@@ -184,7 +190,9 @@ export async function handleHttp(request: Request, tools: readonly Tool[]): Prom
         ? "public, max-age=3600"
         : route.tool === "arl_get_job" || route.tool === "arl_get_agent_outcomes"
           ? "public, max-age=10"
-          : route.tool === "arl_get_agent_score" || route.tool === "arl_get_trust_graph"
+          : route.tool === "arl_get_agent_score" ||
+              route.tool === "arl_get_trust_graph" ||
+              route.tool === "arl_get_job_audit"
             ? "public, max-age=60"
             : "no-store";
     return json(200, out, cache);
