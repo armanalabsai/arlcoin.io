@@ -21,6 +21,6 @@
     "quickstart": "node examples/quickstart.ts"
   },
   "devDependencies": {
-    "@arl/sdk": "0.2.2"
+    "@arl/sdk": "0.3.0"
   }
 }
