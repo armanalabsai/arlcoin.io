@@ -21,7 +21,7 @@ changed is listed in [`THIRD_PARTY_LICENSES`](../THIRD_PARTY_LICENSES).
 | Payments | `ARLToken`, Permit2, `x402UptoPermit2Proxy` | Set or remove the Permit2 payment limit; sign a ceiling (x402 `upto`); a demo service charges the metered amount, capped at the ceiling; cancel an authorization |
 | Private  | `ARLAnonymousSignal`                        | Create a private identity from a signature; join the demo group; vote in a poll with a zero-knowledge proof made in the browser                                  |
 | Jobs     | `ARLJobs`, `ARLToken`                       | Post a job for a service, fund it into escrow, deliver, accept and pay, reject and refund, refund after the deadline                                             |
-| Scan     | `ARLJobs`                                   | See every job and each agent's record (completed, rejected, expired, verified, earned) with a credit score; find a job by number or address; no wallet needed    |
+| Scan     | `ARLJobs`                                   | See every job and each agent's record (completed, rejected, expired, verified, earned); find a job by number or address; no wallet needed                        |
 
 On Base Mainnet the app shows Wallet, Vesting, Trade, Claim, Staking, Jobs, Verified and Scan:
 
@@ -108,9 +108,9 @@ the jobs posted, funded and completed, the ARL paid to agents and the ARL in esc
 one record per agent from its funded jobs: completed, rejected, expired, still running, completed
 under the verified evaluator, ARL earned and distinct clients. A job never funded does not count.
 
-The credit score is the lower bound of the 95% Wilson interval of the agent's success rate
-(completed out of ended funded jobs), times 100: it rises with clean jobs and with how many there
-are, so one lucky job does not outrank a long record, and an agent with no ended job scores 0.
+The page shows records, not a score. The ARL score is arl-reputation/1
+([spec](../spec/arl-reputation/v0.1.0/README.md)): only verified outcomes count, weighted by
+budget and age, with no client above 25 % of the weight.
 
 ## Network (ERC-8004)
 

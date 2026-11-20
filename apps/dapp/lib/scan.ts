@@ -4,10 +4,8 @@
 // getJob), so anyone can recompute it. An agent's record counts only funded jobs that have ended:
 // a job never funded proves nothing, and an open one has no outcome yet.
 //
-// The credit score is the lower bound of the 95% Wilson interval of the agent's success rate
-// (completed out of ended funded jobs), times 100. It rises with successes and with the number of
-// jobs behind them, so one lucky job does not outrank a long clean record, and a fresh address
-// starts at 0.
+// The page shows each agent's record, not a score: the ARL score is arl-reputation/1
+// (spec/arl-reputation/v0.1.0, `reputationScore` in packages/protocol), from verified outcomes only.
 
 import { getAddress, isAddressEqual } from "viem";
 import type { Address } from "viem";
@@ -37,7 +35,6 @@ export interface AgentRecord {
   verified: number;
   earned: bigint;
   clients: number;
-  score: number;
 }
 
 const RUNNING = new Set(["Funded", "Submitted"]);
@@ -77,19 +74,7 @@ export function wasFunded(j: Job): boolean {
   return j.funded === true || j.status === "Completed" || RUNNING.has(j.status);
 }
 
-/** Lower bound of the 95% Wilson score interval, as 0-100. */
-export function creditScore(successes: number, total: number): number {
-  if (total <= 0) return 0;
-  const z = 1.96;
-  const p = successes / total;
-  const z2 = z * z;
-  const centre = p + z2 / (2 * total);
-  const margin = z * Math.sqrt((p * (1 - p)) / total + z2 / (4 * total * total));
-  const lower = (centre - margin) / (1 + z2 / total);
-  return Math.max(0, Math.round(lower * 100));
-}
-
-/** One record per provider with at least one funded job, best score first. */
+/** One record per provider with at least one funded job: most completed jobs first. */
 export function agentRecords(jobs: readonly Job[], verifiedEvaluator: Address): AgentRecord[] {
   const byProvider = new Map<string, AgentRecord & { clientSet: Set<string> }>();
   for (const j of jobs) {
@@ -106,7 +91,6 @@ export function agentRecords(jobs: readonly Job[], verifiedEvaluator: Address): 
         verified: 0,
         earned: 0n,
         clients: 0,
-        score: 0,
         clientSet: new Set(),
       };
       byProvider.set(key, r);
@@ -123,13 +107,12 @@ export function agentRecords(jobs: readonly Job[], verifiedEvaluator: Address): 
   const records = [...byProvider.values()].map(({ clientSet, ...r }) => ({
     ...r,
     clients: clientSet.size,
-    score: creditScore(r.completed, r.completed + r.rejected + r.expired),
   }));
   return records.sort(
     (a, b) =>
-      b.score - a.score ||
       b.completed - a.completed ||
-      (b.earned > a.earned ? 1 : b.earned < a.earned ? -1 : 0),
+      (b.earned > a.earned ? 1 : b.earned < a.earned ? -1 : 0) ||
+      a.rejected + a.expired - (b.rejected + b.expired),
   );
 }
 

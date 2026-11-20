@@ -5,7 +5,7 @@ import { isAddressEqual } from "viem";
 import type { Address } from "viem";
 
 import type { Job, JobStatus } from "../../lib/jobs.ts";
-import { agentRecords, creditScore, filterJobs, scanTotals } from "../../lib/scan.ts";
+import { agentRecords, filterJobs, scanTotals } from "../../lib/scan.ts";
 
 const A = "0x00000000000000000000000000000000000000aa" as Address;
 const B = "0x00000000000000000000000000000000000000bb" as Address;
@@ -30,26 +30,6 @@ function job(provider: Address, status: JobStatus, over: Partial<Job> = {}): Job
     ...over,
   };
 }
-
-describe("ARLscan credit score", () => {
-  it("is 0 without ended jobs and rises with the number of clean jobs", () => {
-    assert.equal(creditScore(0, 0), 0);
-    assert.equal(creditScore(0, 3), 0);
-    const one = creditScore(1, 1);
-    const ten = creditScore(10, 10);
-    const fifty = creditScore(50, 50);
-    assert.ok(one > 0 && one < ten && ten < fifty && fifty <= 100);
-  });
-
-  it("ranks a long record with one failure above a single lucky job", () => {
-    assert.ok(creditScore(19, 20) > creditScore(1, 1));
-  });
-
-  it("matches the Wilson lower bound", () => {
-    // p = 0.8, n = 10, z = 1.96: lower bound 0.4902
-    assert.equal(creditScore(8, 10), 49);
-  });
-});
 
 describe("ARLscan records", () => {
   const jobs = [
@@ -77,8 +57,8 @@ describe("ARLscan records", () => {
       [b.completed, b.rejected, b.expired, b.open, b.verified, b.clients, b.earned],
       [1, 0, 1, 0, 0, 1, 5n * ARL],
     );
-    assert.equal(a.score, creditScore(2, 3));
-    assert.ok(first.score >= second.score);
+    // Most completed jobs first.
+    assert.ok(isAddressEqual(first.provider, A));
   });
 
   it("totals what was paid and what is still in escrow", () => {

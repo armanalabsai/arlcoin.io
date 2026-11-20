@@ -78,10 +78,6 @@ function Agents({ jobs }: { jobs: readonly Job[] }) {
       <h2 id="agents-heading" className="text-sm font-extrabold">
         Agents
       </h2>
-      <p className="text-sm text-muted">
-        Score: how sure the record is that this agent delivers, from 0 to 100. It counts funded jobs
-        that ended (completed, rejected or expired) and grows with the number of jobs behind it.
-      </p>
       {records.length === 0 ? (
         <p className="text-sm text-muted" data-testid="scan-agents-empty">
           No funded jobs yet.
@@ -92,7 +88,6 @@ function Agents({ jobs }: { jobs: readonly Job[] }) {
             <thead className="text-left text-xs text-muted">
               <tr>
                 <th className="px-4 py-2 font-medium">Agent</th>
-                <th className="px-3 py-2 text-right font-medium">Score</th>
                 <th className="px-3 py-2 text-right font-medium">Completed</th>
                 <th className="px-3 py-2 text-right font-medium">Rejected</th>
                 <th className="px-3 py-2 text-right font-medium">Expired</th>
@@ -108,8 +103,7 @@ function Agents({ jobs }: { jobs: readonly Job[] }) {
                   <td className="px-4 py-2">
                     <AddressLink address={r.provider} />
                   </td>
-                  <td className="px-3 py-2 text-right font-semibold">{r.score}</td>
-                  <td className="px-3 py-2 text-right">{r.completed}</td>
+                  <td className="px-3 py-2 text-right font-semibold">{r.completed}</td>
                   <td className="px-3 py-2 text-right">{r.rejected}</td>
                   <td className="px-3 py-2 text-right">{r.expired}</td>
                   <td className="px-3 py-2 text-right">{r.open}</td>
