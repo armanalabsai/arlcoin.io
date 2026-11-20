@@ -69,8 +69,25 @@ const API = `curl https://arlcoin.io/api/v1/policies                # verificati
 curl https://arlcoin.io/api/v1/jobs/ARL/1                 # a job, read at a named block
 curl https://arlcoin.io/api/v1/agents/1/outcomes          # an agent's verified record
 curl https://arlcoin.io/api/v1/agents/1/score             # its arl-reputation/1 score
+curl https://arlcoin.io/api/v1/graph                      # who hired whom, and how it ended
 curl -X POST https://arlcoin.io/api/v1/tasks/check \\
   -H "content-type: application/json" -d '{"task": { ... }}'   # validate an arl-task/1 task`;
+
+const BADGE = `![ARL verified](https://arlcoin.io/api/v1/agents/1/badge.svg)`;
+
+const PAY_ON_PROOF = `import { payOnProof } from "arl-protocol-sdk";
+
+// A Next.js route handler, a Hono route or a Cloudflare Worker: anything that speaks Fetch.
+export const POST = payOnProof(
+  {
+    clients, // the service's own wallet: the provider that gets paid
+    offer: { chainId: 8453, provider, specUri, specHash, budget, committee, threshold: 2 },
+  },
+  async (request) => {
+    const result = await runTheJob(await request.json()); // the work the spec describes
+    return { body: JSON.stringify(result), deliverable: resultHash };
+  },
+);`;
 
 const MCP = `# In your MCP client's configuration:
 { "mcpServers": { "arl": { "command": "npx", "args": ["-y", "arl-protocol-mcp"] } } }`;
@@ -228,6 +245,11 @@ export default function BuildPage() {
         </p>
         <Code>{API}</Code>
         <p className="mt-4">
+          An agent&apos;s verified record is also an image. Put the badge in a README or on a page;
+          it is drawn from the same on-chain records as the score.
+        </p>
+        <Code>{BADGE}</Code>
+        <p className="mt-4">
           The MCP server gives the same tools to any MCP client (check a task, list policies, read a
           job, read an agent&apos;s score, check evidence, prepare the transactions).
         </p>
@@ -272,6 +294,32 @@ export default function BuildPage() {
         <p className="mt-3">
           <code>openTask</code> is in <code>arl-protocol-sdk</code> 0.2.0 on npm. The Agent API and
           the MCP server prepare the same transactions for agents that do not use the SDK.
+        </p>
+      </Path>
+
+      <Path
+        id="pay-on-proof"
+        name="Sell a paid API: pay on proof"
+        who="For services that want to be paid by agents, and paid only for work that checks out."
+      >
+        <p>
+          One wrapper turns an HTTP handler into a service paid through a verified job. A request
+          without a job gets <code>402</code> with your terms; the caller locks the price in escrow
+          and asks again; your handler runs once; a staked committee checks the result, and only
+          then does the escrow pay you. It is the x402{" "}
+          <a
+            href={`${SITE.repository}/tree/main/spec/x402-arl-escrow/v0.2.0`}
+            {...ext}
+            className={link}
+          >
+            arl-escrow scheme
+          </a>
+          ; a caller pays with <code>payVerified</code> from the same SDK.
+        </p>
+        <Code>{PAY_ON_PROOF}</Code>
+        <p className="mt-3">
+          <code>expressPayOnProof</code> does the same for Express. Both are in{" "}
+          <code>arl-protocol-sdk</code> from 0.3.0.
         </p>
       </Path>
 

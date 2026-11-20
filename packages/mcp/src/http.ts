@@ -5,8 +5,11 @@
 //   GET  /api/v1/policies                 built-in arl-policy/1 documents and hashes
 //   POST /api/v1/tasks/check              body: { task, policy? } -> hashes and policy verdict
 //   GET  /api/v1/jobs/{ARL|USDC}/{jobId}   job, committee configuration and verdict
+//   GET  /api/v1/jobs/{ARL|USDC}/{jobId}/audit every on-chain event of the job, in order
+//   GET  /api/v1/agents/{agentId}          the agent's passport: identity and verified record
 //   GET  /api/v1/agents/{agentId}/outcomes verified approvals and rejections of an agent
 //   GET  /api/v1/agents/{agentId}/score    the agent's arl-reputation/1 score and its outcomes
+//   GET  /api/v1/graph                    the trust graph: agents, scores and client-agent edges
 //   GET  /api/v1/agents/{agentId}/badge.svg the same record as an SVG badge for a README or a page
 //   POST /api/v1/evidence/check           body: { evidence } -> outcome of an arl-evidence/2
 //   POST /api/v1/jobs/prepare             body: as arl_prepare_job -> unsigned createJob
@@ -99,6 +102,12 @@ const ROUTES: { method: "GET" | "POST"; path: RegExp; tool: string }[] = [
   { method: "GET", path: /^\/api\/v1\/jobs\/(ARL|USDC)\/([0-9]{1,78})$/, tool: "arl_get_job" },
   {
     method: "GET",
+    path: /^\/api\/v1\/jobs\/(ARL|USDC)\/([0-9]{1,78})\/audit$/,
+    tool: "arl_get_job_audit",
+  },
+  { method: "GET", path: /^\/api\/v1\/agents\/([0-9]{1,78})$/, tool: "arl_get_agent" },
+  {
+    method: "GET",
     path: /^\/api\/v1\/agents\/([0-9]{1,78})\/outcomes$/,
     tool: "arl_get_agent_outcomes",
   },
@@ -107,6 +116,7 @@ const ROUTES: { method: "GET" | "POST"; path: RegExp; tool: string }[] = [
     path: /^\/api\/v1\/agents\/([0-9]{1,78})\/score$/,
     tool: "arl_get_agent_score",
   },
+  { method: "GET", path: /^\/api\/v1\/graph$/, tool: "arl_get_trust_graph" },
   { method: "POST", path: /^\/api\/v1\/evidence\/check$/, tool: "arl_check_evidence" },
   { method: "POST", path: /^\/api\/v1\/jobs\/prepare$/, tool: "arl_prepare_job" },
   { method: "POST", path: /^\/api\/v1\/jobs\/prepare-funding$/, tool: "arl_prepare_funding" },
@@ -167,9 +177,12 @@ export async function handleHttp(request: Request, tools: readonly Tool[]): Prom
     if (route.method === "GET") {
       const m = route.path.exec(pathname);
       args =
-        route.tool === "arl_get_job" && m
+        (route.tool === "arl_get_job" || route.tool === "arl_get_job_audit") && m
           ? { token: m[1], jobId: m[2] }
-          : (route.tool === "arl_get_agent_outcomes" || route.tool === "arl_get_agent_score") && m
+          : (route.tool === "arl_get_agent" ||
+                route.tool === "arl_get_agent_outcomes" ||
+                route.tool === "arl_get_agent_score") &&
+              m
             ? { agentId: m[1] }
             : {};
     } else {
@@ -182,7 +195,10 @@ export async function handleHttp(request: Request, tools: readonly Tool[]): Prom
         ? "public, max-age=3600"
         : route.tool === "arl_get_job" || route.tool === "arl_get_agent_outcomes"
           ? "public, max-age=10"
-          : route.tool === "arl_get_agent_score"
+          : route.tool === "arl_get_agent" ||
+              route.tool === "arl_get_agent_score" ||
+              route.tool === "arl_get_trust_graph" ||
+              route.tool === "arl_get_job_audit"
             ? "public, max-age=60"
             : "no-store";
     return json(200, out, cache);

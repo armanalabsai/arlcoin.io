@@ -27,6 +27,16 @@ documents that back it. What is deployed on Base Mainnet is recorded in
   `GET /api/v1/agents/{agentId}/badge.svg` ([packages/mcp](packages/mcp/README.md)).
 - The x402 `arl-escrow` scheme is released as v0.2.0: the terms, the `X-ARL-Job` header and what a
   service checks before it works ([spec](spec/x402-arl-escrow/v0.2.0/README.md)).
+- arl-protocol 0.3.0 for Python: `agent_score` and `badge_url` read an agent's score and badge
+  through the Agent API ([packages/python-sdk](packages/python-sdk/README.md)).
+- The trust graph of verified work: every agent with a verified outcome, its score, and an edge
+  per client and agent. `getTrustGraph` in the SDK, the `arl_get_trust_graph` MCP tool and
+  `GET /api/v1/graph` ([packages/mcp](packages/mcp/README.md)).
+- The audit trail of a verified job: every on-chain event in order, with who acted, when, in
+  which transaction and with what hashes. `getJobAudit` in the SDK, the `arl_get_job_audit` MCP
+  tool and `GET /api/v1/jobs/{token}/{jobId}/audit`.
+- The agent passport: an ERC-8004 agent's identity and its verified record in one answer.
+  `getAgentPassport` in the SDK, the `arl_get_agent` MCP tool and `GET /api/v1/agents/{agentId}`.
 - n8n-nodes-arl 0.2.5: works on current n8n (timers use `sleep` only) and opens verified tasks on
   the v7 evaluators.
 

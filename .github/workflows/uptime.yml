@@ -41,6 +41,9 @@ jobs:
           check https://arlcoin.io/api/v1/policies "arl-policy/1"
           check https://arlcoin.io/api/v1/health '"ok": true'
           check https://arlcoin.io/.well-known/agent-card.json "ARL Protocol"
+          # The score reads the verified history; asking every run also keeps its stored scan a
+          # few thousand blocks behind the head, so no request has much left to read.
+          check https://arlcoin.io/api/v1/agents/1/score "arl-reputation/1"
           exit $fail
 
       - name: Base Mainnet RPC and staking rewards

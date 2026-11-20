@@ -13,6 +13,19 @@ Amounts are plain token units ("10" is 10 ARL, or 10 USDC with token="USDC").
 
 from .client import ESCROWS, EVALUATORS, STATUS, Arl, ArlError, Outcomes, outcomes_of
 from .open_task import open_task
+from .score import AgentScore, agent_score, badge_url
 
-__all__ = ["Arl", "ArlError", "ESCROWS", "EVALUATORS", "Outcomes", "STATUS", "open_task", "outcomes_of"]
-__version__ = "0.2.2"
+__all__ = [
+    "AgentScore",
+    "Arl",
+    "ArlError",
+    "ESCROWS",
+    "EVALUATORS",
+    "Outcomes",
+    "STATUS",
+    "agent_score",
+    "badge_url",
+    "open_task",
+    "outcomes_of",
+]
+__version__ = "0.3.0"

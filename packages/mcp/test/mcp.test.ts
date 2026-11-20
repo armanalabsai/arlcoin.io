@@ -95,8 +95,11 @@ describe("MCP protocol", () => {
       "arl_check_task",
       "arl_list_policies",
       "arl_get_job",
+      "arl_get_job_audit",
       "arl_get_agent_outcomes",
       "arl_get_agent_score",
+      "arl_get_agent",
+      "arl_get_trust_graph",
       "arl_check_evidence",
       "arl_prepare_job",
       "arl_prepare_funding",
@@ -223,6 +226,18 @@ describe("ARL tools", () => {
     // Two reads per range: the agent's feedback, and the evaluators' and escrows' events.
     assert.equal(ranges.length, 2);
     assert.ok(ranges.every(([, to]) => to === HEAD));
+    const audit = await call(arlTools({ chain }), "arl_get_job_audit", {
+      token: "ARL",
+      jobId: "1",
+    });
+    assert.equal(audit.isError, false);
+    assert.deepEqual(audit.json().entries, []);
+    assert.equal(audit.json().block, HEAD.toString());
+    const graph = await call(arlTools({ chain }), "arl_get_trust_graph", {});
+    assert.equal(graph.isError, false);
+    assert.deepEqual(graph.json().agents, []);
+    assert.deepEqual(graph.json().edges, []);
+    assert.equal(graph.json().block, HEAD.toString());
     const noLogs = await call(arlTools({ chain: fakeChain(null) }), "arl_get_agent_score", {
       agentId: "42",
     });

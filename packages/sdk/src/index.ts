@@ -93,5 +93,11 @@ export {
   REPUTATION_REGISTRY,
   VERIFIED_EVALUATORS,
   getAgentScore,
+  getTrustGraph,
   type AgentScore,
+  type HistoryOptions,
+  type TrustEdge,
+  type TrustGraph,
 } from "./agentScore.ts";
+export { getJobAudit, type AuditEntry, type AuditValue, type JobAudit } from "./audit.ts";
+export { IDENTITY_REGISTRY, getAgentPassport, type AgentPassport } from "./passport.ts";

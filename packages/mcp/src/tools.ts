@@ -22,7 +22,9 @@ import {
   type TaskDeployment,
   type Token,
 } from "../../protocol/src/index.ts";
-import { getAgentScore } from "../../sdk/src/agentScore.ts";
+import { getAgentScore, getTrustGraph } from "../../sdk/src/agentScore.ts";
+import { getJobAudit } from "../../sdk/src/audit.ts";
+import { getAgentPassport } from "../../sdk/src/passport.ts";
 import type { Tool } from "./server.ts";
 
 /** The chain reads the tools need (a viem PublicClient satisfies it). */
@@ -49,6 +51,11 @@ export interface ToolOptions {
    * 50,000-block ranges, so a score stays within a few requests.
    */
   logReader?: PublicClient;
+  /**
+   * True when `logReader` stores finished log scans and splits wide ranges itself
+   * (`cachedLogsProvider`): the history is then asked for in one request.
+   */
+  wholeRangeLogs?: boolean;
 }
 
 const readAbi = parseAbi([
@@ -166,6 +173,7 @@ const OPEN_INPUT = {
 
 export function arlTools(opts: ToolOptions): Tool[] {
   const deployments = opts.deployments ?? BASE_MAINNET_TASK_DEPLOYMENTS;
+  const history = { wholeRange: opts.wholeRangeLogs === true };
 
   /** Chain id and latest block, read once per call so every answer names its block. */
   async function head(): Promise<{ chainId: number; block: bigint; timestamp: bigint }> {
@@ -316,6 +324,27 @@ export function arlTools(opts: ToolOptions): Tool[] {
       },
     },
     {
+      name: "arl_get_job_audit",
+      description:
+        "Read the audit trail of a verified job on Base Mainnet (ARL or USDC escrow): every on-chain event of the job in order (opened, configured, funded, committee approved and accepted, deliverable submitted, votes, verdict, dispute, finalization, payment or refund), each with who acted, the time, the transaction and the hashes it carried. Read at one block that the answer names; an empty trail means the job has no events on the verified evaluator's escrow.",
+      inputSchema: {
+        type: "object",
+        properties: { token: TOKEN, jobId: JOB_ID },
+        required: ["token", "jobId"],
+        additionalProperties: false,
+      },
+      async run(args) {
+        const t = token(args.token);
+        const id = jobId(args.jobId);
+        const reader = opts.logReader ?? (opts.chain as unknown as PublicClient);
+        if (typeof (reader as { getLogs?: unknown }).getLogs !== "function") {
+          throw new ToolInputError("this server's chain reader cannot read logs");
+        }
+        const a = await getJobAudit(reader, t, id, history);
+        return { chainId: 8453, ...a };
+      },
+    },
+    {
       name: "arl_get_agent_outcomes",
       description:
         "Read an agent's verified record on Base Mainnet: how many of its jobs the ARL and the USDC verified evaluators approved and rejected. The evaluators keep these counts themselves (outcomesOf), so a reputation registry refusing a write cannot erase them. Read at one block that the answer names.",
@@ -368,7 +397,7 @@ export function arlTools(opts: ToolOptions): Tool[] {
         if (typeof (reader as { getLogs?: unknown }).getLogs !== "function") {
           throw new ToolInputError("this server's chain reader cannot read logs");
         }
-        const r = await getAgentScore(reader, id);
+        const r = await getAgentScore(reader, id, history);
         return {
           chainId: 8453,
           block: r.block,
@@ -376,6 +405,51 @@ export function arlTools(opts: ToolOptions): Tool[] {
           ...r.score,
           outcomes: r.outcomes,
           skipped: r.skipped,
+        };
+      },
+    },
+    {
+      name: "arl_get_agent",
+      description:
+        "Read an agent's passport on Base Mainnet: who the ERC-8004 agent is (registered or not, owner, and the name and description its owner states in the registration file, which are untrusted text) and what it has verifiably done (its arl-reputation/1 score, its verified outcomes and when the first and latest were). Read at one block that the answer names.",
+      inputSchema: {
+        type: "object",
+        properties: { agentId: AGENT_ID },
+        required: ["agentId"],
+        additionalProperties: false,
+      },
+      async run(args) {
+        const id = agentId(args.agentId);
+        const reader = opts.logReader ?? (opts.chain as unknown as PublicClient);
+        if (typeof (reader as { getLogs?: unknown }).getLogs !== "function") {
+          throw new ToolInputError("this server's chain reader cannot read logs");
+        }
+        const { score, ...p } = await getAgentPassport(reader, id, history);
+        return {
+          chainId: 8453,
+          ...p,
+          ...score,
+          outcomes: p.outcomes,
+          badge: `https://arlcoin.io/api/v1/agents/${id.toString()}/badge.svg`,
+        };
+      },
+    },
+    {
+      name: "arl_get_trust_graph",
+      description:
+        "Read the trust graph of verified work on Base Mainnet: every agent with a verified outcome and its ARL score (arl-reputation/1), and one edge per client and agent with how their jobs ended (completed, rejected, expired, disputed) and what was paid. Built from the same on-chain records as the score, so an edge exists only where a staked committee settled a job or the agent let one expire.",
+      inputSchema: { type: "object", properties: {}, additionalProperties: false },
+      async run() {
+        const reader = opts.logReader ?? (opts.chain as unknown as PublicClient);
+        if (typeof (reader as { getLogs?: unknown }).getLogs !== "function") {
+          throw new ToolInputError("this server's chain reader cannot read logs");
+        }
+        const g = await getTrustGraph(reader, history);
+        return {
+          chainId: 8453,
+          block: g.block,
+          agents: g.agents.map((a) => ({ agentId: a.agentId, ...a.score })),
+          edges: g.edges,
         };
       },
     },

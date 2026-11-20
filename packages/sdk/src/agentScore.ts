@@ -9,9 +9,9 @@
 // evaluators never had a job (contracts/deploy/base-mainnet-jobs.json).
 
 import {
+  getAddress,
   isAddressEqual,
   parseAbi,
-  parseAbiItem,
   type Address,
   type Hex,
   type PublicClient,
@@ -54,20 +54,43 @@ export const VERIFIED_EVALUATORS = [
 const registryEvents = parseAbi([
   "event NewFeedback(uint256 indexed agentId, address indexed clientAddress, uint64 feedbackIndex, int128 value, uint8 valueDecimals, string indexed indexedTag1, string tag1, string tag2, string endpoint, string feedbackURI, bytes32 feedbackHash)",
 ]);
-const evaluatorEvents = parseAbi([
+/** Every event of the escrow and the verified evaluator: all carry the job id as first topic. */
+export const protocolEvents = parseAbi([
+  "event JobCreated(uint256 indexed jobId, address indexed client, address indexed provider, address evaluator, uint256 expiredAt, address hook)",
+  "event ProviderSet(uint256 indexed jobId, address indexed provider)",
+  "event BudgetSet(uint256 indexed jobId, uint256 amount)",
+  "event JobFunded(uint256 indexed jobId, address indexed client, uint256 amount)",
+  "event JobSubmitted(uint256 indexed jobId, address indexed provider, bytes32 deliverable)",
+  "event JobCompleted(uint256 indexed jobId, address indexed evaluator, bytes32 reason)",
+  "event JobRejected(uint256 indexed jobId, address indexed rejector, bytes32 reason)",
+  "event JobExpired(uint256 indexed jobId)",
+  "event PaymentReleased(uint256 indexed jobId, address indexed provider, uint256 amount)",
+  "event Refunded(uint256 indexed jobId, address indexed client, uint256 amount)",
   "event Configured(uint256 indexed jobId, uint8 tier, uint8 threshold, uint64 voteWindow, uint64 challengeWindow, uint96 bond, uint256 providerAgentId, bytes32 specHash, address[] committee)",
   "event CommitteeApproved(uint256 indexed jobId, address indexed provider)",
-  "event FeedbackFailed(uint256 indexed jobId, uint256 agentId)",
-  "event Finalized(uint256 indexed jobId, bool approved, bytes32 voteHash)",
+  "event Accepted(uint256 indexed jobId, address indexed validator, uint256 bond)",
+  "event VotingStarted(uint256 indexed jobId, uint64 voteEnds)",
+  "event Voted(uint256 indexed jobId, address indexed validator, bool approve, bytes32 deliverable, bytes32 evidence)",
+  "event Decided(uint256 indexed jobId, bool approved, uint64 challengeEnds)",
   "event Disputed(uint256 indexed jobId, address indexed challenger, bytes32 evidence)",
+  "event Resolved(uint256 indexed jobId, bool approved, bool overturned, bytes32 reason)",
+  "event Slashed(uint256 indexed jobId, address indexed account, uint256 amount)",
   "event Failed(uint256 indexed jobId)",
+  "event Finalized(uint256 indexed jobId, bool approved, bytes32 voteHash)",
+  "event Released(uint256 indexed jobId)",
+  "event FeedbackFailed(uint256 indexed jobId, uint256 agentId)",
+  "event RefundDeferred(uint256 indexed jobId)",
+  "event DisputeExpired(uint256 indexed jobId)",
 ]);
-const jobExpired = parseAbiItem("event JobExpired(uint256 indexed jobId)");
 
 const MAX_SPAN = 50_000n;
 const MIN_SPAN = 500n;
-const RATE_LIMITED = /rate limit|request limit reached|too many requests|status: 429|-32011/i;
-const TOO_WIDE = /range|query returned more than|response size|10000 results|-32614|-32005|exceed/i;
+// A rate limit and a range that is too wide are told apart by their wording: asking for a smaller
+// range does not help against a rate limit, and waiting does not help against a range limit.
+const TOO_WIDE =
+  /block range|range (is )?too|max(imum)? (block )?range|query returned more than|response size|10000 results|-32614|-32602/i;
+const RATE_LIMITED =
+  /rate limit|request limit|limit exceeded|too many requests|status: 429|-32011|-32005|-32016/i;
 
 const errorText = (e: unknown) =>
   e instanceof Error
@@ -83,11 +106,14 @@ const CONCURRENCY = 2;
  * read two at a time; the answer keeps block order. Once the endpoint rate-limits a request the
  * rest are read one after another.
  */
-async function logsInRange<T>(
+export async function logsInRange<T>(
   from: bigint,
   to: bigint,
   read: (fromBlock: bigint, toBlock: bigint) => Promise<T[]>,
+  wholeRange = false,
 ): Promise<T[]> {
+  // A client that stores finished scans itself takes the whole range in one request.
+  if (wholeRange) return read(from, to);
   const spans: [bigint, bigint][] = [];
   for (let start = from; start <= to; start += MAX_SPAN) {
     const end = start + MAX_SPAN - 1n;
@@ -133,12 +159,12 @@ async function logsInSpan<T>(
       waits = 0;
     } catch (e) {
       const text = errorText(e);
-      if (RATE_LIMITED.test(text) && waits < 5) {
+      if (TOO_WIDE.test(text) && span > MIN_SPAN) {
+        span /= 2n;
+      } else if (RATE_LIMITED.test(text) && waits < 5) {
         onRateLimited();
         waits += 1;
         await new Promise((r) => setTimeout(r, 1000 * waits));
-      } else if (TOO_WIDE.test(text) && span > MIN_SPAN) {
-        span /= 2n;
       } else {
         throw e;
       }
@@ -156,41 +182,79 @@ export interface AgentScore {
   skipped: { what: string; reason: string }[];
 }
 
-export async function getAgentScore(
+export interface HistoryOptions {
+  /**
+   * Ask for the whole history in one `getLogs` request instead of 50,000-block ranges. Only for a
+   * client whose transport stores finished scans and splits the request itself (the Agent API's
+   * `cachedLogsProvider`); a plain RPC endpoint refuses a range this wide.
+   */
+  wholeRange?: boolean;
+}
+
+/** The first block any verified evaluator has code at: where every scan starts. */
+export const HISTORY_START = VERIFIED_EVALUATORS.reduce<bigint>(
+  (min, e) => (e.fromBlock < min ? e.fromBlock : min),
+  VERIFIED_EVALUATORS[0].fromBlock,
+);
+
+/**
+ * The events of every escrow and evaluator in [from, to], in one request per range. The filter is
+ * the same for every caller, so a provider that stores finished ranges serves the score, the
+ * trust graph and the audit trail from one store.
+ */
+export function readProtocolLogs(
   client: PublicClient,
-  agentId: bigint,
-  opts: { now?: number } = {},
-): Promise<AgentScore> {
+  from: bigint,
+  to: bigint,
+  opts: HistoryOptions = {},
+) {
+  return logsInRange(
+    from,
+    to,
+    (fromBlock, toBlock) =>
+      client.getLogs({
+        address: VERIFIED_EVALUATORS.flatMap((e) => [e.evaluator, e.escrow]),
+        events: protocolEvents,
+        fromBlock,
+        toBlock,
+      }),
+    opts.wholeRange,
+  );
+}
+
+/** Everything the verified evaluators recorded, read once and used for any number of agents. */
+async function readHistory(client: PublicClient, opts: HistoryOptions = {}) {
   const head = await client.getBlock();
   const to = head.number;
-  const from = VERIFIED_EVALUATORS.reduce<bigint>(
-    (min, e) => (e.fromBlock < min ? e.fromBlock : min),
-    VERIFIED_EVALUATORS[0].fromBlock,
-  );
+  const from = HISTORY_START;
 
   // Two reads per block range: the feedback the evaluators wrote to the registry, and the
   // evaluators' and escrows' events (few, for every job) in one request. Neither filter names the
   // agent, so a provider that stores finished ranges serves every agent from the same store.
   const [feedbackLogs, protocolLogs] = await Promise.all([
-    logsInRange(from, to, (fromBlock, toBlock) =>
-      client.getLogs({
-        address: REPUTATION_REGISTRY,
-        event: registryEvents[0],
-        args: { clientAddress: VERIFIED_EVALUATORS.map((e) => e.evaluator) },
-        fromBlock,
-        toBlock,
-      }),
+    logsInRange(
+      from,
+      to,
+      (fromBlock, toBlock) =>
+        client.getLogs({
+          address: REPUTATION_REGISTRY,
+          event: registryEvents[0],
+          args: { clientAddress: VERIFIED_EVALUATORS.map((e) => e.evaluator) },
+          fromBlock,
+          toBlock,
+        }),
+      opts.wholeRange,
     ),
-    logsInRange(from, to, (fromBlock, toBlock) =>
-      client.getLogs({
-        address: VERIFIED_EVALUATORS.flatMap((e) => [e.evaluator, e.escrow]),
-        events: [...evaluatorEvents, jobExpired],
-        fromBlock,
-        toBlock,
-      }),
-    ),
+    readProtocolLogs(client, from, to, opts),
   ]);
 
+  return { head, to, feedbackLogs, protocolLogs };
+}
+type History = Awaited<ReturnType<typeof readHistory>>;
+
+/** One agent's verified outcomes from the history, with the jobs read at the history's block. */
+async function agentOutcomes(client: PublicClient, history: History, agentId: bigint) {
+  const { to, feedbackLogs, protocolLogs } = history;
   const evaluators: EvaluatorLogs[] = [];
   const jobs: JobRecord[] = [];
   for (const e of VERIFIED_EVALUATORS) {
@@ -280,13 +344,102 @@ export async function getAgentScore(
     });
   }
 
-  const { outcomes, skipped } = outcomesFromChain(agentId, feedback, evaluators, jobs);
-  const now = opts.now ?? Number(head.timestamp);
-  return { agentId, block: to, score: reputationScore(outcomes, now), outcomes, skipped };
+  return outcomesFromChain(agentId, feedback, evaluators, jobs);
+}
+
+export async function getAgentScore(
+  client: PublicClient,
+  agentId: bigint,
+  opts: { now?: number } & HistoryOptions = {},
+): Promise<AgentScore> {
+  const history = await readHistory(client, opts);
+  const { outcomes, skipped } = await agentOutcomes(client, history, agentId);
+  const now = opts.now ?? Number(history.head.timestamp);
+  return {
+    agentId,
+    block: history.to,
+    score: reputationScore(outcomes, now),
+    outcomes,
+    skipped,
+  };
+}
+
+/** Who hired whom, and how it ended: one edge per client and agent. */
+export interface TrustEdge {
+  client: Address;
+  agentId: bigint;
+  completed: number;
+  rejected: number;
+  expired: number;
+  disputed: number;
+  /** Budget of the completed jobs, in base units, per payment token. */
+  paid: Partial<Record<Outcome["token"], string>>;
+  /** Unix seconds of the first and the latest outcome between the two. */
+  first: number;
+  latest: number;
+}
+
+export interface TrustGraph {
+  /** The block everything was read at. */
+  block: bigint;
+  agents: { agentId: bigint; score: Score }[];
+  edges: TrustEdge[];
+}
+
+/**
+ * The trust graph of verified work: every agent with a verified outcome, its score, and an edge
+ * for each client it worked for. Built from the same records as the score, so an edge exists only
+ * where a committee settled a job (or the agent let one expire).
+ */
+export async function getTrustGraph(
+  client: PublicClient,
+  opts: { now?: number } & HistoryOptions = {},
+): Promise<TrustGraph> {
+  const history = await readHistory(client, opts);
+  const now = opts.now ?? Number(history.head.timestamp);
+  const ids = new Set<bigint>();
+  for (const l of history.protocolLogs) {
+    if (l.eventName === "Configured")
+      ids.add((l.args as { providerAgentId: bigint }).providerAgentId);
+  }
+  const agents: TrustGraph["agents"] = [];
+  const edges = new Map<string, TrustEdge>();
+  for (const agentId of [...ids].sort((x, y) => (x < y ? -1 : x > y ? 1 : 0))) {
+    const { outcomes } = await agentOutcomes(client, history, agentId);
+    if (outcomes.length === 0) continue;
+    agents.push({ agentId, score: reputationScore(outcomes, now) });
+    for (const o of outcomes) {
+      const key = `${o.client.toLowerCase()}:${agentId.toString()}`;
+      let e = edges.get(key);
+      if (!e) {
+        e = {
+          client: getAddress(o.client),
+          agentId,
+          completed: 0,
+          rejected: 0,
+          expired: 0,
+          disputed: 0,
+          paid: {},
+          first: o.final_at,
+          latest: o.final_at,
+        };
+        edges.set(key, e);
+      }
+      if (o.outcome === "completed") {
+        e.completed += 1;
+        e.paid[o.token] = (BigInt(e.paid[o.token] ?? "0") + BigInt(o.budget)).toString();
+      } else if (o.outcome === "rejected") e.rejected += 1;
+      else if (o.outcome === "expired") e.expired += 1;
+      if (o.disputed) e.disputed += 1;
+      e.first = Math.min(e.first, o.final_at);
+      e.latest = Math.max(e.latest, o.final_at);
+    }
+  }
+  return { block: history.to, agents, edges: [...edges.values()] };
 }
 
 const times = new Map<bigint, number>();
-async function blockTime(client: PublicClient, block: bigint): Promise<number> {
+export async function blockTime(client: PublicClient, block: bigint): Promise<number> {
   const known = times.get(block);
   if (known !== undefined) return known;
   const t = Number((await client.getBlock({ blockNumber: block })).timestamp);

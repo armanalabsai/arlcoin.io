@@ -48,6 +48,18 @@ out = outcomes_of(42)  # token="USDC" for the USDC evaluator
 print(out.approved, out.rejected)
 ```
 
+Read an agent's ARL score (arl-reputation/1) and its badge through the Agent API, with no key and
+no RPC. The score counts verified outcomes only and is `None` until the agent has 3 outcomes from
+2 distinct clients:
+
+```python
+from arl_protocol import agent_score, badge_url
+
+score = agent_score(42)
+print(score.score_bps, score.completed, score.rejected, len(score.outcomes))
+print(badge_url(42))  # an SVG badge for a README or a page
+```
+
 The evaluator is the client's wallet unless `create_job(..., evaluator="0x...")` names another.
 Every write is simulated first: a call that would fail raises `ArlError` with the reason before
 any gas is spent.
