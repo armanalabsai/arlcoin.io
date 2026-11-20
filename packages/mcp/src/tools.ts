@@ -51,6 +51,11 @@ export interface ToolOptions {
    * 50,000-block ranges, so a score stays within a few requests.
    */
   logReader?: PublicClient;
+  /**
+   * True when `logReader` stores finished log scans and splits wide ranges itself
+   * (`cachedLogsProvider`): the history is then asked for in one request.
+   */
+  wholeRangeLogs?: boolean;
 }
 
 const readAbi = parseAbi([
@@ -168,6 +173,7 @@ const OPEN_INPUT = {
 
 export function arlTools(opts: ToolOptions): Tool[] {
   const deployments = opts.deployments ?? BASE_MAINNET_TASK_DEPLOYMENTS;
+  const history = { wholeRange: opts.wholeRangeLogs === true };
 
   /** Chain id and latest block, read once per call so every answer names its block. */
   async function head(): Promise<{ chainId: number; block: bigint; timestamp: bigint }> {
@@ -334,7 +340,7 @@ export function arlTools(opts: ToolOptions): Tool[] {
         if (typeof (reader as { getLogs?: unknown }).getLogs !== "function") {
           throw new ToolInputError("this server's chain reader cannot read logs");
         }
-        const a = await getJobAudit(reader, t, id);
+        const a = await getJobAudit(reader, t, id, history);
         return { chainId: 8453, ...a };
       },
     },
@@ -391,7 +397,7 @@ export function arlTools(opts: ToolOptions): Tool[] {
         if (typeof (reader as { getLogs?: unknown }).getLogs !== "function") {
           throw new ToolInputError("this server's chain reader cannot read logs");
         }
-        const r = await getAgentScore(reader, id);
+        const r = await getAgentScore(reader, id, history);
         return {
           chainId: 8453,
           block: r.block,
@@ -418,7 +424,7 @@ export function arlTools(opts: ToolOptions): Tool[] {
         if (typeof (reader as { getLogs?: unknown }).getLogs !== "function") {
           throw new ToolInputError("this server's chain reader cannot read logs");
         }
-        const { score, ...p } = await getAgentPassport(reader, id);
+        const { score, ...p } = await getAgentPassport(reader, id, history);
         return {
           chainId: 8453,
           ...p,
@@ -438,7 +444,7 @@ export function arlTools(opts: ToolOptions): Tool[] {
         if (typeof (reader as { getLogs?: unknown }).getLogs !== "function") {
           throw new ToolInputError("this server's chain reader cannot read logs");
         }
-        const g = await getTrustGraph(reader);
+        const g = await getTrustGraph(reader, history);
         return {
           chainId: 8453,
           block: g.block,

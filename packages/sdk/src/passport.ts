@@ -10,7 +10,7 @@
 import { getAddress, parseAbi, type Address, type PublicClient } from "viem";
 
 import type { Outcome, Score } from "../../protocol/src/index.ts";
-import { getAgentScore } from "./agentScore.ts";
+import { getAgentScore, type HistoryOptions } from "./agentScore.ts";
 
 /** Canonical ERC-8004 IdentityRegistry on Base Mainnet. */
 export const IDENTITY_REGISTRY: Address = "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432";
@@ -78,8 +78,9 @@ function base64(text: string): Uint8Array {
 export async function getAgentPassport(
   client: PublicClient,
   agentId: bigint,
+  opts: HistoryOptions = {},
 ): Promise<AgentPassport> {
-  const scored = await getAgentScore(client, agentId);
+  const scored = await getAgentScore(client, agentId, opts);
   const at = { blockNumber: scored.block };
   let owner: Address | undefined;
   let uri = "";

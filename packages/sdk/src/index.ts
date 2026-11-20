@@ -95,6 +95,7 @@ export {
   getAgentScore,
   getTrustGraph,
   type AgentScore,
+  type HistoryOptions,
   type TrustEdge,
   type TrustGraph,
 } from "./agentScore.ts";

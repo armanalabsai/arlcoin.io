@@ -85,8 +85,12 @@ export const protocolEvents = parseAbi([
 
 const MAX_SPAN = 50_000n;
 const MIN_SPAN = 500n;
-const RATE_LIMITED = /rate limit|request limit reached|too many requests|status: 429|-32011/i;
-const TOO_WIDE = /range|query returned more than|response size|10000 results|-32614|-32005|exceed/i;
+// A rate limit and a range that is too wide are told apart by their wording: asking for a smaller
+// range does not help against a rate limit, and waiting does not help against a range limit.
+const TOO_WIDE =
+  /block range|range (is )?too|max(imum)? (block )?range|query returned more than|response size|10000 results|-32614|-32602/i;
+const RATE_LIMITED =
+  /rate limit|request limit|limit exceeded|too many requests|status: 429|-32011|-32005|-32016/i;
 
 const errorText = (e: unknown) =>
   e instanceof Error
@@ -106,7 +110,10 @@ export async function logsInRange<T>(
   from: bigint,
   to: bigint,
   read: (fromBlock: bigint, toBlock: bigint) => Promise<T[]>,
+  wholeRange = false,
 ): Promise<T[]> {
+  // A client that stores finished scans itself takes the whole range in one request.
+  if (wholeRange) return read(from, to);
   const spans: [bigint, bigint][] = [];
   for (let start = from; start <= to; start += MAX_SPAN) {
     const end = start + MAX_SPAN - 1n;
@@ -152,12 +159,12 @@ async function logsInSpan<T>(
       waits = 0;
     } catch (e) {
       const text = errorText(e);
-      if (RATE_LIMITED.test(text) && waits < 5) {
+      if (TOO_WIDE.test(text) && span > MIN_SPAN) {
+        span /= 2n;
+      } else if (RATE_LIMITED.test(text) && waits < 5) {
         onRateLimited();
         waits += 1;
         await new Promise((r) => setTimeout(r, 1000 * waits));
-      } else if (TOO_WIDE.test(text) && span > MIN_SPAN) {
-        span /= 2n;
       } else {
         throw e;
       }
@@ -175,6 +182,15 @@ export interface AgentScore {
   skipped: { what: string; reason: string }[];
 }
 
+export interface HistoryOptions {
+  /**
+   * Ask for the whole history in one `getLogs` request instead of 50,000-block ranges. Only for a
+   * client whose transport stores finished scans and splits the request itself (the Agent API's
+   * `cachedLogsProvider`); a plain RPC endpoint refuses a range this wide.
+   */
+  wholeRange?: boolean;
+}
+
 /** The first block any verified evaluator has code at: where every scan starts. */
 export const HISTORY_START = VERIFIED_EVALUATORS.reduce<bigint>(
   (min, e) => (e.fromBlock < min ? e.fromBlock : min),
@@ -186,19 +202,28 @@ export const HISTORY_START = VERIFIED_EVALUATORS.reduce<bigint>(
  * the same for every caller, so a provider that stores finished ranges serves the score, the
  * trust graph and the audit trail from one store.
  */
-export function readProtocolLogs(client: PublicClient, from: bigint, to: bigint) {
-  return logsInRange(from, to, (fromBlock, toBlock) =>
-    client.getLogs({
-      address: VERIFIED_EVALUATORS.flatMap((e) => [e.evaluator, e.escrow]),
-      events: protocolEvents,
-      fromBlock,
-      toBlock,
-    }),
+export function readProtocolLogs(
+  client: PublicClient,
+  from: bigint,
+  to: bigint,
+  opts: HistoryOptions = {},
+) {
+  return logsInRange(
+    from,
+    to,
+    (fromBlock, toBlock) =>
+      client.getLogs({
+        address: VERIFIED_EVALUATORS.flatMap((e) => [e.evaluator, e.escrow]),
+        events: protocolEvents,
+        fromBlock,
+        toBlock,
+      }),
+    opts.wholeRange,
   );
 }
 
 /** Everything the verified evaluators recorded, read once and used for any number of agents. */
-async function readHistory(client: PublicClient) {
+async function readHistory(client: PublicClient, opts: HistoryOptions = {}) {
   const head = await client.getBlock();
   const to = head.number;
   const from = HISTORY_START;
@@ -207,16 +232,20 @@ async function readHistory(client: PublicClient) {
   // evaluators' and escrows' events (few, for every job) in one request. Neither filter names the
   // agent, so a provider that stores finished ranges serves every agent from the same store.
   const [feedbackLogs, protocolLogs] = await Promise.all([
-    logsInRange(from, to, (fromBlock, toBlock) =>
-      client.getLogs({
-        address: REPUTATION_REGISTRY,
-        event: registryEvents[0],
-        args: { clientAddress: VERIFIED_EVALUATORS.map((e) => e.evaluator) },
-        fromBlock,
-        toBlock,
-      }),
+    logsInRange(
+      from,
+      to,
+      (fromBlock, toBlock) =>
+        client.getLogs({
+          address: REPUTATION_REGISTRY,
+          event: registryEvents[0],
+          args: { clientAddress: VERIFIED_EVALUATORS.map((e) => e.evaluator) },
+          fromBlock,
+          toBlock,
+        }),
+      opts.wholeRange,
     ),
-    readProtocolLogs(client, from, to),
+    readProtocolLogs(client, from, to, opts),
   ]);
 
   return { head, to, feedbackLogs, protocolLogs };
@@ -321,9 +350,9 @@ async function agentOutcomes(client: PublicClient, history: History, agentId: bi
 export async function getAgentScore(
   client: PublicClient,
   agentId: bigint,
-  opts: { now?: number } = {},
+  opts: { now?: number } & HistoryOptions = {},
 ): Promise<AgentScore> {
-  const history = await readHistory(client);
+  const history = await readHistory(client, opts);
   const { outcomes, skipped } = await agentOutcomes(client, history, agentId);
   const now = opts.now ?? Number(history.head.timestamp);
   return {
@@ -364,9 +393,9 @@ export interface TrustGraph {
  */
 export async function getTrustGraph(
   client: PublicClient,
-  opts: { now?: number } = {},
+  opts: { now?: number } & HistoryOptions = {},
 ): Promise<TrustGraph> {
-  const history = await readHistory(client);
+  const history = await readHistory(client, opts);
   const now = opts.now ?? Number(history.head.timestamp);
   const ids = new Set<bigint>();
   for (const l of history.protocolLogs) {

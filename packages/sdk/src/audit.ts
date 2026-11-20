@@ -7,7 +7,13 @@
 
 import { getAddress, isAddressEqual, type Address, type Hex, type PublicClient } from "viem";
 
-import { HISTORY_START, VERIFIED_EVALUATORS, blockTime, readProtocolLogs } from "./agentScore.ts";
+import {
+  HISTORY_START,
+  VERIFIED_EVALUATORS,
+  blockTime,
+  readProtocolLogs,
+  type HistoryOptions,
+} from "./agentScore.ts";
 
 /** What each event means, in the words of the flow (spec/x402-arl-escrow). */
 const STEPS: Record<string, string> = {
@@ -96,11 +102,12 @@ export async function getJobAudit(
   client: PublicClient,
   token: "ARL" | "USDC",
   jobId: bigint,
+  opts: HistoryOptions = {},
 ): Promise<JobAudit> {
   const deployment = VERIFIED_EVALUATORS.find((e) => e.token === token);
   if (!deployment) throw new Error(`no verified evaluator for ${token}`);
   const head = await client.getBlock();
-  const logs = await readProtocolLogs(client, HISTORY_START, head.number);
+  const logs = await readProtocolLogs(client, HISTORY_START, head.number, opts);
 
   const entries: AuditEntry[] = [];
   for (const l of logs) {

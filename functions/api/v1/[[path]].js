@@ -19,27 +19,38 @@ const chain = createPublicClient({
   chain: base,
   transport: fallback(RPCS.map((url) => http(url, { timeout: 3000, retryCount: 0 }))),
 });
-// Wide log reads (the agent score) go to one endpoint that accepts 50,000-block getLogs ranges,
-// through a provider that keeps finished ranges in the Cache API: a score reads only the newest
-// blocks from the RPC, however long the history grows (packages/mcp/src/cachedLogs.ts).
+// Log reads for the agent score, the trust graph and the audit trail go through a provider that
+// keeps each scan's finished part in the Cache API and reads only the newest blocks
+// (packages/mcp/src/cachedLogs.ts). Only LOG_RPC accepts 50,000-block ranges, and it rate-limits
+// Cloudflare's shared addresses, so small gaps fall back to NARROW_RPC in 1,000-block requests and
+// every other call goes to RPCS.
 const LOG_RPC = "https://base-rpc.publicnode.com";
+const NARROW_RPC = "https://base.gateway.tenderly.co";
 const logCache = {
   async match(key) {
-    const hit = await caches.default.match(`https://arl-log-cache.invalid/${key}`);
+    const hit = await caches.default.match(`https://arl-log-cache.invalid/v3/${key}`);
     return hit ? hit.text() : undefined;
   },
   put(key, value) {
     return caches.default.put(
-      `https://arl-log-cache.invalid/${key}`,
+      `https://arl-log-cache.invalid/v3/${key}`,
       new Response(value, { headers: { "cache-control": "public, max-age=31536000, immutable" } }),
     );
   },
 };
 const logReader = createPublicClient({
   chain: base,
-  transport: custom(cachedLogsProvider({ url: LOG_RPC, cache: logCache }), { retryCount: 1 }),
+  transport: custom(
+    cachedLogsProvider({
+      url: LOG_RPC,
+      narrow: { url: NARROW_RPC, maxSpan: 1000n, maxRequests: 12 },
+      readUrls: ["https://mainnet.base.org", "https://base.drpc.org", LOG_RPC],
+      cache: logCache,
+    }),
+    { retryCount: 0 },
+  ),
 });
-const tools = arlTools({ chain, logReader });
+const tools = arlTools({ chain, logReader, wholeRangeLogs: true });
 
 /** GET /api/v1/health: how each endpoint answers from here, for the uptime monitor. */
 async function health() {
