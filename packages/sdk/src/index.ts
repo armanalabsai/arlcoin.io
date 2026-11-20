@@ -60,6 +60,17 @@ export {
   type EscrowOfferInput,
 } from "./escrowProvider.ts";
 export {
+  DELIVERABLE_HEADER,
+  expressPayOnProof,
+  memoryUsedJobs,
+  payOnProof,
+  type PayOnProofConfig,
+  type PayOnProofDeps,
+  type PayOnProofHandler,
+  type PayOnProofResult,
+  type UsedJobs,
+} from "./payOnProof.ts";
+export {
   ArlJobError,
   ESCROWS,
   STATUS as JOB_STATUS,

@@ -55,6 +55,36 @@ A task that fails validation sends no transaction. `prepareTask` and `fundingTra
 the same calls unsigned, for wallets that sign elsewhere. `parseTask`, `taskHash`,
 `checkTaskAgainstPolicy` and the other protocol functions are exported too.
 
+## Get paid on proof (sell a service to agents)
+
+`payOnProof` wraps an HTTP handler so every call is paid through a verified job. The client pays
+into escrow first, the service does the work, and the money reaches the service only after a
+staked committee has checked the result. It works in any runtime with the Fetch API (Next.js route
+handlers, Hono, Cloudflare Workers, Bun, Deno); `expressPayOnProof` does the same for Express.
+
+```ts
+import { payOnProof } from "arl-protocol-sdk";
+
+export const POST = payOnProof(
+  {
+    clients, // the service's own wallet is the provider
+    offer: { chainId: 8453, provider, specUri, specHash, budget, committee, threshold: 2 },
+  },
+  async (req, job) => {
+    const result = await runTheJob(await req.json()); // the work the spec describes
+    return { body: JSON.stringify(result), deliverable: resultHash };
+  },
+);
+```
+
+Without an `X-ARL-Job` header the service answers `402` with an `arl-escrow` offer;
+`payVerified` (or any x402 client that knows the scheme) opens and funds the job and asks again.
+For a funded job that matches the offer, the handler runs once, the response carries
+`X-ARL-Job` and `X-ARL-Deliverable`, and the deliverable is submitted on chain as soon as enough
+committee members have accepted the job. A job is served once: the default record of served jobs
+lives in memory, so a service with several instances or restarts passes `usedJobs` backed by a
+database or KV store. On runtimes that stop work when the response ends, pass `waitUntil`.
+
 ## Also in the SDK
 
 | Function                                   | What it does                                                              |
@@ -63,6 +93,7 @@ the same calls unsigned, for wallets that sign elsewhere. `parseTask`, `taskHash
 | `quoteArl`, `acquireArl`                   | Buy exact ARL in the official Uniswap v3 pools, paying USDC, USDT or ETH |
 | `openVerifiedJob`, `getVerdict`, `getOutcomes`, `finalizeJob` | Verified jobs: a committee of staked ARL validators checks the work, and `getOutcomes` reads an agent's verified `outcomesOf` counts |
 | `payVerified`                              | Pay a service that answers HTTP 402 with an ARL escrow offer              |
+| `payOnProof`, `expressPayOnProof`          | Sell a service paid through a verified job (the provider side of `payVerified`) |
 
 ## Contracts on Base Mainnet
 
