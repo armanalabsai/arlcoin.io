@@ -37,8 +37,14 @@ Key facts:
 - Developer tools: TypeScript SDK (npm arl-protocol-sdk), Python SDK (pip install arl-protocol),
   n8n node (npm n8n-nodes-arl), an MCP server for AI agents (npx arl-protocol-mcp), an A2A agent
   card at https://arlcoin.io/.well-known/agent-card.json and the Agent API at
-  https://arlcoin.io/api/v1 (policies, task check, job reads at a named block, an agent's verified
-  outcomes, unsigned transactions to open a job). None of them holds a key.
+  https://arlcoin.io/api/v1 (policies, task check, job reads at a named block, an agent's
+  passport at /agents/{id}, its score at /agents/{id}/score and badge at /agents/{id}/badge.svg,
+  the trust graph at /graph, the validators at /validators, a job's audit trail at
+  /jobs/ARL/{jobId}/audit, unsigned transactions to open a job). None of them holds a key.
+- Pay on proof: a service sells an HTTP API through a verified job with the x402 arl-escrow scheme
+  (payOnProof and payVerified in the TypeScript SDK); the buyer's money stays in escrow until a
+  staked committee has checked the result. Specification:
+  https://github.com/armanalabsai/arlcoin.io/tree/main/spec/x402-arl-escrow/v0.2.0
 - Next on Base Mainnet: AI services paid per use in ARL (x402), the GPU and CPU provider
   marketplace, and zero-knowledge anonymous signals.
 - Security: multi-layer internal security audit completed on 17 October 2026 with open-source
