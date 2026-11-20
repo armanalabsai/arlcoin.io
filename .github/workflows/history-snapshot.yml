@@ -1,0 +1,46 @@
+name: History snapshot
+
+# Every ten minutes: reads the verified evaluators' events from Base Mainnet and publishes them as
+# packages/mcp/log-seed.json on the "history-snapshot" release. The Agent API reads the agent
+# score, passport, trust graph, audit trail and validators from that file, because the public
+# endpoints refuse most log requests that come from Cloudflare (functions/api/v1). The file holds
+# public on-chain events only. Nothing is signed or sent to the chain.
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: history-snapshot
+  cancel-in-progress: false
+
+# Actions are pinned to full commit SHAs; the tag is noted for review.
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write # uploads the file to the release, nothing else
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Read the history
+        run: node packages/mcp/seed.ts
+      - name: Publish the snapshot
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          gh release view history-snapshot >/dev/null 2>&1 || gh release create history-snapshot \
+            --title "History snapshot" --prerelease --latest=false \
+            --notes "Machine-written: the verified evaluators' events, refreshed every ten minutes by the History snapshot workflow. The Agent API reads it. Not a software release."
+          gh release upload history-snapshot packages/mcp/log-seed.json --clobber

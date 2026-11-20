@@ -12,6 +12,7 @@ function setup(
   store = new Map<string, string>(),
   refuseWide = () => false,
   seed?: Record<string, string>,
+  extra: Partial<Parameters<typeof cachedLogsProvider>[0]> = {},
 ) {
   const cache: LogCache = {
     match: (k) => Promise.resolve(store.get(k)),
@@ -29,6 +30,9 @@ function setup(
     };
     if (method === "eth_blockNumber") {
       return Promise.resolve(Response.json({ result: `0x${head.toString(16)}` }));
+    }
+    if (method === "eth_getBlockByNumber") {
+      return Promise.resolve(Response.json({ result: { number: params[0], asked: url } }));
     }
     if (method !== "eth_getLogs") return Promise.resolve(Response.json({ result: url }));
     if (params[0]?.toBlock === "latest") return Promise.resolve(Response.json({ result: [] }));
@@ -51,6 +55,7 @@ function setup(
     cache,
     fetch: fakeFetch,
     ...(seed ? { seed } : {}),
+    ...extra,
   });
   return { provider, asked, store };
 }
@@ -143,6 +148,52 @@ describe("cached log scans", () => {
     const next = setup(126_000n, seeded.store, () => false, seed);
     await next.provider.request(logs(1n, 126_000n));
     assert.deepEqual(next.asked, ["wide 124001-126000"]);
+  });
+
+  it("pinned: presents the chain as of the stored scans and asks no endpoint for logs", async () => {
+    const made = setup(120_000n);
+    await made.provider.request(logs(1n, 120_000n));
+    const seed = Object.fromEntries(made.store); // reaches block 119,000
+
+    const pinned = setup(125_000n, new Map(), () => true, seed, { pinned: true });
+    assert.equal(await pinned.provider.request({ method: "eth_blockNumber" }), h(119_000n));
+    const latest = (await pinned.provider.request({
+      method: "eth_getBlockByNumber",
+      params: ["latest", false],
+    })) as { number: string };
+    assert.equal(latest.number, h(119_000n));
+    // A block asked for by number is not changed.
+    const named = (await pinned.provider.request({
+      method: "eth_getBlockByNumber",
+      params: [h(7n), false],
+    })) as { number: string };
+    assert.equal(named.number, h(7n));
+    const found = await pinned.provider.request(logs(1n, 119_000n));
+    assert.deepEqual(blocks(found), [1, 50_000, 50_001, 100_000, 100_001]);
+    assert.deepEqual(pinned.asked, []);
+  });
+
+  it("pinned: moves to a newer snapshot, and uses the real head when nothing is stored", async () => {
+    const made = setup(120_000n);
+    await made.provider.request(logs(1n, 120_000n));
+    const seed = Object.fromEntries(made.store);
+    const later = setup(200_000n, new Map(made.store));
+    await later.provider.request(logs(1n, 200_000n));
+    const newer = Object.fromEntries(later.store); // reaches block 199,000
+
+    const pinned = setup(250_000n, new Map(), () => true, seed, {
+      pinned: true,
+      snapshot: () => Promise.resolve(newer),
+    });
+    assert.equal(await pinned.provider.request({ method: "eth_blockNumber" }), h(199_000n));
+    await pinned.provider.request(logs(1n, 199_000n));
+    assert.deepEqual(pinned.asked, []);
+
+    const empty = setup(250_000n, new Map(), () => false, undefined, {
+      pinned: true,
+      snapshot: () => Promise.reject(new Error("offline")),
+    });
+    assert.equal(await empty.provider.request({ method: "eth_blockNumber" }), h(250_000n));
   });
 
   it("keeps filters apart and never stores a moving range", async () => {
