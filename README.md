@@ -62,6 +62,12 @@ the upheld deliverable; plus in v7: a rejection closed with `release` reaches th
 described by `contracts/deploy/bytecode.json`. The earlier v2 escrows and v4, v5 and v6
 evaluators are retired; no job was ever created on them.
 
+The first verified job ran on these contracts on 2026-11-20: job 1 on the ARL escrow, 100 ARL,
+the three operator validators re-executed
+[its spec](https://arlcoin.io/jobs/first-verified-job/spec.json) in Docker and approved the
+deliverable. Every job and each agent's record is public at
+[arlcoin.io/app/scan](https://arlcoin.io/app/scan).
+
 ## Claims and evidence
 
 | Claim                                    | Code                                                                                                     | Tests                                                                                                                                       | Document                                                         | Status                         |
