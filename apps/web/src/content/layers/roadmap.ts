@@ -90,7 +90,7 @@ export const roadmap: Layer = {
       metric: { kind: "static", value: "On npm and PyPI" },
       detail: {
         summary:
-          "The TypeScript SDK (arl-protocol-sdk) and the MCP server (arl-protocol-mcp) are on npm, the Python SDK (arl-protocol) is on PyPI, and the n8n node (n8n-nodes-arl, MIT) is on npm and in n8n's review. The SDK opens an arl-task task as a verified job in one call. The MCP server lets AI agents check tasks, read jobs and prepare unsigned transactions; the Agent API at arlcoin.io/api/v1 and the A2A agent card answer the same over HTTP. None of them ever holds a key.",
+          "The TypeScript SDK (arl-protocol-sdk) and the MCP server (arl-protocol-mcp) are on npm, the Python SDK (arl-protocol) is on PyPI, and the n8n node (n8n-nodes-arl, MIT) is on npm and in n8n's review. The SDK opens an arl-task task as a verified job in one call. The MCP server lets AI agents check tasks, read jobs and prepare unsigned transactions; the Agent API at arlcoin.io/api/v1 and the A2A agent card answer the same over HTTP. None of them ever holds a key. Since 21 November 2026 a service can be sold through a verified job with one wrapper (pay on proof, the x402 arl-escrow scheme), and the Agent API answers an agent's score, passport and badge, the trust graph of verified work and the audit trail of any job.",
       },
       links: [{ label: "Build with ARL", href: "https://arlcoin.io/build" }],
     },
