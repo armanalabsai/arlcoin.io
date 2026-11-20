@@ -72,13 +72,74 @@ export async function loadAllJobs(client: PublicClient): Promise<Job[]> {
   return jobs.reverse();
 }
 
-/** All jobs on ARLJobs, refreshed while the page is open. */
+/**
+ * Every job for the explorer, read from contract state: `jobCounter` and one `getJob` per job, no
+ * event history. The history is read only when a job's status alone does not say whether it was
+ * ever funded (Rejected or Expired), so the usual page load is a handful of calls however old the
+ * escrow is. Newest first; deliverables are not included (the Jobs page reads them).
+ */
+export async function loadJobsFromState(client: PublicClient): Promise<Job[]> {
+  const count = await client.readContract({
+    address: JOBS.address,
+    abi: JOBS.abi,
+    functionName: "jobCounter",
+  });
+  const ids = Array.from({ length: Number(count) }, (_, i) => BigInt(i + 1));
+  const read = await Promise.all(
+    ids.map(async (id) => {
+      const j = await client.readContract({
+        address: JOBS.address,
+        abi: JOBS.abi,
+        functionName: "getJob",
+        args: [id],
+      });
+      return { id, j, status: statusName(j.status) };
+    }),
+  );
+  const unclear = read.some((r) => r.status === "Rejected" || r.status === "Expired");
+  const funded = unclear
+    ? new Set(
+        (
+          await eventsSince(client, deployBlock(JOBS), (range) =>
+            client.getContractEvents({
+              address: JOBS.address,
+              abi: JOBS.abi,
+              eventName: "JobFunded",
+              ...range,
+            }),
+          )
+        ).flatMap((l) => (l.args.jobId === undefined ? [] : [l.args.jobId])),
+      )
+    : new Set<bigint>();
+  return read
+    .map(
+      ({ id, j, status }) =>
+        ({
+          id,
+          client: j.client,
+          provider: j.provider,
+          evaluator: j.evaluator,
+          description: j.description,
+          budget: j.budget,
+          expiredAt: j.expiredAt,
+          status,
+          funded:
+            status === "Funded" ||
+            status === "Submitted" ||
+            status === "Completed" ||
+            funded.has(id),
+        }) satisfies Job,
+    )
+    .reverse();
+}
+
+/** All jobs on ARLJobs for the explorer, refreshed while the page is open. */
 export function useAllJobs() {
   const client = usePublicClient();
   return useQuery({
     queryKey: ["arl-all-jobs", client?.chain.id],
     enabled: !!client,
     refetchInterval: REFRESH_MS,
-    queryFn: () => (client ? loadAllJobs(client) : Promise.resolve([])),
+    queryFn: () => (client ? loadJobsFromState(client) : Promise.resolve([])),
   });
 }
