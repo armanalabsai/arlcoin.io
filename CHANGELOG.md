@@ -4,6 +4,16 @@ Notable changes to ARL Protocol, newest first. Dates are UTC. Every entry links 
 documents that back it. What is deployed on Base Mainnet is recorded in
 [docs/mainnet-services.md](docs/mainnet-services.md) and `contracts/deploy/`.
 
+## 2026-11-21
+
+- arl-protocol-sdk 0.3.1: `getValidators`, on top of 0.3.0's `payOnProof`, `getAgentScore`,
+  `getAgentPassport`, `getTrustGraph` and `getJobAudit`.
+- The Agent API reads the verified history from a snapshot published every ten minutes
+  ([History snapshot workflow](.github/workflows/history-snapshot.yml)); its answers name the
+  block they were read at.
+- ARLscan lists the validators of the verified evaluator
+  ([docs/app.md](docs/app.md#scan-arlscan)).
+
 ## 2026-11-20
 
 - The first verified job ran on Base Mainnet: job 1 on the ARL escrow, 100 ARL, re-executed and

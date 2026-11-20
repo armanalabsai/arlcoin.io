@@ -114,6 +114,10 @@ acted and the transaction. The page reads it from the Agent API
 (`GET /api/v1/jobs/ARL/{jobId}/audit`) when asked and checks the answer before showing it
 (`lib/audit.ts`). Base Mainnet builds only.
 
+The **Validators** table lists every address that staked on the verified evaluator: stake, the
+part locked on running jobs, jobs accepted, votes by direction and slashes, read from the Agent
+API (`GET /api/v1/validators`, checked in `lib/validators.ts`). Base Mainnet builds only.
+
 The page shows records, not a score. The ARL score is arl-reputation/1
 ([spec](../spec/arl-reputation/v0.1.0/README.md)): only verified outcomes count, weighted by
 budget and age, with no client above 25 % of the weight.
