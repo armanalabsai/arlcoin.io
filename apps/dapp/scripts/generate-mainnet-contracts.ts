@@ -41,7 +41,9 @@ const CONTRACTS = {
   ARLToken: { address: token.token, deployedOnBlock: 53_023_206 },
   ARLVestingWallet: { address: token.investorsVesting, deployedOnBlock: 53_023_098 },
   ARLStakingRewards: { address: services.staking, deployedOnBlock: 56_649_904 },
-  ARLJobs: { address: jobs.arl.jobs, deployedOnBlock: 53_315_381 },
+  // ARLJobs v3 (16 November 2026); 53_315_381 was the retired v2 escrow and made every job read
+  // scan 6 million extra blocks.
+  ARLJobs: { address: jobs.arl.jobs, deployedOnBlock: 58_067_169 },
 } as const;
 
 // Contracts whose deployed version is older than the current source keep that version's ABI.

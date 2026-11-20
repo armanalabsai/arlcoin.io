@@ -2364,7 +2364,7 @@ const baseMainnetContracts = {
           inputs: [],
         },
       ],
-      deployedOnBlock: 53315381,
+      deployedOnBlock: 58067169,
     },
   },
 } as const;
