@@ -93,5 +93,8 @@ export {
   REPUTATION_REGISTRY,
   VERIFIED_EVALUATORS,
   getAgentScore,
+  getTrustGraph,
   type AgentScore,
+  type TrustEdge,
+  type TrustGraph,
 } from "./agentScore.ts";

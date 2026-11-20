@@ -7,6 +7,7 @@
 //   GET  /api/v1/jobs/{ARL|USDC}/{jobId}   job, committee configuration and verdict
 //   GET  /api/v1/agents/{agentId}/outcomes verified approvals and rejections of an agent
 //   GET  /api/v1/agents/{agentId}/score    the agent's arl-reputation/1 score and its outcomes
+//   GET  /api/v1/graph                    the trust graph: agents, scores and client-agent edges
 //   GET  /api/v1/agents/{agentId}/badge.svg the same record as an SVG badge for a README or a page
 //   POST /api/v1/evidence/check           body: { evidence } -> outcome of an arl-evidence/2
 //   POST /api/v1/jobs/prepare             body: as arl_prepare_job -> unsigned createJob
@@ -107,6 +108,7 @@ const ROUTES: { method: "GET" | "POST"; path: RegExp; tool: string }[] = [
     path: /^\/api\/v1\/agents\/([0-9]{1,78})\/score$/,
     tool: "arl_get_agent_score",
   },
+  { method: "GET", path: /^\/api\/v1\/graph$/, tool: "arl_get_trust_graph" },
   { method: "POST", path: /^\/api\/v1\/evidence\/check$/, tool: "arl_check_evidence" },
   { method: "POST", path: /^\/api\/v1\/jobs\/prepare$/, tool: "arl_prepare_job" },
   { method: "POST", path: /^\/api\/v1\/jobs\/prepare-funding$/, tool: "arl_prepare_funding" },
@@ -182,7 +184,7 @@ export async function handleHttp(request: Request, tools: readonly Tool[]): Prom
         ? "public, max-age=3600"
         : route.tool === "arl_get_job" || route.tool === "arl_get_agent_outcomes"
           ? "public, max-age=10"
-          : route.tool === "arl_get_agent_score"
+          : route.tool === "arl_get_agent_score" || route.tool === "arl_get_trust_graph"
             ? "public, max-age=60"
             : "no-store";
     return json(200, out, cache);

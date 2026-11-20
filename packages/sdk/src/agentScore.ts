@@ -9,6 +9,7 @@
 // evaluators never had a job (contracts/deploy/base-mainnet-jobs.json).
 
 import {
+  getAddress,
   isAddressEqual,
   parseAbi,
   parseAbiItem,
@@ -156,11 +157,8 @@ export interface AgentScore {
   skipped: { what: string; reason: string }[];
 }
 
-export async function getAgentScore(
-  client: PublicClient,
-  agentId: bigint,
-  opts: { now?: number } = {},
-): Promise<AgentScore> {
+/** Everything the verified evaluators recorded, read once and used for any number of agents. */
+async function readHistory(client: PublicClient) {
   const head = await client.getBlock();
   const to = head.number;
   const from = VERIFIED_EVALUATORS.reduce<bigint>(
@@ -191,6 +189,13 @@ export async function getAgentScore(
     ),
   ]);
 
+  return { head, to, feedbackLogs, protocolLogs };
+}
+type History = Awaited<ReturnType<typeof readHistory>>;
+
+/** One agent's verified outcomes from the history, with the jobs read at the history's block. */
+async function agentOutcomes(client: PublicClient, history: History, agentId: bigint) {
+  const { to, feedbackLogs, protocolLogs } = history;
   const evaluators: EvaluatorLogs[] = [];
   const jobs: JobRecord[] = [];
   for (const e of VERIFIED_EVALUATORS) {
@@ -280,9 +285,98 @@ export async function getAgentScore(
     });
   }
 
-  const { outcomes, skipped } = outcomesFromChain(agentId, feedback, evaluators, jobs);
-  const now = opts.now ?? Number(head.timestamp);
-  return { agentId, block: to, score: reputationScore(outcomes, now), outcomes, skipped };
+  return outcomesFromChain(agentId, feedback, evaluators, jobs);
+}
+
+export async function getAgentScore(
+  client: PublicClient,
+  agentId: bigint,
+  opts: { now?: number } = {},
+): Promise<AgentScore> {
+  const history = await readHistory(client);
+  const { outcomes, skipped } = await agentOutcomes(client, history, agentId);
+  const now = opts.now ?? Number(history.head.timestamp);
+  return {
+    agentId,
+    block: history.to,
+    score: reputationScore(outcomes, now),
+    outcomes,
+    skipped,
+  };
+}
+
+/** Who hired whom, and how it ended: one edge per client and agent. */
+export interface TrustEdge {
+  client: Address;
+  agentId: bigint;
+  completed: number;
+  rejected: number;
+  expired: number;
+  disputed: number;
+  /** Budget of the completed jobs, in base units, per payment token. */
+  paid: Partial<Record<Outcome["token"], string>>;
+  /** Unix seconds of the first and the latest outcome between the two. */
+  first: number;
+  latest: number;
+}
+
+export interface TrustGraph {
+  /** The block everything was read at. */
+  block: bigint;
+  agents: { agentId: bigint; score: Score }[];
+  edges: TrustEdge[];
+}
+
+/**
+ * The trust graph of verified work: every agent with a verified outcome, its score, and an edge
+ * for each client it worked for. Built from the same records as the score, so an edge exists only
+ * where a committee settled a job (or the agent let one expire).
+ */
+export async function getTrustGraph(
+  client: PublicClient,
+  opts: { now?: number } = {},
+): Promise<TrustGraph> {
+  const history = await readHistory(client);
+  const now = opts.now ?? Number(history.head.timestamp);
+  const ids = new Set<bigint>();
+  for (const l of history.protocolLogs) {
+    if (l.eventName === "Configured")
+      ids.add((l.args as { providerAgentId: bigint }).providerAgentId);
+  }
+  const agents: TrustGraph["agents"] = [];
+  const edges = new Map<string, TrustEdge>();
+  for (const agentId of [...ids].sort((x, y) => (x < y ? -1 : x > y ? 1 : 0))) {
+    const { outcomes } = await agentOutcomes(client, history, agentId);
+    if (outcomes.length === 0) continue;
+    agents.push({ agentId, score: reputationScore(outcomes, now) });
+    for (const o of outcomes) {
+      const key = `${o.client.toLowerCase()}:${agentId.toString()}`;
+      let e = edges.get(key);
+      if (!e) {
+        e = {
+          client: getAddress(o.client),
+          agentId,
+          completed: 0,
+          rejected: 0,
+          expired: 0,
+          disputed: 0,
+          paid: {},
+          first: o.final_at,
+          latest: o.final_at,
+        };
+        edges.set(key, e);
+      }
+      if (o.outcome === "completed") {
+        e.completed += 1;
+        e.paid[o.token] = (BigInt(e.paid[o.token] ?? "0") + BigInt(o.budget)).toString();
+      } else if (o.outcome === "rejected") e.rejected += 1;
+      else if (o.outcome === "expired") e.expired += 1;
+      if (o.disputed) e.disputed += 1;
+      e.first = Math.min(e.first, o.final_at);
+      e.latest = Math.max(e.latest, o.final_at);
+    }
+  }
+  return { block: history.to, agents, edges: [...edges.values()] };
 }
 
 const times = new Map<bigint, number>();

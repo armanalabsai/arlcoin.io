@@ -22,7 +22,7 @@ import {
   type TaskDeployment,
   type Token,
 } from "../../protocol/src/index.ts";
-import { getAgentScore } from "../../sdk/src/agentScore.ts";
+import { getAgentScore, getTrustGraph } from "../../sdk/src/agentScore.ts";
 import type { Tool } from "./server.ts";
 
 /** The chain reads the tools need (a viem PublicClient satisfies it). */
@@ -376,6 +376,25 @@ export function arlTools(opts: ToolOptions): Tool[] {
           ...r.score,
           outcomes: r.outcomes,
           skipped: r.skipped,
+        };
+      },
+    },
+    {
+      name: "arl_get_trust_graph",
+      description:
+        "Read the trust graph of verified work on Base Mainnet: every agent with a verified outcome and its ARL score (arl-reputation/1), and one edge per client and agent with how their jobs ended (completed, rejected, expired, disputed) and what was paid. Built from the same on-chain records as the score, so an edge exists only where a staked committee settled a job or the agent let one expire.",
+      inputSchema: { type: "object", properties: {}, additionalProperties: false },
+      async run() {
+        const reader = opts.logReader ?? (opts.chain as unknown as PublicClient);
+        if (typeof (reader as { getLogs?: unknown }).getLogs !== "function") {
+          throw new ToolInputError("this server's chain reader cannot read logs");
+        }
+        const g = await getTrustGraph(reader);
+        return {
+          chainId: 8453,
+          block: g.block,
+          agents: g.agents.map((a) => ({ agentId: a.agentId, ...a.score })),
+          edges: g.edges,
         };
       },
     },
