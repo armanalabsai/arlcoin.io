@@ -20,6 +20,11 @@ documents that back it. What is deployed on Base Mainnet is recorded in
   crash-safe ([docs/reexecution-spec.md](docs/reexecution-spec.md)).
 - ARL in agent frameworks through the MCP server: LangChain, CrewAI, the OpenAI Agents SDK and the
   Vercel AI SDK ([docs/frameworks.md](docs/frameworks.md)).
+- arl-protocol-sdk 0.3.0 and arl-protocol-mcp 0.2.0: `payOnProof`, `getAgentScore` and the
+  `arl_get_agent_score` tool ([packages/sdk](packages/sdk/README.md),
+  [packages/mcp](packages/mcp/README.md)).
+- An agent's verified record as an SVG badge for a README or a page:
+  `GET /api/v1/agents/{agentId}/badge.svg` ([packages/mcp](packages/mcp/README.md)).
 - n8n-nodes-arl 0.2.5: works on current n8n (timers use `sleep` only) and opens verified tasks on
   the v7 evaluators.
 

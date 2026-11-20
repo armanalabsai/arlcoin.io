@@ -168,14 +168,15 @@ export async function getAgentScore(
     VERIFIED_EVALUATORS[0].fromBlock,
   );
 
-  // Two reads per block range: this agent's feedback in the registry, and the evaluators' and
-  // escrows' events (few, for every job) in one request.
+  // Two reads per block range: the feedback the evaluators wrote to the registry, and the
+  // evaluators' and escrows' events (few, for every job) in one request. Neither filter names the
+  // agent, so a provider that stores finished ranges serves every agent from the same store.
   const [feedbackLogs, protocolLogs] = await Promise.all([
     logsInRange(from, to, (fromBlock, toBlock) =>
       client.getLogs({
         address: REPUTATION_REGISTRY,
         event: registryEvents[0],
-        args: { agentId, clientAddress: VERIFIED_EVALUATORS.map((e) => e.evaluator) },
+        args: { clientAddress: VERIFIED_EVALUATORS.map((e) => e.evaluator) },
         fromBlock,
         toBlock,
       }),
@@ -267,9 +268,10 @@ export async function getAgentScore(
 
   const feedback: FeedbackRecord[] = [];
   for (const l of feedbackLogs) {
+    if (l.args.agentId !== agentId) continue;
     feedback.push({
       evaluator: l.args.clientAddress as Address,
-      agentId: l.args.agentId as bigint,
+      agentId: l.args.agentId,
       value: l.args.value as bigint,
       valueDecimals: l.args.valueDecimals as number,
       tag1: l.args.tag1 as string,

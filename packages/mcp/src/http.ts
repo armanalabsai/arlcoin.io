@@ -7,6 +7,7 @@
 //   GET  /api/v1/jobs/{ARL|USDC}/{jobId}   job, committee configuration and verdict
 //   GET  /api/v1/agents/{agentId}/outcomes verified approvals and rejections of an agent
 //   GET  /api/v1/agents/{agentId}/score    the agent's arl-reputation/1 score and its outcomes
+//   GET  /api/v1/agents/{agentId}/badge.svg the same record as an SVG badge for a README or a page
 //   POST /api/v1/evidence/check           body: { evidence } -> outcome of an arl-evidence/2
 //   POST /api/v1/jobs/prepare             body: as arl_prepare_job -> unsigned createJob
 //   POST /api/v1/jobs/prepare-funding     body: as arl_prepare_funding -> unsigned funding calls
@@ -29,6 +30,67 @@ function json(status: number, body: unknown, cache = "no-store"): Response {
     status,
     headers: { ...HEADERS, "cache-control": cache },
   });
+}
+
+const BADGE = /^\/api\/v1\/agents\/([0-9]{1,78})\/badge\.svg$/;
+
+/** Text width in a badge, close enough for 11px Verdana without measuring glyphs. */
+const width = (text: string) => Math.round(text.length * 6.6) + 12;
+
+/**
+ * A two-part SVG badge: "ARL verified" and what the chain records. Both texts are built here from
+ * numbers only, so nothing a caller sends reaches the SVG.
+ */
+export function badgeSvg(right: string, color: string): string {
+  const left = "ARL verified";
+  const lw = width(left);
+  const rw = width(right);
+  const w = lw + rw;
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${String(w)}" height="20" role="img" aria-label="${left}: ${right}">` +
+    `<title>${left}: ${right}</title>` +
+    `<clipPath id="r"><rect width="${String(w)}" height="20" rx="3"/></clipPath>` +
+    `<g clip-path="url(#r)"><rect width="${String(lw)}" height="20" fill="#1f2937"/>` +
+    `<rect x="${String(lw)}" width="${String(rw)}" height="20" fill="${color}"/></g>` +
+    `<g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="11">` +
+    `<text x="${String(lw / 2)}" y="14">${left}</text>` +
+    `<text x="${String(lw + rw / 2)}" y="14">${right}</text></g></svg>\n`
+  );
+}
+
+/** The badge text for a score: counts of verified outcomes, never an estimate. */
+export function badgeText(score: { outcomes: number; completed: number }): string {
+  if (score.outcomes === 0) return "no verified jobs yet";
+  const pct = Math.round((score.completed / score.outcomes) * 100);
+  return `${String(score.outcomes)} ${score.outcomes === 1 ? "job" : "jobs"}, ${String(pct)}% approved`;
+}
+
+function svg(status: number, body: string, cache: string): Response {
+  return new Response(body, {
+    status,
+    headers: {
+      "content-type": "image/svg+xml; charset=utf-8",
+      "access-control-allow-origin": "*",
+      "x-content-type-options": "nosniff",
+      "cache-control": cache,
+    },
+  });
+}
+
+async function badge(agentId: string, tools: readonly Tool[]): Promise<Response> {
+  const tool = tools.find((t) => t.name === "arl_get_agent_score");
+  try {
+    if (!tool) throw new Error("tool missing");
+    const score = (await tool.run({ agentId })) as { outcomes: unknown[]; completed: number };
+    const text = badgeText({ outcomes: score.outcomes.length, completed: score.completed });
+    return svg(
+      200,
+      badgeSvg(text, score.outcomes.length > 0 ? "#15803d" : "#6b7280"),
+      "public, max-age=300",
+    );
+  } catch {
+    return svg(502, badgeSvg("unavailable", "#6b7280"), "no-store");
+  }
 }
 
 const ROUTES: { method: "GET" | "POST"; path: RegExp; tool: string }[] = [
@@ -87,6 +149,11 @@ export async function handleHttp(request: Request, tools: readonly Tool[]): Prom
         "access-control-max-age": "86400",
       },
     });
+  }
+  const badgeMatch = BADGE.exec(pathname);
+  if (badgeMatch) {
+    if (request.method !== "GET") return json(405, { error: "use GET" });
+    return badge(badgeMatch[1] as string, tools);
   }
   const matches = ROUTES.filter((r) => r.path.test(pathname));
   if (matches.length === 0)
