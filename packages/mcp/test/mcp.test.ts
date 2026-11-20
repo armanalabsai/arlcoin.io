@@ -96,6 +96,7 @@ describe("MCP protocol", () => {
       "arl_list_policies",
       "arl_get_job",
       "arl_get_agent_outcomes",
+      "arl_get_agent_score",
       "arl_check_evidence",
       "arl_prepare_job",
       "arl_prepare_funding",
@@ -198,6 +199,33 @@ describe("ARL tools", () => {
     assert.ok(chain.reads.every((x) => x.blockNumber === BLOCK));
     const bad = await call(arlTools({ chain }), "arl_get_agent_outcomes", { agentId: "-1" });
     assert.equal(bad.isError, true);
+  });
+
+  it("scores an agent from verified outcomes, and refuses a reader without logs", async () => {
+    const ranges: bigint[][] = [];
+    const HEAD = 59_600_000n;
+    const chain = {
+      ...fakeChain(null),
+      getBlock: () => Promise.resolve({ number: HEAD, timestamp: NOW }),
+      getLogs: (a: { fromBlock: bigint; toBlock: bigint }) => {
+        ranges.push([a.fromBlock, a.toBlock]);
+        return Promise.resolve([]);
+      },
+    };
+    const r = await call(arlTools({ chain }), "arl_get_agent_score", { agentId: "42" });
+    assert.equal(r.isError, false);
+    const j = r.json();
+    assert.equal(j.version, "arl-reputation/1");
+    assert.equal(j.score_bps, null);
+    assert.deepEqual(j.outcomes, []);
+    // Every log read ends at the block the answer names.
+    assert.equal(j.block, HEAD.toString());
+    assert.ok(ranges.length >= 3 && ranges.every(([, to]) => to === HEAD));
+    const noLogs = await call(arlTools({ chain: fakeChain(null) }), "arl_get_agent_score", {
+      agentId: "42",
+    });
+    assert.equal(noLogs.isError, true);
+    assert.match(noLogs.text, /cannot read logs/);
   });
 
   it("prepares createJob, then funding only for this task's job", async () => {

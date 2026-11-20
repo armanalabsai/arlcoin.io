@@ -27,6 +27,10 @@ registry never blocks settlement.
    evaluator does not write; the provider took the job and did not deliver.
 4. Compute the score with `reputationScore`.
 
+Steps 1 to 3 are `outcomesFromChain` in `@arl/protocol` (it reports any record it cannot join
+instead of guessing); `getAgentScore` in the TypeScript SDK reads the logs and jobs on Base Mainnet
+and runs all four, and the Agent API serves it at `GET /api/v1/agents/{agentId}/score`.
+
 ## Score
 
 | Outcome     | Value | Note                                                         |

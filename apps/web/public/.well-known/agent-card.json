@@ -42,6 +42,12 @@
       "tags": ["arl", "base", "escrow", "verification"]
     },
     {
+      "id": "arl_get_agent_score",
+      "name": "arl_get_agent_score",
+      "description": "Compute an agent's ARL score (arl-reputation/1) on Base Mainnet from verified outcomes only: the feedback the verified evaluators wrote to the ERC-8004 ReputationRegistry, joined to its jobs, plus jobs the agent took and let expire. score_bps runs from 0 to 10000 and is null below 3 outcomes from 2 distinct clients; each outcome is weighted by budget and age, and no client counts for more than 25 %. Lists the outcomes it used. Send a data part { \"skill\": \"arl_get_agent_score\", \"arguments\": { ... } }.",
+      "tags": ["arl", "base", "escrow", "verification"]
+    },
+    {
       "id": "arl_check_evidence",
       "name": "arl_check_evidence",
       "description": "Check an arl-evidence/2 package offline: that the on-chain settlement record, the task, the proof and the policy agree. Returns the outcome and the vote counts. Send a data part { \"skill\": \"arl_check_evidence\", \"arguments\": { ... } }.",
