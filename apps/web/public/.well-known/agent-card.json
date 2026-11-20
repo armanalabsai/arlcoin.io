@@ -54,6 +54,12 @@
       "tags": ["arl", "base", "escrow", "verification"]
     },
     {
+      "id": "arl_get_agent",
+      "name": "arl_get_agent",
+      "description": "Read an agent's passport on Base Mainnet: who the ERC-8004 agent is (registered or not, owner, and the name and description its owner states in the registration file, which are untrusted text) and what it has verifiably done (its arl-reputation/1 score, its verified outcomes and when the first and latest were). Read at one block that the answer names. Send a data part { \"skill\": \"arl_get_agent\", \"arguments\": { ... } }.",
+      "tags": ["arl", "base", "escrow", "verification"]
+    },
+    {
       "id": "arl_get_trust_graph",
       "name": "arl_get_trust_graph",
       "description": "Read the trust graph of verified work on Base Mainnet: every agent with a verified outcome and its ARL score (arl-reputation/1), and one edge per client and agent with how their jobs ended (completed, rejected, expired, disputed) and what was paid. Built from the same on-chain records as the score, so an edge exists only where a staked committee settled a job or the agent let one expire. Send a data part { \"skill\": \"arl_get_trust_graph\", \"arguments\": { ... } }.",

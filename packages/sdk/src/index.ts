@@ -99,3 +99,4 @@ export {
   type TrustGraph,
 } from "./agentScore.ts";
 export { getJobAudit, type AuditEntry, type AuditValue, type JobAudit } from "./audit.ts";
+export { IDENTITY_REGISTRY, getAgentPassport, type AgentPassport } from "./passport.ts";

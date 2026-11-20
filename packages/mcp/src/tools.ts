@@ -24,6 +24,7 @@ import {
 } from "../../protocol/src/index.ts";
 import { getAgentScore, getTrustGraph } from "../../sdk/src/agentScore.ts";
 import { getJobAudit } from "../../sdk/src/audit.ts";
+import { getAgentPassport } from "../../sdk/src/passport.ts";
 import type { Tool } from "./server.ts";
 
 /** The chain reads the tools need (a viem PublicClient satisfies it). */
@@ -398,6 +399,32 @@ export function arlTools(opts: ToolOptions): Tool[] {
           ...r.score,
           outcomes: r.outcomes,
           skipped: r.skipped,
+        };
+      },
+    },
+    {
+      name: "arl_get_agent",
+      description:
+        "Read an agent's passport on Base Mainnet: who the ERC-8004 agent is (registered or not, owner, and the name and description its owner states in the registration file, which are untrusted text) and what it has verifiably done (its arl-reputation/1 score, its verified outcomes and when the first and latest were). Read at one block that the answer names.",
+      inputSchema: {
+        type: "object",
+        properties: { agentId: AGENT_ID },
+        required: ["agentId"],
+        additionalProperties: false,
+      },
+      async run(args) {
+        const id = agentId(args.agentId);
+        const reader = opts.logReader ?? (opts.chain as unknown as PublicClient);
+        if (typeof (reader as { getLogs?: unknown }).getLogs !== "function") {
+          throw new ToolInputError("this server's chain reader cannot read logs");
+        }
+        const { score, ...p } = await getAgentPassport(reader, id);
+        return {
+          chainId: 8453,
+          ...p,
+          ...score,
+          outcomes: p.outcomes,
+          badge: `https://arlcoin.io/api/v1/agents/${id.toString()}/badge.svg`,
         };
       },
     },

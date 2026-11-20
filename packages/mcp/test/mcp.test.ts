@@ -98,6 +98,7 @@ describe("MCP protocol", () => {
       "arl_get_job_audit",
       "arl_get_agent_outcomes",
       "arl_get_agent_score",
+      "arl_get_agent",
       "arl_get_trust_graph",
       "arl_check_evidence",
       "arl_prepare_job",
