@@ -196,3 +196,25 @@ describe("audit trail as CSV", () => {
     );
   });
 });
+
+describe("a history scan that is catching up", () => {
+  it("answers 503 with Retry-After, and 502 for any other failure", async () => {
+    const tool = (message: string) => [
+      {
+        name: "arl_get_agent_score",
+        description: "",
+        inputSchema: {},
+        run: () => Promise.reject(new Error(message)),
+      },
+    ];
+    const url = "https://arlcoin.io/api/v1/agents/1/score";
+    const busy = await handleHttp(
+      new Request(url),
+      tool("An unknown RPC error occurred. Details: the log scan is catching up, try again"),
+    );
+    assert.equal(busy.status, 503);
+    assert.equal(busy.headers.get("retry-after"), "5");
+    assert.match(await busy.text(), /ask again/);
+    assert.equal((await handleHttp(new Request(url), tool("rpc down") as never)).status, 502);
+  });
+});

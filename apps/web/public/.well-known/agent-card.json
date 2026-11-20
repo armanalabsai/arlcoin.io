@@ -66,6 +66,12 @@
       "tags": ["arl", "base", "escrow", "verification"]
     },
     {
+      "id": "arl_list_validators",
+      "name": "arl_list_validators",
+      "description": "List the validators of the verified evaluators on Base Mainnet: every address that staked, its stake and the part locked as bonds on running jobs (base units of the stake token), the jobs it accepted, its votes by direction, its slashes, and since when it has staked. Anyone can stake and be named on a committee; this is the record to read before naming one. Read at one block that the answer names. Send a data part { \"skill\": \"arl_list_validators\", \"arguments\": { ... } }.",
+      "tags": ["arl", "base", "escrow", "verification"]
+    },
+    {
       "id": "arl_check_evidence",
       "name": "arl_check_evidence",
       "description": "Check an arl-evidence/2 package offline: that the on-chain settlement record, the task, the proof and the policy agree. Returns the outcome and the vote counts. Send a data part { \"skill\": \"arl_check_evidence\", \"arguments\": { ... } }.",

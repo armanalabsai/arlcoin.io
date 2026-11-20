@@ -14,6 +14,11 @@
 //   then takes several requests to catch up, and each one stores what it read.
 // - Everything that is not `eth_getLogs` goes to the other endpoints, tried in order.
 //
+// - Where even that is not dependable (public endpoints refuse most requests from Cloudflare), the
+//   stored scans come from outside: a seed shipped with the deployment and a snapshot a scheduled
+//   job publishes every few minutes. With `pinned`, the provider then presents the chain as of the
+//   block those scans reach, and no log request leaves for an endpoint at all.
+//
 // One entry per filter (not one per range) matters on Cloudflare, where each cache read and write
 // counts toward the subrequests a request may make. The store is the Cache API there
 // (`caches.default`); anything with `match` and `put` works, which keeps this testable.
@@ -44,6 +49,19 @@ export interface CachedLogsOptions {
    * with less than the seed, starts from the seed instead of from its first block.
    */
   seed?: Readonly<Record<string, string>>;
+  /**
+   * Fetches a newer copy of the same stored scans, published outside the deployment (a scheduled
+   * job reads the chain from a machine the endpoints do not rate-limit). Asked at most once every
+   * five minutes; a failure keeps what is already known.
+   */
+  snapshot?: () => Promise<Readonly<Record<string, string>> | undefined>;
+  /**
+   * Present the chain as of the block the stored scans reach: "latest" and `eth_blockNumber`
+   * answer that block, so a caller that reads the head first asks for logs the store already
+   * holds and no log request leaves for an endpoint. Answers are then a few minutes behind the
+   * chain and say so through the block they name. Without stored scans the real head is used.
+   */
+  pinned?: boolean;
   fetch?: typeof fetch;
   /** Logs are stored only for blocks at least this far behind the head. */
   finality?: bigint;
@@ -67,6 +85,9 @@ interface Scan {
   /** Requests for this filter run one after another, so the entry only ever moves forward. */
   queue: Promise<unknown>;
 }
+
+/** How often a newer snapshot of the stored scans is looked for. */
+const SNAPSHOT_EVERY_MS = 300_000;
 
 /** How long an endpoint that failed is skipped while another one answers. */
 const COOL_DOWN_MS = 30_000;
@@ -223,6 +244,36 @@ export function cachedLogsProvider(opts: CachedLogsOptions) {
     }
   };
 
+  // The stored scans known without the cache: the seed, replaced by each newer snapshot.
+  let known: Readonly<Record<string, string>> = opts.seed ?? {};
+  let snapshotAt = -SNAPSHOT_EVERY_MS;
+  let refreshing: Promise<void> | undefined;
+  function refresh(): Promise<void> {
+    if (!opts.snapshot || Date.now() - snapshotAt < SNAPSHOT_EVERY_MS) return Promise.resolve();
+    refreshing ??= opts
+      .snapshot()
+      .then((fresh) => {
+        if (fresh && Object.keys(fresh).length > 0) known = fresh;
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        snapshotAt = Date.now();
+        refreshing = undefined;
+      });
+    return refreshing;
+  }
+
+  /** The block every known scan reaches: where the chain is pinned. Null when nothing is known. */
+  async function pin(): Promise<bigint | null> {
+    await refresh();
+    let lowest: bigint | null = null;
+    for (const stored of Object.values(known)) {
+      const v = parse(stored);
+      if (v && (lowest === null || v.to < lowest)) lowest = v.to;
+    }
+    return lowest;
+  }
+
   const scans = new Map<string, Promise<Scan>>();
   function scan(key: string): Promise<Scan> {
     let s = scans.get(key);
@@ -232,7 +283,7 @@ export function cachedLogsProvider(opts: CachedLogsOptions) {
         .catch(() => undefined)
         .then((hit) => {
           const cached = parse(hit);
-          const seeded = parse(opts.seed?.[key]);
+          const seeded = parse(known[key]);
           // Whichever reaches further; the seed's logs are copied, the scan appends to its own.
           const best =
             cached && (!seeded || cached.to >= seeded.to)
@@ -258,6 +309,13 @@ export function cachedLogsProvider(opts: CachedLogsOptions) {
     from: bigint,
     to: bigint,
   ): Promise<RawLog[]> {
+    // A snapshot that arrived after this scan was loaded may reach further than the scan does.
+    const newer = parse(known[key]);
+    if (newer && newer.to > s.to) {
+      s.from = newer.from;
+      s.to = newer.to;
+      s.logs = [...newer.logs];
+    }
     // The entry starts where the first scan started. A request that starts elsewhere (before the
     // entry, or past its end with a gap) is answered from the endpoint and stored nowhere.
     const start = s.from ?? from;
@@ -306,7 +364,18 @@ export function cachedLogsProvider(opts: CachedLogsOptions) {
 
   return {
     async request({ method, params }: RpcRequest): Promise<unknown> {
+      if (opts.pinned && (method === "eth_blockNumber" || method === "eth_getBlockByNumber")) {
+        const args = Array.isArray(params) ? (params as unknown[]) : [];
+        const latest = method === "eth_blockNumber" || args[0] === "latest";
+        const at = latest ? await pin() : null;
+        if (at !== null) {
+          return method === "eth_blockNumber"
+            ? toHex(at)
+            : read(method, [toHex(at), ...args.slice(1)]);
+        }
+      }
       if (method !== "eth_getLogs") return read(method, params);
+      await refresh();
       const given = (Array.isArray(params) ? params[0] : undefined) as
         Record<string, unknown> | undefined;
       const from = hex(given?.fromBlock);

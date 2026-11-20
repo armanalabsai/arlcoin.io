@@ -100,6 +100,7 @@ describe("MCP protocol", () => {
       "arl_get_agent_score",
       "arl_get_agent",
       "arl_get_trust_graph",
+      "arl_list_validators",
       "arl_check_evidence",
       "arl_prepare_job",
       "arl_prepare_funding",
@@ -233,6 +234,9 @@ describe("ARL tools", () => {
     assert.equal(audit.isError, false);
     assert.deepEqual(audit.json().entries, []);
     assert.equal(audit.json().block, HEAD.toString());
+    const validators = await call(arlTools({ chain }), "arl_list_validators", {});
+    assert.equal(validators.isError, false);
+    assert.deepEqual(validators.json().validators, []);
     const graph = await call(arlTools({ chain }), "arl_get_trust_graph", {});
     assert.equal(graph.isError, false);
     assert.deepEqual(graph.json().agents, []);

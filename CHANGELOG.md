@@ -37,6 +37,8 @@ documents that back it. What is deployed on Base Mainnet is recorded in
   tool and `GET /api/v1/jobs/{token}/{jobId}/audit` (add `.csv` for a spreadsheet).
 - The agent passport: an ERC-8004 agent's identity and its verified record in one answer.
   `getAgentPassport` in the SDK, the `arl_get_agent` MCP tool and `GET /api/v1/agents/{agentId}`.
+- The validators' public record: who has staked, how much, and what each has done. `getValidators`
+  in the SDK, the `arl_list_validators` MCP tool and `GET /api/v1/validators`.
 - n8n-nodes-arl 0.2.5: works on current n8n (timers use `sleep` only) and opens verified tasks on
   the v7 evaluators.
 
