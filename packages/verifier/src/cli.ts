@@ -24,7 +24,7 @@
 // and votes approve or reject (the validator must have accepted the job). Base Mainnet, Base
 // Sepolia and the local chain only. The key is read from the environment, never from arguments.
 
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import process from "node:process";
 
 import { createPublicClient, createWalletClient, http, isAddress, isHex } from "viem";
@@ -33,6 +33,7 @@ import { base, baseSepolia } from "viem/chains";
 
 import { castVote, MemberState, readJob } from "./chain.ts";
 import { DockerRunner } from "./docker.ts";
+import { parseWatchState, saveWatchState } from "./state.ts";
 import { networkFetcher } from "./inputs.ts";
 import { validatorKey } from "./key.ts";
 import { parseSpec, specHash } from "./spec.ts";
@@ -179,15 +180,24 @@ async function main(argv: readonly string[]): Promise<void> {
       const head = await client.getBlockNumber({ cacheTime: 0 });
       const from = fromText.startsWith("-") ? head + BigInt(fromText) : BigInt(fromText);
       let state: WatchState = { fromBlock: from < 0n ? 0n : from, jobs: [] };
+      // A missing file is a first start; anything else that fails to load stops the validator
+      // loudly instead of silently starting over and forgetting its jobs (security report
+      // 2026-11-20).
+      let savedText: string | null = null;
       try {
-        const saved = JSON.parse(await readFile(statePath, "utf8")) as {
-          fromBlock: string;
-          jobs: string[];
-          specs?: WatchState["specs"];
-        };
-        state = { fromBlock: BigInt(saved.fromBlock), jobs: saved.jobs, specs: saved.specs ?? {} };
-      } catch {
-        // No saved state yet: start from the given block.
+        savedText = await readFile(statePath, "utf8");
+      } catch (e) {
+        if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e;
+      }
+      if (savedText !== null) {
+        try {
+          state = parseWatchState(savedText);
+        } catch (e) {
+          fail(
+            `the watch state ${statePath} is unreadable (${(e as Error).message}); ` +
+              "restore it or move it aside before starting again",
+          );
+        }
       }
       const deps = {
         client,
@@ -205,14 +215,7 @@ async function main(argv: readonly string[]): Promise<void> {
       for (;;) {
         try {
           state = await step(deps, state);
-          await writeFile(
-            statePath,
-            JSON.stringify({
-              fromBlock: state.fromBlock.toString(),
-              jobs: state.jobs,
-              specs: state.specs ?? {},
-            }),
-          );
+          await saveWatchState(statePath, state);
         } catch (e) {
           print({ event: "error", error: e instanceof Error ? e.message : String(e) });
         }

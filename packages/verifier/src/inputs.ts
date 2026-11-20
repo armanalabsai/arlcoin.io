@@ -4,7 +4,7 @@
 
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
-import { lstat, mkdir, rm, writeFile } from "node:fs/promises";
+import { lstat, mkdir, readdir, rm, writeFile } from "node:fs/promises";
 import { dirname, join, resolve, sep } from "node:path";
 
 import type { FileInput, GitInput, ReexecSpec } from "./spec.ts";
@@ -54,12 +54,87 @@ export async function noSymlinkOnPath(root: string, full: string): Promise<boole
   return true;
 }
 
-function run(cmd: string, args: readonly string[]): Promise<string> {
+/** Longest a single input download may take (security report 2026-11-20: no deadline). */
+export const FETCH_TIMEOUT_MS = 120_000;
+/** Longest a single git step (init, fetch, checkout) may take. */
+export const GIT_TIMEOUT_MS = 300_000;
+
+/** Most a git input may take on disk, history and checkout together. */
+export const MAX_GIT_BYTES = 1024 * 1024 * 1024;
+
+/**
+ * Bytes under `dir` (no symlinks followed), stopping once past `limit`. Kept here, not in
+ * docker.ts, so the input path does not depend on the runner.
+ */
+async function sizeOf(dir: string, limit: number): Promise<number> {
+  let total = 0;
+  const stack = [dir];
+  while (stack.length > 0 && total <= limit) {
+    const d = stack.pop() as string;
+    let entries;
+    try {
+      entries = await readdir(d, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+    for (const e of entries) {
+      const p = join(d, e.name);
+      if (e.isDirectory()) stack.push(p);
+      else {
+        try {
+          total += (await lstat(p)).size;
+        } catch {
+          // Removed while we looked.
+        }
+      }
+    }
+  }
+  return total;
+}
+
+/** A command, killed at `timeoutMs` or when `watch.dir` grows past `watch.maxBytes`. */
+function run(
+  cmd: string,
+  args: readonly string[],
+  timeoutMs = GIT_TIMEOUT_MS,
+  watch?: { dir: string; maxBytes: number },
+): Promise<string> {
   return new Promise((resolvePromise, reject) => {
     const child = spawn(cmd, [...args], {
       shell: false,
       stdio: ["ignore", "pipe", "pipe"],
       env: { PATH: process.env.PATH ?? "/usr/bin:/bin", GIT_TERMINAL_PROMPT: "0" },
+    });
+    // The remote is chosen by the job's client: a stalled transfer must not hold the validator.
+    let timedOut = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      child.kill("SIGKILL");
+    }, timeoutMs);
+    // The repository is chosen by the job's client: its size is bounded while it downloads, not
+    // after (security report 2026-11-20).
+    let tooLarge = false;
+    let measuring = false;
+    const poll =
+      watch === undefined
+        ? undefined
+        : setInterval(() => {
+            if (measuring || tooLarge) return;
+            measuring = true;
+            void sizeOf(watch.dir, watch.maxBytes)
+              .then((n) => {
+                if (n > watch.maxBytes) {
+                  tooLarge = true;
+                  child.kill("SIGKILL");
+                }
+              })
+              .finally(() => {
+                measuring = false;
+              });
+          }, 500);
+    child.on("exit", () => {
+      clearTimeout(timer);
+      clearInterval(poll);
     });
     const out: Buffer[] = [];
     const err: Buffer[] = [];
@@ -69,7 +144,13 @@ function run(cmd: string, args: readonly string[]): Promise<string> {
       reject(new InputError(`${cmd} could not start: ${e.message}`));
     });
     child.on("close", (code) => {
-      if (code === 0) resolvePromise(Buffer.concat(out).toString("utf8"));
+      clearTimeout(timer);
+      clearInterval(poll);
+      if (tooLarge)
+        reject(new InputError(`${cmd} ${args[0] ?? ""} grew past ${watch?.maxBytes ?? 0} bytes`));
+      else if (timedOut)
+        reject(new InputError(`${cmd} ${args[0] ?? ""} took longer than ${timeoutMs} ms`));
+      else if (code === 0) resolvePromise(Buffer.concat(out).toString("utf8"));
       else
         reject(
           new InputError(
@@ -91,30 +172,60 @@ export function httpUrl(url: string): string {
   throw new InputError(`unsupported URL ${url}`);
 }
 
+/** Reads a response body, failing as soon as it passes `max` bytes. */
+export async function readLimited(
+  body: ReadableStream<Uint8Array> | null,
+  max: number,
+  url = "the input",
+): Promise<Buffer> {
+  if (body === null) return Buffer.alloc(0);
+  const reader = body.getReader();
+  const chunks: Buffer[] = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > max) {
+      await reader.cancel().catch(() => undefined);
+      throw new InputError(`${url} is larger than ${max} bytes`);
+    }
+    chunks.push(Buffer.from(value));
+  }
+  return Buffer.concat(chunks, total);
+}
+
 export const networkFetcher: Fetcher = {
   async file(url) {
-    const res = await fetch(httpUrl(url), { redirect: "follow" });
+    // The URL is chosen by the job's client, so the whole download (headers and body) has a
+    // deadline (security report 2026-11-20).
+    const res = await fetch(httpUrl(url), {
+      redirect: "follow",
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    });
     if (!res.ok) throw new InputError(`GET ${url}: HTTP ${res.status}`);
     const length = Number(res.headers.get("content-length") ?? "0");
     if (length > MAX_FILE_BYTES)
       throw new InputError(`${url} is larger than ${MAX_FILE_BYTES} bytes`);
-    const body = Buffer.from(await res.arrayBuffer());
-    if (body.length > MAX_FILE_BYTES)
-      throw new InputError(`${url} is larger than ${MAX_FILE_BYTES} bytes`);
-    return body;
+    // Counted while it streams: a server that sends no length, or a false one, is cut off at the
+    // limit instead of being buffered whole first (security report 2026-11-20).
+    return readLimited(res.body, MAX_FILE_BYTES, url);
   },
   async git(url, commit, dir) {
     await run("git", ["-C", dir, "init", "-q"]);
-    await run("git", ["-C", dir, "fetch", "-q", "--depth", "1", url, commit]);
-    await run("git", [
-      "-C",
-      dir,
-      "-c",
-      "advice.detachedHead=false",
-      "checkout",
-      "-q",
-      "FETCH_HEAD",
-    ]);
+    const watch = { dir, maxBytes: MAX_GIT_BYTES };
+    await run(
+      "git",
+      ["-C", dir, "fetch", "-q", "--depth", "1", url, commit],
+      GIT_TIMEOUT_MS,
+      watch,
+    );
+    await run(
+      "git",
+      ["-C", dir, "-c", "advice.detachedHead=false", "checkout", "-q", "FETCH_HEAD"],
+      GIT_TIMEOUT_MS,
+      watch,
+    );
   },
 };
 

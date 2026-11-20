@@ -69,14 +69,17 @@ an approved job: the job was "run these tests and report", and the report is cor
 
 `DockerRunner` pulls the image by digest, then runs it with:
 
-| Control     | Setting                                                        |
-| ----------- | -------------------------------------------------------------- |
-| Network     | `--network none` (and `--pull never` for the run)              |
-| File system | `--read-only`; `/tmp` tmpfs; `/work` (inputs) and `/out` bound |
-| Privileges  | `--cap-drop ALL`, `no-new-privileges`, user `65534:65534`      |
-| Resources   | `--memory` = `--memory-swap`, `--cpus`, `--pids-limit 512`     |
-| Time        | Killed at `limits.seconds`; the result records `timed_out`     |
-| Environment | Exactly `env` plus `HOME=/tmp` (and the image's own `PATH`)    |
+| Control     | Setting                                                                                                                             |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Network     | `--network none` (and `--pull never` for the run)                                                                                   |
+| File system | `--read-only`; `/tmp` tmpfs; `/work` (inputs) and `/out` bound                                                                      |
+| Privileges  | `--cap-drop ALL`, `no-new-privileges`, user `65534:65534`                                                                           |
+| Resources   | `--memory` = `--memory-swap`, `--cpus`, `--pids-limit 512`                                                                          |
+| Time        | Killed at `limits.seconds`; the result records `timed_out`                                                                          |
+| Disk        | At most 1 GiB written to `/work` and `/out` together; past it the job is killed and the run fails (a reject vote)                   |
+| Inputs      | Downloads end after 120 s and at 256 MiB (counted while streaming); git steps end after 300 s and at 1 GiB; image pulls after 600 s |
+| Outputs     | Hashed as a stream, never read whole into memory                                                                                    |
+| Environment | Exactly `env` plus `HOME=/tmp` (and the image's own `PATH`)                                                                         |
 
 Inputs are checked before the run: a file must match its SHA-256, a git checkout must be exactly
 `commit`; `.git` is then removed, so the workspace is a function of the commit's tree. Input files

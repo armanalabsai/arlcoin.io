@@ -2,6 +2,7 @@
 // recomputed result hash must equal the deliverable the provider submitted, and the result must
 // meet the spec's own acceptance conditions. Providers use `execute` to produce the deliverable.
 
+import { createHash } from "node:crypto";
 import { constants } from "node:fs";
 import { chmod, mkdtemp, open, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -10,7 +11,7 @@ import { join } from "node:path";
 import type { Hex } from "viem";
 
 import type { ContainerRunner } from "./docker.ts";
-import { inside, materialize, noSymlinkOnPath, sha256, type Fetcher } from "./inputs.ts";
+import { inside, materialize, noSymlinkOnPath, type Fetcher } from "./inputs.ts";
 import {
   acceptance,
   RESULT_VERSION,
@@ -56,7 +57,12 @@ async function outputEntry(outDir: string, path: string): Promise<OutputEntry> {
   }
   try {
     if (!(await handle.stat()).isFile()) return { path, sha256: null };
-    return { path, sha256: sha256(await handle.readFile()) };
+    // Streamed through the hash, never read whole into memory (security report 2026-11-20).
+    const hash = createHash("sha256");
+    for await (const chunk of handle.createReadStream({ autoClose: false })) {
+      hash.update(chunk as Buffer);
+    }
+    return { path, sha256: hash.digest("hex") };
   } finally {
     await handle.close();
   }
