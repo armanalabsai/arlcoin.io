@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { isAddressEqual } from "viem";
 import type { Address } from "viem";
 
@@ -11,6 +11,8 @@ import type { Audit } from "~~/lib/audit";
 import { EVALUATOR, EXPLORER } from "~~/lib/evaluator";
 import type { Job } from "~~/lib/jobs";
 import { agentRecords, filterJobs, scanTotals } from "~~/lib/scan";
+import { VALIDATORS_URL, parseValidators } from "~~/lib/validators";
+import type { ValidatorList } from "~~/lib/validators";
 
 const SHOWN = 50;
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
@@ -49,6 +51,7 @@ export default function ScanPage() {
         <div className="flex flex-col gap-6">
           <Totals jobs={jobs} />
           <Agents jobs={jobs} />
+          {AUDIT_AVAILABLE ? <Validators /> : null}
           <JobList jobs={jobs} />
         </div>
       )}
@@ -69,6 +72,80 @@ function Totals({ jobs }: { jobs: readonly Job[] }) {
         <Stat label="Agents paid through escrow" value={t.agents} />
         <Stat label="Clients" value={t.clients} />
       </Facts>
+    </section>
+  );
+}
+
+/** The validators that have staked on the verified evaluator, read from the Agent API. */
+function Validators() {
+  const [list, setList] = useState<ValidatorList | "failed" | undefined>(undefined);
+  useEffect(() => {
+    let live = true;
+    fetch(VALIDATORS_URL)
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((body: unknown) => {
+        if (live) setList(parseValidators(body));
+      })
+      .catch(() => {
+        if (live) setList("failed");
+      });
+    return () => {
+      live = false;
+    };
+  }, []);
+  return (
+    <section className="flex flex-col gap-3" aria-labelledby="validators-heading">
+      <h2 id="validators-heading" className="text-sm font-extrabold">
+        Validators
+      </h2>
+      {list === undefined ? (
+        <p className="text-sm text-muted">Reading validators</p>
+      ) : list === "failed" ? (
+        <p className="text-sm text-muted">The validators could not be read. Reload to try again.</p>
+      ) : list.rows.length === 0 ? (
+        <p className="text-sm text-muted">No validator has staked yet.</p>
+      ) : (
+        <>
+          <div className="glass-strong overflow-x-auto rounded-xl">
+            <table className="w-full text-sm" data-testid="scan-validators">
+              <thead className="text-left text-xs text-muted">
+                <tr>
+                  <th className="px-4 py-2 font-medium">Validator</th>
+                  <th className="px-3 py-2 text-right font-medium">Stake</th>
+                  <th className="px-3 py-2 text-right font-medium">Locked</th>
+                  <th className="px-3 py-2 text-right font-medium">Jobs</th>
+                  <th className="px-3 py-2 text-right font-medium">Approved</th>
+                  <th className="px-3 py-2 text-right font-medium">Rejected</th>
+                  <th className="px-4 py-2 text-right font-medium">Slashes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {list.rows.map((v) => (
+                  <tr key={v.validator}>
+                    <td className="px-4 py-2">
+                      <AddressLink address={v.validator} />
+                    </td>
+                    <td className="px-3 py-2 text-right whitespace-nowrap">
+                      <Arl value={v.stake} />
+                    </td>
+                    <td className="px-3 py-2 text-right whitespace-nowrap">
+                      <Arl value={v.locked} />
+                    </td>
+                    <td className="px-3 py-2 text-right">{v.accepted}</td>
+                    <td className="px-3 py-2 text-right">{v.approved}</td>
+                    <td className="px-3 py-2 text-right">{v.rejected}</td>
+                    <td className="px-4 py-2 text-right">{v.slashes}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-subtle">
+            Anyone can stake ARL and be named on a job&apos;s committee. Votes and slashes are
+            counted from the chain, read at block {list.block}.
+          </p>
+        </>
+      )}
     </section>
   );
 }
