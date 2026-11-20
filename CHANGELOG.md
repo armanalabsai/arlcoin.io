@@ -27,6 +27,8 @@ documents that back it. What is deployed on Base Mainnet is recorded in
   `GET /api/v1/agents/{agentId}/badge.svg` ([packages/mcp](packages/mcp/README.md)).
 - The x402 `arl-escrow` scheme is released as v0.2.0: the terms, the `X-ARL-Job` header and what a
   service checks before it works ([spec](spec/x402-arl-escrow/v0.2.0/README.md)).
+- arl-protocol 0.3.0 for Python: `agent_score` and `badge_url` read an agent's score and badge
+  through the Agent API ([packages/python-sdk](packages/python-sdk/README.md)).
 - n8n-nodes-arl 0.2.5: works on current n8n (timers use `sleep` only) and opens verified tasks on
   the v7 evaluators.
 
