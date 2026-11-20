@@ -2,8 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { erc20Abi } from "viem";
-import type { Address } from "viem";
+import { erc20Abi, formatUnits, parseEventLogs, parseUnits } from "viem";
+import type { Address, Hex } from "viem";
 import { useAccount, usePublicClient, useWriteContract } from "wagmi";
 
 import {
@@ -30,6 +30,13 @@ import {
 } from "~~/lib/evaluator";
 import { formatDate, timeLeft } from "~~/lib/format";
 import { eventsSince } from "~~/lib/logs";
+import {
+  OPERATOR_VALIDATORS,
+  REEXECUTION,
+  checkOpen,
+  deliverableOf,
+  specHashOf,
+} from "~~/lib/verifiedJob";
 
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
 const firstLine = (e: unknown, fallback: string) =>
@@ -284,6 +291,10 @@ function Verified() {
 
       <RetiredStake />
 
+      <OpenVerifiedJob minBond={me.data?.minBond} minWindow={me.data?.minWindow} />
+
+      <ProviderSteps />
+
       <section className="glass-strong flex flex-col gap-4 p-5" aria-labelledby="verdict-heading">
         <h2 id="verdict-heading" className="text-sm font-extrabold">
           Look up a job&apos;s verdict
@@ -353,6 +364,394 @@ function Verified() {
         </p>
       ) : null}
     </div>
+  );
+}
+
+const JOBS = ARL.ARLJobs;
+const TOKEN = ARL.ARLToken;
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+
+/** Where the browser fetches a spec from: https as is, ipfs through a public gateway. */
+const fetchable = (url: string) =>
+  url.startsWith("ipfs://") ? `https://ipfs.io/ipfs/${url.slice("ipfs://".length)}` : url;
+
+/**
+ * The client's side of a verified job, in one flow: post the job with the spec link as its
+ * description, name the committee and the spec hash, propose the budget and escrow it. Every
+ * check `configure` and the reference validators make runs first, so nothing is sent for a job
+ * that would revert or that no validator would accept.
+ */
+function OpenVerifiedJob({ minBond, minWindow }: { minBond?: bigint; minWindow?: bigint }) {
+  const { address } = useAccount();
+  const client = usePublicClient();
+  const { writeContractAsync } = useWriteContract();
+  const [specUrl, setSpecUrl] = useState("");
+  const [provider, setProvider] = useState("");
+  const [budget, setBudget] = useState("100");
+  const [bond, setBond] = useState("");
+  const [committee, setCommittee] = useState(OPERATOR_VALIDATORS.join("\n"));
+  const [threshold, setThreshold] = useState("2");
+  const [voteHours, setVoteHours] = useState("2");
+  const [challengeHours, setChallengeHours] = useState("");
+  const [deadlineHours, setDeadlineHours] = useState("72");
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState("");
+
+  const toUnits = (text: string, fallback?: bigint) => {
+    if (text.trim() === "") return fallback ?? -1n;
+    try {
+      return parseUnits(text.trim(), 18);
+    } catch {
+      return -1n;
+    }
+  };
+  const toSeconds = (text: string, fallback?: bigint) => {
+    if (text.trim() === "") return fallback ?? -1n;
+    const n = Number(text.trim());
+    return Number.isFinite(n) && n > 0 ? BigInt(Math.round(n * 3600)) : -1n;
+  };
+
+  const open = async () => {
+    if (!client || !address || minBond === undefined || minWindow === undefined) return;
+    const checked = checkOpen({
+      client: address,
+      arbiter: ARBITER_SAFE,
+      specUrl,
+      provider,
+      committee,
+      threshold: Number(threshold),
+      budget: toUnits(budget),
+      bond: toUnits(bond, minBond),
+      minBond,
+      voteWindow: toSeconds(voteHours),
+      challengeWindow: toSeconds(challengeHours, minWindow),
+      minChallengeWindow: minWindow,
+      deadlineSeconds: toSeconds(deadlineHours),
+    });
+    if (!checked.ok) return setNote(checked.error);
+    const p = checked.plan;
+    setBusy(true);
+    try {
+      setNote("Reading the spec");
+      const response = await fetch(fetchable(p.specUrl));
+      if (!response.ok) throw new Error(`The spec link answered ${String(response.status)}`);
+      const specHash = specHashOf(await response.text());
+
+      setNote("Posting the job (1 of 5)");
+      const block = await client.getBlock();
+      const created = await writeContractAsync({
+        address: JOBS.address,
+        abi: JOBS.abi,
+        functionName: "createJob",
+        args: [p.provider, EVALUATOR, block.timestamp + p.deadlineSeconds, p.specUrl, ZERO_ADDRESS],
+      });
+      const receipt = await client.waitForTransactionReceipt({ hash: created });
+      const [event] = parseEventLogs({
+        abi: JOBS.abi,
+        eventName: "JobCreated",
+        logs: receipt.logs,
+      });
+      if (!event) throw new Error("The job was not created");
+      const id = event.args.jobId;
+
+      setNote(`Job ${String(id)}: naming the committee (2 of 5)`);
+      const configured = await writeContractAsync({
+        address: EVALUATOR,
+        abi: evaluatorAbi,
+        functionName: "configure",
+        args: [
+          id,
+          {
+            tier: REEXECUTION,
+            threshold: p.threshold,
+            voteWindow: p.voteWindow,
+            challengeWindow: p.challengeWindow,
+            bond: p.bond,
+            providerAgentId: 0n,
+            specHash,
+            committee: p.committee,
+          },
+        ],
+      });
+      await client.waitForTransactionReceipt({ hash: configured });
+
+      setNote(`Job ${String(id)}: proposing the budget (3 of 5)`);
+      const priced = await writeContractAsync({
+        address: JOBS.address,
+        abi: JOBS.abi,
+        functionName: "setBudget",
+        args: [id, p.budget, "0x"],
+      });
+      await client.waitForTransactionReceipt({ hash: priced });
+
+      setNote(`Job ${String(id)}: approving exactly the budget (4 of 5)`);
+      const approved = await writeContractAsync({
+        address: TOKEN.address,
+        abi: TOKEN.abi,
+        functionName: "approve",
+        args: [JOBS.address, p.budget],
+      });
+      await client.waitForTransactionReceipt({ hash: approved });
+
+      setNote(`Job ${String(id)}: escrowing the budget (5 of 5)`);
+      const funded = await writeContractAsync({
+        address: JOBS.address,
+        abi: JOBS.abi,
+        functionName: "fund",
+        args: [id, p.budget, "0x"],
+      });
+      await client.waitForTransactionReceipt({ hash: funded });
+      setNote(
+        `Job ${String(id)} is open and funded. Next, the provider approves the committee, then each member accepts.`,
+      );
+    } catch (e) {
+      setNote(firstLine(e, "Could not open the job"));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const field = "input glass-field w-full";
+  return (
+    <section className="glass-strong flex flex-col gap-3 p-5" aria-labelledby="open-heading">
+      <h2 id="open-heading" className="text-sm font-extrabold">
+        Open a verified job (client)
+      </h2>
+      <p className="text-sm text-muted">
+        The job description is the link to an <code>arl-reexec/1</code> spec; its hash is recorded
+        on chain, and the committee re-runs it and compares the result with what the provider
+        delivers. Five confirmations: post, name the committee, propose the budget, approve, escrow.
+      </p>
+      <label className="text-sm text-muted" htmlFor="open-spec">
+        Spec link (https:// or ipfs://)
+      </label>
+      <input
+        id="open-spec"
+        className={field}
+        value={specUrl}
+        onChange={(e) => setSpecUrl(e.target.value)}
+        placeholder="https://…/spec.json"
+        data-testid="open-spec"
+      />
+      <label className="text-sm text-muted" htmlFor="open-provider">
+        Provider address
+      </label>
+      <input
+        id="open-provider"
+        className={field}
+        value={provider}
+        onChange={(e) => setProvider(e.target.value)}
+        placeholder="0x…"
+        data-testid="open-provider"
+      />
+      <div className="grid grid-cols-2 gap-3">
+        <label className="flex flex-col gap-1 text-sm text-muted">
+          Budget (ARL)
+          <input
+            className={field}
+            inputMode="decimal"
+            value={budget}
+            onChange={(e) => setBudget(e.target.value)}
+            data-testid="open-budget"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm text-muted">
+          Bond per member (ARL)
+          <input
+            className={field}
+            inputMode="decimal"
+            value={bond}
+            onChange={(e) => setBond(e.target.value)}
+            placeholder={minBond === undefined ? "reading" : formatUnits(minBond, 18)}
+            data-testid="open-bond"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm text-muted">
+          Vote window (hours)
+          <input
+            className={field}
+            inputMode="decimal"
+            value={voteHours}
+            onChange={(e) => setVoteHours(e.target.value)}
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm text-muted">
+          Challenge window (hours)
+          <input
+            className={field}
+            inputMode="decimal"
+            value={challengeHours}
+            onChange={(e) => setChallengeHours(e.target.value)}
+            placeholder={minWindow === undefined ? "reading" : String(Number(minWindow) / 3600)}
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm text-muted">
+          Deadline (hours from now)
+          <input
+            className={field}
+            inputMode="decimal"
+            value={deadlineHours}
+            onChange={(e) => setDeadlineHours(e.target.value)}
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm text-muted">
+          Approvals needed
+          <input
+            className={field}
+            inputMode="numeric"
+            value={threshold}
+            onChange={(e) => setThreshold(e.target.value)}
+          />
+        </label>
+      </div>
+      <label className="text-sm text-muted" htmlFor="open-committee">
+        Committee (one address per line; the ARL operator&apos;s validators by default)
+      </label>
+      <textarea
+        id="open-committee"
+        className="textarea glass-field w-full font-mono text-xs"
+        rows={3}
+        value={committee}
+        onChange={(e) => setCommittee(e.target.value)}
+        data-testid="open-committee"
+      />
+      <div>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={busy || minBond === undefined}
+          onClick={() => void open()}
+          data-testid="open-submit"
+        >
+          Open and fund the job
+        </button>
+      </div>
+      {note ? (
+        <p className="text-sm text-muted" role="status" data-testid="open-note">
+          {note}
+        </p>
+      ) : null}
+    </section>
+  );
+}
+
+/**
+ * The provider's side: approve the committee the client named (no member can accept before),
+ * then submit the re-execution result. The deliverable is the hash of the result's canonical
+ * JSON, the value the validators recompute.
+ */
+function ProviderSteps() {
+  const client = usePublicClient();
+  const { writeContractAsync } = useWriteContract();
+  const [jobText, setJobText] = useState("");
+  const [result, setResult] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState("");
+  const id = /^\d+$/.test(jobText.trim()) ? BigInt(jobText.trim()) : undefined;
+
+  const run = async (label: string, send: () => Promise<Hex>) => {
+    setBusy(true);
+    setNote(`${label}: confirm in your wallet`);
+    try {
+      const hash = await send();
+      await client?.waitForTransactionReceipt({ hash });
+      setNote(`${label}: done`);
+    } catch (e) {
+      setNote(firstLine(e, `${label} failed`));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  let deliverable: Hex | null = null;
+  let resultError = "";
+  if (result.trim() !== "") {
+    try {
+      deliverable = deliverableOf(result);
+    } catch (e) {
+      resultError = firstLine(e, "Not a result document");
+    }
+  }
+
+  return (
+    <section className="glass-strong flex flex-col gap-3 p-5" aria-labelledby="provider-heading">
+      <h2 id="provider-heading" className="text-sm font-extrabold">
+        Deliver a verified job (provider)
+      </h2>
+      <input
+        className="input glass-field w-full"
+        inputMode="numeric"
+        placeholder="Job number"
+        value={jobText}
+        onChange={(e) => setJobText(e.target.value)}
+        aria-label="Job number"
+        data-testid="provider-job"
+      />
+      <div>
+        <button
+          type="button"
+          className="btn btn-glass"
+          disabled={busy || id === undefined}
+          data-testid="provider-approve"
+          onClick={() =>
+            id !== undefined &&
+            void run("Approve the committee", () =>
+              writeContractAsync({
+                address: EVALUATOR,
+                abi: evaluatorAbi,
+                functionName: "approveCommittee",
+                args: [id],
+              }),
+            )
+          }
+        >
+          Approve the committee
+        </button>
+      </div>
+      <label className="text-sm text-muted" htmlFor="provider-result">
+        Result (<code>arl-reexec-result/1</code> JSON from <code>arl-verifier run</code>)
+      </label>
+      <textarea
+        id="provider-result"
+        className="textarea glass-field w-full font-mono text-xs"
+        rows={4}
+        value={result}
+        onChange={(e) => setResult(e.target.value)}
+        data-testid="provider-result"
+      />
+      {deliverable ? (
+        <p className="break-all text-xs text-subtle">Deliverable: {deliverable}</p>
+      ) : resultError ? (
+        <p className="text-xs text-error">{resultError}</p>
+      ) : null}
+      <div>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={busy || id === undefined || deliverable === null}
+          data-testid="provider-submit"
+          onClick={() =>
+            id !== undefined &&
+            deliverable !== null &&
+            void run("Submit the result", () =>
+              writeContractAsync({
+                address: JOBS.address,
+                abi: JOBS.abi,
+                functionName: "submit",
+                args: [id, deliverable, "0x"],
+              }),
+            )
+          }
+        >
+          Submit the result
+        </button>
+      </div>
+      {note ? (
+        <p className="text-sm text-muted" role="status">
+          {note}
+        </p>
+      ) : null}
+    </section>
   );
 }
 

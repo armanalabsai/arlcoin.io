@@ -81,6 +81,36 @@ export const evaluatorAbi = [
   },
   {
     type: "function",
+    name: "configure",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "jobId", type: "uint256" },
+      {
+        name: "cfg",
+        type: "tuple",
+        components: [
+          { name: "tier", type: "uint8" },
+          { name: "threshold", type: "uint8" },
+          { name: "voteWindow", type: "uint64" },
+          { name: "challengeWindow", type: "uint64" },
+          { name: "bond", type: "uint96" },
+          { name: "providerAgentId", type: "uint256" },
+          { name: "specHash", type: "bytes32" },
+          { name: "committee", type: "address[]" },
+        ],
+      },
+    ],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "approveCommittee",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "jobId", type: "uint256" }],
+    outputs: [],
+  },
+  {
+    type: "function",
     name: "getConfig",
     stateMutability: "view",
     inputs: [{ name: "jobId", type: "uint256" }],
@@ -127,7 +157,7 @@ export const evaluatorAbi = [
 ] as const;
 
 /** The block the evaluator was deployed in: its event history starts there. */
-export const EVALUATOR_DEPLOY_BLOCK = 59_461_386n;
+export const EVALUATOR_DEPLOY_BLOCK = 59_577_368n;
 
 /** Events the public statistics are counted from. */
 export const evaluatorEvents = [
