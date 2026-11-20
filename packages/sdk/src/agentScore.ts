@@ -8,7 +8,14 @@
 // `reputationScore` (packages/protocol). Only the deployed verified evaluators count: earlier
 // evaluators never had a job (contracts/deploy/base-mainnet-jobs.json).
 
-import { parseAbi, parseAbiItem, type Address, type Hex, type PublicClient } from "viem";
+import {
+  isAddressEqual,
+  parseAbi,
+  parseAbiItem,
+  type Address,
+  type Hex,
+  type PublicClient,
+} from "viem";
 
 import {
   outcomesFromChain,
@@ -117,9 +124,15 @@ export async function getAgentScore(
 ): Promise<AgentScore> {
   const head = await client.getBlock();
   const to = head.number;
+  const from = VERIFIED_EVALUATORS.reduce<bigint>(
+    (min, e) => (e.fromBlock < min ? e.fromBlock : min),
+    VERIFIED_EVALUATORS[0].fromBlock,
+  );
 
-  const readFeedback = () =>
-    logsInRange(VERIFIED_EVALUATORS[0].fromBlock, to, (fromBlock, toBlock) =>
+  // Two reads per block range: this agent's feedback in the registry, and the evaluators' and
+  // escrows' events (few, for every job) in one request.
+  const [feedbackLogs, protocolLogs] = await Promise.all([
+    logsInRange(from, to, (fromBlock, toBlock) =>
       client.getLogs({
         address: REPUTATION_REGISTRY,
         event: registryEvents[0],
@@ -127,15 +140,20 @@ export async function getAgentScore(
         fromBlock,
         toBlock,
       }),
-    );
+    ),
+    logsInRange(from, to, (fromBlock, toBlock) =>
+      client.getLogs({
+        address: VERIFIED_EVALUATORS.flatMap((e) => [e.evaluator, e.escrow]),
+        events: [...evaluatorEvents, jobExpired],
+        fromBlock,
+        toBlock,
+      }),
+    ),
+  ]);
 
-  const readEvaluator = async (
-    e: (typeof VERIFIED_EVALUATORS)[number],
-  ): Promise<{ ev: EvaluatorLogs; jobs: JobRecord[] }> => {
-    const jobs: JobRecord[] = [];
-    const logs = await logsInRange(e.fromBlock, to, (fromBlock, toBlock) =>
-      client.getLogs({ address: e.evaluator, events: evaluatorEvents, fromBlock, toBlock }),
-    );
+  const evaluators: EvaluatorLogs[] = [];
+  const jobs: JobRecord[] = [];
+  for (const e of VERIFIED_EVALUATORS) {
     const ev: EvaluatorLogs = {
       evaluator: e.evaluator,
       escrow: e.escrow,
@@ -147,6 +165,9 @@ export async function getAgentScore(
       disputed: [],
       failed: [],
     };
+    const of = (address: string) =>
+      protocolLogs.filter((l) => isAddressEqual(l.address, address as Address));
+    const logs = of(e.evaluator);
     const approvedTx = new Map<string, bigint>();
     for (const l of logs) {
       const a = l.args as Record<string, unknown>;
@@ -176,18 +197,14 @@ export async function getAgentScore(
     for (const l of logs)
       if (l.eventName === "FeedbackFailed" && approvedTx.get(l.transactionHash) !== undefined)
         ev.unbound.push((l.args as { jobId: bigint }).jobId);
+    evaluators.push(ev);
 
     const mine = ev.configured.filter((c) => c.providerAgentId === agentId).map((c) => c.jobId);
-    const expiredLogs =
-      mine.length === 0
-        ? []
-        : await logsInRange(e.fromBlock, to, (fromBlock, toBlock) =>
-            client.getLogs({ address: e.escrow, event: jobExpired, fromBlock, toBlock }),
-          );
     const expiredBlock = new Map<bigint, bigint>();
-    for (const l of expiredLogs) {
-      const id = l.args.jobId;
-      if (id !== undefined && mine.includes(id)) expiredBlock.set(id, l.blockNumber);
+    for (const l of of(e.escrow)) {
+      const id = (l.args as { jobId?: bigint }).jobId;
+      if (l.eventName === "JobExpired" && id !== undefined && mine.includes(id))
+        expiredBlock.set(id, l.blockNumber);
     }
     for (const jobId of mine) {
       const j = await client.readContract({
@@ -207,15 +224,7 @@ export async function getAgentScore(
         ...(at === undefined ? {} : { expiredAt: await blockTime(client, at) }),
       });
     }
-    return { ev, jobs };
-  };
-
-  const [feedbackLogs, ...read] = await Promise.all([
-    readFeedback(),
-    ...VERIFIED_EVALUATORS.map((e) => readEvaluator(e)),
-  ]);
-  const evaluators = read.map((r) => r.ev);
-  const jobs = read.flatMap((r) => r.jobs);
+  }
 
   const feedback: FeedbackRecord[] = [];
   for (const l of feedbackLogs) {
