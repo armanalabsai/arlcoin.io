@@ -18,6 +18,7 @@ import { useAccount, usePublicClient, useWriteContract } from "wagmi";
 import { Arl, Facts, PageTitle, RequireWallet, Stat, useChainTime } from "~~/components/arl/ui";
 import { useArlServices } from "~~/hooks/arl/useArlServices";
 import type { ListedService } from "~~/hooks/arl/useArlServices";
+import { loadAllJobs } from "~~/hooks/arl/useAllJobs";
 import { useJobRatings } from "~~/hooks/arl/useJobRatings";
 import type { ServiceRatings } from "~~/hooks/arl/useJobRatings";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
@@ -28,7 +29,6 @@ import {
   deliverableHash,
   isAnvilAccount,
   rolesOf,
-  statusName,
   validateJob,
 } from "~~/lib/jobs";
 import type { Job, Role } from "~~/lib/jobs";
@@ -42,8 +42,7 @@ import {
   reputationRegistryAbi,
   starsToValue,
 } from "~~/lib/reputation";
-import { ARL, REFRESH_MS, deployBlock } from "~~/lib/contracts";
-import { eventsSince } from "~~/lib/logs";
+import { ARL, REFRESH_MS } from "~~/lib/contracts";
 
 const JOBS = ARL.ARLJobs;
 const TOKEN = ARL.ARLToken;
@@ -105,64 +104,8 @@ function useJobs(account: Address | undefined) {
     refetchInterval: REFRESH_MS,
     queryFn: async (): Promise<Job[]> => {
       if (!client || !account) return [];
-      const [created, submitted, fundedLogs] = await Promise.all([
-        eventsSince(client, deployBlock(JOBS), (range) =>
-          client.getContractEvents({
-            address: JOBS.address,
-            abi: JOBS.abi,
-            eventName: "JobCreated",
-            ...range,
-          }),
-        ),
-        eventsSince(client, deployBlock(JOBS), (range) =>
-          client.getContractEvents({
-            address: JOBS.address,
-            abi: JOBS.abi,
-            eventName: "JobSubmitted",
-            ...range,
-          }),
-        ),
-        eventsSince(client, deployBlock(JOBS), (range) =>
-          client.getContractEvents({
-            address: JOBS.address,
-            abi: JOBS.abi,
-            eventName: "JobFunded",
-            ...range,
-          }),
-        ),
-      ]);
-      const funded = new Set(
-        fundedLogs.flatMap((l) => (l.args.jobId === undefined ? [] : [l.args.jobId])),
-      );
-      const delivered = new Map<bigint, Hex>();
-      for (const s of submitted)
-        if (s.args.jobId !== undefined && s.args.deliverable)
-          delivered.set(s.args.jobId, s.args.deliverable);
-      const ids = created.flatMap((c) => (c.args.jobId === undefined ? [] : [c.args.jobId]));
-      const jobs = await Promise.all(
-        ids.map(async (id) => {
-          const j = await client.readContract({
-            address: JOBS.address,
-            abi: JOBS.abi,
-            functionName: "getJob",
-            args: [id],
-          });
-          return {
-            id,
-            client: j.client,
-            provider: j.provider,
-            evaluator: j.evaluator,
-            description: j.description,
-            budget: j.budget,
-            expiredAt: j.expiredAt,
-            status: statusName(j.status),
-            deliverable: delivered.get(id),
-            funded: funded.has(id),
-          } satisfies Job;
-        }),
-      );
       // Newest first; only jobs this account is part of.
-      return jobs.filter((j) => rolesOf(j, account).length > 0).reverse();
+      return (await loadAllJobs(client)).filter((j) => rolesOf(j, account).length > 0);
     },
   });
 }
