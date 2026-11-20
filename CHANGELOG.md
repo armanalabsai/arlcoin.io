@@ -11,6 +11,9 @@ documents that back it. What is deployed on Base Mainnet is recorded in
 - The Agent API reads the verified history from a snapshot published every ten minutes
   ([History snapshot workflow](.github/workflows/history-snapshot.yml)); its answers name the
   block they were read at.
+- Portable job receipts: a finalized job's record as an Ethereum Attestation Service schema, with
+  the unsigned `attest` call for the provider's own wallet. `getJobReceipt` in the SDK, the
+  `arl_get_job_receipt` MCP tool and `GET /api/v1/jobs/{token}/{jobId}/receipt`.
 - ARLscan lists the validators of the verified evaluator
   ([docs/app.md](docs/app.md#scan-arlscan)).
 

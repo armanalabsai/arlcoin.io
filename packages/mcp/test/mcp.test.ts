@@ -96,6 +96,7 @@ describe("MCP protocol", () => {
       "arl_list_policies",
       "arl_get_job",
       "arl_get_job_audit",
+      "arl_get_job_receipt",
       "arl_get_agent_outcomes",
       "arl_get_agent_score",
       "arl_get_agent",

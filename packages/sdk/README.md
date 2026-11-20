@@ -100,6 +100,7 @@ database or KV store. On runtimes that stop work when the response ends, pass `w
 | `getJobAudit`   | Every on-chain event of a verified job in order: who acted, when, with what hashes |
 | `getAgentPassport` | An agent's ERC-8004 identity and its verified record in one answer |
 | `getValidators` | Every validator that staked: stake, locked bonds, jobs accepted, votes and slashes |
+| `getJobReceipt` | A finalized job's portable receipt and the unsigned EAS `attest` call that records it |
 | `getTrustGraph` | Every agent with a verified outcome, its score, and an edge per client and agent |
 
 ## Contracts on Base Mainnet
