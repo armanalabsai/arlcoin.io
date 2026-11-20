@@ -33,8 +33,14 @@ function cacheCrs() {
     const out = join(CRS_DIR, file);
     if (existsSync(out) && (!range || statSync(out).size === Number(range.split("-")[1]) + 1))
       return;
+    // The CDN sometimes resets the connection: ask again instead of failing the whole run.
     execFileSync("curl", [
       "-sSfL",
+      "--retry",
+      "5",
+      "--retry-all-errors",
+      "--retry-delay",
+      "3",
       ...(range ? ["-r", range] : []),
       "-o",
       out,
