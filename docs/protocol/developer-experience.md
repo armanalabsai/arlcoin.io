@@ -62,7 +62,7 @@ Every answer carries the block number it was read at, so clients can re-check it
 ### 6.3 Agent integrations
 
 **Built, 15 November 2026:** the MCP server (`packages/mcp`, npm name `arl-protocol-mcp`) with
-`arl_check_task`, `arl_list_policies`, `arl_get_job`, `arl_get_job_audit`, `arl_get_agent_outcomes`, `arl_get_agent_score`, `arl_get_agent`, `arl_get_trust_graph`, `arl_list_validators`,
+`arl_check_task`, `arl_list_policies`, `arl_get_job`, `arl_get_job_audit`, `arl_get_job_receipt`, `arl_get_agent_outcomes`, `arl_get_agent_score`, `arl_get_agent`, `arl_get_trust_graph`, `arl_list_validators`,
 `arl_check_evidence`, `arl_prepare_job` and `arl_prepare_funding`. It speaks MCP over stdio with no dependency beyond viem, reads the chain at
 one block per answer and holds no key. `arl_get_agent_outcomes` reads an agent's verified record
 from both evaluators (6.2).

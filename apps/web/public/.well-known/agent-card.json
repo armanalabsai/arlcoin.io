@@ -42,6 +42,12 @@
       "tags": ["arl", "base", "escrow", "verification"]
     },
     {
+      "id": "arl_get_job_receipt",
+      "name": "arl_get_job_receipt",
+      "description": "Read the portable receipt of a finalized verified job on Base Mainnet and prepare the unsigned transaction that records it on the Ethereum Attestation Service (EAS): client, provider and its ERC-8004 agent, the committee's verdict, the deliverable, spec and vote hashes, and when it was finalized. The receipt is null while the job is not finalized. Nothing is signed or sent: `attest` is for the caller's own wallet (usually the provider, whose record it is), and `registerSchema` appears while the schema is not on EAS yet. Send a data part { \"skill\": \"arl_get_job_receipt\", \"arguments\": { ... } }.",
+      "tags": ["arl", "base", "escrow", "verification"]
+    },
+    {
       "id": "arl_get_agent_outcomes",
       "name": "arl_get_agent_outcomes",
       "description": "Read an agent's verified record on Base Mainnet: how many of its jobs the ARL and the USDC verified evaluators approved and rejected. The evaluators keep these counts themselves (outcomesOf), so a reputation registry refusing a write cannot erase them. Read at one block that the answer names. Send a data part { \"skill\": \"arl_get_agent_outcomes\", \"arguments\": { ... } }.",

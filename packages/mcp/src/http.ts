@@ -7,6 +7,7 @@
 //   GET  /api/v1/jobs/{ARL|USDC}/{jobId}   job, committee configuration and verdict
 //   GET  /api/v1/jobs/{ARL|USDC}/{jobId}/audit every on-chain event of the job, in order
 //   GET  /api/v1/jobs/{ARL|USDC}/{jobId}/audit.csv the same trail as a spreadsheet
+//   GET  /api/v1/jobs/{ARL|USDC}/{jobId}/receipt the job's portable receipt and its unsigned EAS call
 //   GET  /api/v1/agents/{agentId}          the agent's passport: identity and verified record
 //   GET  /api/v1/agents/{agentId}/outcomes verified approvals and rejections of an agent
 //   GET  /api/v1/agents/{agentId}/score    the agent's arl-reputation/1 score and its outcomes
@@ -168,6 +169,11 @@ const ROUTES: { method: "GET" | "POST"; path: RegExp; tool: string }[] = [
     path: /^\/api\/v1\/jobs\/(ARL|USDC)\/([0-9]{1,78})\/audit$/,
     tool: "arl_get_job_audit",
   },
+  {
+    method: "GET",
+    path: /^\/api\/v1\/jobs\/(ARL|USDC)\/([0-9]{1,78})\/receipt$/,
+    tool: "arl_get_job_receipt",
+  },
   { method: "GET", path: /^\/api\/v1\/agents\/([0-9]{1,78})$/, tool: "arl_get_agent" },
   {
     method: "GET",
@@ -246,7 +252,10 @@ export async function handleHttp(request: Request, tools: readonly Tool[]): Prom
     if (route.method === "GET") {
       const m = route.path.exec(pathname);
       args =
-        (route.tool === "arl_get_job" || route.tool === "arl_get_job_audit") && m
+        (route.tool === "arl_get_job" ||
+          route.tool === "arl_get_job_audit" ||
+          route.tool === "arl_get_job_receipt") &&
+        m
           ? { token: m[1], jobId: m[2] }
           : (route.tool === "arl_get_agent" ||
                 route.tool === "arl_get_agent_outcomes" ||
@@ -268,7 +277,8 @@ export async function handleHttp(request: Request, tools: readonly Tool[]): Prom
               route.tool === "arl_get_agent_score" ||
               route.tool === "arl_get_trust_graph" ||
               route.tool === "arl_list_validators" ||
-              route.tool === "arl_get_job_audit"
+              route.tool === "arl_get_job_audit" ||
+              route.tool === "arl_get_job_receipt"
             ? "public, max-age=60"
             : "no-store";
     return json(200, out, cache);

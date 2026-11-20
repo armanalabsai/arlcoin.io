@@ -25,6 +25,7 @@ import {
 import { getAgentScore, getTrustGraph } from "../../sdk/src/agentScore.ts";
 import { getJobAudit } from "../../sdk/src/audit.ts";
 import { getAgentPassport } from "../../sdk/src/passport.ts";
+import { getJobReceipt } from "../../sdk/src/receipt.ts";
 import { getValidators } from "../../sdk/src/validators.ts";
 import type { Tool } from "./server.ts";
 
@@ -343,6 +344,27 @@ export function arlTools(opts: ToolOptions): Tool[] {
         }
         const a = await getJobAudit(reader, t, id, history);
         return { chainId: 8453, ...a };
+      },
+    },
+    {
+      name: "arl_get_job_receipt",
+      description:
+        "Read the portable receipt of a finalized verified job on Base Mainnet and prepare the unsigned transaction that records it on the Ethereum Attestation Service (EAS): client, provider and its ERC-8004 agent, the committee's verdict, the deliverable, spec and vote hashes, and when it was finalized. The receipt is null while the job is not finalized. Nothing is signed or sent: `attest` is for the caller's own wallet (usually the provider, whose record it is), and `registerSchema` appears while the schema is not on EAS yet.",
+      inputSchema: {
+        type: "object",
+        properties: { token: TOKEN, jobId: JOB_ID },
+        required: ["token", "jobId"],
+        additionalProperties: false,
+      },
+      async run(args) {
+        const t = token(args.token);
+        const id = jobId(args.jobId);
+        const reader = opts.logReader ?? (opts.chain as unknown as PublicClient);
+        if (typeof (reader as { getLogs?: unknown }).getLogs !== "function") {
+          throw new ToolInputError("this server's chain reader cannot read logs");
+        }
+        const r = await getJobReceipt(reader, t, id, history);
+        return { chainId: 8453, token: t, jobId: id, ...r };
       },
     },
     {

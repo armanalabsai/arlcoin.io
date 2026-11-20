@@ -102,3 +102,17 @@ export {
 export { getJobAudit, type AuditEntry, type AuditValue, type JobAudit } from "./audit.ts";
 export { IDENTITY_REGISTRY, getAgentPassport, type AgentPassport } from "./passport.ts";
 export { getValidators, type ValidatorRecord, type Validators } from "./validators.ts";
+export {
+  EAS,
+  EAS_SCHEMA_REGISTRY,
+  RECEIPT_SCHEMA,
+  encodeReceipt,
+  getJobReceipt,
+  prepareReceiptAttestation,
+  prepareReceiptSchemaRegistration,
+  receiptFromAudit,
+  receiptSchemaUid,
+  type JobReceipt,
+  type JobReceiptAnswer,
+  type PreparedCall,
+} from "./receipt.ts";
