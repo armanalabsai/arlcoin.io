@@ -18,7 +18,14 @@ const chain = createPublicClient({
   chain: base,
   transport: fallback(RPCS.map((url) => http(url, { timeout: 3000, retryCount: 0 }))),
 });
-const tools = arlTools({ chain });
+// Wide log reads (the agent score) go to one endpoint that accepts 50,000-block getLogs ranges:
+// through the fallback, an endpoint with a smaller limit would split them into more requests than
+// a Function may make.
+const logReader = createPublicClient({
+  chain: base,
+  transport: http("https://base-rpc.publicnode.com", { timeout: 10_000, retryCount: 1 }),
+});
+const tools = arlTools({ chain, logReader });
 
 /** GET /api/v1/health: how each endpoint answers from here, for the uptime monitor. */
 async function health() {

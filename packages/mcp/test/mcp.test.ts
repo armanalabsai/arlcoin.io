@@ -220,7 +220,9 @@ describe("ARL tools", () => {
     assert.deepEqual(j.outcomes, []);
     // Every log read ends at the block the answer names.
     assert.equal(j.block, HEAD.toString());
-    assert.ok(ranges.length >= 3 && ranges.every(([, to]) => to === HEAD));
+    // Two reads per range: the agent's feedback, and the evaluators' and escrows' events.
+    assert.equal(ranges.length, 2);
+    assert.ok(ranges.every(([, to]) => to === HEAD));
     const noLogs = await call(arlTools({ chain: fakeChain(null) }), "arl_get_agent_score", {
       agentId: "42",
     });
