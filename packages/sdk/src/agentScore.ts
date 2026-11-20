@@ -74,11 +74,42 @@ const errorText = (e: unknown) =>
     ? `${e.message} ${(e as { details?: string }).details ?? ""} ${e.cause instanceof Error ? e.cause.message : ""}`
     : String(e);
 
+/** How many block ranges are read at once. */
+const CONCURRENCY = 4;
+
 /**
- * getLogs over [from, to] in spans the endpoint accepts: the span halves when the endpoint asks
- * for a smaller range, and a rate-limited request waits and is asked again (three times at most).
+ * getLogs over [from, to] in spans the endpoint accepts. The ranges are fixed 50,000-block steps
+ * from `from` (so a finished range is always asked for the same way and can be cached) and are
+ * read a few at a time; the answer keeps block order.
  */
 async function logsInRange<T>(
+  from: bigint,
+  to: bigint,
+  read: (fromBlock: bigint, toBlock: bigint) => Promise<T[]>,
+): Promise<T[]> {
+  const spans: [bigint, bigint][] = [];
+  for (let start = from; start <= to; start += MAX_SPAN) {
+    const end = start + MAX_SPAN - 1n;
+    spans.push([start, end < to ? end : to]);
+  }
+  const parts = new Array<T[]>(spans.length);
+  let next = 0;
+  const worker = async () => {
+    while (next < spans.length) {
+      const i = next++;
+      const [start, end] = spans[i] as [bigint, bigint];
+      parts[i] = await logsInSpan(start, end, read);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, spans.length) }, worker));
+  return parts.flat();
+}
+
+/**
+ * One range: the span halves when the endpoint asks for a smaller range, and a rate-limited
+ * request waits and is asked again (three times at most).
+ */
+async function logsInSpan<T>(
   from: bigint,
   to: bigint,
   read: (fromBlock: bigint, toBlock: bigint) => Promise<T[]>,
