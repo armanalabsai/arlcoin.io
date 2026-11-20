@@ -9,8 +9,9 @@
 //   up to a block well behind the head (blocks that far back never change). The caller asks for
 //   the whole range in one request; the provider answers the stored part from the entry and reads
 //   only the blocks after it, then moves the entry forward.
-// - The blocks after the entry are read from the wide endpoint. When it refuses, and the gap is
-//   small, they are read from an endpoint with a narrow range limit, in several requests.
+// - The blocks after the entry are read from the wide endpoint. When it refuses they are read from
+//   an endpoint with a narrow range limit, a bounded number of requests at a time: a long scan
+//   then takes several requests to catch up, and each one stores what it read.
 // - Everything that is not `eth_getLogs` goes to the other endpoints, tried in order.
 //
 // One entry per filter (not one per range) matters on Cloudflare, where each cache read and write
@@ -28,19 +29,25 @@ export interface CachedLogsOptions {
   /** Widest range `url` accepts, in blocks. */
   maxSpan?: bigint;
   /**
-   * An endpoint with a narrow range limit, asked when `url` refuses and the blocks to read fit in
-   * `maxRequests` requests of `maxSpan` blocks.
+   * An endpoint with a narrow range limit, asked when `url` refuses. One `eth_getLogs` request to
+   * this provider spends at most `maxRequests` requests of `maxSpan` blocks on it; what they cover
+   * is stored, and a scan with more left to read fails with "catching up" and goes on from there
+   * on the next request.
    */
   narrow?: { url: string; maxSpan: bigint; maxRequests: number };
   /** Endpoints for every other method, tried in order. Defaults to `url`. */
   readUrls?: readonly string[];
   cache: LogCache;
+  /**
+   * Stored scans shipped with the deployment, by the same keys and in the same form as the cache
+   * holds them (packages/mcp/seed.ts writes the file). A scan with nothing in the cache, or
+   * with less than the seed, starts from the seed instead of from its first block.
+   */
+  seed?: Readonly<Record<string, string>>;
   fetch?: typeof fetch;
   /** Logs are stored only for blocks at least this far behind the head. */
   finality?: bigint;
   timeoutMs?: number;
-  /** Pause before the wide endpoint is asked again after it refused, in milliseconds. */
-  retryMs?: number;
 }
 
 interface RpcRequest {
@@ -157,24 +164,64 @@ export function cachedLogsProvider(opts: CachedLogsOptions) {
     return parts.flat();
   }
 
-  /** The logs of [from, to] that are not stored yet, from the wide endpoint or the narrow one. */
-  async function fetchNew(filter: object, from: bigint, to: bigint): Promise<RawLog[]> {
-    const narrow = opts.narrow;
-    const fitsNarrow =
-      narrow !== undefined && to - from + 1n <= narrow.maxSpan * BigInt(narrow.maxRequests);
-    try {
-      return await inSpans(opts.url, filter, from, to, maxSpan, 1);
-    } catch (first) {
-      if (fitsNarrow) return inSpans(narrow.url, filter, from, to, narrow.maxSpan, 4);
-      // The wide endpoint is the only one that can read this much: wait once and ask it again.
-      await new Promise((r) => setTimeout(r, opts.retryMs ?? 1_500));
+  /** When the wide endpoint last refused: it is left alone for a while, the narrow one is asked. */
+  let wideFailedAt = -COOL_DOWN_MS;
+
+  /**
+   * The logs of [from, upTo] where upTo is as far as could be read: the whole range from the wide
+   * endpoint, or, when it refuses, as many blocks from `from` as the narrow endpoint's remaining
+   * requests cover. `budget.left` counts those requests down.
+   */
+  async function fetchNew(
+    filter: object,
+    from: bigint,
+    to: bigint,
+    budget: { left: number },
+  ): Promise<{ logs: RawLog[]; upTo: bigint }> {
+    let refused: unknown;
+    if (Date.now() - wideFailedAt >= COOL_DOWN_MS) {
       try {
-        return await inSpans(opts.url, filter, from, to, maxSpan, 1);
-      } catch {
-        throw first;
+        return { logs: await inSpans(opts.url, filter, from, to, maxSpan, 1), upTo: to };
+      } catch (e) {
+        wideFailedAt = Date.now();
+        refused = e;
       }
     }
+    const narrow = opts.narrow;
+    if (!narrow || budget.left <= 0) {
+      throw refused instanceof Error
+        ? refused
+        : new Error("the log scan is catching up, try again");
+    }
+    // One narrow request after another: this endpoint rate-limits too, so whatever was read
+    // before it refuses is kept, and the rest waits for the next request.
+    const logs: RawLog[] = [];
+    let next = from;
+    while (next <= to && budget.left > 0) {
+      const end = next + narrow.maxSpan - 1n < to ? next + narrow.maxSpan - 1n : to;
+      budget.left -= 1;
+      try {
+        logs.push(...(await getLogs(narrow.url, filter, next, end)));
+      } catch (e) {
+        budget.left = 0;
+        if (next === from) throw e;
+        break;
+      }
+      next = end + 1n;
+    }
+    return { logs, upTo: next - 1n };
   }
+
+  const parse = (stored: string | undefined): Pick<Scan, "from" | "to" | "logs"> | null => {
+    if (stored === undefined) return null;
+    try {
+      const v = JSON.parse(stored) as { from: string; to: string; logs: RawLog[] };
+      if (!Array.isArray(v.logs)) return null;
+      return { from: BigInt(v.from), to: BigInt(v.to), logs: v.logs };
+    } catch {
+      return null;
+    }
+  };
 
   const scans = new Map<string, Promise<Scan>>();
   function scan(key: string): Promise<Scan> {
@@ -184,14 +231,14 @@ export function cachedLogsProvider(opts: CachedLogsOptions) {
         .match(key)
         .catch(() => undefined)
         .then((hit) => {
-          const fresh: Scan = { from: null, to: -1n, logs: [], queue: Promise.resolve() };
-          if (hit === undefined) return fresh;
-          try {
-            const v = JSON.parse(hit) as { from: string; to: string; logs: RawLog[] };
-            return { ...fresh, from: BigInt(v.from), to: BigInt(v.to), logs: v.logs };
-          } catch {
-            return fresh;
-          }
+          const cached = parse(hit);
+          const seeded = parse(opts.seed?.[key]);
+          // Whichever reaches further; the seed's logs are copied, the scan appends to its own.
+          const best =
+            cached && (!seeded || cached.to >= seeded.to)
+              ? cached
+              : seeded && { ...seeded, logs: [...seeded.logs] };
+          return { from: null, to: -1n, logs: [], ...best, queue: Promise.resolve() };
         });
       scans.set(key, s);
     }
@@ -215,11 +262,16 @@ export function cachedLogsProvider(opts: CachedLogsOptions) {
     // entry, or past its end with a gap) is answered from the endpoint and stored nowhere.
     const start = s.from ?? from;
     const stored = s.from === null ? start - 1n : s.to;
-    if (from < start || from > stored + 1n) return fetchNew(filter, from, to);
+    const budget = { left: opts.narrow?.maxRequests ?? 0 };
+    if (from < start || from > stored + 1n) {
+      const direct = await fetchNew(filter, from, to, budget);
+      if (direct.upTo < to) throw new Error("the range is too wide for the endpoints that answer");
+      return direct.logs;
+    }
     if (to <= stored) return within(s.logs, from, to);
 
-    // Read what is missing one wide range at a time. Each range that is final joins the entry at
-    // once, so a scan the endpoint cuts short still leaves the next request less to read.
+    // Read what is missing one wide range at a time. Each part that is final joins the entry at
+    // once, so a scan that cannot finish in this request still leaves the next one less to read.
     const headBlock = await head();
     const finalTo =
       headBlock === null ? stored : headBlock - finality < to ? headBlock - finality : to;
@@ -227,8 +279,8 @@ export function cachedLogsProvider(opts: CachedLogsOptions) {
     let moved = false;
     try {
       for (let cursor = stored + 1n; cursor <= to;) {
-        const end = cursor + maxSpan - 1n < to ? cursor + maxSpan - 1n : to;
-        const logs = await fetchNew(filter, cursor, end);
+        const want = cursor + maxSpan - 1n < to ? cursor + maxSpan - 1n : to;
+        const { logs, upTo: end } = await fetchNew(filter, cursor, want, budget);
         const final = end <= finalTo ? end : finalTo;
         if (final >= cursor) {
           s.from = start;

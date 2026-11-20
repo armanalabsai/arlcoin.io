@@ -7,7 +7,12 @@ const WIDE = "https://wide.example";
 const NARROW = "https://narrow.example";
 const READ = "https://read.example";
 
-function setup(head: bigint, store = new Map<string, string>(), refuseWide = () => false) {
+function setup(
+  head: bigint,
+  store = new Map<string, string>(),
+  refuseWide = () => false,
+  seed?: Record<string, string>,
+) {
   const cache: LogCache = {
     match: (k) => Promise.resolve(store.get(k)),
     put: (k, v) => {
@@ -45,7 +50,7 @@ function setup(head: bigint, store = new Map<string, string>(), refuseWide = () 
     readUrls: [READ],
     cache,
     fetch: fakeFetch,
-    retryMs: 1,
+    ...(seed ? { seed } : {}),
   });
   return { provider, asked, store };
 }
@@ -90,15 +95,54 @@ describe("cached log scans", () => {
     assert.equal(blocks(found).at(-1), 121_500);
   });
 
+  it("catches up through the narrow endpoint, a few requests at a time", async () => {
+    // The wide endpoint refuses everything: three narrow requests per call is all there is.
+    const store = new Map<string, string>();
+    const first = setup(500_000n, store, () => true);
+    await assert.rejects(() => first.provider.request(logs(1n, 8_000n)), /catching up|429/);
+    assert.deepEqual(first.asked, [
+      "wide 1-8000",
+      "narrow 1-1000",
+      "narrow 1001-2000",
+      "narrow 2001-3000",
+    ]);
+    assert.equal(store.size, 1);
+    // The next requests go on from what was stored, until the scan is complete.
+    const second = setup(500_000n, store, () => true);
+    await assert.rejects(() => second.provider.request(logs(1n, 8_000n)));
+    assert.equal(second.asked[1], "narrow 3001-4000");
+    const third = setup(500_000n, store, () => true);
+    const found = await third.provider.request(logs(1n, 8_000n));
+    assert.deepEqual(third.asked.slice(1), ["narrow 6001-7000", "narrow 7001-8000"]);
+    assert.deepEqual(blocks(found).slice(0, 3), [1, 1_000, 1_001]);
+    assert.equal(blocks(found).at(-1), 8_000);
+  });
+
   it("keeps the ranges it finished when the wide endpoint cuts a long scan short", async () => {
     let calls = 0;
     const s = setup(500_000n, new Map(), () => ++calls > 2);
-    await assert.rejects(() => s.provider.request(logs(1n, 500_000n)), /429/);
+    await assert.rejects(() => s.provider.request(logs(1n, 500_000n)));
     assert.equal(s.store.size, 1);
-    // The next request starts after the two ranges that were stored.
+    // Two wide ranges and three narrow requests were stored: the next request starts after them.
     const next = setup(500_000n, s.store);
     await next.provider.request(logs(1n, 500_000n));
-    assert.equal(next.asked[0], "wide 100001-150000");
+    assert.equal(next.asked[0], "wide 103001-153000");
+  });
+
+  it("starts from a seed shipped with the deployment, unless the cache reaches further", async () => {
+    // A first scan writes the entry; its stored form is what a seed file holds.
+    const made = setup(120_000n);
+    await made.provider.request(logs(1n, 120_000n));
+    const seed = Object.fromEntries(made.store);
+
+    const seeded = setup(125_000n, new Map(), () => false, seed);
+    const found = await seeded.provider.request(logs(1n, 125_000n));
+    assert.deepEqual(seeded.asked, ["wide 119001-125000"]);
+    assert.deepEqual(blocks(found).slice(0, 2), [1, 50_000]);
+    // The cache now reaches further than the seed, so the next request goes on from the cache.
+    const next = setup(126_000n, seeded.store, () => false, seed);
+    await next.provider.request(logs(1n, 126_000n));
+    assert.deepEqual(next.asked, ["wide 124001-126000"]);
   });
 
   it("keeps filters apart and never stores a moving range", async () => {
@@ -119,7 +163,6 @@ describe("cached log scans", () => {
     const failing = cachedLogsProvider({
       url: "https://rpc.example",
       cache: { match: () => Promise.resolve(undefined), put: () => Promise.resolve() },
-      retryMs: 1,
       fetch: () =>
         Promise.resolve(
           Response.json({ error: { code: -32701, message: "exceed maximum block range: 50000" } }),

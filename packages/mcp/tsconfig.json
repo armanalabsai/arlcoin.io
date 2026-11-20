@@ -3,5 +3,5 @@
   "compilerOptions": {
     "skipLibCheck": true
   },
-  "include": ["src", "test", "build.ts"]
+  "include": ["src", "test", "build.ts", "seed.ts"]
 }

@@ -4,6 +4,7 @@
 import { createPublicClient, custom, fallback, http } from "viem";
 import { base } from "viem/chains";
 
+import logSeed from "../../../packages/mcp/log-seed.json";
 import { cachedLogsProvider } from "../../../packages/mcp/src/cachedLogs.ts";
 import { handleHttp } from "../../../packages/mcp/src/http.ts";
 import { arlTools } from "../../../packages/mcp/src/tools.ts";
@@ -22,8 +23,9 @@ const chain = createPublicClient({
 // Log reads for the agent score, the trust graph and the audit trail go through a provider that
 // keeps each scan's finished part in the Cache API and reads only the newest blocks
 // (packages/mcp/src/cachedLogs.ts). Only LOG_RPC accepts 50,000-block ranges, and it rate-limits
-// Cloudflare's shared addresses, so small gaps fall back to NARROW_RPC in 1,000-block requests and
-// every other call goes to RPCS.
+// Cloudflare's shared addresses, so when it refuses the blocks are read from NARROW_RPC in
+// 1,000-block requests (a long scan catches up over several requests), and every other call goes
+// to the read endpoints.
 const LOG_RPC = "https://base-rpc.publicnode.com";
 const NARROW_RPC = "https://base.gateway.tenderly.co";
 const logCache = {
@@ -43,9 +45,12 @@ const logReader = createPublicClient({
   transport: custom(
     cachedLogsProvider({
       url: LOG_RPC,
-      narrow: { url: NARROW_RPC, maxSpan: 1000n, maxRequests: 12 },
+      // 20 requests per scan and two scans per answer stay inside a Worker's 50 subrequests.
+      narrow: { url: NARROW_RPC, maxSpan: 1000n, maxRequests: 20 },
       readUrls: ["https://mainnet.base.org", "https://base.drpc.org", LOG_RPC],
       cache: logCache,
+      // Where a data centre with an empty cache starts (packages/mcp/seed.ts).
+      seed: logSeed,
     }),
     { retryCount: 0 },
   ),
