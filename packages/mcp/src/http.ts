@@ -155,6 +155,9 @@ async function auditCsv(token: string, jobId: string, tools: readonly Tool[]): P
   }
 }
 
+/** The log provider's own message while a scan catches up (packages/mcp/src/cachedLogs.ts). */
+const CATCHING_UP = /log scan is catching up/;
+
 const ROUTES: { method: "GET" | "POST"; path: RegExp; tool: string }[] = [
   { method: "GET", path: /^\/api\/v1\/policies$/, tool: "arl_list_policies" },
   { method: "POST", path: /^\/api\/v1\/tasks\/check$/, tool: "arl_check_task" },
@@ -273,8 +276,14 @@ export async function handleHttp(request: Request, tools: readonly Tool[]): Prom
     // Validation errors are the caller's to fix; anything else (an RPC failing) is ours.
     const client =
       /^(TaskError|PolicyError|ProofError|EvidenceError|ToolInputError|CanonicalError)$/.test(name);
-    return json(client ? 400 : 502, {
-      error: client ? `${name}: ${message}` : "chain read failed, try again",
-    });
+    if (client) return json(400, { error: `${name}: ${message}` });
+    // A history scan that is still being stored: the next request goes on from where this one
+    // stopped, so the caller is told to ask again rather than that something broke.
+    if (CATCHING_UP.test(message)) {
+      const res = json(503, { error: "the history is being read, ask again in a few seconds" });
+      res.headers.set("retry-after", "5");
+      return res;
+    }
+    return json(502, { error: "chain read failed, try again" });
   }
 }
