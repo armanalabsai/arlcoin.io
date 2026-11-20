@@ -89,3 +89,9 @@ export {
 // arl-task/1 and the other protocol documents (packages/protocol), and opening a task on chain.
 export * from "../../protocol/src/index.ts";
 export { openTask, type OpenTaskOptions, type OpenedTask } from "./openTask.ts";
+export {
+  REPUTATION_REGISTRY,
+  VERIFIED_EVALUATORS,
+  getAgentScore,
+  type AgentScore,
+} from "./agentScore.ts";

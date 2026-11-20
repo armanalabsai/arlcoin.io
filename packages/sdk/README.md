@@ -94,6 +94,7 @@ database or KV store. On runtimes that stop work when the response ends, pass `w
 | `openVerifiedJob`, `getVerdict`, `getOutcomes`, `finalizeJob` | Verified jobs: a committee of staked ARL validators checks the work, and `getOutcomes` reads an agent's verified `outcomesOf` counts |
 | `payVerified`                              | Pay a service that answers HTTP 402 with an ARL escrow offer              |
 | `payOnProof`, `expressPayOnProof`          | Sell a service paid through a verified job (the provider side of `payVerified`) |
+| `getAgentScore` | An agent's arl-reputation/1 score on Base Mainnet, from verified outcomes only |
 
 ## Contracts on Base Mainnet
 

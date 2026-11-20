@@ -6,6 +6,7 @@
 //   POST /api/v1/tasks/check              body: { task, policy? } -> hashes and policy verdict
 //   GET  /api/v1/jobs/{ARL|USDC}/{jobId}   job, committee configuration and verdict
 //   GET  /api/v1/agents/{agentId}/outcomes verified approvals and rejections of an agent
+//   GET  /api/v1/agents/{agentId}/score    the agent's arl-reputation/1 score and its outcomes
 //   POST /api/v1/evidence/check           body: { evidence } -> outcome of an arl-evidence/2
 //   POST /api/v1/jobs/prepare             body: as arl_prepare_job -> unsigned createJob
 //   POST /api/v1/jobs/prepare-funding     body: as arl_prepare_funding -> unsigned funding calls
@@ -38,6 +39,11 @@ const ROUTES: { method: "GET" | "POST"; path: RegExp; tool: string }[] = [
     method: "GET",
     path: /^\/api\/v1\/agents\/([0-9]{1,78})\/outcomes$/,
     tool: "arl_get_agent_outcomes",
+  },
+  {
+    method: "GET",
+    path: /^\/api\/v1\/agents\/([0-9]{1,78})\/score$/,
+    tool: "arl_get_agent_score",
   },
   { method: "POST", path: /^\/api\/v1\/evidence\/check$/, tool: "arl_check_evidence" },
   { method: "POST", path: /^\/api\/v1\/jobs\/prepare$/, tool: "arl_prepare_job" },
@@ -96,7 +102,7 @@ export async function handleHttp(request: Request, tools: readonly Tool[]): Prom
       args =
         route.tool === "arl_get_job" && m
           ? { token: m[1], jobId: m[2] }
-          : route.tool === "arl_get_agent_outcomes" && m
+          : (route.tool === "arl_get_agent_outcomes" || route.tool === "arl_get_agent_score") && m
             ? { agentId: m[1] }
             : {};
     } else {
@@ -109,7 +115,9 @@ export async function handleHttp(request: Request, tools: readonly Tool[]): Prom
         ? "public, max-age=3600"
         : route.tool === "arl_get_job" || route.tool === "arl_get_agent_outcomes"
           ? "public, max-age=10"
-          : "no-store";
+          : route.tool === "arl_get_agent_score"
+            ? "public, max-age=60"
+            : "no-store";
     return json(200, out, cache);
   } catch (e) {
     if (e instanceof HttpError) return json(e.status, { error: e.message });

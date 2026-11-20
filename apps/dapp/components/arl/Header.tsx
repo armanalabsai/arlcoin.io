@@ -22,6 +22,7 @@ const NAV = [
     : []),
   { href: "/jobs", label: "Jobs" },
   { href: "/verified", label: "Verified" },
+  { href: "/scan", label: "Scan" },
   ...(IS_LOCAL ? [{ href: "/private", label: "Private" }] : []),
 ];
 

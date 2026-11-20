@@ -68,6 +68,7 @@ cast call ${ESCROW_ARL} "jobCounter()(uint256)" --rpc-url https://mainnet.base.o
 const API = `curl https://arlcoin.io/api/v1/policies                # verification policies
 curl https://arlcoin.io/api/v1/jobs/ARL/1                 # a job, read at a named block
 curl https://arlcoin.io/api/v1/agents/1/outcomes          # an agent's verified record
+curl https://arlcoin.io/api/v1/agents/1/score             # its arl-reputation/1 score
 curl -X POST https://arlcoin.io/api/v1/tasks/check \\
   -H "content-type: application/json" -d '{"task": { ... }}'   # validate an arl-task/1 task`;
 
