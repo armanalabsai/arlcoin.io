@@ -229,12 +229,20 @@ export default function BuildPage() {
         <Code>{API}</Code>
         <p className="mt-4">
           The MCP server gives the same tools to any MCP client (check a task, list policies, read a
-          job, check evidence, prepare the transactions).
+          job, read an agent&apos;s score, check evidence, prepare the transactions).
         </p>
         <Code>{MCP}</Code>
         <p className="mt-3">
           <a href="https://www.npmjs.com/package/arl-protocol-mcp" {...ext} className={link}>
             arl-protocol-mcp on npm
+          </a>
+          {" · "}
+          <a
+            href="https://github.com/armanalabsai/arlcoin.io/blob/main/docs/frameworks.md"
+            {...ext}
+            className={link}
+          >
+            Use it from LangChain, CrewAI, the OpenAI Agents SDK or the Vercel AI SDK
           </a>
         </p>
         <p className="mt-3">
