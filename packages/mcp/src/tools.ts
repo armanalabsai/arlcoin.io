@@ -25,6 +25,7 @@ import {
 import { getAgentScore, getTrustGraph } from "../../sdk/src/agentScore.ts";
 import { getJobAudit } from "../../sdk/src/audit.ts";
 import { getAgentPassport } from "../../sdk/src/passport.ts";
+import { getValidators } from "../../sdk/src/validators.ts";
 import type { Tool } from "./server.ts";
 
 /** The chain reads the tools need (a viem PublicClient satisfies it). */
@@ -451,6 +452,20 @@ export function arlTools(opts: ToolOptions): Tool[] {
           agents: g.agents.map((a) => ({ agentId: a.agentId, ...a.score })),
           edges: g.edges,
         };
+      },
+    },
+    {
+      name: "arl_list_validators",
+      description:
+        "List the validators of the verified evaluators on Base Mainnet: every address that staked, its stake and the part locked as bonds on running jobs (base units of the stake token), the jobs it accepted, its votes by direction, its slashes, and since when it has staked. Anyone can stake and be named on a committee; this is the record to read before naming one. Read at one block that the answer names.",
+      inputSchema: { type: "object", properties: {}, additionalProperties: false },
+      async run() {
+        const reader = opts.logReader ?? (opts.chain as unknown as PublicClient);
+        if (typeof (reader as { getLogs?: unknown }).getLogs !== "function") {
+          throw new ToolInputError("this server's chain reader cannot read logs");
+        }
+        const v = await getValidators(reader, history);
+        return { chainId: 8453, ...v };
       },
     },
     {

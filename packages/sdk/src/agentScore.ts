@@ -54,7 +54,7 @@ export const VERIFIED_EVALUATORS = [
 const registryEvents = parseAbi([
   "event NewFeedback(uint256 indexed agentId, address indexed clientAddress, uint64 feedbackIndex, int128 value, uint8 valueDecimals, string indexed indexedTag1, string tag1, string tag2, string endpoint, string feedbackURI, bytes32 feedbackHash)",
 ]);
-/** Every event of the escrow and the verified evaluator: all carry the job id as first topic. */
+/** Every event of the escrow and the verified evaluator. */
 export const protocolEvents = parseAbi([
   "event JobCreated(uint256 indexed jobId, address indexed client, address indexed provider, address evaluator, uint256 expiredAt, address hook)",
   "event ProviderSet(uint256 indexed jobId, address indexed provider)",
@@ -81,6 +81,8 @@ export const protocolEvents = parseAbi([
   "event FeedbackFailed(uint256 indexed jobId, uint256 agentId)",
   "event RefundDeferred(uint256 indexed jobId)",
   "event DisputeExpired(uint256 indexed jobId)",
+  "event Staked(address indexed validator, uint256 amount)",
+  "event Unstaked(address indexed validator, uint256 amount)",
 ]);
 
 const MAX_SPAN = 50_000n;
