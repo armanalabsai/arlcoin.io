@@ -6,6 +6,7 @@ import type { Address } from "viem";
 
 import { BASE_MAINNET_TASK_DEPLOYMENTS } from "../../protocol/src/index.ts";
 import { MAX_BODY_BYTES, arlTools, handleHttp, type ChainReader } from "../src/index.ts";
+import { badgeText } from "../src/http.ts";
 
 const vectors = JSON.parse(
   readFileSync(new URL("../../../spec/arl-task/v0.1.0/vectors.json", import.meta.url), "utf8"),
@@ -100,5 +101,44 @@ describe("Agent API v1", () => {
     const pre = await api("/api/v1/policies", { method: "OPTIONS" });
     assert.equal(pre.status, 204);
     assert.equal(pre.headers.get("access-control-allow-methods"), "GET, POST, OPTIONS");
+  });
+});
+
+describe("agent badge", () => {
+  const scoreTool = (outcomes: unknown[], completed: number, fail = false) => [
+    {
+      name: "arl_get_agent_score",
+      description: "",
+      inputSchema: {},
+      run: () =>
+        fail ? Promise.reject(new Error("rpc down")) : Promise.resolve({ outcomes, completed }),
+    },
+  ];
+  const get = (tools: ReturnType<typeof scoreTool>, method = "GET") =>
+    handleHttp(new Request("https://arlcoin.io/api/v1/agents/7/badge.svg", { method }), tools);
+
+  it("words the record from counts only", () => {
+    assert.equal(badgeText({ outcomes: 0, completed: 0 }), "no verified jobs yet");
+    assert.equal(badgeText({ outcomes: 1, completed: 1 }), "1 job, 100% approved");
+    assert.equal(badgeText({ outcomes: 42, completed: 41 }), "42 jobs, 98% approved");
+  });
+
+  it("serves an SVG with the agent's verified record", async () => {
+    const res = await get(scoreTool([{}, {}, {}], 2));
+    assert.equal(res.status, 200);
+    assert.match(res.headers.get("content-type") ?? "", /^image\/svg\+xml/);
+    assert.equal(res.headers.get("cache-control"), "public, max-age=300");
+    const text = await res.text();
+    assert.match(text, /^<svg /);
+    assert.match(text, /ARL verified: 3 jobs, 67% approved/);
+  });
+
+  it("says so when an agent has no verified job, and when the chain cannot be read", async () => {
+    assert.match(await (await get(scoreTool([], 0))).text(), /no verified jobs yet/);
+    const down = await get(scoreTool([], 0, true));
+    assert.equal(down.status, 502);
+    assert.equal(down.headers.get("cache-control"), "no-store");
+    assert.match(await down.text(), /unavailable/);
+    assert.equal((await get(scoreTool([], 0), "POST")).status, 405);
   });
 });
