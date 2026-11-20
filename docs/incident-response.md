@@ -19,7 +19,7 @@ reward period runs for at least 3 more days. A failed check fails the run and Gi
 owner by email and in the mobile app. The [Monitor mainnet](../.github/workflows/monitor.yml)
 workflow checks the recorded Base Mainnet deployment. The [Protocol events](../.github/workflows/events.yml)
 workflow (S-4 in [security-hardening.md](protocol/security-hardening.md)) scans the live ARLJobs v3
-escrows, the Verified Evaluator v5 contracts and the staking contract every hour (addresses in
+escrows, the Verified Evaluator v7 contracts and the staking contract every hour (addresses in
 [events-8453.json](../contracts/deploy/events-8453.json)). Disputes, slashes, refused refunds,
 disputes closed without a ruling and failed reputation writes fail the run and email the owner.
 

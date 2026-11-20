@@ -7,13 +7,13 @@ is funded. The ARL app at arlcoin.io/app runs on Base
 Mainnet. The ARL token, its Safes, vesting wallets and timelock are on Base Mainnet since
 2026-10-24 ([mainnet-plan.md](mainnet-plan.md)).
 
-| Step | Service                                          | Status                                                         |
-| ---- | ------------------------------------------------ | -------------------------------------------------------------- |
-| 1    | Jobs escrows (ARL, USDC) and verified evaluators | Deployed (v3 escrows, v5 evaluators, nonces 33-36, 2026-11-16) |
-| 2    | Validators: keys, ETH for gas, staked ARL        | Not started                                                    |
-| 3    | x402 per-use payments facilitator on 8453        | Not started                                                    |
-| 4    | Staking rewards contract and its reward budget   | Deployed (nonce 32); 300,000 ARL period funded 2026-11-16      |
-| 5    | App and site on Base Mainnet                     | Done (2026-11-13)                                              |
+| Step | Service                                          | Status                                                        |
+| ---- | ------------------------------------------------ | ------------------------------------------------------------- |
+| 1    | Jobs escrows (ARL, USDC) and verified evaluators | Deployed (v3 escrows 2026-11-16; evaluators v7, 2026-11-19)   |
+| 2    | Validators: keys, ETH for gas, staked ARL        | Running: 3 operator validators staked on v7; first job 20 Nov |
+| 3    | x402 per-use payments facilitator on 8453        | Not started                                                   |
+| 4    | Staking rewards contract and its reward budget   | Deployed (nonce 32); 300,000 ARL period funded 2026-11-16     |
+| 5    | App and site on Base Mainnet                     | Done (2026-11-13)                                             |
 
 ## Step 1: jobs escrow and verified evaluator
 
@@ -54,12 +54,12 @@ Deploy screen (`arlcoin.io/app/deploy/?plan=…`):
 |    31 | `8453-services`                           | `ComputePayment`, paid in ARL                                    | `0x1bFE932896fdd32175836a7364dcaf53d49EE464` | Deployed                   |
 |    32 | `8453-services`                           | `ARLStakingRewards`, ARL, 180-day periods                        | `0x15e257009BE9B1875fbfa69D291320aaFE3fa102` | Deployed                   |
 |    33 | `8453-verified-jobs-arl-v3`               | `ARLJobs` v3, paid in ARL (fund balance check, `claimRefundTo`)  | `0x9aE99bF9a59aF47E81346B7c0b93Cd2B610455fC` | Deployed 2026-11-16        |
-|    34 | `8453-verified-jobs-arl-v3`               | `ARLVerifiedEvaluator` v5 for it, bonds in ARL                   | `0x6648e141cb7473822ddBd8bC039b91e5af3259B4` | Deployed 2026-11-16        |
+|    34 | `8453-verified-jobs-arl-v3`               | `ARLVerifiedEvaluator` v5 for it, bonds in ARL                   | `0x6648e141cb7473822ddBd8bC039b91e5af3259B4` | Retired: v6 2026-11-19     |
 |    35 | `8453-verified-jobs-usdc-v3`              | `ARLJobs` v3, paid in USDC                                       | `0xE3eA0EAEc3Cf9DA2d0856A0f784A4B1671AeFD04` | Deployed 2026-11-16        |
-|    36 | `8453-verified-jobs-usdc-v3`              | `ARLVerifiedEvaluator` v5 for it, bonds in ARL                   | `0x6bFfdEace7d0B2F7711f604F0A5D2545be2961AF` | Deployed 2026-11-16        |
+|    36 | `8453-verified-jobs-usdc-v3`              | `ARLVerifiedEvaluator` v5 for it, bonds in ARL                   | `0x6bFfdEace7d0B2F7711f604F0A5D2545be2961AF` | Retired: v6 2026-11-19     |
 |    37 | none                                      | nothing from a plan (the deployer's nonce read 38 on 2026-11-19) |                                              |                            |
-|    38 | `8453-verified-evaluator-arl-v6`          | `ARLVerifiedEvaluator` v6 for the ARL escrow at nonce 33         | `0xcF87CF8751648919b5A7F3b45795999dFDeE5861` | Deployed 2026-11-19        |
-|    39 | `8453-verified-evaluator-usdc-v6`         | `ARLVerifiedEvaluator` v6 for the USDC escrow at nonce 35        | `0xc121c4fE9460c55d85dE0175C1C7045235f94c07` | Deployed 2026-11-19        |
+|    38 | `8453-verified-evaluator-arl-v6`          | `ARLVerifiedEvaluator` v6 for the ARL escrow at nonce 33         | `0xcF87CF8751648919b5A7F3b45795999dFDeE5861` | Retired: v7 2026-11-19     |
+|    39 | `8453-verified-evaluator-usdc-v6`         | `ARLVerifiedEvaluator` v6 for the USDC escrow at nonce 35        | `0xc121c4fE9460c55d85dE0175C1C7045235f94c07` | Retired: v7 2026-11-19     |
 |    40 | `8453-verified-evaluator-arl-v7`          | `ARLVerifiedEvaluator` v7 for the ARL escrow at nonce 33         | `0x0D160C869bd2a7AaEDd29e11fc60fdAEf21c3E28` | Deployed 2026-11-19        |
 |    41 | `8453-verified-evaluator-usdc-v7`         | `ARLVerifiedEvaluator` v7 for the USDC escrow at nonce 35        | `0x7A00D45598Da7C13feEA8962fc1110FC4Db4D850` | Deployed 2026-11-19        |
 

@@ -84,7 +84,7 @@ reads made during this session.
 | `ARLVestingWallet`     | Investor and partnership vesting                                            | LIVE                                                              | `docs/mainnet-plan.md`                                  |
 | `ARLTimelock`          | Treasury timelock with cancel-only guardian                                 | LIVE                                                              | `docs/mainnet-plan.md`                                  |
 | `ARLJobs`              | ERC-8183 escrow: Open → Funded → Submitted → Completed / Rejected / Expired | LIVE (v3) `0x9aE9…55fC` ARL, `0xE3eA…FD04` USDC                   | `base-mainnet-jobs.json`; jobs-record 9/9 checks        |
-| `ARLVerifiedEvaluator` | Staked committee votes, challenge window, disputes, arbiter, ERC-8004 write | LIVE v5 `0x6648…59B4` ARL, `0x6bFf…61AF` USDC                     | `docs/mainnet-services.md` nonces 29, 30                |
+| `ARLVerifiedEvaluator` | Staked committee votes, challenge window, disputes, arbiter, ERC-8004 write | LIVE v7 `0x0D16…3E28` ARL, `0x7A00…D850` USDC (since 2026-11-19)  | `docs/mainnet-services.md` nonces 40, 41                |
 | `ComputePayment`       | Per-second compute streams paid in ARL                                      | LIVE `0x1bFE…E464`                                                | nonce 31, 10/10 checks                                  |
 | `ARLStakingRewards`    | ARL staking with reward periods                                             | LIVE `0x15e2…a102`, first period of 300,000 ARL funded 2026-11-16 | nonce 32; `docs/mainnet-services.md` step 4             |
 | `ARLAnonymousSignal`   | Semaphore-style anonymous signals (Noir/UltraHonk)                          | BUILDING: local chain only                                        | `docs/zk-privacy.md`                                    |
@@ -142,7 +142,7 @@ flowchart TB
   subgraph Current["Current (LIVE / BUILDING)"]
     direction TB
     C_SDK[SDKs: TS, Python, n8n]:::live --> C_JOBS[ARLJobs v3 escrow]:::live
-    C_SDK --> C_EVAL[ARLVerifiedEvaluator v5]:::live
+    C_SDK --> C_EVAL[ARLVerifiedEvaluator v7]:::live
     C_EVAL --> C_JOBS
     C_EVAL --> C_REP[ERC-8004 Reputation]:::live
     C_VER[arl-verifier: re-exec, bundle]:::building -.not running on mainnet.-> C_EVAL
