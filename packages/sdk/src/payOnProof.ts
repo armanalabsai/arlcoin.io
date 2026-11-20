@@ -30,7 +30,7 @@ import {
   type EscrowOfferInput,
 } from "./escrowProvider.ts";
 import { JOB_HEADER, parseEscrowOffer, type EscrowOffer } from "./payVerified.ts";
-import type { VerifiedClients } from "./verified.ts";
+import { VerifiedJobError, type VerifiedClients } from "./verified.ts";
 
 /** Header with the deliverable the service submits for the job. */
 export const DELIVERABLE_HEADER = "X-ARL-Deliverable";
@@ -108,8 +108,12 @@ const json = (status: number, body: unknown, headers?: HeadersInit) =>
     headers: { "content-type": "application/json", ...Object.fromEntries(new Headers(headers)) },
   });
 
-const firstLine = (e: unknown) =>
-  e instanceof Error ? (e.message.split("\n")[0] ?? e.message) : String(e);
+/**
+ * What a caller may learn from a failure: the SDK's own checks explain themselves (a job on another
+ * chain, an unfunded job); anything else (an RPC or library error) stays on the server.
+ */
+const publicReason = (e: unknown, fallback: string) =>
+  e instanceof VerifiedJobError ? (e.message.split("\n")[0] ?? fallback) : fallback;
 
 /** Wraps `handler` so every call is paid through a verified job before it runs. */
 export function payOnProof(
@@ -135,7 +139,7 @@ export function payOnProof(
     try {
       job = await deps.checkFundedJob(config.clients.publicClient, offer, header);
     } catch (e) {
-      return json(402, { ...offerBody, error: firstLine(e) });
+      return json(402, { ...offerBody, error: publicReason(e, "could not check the job") });
     }
 
     // One run per job: recorded before the work, released only if the work never started.
@@ -147,7 +151,9 @@ export function payOnProof(
       await deps.approveCommittee(config.clients, offer, job.jobId);
     } catch (e) {
       await used.delete(key);
-      return json(503, { error: `could not approve the committee: ${firstLine(e)}` });
+      return json(503, {
+        error: `could not approve the committee: ${publicReason(e, "try again")}`,
+      });
     }
 
     const result = await handler(request, job);

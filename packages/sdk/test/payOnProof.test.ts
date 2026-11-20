@@ -9,6 +9,7 @@ import {
   type PayOnProofConfig,
   type PayOnProofDeps,
   type VerifiedClients,
+  VerifiedJobError,
 } from "../src/index.ts";
 
 const PROVIDER = "0x00000000000000000000000000000000000000aa";
@@ -103,12 +104,24 @@ describe("pay-on-proof", () => {
 
   it("refuses a job that does not match the offer, with the reason, before any work", async () => {
     const s = setup({
-      checkFundedJob: () => Promise.reject(new Error("job 7: not funded")),
+      checkFundedJob: () => Promise.reject(new VerifiedJobError("job 7: not funded")),
     });
     const res = await s.handle(req(HEADER));
     assert.equal(res.status, 402);
     assert.match(((await res.json()) as { error: string }).error, /not funded/);
     assert.equal(s.runs(), 0);
+  });
+
+  it("keeps RPC and library errors on the server", async () => {
+    const s = setup({
+      checkFundedJob: () =>
+        Promise.reject(new Error("HTTP request failed: https://rpc.internal/key")),
+    });
+    const res = await s.handle(req(HEADER));
+    assert.equal(res.status, 402);
+    const { error } = (await res.json()) as { error: string };
+    assert.equal(error, "could not check the job");
+    assert.doesNotMatch(error, /rpc\.internal/);
   });
 
   it("runs the work once for a funded job and submits its deliverable after acceptance", async () => {
