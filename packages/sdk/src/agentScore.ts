@@ -74,13 +74,14 @@ const errorText = (e: unknown) =>
     ? `${e.message} ${(e as { details?: string }).details ?? ""} ${e.cause instanceof Error ? e.cause.message : ""}`
     : String(e);
 
-/** How many block ranges are read at once. */
-const CONCURRENCY = 4;
+/** How many block ranges are read at once, while the endpoint allows it. */
+const CONCURRENCY = 2;
 
 /**
  * getLogs over [from, to] in spans the endpoint accepts. The ranges are fixed 50,000-block steps
  * from `from` (so a finished range is always asked for the same way and can be cached) and are
- * read a few at a time; the answer keeps block order.
+ * read two at a time; the answer keeps block order. Once the endpoint rate-limits a request the
+ * rest are read one after another.
  */
 async function logsInRange<T>(
   from: bigint,
@@ -94,14 +95,19 @@ async function logsInRange<T>(
   }
   const parts = new Array<T[]>(spans.length);
   let next = 0;
-  const worker = async () => {
-    while (next < spans.length) {
+  let limited = false;
+  const worker = async (id: number) => {
+    while (next < spans.length && !(limited && id > 0)) {
       const i = next++;
       const [start, end] = spans[i] as [bigint, bigint];
-      parts[i] = await logsInSpan(start, end, read);
+      parts[i] = await logsInSpan(start, end, read, () => {
+        limited = true;
+      });
     }
   };
-  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, spans.length) }, worker));
+  await Promise.all(
+    Array.from({ length: Math.min(CONCURRENCY, spans.length) }, (_, id) => worker(id)),
+  );
   return parts.flat();
 }
 
@@ -113,6 +119,7 @@ async function logsInSpan<T>(
   from: bigint,
   to: bigint,
   read: (fromBlock: bigint, toBlock: bigint) => Promise<T[]>,
+  onRateLimited: () => void,
 ): Promise<T[]> {
   const out: T[] = [];
   let span = MAX_SPAN;
@@ -126,7 +133,8 @@ async function logsInSpan<T>(
       waits = 0;
     } catch (e) {
       const text = errorText(e);
-      if (RATE_LIMITED.test(text) && waits < 3) {
+      if (RATE_LIMITED.test(text) && waits < 5) {
+        onRateLimited();
         waits += 1;
         await new Promise((r) => setTimeout(r, 1000 * waits));
       } else if (TOO_WIDE.test(text) && span > MIN_SPAN) {
