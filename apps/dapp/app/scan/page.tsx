@@ -6,6 +6,8 @@ import type { Address } from "viem";
 
 import { Arl, Facts, PageTitle, Stat } from "~~/components/arl/ui";
 import { useAllJobs } from "~~/hooks/arl/useAllJobs";
+import { AUDIT_AVAILABLE, auditUrl, parseAudit } from "~~/lib/audit";
+import type { Audit } from "~~/lib/audit";
 import { EVALUATOR, EXPLORER } from "~~/lib/evaluator";
 import type { Job } from "~~/lib/jobs";
 import { agentRecords, filterJobs, scanTotals } from "~~/lib/scan";
@@ -122,6 +124,79 @@ function Agents({ jobs }: { jobs: readonly Job[] }) {
   );
 }
 
+/** Every on-chain step of a verified job, read from the Agent API when asked for. */
+function AuditTrail({ jobId }: { jobId: bigint }) {
+  const [state, setState] = useState<"closed" | "loading" | "failed" | Audit>("closed");
+  const open = () => {
+    setState("loading");
+    fetch(auditUrl(jobId))
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((body: unknown) => {
+        setState(parseAudit(body));
+      })
+      .catch(() => {
+        setState("failed");
+      });
+  };
+  if (state === "closed" || state === "failed" || state === "loading") {
+    return (
+      <p className="text-xs">
+        <button
+          type="button"
+          className="link"
+          onClick={open}
+          disabled={state === "loading"}
+          data-testid="scan-audit-open"
+        >
+          {state === "loading" ? "Reading the audit trail…" : "Audit trail"}
+        </button>
+        {state === "failed" ? (
+          <span className="text-subtle"> · could not be read, try again</span>
+        ) : null}
+      </p>
+    );
+  }
+  return (
+    <div className="mt-1 flex flex-col gap-1 text-xs" data-testid="scan-audit">
+      <ol className="flex flex-col gap-1">
+        {state.steps.map((s) => (
+          <li
+            key={`${s.transaction}:${s.event}:${s.actor ?? ""}`}
+            className="flex flex-wrap gap-x-2"
+          >
+            <span className="text-subtle whitespace-nowrap">
+              {new Date(s.at * 1000).toISOString().slice(0, 19).replace("T", " ")} UTC
+            </span>
+            <span>{s.step}</span>
+            {s.actor ? <AddressLink address={s.actor} /> : null}
+            <a
+              href={`${EXPLORER}/tx/${s.transaction}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline decoration-white/20 underline-offset-2 hover:decoration-white/60"
+            >
+              transaction
+            </a>
+          </li>
+        ))}
+      </ol>
+      <p className="text-subtle">
+        {state.steps.length === 0 ? "No step recorded yet. " : ""}Read from the chain at block{" "}
+        {state.block}.{" "}
+        <button
+          type="button"
+          className="link"
+          onClick={() => {
+            setState("closed");
+          }}
+        >
+          Hide
+        </button>
+      </p>
+    </div>
+  );
+}
+
 function JobList({ jobs }: { jobs: readonly Job[] }) {
   const [query, setQuery] = useState("");
   const found = useMemo(() => filterJobs(jobs, query), [jobs, query]);
@@ -162,6 +237,9 @@ function JobList({ jobs }: { jobs: readonly Job[] }) {
                 Client <AddressLink address={j.client} /> · Agent{" "}
                 <AddressLink address={j.provider} />
               </p>
+              {AUDIT_AVAILABLE && isAddressEqual(j.evaluator, EVALUATOR) ? (
+                <AuditTrail jobId={j.id} />
+              ) : null}
             </li>
           ))}
         </ul>
