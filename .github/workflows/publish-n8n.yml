@@ -38,4 +38,4 @@ jobs:
         working-directory: packages/n8n-nodes-arl
         run: |
           npm install -g npm@11
-          npm publish --provenance --access public
+          npm stage publish . --provenance --access public

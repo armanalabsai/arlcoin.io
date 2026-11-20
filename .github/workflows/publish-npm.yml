@@ -6,6 +6,8 @@ name: Publish npm package
 # through GitHub's OIDC token, so no npm token is stored anywhere. Each npm package must list this
 # workflow as a trusted publisher (armanalabsai, arlcoin.io, publish-npm.yml, environment npm).
 # The version published is the one in the package's package.json; bump it in a pull request first.
+# npm stages the upload (trusted publishers may only stage): a maintainer approves it on npmjs.com
+# or with `npm stage approve <stage-id>`, with 2FA, before it goes live.
 on:
   workflow_dispatch:
     inputs:
@@ -48,4 +50,4 @@ jobs:
         working-directory: packages/${{ inputs.package }}/dist/package
         run: |
           npm install -g npm@11
-          npm publish --provenance --access public
+          npm stage publish . --provenance --access public
