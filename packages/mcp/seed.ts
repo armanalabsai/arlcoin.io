@@ -5,7 +5,8 @@
 // again, through an endpoint that rate-limits Workers. This script reads it once from an ordinary
 // machine and writes it in the form the cache holds, so a deployment starts close to the head.
 //
-//   node packages/mcp/seed.ts        (run before a release; commit the file)
+//   node packages/mcp/seed.ts            (before a release; commit packages/mcp/log-seed.json)
+//   node packages/mcp/seed.ts <file>     (a publisher: writes the snapshot somewhere else)
 //
 // The file holds public on-chain events only. An out-of-date seed is still correct: the provider
 // reads whatever came after it.
@@ -41,7 +42,8 @@ const client = createPublicClient({
 await getAgentScore(client as never, 1n, { wholeRange: true });
 if (store.size !== 2) throw new Error(`expected 2 scans, read ${String(store.size)}`);
 
-const out = new URL("./log-seed.json", import.meta.url);
+// The file to write: the first argument, or the seed bundled with the deployment.
+const out = process.argv[2] ?? new URL("./log-seed.json", import.meta.url);
 writeFileSync(out, `${JSON.stringify(Object.fromEntries([...store].sort()), null, 2)}\n`);
 for (const [key, value] of store) {
   const v = JSON.parse(value) as { from: string; to: string; logs: unknown[] };

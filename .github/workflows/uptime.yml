@@ -1,6 +1,7 @@
 name: Uptime
 
-# Read-only uptime check of the public services every 10 minutes: the website, the app page, the
+# Read-only uptime check of the public services, scheduled every 10 minutes (GitHub runs it less
+# often in practice): the website, the app page, the
 # Agent API and A2A card, the Base Mainnet RPC and the staking reward window (once the first period is funded). Any failed
 # check fails the run, and GitHub notifies the owner by email and in the GitHub mobile app.
 # Nothing is signed or sent.
@@ -44,9 +45,9 @@ jobs:
           # The score reads the verified history; asking every run also keeps its stored scan a
           # few thousand blocks behind the head, so no request has much left to read.
           check https://arlcoin.io/api/v1/agents/1/score "arl-reputation/1"
-          # The history comes from a snapshot the History snapshot workflow publishes every ten
-          # minutes. If that stops, the answers go stale without failing: compare the block they
-          # name with the chain's head (Base makes about 300 blocks a minute).
+          # The history comes from a published snapshot (the data/history branch, or the
+          # history-snapshot release). If publishing stops, the answers go stale without failing:
+          # compare the block they name with the chain's head (Base makes about 300 blocks a minute).
           read_at=$(curl -sf --max-time 20 https://arlcoin.io/api/v1/agents/1/score | sed -n 's/.*"block": *"\([0-9]*\)".*/\1/p' | head -1)
           head_hex=$(curl -sf --max-time 20 -X POST "$RPC" -H 'content-type: application/json' \
             -d '{"jsonrpc":"2.0","id":1,"method":"eth_blockNumber","params":[]}' | sed -n 's/.*"result":"\(0x[0-9a-f]*\)".*/\1/p')

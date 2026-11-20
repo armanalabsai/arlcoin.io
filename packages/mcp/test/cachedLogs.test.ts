@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { cachedLogsProvider, type LogCache } from "../src/cachedLogs.ts";
+import { cachedLogsProvider, freshestSnapshot, type LogCache } from "../src/cachedLogs.ts";
 
 const WIDE = "https://wide.example";
 const NARROW = "https://narrow.example";
@@ -220,5 +220,27 @@ describe("cached log scans", () => {
         ),
     });
     await assert.rejects(() => failing.request(logs(1n, 2n)), /exceed maximum block range/);
+  });
+});
+
+describe("several published snapshots", () => {
+  const copy = (...to: number[]) =>
+    Object.fromEntries(
+      to.map((t, i) => [`k${String(i)}`, JSON.stringify({ from: "1", to: String(t), logs: [] })]),
+    );
+
+  it("uses the copy whose least advanced scan reaches furthest", () => {
+    const old = copy(100, 100);
+    const fresh = copy(300, 300);
+    const uneven = copy(900, 200);
+    assert.equal(freshestSnapshot([old, fresh, uneven]), fresh);
+    assert.equal(freshestSnapshot([undefined, old]), old);
+  });
+
+  it("skips a copy that cannot be read, and returns nothing when none can", () => {
+    const good = copy(50);
+    assert.equal(freshestSnapshot([{ k0: "not json" }, good]), good);
+    assert.equal(freshestSnapshot([undefined, { k0: "{" }]), undefined);
+    assert.equal(freshestSnapshot([]), undefined);
   });
 });

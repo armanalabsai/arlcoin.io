@@ -1,10 +1,15 @@
 name: History snapshot
 
-# Every ten minutes: reads the verified evaluators' events from Base Mainnet and publishes them as
+# Reads the verified evaluators' events from Base Mainnet and publishes them as
 # packages/mcp/log-seed.json on the "history-snapshot" release. The Agent API reads the agent
 # score, passport, trust graph, audit trail and validators from that file, because the public
 # endpoints refuse most log requests that come from Cloudflare (functions/api/v1). The file holds
 # public on-chain events only. Nothing is signed or sent to the chain.
+#
+# The schedule asks for every ten minutes; GitHub runs scheduled workflows of this repository far
+# less often (a few times a day), so this is the fallback publisher. The operator's machine
+# publishes the same file every ten minutes on the data/history branch, and the API uses the
+# fresher of the two.
 on:
   schedule:
     - cron: "*/10 * * * *"

@@ -101,6 +101,30 @@ async function sha256(text: string): Promise<string> {
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+/**
+ * Of several copies of the stored scans (each as a seed file holds them), the one that reaches
+ * furthest; a copy is as fresh as its least advanced scan. Undefined when none is usable.
+ */
+export function freshestSnapshot(
+  copies: readonly (Readonly<Record<string, string>> | undefined)[],
+): Readonly<Record<string, string>> | undefined {
+  let best: { copy: Readonly<Record<string, string>>; to: bigint } | undefined;
+  for (const copy of copies) {
+    if (!copy || typeof copy !== "object") continue;
+    let lowest: bigint | null = null;
+    try {
+      for (const stored of Object.values(copy)) {
+        const to = BigInt((JSON.parse(stored) as { to: string }).to);
+        if (lowest === null || to < lowest) lowest = to;
+      }
+    } catch {
+      continue;
+    }
+    if (lowest !== null && (!best || lowest > best.to)) best = { copy, to: lowest };
+  }
+  return best?.copy;
+}
+
 /** An EIP-1193 style `request` function for viem's `custom` transport. */
 export function cachedLogsProvider(opts: CachedLogsOptions) {
   const doFetch = opts.fetch ?? fetch;

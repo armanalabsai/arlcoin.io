@@ -5,7 +5,7 @@ import { createPublicClient, custom, fallback, http } from "viem";
 import { base } from "viem/chains";
 
 import logSeed from "../../../packages/mcp/log-seed.json";
-import { cachedLogsProvider } from "../../../packages/mcp/src/cachedLogs.ts";
+import { cachedLogsProvider, freshestSnapshot } from "../../../packages/mcp/src/cachedLogs.ts";
 import { handleHttp } from "../../../packages/mcp/src/http.ts";
 import { arlTools } from "../../../packages/mcp/src/tools.ts";
 
@@ -23,14 +23,19 @@ const chain = createPublicClient({
 // The verified history (agent score, passport, trust graph, audit trail, validators) is read
 // through a provider that holds each log scan as one stored entry (packages/mcp/src/cachedLogs.ts).
 // Public endpoints refuse most log requests that come from Cloudflare, so the scans come from
-// outside: the seed bundled with this deployment, and a snapshot the "History snapshot" workflow
-// publishes every ten minutes. The provider presents the chain as of the block the scans reach, so
+// outside: the seed bundled with this deployment, and a snapshot published every few minutes (see
+// SNAPSHOT_URLS). The provider presents the chain as of the block the scans reach, so
 // every answer is a few minutes behind the head and names the block it was read at. LOG_RPC and
 // NARROW_RPC remain for a range the stored scans do not cover.
 const LOG_RPC = "https://base-rpc.publicnode.com";
 const NARROW_RPC = "https://base.gateway.tenderly.co";
-const SNAPSHOT_URL =
-  "https://github.com/armanalabsai/arlcoin.io/releases/download/history-snapshot/log-seed.json";
+// Two publishers write the same file: the operator's machine every ten minutes (the data/history
+// branch) and the History snapshot workflow whenever GitHub runs its schedule (the release). The
+// fresher copy is used.
+const SNAPSHOT_URLS = [
+  "https://raw.githubusercontent.com/armanalabsai/arlcoin.io/data/history/log-seed.json",
+  "https://github.com/armanalabsai/arlcoin.io/releases/download/history-snapshot/log-seed.json",
+];
 const logCache = {
   async match(key) {
     const hit = await caches.default.match(`https://arl-log-cache.invalid/v3/${key}`);
@@ -54,10 +59,16 @@ const logReader = createPublicClient({
       cache: logCache,
       // Where a data centre with an empty cache starts (packages/mcp/seed.ts).
       seed: logSeed,
-      snapshot: async () => {
-        const res = await fetch(SNAPSHOT_URL, { cf: { cacheTtl: 120, cacheEverything: true } });
-        return res.ok ? res.json() : undefined;
-      },
+      snapshot: async () =>
+        freshestSnapshot(
+          await Promise.all(
+            SNAPSHOT_URLS.map((url) =>
+              fetch(url, { cf: { cacheTtl: 120, cacheEverything: true } })
+                .then((res) => (res.ok ? res.json() : undefined))
+                .catch(() => undefined),
+            ),
+          ),
+        ),
       pinned: true,
     }),
     { retryCount: 0 },
