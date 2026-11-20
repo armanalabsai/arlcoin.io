@@ -1,9 +1,10 @@
 // Cloudflare Pages Function: arlcoin.io/api/v1/* (Agent API v1). The routes and the rule live in
 // packages/mcp/src/http.ts; they are the MCP server's tools over HTTP. Read-only: no key, no
 // transaction is ever sent.
-import { createPublicClient, fallback, http } from "viem";
+import { createPublicClient, custom, fallback, http } from "viem";
 import { base } from "viem/chains";
 
+import { cachedLogsProvider } from "../../../packages/mcp/src/cachedLogs.ts";
 import { handleHttp } from "../../../packages/mcp/src/http.ts";
 import { arlTools } from "../../../packages/mcp/src/tools.ts";
 
@@ -18,12 +19,25 @@ const chain = createPublicClient({
   chain: base,
   transport: fallback(RPCS.map((url) => http(url, { timeout: 3000, retryCount: 0 }))),
 });
-// Wide log reads (the agent score) go to one endpoint that accepts 50,000-block getLogs ranges:
-// through the fallback, an endpoint with a smaller limit would split them into more requests than
-// a Function may make.
+// Wide log reads (the agent score) go to one endpoint that accepts 50,000-block getLogs ranges,
+// through a provider that keeps finished ranges in the Cache API: a score reads only the newest
+// blocks from the RPC, however long the history grows (packages/mcp/src/cachedLogs.ts).
+const LOG_RPC = "https://base-rpc.publicnode.com";
+const logCache = {
+  async match(key) {
+    const hit = await caches.default.match(`https://arl-log-cache.invalid/${key}`);
+    return hit ? hit.text() : undefined;
+  },
+  put(key, value) {
+    return caches.default.put(
+      `https://arl-log-cache.invalid/${key}`,
+      new Response(value, { headers: { "cache-control": "public, max-age=31536000, immutable" } }),
+    );
+  },
+};
 const logReader = createPublicClient({
   chain: base,
-  transport: http("https://base-rpc.publicnode.com", { timeout: 10_000, retryCount: 1 }),
+  transport: custom(cachedLogsProvider({ url: LOG_RPC, cache: logCache }), { retryCount: 1 }),
 });
 const tools = arlTools({ chain, logReader });
 
