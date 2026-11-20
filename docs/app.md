@@ -30,7 +30,12 @@ On Base Mainnet the app shows Wallet, Vesting, Trade, Claim, Staking, Jobs and V
   (`0xfF12597A671ebAF0cAe37999EE659e03c4f444B5`, 2 of 3); the first period (300,000 ARL) runs
   from 2026-11-16 to 2027-05-15.
 - **Jobs** and **Verified** use the ERC-8183 escrows and the verified evaluators on Base Mainnet
-  (see [jobs.md](jobs.md)).
+  (see [jobs.md](jobs.md)). On Verified, a client opens a re-execution job in one flow (post with
+  the `arl-reexec/1` spec link as description, `configure` with the spec hash and committee, budget,
+  approve, escrow), after the same checks `configure` and the reference validators apply; the
+  provider approves the committee and submits the result there, and the deliverable is the hash of
+  the result's canonical JSON. The first job's spec and script are in
+  `apps/web/public/jobs/first-verified-job/` (served at arlcoin.io/jobs/first-verified-job/).
 
 Payments, Network and Private run on the local chain only. In the Base Mainnet build they show
 "Not live on Base Mainnet yet": the per-use x402 payments facilitator, the provider marketplace and
