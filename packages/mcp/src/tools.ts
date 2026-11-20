@@ -2,7 +2,7 @@
 // block, which every answer names so it can be re-checked; transactions are prepared unsigned for
 // the user's own wallet. No tool signs, sends or asks for a key.
 
-import { getAddress, isAddress, parseAbi, type Address, type Hex } from "viem";
+import { getAddress, isAddress, parseAbi, type Address, type Hex, type PublicClient } from "viem";
 
 import {
   BASE_MAINNET_TASK_DEPLOYMENTS,
@@ -22,6 +22,7 @@ import {
   type TaskDeployment,
   type Token,
 } from "../../protocol/src/index.ts";
+import { getAgentScore } from "../../sdk/src/agentScore.ts";
 import type { Tool } from "./server.ts";
 
 /** The chain reads the tools need (a viem PublicClient satisfies it). */
@@ -343,6 +344,32 @@ export function arlTools(opts: ToolOptions): Tool[] {
           byToken[t] = { evaluator: deployments[t].evaluator, approved: a, rejected: r };
         });
         return { chainId, block, agentId: id, approved, rejected, byToken };
+      },
+    },
+    {
+      name: "arl_get_agent_score",
+      description:
+        "Compute an agent's ARL score (arl-reputation/1) on Base Mainnet from verified outcomes only: the feedback the verified evaluators wrote to the ERC-8004 ReputationRegistry, joined to its jobs, plus jobs the agent took and let expire. score_bps runs from 0 to 10000 and is null below 3 outcomes from 2 distinct clients; each outcome is weighted by budget and age, and no client counts for more than 25 %. Lists the outcomes it used.",
+      inputSchema: {
+        type: "object",
+        properties: { agentId: AGENT_ID },
+        required: ["agentId"],
+        additionalProperties: false,
+      },
+      async run(args) {
+        const id = agentId(args.agentId);
+        if (typeof (opts.chain as { getLogs?: unknown }).getLogs !== "function") {
+          throw new ToolInputError("this server's chain reader cannot read logs");
+        }
+        const r = await getAgentScore(opts.chain as unknown as PublicClient, id);
+        return {
+          chainId: 8453,
+          block: r.block,
+          agentId: id,
+          ...r.score,
+          outcomes: r.outcomes,
+          skipped: r.skipped,
+        };
       },
     },
     {
