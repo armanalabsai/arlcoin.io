@@ -34,8 +34,9 @@ Bounty allocation never exceed its 400,000 ARL.
 - In scope: the contracts in `contracts/src` as deployed on Base Mainnet, reviewed at the commit
   their deployed bytecode matches: `00d9056` for the token, vesting, distributor and timelock;
   `99d41b4` for `ComputePayment` and `ARLStakingRewards` (deployed 12 November 2026); `a7039d7` for
-  `ARLJobs` v3 and `ARLVerifiedEvaluator` v5 (deployed 16 November 2026). The retired v2 escrows and
-  v4 evaluators are out of scope; no job was ever created on them. Contracts in the repository that are not deployed
+  `ARLJobs` v3 (deployed 16 November 2026); `c884e35` for `ARLVerifiedEvaluator` v7 (deployed
+  19 November 2026). The retired v2 escrows and v4 to v6 evaluators are out of scope; no job was
+  ever created on them. Contracts in the repository that are not deployed
   (for example `ARLAnonymousSignal`) are out of scope.
 - Out of scope: third-party code (OpenZeppelin, Safe, forge-std; report those upstream), the
   website, the dApp front end, social engineering, and denial of service against RPC providers.

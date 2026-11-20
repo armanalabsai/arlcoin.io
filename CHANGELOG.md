@@ -1,7 +1,44 @@
 # Changelog
 
 Notable changes to ARL Protocol, newest first. Dates are UTC. Every entry links to the code and
-documents that back it; nothing here is deployed on Base Mainnet.
+documents that back it. What is deployed on Base Mainnet is recorded in
+[docs/mainnet-services.md](docs/mainnet-services.md) and `contracts/deploy/`.
+
+## 2026-11-20
+
+- The first verified job ran on Base Mainnet: job 1 on the ARL escrow, 100 ARL, re-executed and
+  approved by the three operator validators
+  ([spec](apps/web/public/jobs/first-verified-job/spec.json)).
+- ARLscan, a public explorer of every job and each agent's record, at arlcoin.io/app/scan
+  ([docs/app.md](docs/app.md#scan-arlscan)).
+- `payOnProof` in the TypeScript SDK: the provider side of the x402 `arl-escrow` scheme
+  ([packages/sdk](packages/sdk/README.md)).
+- The arl-reputation/1 read path: `outcomesFromChain`, `getAgentScore`, the `arl_get_agent_score`
+  MCP tool and `GET /api/v1/agents/{agentId}/score`
+  ([spec](spec/arl-reputation/v0.1.0/README.md)).
+- The reference validator bounds the disk, memory and time a job can take and keeps its watch state
+  crash-safe ([docs/reexecution-spec.md](docs/reexecution-spec.md)).
+- ARL in agent frameworks through the MCP server: LangChain, CrewAI, the OpenAI Agents SDK and the
+  Vercel AI SDK ([docs/frameworks.md](docs/frameworks.md)).
+- n8n-nodes-arl 0.2.5: works on current n8n (timers use `sleep` only) and opens verified tasks on
+  the v7 evaluators.
+
+## 2026-11-19
+
+- `ARLVerifiedEvaluator` v6 and then v7 on Base Mainnet, with fixes from bug bounty reports; v7 is
+  the live evaluator ([docs/mainnet-services.md](docs/mainnet-services.md)).
+- Liquidity rewards: 60,000 ARL for the ARL/USDT pool on the Uniswap v3 staker, 21 November to
+  21 December 2026.
+- arl-protocol-sdk 0.2.2 and arl-protocol-mcp 0.1.2 on npm, arl-protocol 0.2.2 on PyPI.
+
+## 2026-11-16
+
+- `ARLJobs` v3 escrows (ARL and USDC) on Base Mainnet, and the first staking period of 300,000 ARL
+  funded (ends 15 May 2027).
+
+## 2026-11-12
+
+- `ARLStakingRewards` and `ComputePayment` on Base Mainnet.
 
 ## 2026-10-31
 
@@ -10,6 +47,7 @@ documents that back it; nothing here is deployed on Base Mainnet.
 
 ## 2026-10-23
 
+- ARL token generation event on Base Mainnet.
 - Portable evidence bundles for verified jobs: `arl-verifier bundle` exports a job's settlement
   evidence (`arl-evidence/1`) and `verify-bundle` checks it offline and against the chain
   ([reexecution-spec.md](docs/reexecution-spec.md#evidence-bundle)).
