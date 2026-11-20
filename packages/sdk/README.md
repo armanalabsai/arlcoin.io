@@ -79,6 +79,8 @@ export const POST = payOnProof(
 
 Without an `X-ARL-Job` header the service answers `402` with an `arl-escrow` offer;
 `payVerified` (or any x402 client that knows the scheme) opens and funds the job and asks again.
+The scheme is specified in
+[spec/x402-arl-escrow](https://github.com/armanalabsai/arlcoin.io/tree/main/spec/x402-arl-escrow/v0.2.0).
 For a funded job that matches the offer, the handler runs once, the response carries
 `X-ARL-Job` and `X-ARL-Deliverable`, and the deliverable is submitted on chain as soon as enough
 committee members have accepted the job. A job is served once: the default record of served jobs

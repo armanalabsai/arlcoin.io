@@ -1,6 +1,10 @@
 # x402-arl-escrow v0.2.0 (draft): end-to-end flow
 
-Status: **draft for review**, 2026-10-24. Non-normative until v0.2.0 is released. It maps the
+Superseded by [v0.2.0](../v0.2.0/README.md), released 2026-11-20, which is the scheme as the SDK
+speaks it on Base Mainnet. This draft is kept for its step-by-step contract calls; its section 3
+describes the state of October 2026.
+
+Status when written: **draft for review**, 2026-10-24. Non-normative until v0.2.0 is released. It maps the
 verified-payment flow onto the contracts as deployed today, so every step names the function,
 the caller, the precondition that reverts, and the event a third party reads.
 
