@@ -43,6 +43,12 @@ export interface ToolOptions {
   chain: ChainReader;
   /** Escrow and evaluator per token; Base Mainnet by default. */
   deployments?: Record<Token, TaskDeployment>;
+  /**
+   * A client for wide log reads (the agent score). Defaults to `chain`; a server whose `chain`
+   * falls back across endpoints with small getLogs limits passes one endpoint that accepts
+   * 50,000-block ranges, so a score stays within a few requests.
+   */
+  logReader?: PublicClient;
 }
 
 const readAbi = parseAbi([
@@ -358,10 +364,11 @@ export function arlTools(opts: ToolOptions): Tool[] {
       },
       async run(args) {
         const id = agentId(args.agentId);
-        if (typeof (opts.chain as { getLogs?: unknown }).getLogs !== "function") {
+        const reader = opts.logReader ?? (opts.chain as unknown as PublicClient);
+        if (typeof (reader as { getLogs?: unknown }).getLogs !== "function") {
           throw new ToolInputError("this server's chain reader cannot read logs");
         }
-        const r = await getAgentScore(opts.chain as unknown as PublicClient, id);
+        const r = await getAgentScore(reader, id);
         return {
           chainId: 8453,
           block: r.block,
