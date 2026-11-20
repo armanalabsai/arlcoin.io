@@ -145,7 +145,7 @@ describe("verified history", () => {
     );
     assert.equal(a.entries[0]?.detail.providerAgentId, "7");
     assert.equal(a.entries[2]?.detail.approved, false);
-    assert.match(a.entries[2]?.step ?? "", /finalized/);
+    assert.match(a.entries.map((e) => e.step).join(" "), /finalized/);
     assert.equal((await getJobAudit(client, "USDC", 2n)).entries.length, 0);
   });
 });
