@@ -99,25 +99,25 @@ deployed but **has not been exercised on mainnet**.
 
 ### 3.2 Off-chain packages and services
 
-| Component                               | Purpose                                                                                     | Status                                                                                   | Evidence                                    |
-| --------------------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------- |
-| `packages/verifier` (`arl-verifier`)    | Reference validator: `run`, `watch`, `bundle`, `verify-bundle`; `arl-reexec/1` re-execution | BUILDING: tests pass (unit, container, Anvil); **no validator runs on mainnet**          | `docs/reexecution-spec.md`, baseline        |
-| Evidence bundle `arl-evidence/1`        | Portable settlement evidence, verifiable offline and against chain                          | BUILDING                                                                                 | `packages/verifier/src/bundle.ts`           |
-| `packages/payments`                     | x402 `upto` (Permit2) facilitator, metering, receipts                                       | BUILDING: Base Sepolia only, **does not open 8453**                                      | `docs/payments.md`                          |
-| `spec/x402-arl-upto` v0.1.0             | x402 `upto` scheme for ARL with test vectors                                                | BUILDING (spec released, facilitator not on mainnet)                                     | `spec/x402-arl-upto/v0.1.0`                 |
-| `spec/x402-arl-escrow` v0.2.0           | x402 `arl-escrow` scheme: 402 terms → verified job                                          | PLANNED (draft for review, 2026-10-24)                                                   | `spec/x402-arl-escrow/v0.2.0-draft/flow.md` |
-| `packages/provider`                     | Reference compute provider settling seconds used                                            | BUILDING                                                                                 | `docs/compute-provider.md`                  |
-| `packages/sdk` (`arl-protocol-sdk`)     | Jobs, verified jobs, `payVerified`, compute streams, `acquireArl`                           | LIVE on npm (0.1.0); jobs functions tested on a mainnet fork                             | npm; `packages/sdk`                         |
-| `packages/python-sdk` (`arl_protocol`)  | Jobs in Python                                                                              | LIVE as a source install from GitHub; not on PyPI                                        | PR #158                                     |
-| `packages/n8n-nodes-arl`                | n8n node for jobs                                                                           | LIVE on npm (0.1.0); n8n Cloud verification pending                                      | npm; PR #156                                |
-| `apps/dapp` (`arlcoin.io/app`)          | Wallet, trade, vesting, staking, jobs, verified jobs, network                               | LIVE on Base Mainnet; Payments and Private screens show "not live"                       | site answers 200; `apps/dapp/app/*`         |
-| `apps/web` (`arlcoin.io`)               | Site and developer page `/build`                                                            | LIVE                                                                                     | Cloudflare Pages                            |
-| `functions/api` (`supply`, `whitelist`) | Supply API, whitelist intake                                                                | LIVE                                                                                     | baseline                                    |
-| `packages/telegram-bot`                 | Community bot                                                                               | LIVE (Cloudflare Worker)                                                                 | PR #151                                     |
-| Event indexer                           | Indexed jobs, votes, outcomes                                                               | PLANNED: the app reads logs directly (`apps/dapp/lib/logs.ts`)                           | no indexer in repo                          |
-| Evidence storage                        | Specs and results by URI (IPFS/HTTPS)                                                       | PLANNED: specs are fetched from URIs; no ARL-operated store                              | `docs/reexecution-spec.md`                  |
-| Public API for agents                   | REST/JSON API over jobs, discovery, evidence                                                | PLANNED                                                                                  | none                                        |
-| Monitoring                              | Uptime of the site; contract monitor CLI                                                    | BUILDING: `uptime.yml`, `packages/deploy/src/monitor.ts`; no alerting on protocol events | `.github/workflows/uptime.yml`              |
+| Component                               | Purpose                                                                                     | Status                                                                                   | Evidence                                |
+| --------------------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | --------------------------------------- |
+| `packages/verifier` (`arl-verifier`)    | Reference validator: `run`, `watch`, `bundle`, `verify-bundle`; `arl-reexec/1` re-execution | BUILDING: tests pass (unit, container, Anvil); **no validator runs on mainnet**          | `docs/reexecution-spec.md`, baseline    |
+| Evidence bundle `arl-evidence/1`        | Portable settlement evidence, verifiable offline and against chain                          | BUILDING                                                                                 | `packages/verifier/src/bundle.ts`       |
+| `packages/payments`                     | x402 `upto` (Permit2) facilitator, metering, receipts                                       | BUILDING: Base Sepolia only, **does not open 8453**                                      | `docs/payments.md`                      |
+| `spec/x402-arl-upto` v0.1.0             | x402 `upto` scheme for ARL with test vectors                                                | BUILDING (spec released, facilitator not on mainnet)                                     | `spec/x402-arl-upto/v0.1.0`             |
+| `spec/x402-arl-escrow` v0.2.0           | x402 `arl-escrow` scheme: 402 terms → verified job                                          | LIVE (released 2026-11-20; `payVerified`, `payOnProof`)                                  | `spec/x402-arl-escrow/v0.2.0/README.md` |
+| `packages/provider`                     | Reference compute provider settling seconds used                                            | BUILDING                                                                                 | `docs/compute-provider.md`              |
+| `packages/sdk` (`arl-protocol-sdk`)     | Jobs, verified jobs, `payVerified`, compute streams, `acquireArl`                           | LIVE on npm (0.1.0); jobs functions tested on a mainnet fork                             | npm; `packages/sdk`                     |
+| `packages/python-sdk` (`arl_protocol`)  | Jobs in Python                                                                              | LIVE as a source install from GitHub; not on PyPI                                        | PR #158                                 |
+| `packages/n8n-nodes-arl`                | n8n node for jobs                                                                           | LIVE on npm (0.1.0); n8n Cloud verification pending                                      | npm; PR #156                            |
+| `apps/dapp` (`arlcoin.io/app`)          | Wallet, trade, vesting, staking, jobs, verified jobs, network                               | LIVE on Base Mainnet; Payments and Private screens show "not live"                       | site answers 200; `apps/dapp/app/*`     |
+| `apps/web` (`arlcoin.io`)               | Site and developer page `/build`                                                            | LIVE                                                                                     | Cloudflare Pages                        |
+| `functions/api` (`supply`, `whitelist`) | Supply API, whitelist intake                                                                | LIVE                                                                                     | baseline                                |
+| `packages/telegram-bot`                 | Community bot                                                                               | LIVE (Cloudflare Worker)                                                                 | PR #151                                 |
+| Event indexer                           | Indexed jobs, votes, outcomes                                                               | PLANNED: the app reads logs directly (`apps/dapp/lib/logs.ts`)                           | no indexer in repo                      |
+| Evidence storage                        | Specs and results by URI (IPFS/HTTPS)                                                       | PLANNED: specs are fetched from URIs; no ARL-operated store                              | `docs/reexecution-spec.md`              |
+| Public API for agents                   | REST/JSON API over jobs, discovery, evidence                                                | PLANNED                                                                                  | none                                    |
+| Monitoring                              | Uptime of the site; contract monitor CLI                                                    | BUILDING: `uptime.yml`, `packages/deploy/src/monitor.ts`; no alerting on protocol events | `.github/workflows/uptime.yml`          |
 
 ### 3.3 External dependencies
 
@@ -126,7 +126,7 @@ deployed but **has not been exercised on mainnet**.
 | Base (8453)                      | Settlement chain                        | LIVE                                                              |
 | ERC-8004 Identity and Reputation | Agent identity, outcome feedback        | LIVE (canonical registries; evaluator writes feedback, app reads) |
 | ERC-8183                         | Escrowed job interface                  | LIVE (implemented by `ARLJobs`)                                   |
-| x402 (Coinbase)                  | HTTP 402 payment negotiation            | BUILDING in ARL (`upto` on Sepolia; `arl-escrow` draft)           |
+| x402 (Coinbase)                  | HTTP 402 payment negotiation            | `arl-escrow` LIVE on Base Mainnet; `upto` BUILDING (Sepolia)      |
 | Permit2, EIP-3009                | Signature-based token transfers         | BUILDING (payments package)                                       |
 | Safe v1.5.0                      | Arbiter, allocation custody             | LIVE                                                              |
 | Uniswap v3                       | ARL liquidity (USDC, USDT, WETH, cbBTC) | LIVE                                                              |
@@ -293,13 +293,13 @@ On-chain components are marked ⛓; off-chain components are marked ☁.
 
 ### D. Blockchain and payment infrastructure
 
-| Component         | Responsibility                          | Status                                             |
-| ----------------- | --------------------------------------- | -------------------------------------------------- |
-| Base              | Execution, finality, forced inclusion   | LIVE                                               |
-| ARL token         | Escrow currency, stakes and bonds, fees | LIVE                                               |
-| x402 `upto`       | Metered per-use payments                | BUILDING (Sepolia only)                            |
-| x402 `arl-escrow` | 402 terms that open a verified job      | PLANNED (draft spec; gateway contract designed)    |
-| AP2               | Agent payment mandates                  | PLANNED, only if a pilot partner requires it (D-5) |
+| Component         | Responsibility                          | Status                                              |
+| ----------------- | --------------------------------------- | --------------------------------------------------- |
+| Base              | Execution, finality, forced inclusion   | LIVE                                                |
+| ARL token         | Escrow currency, stakes and bonds, fees | LIVE                                                |
+| x402 `upto`       | Metered per-use payments                | BUILDING (Sepolia only)                             |
+| x402 `arl-escrow` | 402 terms that open a verified job      | LIVE (spec v0.2.0; SDK `payVerified`, `payOnProof`) |
+| AP2               | Agent payment mandates                  | PLANNED, only if a pilot partner requires it (D-5)  |
 
 ### E. Data and developer infrastructure
 
