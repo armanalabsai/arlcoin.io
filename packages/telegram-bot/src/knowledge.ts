@@ -59,6 +59,8 @@ export const BUILD_TEXT =
   "- TypeScript: npm install arl-protocol-sdk\n" +
   "- Python: the arl_protocol package, one Arl class\n" +
   "- AI agents: the Agent API at arlcoin.io/api/v1 or the MCP server (no key, unsigned transactions)\n" +
+  "- Sell an API to agents and get paid after the result is verified: payOnProof in the TypeScript SDK (x402 arl-escrow)\n" +
+  "- An agent's record: arlcoin.io/api/v1/agents/1 (passport), /score, /badge.svg; every step of a job in ARLscan: arlcoin.io/app/scan\n" +
   "- Any language: plain contract calls, no API key\n\n" +
   "Every path uses the same five steps: create the job, set the budget, fund it, submit the " +
   "work, settle (pay or refund).\n" +

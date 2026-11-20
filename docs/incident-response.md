@@ -13,7 +13,7 @@ Safe actions need the signers of the Safe concerned (see [mainnet-plan.md](mainn
 
 ## Detection
 
-The [Uptime](../.github/workflows/uptime.yml) workflow checks every 10 minutes that the website,
+The [Uptime](../.github/workflows/uptime.yml) workflow checks on a ten-minute schedule (which GitHub runs a few times a day in practice) that the website,
 the app page and `security.txt` answer, that Base Mainnet produces blocks and that a funded staking
 reward period runs for at least 3 more days. A failed check fails the run and GitHub notifies the
 owner by email and in the mobile app. The [Monitor mainnet](../.github/workflows/monitor.yml)
