@@ -6,6 +6,7 @@
 //   POST /api/v1/tasks/check              body: { task, policy? } -> hashes and policy verdict
 //   GET  /api/v1/jobs/{ARL|USDC}/{jobId}   job, committee configuration and verdict
 //   GET  /api/v1/jobs/{ARL|USDC}/{jobId}/audit every on-chain event of the job, in order
+//   GET  /api/v1/jobs/{ARL|USDC}/{jobId}/audit.csv the same trail as a spreadsheet
 //   GET  /api/v1/agents/{agentId}          the agent's passport: identity and verified record
 //   GET  /api/v1/agents/{agentId}/outcomes verified approvals and rejections of an agent
 //   GET  /api/v1/agents/{agentId}/score    the agent's arl-reputation/1 score and its outcomes
@@ -96,6 +97,64 @@ async function badge(agentId: string, tools: readonly Tool[]): Promise<Response>
   }
 }
 
+const AUDIT_CSV = /^\/api\/v1\/jobs\/(ARL|USDC)\/([0-9]{1,78})\/audit\.csv$/;
+
+/** One CSV cell: quoted, and never starting with a character a spreadsheet reads as a formula. */
+export function csvCell(value: unknown): string {
+  const raw = typeof value === "string" ? value : JSON.stringify(value ?? "");
+  const safe = /^[=+\-@\t\r]/.test(raw) ? `'${raw}` : raw;
+  return `"${safe.replace(/"/g, '""')}"`;
+}
+
+/** The audit trail of a job as a spreadsheet: one row per on-chain event, oldest first. */
+export function auditToCsv(audit: {
+  entries: {
+    at: number;
+    step: string;
+    event: string;
+    contract: string;
+    actor?: string;
+    block: unknown;
+    transaction: string;
+    detail: unknown;
+  }[];
+}): string {
+  const rows = [
+    ["time_utc", "step", "event", "contract", "actor", "block", "transaction", "detail"],
+    ...audit.entries.map((e) => [
+      new Date(e.at * 1000).toISOString(),
+      e.step,
+      e.event,
+      e.contract,
+      e.actor ?? "",
+      String(e.block),
+      e.transaction,
+      toJson(e.detail).replace(/\s+/g, " "),
+    ]),
+  ];
+  return `${rows.map((r) => r.map(csvCell).join(",")).join("\r\n")}\r\n`;
+}
+
+async function auditCsv(token: string, jobId: string, tools: readonly Tool[]): Promise<Response> {
+  const tool = tools.find((t) => t.name === "arl_get_job_audit");
+  try {
+    if (!tool) throw new Error("tool missing");
+    const audit = (await tool.run({ token, jobId })) as Parameters<typeof auditToCsv>[0];
+    return new Response(auditToCsv(audit), {
+      status: 200,
+      headers: {
+        "content-type": "text/csv; charset=utf-8",
+        "content-disposition": `attachment; filename="arl-job-${token}-${jobId}-audit.csv"`,
+        "access-control-allow-origin": "*",
+        "x-content-type-options": "nosniff",
+        "cache-control": "public, max-age=60",
+      },
+    });
+  } catch {
+    return json(502, { error: "chain read failed, try again" });
+  }
+}
+
 const ROUTES: { method: "GET" | "POST"; path: RegExp; tool: string }[] = [
   { method: "GET", path: /^\/api\/v1\/policies$/, tool: "arl_list_policies" },
   { method: "POST", path: /^\/api\/v1\/tasks\/check$/, tool: "arl_check_task" },
@@ -164,6 +223,11 @@ export async function handleHttp(request: Request, tools: readonly Tool[]): Prom
   if (badgeMatch) {
     if (request.method !== "GET") return json(405, { error: "use GET" });
     return badge(badgeMatch[1] as string, tools);
+  }
+  const csvMatch = AUDIT_CSV.exec(pathname);
+  if (csvMatch) {
+    if (request.method !== "GET") return json(405, { error: "use GET" });
+    return auditCsv(csvMatch[1] as string, csvMatch[2] as string, tools);
   }
   const matches = ROUTES.filter((r) => r.path.test(pathname));
   if (matches.length === 0)

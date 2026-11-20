@@ -38,7 +38,7 @@ endpoints and the first answer wins. Requires Node.js 22 or later.
 provider, evaluator and on-chain description) before preparing anything that moves funds.
 
 The same tools answer over HTTP at `https://arlcoin.io/api/v1` (`GET /policies`,
-`POST /tasks/check`, `GET /jobs/ARL/{id}`, `GET /jobs/ARL/{id}/audit`, `GET /agents/{agentId}`, `GET /agents/{agentId}/outcomes`, `GET /agents/{agentId}/score`, `GET /agents/{agentId}/badge.svg`, `GET /graph`, `POST /evidence/check`, `POST /jobs/prepare`,
+`POST /tasks/check`, `GET /jobs/ARL/{id}`, `GET /jobs/ARL/{id}/audit`, `GET /jobs/ARL/{id}/audit.csv`, `GET /agents/{agentId}`, `GET /agents/{agentId}/outcomes`, `GET /agents/{agentId}/score`, `GET /agents/{agentId}/badge.svg`, `GET /graph`, `POST /evidence/check`, `POST /jobs/prepare`,
 `POST /jobs/prepare-funding`), for agents that do not speak MCP.
 
 The task format is specified in

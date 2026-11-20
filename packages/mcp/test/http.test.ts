@@ -6,7 +6,7 @@ import type { Address } from "viem";
 
 import { BASE_MAINNET_TASK_DEPLOYMENTS } from "../../protocol/src/index.ts";
 import { MAX_BODY_BYTES, arlTools, handleHttp, type ChainReader } from "../src/index.ts";
-import { badgeText } from "../src/http.ts";
+import { auditToCsv, badgeText, csvCell } from "../src/http.ts";
 
 const vectors = JSON.parse(
   readFileSync(new URL("../../../spec/arl-task/v0.1.0/vectors.json", import.meta.url), "utf8"),
@@ -140,5 +140,59 @@ describe("agent badge", () => {
     assert.equal(down.headers.get("cache-control"), "no-store");
     assert.match(await down.text(), /unavailable/);
     assert.equal((await get(scoreTool([], 0), "POST")).status, 405);
+  });
+});
+
+describe("audit trail as CSV", () => {
+  const entries = [
+    {
+      at: 1_795_191_666,
+      step: "The client opened the job",
+      event: "JobCreated",
+      contract: "escrow",
+      actor: "0x00000000000000000000000000000000000000A1",
+      block: 60_000_001n,
+      transaction: `0x${"ab".repeat(32)}`,
+      detail: { budget: "100" },
+    },
+  ];
+  const auditTool = (fail = false) => [
+    {
+      name: "arl_get_job_audit",
+      description: "",
+      inputSchema: {},
+      run: () => (fail ? Promise.reject(new Error("rpc down")) : Promise.resolve({ entries })),
+    },
+  ];
+
+  it("quotes every cell and defuses spreadsheet formulas", () => {
+    assert.equal(csvCell("plain"), '"plain"');
+    assert.equal(csvCell('a "quoted" word'), '"a ""quoted"" word"');
+    assert.equal(csvCell("=SUM(A1)"), `"'=SUM(A1)"`);
+    assert.equal(csvCell("-1"), `"'-1"`);
+    assert.equal(csvCell("@cmd"), `"'@cmd"`);
+  });
+
+  it("writes one row per event under a header", () => {
+    const lines = auditToCsv({ entries }).trimEnd().split("\r\n");
+    assert.equal(lines.length, 2);
+    assert.match(lines[0] ?? "", /^"time_utc","step","event"/);
+    assert.match(lines[1] ?? "", /^"2026-11-20T/);
+    assert.match(lines[1] ?? "", /"60000001"/);
+    assert.match(lines[1] ?? "", /""budget"": ""100""/);
+  });
+
+  it("serves the file, and says so when the chain cannot be read", async () => {
+    const url = "https://arlcoin.io/api/v1/jobs/ARL/1/audit.csv";
+    const ok = await handleHttp(new Request(url), auditTool());
+    assert.equal(ok.status, 200);
+    assert.match(ok.headers.get("content-type") ?? "", /^text\/csv/);
+    assert.match(ok.headers.get("content-disposition") ?? "", /arl-job-ARL-1-audit\.csv/);
+    assert.equal((await ok.text()).split("\r\n").length, 3);
+    assert.equal((await handleHttp(new Request(url), auditTool(true) as never)).status, 502);
+    assert.equal(
+      (await handleHttp(new Request(url, { method: "POST" }), auditTool() as never)).status,
+      405,
+    );
   });
 });
