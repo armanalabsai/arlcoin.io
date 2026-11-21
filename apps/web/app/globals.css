@@ -936,13 +936,14 @@
 }
 @media (min-width: 768px) {
   .landing-road {
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     border-left: 0;
-    border-top: 1px solid var(--color-line);
     margin-left: 0;
   }
+  /* Two rows of four: each phase carries its own piece of the line. */
   .landing-road li {
-    padding: 24px 16px 0 0;
+    padding: 24px 16px 28px 0;
+    border-top: 1px solid var(--color-line);
   }
   .landing-road li::before {
     top: -5px;

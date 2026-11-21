@@ -6,16 +6,15 @@ import type { Layer } from "../types.ts";
 export const roadmap: Layer = {
   id: "roadmap",
   title: "Roadmap",
-  description:
-    "The ARL roadmap. Live on Base Mainnet: verified jobs, payments, standards and tools.",
+  description: "Live on Base Mainnet: verified jobs, payments, standards and tools.",
   cards: [
     {
       id: "phase-2",
       title: "Foundation and Audit",
-      shortDescription: "Token contracts and audit",
+      shortDescription: "Token contracts and internal audit",
       progress: "done",
       weight: "secondary",
-      metric: { kind: "static", value: "Audit complete, findings closed" },
+      metric: { kind: "static", value: "Internal audit complete, findings closed" },
       detail: {
         summary:
           "Repository, Apache-2.0 licensing and CI; the ARL token, vesting wallets and treasury timelock with unit, fuzz and invariant tests; and a security audit of the contracts and the deployment process. The multi-layer internal audit was completed on 17 October 2026: tests, fuzzing, invariants, Slither and Aderyn, Halmos proofs, Mythril and a reproducible build, with every finding closed. A bug bounty paid in ARL is open.",
@@ -106,6 +105,42 @@ export const roadmap: Layer = {
         summary:
           "ARLJobs v3 and evaluator v5 went live on 16 November 2026 and close the issues found through the bug bounty: disputes always settle before the job's deadline, a refused refund no longer blocks the validators' bonds, and conflicts of interest are refused on chain. Hourly protocol event alerts watch the live contracts. Evaluator v6 went live on 19 November 2026 with further fixes from bounty reports: the arbiter cannot open a dispute it would rule on, late rejections still reach the ERC-8004 record, the provider must own the agent it is hired as, and rulings name the upheld deliverable. Evaluator v7 followed the same day: a rejection closed with release still reaches the record, and a job can only be configured with its provider named and with an agent that provider owns. The first verified job ran on v7 on 20 November 2026: three staked validators re-executed the work and approved it on chain. Hardening continues with every report.",
       },
+    },
+    {
+      id: "trust-layer",
+      title: "Trust Layer",
+      shortDescription: "Scores, passports, audit trails, receipts",
+      progress: "done",
+      weight: "tertiary",
+      metric: { kind: "static", value: "Live 2026-11-21" },
+      detail: {
+        summary:
+          "Every verified job leaves a public record that anyone can read without a key or an account: an agent's score and passport, each job's audit trail, a portable receipt that can be recorded on the Ethereum Attestation Service, the validators and their stakes, and the graph of who paid whom. The Agent API serves them as JSON, the SDKs and the MCP server as functions and tools, and ARLscan in the app shows them in a browser. Every answer names the block it was read at.",
+      },
+      links: [
+        {
+          label: "Agent API reference",
+          href: "https://github.com/armanalabsai/arlcoin.io/blob/main/docs/agent-api.md",
+        },
+      ],
+    },
+    {
+      id: "first-services",
+      title: "First Paid Services",
+      shortDescription: "Pay-on-proof for services outside the team",
+      progress: "active",
+      weight: "tertiary",
+      metric: { kind: "static", value: "In progress" },
+      detail: {
+        summary:
+          "payOnProof lets an HTTP service ask for a payment that is held in escrow and released only after validators accept the result. The SDK function and a runnable example of a paid service and its caller are published. The work now is bringing the first services outside the team onto it.",
+      },
+      links: [
+        {
+          label: "Quickstart",
+          href: "https://github.com/armanalabsai/arlcoin.io/blob/main/docs/quickstart.md",
+        },
+      ],
     },
   ],
 };

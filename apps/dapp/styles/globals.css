@@ -253,10 +253,10 @@ h3 {
   top: 50%;
   left: 50%;
   z-index: -10;
-  width: min(78vmin, 640px);
+  width: min(104vmin, 860px);
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
-  opacity: 0.24;
+  opacity: 0.42;
   pointer-events: none;
 }
 .backdrop-logo-rings {
@@ -267,7 +267,8 @@ h3 {
   overflow: visible;
 }
 .backdrop-logo-ticks,
-.backdrop-logo-orbit {
+.backdrop-logo-orbit,
+.backdrop-logo-glow {
   transform-box: view-box;
   transform-origin: 50% 50%;
 }
@@ -277,11 +278,26 @@ h3 {
 .backdrop-logo-orbit {
   animation: backdrop-spin 24s linear infinite reverse;
 }
+.backdrop-logo-glow {
+  animation: backdrop-breathe 5s ease-in-out infinite;
+}
 .backdrop-logo-mark {
   position: absolute;
   inset: 22%;
   width: 56%;
   height: 56%;
+  animation: backdrop-float 6s ease-in-out infinite;
+}
+@keyframes backdrop-breathe {
+  50% {
+    opacity: 0.55;
+    transform: scale(0.94);
+  }
+}
+@keyframes backdrop-float {
+  50% {
+    transform: translateY(-6px);
+  }
 }
 @keyframes backdrop-spin {
   to {
@@ -290,7 +306,9 @@ h3 {
 }
 @media (prefers-reduced-motion: reduce) {
   .backdrop-logo-ticks,
-  .backdrop-logo-orbit {
+  .backdrop-logo-orbit,
+  .backdrop-logo-glow,
+  .backdrop-logo-mark {
     animation: none;
   }
 }

@@ -11,7 +11,7 @@ if (!grants) throw new Error("Grants allocation is missing from packages/tokenom
 export const ecosystem: Layer = {
   id: "ecosystem",
   title: "Ecosystem",
-  description: "The open-source software ARL Protocol builds on, and the programs for builders.",
+  description: "Open-source software ARL builds on, and builder programs.",
   cards: [
     {
       id: "repository",

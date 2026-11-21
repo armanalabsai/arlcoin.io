@@ -1,6 +1,6 @@
 // The turning ARL logo of the landing page (apps/web/src/site/HeroLogo.tsx), as a fixed backdrop
-// for the app: a gold ring of ticks turning slowly, a dashed orbit turning the other way, and the
-// mark at the centre. It sits behind every panel, button and line of text, takes no pointer
+// for the app: a gold ring of ticks turning slowly, a dashed orbit turning the other way, a glow
+// that breathes, and the mark at the centre. It sits behind every panel, button and line of text, takes no pointer
 // events, and stays in place while the page scrolls. All motion stops when the visitor prefers
 // reduced motion (styles/globals.css, .backdrop-logo).
 
@@ -22,7 +22,13 @@ export function BackdropLogo() {
             <stop offset="100%" stopColor="#a8834a" />
           </linearGradient>
         </defs>
-        <circle cx="200" cy="200" r="196" fill="url(#backdrop-glow)" />
+        <circle
+          className="backdrop-logo-glow"
+          cx="200"
+          cy="200"
+          r="196"
+          fill="url(#backdrop-glow)"
+        />
         <g className="backdrop-logo-ticks">
           {TICKS.map((i) => (
             <line
@@ -54,6 +60,15 @@ export function BackdropLogo() {
           <circle cx="338.6" cy="280" r="3.5" fill="#d9b77a" />
           <circle cx="61.4" cy="280" r="3.5" fill="#d9b77a" />
         </g>
+        <circle
+          cx="200"
+          cy="200"
+          r="138"
+          fill="none"
+          stroke="url(#backdrop-gold)"
+          strokeWidth="0.8"
+          opacity="0.35"
+        />
       </svg>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
