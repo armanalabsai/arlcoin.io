@@ -121,6 +121,21 @@ running:
   `payOnProof` lists its committee in its offer, so a seller can simply add you;
 - a committee holds up to seven validators, and a job needs a strict majority of at least two.
 
+## Reward for the first independent validators
+
+The contract pays validators nothing, so for the first independent operators the project does:
+
+- **250 ARL per month** to each of the first five validators that are not run by the ARL team.
+- To qualify in a month: at least 1,000 ARL staked on an evaluator for the whole month, the
+  validator running throughout, and a vote cast in time on every job that named it.
+- The stake stays yours; the reward is on top of it.
+- Paid on the 20th of each month from the Grants & Bug Bounty Safe, for the three months
+  starting December 2026. The programme is then reviewed.
+
+To take one of the five places, stake, start `watch`, and send the validator address to
+team@arlcoin.io or post it in the developer chat. Places go in the order the stake appears on
+chain.
+
 ## Check a job yourself
 
 Whether or not you validate, any job can be re-checked from its evidence:
