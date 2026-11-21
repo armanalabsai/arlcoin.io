@@ -22,7 +22,7 @@ const PRIORITY: Record<string, number> = {
   ...Object.fromEntries(SOLUTION_PATHS.map((p) => [p, 0.8])),
 };
 const LOW = new Set(["/privacy", "/terms"]);
-// The web app lives under /app/ on the same domain.
+// The web app under /app/ asks search engines not to index it, so it is not listed here.
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
@@ -31,7 +31,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...SITE_PAGES,
     ...SOLUTION_PATHS,
     ...DOCS.map((d) => docPath(d.slug)),
-    "/app/",
   ].map((path) => ({
     url: new URL(withSlash(path), SITE.url).toString(),
     changeFrequency:

@@ -1,5 +1,4 @@
 import type { CoreRoute } from "./registry.ts";
-import { SITE } from "./site.ts";
 
 /** Document title for a route. Used by server metadata and client navigation alike. */
 export function titleFor(route: CoreRoute): string {
@@ -22,5 +21,5 @@ export function clampDescription(text: string, max = MAX_DESCRIPTION): string {
 export function descriptionFor(route: CoreRoute): string {
   if (route.card) return clampDescription(route.card.detail.summary);
   if (route.layer) return clampDescription(route.layer.description);
-  return SITE.description;
+  return "The ARL Protocol Core: token, technology, security, roadmap and ecosystem, each fact linked to its source.";
 }

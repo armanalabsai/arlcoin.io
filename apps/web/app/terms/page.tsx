@@ -5,7 +5,8 @@ import { OG_IMAGE, SITE } from "@/content/site.ts";
 import { PageShell } from "@/site/PageShell.tsx";
 
 const title = "Terms of Use · ARL Protocol";
-const description = "The terms for using arlcoin.io and its whitelist and contact forms.";
+const description =
+  "The terms for using arlcoin.io, the ARL Protocol website, and its whitelist and contact forms.";
 
 export const metadata: Metadata = {
   title,

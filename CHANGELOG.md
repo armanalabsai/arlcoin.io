@@ -6,6 +6,11 @@ documents that back it. What is deployed on Base Mainnet is recorded in
 
 ## 2026-11-21
 
+- arl-protocol-sdk 0.3.2 and arl-protocol-mcp 0.2.1: `getJobReceipt` and `arl_get_job_receipt`,
+  the portable job receipt that the Agent API already serves, so the npm packages match their
+  documentation.
+- Search descriptions: every page of arlcoin.io has its own description of useful length; the
+  sitemap no longer lists the app, which asks not to be indexed.
 - arl-protocol-sdk 0.3.1: `getValidators`, on top of 0.3.0's `payOnProof`, `getAgentScore`,
   `getAgentPassport`, `getTrustGraph` and `getJobAudit`.
 - The Agent API reads the verified history from a snapshot published every ten minutes

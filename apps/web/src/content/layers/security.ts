@@ -4,7 +4,7 @@ import type { Layer } from "../types.ts";
 export const security: Layer = {
   id: "security",
   title: "Security",
-  description: "How the contracts limit what anyone can do, and how they are checked.",
+  description: "How the ARL contracts limit what anyone can do, and how they are checked.",
   cards: [
     {
       id: "fixed-supply",

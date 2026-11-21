@@ -1,6 +1,6 @@
 {
   "name": "@arl/sdk",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "author": "Alazdg <team@arlcoin.io>",
   "private": true,
   "description": "ARL developer SDK (npm: arl-protocol-sdk): verified job payments (payVerified, ARLJobs + ARLVerifiedEvaluator), ARL purchase on Uniswap, compute streams on Base Mainnet; viem-based",
