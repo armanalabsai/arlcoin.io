@@ -11,6 +11,10 @@ documents that back it. What is deployed on Base Mainnet is recorded in
   documentation.
 - Search descriptions: every page of arlcoin.io has its own description of useful length; the
   sitemap no longer lists the app, which asks not to be indexed.
+- The app (arlcoin.io/app) shows the turning ARL logo of the landing page as a fixed backdrop
+  behind its panels ([BackdropLogo.tsx](apps/dapp/components/arl/BackdropLogo.tsx)).
+- The "Works where your agents work" diagram on the home page adds XSpaceSI and DeepSeek, reached through the
+  HTTP Agent API ([AgentNetwork.tsx](apps/web/src/site/AgentNetwork.tsx)).
 - arl-protocol-sdk 0.3.1: `getValidators`, on top of 0.3.0's `payOnProof`, `getAgentScore`,
   `getAgentPassport`, `getTrustGraph` and `getJobAudit`.
 - The Agent API reads the verified history from a snapshot published every ten minutes
