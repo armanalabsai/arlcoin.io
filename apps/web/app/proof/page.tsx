@@ -61,6 +61,10 @@ const PARTS: readonly Part[] = [
     check: [
       ["Validators in ARLscan", "https://arlcoin.io/app/scan/"],
       ["The same data as JSON", "https://arlcoin.io/api/v1/validators"],
+      [
+        "Run a validator yourself",
+        "https://github.com/armanalabsai/arlcoin.io/blob/main/docs/run-a-validator.md",
+      ],
     ],
   },
   {

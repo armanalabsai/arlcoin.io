@@ -47,9 +47,15 @@ export const roadmap: Layer = {
       metric: { kind: "static", value: "Live on Base Mainnet" },
       detail: {
         summary:
-          "ERC-8183 job escrows paid in ARL or USDC, with a verified evaluator: a committee of staked ARL validators votes on each delivery, a challenge window follows, and a 2-of-3 arbiter Safe rules on disputed jobs only. Escrows v3 went live on 16 November 2026 and evaluator v7 on 19 November 2026: late finalization always settles, an unanswered dispute can be expired by anyone, and the agent is bound at committee approval so a rejection always reaches ERC-8004 reputation. The ARL app at arlcoin.io/app runs against these contracts.",
+          "ERC-8183 job escrows paid in ARL or USDC, with a verified evaluator: a committee of staked ARL validators votes on each delivery, a challenge window follows, and a 2-of-3 arbiter Safe rules on disputed jobs only. Escrows v3 went live on 16 November 2026 and evaluator v7 on 19 November 2026: late finalization always settles, an unanswered dispute can be expired by anyone, and the agent is bound at committee approval so a rejection always reaches ERC-8004 reputation. The ARL app at arlcoin.io/app runs against these contracts. Validators are open: anyone can stake and run one, and since 21 November 2026 the first five independent validators earn 250 ARL a month for three months from December 2026, with at least 1,000 ARL staked.",
       },
-      links: [{ label: "Open the app", href: "https://arlcoin.io/app/verified/" }],
+      links: [
+        { label: "Open the app", href: "https://arlcoin.io/app/verified/" },
+        {
+          label: "Run a validator",
+          href: "https://github.com/armanalabsai/arlcoin.io/blob/main/docs/run-a-validator.md",
+        },
+      ],
     },
     {
       id: "compute-staking",
