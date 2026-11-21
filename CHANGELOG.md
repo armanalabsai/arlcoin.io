@@ -6,6 +6,11 @@ documents that back it. What is deployed on Base Mainnet is recorded in
 
 ## 2026-11-21
 
+- [arlcoin.io/proof](https://arlcoin.io/proof/): every working part, how it works and where to
+  check it on Base Mainnet, with a 78-second video and a plain list of what is not proven yet
+  ([page.tsx](apps/web/app/proof/page.tsx)).
+- The home page animation says Base produces about five blocks a second, as it does now, not one
+  every two seconds.
 - arl-protocol-sdk 0.3.3: the same code as 0.3.2, published so that the `latest` tag on npm points
   at the current version again (an older staged 0.3.0 had taken it).
 - arl-protocol-sdk 0.3.2 and arl-protocol-mcp 0.2.1: `getJobReceipt` and `arl_get_job_receipt`,

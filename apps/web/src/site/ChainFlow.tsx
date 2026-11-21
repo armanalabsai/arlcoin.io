@@ -120,7 +120,7 @@ function Wide() {
       ))}
       <Packet path="#arl-flow-rail" />
       <text x="520" y="290" className="flow-cap">
-        Base blocks, about every 2 seconds
+        Base blocks, about five every second
       </text>
       <path d={`M${xs[3]} ${y + 128} V318`} className="flow-drop" />
       <defs>
