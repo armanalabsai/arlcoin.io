@@ -44,10 +44,10 @@ export const roadmap: Layer = {
       shortDescription: "Escrowed AI jobs checked by staked validators",
       progress: "done",
       weight: "tertiary",
-      metric: { kind: "static", value: "Live on Base Mainnet" },
+      metric: { kind: "static", value: "First job paid 2026-11-21" },
       detail: {
         summary:
-          "ERC-8183 job escrows paid in ARL or USDC, with a verified evaluator: a committee of staked ARL validators votes on each delivery, a challenge window follows, and a 2-of-3 arbiter Safe rules on disputed jobs only. Escrows v3 went live on 16 November 2026 and evaluator v7 on 19 November 2026: late finalization always settles, an unanswered dispute can be expired by anyone, and the agent is bound at committee approval so a rejection always reaches ERC-8004 reputation. The ARL app at arlcoin.io/app runs against these contracts. Validators are open: anyone can stake and run one, and since 21 November 2026 the first five independent validators earn 250 ARL a month for three months from December 2026, with at least 1,000 ARL staked.",
+          "ERC-8183 job escrows paid in ARL or USDC, with a verified evaluator: a committee of staked ARL validators votes on each delivery, a challenge window follows, and a 2-of-3 arbiter Safe rules on disputed jobs only. Escrows v3 went live on 16 November 2026 and evaluator v7 on 19 November 2026: late finalization always settles, an unanswered dispute can be expired by anyone, and the agent is bound at committee approval so a rejection always reaches ERC-8004 reputation. The first verified job went through every step with real funds and was paid on 21 November 2026. The ARL app at arlcoin.io/app runs against these contracts. Validators are open: anyone can stake and run one, and since 21 November 2026 the first five independent validators earn 250 ARL a month for three months from December 2026, with at least 1,000 ARL staked.",
       },
       links: [
         { label: "Open the app", href: "https://arlcoin.io/app/verified/" },
@@ -109,7 +109,7 @@ export const roadmap: Layer = {
       metric: { kind: "static", value: "Evaluator v7 live 2026-11-19" },
       detail: {
         summary:
-          "ARLJobs v3 and evaluator v5 went live on 16 November 2026 and close the issues found through the bug bounty: disputes always settle before the job's deadline, a refused refund no longer blocks the validators' bonds, and conflicts of interest are refused on chain. Hourly protocol event alerts watch the live contracts. Evaluator v6 went live on 19 November 2026 with further fixes from bounty reports: the arbiter cannot open a dispute it would rule on, late rejections still reach the ERC-8004 record, the provider must own the agent it is hired as, and rulings name the upheld deliverable. Evaluator v7 followed the same day: a rejection closed with release still reaches the record, and a job can only be configured with its provider named and with an agent that provider owns. The first verified job ran on v7 on 20 November 2026: three staked validators re-executed the work and approved it on chain. Hardening continues with every report.",
+          "ARLJobs v3 and evaluator v5 went live on 16 November 2026 and close the issues found through the bug bounty: disputes always settle before the job's deadline, a refused refund no longer blocks the validators' bonds, and conflicts of interest are refused on chain. Hourly protocol event alerts watch the live contracts. Evaluator v6 went live on 19 November 2026 with further fixes from bounty reports: the arbiter cannot open a dispute it would rule on, late rejections still reach the ERC-8004 record, the provider must own the agent it is hired as, and rulings name the upheld deliverable. Evaluator v7 followed the same day: a rejection closed with release still reaches the record, and a job can only be configured with its provider named and with an agent that provider owns. The first verified job ran on v7 on 20 November 2026: three staked validators re-executed the work and approved it on chain. It settled on 21 November 2026: the challenge window passed with no dispute, the escrow paid the provider and every validator bond was returned. Hardening continues with every report.",
       },
     },
     {

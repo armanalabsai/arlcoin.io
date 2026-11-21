@@ -6,6 +6,9 @@ documents that back it. What is deployed on Base Mainnet is recorded in
 
 ## 2026-11-21
 
+- The first verified job (job 1) settled and was paid on Base Mainnet: the challenge window passed
+  with no dispute and every validator bond was returned. The README, the roadmap, the proof page
+  and the docs that mention the job now say so.
 - Python SDK 0.6.0, compute streams for both sides
   ([compute_stream.py](packages/python-sdk/src/arl_protocol/compute_stream.py)):
   `ServeOnStream` answers only while the caller's stream pays the provider,
