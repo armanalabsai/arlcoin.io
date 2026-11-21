@@ -44,7 +44,11 @@ export interface TestRunInput {
  * so the tests must run from the checkout alone, without an install step.
  */
 export function nodeTestSpec(input: TestRunInput): ReexecSpec {
-  const directory = (input.directory ?? "").replace(/^\/+|\/+$/g, "");
+  // Leading and trailing slashes are dropped part by part, without a pattern over the whole text.
+  const directory = (input.directory ?? "")
+    .split("/")
+    .filter((part) => part !== "")
+    .join("/");
   return parseSpec({
     version: "arl-reexec/1",
     container_digest: NODE_IMAGE,
