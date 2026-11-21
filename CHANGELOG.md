@@ -16,6 +16,8 @@ documents that back it. What is deployed on Base Mainnet is recorded in
   `arl_get_job_receipt` MCP tool and `GET /api/v1/jobs/{token}/{jobId}/receipt`.
 - arl-protocol 0.4.0 for Python: `agent_passport`, `job_audit`, `job_receipt`, `validators` and
   `trust_graph` ([packages/python-sdk](packages/python-sdk/README.md)).
+- A runnable pay-on-proof example: a paid HTTP service and its caller on a local chain, in one
+  command ([docs/quickstart.md](docs/quickstart.md#pay-on-proof-a-paid-http-service-in-one-command)).
 - ARLscan lists the validators of the verified evaluator
   ([docs/app.md](docs/app.md#scan-arlscan)).
 

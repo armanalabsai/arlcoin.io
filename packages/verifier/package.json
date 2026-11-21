@@ -18,7 +18,8 @@
     "test": "node --test \"test/**/*.test.ts\"",
     "test:docker": "node --test \"test-docker/**/*.test.ts\"",
     "test:anvil": "node --test \"test-anvil/**/*.test.ts\"",
-    "quickstart": "node examples/quickstart.ts"
+    "quickstart": "node examples/quickstart.ts",
+    "pay-on-proof": "node examples/pay-on-proof.ts"
   },
   "devDependencies": {
     "@arl/sdk": "0.3.1"
