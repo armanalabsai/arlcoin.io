@@ -65,6 +65,33 @@ over. The key is read from the environment only and is never printed.
 Set `ARL_IMAGES` unless you intend to run any image a client names: the container has no network
 and no access to the host beyond its work directory, but what runs is the client's choice.
 
+## A job to hire it for: a verified test run
+
+`make-spec` writes the spec of the most common job: run a repository's tests at an exact commit
+with Node's built-in runner, and accept the job only when every test passes.
+
+```sh
+node packages/verifier/src/cli.ts make-spec   https://github.com/armanalabsai/arlcoin.io 8a07287a8b7e459cfd64dddfbfe587864847f6d2   examples/verified-tests > spec.json
+node packages/verifier/src/cli.ts run spec.json
+```
+
+The spec pins the official Node.js 22 image by digest and the commit by id. The container has no
+network, so the tests must run from the checkout alone, without an install step. The result is
+the runner's summary counts (the report's timings differ on every machine and are left out) and
+the exit status.
+
+That command, run twice in Docker against
+[examples/verified-tests](../examples/verified-tests) at that commit, gave the same deliverable
+both times:
+
+| Spec hash   | `0x5e2d58f31b217799c32a9392abe998836751027704d16a1e8d64e81f91f6d21a` |
+| ----------- | -------------------------------------------------------------------- |
+| Deliverable | `0x0e8fe60bd009ba3d9d8edf3ac707db1bd47f10c11076cba5b9d346b9ab115484` |
+
+A client hosts `spec.json` at an https address, opens a verified job with that address and the
+spec hash, and names the provider. The provider and every validator then compute that same
+deliverable.
+
 ## Tested
 
 `packages/verifier/test-anvil/provide.anvil.test.ts` runs the agent with three unattended
