@@ -21,7 +21,7 @@ automatically.
 | Security review        | https://arlcoin.io/docs/security-audit                                                      |
 | Source code            | https://github.com/armanalabsai/arlcoin.io                                                  |
 | X                      | https://x.com/arlprotocol (@arlprotocol)                                                    |
-| Telegram               | https://t.me/arlcoin_community                                                              |
+| Telegram               | https://t.me/arlprotocol_community                                                          |
 | Email                  | team@arlcoin.io                                                                             |
 | Logo (SVG)             | `apps/web/public/arl-token.svg`, served at https://arlcoin.io/arl-token.svg                 |
 | Logo (PNG)             | `assets/brand/png/arl-token-icon-small-32.png`, `arl-token-icon-256.png`, `-512.png`        |

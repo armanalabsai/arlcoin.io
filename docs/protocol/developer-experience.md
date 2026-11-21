@@ -3,6 +3,12 @@
 Status: **plan**, 14 November 2026. Phase 6 of the
 [master architecture and roadmap](../architecture/MASTER-ARCHITECTURE-ROADMAP.md).
 
+> Superseded where it describes the state of 14 November 2026: the Python package is on PyPI
+> (`arl-protocol`), and the x402 `arl-escrow` scheme is released as
+> [v0.2.0](../../spec/x402-arl-escrow/v0.2.0/README.md) with `payVerified` and `payOnProof` in the
+> SDK. What is live today is listed in the [README](../../README.md) and the
+> [changelog](../../CHANGELOG.md).
+
 ## What developers have today
 
 | Path       | Package                          | State                                                    |

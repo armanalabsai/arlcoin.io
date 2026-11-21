@@ -6,6 +6,14 @@ documents that back it. What is deployed on Base Mainnet is recorded in
 
 ## 2026-11-21
 
+- arl-protocol-sdk 0.3.2 and arl-protocol-mcp 0.2.1: `getJobReceipt` and `arl_get_job_receipt`,
+  the portable job receipt that the Agent API already serves, so the npm packages match their
+  documentation.
+- Search descriptions: every page of arlcoin.io has its own description of useful length; the
+  sitemap no longer lists the app, which asks not to be indexed.
+- The home page timeline adds two phases, the trust layer (done) and the first paid services
+  (under way), and names the audit as the internal audit it is
+  ([roadmap.ts](apps/web/src/content/layers/roadmap.ts)).
 - The app (arlcoin.io/app) shows the turning ARL logo of the landing page as a fixed backdrop
   behind its panels ([BackdropLogo.tsx](apps/dapp/components/arl/BackdropLogo.tsx)).
 - The "Works where your agents work" diagram on the home page adds XSpaceSI and DeepSeek, reached through the
