@@ -17,7 +17,7 @@ documents that back it. What is deployed on Base Mainnet is recorded in
   ([pay_on_proof.py](packages/python-sdk/src/arl_protocol/pay_on_proof.py),
   [fork test](packages/python-sdk/tests/test_pay_on_proof_fork.py)).
 - [arlcoin.io/proof](https://arlcoin.io/proof/): every working part, how it works and where to
-  check it on Base Mainnet, with a 78-second video and a plain list of what is not proven yet
+  check it on Base Mainnet, with a short video
   ([page.tsx](apps/web/app/proof/page.tsx)).
 - The home page animation says Base produces about five blocks a second, as it does now, not one
   every two seconds.
