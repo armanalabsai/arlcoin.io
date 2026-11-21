@@ -8,6 +8,11 @@ documents that back it. What is deployed on Base Mainnet is recorded in
 
 - The Core page shows the same turning logo as the landing page and the app
   ([CoreCard.tsx](apps/web/src/core/CoreCard.tsx)).
+- arl-protocol 0.5.0 (Python): `PayOnProof`, so a FastAPI, Flask or Django service can be paid
+  through a verified job as the TypeScript `payOnProof` does. Tested end to end on a local fork of
+  Base Mainnet against the live escrow and evaluator
+  ([pay_on_proof.py](packages/python-sdk/src/arl_protocol/pay_on_proof.py),
+  [fork test](packages/python-sdk/tests/test_pay_on_proof_fork.py)).
 - [arlcoin.io/proof](https://arlcoin.io/proof/): every working part, how it works and where to
   check it on Base Mainnet, with a 78-second video and a plain list of what is not proven yet
   ([page.tsx](apps/web/app/proof/page.tsx)).

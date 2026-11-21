@@ -13,6 +13,7 @@ Amounts are plain token units ("10" is 10 ARL, or 10 USDC with token="USDC").
 
 from .client import ESCROWS, EVALUATORS, STATUS, Arl, ArlError, Outcomes, outcomes_of
 from .open_task import open_task
+from .pay_on_proof import MemoryUsedJobs, Offer, PaidJob, PaidResponse, PayOnProof
 from .score import (
     AgentScore,
     agent_passport,
@@ -30,7 +31,12 @@ __all__ = [
     "ArlError",
     "ESCROWS",
     "EVALUATORS",
+    "MemoryUsedJobs",
+    "Offer",
     "Outcomes",
+    "PaidJob",
+    "PaidResponse",
+    "PayOnProof",
     "STATUS",
     "agent_passport",
     "agent_score",
@@ -42,4 +48,4 @@ __all__ = [
     "trust_graph",
     "validators",
 ]
-__version__ = "0.4.0"
+__version__ = "0.5.0"
