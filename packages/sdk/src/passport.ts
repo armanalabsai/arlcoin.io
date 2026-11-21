@@ -7,7 +7,7 @@
 // text, cut to a short length and stripped of control characters, and nothing in it changes the
 // score.
 
-import { getAddress, parseAbi, type Address, type PublicClient } from "viem";
+import { getAddress, parseAbi, type Address } from "viem";
 
 import type { Outcome, Score } from "../../protocol/src/index.ts";
 import { getAgentScore, type HistoryOptions } from "./agentScore.ts";

@@ -5,7 +5,7 @@
 // What a validator did (accepted jobs, votes, slashes) comes from the evaluators' events; its
 // stake and the part locked in running jobs are read from the contract at the same block.
 
-import { getAddress, isAddressEqual, parseAbi, type Address, type PublicClient } from "viem";
+import { getAddress, isAddressEqual, parseAbi, type Address } from "viem";
 
 import {
   HISTORY_START,

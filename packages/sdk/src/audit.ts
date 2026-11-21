@@ -5,7 +5,7 @@
 // Nothing here is interpreted beyond naming the step: each entry is one on-chain event, and the
 // block the trail was read at is part of the answer, so anyone can re-read it.
 
-import { getAddress, isAddressEqual, type Address, type Hex, type PublicClient } from "viem";
+import { getAddress, isAddressEqual, type Address, type Hex } from "viem";
 
 import {
   HISTORY_START,

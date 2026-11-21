@@ -16,7 +16,6 @@ import {
   parseAbi,
   type Address,
   type Hex,
-  type PublicClient,
 } from "viem";
 
 import type { HistoryOptions } from "./agentScore.ts";
