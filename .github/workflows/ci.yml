@@ -168,6 +168,8 @@ jobs:
       - run: npm run test:anvil -w @arl/verifier
       # The developer quickstart must keep working end to end (docs/quickstart.md).
       - run: npm run quickstart -w @arl/verifier
+      # So must the pay-on-proof example: a paid HTTP service and its caller, end to end.
+      - run: npm run pay-on-proof -w @arl/verifier
       # SDK end to end on Anvil: compute streams and payVerified (402 offer → funded job).
       - run: npm run test:anvil -w @arl/sdk
       - run: npm run test:docker -w @arl/verifier
