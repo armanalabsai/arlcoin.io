@@ -129,5 +129,6 @@ ARL contact; we answer within a day with code and links. Everything is open sour
 | Quickstart              | [quickstart.md](quickstart.md)                     |
 | Jobs                    | [jobs.md](jobs.md)                                 |
 | Verification            | [verifiable-execution.md](verifiable-execution.md) |
+| Run a validator         | [run-a-validator.md](run-a-validator.md)           |
 | Contracts and addresses | [mainnet-services.md](mainnet-services.md)         |
 | Contact                 | team@arlcoin.io                                    |

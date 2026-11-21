@@ -6,6 +6,9 @@ documents that back it. What is deployed on Base Mainnet is recorded in
 
 ## 2026-11-21
 
+- [Run a validator](docs/run-a-validator.md): what an independent operator stakes and risks,
+  what to install, and the commands to stake, run `watch` unattended and be named on a
+  committee. No permission from the team is involved.
 - A runnable compute stream example: `npm run compute-stream -w @arl/sdk` serves a caller
   while its stream pays, refuses another account that names the same stream, withdraws,
   stops and checks the settlement on a local chain
