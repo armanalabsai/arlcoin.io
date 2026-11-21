@@ -6,6 +6,9 @@ documents that back it. What is deployed on Base Mainnet is recorded in
 
 ## 2026-11-21
 
+- [Integration brief](docs/integration-brief.md): the three ways to connect to ARL (verified
+  jobs, per-second compute streams, the MCP server and Agent API), the contract addresses, and
+  a first integration plan for an inference or GPU workload.
 - SDK 0.3.4: every read function takes the same client, a viem public client or
   `{ publicClient }`, and a job is named by its token ("ARL", "USDC") or by its escrow address
   in `getJob`, `getJobAudit` and `getJobReceipt`
