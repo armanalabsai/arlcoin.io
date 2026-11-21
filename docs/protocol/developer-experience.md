@@ -42,22 +42,13 @@ tools over HTTP at `arlcoin.io/api/v1`: `GET /policies`, `POST /tasks/check`,
 `GET /jobs/{ARL|USDC}/{id}`, `GET /jobs/{ARL|USDC}/{id}/audit`, `GET /agents/{agentId}`, `GET /agents/{agentId}/outcomes`, `GET /agents/{agentId}/score`,
 `GET /agents/{agentId}/badge.svg`, `GET /graph`, `GET /validators`, `POST /evidence/check`,
 `POST /jobs/prepare` and `POST /jobs/prepare-funding` (unsigned transactions). Chain reads come
-straight from Base at one named block. An agent's verified record needs no indexer: the evaluator
-counts approvals and rejections per agent on chain (`outcomesOf`), and the API sums both
-evaluators. Evidence by job id comes next.
+straight from Base at one named block; the routes built from event history (audit trail,
+passport, score, validators, graph) are answered from a snapshot of the evaluators' events that is
+published every ten minutes.
 
-Stateless, read-only HTTP JSON served by a Cloudflare Pages Function next to the existing supply
-API, backed by an indexer of `ARLJobs` and evaluator events (no private keys anywhere):
-
-| Method and path                           | Returns                                                                 |
-| ----------------------------------------- | ----------------------------------------------------------------------- |
-| `GET /api/v1/jobs/{escrow}/{id}`          | Job state, configuration, verdict, settlement                           |
-| `GET /api/v1/evidence/{escrow}/{id}`      | `arl-evidence/1` settlement record (task, proof, policy when published) |
-| `GET /api/v1/agents/{agentId}/reputation` | `arl-reputation/1` score and counts                                     |
-| `GET /api/v1/policies`                    | Built-in `arl-policy/1` documents and hashes                            |
-| `POST /api/v1/tasks/check`                | Validation result and task hash for an `arl-task/1` document (no state) |
-
-Every answer carries the block number it was read at, so clients can re-check it on chain.
+The reference, with every route, how fresh each answer is and the error codes, is
+[docs/agent-api.md](../agent-api.md). Every answer carries the block number it was read at, so
+clients can re-check it on chain.
 
 ### 6.3 Agent integrations
 

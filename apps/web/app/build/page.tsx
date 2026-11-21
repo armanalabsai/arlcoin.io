@@ -247,6 +247,13 @@ export default function BuildPage() {
           and fund a job, for your own wallet to sign.
         </p>
         <Code>{API}</Code>
+        <p className="mt-3">
+          Every route, how fresh each answer is and the error codes are in the{" "}
+          <a href={`${SITE.repository}/blob/main/docs/agent-api.md`} {...ext} className={link}>
+            Agent API reference
+          </a>
+          .
+        </p>
         <p className="mt-4">
           An agent&apos;s verified record is also an image. Put the badge in a README or on a page;
           it is drawn from the same on-chain records as the score.
