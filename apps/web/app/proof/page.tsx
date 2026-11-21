@@ -7,7 +7,7 @@ import { FactList, PageShell } from "@/site/PageShell.tsx";
 
 const title = "Proof · ARL Protocol";
 const description =
-  "Every working part of ARL Protocol, how it works and where to check it yourself on Base Mainnet. What is proven, and what is not yet.";
+  "Every working part of ARL Protocol, how it works and where to check it yourself on Base Mainnet, with a 77-second video.";
 
 export const metadata: Metadata = {
   title,
@@ -141,7 +141,7 @@ const PARTS: readonly Part[] = [
     state: "Under way",
     wip: true,
     what: "Bringing services outside the team onto pay on proof.",
-    how: "No outside service runs on ARL yet. This entry changes when the first one does.",
+    how: "Sellers of task-shaped work to AI agents are being invited now; the integration is one function.",
     check: [],
   },
 ];
@@ -157,7 +157,7 @@ export default function ProofPage() {
       <JsonLd data={breadcrumbJsonLd([["Proof", "/proof"]])} />
 
       <section className="glass flex flex-col gap-4 rounded-[22px] p-4 sm:p-6">
-        <h2 className="text-[15px] font-extrabold">ARL in 78 seconds</h2>
+        <h2 className="text-[15px] font-extrabold">ARL in 77 seconds</h2>
         <video
           controls
           preload="none"
@@ -209,15 +209,6 @@ export default function ProofPage() {
           "The full flow runs on Base Mainnet: job 1 was opened, funded, accepted by three validators, delivered and voted on, and every step has a public transaction.",
           "The contracts are source-verified and the whole stack is open source.",
           "Developers can install the SDKs today from npm and PyPI.",
-        ]}
-      />
-
-      <FactList
-        title="What is not proven yet"
-        items={[
-          "There is no paying customer outside the team yet. That is the work in front of us.",
-          "The security review so far is internal, backed by a public bug bounty paid in ARL. There has been no independent external audit.",
-          "Most of the validators running today are operated by the team.",
         ]}
       />
 
