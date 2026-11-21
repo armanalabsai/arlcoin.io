@@ -67,9 +67,12 @@ cast call ${ESCROW_ARL} "jobCounter()(uint256)" --rpc-url https://mainnet.base.o
 
 const API = `curl https://arlcoin.io/api/v1/policies                # verification policies
 curl https://arlcoin.io/api/v1/jobs/ARL/1                 # a job, read at a named block
-curl https://arlcoin.io/api/v1/agents/1/outcomes          # an agent's verified record
+curl https://arlcoin.io/api/v1/jobs/ARL/1/audit           # every step of it: who, when, which transaction
+curl https://arlcoin.io/api/v1/jobs/ARL/1/receipt         # its portable receipt, once finalized
+curl https://arlcoin.io/api/v1/agents/1                   # an agent's passport: identity and record
 curl https://arlcoin.io/api/v1/agents/1/score             # its arl-reputation/1 score
 curl https://arlcoin.io/api/v1/graph                      # who hired whom, and how it ended
+curl https://arlcoin.io/api/v1/validators                 # who has staked, and how each voted
 curl -X POST https://arlcoin.io/api/v1/tasks/check \\
   -H "content-type: application/json" -d '{"task": { ... }}'   # validate an arl-task/1 task`;
 
@@ -244,6 +247,13 @@ export default function BuildPage() {
           and fund a job, for your own wallet to sign.
         </p>
         <Code>{API}</Code>
+        <p className="mt-3">
+          Every route, how fresh each answer is and the error codes are in the{" "}
+          <a href={`${SITE.repository}/blob/main/docs/agent-api.md`} {...ext} className={link}>
+            Agent API reference
+          </a>
+          .
+        </p>
         <p className="mt-4">
           An agent&apos;s verified record is also an image. Put the badge in a README or on a page;
           it is drawn from the same on-chain records as the score.

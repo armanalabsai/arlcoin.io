@@ -91,3 +91,73 @@ def agent_score(agent_id: int, *, api_url: str = AGENT_API, get: Get = http_get)
 def badge_url(agent_id: int, *, api_url: str = AGENT_API) -> str:
     """The address of the agent's "ARL verified" SVG badge, for a README or a page."""
     return f"{api_url}/agents/{_agent_id(agent_id)}/badge.svg"
+
+
+def _token(token: str) -> str:
+    if token not in ("ARL", "USDC"):
+        raise ArlError('token must be "ARL" or "USDC"')
+    return token
+
+
+def _job_id(job_id: int) -> int:
+    if isinstance(job_id, bool) or not isinstance(job_id, int) or job_id < 1:
+        raise ArlError("job_id must be a positive integer")
+    return job_id
+
+
+def _answer(body: dict, key: str, kind: type) -> dict:
+    """An Agent API answer is used only when it names its block and carries what was asked for."""
+    if not isinstance(body, dict) or not str(body.get("block", "")).isdigit() or not isinstance(body.get(key), kind):
+        raise ArlError(f"the API did not return {key}")
+    return body
+
+
+def agent_passport(agent_id: int, *, api_url: str = AGENT_API, get: Get = http_get) -> dict:
+    """An ERC-8004 agent's identity and verified record in one answer.
+
+    `registered`, `owner`, and the `name` and `description` its owner states (untrusted text),
+    with its arl-reputation/1 score fields and `outcomes`.
+    """
+    body = get(f"{api_url}/agents/{_agent_id(agent_id)}")
+    if not isinstance(body, dict) or not isinstance(body.get("registered"), bool):
+        raise ArlError("the API did not return an agent passport")
+    return _answer(body, "outcomes", list)
+
+
+def job_audit(job_id: int, *, token: str = "ARL", api_url: str = AGENT_API, get: Get = http_get) -> list[dict]:
+    """Every on-chain event of a verified job, oldest first.
+
+    Each entry has `step` (one sentence), `event`, `contract`, `block`, `at` (Unix seconds),
+    `transaction`, `actor` where the event names one, and `detail`.
+    """
+    body = get(f"{api_url}/jobs/{_token(token)}/{_job_id(job_id)}/audit")
+    return _answer(body, "entries", list)["entries"]
+
+
+def job_receipt(job_id: int, *, token: str = "ARL", api_url: str = AGENT_API, get: Get = http_get) -> dict:
+    """A finalized job's portable receipt and the unsigned EAS call that records it.
+
+    `receipt` is None while the job is not finalized. `attest` (and `registerSchema`, while the
+    schema is not on EAS) are unsigned transactions for the caller's own wallet: nothing is sent.
+    """
+    body = get(f"{api_url}/jobs/{_token(token)}/{_job_id(job_id)}/receipt")
+    if not isinstance(body, dict) or "receipt" not in body:
+        raise ArlError("the API did not return a receipt")
+    return _answer(body, "schemaUid", str)
+
+
+def validators(*, api_url: str = AGENT_API, get: Get = http_get) -> list[dict]:
+    """Every validator that staked on a verified evaluator, most active first.
+
+    Each has `token`, `validator`, `stake` and `locked` (base units), `accepted`, `approved`,
+    `rejected`, `slashes`, `slashed` and `since`.
+    """
+    return _answer(get(f"{api_url}/validators"), "validators", list)["validators"]
+
+
+def trust_graph(*, api_url: str = AGENT_API, get: Get = http_get) -> dict:
+    """Who hired whom, and how it ended: `agents` with their scores and `edges` per client and agent."""
+    body = _answer(get(f"{api_url}/graph"), "edges", list)
+    if not isinstance(body.get("agents"), list):
+        raise ArlError("the API did not return agents")
+    return body
