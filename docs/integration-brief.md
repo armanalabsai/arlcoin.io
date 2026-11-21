@@ -96,6 +96,10 @@ x402 `upto`: [compute-provider.md](compute-provider.md).
 
 ## A first integration for an inference or GPU workload
 
+To see the exchange before building anything, run the example on a local chain:
+`npm run compute-stream -w @arl/sdk`
+([examples/compute-stream.ts](../packages/sdk/examples/compute-stream.ts)).
+
 A plan that keeps the first step small:
 
 1. **One existing workload.** For example one vLLM deployment serving one model.

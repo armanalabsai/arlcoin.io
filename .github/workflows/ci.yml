@@ -170,6 +170,8 @@ jobs:
       - run: npm run quickstart -w @arl/verifier
       # So must the pay-on-proof example: a paid HTTP service and its caller, end to end.
       - run: npm run pay-on-proof -w @arl/verifier
+      # And the compute stream example: a service that answers only while a stream pays it.
+      - run: npm run compute-stream -w @arl/sdk
       # SDK end to end on Anvil: compute streams and payVerified (402 offer → funded job).
       - run: npm run test:anvil -w @arl/sdk
       - run: npm run test:docker -w @arl/verifier
