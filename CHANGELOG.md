@@ -6,6 +6,9 @@ documents that back it. What is deployed on Base Mainnet is recorded in
 
 ## 2026-11-21
 
+- Status lines of [jobs.md](docs/jobs.md), [compute-streaming.md](docs/compute-streaming.md) and
+  [verifiable-execution.md](docs/verifiable-execution.md) state what runs on Base Mainnet; they
+  still described the testnet stage.
 - arl-protocol 0.5.0 (Python): `PayOnProof`, so a FastAPI, Flask or Django service can be paid
   through a verified job as the TypeScript `payOnProof` does. Tested end to end on a local fork of
   Base Mainnet against the live escrow and evaluator

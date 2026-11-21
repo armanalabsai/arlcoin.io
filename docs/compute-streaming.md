@@ -1,7 +1,9 @@
 # Compute streaming: per-second payments in ARL
 
-Status: **IN DEVELOPMENT.** Tested on a local chain (Foundry unit, fuzz and invariant tests, and
-an Anvil end-to-end test of the SDK). Not deployed.
+Status: **DEPLOYED on Base Mainnet** at `0x1bFE932896fdd32175836a7364dcaf53d49EE464`
+(2026-11-12, [mainnet-services.md](mainnet-services.md)). Tested with Foundry unit, fuzz and
+invariant tests and an Anvil end-to-end test of the SDK. No provider outside the team runs streams
+yet. The deployment steps below describe the earlier Base Sepolia rehearsal.
 
 A client pays a compute provider by the second. The client opens a stream at a fixed rate for at
 most a fixed duration and escrows `rate × duration` ARL. The provider earns the rate every second
@@ -126,9 +128,9 @@ own creations, so ComputePayment is broadcast from the command line.
 
 ## Limits
 
-- ComputePayment is not deployed on any public network. ARL is deployed on Base Sepolia;
-  ComputePayment is deployed after it. Base Mainnet is refused by the deploy script and by the
-  SDK.
+- ComputePayment runs on Base Mainnet (address above). The `DeployComputePayment` script in this
+  section is the Base Sepolia rehearsal and refuses Base Mainnet; the mainnet contract was
+  created by `DeployMainnetServices`.
 - A stream pushes the provider's share to the provider at settlement. With ARL (a plain ERC-20,
   no hooks) that transfer cannot be blocked by the recipient.
 - Outside the first review scope (see [review-scope.md](review-scope.md)).
