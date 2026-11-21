@@ -125,6 +125,24 @@ export const roadmap: Layer = {
       ],
     },
     {
+      id: "open-validators",
+      title: "Open Validators",
+      shortDescription: "Independent validators, with a reward",
+      progress: "active",
+      weight: "tertiary",
+      metric: { kind: "static", value: "Open since 2026-11-21" },
+      detail: {
+        summary:
+          "Anyone can stake ARL and check verified jobs; no permission from the team is involved. Since 21 November 2026 a guide covers what an independent operator stakes and risks and the one command that runs a validator unattended. The first five validators not run by the team earn 250 ARL a month for three months from December 2026, with at least 1,000 ARL staked. The work now is bringing independent validators onto the committees.",
+      },
+      links: [
+        {
+          label: "Run a validator",
+          href: "https://github.com/armanalabsai/arlcoin.io/blob/main/docs/run-a-validator.md",
+        },
+      ],
+    },
+    {
       id: "first-services",
       title: "First Paid Services",
       shortDescription: "Pay-on-proof for services outside the team",
