@@ -1,7 +1,10 @@
 # Jobs: escrowed work paid in ARL (ERC-8183)
 
-Status: **IN DEVELOPMENT.** Deployed on Base Sepolia at
-`0xec79a897105aEd6daFBbB2a904E5bcFF71455644`; not on Base Mainnet.
+Status: **LIVE on Base Mainnet.** The escrows that run today are `ARLJobs` v3: ARL at
+`0x9aE99bF9a59aF47E81346B7c0b93Cd2B610455fC` and USDC at
+`0xE3eA0EAEc3Cf9DA2d0856A0f784A4B1671AeFD04` ([mainnet-services.md](mainnet-services.md)). The first
+version was tried on Base Sepolia at `0xec79a897105aEd6daFBbB2a904E5bcFF71455644`; the testnet
+is no longer used.
 
 A client hires a provider (for example an AI or compute service listed on
 [ARL Network](app.md#network-erc-8004)) for a piece of work and pays in ARL through escrow. This is
@@ -81,6 +84,6 @@ the result as "Rated N/100 from M paid jobs" (`apps/dapp/lib/reputation.ts`).
 - Disputes or arbitration in `ARLJobs` itself (the standard has none; reject and expiry are
   final). A job can instead name `ARLVerifiedEvaluator` as its evaluator: a staked validator
   committee, a challenge window and a dispute path; see
-  [verifiable-execution.md](verifiable-execution.md) (built, not deployed).
+  [verifiable-execution.md](verifiable-execution.md) (live on Base Mainnet as evaluator v7).
 - Responses from providers to ratings (`appendResponse`) and revoking a rating from the app.
 - Gasless use through ERC-2771 and a facilitator.

@@ -82,7 +82,7 @@ createProviderServer(provider).listen(8080); // behind a TLS-terminating proxy
   most 600 seconds, and an authorization must still be valid at settlement. A run is therefore at
   most 540 seconds (`MAX_RUN_SECONDS`).
 - Longer jobs use the escrowed Jobs flow (ERC-8183, see [jobs.md](jobs.md)) or an on-chain
-  per-second stream ([compute-streaming.md](compute-streaming.md), not deployed). Streaming payment
+  per-second stream ([compute-streaming.md](compute-streaming.md), deployed on Base Mainnet). Streaming payment
   through consecutive x402 authorizations is not built.
 - The record of authorizations already started lives in memory. A provider with several
   instances or restarts needs a shared store, the same as the facilitator's `AuthorizationStore`.

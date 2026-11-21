@@ -1,6 +1,9 @@
 # Verifiable execution and evaluation layer
 
-Status: **Phase 1 contract built, tested and deployed on Base Sepolia** (testnet only:
+Status: **LIVE on Base Mainnet** as evaluator v7: ARL at
+`0x0D160C869bd2a7AaEDd29e11fc60fdAEf21c3E28`, USDC at
+`0x7A00D45598Da7C13feEA8962fc1110FC4Db4D850` ([mainnet-services.md](mainnet-services.md)). The
+Phase 1 contract was first deployed on Base Sepolia (testnet:
 [`0x6808F80Eb11538543d31cf4b50332B268dDd4d14`](https://base-sepolia.blockscout.com/address/0x6808F80Eb11538543d31cf4b50332B268dDd4d14),
 source verified; evidence in [verification-evidence.md](verification-evidence.md)). Added after the
 [17 October 2026 internal security audit](../security/2026-10-17/report.md); checked by its own
