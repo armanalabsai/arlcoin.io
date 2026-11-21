@@ -5,7 +5,7 @@
 // Nothing here is interpreted beyond naming the step: each entry is one on-chain event, and the
 // block the trail was read at is part of the answer, so anyone can re-read it.
 
-import { getAddress, isAddressEqual, type Address, type Hex, type PublicClient } from "viem";
+import { getAddress, isAddressEqual, type Address, type Hex } from "viem";
 
 import {
   HISTORY_START,
@@ -14,6 +14,7 @@ import {
   readProtocolLogs,
   type HistoryOptions,
 } from "./agentScore.ts";
+import { entryOf, publicClientOf, type ReadClient } from "./client.ts";
 
 /** What each event means, in the words of the flow (spec/x402-arl-escrow). */
 const STEPS: Record<string, string> = {
@@ -99,12 +100,13 @@ const plain = (v: unknown): AuditValue =>
 
 /** Reads the audit trail of a job on the ARL or the USDC escrow of the verified evaluators. */
 export async function getJobAudit(
-  client: PublicClient,
-  token: "ARL" | "USDC",
+  c: ReadClient,
+  token: "ARL" | "USDC" | Address,
   jobId: bigint,
   opts: HistoryOptions = {},
 ): Promise<JobAudit> {
-  const deployment = VERIFIED_EVALUATORS.find((e) => e.token === token);
+  const client = publicClientOf(c);
+  const deployment = entryOf(VERIFIED_EVALUATORS, (e) => [e.escrow, e.evaluator], token);
   if (!deployment) throw new Error(`no verified evaluator for ${token}`);
   const head = await client.getBlock();
   const logs = await readProtocolLogs(client, HISTORY_START, head.number, opts);
@@ -137,7 +139,7 @@ export async function getJobAudit(
     a.block === b.block ? a.logIndex - b.logIndex : a.block < b.block ? -1 : 1,
   );
   return {
-    token,
+    token: deployment.token,
     escrow: deployment.escrow,
     evaluator: deployment.evaluator,
     jobId,

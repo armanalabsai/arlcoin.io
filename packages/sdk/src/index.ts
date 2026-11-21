@@ -99,6 +99,7 @@ export {
   type TrustEdge,
   type TrustGraph,
 } from "./agentScore.ts";
+export { publicClientOf, type ReadClient } from "./client.ts";
 export { getJobAudit, type AuditEntry, type AuditValue, type JobAudit } from "./audit.ts";
 export { IDENTITY_REGISTRY, getAgentPassport, type AgentPassport } from "./passport.ts";
 export { getValidators, type ValidatorRecord, type Validators } from "./validators.ts";

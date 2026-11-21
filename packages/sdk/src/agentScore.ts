@@ -27,6 +27,7 @@ import {
   type Score,
 } from "../../protocol/src/index.ts";
 import { STATUS, jobsAbi } from "./jobs.ts";
+import { publicClientOf, type ReadClient } from "./client.ts";
 
 export const REPUTATION_REGISTRY: Address = "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63";
 
@@ -350,10 +351,11 @@ async function agentOutcomes(client: PublicClient, history: History, agentId: bi
 }
 
 export async function getAgentScore(
-  client: PublicClient,
+  c: ReadClient,
   agentId: bigint,
   opts: { now?: number } & HistoryOptions = {},
 ): Promise<AgentScore> {
+  const client = publicClientOf(c);
   const history = await readHistory(client, opts);
   const { outcomes, skipped } = await agentOutcomes(client, history, agentId);
   const now = opts.now ?? Number(history.head.timestamp);
@@ -394,9 +396,10 @@ export interface TrustGraph {
  * where a committee settled a job (or the agent let one expire).
  */
 export async function getTrustGraph(
-  client: PublicClient,
+  c: ReadClient,
   opts: { now?: number } & HistoryOptions = {},
 ): Promise<TrustGraph> {
+  const client = publicClientOf(c);
   const history = await readHistory(client, opts);
   const now = opts.now ?? Number(history.head.timestamp);
   const ids = new Set<bigint>();

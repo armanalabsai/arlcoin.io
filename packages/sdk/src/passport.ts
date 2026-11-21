@@ -7,10 +7,11 @@
 // text, cut to a short length and stripped of control characters, and nothing in it changes the
 // score.
 
-import { getAddress, parseAbi, type Address, type PublicClient } from "viem";
+import { getAddress, parseAbi, type Address } from "viem";
 
 import type { Outcome, Score } from "../../protocol/src/index.ts";
 import { getAgentScore, type HistoryOptions } from "./agentScore.ts";
+import { publicClientOf, type ReadClient } from "./client.ts";
 
 /** Canonical ERC-8004 IdentityRegistry on Base Mainnet. */
 export const IDENTITY_REGISTRY: Address = "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432";
@@ -76,10 +77,11 @@ function base64(text: string): Uint8Array {
 
 /** Reads an agent's identity and its verified record at one block. */
 export async function getAgentPassport(
-  client: PublicClient,
+  c: ReadClient,
   agentId: bigint,
   opts: HistoryOptions = {},
 ): Promise<AgentPassport> {
+  const client = publicClientOf(c);
   const scored = await getAgentScore(client, agentId, opts);
   const at = { blockNumber: scored.block };
   let owner: Address | undefined;
