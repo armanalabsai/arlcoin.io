@@ -39,7 +39,17 @@ const client = createPublicClient({
 });
 
 // Any agent id: the scans do not depend on it.
-await getAgentScore(client as never, 1n, { wholeRange: true });
+// The endpoint sometimes refuses a request; the provider then leaves it alone for 30 seconds, so
+// wait longer than that before asking again. What was read stays in the store between attempts.
+for (let attempt = 1; ; attempt++) {
+  try {
+    await getAgentScore(client as never, 1n, { wholeRange: true });
+    break;
+  } catch (e) {
+    if (attempt === 5) throw e;
+    await new Promise((r) => setTimeout(r, 35_000));
+  }
+}
 if (store.size !== 2) throw new Error(`expected 2 scans, read ${String(store.size)}`);
 
 // The file to write: the first argument, or the seed bundled with the deployment.
