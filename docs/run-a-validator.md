@@ -153,5 +153,6 @@ node packages/verifier/src/cli.ts verify-bundle <rpc> evidence.json <fromBlock>
   [verifiable-execution.md](verifiable-execution.md)
 - The job spec format and the reference verifier: [reexecution-spec.md](reexecution-spec.md)
 - Contracts and addresses: [mainnet-services.md](mainnet-services.md)
+- The provider's side, unattended: [run-a-provider.md](run-a-provider.md)
 - Questions: team@arlcoin.io or the developer chat at
   [t.me/arlprotocol_community](https://t.me/arlprotocol_community)

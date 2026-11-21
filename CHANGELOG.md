@@ -6,6 +6,11 @@ documents that back it. What is deployed on Base Mainnet is recorded in
 
 ## 2026-11-21
 
+- An unattended provider agent: `arl-verifier provide` takes the funded jobs that name it,
+  approves the committee, runs the spec once and submits the result when the committee has
+  accepted ([provide.ts](packages/verifier/src/provide.ts),
+  [run-a-provider.md](docs/run-a-provider.md)). Tested end to end on a local chain with
+  unattended validators.
 - The first verified job (job 1) settled and was paid on Base Mainnet: the challenge window passed
   with no dispute and every validator bond was returned. The README, the roadmap, the proof page
   and the docs that mention the job now say so.

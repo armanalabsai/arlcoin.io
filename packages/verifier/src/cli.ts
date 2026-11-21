@@ -2,16 +2,27 @@
 // arl-verifier: hash a spec, run it (a provider's deliverable), check a deliverable, or check a
 // job on chain and vote on it.
 //
+//   node src/cli.ts make-spec <repository https url> <commit> [directory]   > spec.json
 //   node src/cli.ts hash <spec.json>
 //   node src/cli.ts run <spec.json>
 //   node src/cli.ts check <spec.json> <deliverable>
 //   ARL_VALIDATOR_KEY=0x… node src/cli.ts vote <rpc> <evaluator> <jobId> <spec.json>
 //   ARL_VALIDATOR_KEY=0x… node src/cli.ts watch <rpc> <evaluator> <fromBlock> [state.json]
 //
+// `make-spec` prints the spec of a test run with Node's built-in runner at an exact commit: the
+// job is accepted only when every test passes, and its result is the runner's summary counts.
+//
 // `watch` runs unattended: every 15 seconds it accepts the funded jobs whose committee names this
 // validator and votes on the submitted ones, fetching each spec from the job's description
 // (https or ipfs). Its progress is kept in state.json (default .arl-verifier-state.json). A
 // negative fromBlock counts back from the head; ARL_WATCH_ONCE=1 makes one pass and exits.
+//
+//   ARL_PROVIDER_KEY=0x… ARL_MIN_BUDGET=<base units> node src/cli.ts provide <rpc> <evaluator> <fromBlock> [state.json]
+//
+// `provide` is the provider's side of `watch`: it takes the funded jobs that name this account as
+// provider, approves the committee, runs the spec and submits the result hash once enough
+// committee members have accepted. Its progress is kept in state.json (default
+// .arl-provider-state.json), so a job's work runs once across restarts.
 //
 //   node src/cli.ts bundle <rpc> <evaluator> <jobId> <fromBlock>        > evidence.json
 //   node src/cli.ts verify-bundle <rpc> <evidence.json> <fromBlock>
@@ -24,7 +35,7 @@
 // and votes approve or reject (the validator must have accepted the job). Base Mainnet, Base
 // Sepolia and the local chain only. The key is read from the environment, never from arguments.
 
-import { readFile } from "node:fs/promises";
+import { readFile, rename, writeFile } from "node:fs/promises";
 import process from "node:process";
 
 import { createPublicClient, createWalletClient, http, isAddress, isHex } from "viem";
@@ -33,9 +44,18 @@ import { base, baseSepolia } from "viem/chains";
 
 import { castVote, MemberState, readJob } from "./chain.ts";
 import { DockerRunner } from "./docker.ts";
+import {
+  DEFAULT_PROVIDE_POLICY,
+  parseProvideState,
+  provideStep,
+  serializeProvideState,
+  type ProvidePolicy,
+  type ProvideState,
+} from "./provide.ts";
 import { parseWatchState, saveWatchState } from "./state.ts";
 import { networkFetcher } from "./inputs.ts";
 import { validatorKey } from "./key.ts";
+import { nodeTestSpec } from "./make.ts";
 import { parseSpec, specHash } from "./spec.ts";
 import { decide, execute } from "./verify.ts";
 import { buildBundle, verifyBundle, type EvidenceBundle } from "./bundle.ts";
@@ -63,6 +83,16 @@ const opts = { runner: new DockerRunner(), fetcher: networkFetcher };
 async function main(argv: readonly string[]): Promise<void> {
   const [command, ...args] = argv;
   switch (command) {
+    case "make-spec": {
+      const [repository, commit, directory] = args;
+      if (repository === undefined || commit === undefined) {
+        fail("usage: make-spec <repository https url> <commit> [directory]");
+      }
+      const spec = nodeTestSpec({ repository, commit, ...(directory ? { directory } : {}) });
+      print(spec);
+      process.stderr.write(`specHash ${specHash(spec)}\n`);
+      return;
+    }
     case "hash": {
       print({ specHash: specHash(await loadSpec(args[0])) });
       return;
@@ -259,8 +289,125 @@ async function main(argv: readonly string[]): Promise<void> {
       if (problems.length > 0) process.exit(1);
       return;
     }
+    case "provide": {
+      const [rpc, evaluator, fromText, statePath = ".arl-provider-state.json"] = args;
+      if (
+        rpc === undefined ||
+        evaluator === undefined ||
+        !isAddress(evaluator) ||
+        fromText === undefined ||
+        !/^-?\d+$/.test(fromText)
+      ) {
+        fail("usage: provide <rpc> <evaluator> <fromBlock> [state.json]");
+      }
+      // What this provider takes (see ProvidePolicy). Amounts are in the token's smallest unit.
+      //   ARL_MIN_BUDGET             smallest job budget: the provider's price (required)
+      //   ARL_MAX_SECONDS            longest run a spec may ask for (default 600)
+      //   ARL_MAX_MEMORY_MB          most memory a spec may ask for (default 1024)
+      //   ARL_MIN_HOURS_TO_DEADLINE  shortest time left until the job's deadline (default 6)
+      //   ARL_IMAGES                 comma-separated container digests; when set, only these run
+      //   ARL_CLIENTS                comma-separated client addresses; when set, only their jobs
+      //   ARL_VALIDATORS             comma-separated validators; when set, the whole committee must be among them
+      let policy: ProvidePolicy;
+      try {
+        const env = process.env;
+        const list = (name: string) => {
+          const items = (env[name] ?? "")
+            .split(",")
+            .map((c) => c.trim())
+            .filter((c) => c !== "");
+          return items.length > 0 ? items : null;
+        };
+        const addresses = (name: string) => {
+          const items = list(name);
+          const bad = items?.find((c) => !isAddress(c));
+          if (bad !== undefined) throw new Error(`${name}: ${bad} is not an address`);
+          return items as `0x${string}`[] | null;
+        };
+        if (!env.ARL_MIN_BUDGET || !/^\d+$/.test(env.ARL_MIN_BUDGET) || env.ARL_MIN_BUDGET === "0")
+          throw new Error("ARL_MIN_BUDGET must be set to the provider's price in base units");
+        policy = {
+          minBudget: BigInt(env.ARL_MIN_BUDGET),
+          maxSeconds: env.ARL_MAX_SECONDS
+            ? Number(env.ARL_MAX_SECONDS)
+            : DEFAULT_PROVIDE_POLICY.maxSeconds,
+          maxMemoryMb: env.ARL_MAX_MEMORY_MB
+            ? Number(env.ARL_MAX_MEMORY_MB)
+            : DEFAULT_PROVIDE_POLICY.maxMemoryMb,
+          minSecondsToDeadline: env.ARL_MIN_HOURS_TO_DEADLINE
+            ? BigInt(env.ARL_MIN_HOURS_TO_DEADLINE) * 3_600n
+            : DEFAULT_PROVIDE_POLICY.minSecondsToDeadline,
+          images: list("ARL_IMAGES"),
+          clients: addresses("ARL_CLIENTS"),
+          validators: addresses("ARL_VALIDATORS"),
+        };
+        if (!Number.isSafeInteger(policy.maxSeconds) || policy.maxSeconds <= 0)
+          throw new Error("ARL_MAX_SECONDS must be a positive integer");
+        if (!Number.isSafeInteger(policy.maxMemoryMb) || policy.maxMemoryMb <= 0)
+          throw new Error("ARL_MAX_MEMORY_MB must be a positive integer");
+      } catch (error) {
+        fail(`provider policy: ${(error as Error).message}`);
+      }
+      let key: `0x${string}`;
+      try {
+        // The same format as the validator key; only the variable's name differs.
+        key = validatorKey(process.env.ARL_PROVIDER_KEY);
+      } catch (error) {
+        fail((error as Error).message.replace("ARL_VALIDATOR_KEY", "ARL_PROVIDER_KEY"));
+      }
+      const account = privateKeyToAccount(key);
+      const client = createPublicClient({ transport: http(rpc) });
+      const chain = chainFor(await client.getChainId());
+      const wallet = createWalletClient({ account, chain, transport: http(rpc) });
+      const head = await client.getBlockNumber({ cacheTime: 0 });
+      const from = fromText.startsWith("-") ? head + BigInt(fromText) : BigInt(fromText);
+      let state: ProvideState = { fromBlock: from < 0n ? 0n : from, jobs: [] };
+      // A missing file is a first start; a file that does not load stops the provider loudly
+      // instead of starting over and running paid work twice.
+      let savedText: string | null = null;
+      try {
+        savedText = await readFile(statePath, "utf8");
+      } catch (e) {
+        if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e;
+      }
+      if (savedText !== null) {
+        try {
+          state = parseProvideState(savedText);
+        } catch (e) {
+          fail(
+            `the provider state ${statePath} is unreadable (${(e as Error).message}); ` +
+              "restore it or move it aside before starting again",
+          );
+        }
+      }
+      const deps = {
+        client,
+        wallet,
+        evaluator,
+        exec: opts,
+        specFetcher: networkFetcher,
+        logWindow: BigInt(process.env.ARL_LOG_WINDOW ?? "5000"),
+        policy,
+        log: (e: Record<string, unknown>) => {
+          print({ at: new Date().toISOString(), ...e });
+        },
+      };
+      for (;;) {
+        try {
+          state = await provideStep(deps, state);
+          // Written beside the file and renamed over it, so a crash never leaves half a state.
+          await writeFile(`${statePath}.tmp`, serializeProvideState(state));
+          await rename(`${statePath}.tmp`, statePath);
+        } catch (e) {
+          print({ event: "error", error: e instanceof Error ? e.message : String(e) });
+        }
+        // ARL_WATCH_ONCE=1: one pass and exit, for a scheduled job.
+        if (process.env.ARL_WATCH_ONCE === "1") return;
+        await new Promise((r) => setTimeout(r, 15_000));
+      }
+    }
     default:
-      fail("commands: hash, run, check, vote, watch, bundle, verify-bundle");
+      fail("commands: make-spec, hash, run, check, vote, watch, provide, bundle, verify-bundle");
   }
 }
 

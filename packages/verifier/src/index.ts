@@ -8,3 +8,5 @@ export * from "./chain.ts";
 export * from "./watch.ts";
 export * from "./state.ts";
 export * from "./bundle.ts";
+export * from "./provide.ts";
+export * from "./make.ts";
