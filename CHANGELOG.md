@@ -6,6 +6,8 @@ documents that back it. What is deployed on Base Mainnet is recorded in
 
 ## 2026-11-21
 
+- The Core page shows the same turning logo as the landing page and the app
+  ([CoreCard.tsx](apps/web/src/core/CoreCard.tsx)).
 - [arlcoin.io/proof](https://arlcoin.io/proof/): every working part, how it works and where to
   check it on Base Mainnet, with a 78-second video and a plain list of what is not proven yet
   ([page.tsx](apps/web/app/proof/page.tsx)).
