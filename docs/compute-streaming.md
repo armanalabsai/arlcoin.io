@@ -2,8 +2,8 @@
 
 Status: **DEPLOYED on Base Mainnet** at `0x1bFE932896fdd32175836a7364dcaf53d49EE464`
 (2026-11-12, [mainnet-services.md](mainnet-services.md)). Tested with Foundry unit, fuzz and
-invariant tests and an Anvil end-to-end test of the SDK. No provider outside the team runs streams
-yet. The deployment steps below describe the earlier Base Sepolia rehearsal.
+invariant tests and an Anvil end-to-end test of the SDK. The deployment steps below describe the
+earlier Base Sepolia rehearsal.
 
 A client pays a compute provider by the second. The client opens a stream at a fixed rate for at
 most a fixed duration and escrows `rate × duration` ARL. The provider earns the rate every second

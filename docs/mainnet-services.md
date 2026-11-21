@@ -7,13 +7,13 @@ is funded. The ARL app at arlcoin.io/app runs on Base
 Mainnet. The ARL token, its Safes, vesting wallets and timelock are on Base Mainnet since
 2026-10-24 ([mainnet-plan.md](mainnet-plan.md)).
 
-| Step | Service                                          | Status                                                        |
-| ---- | ------------------------------------------------ | ------------------------------------------------------------- |
-| 1    | Jobs escrows (ARL, USDC) and verified evaluators | Deployed (v3 escrows 2026-11-16; evaluators v7, 2026-11-19)   |
-| 2    | Validators: keys, ETH for gas, staked ARL        | Running: 3 operator validators staked on v7; first job 20 Nov |
-| 3    | x402 per-use payments facilitator on 8453        | Not started                                                   |
-| 4    | Staking rewards contract and its reward budget   | Deployed (nonce 32); 300,000 ARL period funded 2026-11-16     |
-| 5    | App and site on Base Mainnet                     | Done (2026-11-13)                                             |
+| Step | Service                                          | Status                                                                    |
+| ---- | ------------------------------------------------ | ------------------------------------------------------------------------- |
+| 1    | Jobs escrows (ARL, USDC) and verified evaluators | Deployed (v3 escrows 2026-11-16; evaluators v7, 2026-11-19)               |
+| 2    | Validators: keys, ETH for gas, staked ARL        | Running: 3 operator validators staked on v7; first job settled 2026-11-21 |
+| 3    | x402 per-use payments facilitator on 8453        | Not started                                                               |
+| 4    | Staking rewards contract and its reward budget   | Deployed (nonce 32); 300,000 ARL period funded 2026-11-16                 |
+| 5    | App and site on Base Mainnet                     | Done (2026-11-13)                                                         |
 
 ## Step 1: jobs escrow and verified evaluator
 

@@ -101,7 +101,7 @@ deployed but **has not been exercised on mainnet**.
 
 | Component                               | Purpose                                                                                     | Status                                                                                                                                                                                                                                                   | Evidence                                                                   |
 | --------------------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| `packages/verifier` (`arl-verifier`)    | Reference validator: `run`, `watch`, `bundle`, `verify-bundle`; `arl-reexec/1` re-execution | LIVE: three operator validators run `watch` on Base Mainnet (evaluator v7) and settled the first verified job on 20 November 2026; anyone can stake (the list is at `/api/v1/validators`)                                                                | `docs/reexecution-spec.md`, baseline                                       |
+| `packages/verifier` (`arl-verifier`)    | Reference validator: `run`, `watch`, `bundle`, `verify-bundle`; `arl-reexec/1` re-execution | LIVE: three operator validators run `watch` on Base Mainnet (evaluator v7) and checked the first verified job on 20 November 2026, which settled and was paid on 21 November 2026; anyone can stake (the list is at `/api/v1/validators`)                | `docs/reexecution-spec.md`, baseline                                       |
 | Evidence bundle `arl-evidence/1`        | Portable settlement evidence, verifiable offline and against chain                          | BUILDING                                                                                                                                                                                                                                                 | `packages/verifier/src/bundle.ts`                                          |
 | `packages/payments`                     | x402 `upto` (Permit2) facilitator, metering, receipts                                       | BUILDING: Base Sepolia only, **does not open 8453**                                                                                                                                                                                                      | `docs/payments.md`                                                         |
 | `spec/x402-arl-upto` v0.1.0             | x402 `upto` scheme for ARL with test vectors                                                | BUILDING (spec released, facilitator not on mainnet)                                                                                                                                                                                                     | `spec/x402-arl-upto/v0.1.0`                                                |
@@ -396,16 +396,16 @@ stateDiagram-v2
 
 ### 7.3 Failure scenarios
 
-| Failure                          | Handling today                                              | Gap / roadmap                                     |
-| -------------------------------- | ----------------------------------------------------------- | ------------------------------------------------- |
-| Provider never delivers          | Deadline refund by anyone (`claimRefund`, `release`)        | Reputation penalty for no-shows (2D)              |
-| Validators accept and never vote | `closeUndecided` burns their bonds, refunds client          | Validator liveness alerts (4, 6)                  |
-| No validators available          | Job cannot be verified; deadline refund                     | Operator-run validator set (9), VRF selection (8) |
-| Wrong approval                   | Dispute within window; arbiter overturns, approvers slashed | Proof-resolved disputes (7)                       |
-| Arbiter unavailable              | Deadline backstop refunds client                            | Timelocked arbiter, proof resolution (8, 7)       |
-| Registry failure                 | Feedback failure emitted, settlement continues              | —                                                 |
-| Non-deterministic output (LLM)   | Not supported by `Reexecution`                              | Attested and model-assisted policies (2C, 7)      |
-| Fee-on-transfer or odd tokens    | v3 balance-delta check merged, **not deployed**             | Decide redeploy in Phase 4                        |
+| Failure                          | Handling today                                                | Gap / roadmap                                     |
+| -------------------------------- | ------------------------------------------------------------- | ------------------------------------------------- |
+| Provider never delivers          | Deadline refund by anyone (`claimRefund`, `release`)          | Reputation penalty for no-shows (2D)              |
+| Validators accept and never vote | `closeUndecided` burns their bonds, refunds client            | Validator liveness alerts (4, 6)                  |
+| No validators available          | Job cannot be verified; deadline refund                       | Operator-run validator set (9), VRF selection (8) |
+| Wrong approval                   | Dispute within window; arbiter overturns, approvers slashed   | Proof-resolved disputes (7)                       |
+| Arbiter unavailable              | Deadline backstop refunds client                              | Timelocked arbiter, proof resolution (8, 7)       |
+| Registry failure                 | Feedback failure emitted, settlement continues                | —                                                 |
+| Non-deterministic output (LLM)   | Not supported by `Reexecution`                                | Attested and model-assisted policies (2C, 7)      |
+| Fee-on-transfer or odd tokens    | v3 balance-delta check, live with the v3 escrows (2026-11-16) | —                                                 |
 
 ## 8. On-chain vs off-chain responsibilities
 

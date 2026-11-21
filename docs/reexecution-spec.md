@@ -1,7 +1,7 @@
 # Re-execution spec (`arl-reexec/1`) and reference verifier
 
 Status: **Live on Base Mainnet.** Three operator validators run it unattended (`watch`) and
-re-executed the first verified job on 20 November 2026. Tested as before (unit, real container,
+re-executed the first verified job on 20 November 2026; it settled and was paid on 21 November 2026. Tested as before (unit, real container,
 local chain). Code:
 [`packages/verifier`](../packages/verifier/src). Used by the `Reexecution` tier of
 [`ARLVerifiedEvaluator`](verifiable-execution.md).

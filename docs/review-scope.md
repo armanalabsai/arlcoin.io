@@ -1,8 +1,11 @@
 # Review scope
 
-Status: deployed on Base Sepolia only (testnet, 2026-10-04); addresses and the free verification evidence are in [`verification-evidence.md`](verification-evidence.md). Nothing is on Base Mainnet.
-Base Mainnet opens only at the TGE (2026-10-23T00:00:00Z) in the deployment tooling (see
-[`deployment.md`](deployment.md#network-gate)).
+Status: live on Base Mainnet since 2026-10-24; the addresses are in
+[`mainnet-services.md`](mainnet-services.md). This document is the hand-over written for the
+review before mainnet. The Base Sepolia deployment of 2026-10-04 it refers to is retired; its
+addresses and the free verification evidence are in
+[`verification-evidence.md`](verification-evidence.md). The deployment tooling opened Base
+Mainnet only at the TGE (2026-10-23T00:00:00Z, see [`deployment.md`](deployment.md#network-gate)).
 
 This document is the hand-over for code reviewers. It lists what is in scope, what the
 contracts are meant to guarantee, how that is already tested, and what is deliberately out of
