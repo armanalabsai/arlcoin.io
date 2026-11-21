@@ -65,7 +65,8 @@ const testClient = createTestClient({ chain, mode: "anvil", transport: http(RPC)
 
 const started = Date.now();
 const say = (text: string) => {
-  console.log(`${((Date.now() - started) / 1000).toFixed(1).padStart(6)} s  ${text}`);
+  process.stdout.write(`${((Date.now() - started) / 1000).toFixed(1).padStart(6)} s  ${text}
+`);
 };
 const arl = (amount: bigint) => `${formatUnits(amount, 18)} ARL`;
 
@@ -225,7 +226,8 @@ try {
     }
   }
   await main();
-  console.log(`\nDone in ${((Date.now() - started) / 1000).toFixed(1)} s.`);
+  process.stdout.write(`\nDone in ${((Date.now() - started) / 1000).toFixed(1)} s.
+`);
 } finally {
   anvil.kill();
 }
