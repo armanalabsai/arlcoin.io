@@ -6,6 +6,8 @@ documents that back it. What is deployed on Base Mainnet is recorded in
 
 ## 2026-11-21
 
+- arl-protocol-sdk 0.3.3: the same code as 0.3.2, published so that the `latest` tag on npm points
+  at the current version again (an older staged 0.3.0 had taken it).
 - arl-protocol-sdk 0.3.2 and arl-protocol-mcp 0.2.1: `getJobReceipt` and `arl_get_job_receipt`,
   the portable job receipt that the Agent API already serves, so the npm packages match their
   documentation.
