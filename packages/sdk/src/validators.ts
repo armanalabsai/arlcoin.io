@@ -14,6 +14,7 @@ import {
   readProtocolLogs,
   type HistoryOptions,
 } from "./agentScore.ts";
+import { publicClientOf, type ReadClient } from "./client.ts";
 
 const stakeAbi = parseAbi([
   "function stakeOf(address validator) view returns (uint256)",
@@ -49,10 +50,8 @@ export interface Validators {
 }
 
 /** Reads every validator that ever staked on a verified evaluator, most active first. */
-export async function getValidators(
-  client: PublicClient,
-  opts: HistoryOptions = {},
-): Promise<Validators> {
+export async function getValidators(c: ReadClient, opts: HistoryOptions = {}): Promise<Validators> {
+  const client = publicClientOf(c);
   const head = await client.getBlock();
   const logs = await readProtocolLogs(client, HISTORY_START, head.number, opts);
   const records = new Map<string, ValidatorRecord & { firstBlock?: bigint }>();

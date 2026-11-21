@@ -18,6 +18,7 @@ import {
   type PublicClient,
   type WalletClient,
 } from "viem";
+import { publicClientOf, type ReadClient } from "./client.ts";
 
 /** The ARL escrows on Base Mainnet (contracts/deploy/base-mainnet-jobs.json). */
 export const ESCROWS = {
@@ -122,13 +123,13 @@ async function send(
   return hash;
 }
 
-async function decimalsOf(c: Clients, escrow: Address): Promise<number> {
-  const token = await c.publicClient.readContract({
+async function decimalsOf(client: PublicClient, escrow: Address): Promise<number> {
+  const token = await client.readContract({
     address: escrow,
     abi: jobsAbi,
     functionName: "paymentToken",
   });
-  return c.publicClient.readContract({ address: token, abi: erc20Abi, functionName: "decimals" });
+  return client.readContract({ address: token, abi: erc20Abi, functionName: "decimals" });
 }
 
 export interface JobView {
@@ -144,15 +145,26 @@ export interface JobView {
   status: string;
 }
 
-export async function getJob(c: Clients, escrow: Address, jobId: bigint): Promise<JobView> {
-  const job = await c.publicClient.readContract({
+/**
+ * Reads a job. `c` is a viem public client or `{ publicClient }`; the escrow is "ARL", "USDC" or
+ * the escrow's address.
+ */
+export async function getJob(
+  c: ReadClient,
+  escrowOrToken: Address | Escrow,
+  jobId: bigint,
+): Promise<JobView> {
+  const client = publicClientOf(c);
+  const escrow: Address =
+    escrowOrToken in ESCROWS ? ESCROWS[escrowOrToken as Escrow] : (escrowOrToken as Address);
+  const job = await client.readContract({
     address: escrow,
     abi: jobsAbi,
     functionName: "getJob",
     args: [jobId],
   });
   if (job.id === 0n) throw new ArlJobError(`job ${jobId.toString()} does not exist`);
-  const decimals = await decimalsOf(c, escrow);
+  const decimals = await decimalsOf(client, escrow);
   return {
     jobId: job.id.toString(),
     escrow,
@@ -221,7 +233,7 @@ export async function setBudget(
   amount: string,
 ): Promise<{ txHash: Hash }> {
   await checkChain(c);
-  const value = parseAmount(amount, await decimalsOf(c, escrow));
+  const value = parseAmount(amount, await decimalsOf(c.publicClient, escrow));
   return { txHash: await send(c, escrow, "setBudget", [jobId, value, "0x"]) };
 }
 

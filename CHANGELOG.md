@@ -6,6 +6,10 @@ documents that back it. What is deployed on Base Mainnet is recorded in
 
 ## 2026-11-21
 
+- SDK 0.3.4: every read function takes the same client, a viem public client or
+  `{ publicClient }`, and a job is named by its token ("ARL", "USDC") or by its escrow address
+  in `getJob`, `getJobAudit` and `getJobReceipt`
+  ([client.ts](packages/sdk/src/client.ts)). Existing calls keep working.
 - Status lines of [jobs.md](docs/jobs.md), [compute-streaming.md](docs/compute-streaming.md) and
   [verifiable-execution.md](docs/verifiable-execution.md) state what runs on Base Mainnet; they
   still described the testnet stage.

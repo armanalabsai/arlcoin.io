@@ -35,6 +35,10 @@ await settleJob(clients, ESCROWS.ARL, BigInt(jobId), "complete", "checked"); // 
 `ESCROWS.USDC` does the same in USDC. `settleJob(…, "reject")` refunds the client, and after the
 deadline `settleJob(…, "claimRefund")` returns an unfinished job's escrow. `getJob` reads a job.
 
+Every read function (`getJob`, `getJobAudit`, `getJobReceipt`, `getValidators`, `getAgentScore`,
+`getTrustGraph`, `getAgentPassport`) takes the same client: a viem public client or
+`{ publicClient }`. A job is named by its token (`"ARL"`, `"USDC"`) or by its escrow address.
+
 ## Open a verified task (arl-task/1)
 
 An [`arl-task/1`](https://github.com/armanalabsai/arlcoin.io/tree/main/spec/arl-task/v0.1.0)

@@ -21,6 +21,7 @@ import {
 
 import type { HistoryOptions } from "./agentScore.ts";
 import { getJobAudit, type JobAudit } from "./audit.ts";
+import { publicClientOf, type ReadClient } from "./client.ts";
 
 /** EAS and its SchemaRegistry on Base (OP Stack predeploys). */
 export const EAS: Address = "0x4200000000000000000000000000000000000021";
@@ -203,11 +204,12 @@ export interface JobReceiptAnswer {
 
 /** Reads a job's receipt and prepares the calls that put it on EAS. */
 export async function getJobReceipt(
-  client: PublicClient,
-  token: "ARL" | "USDC",
+  c: ReadClient,
+  token: "ARL" | "USDC" | Address,
   jobId: bigint,
   opts: HistoryOptions = {},
 ): Promise<JobReceiptAnswer> {
+  const client = publicClientOf(c);
   const audit = await getJobAudit(client, token, jobId, opts);
   const receipt = receiptFromAudit(audit);
   const schemaUid = receiptSchemaUid();
