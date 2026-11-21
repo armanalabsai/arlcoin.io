@@ -8,6 +8,7 @@ import type { ReactNode } from "react";
 import { Toaster } from "react-hot-toast";
 import { WagmiProvider } from "wagmi";
 
+import { BackdropLogo } from "~~/components/arl/BackdropLogo";
 import { Footer } from "~~/components/arl/Footer";
 import { Header } from "~~/components/arl/Header";
 import { NucleusField } from "~~/components/arl/NucleusField";
@@ -39,6 +40,7 @@ export function Providers({ children }: { children: ReactNode }) {
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider avatar={BlockieAvatar} theme={theme}>
           <NucleusField />
+          <BackdropLogo />
           <div className="flex min-h-screen flex-col">
             <Header />
             <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">{children}</main>

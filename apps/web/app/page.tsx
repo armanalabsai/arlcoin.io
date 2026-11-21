@@ -582,7 +582,7 @@ export default function Home() {
         <Section
           alt
           heading="Works where your agents work."
-          sub="Use ARL from the AI tools you already build with, through the MCP server, the A2A agent card, the SDKs and the n8n node."
+          sub="Use ARL from the AI tools you already build with, through the MCP server, the A2A agent card, the Agent API, the SDKs and the n8n node."
         >
           <Reveal delay={120} className="mt-10">
             <AgentNetwork />
