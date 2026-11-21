@@ -2,11 +2,15 @@
 // arl-verifier: hash a spec, run it (a provider's deliverable), check a deliverable, or check a
 // job on chain and vote on it.
 //
+//   node src/cli.ts make-spec <repository https url> <commit> [directory]   > spec.json
 //   node src/cli.ts hash <spec.json>
 //   node src/cli.ts run <spec.json>
 //   node src/cli.ts check <spec.json> <deliverable>
 //   ARL_VALIDATOR_KEY=0x… node src/cli.ts vote <rpc> <evaluator> <jobId> <spec.json>
 //   ARL_VALIDATOR_KEY=0x… node src/cli.ts watch <rpc> <evaluator> <fromBlock> [state.json]
+//
+// `make-spec` prints the spec of a test run with Node's built-in runner at an exact commit: the
+// job is accepted only when every test passes, and its result is the runner's summary counts.
 //
 // `watch` runs unattended: every 15 seconds it accepts the funded jobs whose committee names this
 // validator and votes on the submitted ones, fetching each spec from the job's description
@@ -51,6 +55,7 @@ import {
 import { parseWatchState, saveWatchState } from "./state.ts";
 import { networkFetcher } from "./inputs.ts";
 import { validatorKey } from "./key.ts";
+import { nodeTestSpec } from "./make.ts";
 import { parseSpec, specHash } from "./spec.ts";
 import { decide, execute } from "./verify.ts";
 import { buildBundle, verifyBundle, type EvidenceBundle } from "./bundle.ts";
@@ -78,6 +83,16 @@ const opts = { runner: new DockerRunner(), fetcher: networkFetcher };
 async function main(argv: readonly string[]): Promise<void> {
   const [command, ...args] = argv;
   switch (command) {
+    case "make-spec": {
+      const [repository, commit, directory] = args;
+      if (repository === undefined || commit === undefined) {
+        fail("usage: make-spec <repository https url> <commit> [directory]");
+      }
+      const spec = nodeTestSpec({ repository, commit, ...(directory ? { directory } : {}) });
+      print(spec);
+      process.stderr.write(`specHash ${specHash(spec)}\n`);
+      return;
+    }
     case "hash": {
       print({ specHash: specHash(await loadSpec(args[0])) });
       return;
@@ -392,7 +407,7 @@ async function main(argv: readonly string[]): Promise<void> {
       }
     }
     default:
-      fail("commands: hash, run, check, vote, watch, provide, bundle, verify-bundle");
+      fail("commands: make-spec, hash, run, check, vote, watch, provide, bundle, verify-bundle");
   }
 }
 
