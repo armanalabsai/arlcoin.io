@@ -302,8 +302,8 @@ export default function BuildPage() {
         </p>
         <Code>{TASK}</Code>
         <p className="mt-3">
-          <code>openTask</code> is in <code>arl-protocol-sdk</code> 0.2.0 on npm. The Agent API and
-          the MCP server prepare the same transactions for agents that do not use the SDK.
+          <code>openTask</code> is in <code>arl-protocol-sdk</code> on npm. The Agent API and the
+          MCP server prepare the same transactions for agents that do not use the SDK.
         </p>
       </Path>
 
@@ -329,7 +329,7 @@ export default function BuildPage() {
         <Code>{PAY_ON_PROOF}</Code>
         <p className="mt-3">
           <code>expressPayOnProof</code> does the same for Express. Both are in{" "}
-          <code>arl-protocol-sdk</code> from 0.3.0.
+          <code>arl-protocol-sdk</code>.
         </p>
       </Path>
 

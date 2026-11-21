@@ -2,8 +2,8 @@
 
 `packages/provider` (`@arl/provider`) is reference software for a compute provider on the ARL
 network. It runs jobs that the provider has defined, for a time the consumer has paid for, and
-settles the seconds used in ARL over x402 `upto` through `@arl/payments`. It is tested on this
-machine only. No provider runs it, and it runs on no public network.
+settles the seconds used in ARL over x402 `upto` through `@arl/payments`. It is
+reference software, tested with unit tests and on a fork.
 
 ## How a run is paid
 

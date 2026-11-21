@@ -27,7 +27,7 @@ Values come from their single sources:
 | Value                          | Source                                                                                                                                                                   |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Allocation amounts, max supply | `packages/tokenomics` (planner) and `ARLAllocation.sol` (cross-checked)                                                                                                  |
-| TGE date (TBD)                 | The deployment config (`tge`); every vesting schedule starts at it; durations must be 12 + 36 months; a placeholder TGE is accepted on local Anvil and Base Sepolia only |
+| TGE date                       | The deployment config (`tge`); every vesting schedule starts at it; durations must be 12 + 36 months; a placeholder TGE is accepted on local Anvil and Base Sepolia only |
 | 48-hour timelock floor         | `packages/tokenomics` (planner); `ARLTimelock.MIN_DELAY_FLOOR` (constructor; a test pins the script's copy to it)                                                        |
 | Addresses, chain ID            | The deployment config                                                                                                                                                    |
 
