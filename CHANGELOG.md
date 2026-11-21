@@ -6,6 +6,9 @@ documents that back it. What is deployed on Base Mainnet is recorded in
 
 ## 2026-11-21
 
+- [Agent passport page](https://arlcoin.io/agent/?id=1): look up any agent by its ERC-8004
+  number and read its owner, its verified record on ARL, its score and its badge in a browser,
+  with how a passport is built. The proof page links it and states that job 1 was paid.
 - Python SDK 0.6.0, compute streams for both sides
   ([compute_stream.py](packages/python-sdk/src/arl_protocol/compute_stream.py)):
   `ServeOnStream` answers only while the caller's stream pays the provider,
