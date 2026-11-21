@@ -102,6 +102,9 @@ export function FooterLinks() {
       <Link href="/about" prefetch={false} className={link}>
         About
       </Link>
+      <Link href="/proof" prefetch={false} className={link}>
+        Proof
+      </Link>
       <Link href="/contact" prefetch={false} className={link}>
         Contact
       </Link>
