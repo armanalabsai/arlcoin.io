@@ -122,6 +122,48 @@ The evaluator is the client's wallet unless `create_job(..., evaluator="0x...")`
 Every write is simulated first: a call that would fail raises `ArlError` with the reason before
 any gas is spent.
 
+## Compute paid by the second: serve while a stream pays
+
+For inference and GPU services. A client opens a stream to the provider at a rate per second and
+escrows `rate × seconds` ARL in the ComputePayment contract; the provider earns the rate every
+second, and whatever is not earned returns to the client when the stream stops.
+
+```python
+from arl_protocol import ServeOnStream
+
+service = ServeOnStream(provider=MY_ADDRESS, rate_per_second=10**16)   # 0.01 ARL per second
+
+@app.post("/v1/completions")                # FastAPI; any framework works the same way
+async def completions(request: Request):
+    prompt = await request.body()
+    r = service.handle(request.headers, lambda stream: run_the_model(prompt))
+    return Response(r.body, r.status, r.headers)
+```
+
+Without an `X-ARL-Stream` header the service answers `402` with its terms. With one, the work runs
+only when the stream pays this provider at the asked rate or more, is still accruing and has time
+left. Stream ids are public, so the caller proves the stream is its own by signing a short message
+with the account that opened it; the service checks that signature on every request (contract
+accounts through ERC-1271).
+
+The client side, and the provider's withdrawal:
+
+```python
+from arl_protocol import ComputeStreams, stream_auth_headers
+
+streams = ComputeStreams(private_key=CLIENT_KEY)
+stream = streams.open(provider=PROVIDER, rate_per_second=10**16, max_seconds=600)
+headers = stream_auth_headers(CLIENT_KEY, stream.stream_id)     # send with every request
+streams.stop(stream.stream_id)                                  # refunds what was not used
+
+ComputeStreams(private_key=PROVIDER_KEY).withdraw(stream.stream_id)   # earned so far
+```
+
+The message and the signature are the same as in the TypeScript SDK (`serveOnStream`,
+`streamAuthHeaders`), so a client in one language can pay a service in the other. Tested end to
+end on a local fork of Base Mainnet against the live contract
+([test_compute_stream_fork.py](tests/test_compute_stream_fork.py)).
+
 ## Open a verified task (arl-task/1)
 
 An [arl-task/1](https://github.com/armanalabsai/arlcoin.io/tree/main/spec/arl-task/v0.1.0) task

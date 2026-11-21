@@ -6,6 +6,12 @@ documents that back it. What is deployed on Base Mainnet is recorded in
 
 ## 2026-11-21
 
+- Python SDK 0.6.0, compute streams for both sides
+  ([compute_stream.py](packages/python-sdk/src/arl_protocol/compute_stream.py)):
+  `ServeOnStream` answers only while the caller's stream pays the provider,
+  `ComputeStreams` opens, reads, stops and withdraws, and `stream_auth_headers` proves a
+  stream is the caller's own. Same message and signature as the TypeScript SDK; tested on a
+  fork of Base Mainnet against the live contract.
 - [Run a validator](docs/run-a-validator.md): what an independent operator stakes and risks,
   what to install, and the commands to stake, run `watch` unattended and be named on a
   committee. No permission from the team is involved.

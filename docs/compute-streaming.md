@@ -116,6 +116,10 @@ cd contracts && forge build && cd ..
 npm run compute-stream -w @arl/sdk
 ```
 
+The Python SDK has the same provider side (`ServeOnStream`, `ComputeStreams`,
+`stream_auth_headers` in [packages/python-sdk](../packages/python-sdk/README.md)); the message
+and the signature are identical, so a client in one language can pay a service in the other.
+
 The Anvil test opens a stream, serves the sender, refuses another account that names the same
 stream, withdraws after 100 seconds, stops at 250 seconds and checks that the provider holds
 exactly 250 seconds of pay and that the service then answers `402`.
