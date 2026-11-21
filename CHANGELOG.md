@@ -6,6 +6,10 @@ documents that back it. What is deployed on Base Mainnet is recorded in
 
 ## 2026-11-21
 
+- A runnable compute stream example: `npm run compute-stream -w @arl/sdk` serves a caller
+  while its stream pays, refuses another account that names the same stream, withdraws,
+  stops and checks the settlement on a local chain
+  ([examples/compute-stream.ts](packages/sdk/examples/compute-stream.ts)). It runs in CI.
 - SDK 0.4.0, the provider side of compute streams
   ([streamProvider.ts](packages/sdk/src/streamProvider.ts)): `serveOnStream` runs an HTTP
   handler only while the caller's stream pays this provider, `streamAuthHeaders` proves the

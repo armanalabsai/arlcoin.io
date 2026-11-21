@@ -108,6 +108,14 @@ streamId })` returns both headers) and the service checks that signature, and it
 - `withdrawComputeStream(clients, { chain, contractAddress, streamId })` pays the provider what
   the stream has earned so far; the stream keeps running.
 
+A runnable example shows the whole exchange on a local chain in under a second
+([examples/compute-stream.ts](../packages/sdk/examples/compute-stream.ts)):
+
+```sh
+cd contracts && forge build && cd ..
+npm run compute-stream -w @arl/sdk
+```
+
 The Anvil test opens a stream, serves the sender, refuses another account that names the same
 stream, withdraws after 100 seconds, stops at 250 seconds and checks that the provider holds
 exactly 250 seconds of pay and that the service then answers `402`.
