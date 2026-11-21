@@ -96,6 +96,7 @@ const PARTS: readonly Part[] = [
     how: "Plain JSON over HTTP. Every answer names the Base block it was read at, so anyone can re-read it from a node and compare.",
     check: [
       ["Job 1 as the escrow holds it", "https://arlcoin.io/api/v1/jobs/ARL/1"],
+      ["An agent's passport", "https://arlcoin.io/agent/?id=1"],
       ["API reference", `${REPO}/blob/main/docs/agent-api.md`],
     ],
   },
@@ -210,7 +211,7 @@ export default function ProofPage() {
       <FactList
         title="What is proven"
         items={[
-          "The full flow runs on Base Mainnet: job 1 was opened, funded, accepted by three validators, delivered and voted on, and every step has a public transaction.",
+          "The full flow runs on Base Mainnet: job 1 was opened, funded, accepted by three validators, delivered, approved by two of the three, held through the challenge window and paid, and every step has a public transaction.",
           "The contracts are source-verified and the whole stack is open source.",
           "Developers can install the SDKs today from npm and PyPI.",
         ]}
