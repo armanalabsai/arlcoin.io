@@ -22,9 +22,13 @@ import { privateKeyToAccount } from "viem/accounts";
 
 import {
   computePaymentAbi,
+  getComputeStream,
+  serveOnStream,
   stopComputeStream,
+  streamAuthHeaders,
   streamComputePayment,
   StreamingError,
+  withdrawComputeStream,
 } from "../src/index.ts";
 
 const PORT = 8546;
@@ -207,5 +211,76 @@ describe("ComputePayment via the SDK on Anvil", () => {
       ),
       (error: unknown) => error instanceof StreamingError && error.code === "INSUFFICIENT_BALANCE",
     );
+  });
+  it("serves a caller while its stream pays, lets the provider withdraw, and stops serving after", async () => {
+    const rate = parseUnits("0.01", 18);
+    const before = await balance(provider.address);
+    const stream = await streamComputePayment(
+      { publicClient, walletClient },
+      {
+        chain,
+        contractAddress: payment,
+        providerAddress: provider.address,
+        tokenAddress: token,
+        ratePerSecond: rate,
+        maxDurationSeconds: 600,
+        maxCap: parseUnits("6", 18),
+      },
+    );
+    const service = serveOnStream(
+      {
+        publicClient,
+        chainId: chain.id,
+        provider: provider.address,
+        ratePerSecond: rate,
+        contract: payment,
+      },
+      (_req, s) =>
+        new Response(JSON.stringify({ answer: 42, secondsLeft: s.secondsLeft.toString() })),
+    );
+    const ask = async (wallet: typeof walletClient) => {
+      const at = Number((await publicClient.getBlock()).timestamp);
+      const headers = await streamAuthHeaders(
+        wallet,
+        { chainId: chain.id, contract: payment, streamId: stream.streamId },
+        at,
+      );
+      return service(new Request("http://service.local/infer", { method: "POST", headers }));
+    };
+
+    // No stream named: the terms. The sender: served. Someone else with the same id: refused.
+    assert.equal((await service(new Request("http://service.local/infer"))).status, 402);
+    const served = await ask(walletClient);
+    assert.equal(served.status, 200);
+    assert.equal(((await served.json()) as { answer: number }).answer, 42);
+    assert.equal((await ask(providerWallet)).status, 402);
+
+    // 100 seconds in, the provider takes what it has earned; the stream keeps running.
+    await testClient.setNextBlockTimestamp({ timestamp: stream.startTime + 99n });
+    await testClient.mine({ blocks: 1 });
+    await testClient.setNextBlockTimestamp({ timestamp: stream.startTime + 100n });
+    const withdrawal = await withdrawComputeStream(
+      { publicClient, walletClient: providerWallet },
+      { chain, contractAddress: payment, streamId: stream.streamId },
+    );
+    assert.equal(withdrawal.amount, rate * 100n);
+    assert.equal((await balance(provider.address)) - before, rate * 100n);
+    const state = await getComputeStream(publicClient, stream.streamId, payment);
+    assert.equal(state.live, true);
+    assert.equal(state.withdrawable, 0n);
+    assert.equal((await ask(walletClient)).status, 200);
+
+    // The client stops at 250 seconds: the provider keeps 250 seconds' pay, the client the rest.
+    await testClient.setNextBlockTimestamp({ timestamp: stream.startTime + 250n });
+    const settled = await stopComputeStream(
+      { publicClient, walletClient },
+      { chain, contractAddress: payment, streamId: stream.streamId },
+    );
+    assert.equal(settled.providerAmount, rate * 150n);
+    assert.equal(settled.refundAmount, rate * 350n);
+    assert.equal((await balance(provider.address)) - before, rate * 250n);
+    const after = await ask(walletClient);
+    assert.equal(after.status, 402);
+    assert.equal(((await after.json()) as { error: string }).error, "the stream has ended");
   });
 });

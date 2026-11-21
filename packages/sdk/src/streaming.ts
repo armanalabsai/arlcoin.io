@@ -27,7 +27,7 @@ import {
 
 import { computePaymentAbi } from "./abi.ts";
 
-/** Base Mainnet is locked: the contract is not deployed there and no option unlocks it. */
+/** Base Mainnet, where `COMPUTE_PAYMENT` is deployed. */
 export const BASE_MAINNET_CHAIN_ID = 8453;
 
 /** The ComputePayment contract on Base Mainnet (docs/mainnet-services.md), paid in ARL. */
@@ -295,6 +295,56 @@ export async function stopComputeStream(
     refundAmount: settled.args.refundAmount,
     txHash,
   };
+}
+
+export interface WithdrawComputeStreamParams {
+  chain: Chain;
+  contractAddress: Address;
+  streamId: bigint;
+  confirmations?: number;
+}
+
+export interface StreamWithdrawal {
+  streamId: bigint;
+  /** What reached the provider in this withdrawal. */
+  amount: bigint;
+  txHash: Hash;
+}
+
+/**
+ * The provider takes what the stream has earned so far. The stream keeps running; this can be
+ * called as often as the provider likes. Reverts (`NothingToWithdraw`) when nothing is due.
+ */
+export async function withdrawComputeStream(
+  clients: StreamingClients,
+  params: WithdrawComputeStreamParams,
+): Promise<StreamWithdrawal> {
+  if (!isAddress(params.contractAddress, { strict: false })) {
+    throw new StreamingError("INVALID_PARAMS", "contractAddress is not an address");
+  }
+  const account = await connectedAccount(clients, params.chain);
+  const contract = getAddress(params.contractAddress);
+  const txHash = await send(async () => {
+    const { request } = await clients.publicClient.simulateContract({
+      account,
+      chain: params.chain,
+      address: contract,
+      abi: computePaymentAbi,
+      functionName: "withdraw",
+      args: [params.streamId],
+    });
+    return clients.walletClient.writeContract(request);
+  });
+  const receipt = await confirmed(clients.publicClient, txHash, params.confirmations ?? 1);
+  const withdrawn = parseEventLogs({
+    abi: computePaymentAbi,
+    eventName: "Withdrawn",
+    logs: receipt.logs,
+  }).find((log) => isAddressEqual(log.address, contract));
+  if (withdrawn === undefined) {
+    throw new StreamingError("EVENT_MISSING", `no Withdrawn event in ${txHash}`);
+  }
+  return { streamId: withdrawn.args.streamId, amount: withdrawn.args.amount, txHash };
 }
 
 // ---------------------------------------------------------------- internal

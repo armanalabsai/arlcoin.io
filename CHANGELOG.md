@@ -6,6 +6,12 @@ documents that back it. What is deployed on Base Mainnet is recorded in
 
 ## 2026-11-21
 
+- SDK 0.4.0, the provider side of compute streams
+  ([streamProvider.ts](packages/sdk/src/streamProvider.ts)): `serveOnStream` runs an HTTP
+  handler only while the caller's stream pays this provider, `streamAuthHeaders` proves the
+  stream is the caller's own, `getComputeStream` reads a stream and `withdrawComputeStream`
+  takes what it has earned. Tested end to end on Anvil
+  ([compute-streaming.md](docs/compute-streaming.md#the-provider-side-serve-while-the-stream-pays)).
 - [Integration brief](docs/integration-brief.md): the three ways to connect to ARL (verified
   jobs, per-second compute streams, the MCP server and Agent API), the contract addresses, and
   a first integration plan for an inference or GPU workload.

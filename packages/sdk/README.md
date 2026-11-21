@@ -96,6 +96,8 @@ database or KV store. On runtimes that stop work when the response ends, pass `w
 | Function                                   | What it does                                                              |
 | ------------------------------------------ | ------------------------------------------------------------------------- |
 | `streamComputePayment`, `stopComputeStream` | Pay a compute provider per second (`COMPUTE_PAYMENT` on Base Mainnet)     |
+| `serveOnStream`, `streamAuthHeaders`        | Provider side: an HTTP handler that runs only while the caller's stream pays |
+| `getComputeStream`, `withdrawComputeStream` | Read a stream; the provider takes what it has earned so far               |
 | `quoteArl`, `acquireArl`                   | Buy exact ARL in the official Uniswap v3 pools, paying USDC, USDT or ETH |
 | `openVerifiedJob`, `getVerdict`, `getOutcomes`, `finalizeJob` | Verified jobs: a committee of staked ARL validators checks the work, and `getOutcomes` reads an agent's verified `outcomesOf` counts |
 | `payVerified`                              | Pay a service that answers HTTP 402 with an ARL escrow offer              |
