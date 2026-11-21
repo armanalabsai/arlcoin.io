@@ -12,6 +12,14 @@ Amounts are plain token units ("10" is 10 ARL, or 10 USDC with token="USDC").
 """
 
 from .client import ESCROWS, EVALUATORS, STATUS, Arl, ArlError, Outcomes, outcomes_of
+from .compute_stream import (
+    COMPUTE_PAYMENT,
+    ComputeStreams,
+    ServeOnStream,
+    StreamState,
+    stream_auth_headers,
+    stream_auth_message,
+)
 from .open_task import open_task
 from .pay_on_proof import MemoryUsedJobs, Offer, PaidJob, PaidResponse, PayOnProof
 from .score import (
@@ -29,6 +37,8 @@ __all__ = [
     "AgentScore",
     "Arl",
     "ArlError",
+    "COMPUTE_PAYMENT",
+    "ComputeStreams",
     "ESCROWS",
     "EVALUATORS",
     "MemoryUsedJobs",
@@ -38,6 +48,8 @@ __all__ = [
     "PaidResponse",
     "PayOnProof",
     "STATUS",
+    "ServeOnStream",
+    "StreamState",
     "agent_passport",
     "agent_score",
     "badge_url",
@@ -48,4 +60,4 @@ __all__ = [
     "trust_graph",
     "validators",
 ]
-__version__ = "0.5.0"
+__version__ = "0.6.0"
