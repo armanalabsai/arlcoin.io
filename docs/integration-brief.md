@@ -78,6 +78,11 @@ Metering is by time at a rate agreed when the stream opens. From the SDK:
 import { streamComputePayment, stopComputeStream } from "arl-protocol-sdk";
 ```
 
+On the provider side, `serveOnStream` puts an HTTP handler behind a stream: it runs only while
+the caller's stream is live and pays this provider at the asked rate, and
+`withdrawComputeStream` takes what has been earned so far
+([compute-streaming.md](compute-streaming.md#the-provider-side-serve-while-the-stream-pays)).
+
 For metering by actual usage inside a time ceiling (seconds billed, with a signed usage receipt
 and a hash of the output), the reference provider in `packages/provider` shows the pattern over
 x402 `upto`: [compute-provider.md](compute-provider.md).

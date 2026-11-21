@@ -71,7 +71,7 @@ await stopComputeStream(
 ```
 
 Before anything is signed, `streamComputePayment` checks the parameters (`maxCap` is the most the
-client accepts to escrow), refuses Base Mainnet, checks that both clients are on the expected
+client accepts to escrow), checks that both clients are on the expected
 chain, that the contract streams the given token and that the balance covers the deposit. It
 approves exactly the deposit (never an unlimited allowance) and simulates every transaction
 first, so a contract revert is reported as a `StreamingError` with the custom error name.
@@ -79,6 +79,38 @@ first, so a contract revert is reported as a `StreamingError` with the custom er
 Tests: `npm test -w @arl/sdk` (offline) and `npm run test:anvil -w @arl/sdk` (needs Foundry and
 `forge build` in `contracts/`; deploys ARLToken and ComputePayment on Anvil, runs the SDK end to
 end and fails if the SDK's ABI differs from the compiled contract).
+
+## The provider side: serve while the stream pays
+
+A provider reads a stream, takes what it has earned, and can put any HTTP handler behind a stream
+with one wrapper:
+
+```ts
+import { serveOnStream, withdrawComputeStream, getComputeStream } from "arl-protocol-sdk";
+
+export const POST = serveOnStream(
+  { publicClient, chainId: 8453, provider, ratePerSecond: parseUnits("0.01", 18) },
+  async (request, stream) => new Response(await infer(await request.text())),
+);
+```
+
+- Without an `X-ARL-Stream` header the service answers `402` with its terms (scheme
+  `arl-stream`: the contract, the provider and the rate per second).
+- With one, the handler runs only when the stream exists on that contract, pays this provider at
+  the asked rate or more, is still accruing and has time left. Otherwise the answer is `402`
+  with the reason.
+- Stream ids are public, so the caller proves the stream is its own. The client signs a short
+  message with the account that opened the stream (`streamAuthHeaders(walletClient, { chainId,
+streamId })` returns both headers) and the service checks that signature, and its age, on
+  every request. Smart-contract accounts are checked through ERC-1271.
+- `getComputeStream(client, streamId)` returns the stream as the contract holds it: deposit,
+  earned, withdrawable, whether it is live and the seconds left.
+- `withdrawComputeStream(clients, { chain, contractAddress, streamId })` pays the provider what
+  the stream has earned so far; the stream keeps running.
+
+The Anvil test opens a stream, serves the sender, refuses another account that names the same
+stream, withdraws after 100 seconds, stops at 250 seconds and checks that the provider holds
+exactly 250 seconds of pay and that the service then answers `402`.
 
 ## Deployment
 
