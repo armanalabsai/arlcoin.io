@@ -14,6 +14,8 @@ documents that back it. What is deployed on Base Mainnet is recorded in
 - Portable job receipts: a finalized job's record as an Ethereum Attestation Service schema, with
   the unsigned `attest` call for the provider's own wallet. `getJobReceipt` in the SDK, the
   `arl_get_job_receipt` MCP tool and `GET /api/v1/jobs/{token}/{jobId}/receipt`.
+- arl-protocol 0.4.0 for Python: `agent_passport`, `job_audit`, `job_receipt`, `validators` and
+  `trust_graph` ([packages/python-sdk](packages/python-sdk/README.md)).
 - ARLscan lists the validators of the verified evaluator
   ([docs/app.md](docs/app.md#scan-arlscan)).
 

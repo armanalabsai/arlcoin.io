@@ -60,6 +60,20 @@ print(score.score_bps, score.completed, score.rejected, len(score.outcomes))
 print(badge_url(42))  # an SVG badge for a README or a page
 ```
 
+The rest of the verified record reads the same way:
+
+```python
+from arl_protocol import agent_passport, job_audit, job_receipt, trust_graph, validators
+
+agent_passport(42)   # ERC-8004 identity (owner, stated name) plus the verified record
+job_audit(1)         # every on-chain step of a job: who acted, when, in which transaction
+job_receipt(1)       # a finalized job's portable receipt and the unsigned EAS call for it
+validators()         # who has staked, how much, and how each has voted
+trust_graph()        # who hired whom, and how it ended
+```
+
+Every answer comes from the chain through the Agent API and names the block it was read at.
+
 The evaluator is the client's wallet unless `create_job(..., evaluator="0x...")` names another.
 Every write is simulated first: a call that would fail raises `ArlError` with the reason before
 any gas is spent.
