@@ -74,6 +74,50 @@ trust_graph()        # who hired whom, and how it ended
 
 Every answer comes from the chain through the Agent API and names the block it was read at.
 
+## Pay on proof: sell a service and be paid after it is checked
+
+`PayOnProof` turns an endpoint into a service paid through a verified job
+([x402 arl-escrow](../../spec/x402-arl-escrow/v0.2.0/README.md)). A caller without a job gets
+`402` with your terms; it opens and funds a job that matches them and calls again with the
+`X-ARL-Job` header. Your code runs once per job, and the payment reaches you only after a
+committee of staked validators has checked the result.
+
+```python
+from fastapi import FastAPI, Request, Response
+from arl_protocol import Offer, PayOnProof
+
+paid = PayOnProof(
+    private_key=os.environ["ARL_WALLET_KEY"],          # the service's own wallet
+    offer=Offer(
+        provider="0xYourService",
+        spec_uri="https://example.org/spec.json",      # what the work is and how it is checked
+        spec_hash="0x...",
+        budget=10 * 10**18,                            # 10 ARL
+        committee=["0xValidatorA", "0xValidatorB", "0xValidatorC"],
+        threshold=2,
+    ),
+)
+app = FastAPI()
+
+@app.post("/run")
+async def run(request: Request):
+    def work(job):                                     # job.job_id, job.client
+        result = do_the_work()
+        return result, deliverable_hash(result)        # body, and the 32-byte hash to be checked
+    r = paid.handle(request.headers.get("x-arl-job"), work)
+    return Response(r.body, r.status, r.headers)
+```
+
+`handle` works the same in Flask, Django or any other framework: give it the header, send back
+`status`, `headers` and `body`. It checks the job on chain against your offer before any work,
+approves the committee, runs your function, and submits the deliverable in the background as soon
+as enough committee members have accepted. The wallet only ever signs `approveCommittee` and
+`submit` for jobs that pay this service; the caller's money stays in the escrow contract. A
+service with several instances passes `used_jobs=` a store shared between them.
+
+Tested end to end on a local fork of Base Mainnet against the live escrow and evaluator
+([test_pay_on_proof_fork.py](tests/test_pay_on_proof_fork.py)).
+
 The evaluator is the client's wallet unless `create_job(..., evaluator="0x...")` names another.
 Every write is simulated first: a call that would fail raises `ArlError` with the reason before
 any gas is spent.
