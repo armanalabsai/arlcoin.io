@@ -6,7 +6,8 @@ documents that back it. What is deployed on Base Mainnet is recorded in
 
 ## 2026-11-21
 
-- The roadmap shows Open Validators (under way) and the proof page links the validator guide.
+- The Verified Jobs phase of the roadmap and the proof page link the validator guide and state
+  the reward for the first independent validators.
 - [Run a validator](docs/run-a-validator.md): what an independent operator stakes and risks,
   what to install, and the commands to stake, run `watch` unattended and be named on a
   committee. No permission from the team is involved.
