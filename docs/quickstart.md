@@ -58,6 +58,9 @@ the wrapper answers `402` with the terms, checks the funded job on chain, approv
 runs the handler once per job and submits the deliverable when the committee has accepted. In a
 real service the same handler is a Next.js route, a Hono route or a Cloudflare Worker.
 
+A Python service does the same with `PayOnProof` from `pip install arl-protocol`
+([packages/python-sdk](../packages/python-sdk/README.md#pay-on-proof-sell-a-service-and-be-paid-after-it-is-checked)).
+
 Next: on Base Mainnet, sell a service with `payOnProof` or open a job with `openVerifiedJob`
 (`arl-protocol-sdk` on npm, [arlcoin.io/build](https://arlcoin.io/build/)), run a validator with
 `arl-verifier watch`, and read a job back through the [Agent API](agent-api.md)
